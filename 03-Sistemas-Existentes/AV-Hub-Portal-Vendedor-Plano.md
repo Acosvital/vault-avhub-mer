@@ -37,4 +37,3 @@ Estados vazios/erro, badge de SLA crítico no menu lateral, comparação com mê
 ## Ver também
 - [[AV-Hub-Modulos]]
 - [[AV-Hub-Vendas-Reconciliacao]]
-- [[RH-Escopo-Row-Level-Security]]

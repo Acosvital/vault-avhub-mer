@@ -126,7 +126,7 @@ flowchart TD
         O1 --> O2
     end
 
-    V2 -->|sim| Q1
+    V2 -->|sim, com acompanhamento da qualidade| P1
     V2 -->|nao| P1
     P3 -->|pronto em estoque| E1
     P3 -->|materia-prima em estoque| P5

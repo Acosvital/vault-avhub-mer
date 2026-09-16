@@ -73,8 +73,6 @@ sequenceDiagram
         Omie-->>Qual: C18 · nota de devolução (fecha RNC)
     else aprovado
         Qual->>Compras: C19 · status "disponível" (via casamento av-hub↔MES)
-        Qual->>Omie: C20 · segue pra Expedição/Logística
-        Omie-->>Compras: C21 · faturamento, baixa o item
     end
 ```
 
@@ -139,10 +137,7 @@ Nova requisição — **volta pra C1**, fechando o ciclo sem beco sem saída (pr
 RNC marca `nota_devolucao_pendente = true`; o sistema nunca cria a nota, só sinaliza. Omie emite a nota de devolução; a sincronização de volta fecha a RNC (ver [[Estoque-Regras-Negocio]]). ⚠️ Lembrar da limitação de dado já registrada: `devolucao_parcial` no av-hub é só um boolean, sem nenhum campo de valor associado (ver [[AV-Hub-Vendas-Reconciliacao]]).
 
 **C19 — MES → av-hub: status "disponível" (condicional, aprovado)**
-Item aprovado sai da quarentena. Se já tinha destinação pra um pedido específico (`destinacao_item_pedido`), a reserva de estoque se confirma aqui. Visível pro vendedor como próxima etapa do rastreamento por item — mesma dependência do "casamento av-hub↔MES" de C1.
-
-**C20/C21 — Expedição, faturamento, baixa**
-Segue pra Expedição/Logística dentro do MES; fiscal permanece 100% no Omie (ver [[Faturamento-Expedicao]]); emissão de NF dá baixa no item, que migra de "em aberto" pra "faturado" na carteira do vendedor.
+Item aprovado sai da quarentena. Se já tinha destinação pra um pedido específico (`destinacao_item_pedido`), a reserva de estoque se confirma aqui. Visível pro vendedor como próxima etapa do rastreamento por item — mesma dependência do "casamento av-hub↔MES" de C1. A partir daqui o item segue pro fluxo de Expedição/Faturamento, detalhado à parte em [[Fluxo-Expedicao-Faturamento-Completo]] (Expedição embala/consolida, só a Expedição fala com o Omie, e a baixa chega ao Vendedor — não ao Comprador).
 
 ## Nenhum estado é beco sem saída — verificação
 
@@ -154,7 +149,7 @@ Segue pra Expedição/Logística dentro do MES; fiscal permanece 100% no Omie (v
 
 ## O que este modelo deixa explícito (e não estava antes)
 
-- **C1 e C19 são os dois pontos que dependem do "casamento av-hub↔MES"** ainda não desenhado — todo o resto do fluxo roda inteiramente dentro do MES ou inteiramente dentro do av-hub, sem cruzar a fronteira. Isso reduz a superfície do problema de integração a esses dois pontos específicos, em vez de "o sistema inteiro precisa de tempo real".
+- **C1 e C19 são os dois pontos que dependem do sentido MES→av-hub do "casamento av-hub↔MES"**, ainda não desenhado. C7 (av-hub→MES, referência mínima disparada só na chegada física) e C16 (reaproveita o mesmo mecanismo de C1, "volta pra C1") também cruzam a fronteira, mas não introduzem um ponto de integração novo — reduz a superfície do problema à direção MES→av-hub especificamente, em vez de "o sistema inteiro precisa de tempo real".
 - **C9 (conferência) tem uma ramificação que ainda não tinha desenho formal**: divergência de quantidade/descrição na conferência é um caminho diferente de reprovação de qualidade (C14) — os dois merecem tratamento parecido (volta pro PCP), mas são gatilhos diferentes e precisam de telas diferentes.
 - **A flag acabado/não-acabado (nasce em C4) é o dado que mais decide o formato do resto do fluxo** — quem confere contra o quê (C9), se passa pelo PCP de novo (C10 vs. C11) — reforça que ela precisa estar bem visível e não pode ser opcional.
 - **CCP e Logística de entrada estavam faltando como atores** — ver correção em C6/C6b e C7b/C7c. Lista completa de setores em [[Setores-Envolvidos-no-Fluxo]].
@@ -169,3 +164,4 @@ Segue pra Expedição/Logística dentro do MES; fiscal permanece 100% no Omie (v
 - [[Estoque-Regras-Negocio]]
 - [[Estoque-Riscos]]
 - [[App-PCP-Backend-Producao]]
+- [[Fluxo-Expedicao-Faturamento-Completo]]

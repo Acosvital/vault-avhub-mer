@@ -22,7 +22,7 @@ Cobre a [[Entrada-Comercial|entrada comercial]] (captura pedidos do Omie) e boa 
 
 ## Módulos
 
-Ver [[AV-Hub-Modulos]] para o mapa completo: RH, Vendas, Portal do Vendedor, Portal do Gerente/Equipe, Portal do PCP, Dashboards, Orçamento, Fechamento, Cadastros, Experimental.
+Ver [[AV-Hub-Modulos]] para o mapa completo: Vendas, Portal do Vendedor, Portal do Gerente/Equipe, Portal do PCP, Dashboards, Orçamento, Fechamento, Cadastros, Experimental.
 
 ## Cultura de engenharia observada
 

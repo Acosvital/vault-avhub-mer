@@ -17,22 +17,14 @@ Consolidado dos contratos técnicos (`docs/*.md`) do av-hub **e agora verificado
 | Filtros de busca em `GET /parceiros` | `nome_fantasia`/`cpf_cnpj` comparavam errado; `razao_social`/`cidade` eram ignorados | Todos os 4 agora usam `Op.iLike` (exceto `estado`, que continua exato — é `CHAR(2)`) |
 | Ordenação em `GET /vendedores` | `sort`/`order` sem efeito | Allowlist real (`VENDEDOR_SORTABLE`, 14 colunas) + `fallback`/`tiebreak` para paginação estável; ganhou de brinde `codigo_vendedor_omie` como filtro `ILIKE` e `id_funcionario_in` (lista, até 200 UUIDs) |
 | `cor_unidade`/`foto_url` em `core.unidades` | Não existiam | Ambas presentes em `src/models/unidade.js` — `foto_url` é key de objeto (S3/SeaweedFS), não URL, deliberadamente sem validação de formato |
-| `GET /vendedores/:id/sugestoes` | Suspeita de rota removida/renomeada (500 ou inexistente) | **Existe e está implementada** — usa `pg_trgm` (`similarity`+`unaccent`) com duas CTEs (mesmo código de vendedor em outra unidade > nome parecido em `core.funcionarios`), `min_score`/`limit` parametrizáveis |
-| Escopo por setor em `/funcionarios` | Não aplicado | `resolverEscopoSetor` confirmado, com cache de 30s por usuário, invalidado em toda escrita de usuário |
-| Override `setor_irrestrito` | Não existia | Confirmado, checado **antes** de qualquer outra regra |
 | PK de `vendedores` colidia entre empresas | PK era `codigo_vendedor_omie` (não único entre unidades) | Trocada para `id` uuid — corrigido, comentário no model documenta o bug antigo |
 | Meta Individual 7-18× maior | Meta global dividida 2× por unidade | Corrigido (contrato específico) |
-
-## Expandido além do que a doc antiga cobria
-
-- **Escopo por setor agora tem 2 variantes**: `resolverEscopoSetor` (setor exato, só `/funcionarios`) e `resolverEscopoSetorSubarvore` (setor + toda subárvore via CTE recursiva, aplicado em `/cargos` e `/setores`; `/unidades` continua sem escopo de setor).
-- **Gap conhecido e documentado no próprio código**: Admin/Diretoria que também têm `id_funcionario` vinculado ficam presos no próprio setor em `/funcionarios` (precisa de uma exceção por perfil) — **ainda em aberto**, registrado como comentário no código, não como contrato formal.
 
 ## Pendentes reais remanescentes
 
 | Item | Status |
 |---|---|
-| Backfill de `vendedores.id_funcionario` | ✅ **Já rodou (confirmado 16/09)** — nota anterior ("não rodou ainda", testado ao vivo em 03/09) está desatualizada. Ver [[RH-Escopo-Row-Level-Security]]. |
+| Backfill de `vendedores.id_funcionario` | ✅ **Já rodou (confirmado 16/09)** — nota anterior ("não rodou ainda", testado ao vivo em 03/09) está desatualizada. |
 | Paginação por pedido (não por linha crua) em `/vendas_planilha` | Ainda não implementado — só ordenação foi endereçada, não a paginação por família |
 | Chave composta em `PUT`/`DELETE /blacklist_pedidos` | Resolvido junto com o bug de criação (ver acima) |
 | `fechamento_manual` | Tabela/rota confirmada existente no inventário de rotas do backend real (`fechamento_manual` está na lista de 65 arquivos de rota) |
@@ -40,7 +32,7 @@ Consolidado dos contratos técnicos (`docs/*.md`) do av-hub **e agora verificado
 
 ## ⚠️ Achados que exigem reavaliar suposições anteriores da Portal do Vendedor
 
-Rotas já existem no backend para 3 "extras" que o plano do Portal do Vendedor (ver [[AV-Hub-Portal-Vendedor-Plano]]) tratava como "caro"/"parcial"/"precisa de tabela nova":
+Rotas já existem no backend para 2 "extras" que o plano do Portal do Vendedor (ver [[AV-Hub-Portal-Vendedor-Plano]]) tratava como "caro"/"parcial"/"precisa de tabela nova":
 - **`usuarios_favoritos`** — rota já existe; "favoritar cliente/pedido" (extra 8.10) pode não precisar de tabela nova.
 - **`clientes_inativos`** — rota já existe; "cliente inativo" (extra 8.9), antes avaliado como caro (N chamadas por mês), pode já ter endpoint dedicado.
 
@@ -50,7 +42,6 @@ Essas 2 não foram exploradas em profundidade ainda (não fazia parte do escopo 
 
 ## Ver também
 - [[AV-Hub-Vendas-Reconciliacao]]
-- [[RH-Escopo-Row-Level-Security]]
 - [[AV-Hub-Arquitetura-BFF]]
 - [[AV-Hub-Portal-Vendedor-Plano]]
 - [[AV-Hub-Comissao-Modulo]]

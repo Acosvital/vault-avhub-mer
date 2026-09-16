@@ -18,7 +18,7 @@ criado: 2026-09-16
 
 **Telas:** ~21 telas (mais login), organizadas em Cadastros, Compras, Recebimento, Estoque e Gestão.
 
-> ⚠️ **Lacuna identificada e resolvida (16/09):** o MES (`api-pcp`) hoje só suporta usuário/senha, sem Azure AD — decisão deliberada porque o público original (chão de fábrica) não tem e-mail corporativo (ver [[App-PCP-Visao-Geral]]). Confirmado: o MES **passa a suportar os dois métodos de login** — usuário/senha (chão de fábrica) e e-mail/Azure AD (perfis de escritório do Estoque: comprador, almoxarife, Qualidade). Ver [[Decisoes-Chave-ERP]].
+> ⚠️ **Lacuna identificada e resolvida (16/09):** o MES (`api-pcp`) hoje só suporta usuário/senha, sem Azure AD — decisão deliberada porque o público original (chão de fábrica) não tem e-mail corporativo (ver [[App-PCP-Visao-Geral]]). Confirmado: o MES **passa a suportar os dois métodos de login** — usuário/senha (chão de fábrica) e e-mail/Azure AD (perfis de escritório do Estoque: almoxarife, Qualidade, gestor de estoque — Comprador e Aprovador ficam no av-hub, nunca logam no MES, ver [[Fluxo-Compras-Completo]]). Ver [[Decisoes-Chave-ERP]].
 
 **Equipe:** time de desenvolvimento disponível — [[Equipe-Projeto|Gustavo]] (banco de dados/API) e [[Equipe-Projeto|Robert]] (fullstack sênior) — com Nathan coordenando/product owner.
 

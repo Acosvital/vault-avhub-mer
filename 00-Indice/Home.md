@@ -12,7 +12,7 @@ Vault de análise do projeto de **ERP de altíssimo nível** da Aços Vital: um 
 
 - [[Fluxo-Operacional-Visao-Geral|1. Fluxo Operacional]] — o mapa macro do processo: comercial → PCP → estoque/revenda/fabricação → faturamento. Ver também [[Fluxo-Detalhado-Pedido-Item|o mesmo fluxo no nível de item]], [[Modelo-Destinacao-Item|o modelo formal que reconcilia os dois]], [[Setores-Envolvidos-no-Fluxo|todos os setores envolvidos]] os 6 subfluxos conversa-por-conversa (Compras, Recebimento, Qualidade, Produção/OS-OP, Expedição/Faturamento, Estoque) e [[Fluxogramas-Completos|os fluxogramas visuais de tudo isso]].
 - [[PRD-Estoque-Visao-Geral|2. PRD do Sistema de Estoque]] — o primeiro módulo novo planejado (compras, recebimento, estoque).
-- [[AV-Hub-Visao-Geral|3. Sistemas existentes]] — av-hub, app-pcp, [[Organograma-Visao-Geral|Organograma]] e o [[Omie-ELT-Pipeline|pipeline ELT]] — frontends **e** backends reais.
+- [[AV-Hub-Visao-Geral|3. Sistemas existentes]] — av-hub, app-pcp e o [[Omie-ELT-Pipeline|pipeline ELT]] — frontends **e** backends reais.
 - [[Schema-Postgres-Multi-Dominio|4. Arquitetura transversal]] — ver também [[Diagramas-UML|UML completo]] (classes, casos de uso, estados, componentes, implantação, pacotes) — decisões e padrões que atravessam todos os módulos.
 - [[Equipe-Projeto|5. Pessoas e equipe]]
 - [[Glossario|6. Glossário]]
@@ -22,8 +22,8 @@ Vault de análise do projeto de **ERP de altíssimo nível** da Aços Vital: um 
 - ✅ Fluxo operacional macro mapeado e analisado.
 - ✅ PRD do sistema de Estoque/Recebimento/Compras recebido e analisado (v1.0, ainda não construído).
 - ✅ **Frontends** av-hub e app-pcp analisados em profundidade (todos os `docs/*.md`, todos os módulos, fluxos completos de pedido).
-- ✅ **Backends reais** recebidos e analisados nesta rodada: `api-acos-vital` (Sequelize, backend do av-hub e do Organograma), `api-pcp` (NestJS+Prisma, backend do app-pcp) e `omie-elt-pipeline` (extrator Omie→Postgres). Isso permitiu **confirmar, corrigir e expandir** boa parte do que antes era inferido só a partir dos frontends e de contratos escritos.
-- ✅ Descobertos 2 schemas de backend novos (`core_comissionamento`, `core_aprovacao_de_vagas`) e conteúdo novo no schema do Organograma (história institucional, onboarding).
+- ✅ **Backends reais** recebidos e analisados nesta rodada: `api-acos-vital` (Sequelize, backend do av-hub), `api-pcp` (NestJS+Prisma, backend do app-pcp) e `omie-elt-pipeline` (extrator Omie→Postgres). Isso permitiu **confirmar, corrigir e expandir** boa parte do que antes era inferido só a partir dos frontends e de contratos escritos.
+- ✅ Descobertos 2 schemas de backend novos (`core_comissionamento`, `core_aprovacao_de_vagas`).
 - ✅ Confirmado que a maioria dos bugs antes catalogados como pendentes **já foi corrigida** no backend real — ver [[AV-Hub-Bugs-Catalogo]].
 - ✅ Confirmado que o backend do app-pcp é **muito mais maduro** que o frontend enviado (dashboard de produção, workflow de item por lote, entregas, divergências) — ver [[App-PCP-Backend-Producao]].
 - ✅ **Fluxo detalhado item a item registrado** (16/09, transcrição de áudio do gerente): PCP verifica estoque como primeiro passo (não rota isolada), flag acabado/não-acabado do comprador define método de conferência no Recebimento, Ordem de Serviço/Ordem de Produção emitidas pelo PCP, status por item a caminho do av-hub. Ver [[Fluxo-Detalhado-Pedido-Item]].
@@ -34,7 +34,7 @@ Vault de análise do projeto de **ERP de altíssimo nível** da Aços Vital: um 
 
 Ver [[Decisoes-Chave-ERP]] para a lista completa. Destaques:
 
-- [[Achado-Duplicacao-RBAC|Duplicação de identidade/permissão]] entre av-hub, app-pcp e (possivelmente) o Organograma.
+- [[Achado-Duplicacao-RBAC|Duplicação de identidade/permissão]] entre av-hub e app-pcp.
 - [[Achado-Ambiguidade-PCP|Ambiguidade do nome "PCP"]].
 - O módulo de Estoque ainda não foi construído — existe só como PRD.
 - O app-pcp tem **backend pronto para um board de produção** (dashboard/TV) que o frontend ainda não construiu — puramente lacuna de UI, não de dado.
@@ -56,5 +56,4 @@ Entrada Comercial → PCP (Carteira) → [Estoque | Revenda | Fabricação] → 
 | Fabricação — Grade de Piso, Chapa Expandida, Caldeiraria etc. | MES Aços Vital (mesmo modelo Fábrica/Setor/Roteiro) | 📋 Sistema definido, fábricas/roteiros ainda não cadastrados (lista aberta, não só essas três) |
 | Revenda — corte de chapa sob medida (plasma/laser) | [[PRD-Estoque-Visao-Geral\|PRD Estoque]] (beneficiamento) | 📋 Reclassificado 16/09: é Revenda, não Fabricação — ver [[Fabricacao-Chapas]] |
 | Faturamento / Expedição              | Omie (nota fiscal) + av-hub (visão)                                  | ✅ Parcial (fiscal fica no Omie)                                                           |
-| Organograma / hierarquia / cultura   | [[Organograma-Visao-Geral\|Organograma]]                             | ✅ Em produção, frontend fora do escopo enviado                                            |
 | Comissionamento                      | [[AV-Hub-Comissao-Modulo]]                                           | ✅ Schema de backend em produção, uso ainda a esclarecer                                   |

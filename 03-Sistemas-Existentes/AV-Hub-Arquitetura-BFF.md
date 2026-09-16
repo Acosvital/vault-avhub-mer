@@ -11,7 +11,7 @@ Documentado explicitamente num contrato interno: **"este repo é um BFF puro —
 ## Como funciona
 
 - Todo `app/api/**/route.ts` chama `${process.env.API_URL}/<recurso>` com header `x-api-key` (server-to-server) ou `Authorization: Bearer <session.accessToken>` (por sessão).
-- **Backend confirmado: `api-acos-vital`** (produção em `https://api.acosvital.com.br`, Express + Sequelize) — nome visto direto no código-fonte da API (não só inferido), citado em vários contratos (`src/routes/*.js`, `src/models/*.js`, `src/middlewares/*.js`). Tem acesso direto ao Postgres multi-schema (ver [[Schema-Postgres-Multi-Dominio]]) e serve **três frontends diferentes**: av-hub, o [[Organograma-Visao-Geral|Organograma]] (fora deste zip) e, presumivelmente, telas administrativas próprias.
+- **Backend confirmado: `api-acos-vital`** (produção em `https://api.acosvital.com.br`, Express + Sequelize) — nome visto direto no código-fonte da API (não só inferido), citado em vários contratos (`src/routes/*.js`, `src/models/*.js`, `src/middlewares/*.js`). Tem acesso direto ao Postgres multi-schema (ver [[Schema-Postgres-Multi-Dominio]]) e serve **múltiplos frontends**: av-hub e, presumivelmente, telas administrativas próprias.
 - Contratos recentes (setembro/2026) já foram verificados **por leitura direta do código-fonte da API** (commit `fa27d00`, branch `develop`), não só por teste HTTP ao vivo — dá pra confirmar causa raiz exata de bugs (ex.: `pick(FIELDS)` descartando um campo antes do INSERT). Ver [[AV-Hub-Bugs-Catalogo]].
 - `services/*.ts` no frontend são wrappers de `fetch` para as rotas internas do próprio Next.js (`/api/...`), não para o backend externo diretamente.
 
@@ -29,4 +29,3 @@ Documentado explicitamente num contrato interno: **"este repo é um BFF puro —
 - [[AV-Hub-RBAC]]
 - [[Achado-Duplicacao-RBAC]]
 - [[AV-Hub-Bugs-Catalogo]]
-- [[Organograma-Visao-Geral]]

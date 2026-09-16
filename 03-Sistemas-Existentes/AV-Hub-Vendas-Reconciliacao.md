@@ -26,7 +26,7 @@ Implementação concreta, agora **confirmada direto no código-fonte real de `ap
 - **`blacklist_destinatarios`** e **`blacklist_vendedor_g5`** usam **regex** (`~*`), não substring simples — um regex inválido cadastrado quebra toda query de dashboard/ranking que depende dessas tabelas; a rota valida o regex antes de gravar.
 - **`blacklist_vendedores` foi removida (09/2026)**, substituída por `blacklist_vendedor_g5` — mudança de semântica, não só de nome: a antiga excluía o vendedor inteiramente; a nova **deduz** (mesmo padrão do G4).
 - **G6 (Refaturamento) mudou de semântica recentemente**: do lado de **vendas**, desde 14/09/2026, **todo** refaturamento deduz, independente de `status_refaturamento`; do lado de **faturamento**, só deduz quando o status **não é** `Permitido`. Essa assimetria vendas vs. faturamento é intencional, mas fácil de esquecer ao debugar divergência entre os dois lados.
-- **Cuidado de nomenclatura**: existe um segundo par de blacklists, **`blacklist_comissoes_destinatario`/`blacklist_comissoes_vendedores`** (schema `core_comissionamento`) — parecido no nome, mas **sem nenhuma relação** com G4/G5; usadas só para excluir da comissão (bloqueio binário, sem cascata). Ver [[AV-Hub-Comissao-Modulo]].
+- **Cuidado de nomenclatura**: existe um segundo par de blacklists, **`blacklist_comissao_vendedor`/`blacklist_comissao_destinatario`** (schema `core_comissionamento`) — parecido no nome, mas **sem nenhuma relação** com G4/G5; usadas só para excluir da comissão (bloqueio binário, sem cascata). Ver [[AV-Hub-Comissao-Modulo]].
 
 ## `refaturamentos`
 `status_refaturamento`: `Permitido` | `Proibido` | `Sem Referência`, mais `motivo` (texto livre) e `periodo`. PK é `codigo_pedido_omie`.
@@ -45,12 +45,11 @@ Implementação concreta, agora **confirmada direto no código-fonte real de `ap
 
 ## Fonte real do dado cru — o pipeline ELT
 
-`vw_vendas_planilha`/`vw_faturamento_planilha` e as tabelas base (`pedidos_vendas`, `nota_fiscal_saida`, `produto_vendas`) são alimentadas por um pipeline **EL (não ETL)** dedicado que só extrai do Omie e faz upsert — nenhuma regra de negócio/classificação roda ali, tudo fica nas views/functions do banco. Ver [[Omie-ELT-Pipeline]] para arquitetura completa, incluindo a origem real do dado de `manifestos` (scraping via Playwright, não API do Omie — confirma a suspeita anterior sobre a confiabilidade de `numero_nf` nessas views).
+`vw_vendas_planilha`/`vw_faturamento_planilha` e as tabelas base (`pedidos_vendas`, `notas_fiscais`, `produto_vendas`) são alimentadas por um pipeline **EL (não ETL)** dedicado que só extrai do Omie e faz upsert — nenhuma regra de negócio/classificação roda ali, tudo fica nas views/functions do banco. Ver [[Omie-ELT-Pipeline]] para arquitetura completa, incluindo a origem real do dado de `manifestos` (scraping via Playwright, não API do Omie — confirma a suspeita anterior sobre a confiabilidade de `numero_nf` nessas views).
 
 ## Ver também
 - [[AV-Hub-Modulos]]
 - [[Faturamento-Expedicao]]
 - [[AV-Hub-Bugs-Catalogo]]
-- [[RH-Escopo-Row-Level-Security]]
 - [[Omie-ELT-Pipeline]]
 - [[AV-Hub-Comissao-Modulo]]

@@ -17,7 +17,7 @@ Tem dependência de terceiro **duas vezes** na cadeia: na compra de matéria-pri
 
 **Status:** não identifiquei ainda um sistema dedicado para este subfluxo.
 
-> ⚠️ **Atualização (16/09):** resolvido em decisão de arquitetura — Grades de Piso entra no **MES Aços Vital**, junto com Flanges e Chapas. O modelo de dados (Fábrica/Setor/Roteiro) já é genérico o suficiente para cobrir o rastreamento de lote enviado/retornado da galvanização externa; falta cadastrar a fábrica e o roteiro fabril desta linha, não construir sistema novo. Ver [[MES-Arquitetura-Decisoes]] e [[Achado-Ambiguidade-PCP]].
+> ⚠️ **Atualização (16/09):** resolvido em decisão de arquitetura — Grades de Piso entra no **MES Aços Vital**, junto com Flanges (Chapas **fica de fora** — corte de chapa é beneficiamento de Revenda, não fabricação, ver [[Fabricacao-Chapas]]). O modelo de dados (Fábrica/Setor/Roteiro) já é genérico o suficiente para cobrir o rastreamento de lote enviado/retornado da galvanização externa; falta cadastrar a fábrica e o roteiro fabril desta linha, não construir sistema novo. Ver [[MES-Arquitetura-Decisoes]] e [[Achado-Ambiguidade-PCP]].
 
 ## Ver também
 - [[Rota-Fabricacao]]

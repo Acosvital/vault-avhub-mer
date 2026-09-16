@@ -29,7 +29,7 @@ sequenceDiagram
     participant Qual as Qualidade
     participant Exp as Expedição
 
-    PCP->>Alm: EA1 · verifica saldo (warehouse, ver Depósito×Fábrica)
+    PCP->>Alm: EA1 · verifica saldo (warehouse compartilhado, não vinculado a fábrica)
     Alm->>Alm: EA2 · confirma disponibilidade física
     PCP->>Alm: EA3 · cria reserva (reserva_estoque) vinculada ao pedido/item
     Alm->>Alm: EA4 · separação física (ordem_separacao/item_separacao)

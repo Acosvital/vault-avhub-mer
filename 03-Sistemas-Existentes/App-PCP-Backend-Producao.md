@@ -46,7 +46,7 @@ Além do RBAC de telas idêntico ao padrão do av-hub, existe `PerfilSetor` (vis
 
 ## Auditoria e LGPD
 
-`AuditoriaLogin` (toda tentativa de login, base do rate limiting — 5 falhas/usuário ou 20/IP em 15 min, sem Redis, query de janela deslizante contra a própria tabela) e `AuditoriaAcesso` (toda chamada de API, via interceptor global). `Usuario.anonymizedAt` — mesmo padrão de anonimização LGPD do av-hub (preserva a linha para integridade de FK em auditoria, apaga dado pessoal).
+`AuditoriaLogin` (toda tentativa de login, base do rate limiting — 5 falhas/usuário ou 20/IP em 15 min, sem Redis, query de janela deslizante contra a própria tabela) e `AuditoriaAcesso` (toda chamada de API, via interceptor global). `Usuario.anonymizedAt` — suporte a anonimização estilo LGPD (preserva a linha para integridade de FK em auditoria, apaga dado pessoal); diferente do av-hub, que **não** tem esse campo (corrigido 16/09, ver [[AV-Hub-RBAC]]).
 
 ## Relação com Ordem de Serviço / Ordem de Produção (achado novo, 16/09)
 

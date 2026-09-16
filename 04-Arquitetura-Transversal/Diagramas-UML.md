@@ -5,11 +5,244 @@ criado: 2026-09-16
 
 # Diagramas UML — Modelo Completo
 
-> Conjunto de diagramas UML (e aproximações fiéis via mermaid, onde a notação nativa não existe) cobrindo o máximo possível do que já foi analisado no vault. **Sequência e Atividades já existem** — ver os 6 arquivos `Fluxo-*-Completo` (sequência) e [[Fluxogramas-Completos]] (atividades, com raias por setor) — não duplicados aqui.
+> Conjunto de diagramas UML (e aproximações fiéis via mermaid, onde a notação nativa não existe) cobrindo o máximo possível do que já foi analisado no vault. **Sequência e Atividades já existem** desde antes deste arquivo — ver 0a/0b abaixo pra preview embutido, e [[Fluxo-Compras-Completo]] + 4 irmãos / [[Fluxogramas-Completos]] pro conjunto completo (6 de cada).
 >
-> **Parte 1 (diagramas 1-16):** cobertura completa dos tipos UML — 3 de Classes, 1 de Casos de Uso, 4 de Estados, 1 de Componentes, 1 de Implantação, 1 de Pacotes, 1 de Comunicação, 1 de Objetos, 1 de Estrutura Composta, 1 de Visão Geral de Interação, 1 de Tempo. Cobre 12 dos 14 tipos UML (só falta Perfil, que não se aplica).
+> **Diagramas 0a-0b:** Sequência e Atividades — os 2 que ficavam só citados em texto antes, agora com preview real. **Parte 1 (diagramas 1-16):** cobertura completa dos demais tipos UML — 3 de Classes, 1 de Casos de Uso, 4 de Estados, 1 de Componentes, 1 de Implantação, 1 de Pacotes, 1 de Comunicação, 1 de Objetos, 1 de Estrutura Composta, 1 de Visão Geral de Interação, 1 de Tempo. Diagrama de Perfil (Profile) deliberadamente fora do escopo — não se aplica a documentar uma aplicação de negócio como esta.
 >
-> **Parte 2 (diagramas 17-22):** foco em desenvolvimento — modelo de dados com PK/FK explícitos de Estoque e MES (17/18, originalmente tentados como `erDiagram`, convertidos pra `classDiagram` por limitação de renderização — ver nota no 17), mais um Objetos, um Estados (proposta de Reserva de Estoque), um mapa geral de arquitetura de dados e um Fluxo de Dados. Deliberadamente fora: RH/Organograma, Mapas, Portal de Qualidade, Comissionamento.
+> **Parte 2 (diagramas 17-22):** foco em desenvolvimento — modelo de dados com PK/FK explícitos de Estoque e MES (17/18, originalmente tentados como `erDiagram`, convertidos pra `classDiagram` por limitação de renderização — ver nota no 17), mais um Objetos, um Estados (proposta de Reserva de Estoque), um mapa geral de arquitetura de dados e um Fluxo de Dados. Deliberadamente fora: Mapas, Portal de Qualidade, Comissionamento.
+
+## 0a. Sequência (já existe) — preview: Fluxo de Compras
+
+> ⚠️ **Reforçado (16/09):** isso já existia desde antes deste arquivo de UML, mas só como nota de texto — fácil de passar batido. Aqui está de verdade, embutido: 1 dos 6 diagramas de sequência completos (`Fluxo-*-Completo.md`). Os outros 5 (Recebimento, Qualidade, Produção/OS-OP, Expedição/Faturamento, Estoque) seguem o mesmo padrão — não embutidos aqui só por espaço, mas são o mesmo tipo de diagrama, com o mesmo nível de detalhe.
+
+```mermaid
+sequenceDiagram
+    participant PCP
+    participant Compras as Comprador (av-hub)
+    participant CCP
+    participant Aprov as Aprovador (condicional)
+    participant Forn as Fornecedor (externo)
+    participant LogEnt as Logística de entrada
+    participant Receb as Recebimento (MES)
+    participant Qual as Qualidade (MES)
+    participant Fab as Fábrica/Beneficiamento
+    participant Omie
+
+    PCP->>Compras: C1 · requisição (material, qtd, prazo, filial)
+    Compras->>Forn: C2 · cotação/negociação (fora do sistema)
+    opt acima do valor X
+        Compras->>Aprov: C3 · pedido de aprovação
+        Aprov-->>Compras: aprovado/reprovado
+    end
+    Compras->>Compras: C4 · emite Ordem de Compra (define CIF ou FOB)
+    Compras->>Forn: C5 · envia OC
+    CCP->>Forn: C6 · follow-up ativo de prazo/trânsito (canal externo, manual)
+    Forn-->>CCP: C6b · confirma/atualiza previsão de chegada
+    Compras->>Receb: C7 · referência mínima da OC (itens, qtd, flag acabado/não-acabado)
+    alt FOB — comprador assume custo/responsabilidade desde o despacho
+        LogEnt->>Forn: C7b · coleta no fornecedor
+        LogEnt->>Receb: C8 · chegada física na doca
+    else CIF — fornecedor paga e organiza o transporte
+        Forn->>Receb: C8b · fornecedor entrega direto na doca
+    end
+    Receb->>Receb: C9 · confere (contra Pedido de Venda OU contra OC) + pesagem
+    alt item não acabado
+        Receb->>PCP: C10 · "chegou, precisa beneficiamento"
+        PCP->>Fab: C12 · abre OS/OP
+        Fab->>Qual: C13 · conclui, libera pra inspeção
+    else item acabado
+        Receb->>Qual: C11 · libera pra inspeção
+    end
+    Qual->>Qual: C14 · aprova ou reprova
+    alt reprovado
+        Qual->>PCP: C15 · "reprovado, decide novo norte"
+        PCP->>Compras: C16 · nova requisição (volta pra C1)
+        Qual->>Omie: C17 · sinaliza necessidade de devolução (RNC)
+        Omie-->>Qual: C18 · nota de devolução (fecha RNC)
+    else aprovado
+        Qual->>Compras: C19 · status "disponível" (via casamento av-hub↔MES)
+    end
+```
+
+**Fonte completa (todos os 6):** [[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]], [[Fluxo-Qualidade-Completo]], [[Fluxo-Producao-OS-OP-Completo]], [[Fluxo-Expedicao-Faturamento-Completo]], [[Fluxo-Estoque-Completo]].
+
+## 0b. Atividades (já existe) — preview: Fluxograma mestre
+
+> O diagrama de atividades oficial da UML — decisões, `fork`/`join` (ramificações paralelas), raias por setor. Este é o mestre (fim a fim); os outros 5 focados (Compras, Recebimento, Qualidade, Produção, Estoque) estão em [[Fluxogramas-Completos]].
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 45, 'rankSpacing': 60, 'padding': 14}}}%%
+flowchart TD
+    subgraph SEC_VENDAS[Vendas - av-hub]
+        V1[Vendedor emite o pedido]
+        V2{Qualidade acompanha desde o inicio?}
+        V1 --> V2
+    end
+
+    subgraph SEC_PCP[PCP - MES]
+        P1[PCP classifica o item]
+        P2{Natureza do item}
+        P3{Disponibilidade}
+        P4[Gera requisicao de compra]
+        P5[Abre OS ou OP]
+        P6[Decide o novo norte]
+        P1 --> P2
+        P2 -->|Revenda| P3
+        P2 -->|Fabricacao propria| P3
+    end
+
+    subgraph SEC_COMPRAS[Compras e CCP - av-hub]
+        C1[Cotacao e negociacao]
+        C2{Acima do valor limite?}
+        C3[Aprovacao da diretoria]
+        C4[Emite Ordem de Compra, define CIF ou FOB]
+        C5[CCP: follow-up de prazo]
+        C1 --> C2
+        C2 -->|sim| C3 --> C4
+        C2 -->|nao| C4
+        C4 --> C5
+    end
+
+    subgraph SEC_FORN[Fornecedor - externo]
+        FN1[Recebe a OC]
+    end
+
+    subgraph SEC_LOG[Logistica de entrada]
+        L1{CIF ou FOB?}
+        L2[FOB: coleta no fornecedor]
+        L3[CIF: fornecedor entrega direto]
+        L4[Chegada fisica na doca]
+        L1 -->|FOB| L2 --> L4
+        L1 -->|CIF| L3 --> L4
+    end
+
+    subgraph SEC_RECEB[Recebimento - MES]
+        R1[Confere Pedido de Venda ou Ordem de Compra]
+        R2[Pesagem]
+        R3{Bate com o esperado?}
+        R4[Cria lote em quarentena]
+        R5{Item acabado?}
+        R1 --> R2 --> R3
+        R3 -->|nao| R6[Divergencia]
+        R3 -->|sim| R4 --> R5
+    end
+
+    subgraph SEC_PROD[Fabrica e Beneficiamento - MES]
+        F1[Abre ItemParcial]
+        F2[Percorre o roteiro setor a setor]
+        F3[Conclui no ultimo setor]
+        F1 --> F2 --> F3
+    end
+
+    subgraph SEC_ESTOQUE[Estoque - MES]
+        E1[Verifica saldo no warehouse]
+        E2[Cria reserva]
+        E3[Separacao fisica]
+        E1 --> E2 --> E3
+    end
+
+    subgraph SEC_QUAL[Qualidade - MES]
+        Q1[Inspecao]
+        Q2{Aprova?}
+        Q3[Abre RNC com evidencia]
+        Q4[Cisao de lote]
+        Q1 --> Q2
+        Q2 -->|nao| Q3 --> Q4
+    end
+
+    subgraph SEC_EXP[Expedicao e Logistica de saida - MES]
+        X1[Embalagem e paletizacao]
+        X2{Parcial ou integral?}
+        X3[Consolida a carga]
+        X4[Define transporte]
+        X1 --> X2
+        X2 -->|integral| X3 --> X4
+        X2 -->|parcial| X4
+    end
+
+    subgraph SEC_FISCAL[Fiscal - Omie]
+        O1[Emite nota fiscal]
+        O2[Baixa o item no pedido]
+        O1 --> O2
+    end
+
+    V2 -->|sim| Q1
+    V2 -->|nao| P1
+    P3 -->|pronto em estoque| E1
+    P3 -->|materia-prima em estoque| P5
+    P3 -->|sem estoque| P4
+    P4 --> C1
+    C5 --> FN1
+    FN1 --> L1
+    L4 --> R1
+    R6 --> P6
+    P6 -->|reabre compra| P4
+    R5 -->|sim| Q1
+    R5 -->|nao| P5
+    P5 --> F1
+    F3 --> Q1
+    E3 --> Q1
+    Q2 -->|sim| X1
+    Q3 --> Q4
+    Q4 --> P6
+    P6 -->|retrabalho ou nova OS/OP| F1
+    X4 --> O1
+
+    style SEC_VENDAS fill:#d9f0ec,stroke:#0f7a6b,stroke-width:2px,color:#181c22
+    style SEC_PCP fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
+    style SEC_COMPRAS fill:#e3e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
+    style SEC_FORN fill:#ece8e3,stroke:#8a7a63,stroke-width:2px,color:#181c22
+    style SEC_LOG fill:#fbe8d9,stroke:#c9541a,stroke-width:2px,color:#181c22
+    style SEC_RECEB fill:#e1eede,stroke:#5a7d3a,stroke-width:2px,color:#181c22
+    style SEC_PROD fill:#f3ddd6,stroke:#a8420f,stroke-width:2px,color:#181c22
+    style SEC_ESTOQUE fill:#d9eef2,stroke:#1f7a8c,stroke-width:2px,color:#181c22
+    style SEC_QUAL fill:#f7edd0,stroke:#a8860f,stroke-width:2px,color:#181c22
+    style SEC_EXP fill:#ece0f0,stroke:#7a3f9e,stroke-width:2px,color:#181c22
+    style SEC_FISCAL fill:#f6dde4,stroke:#a83f5c,stroke-width:2px,color:#181c22
+
+    style V1 fill:#ffffff,stroke:#0f7a6b,stroke-width:1.5px,color:#181c22
+    style V2 fill:#ffffff,stroke:#0f7a6b,stroke-width:1.5px,color:#181c22
+    style P1 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
+    style P2 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
+    style P3 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
+    style P4 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
+    style P5 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
+    style P6 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
+    style C1 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
+    style C2 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
+    style C3 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
+    style C4 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
+    style C5 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
+    style FN1 fill:#ffffff,stroke:#8a7a63,stroke-width:1.5px,color:#181c22
+    style L1 fill:#ffffff,stroke:#c9541a,stroke-width:1.5px,color:#181c22
+    style L2 fill:#ffffff,stroke:#c9541a,stroke-width:1.5px,color:#181c22
+    style L3 fill:#ffffff,stroke:#c9541a,stroke-width:1.5px,color:#181c22
+    style L4 fill:#ffffff,stroke:#c9541a,stroke-width:1.5px,color:#181c22
+    style R1 fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
+    style R2 fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
+    style R3 fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
+    style R4 fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
+    style R5 fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
+    style R6 fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
+    style F1 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
+    style F2 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
+    style F3 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
+    style E1 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style E2 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style E3 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style Q1 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
+    style Q2 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
+    style Q3 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
+    style Q4 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
+    style X1 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
+    style X2 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
+    style X3 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
+    style X4 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
+    style O1 fill:#ffffff,stroke:#a83f5c,stroke-width:1.5px,color:#181c22
+    style O2 fill:#ffffff,stroke:#a83f5c,stroke-width:1.5px,color:#181c22
+```
+
+**Fonte completa (todos os 6):** [[Fluxogramas-Completos]] — mestre + 5 focados (Compras, Recebimento, Qualidade, Produção OS/OP, Estoque).
 
 ## 1. Classes — Domínio Estoque
 
@@ -433,13 +666,13 @@ classDiagram
     cssClass "Usuario,Perfil,Tela,Permissao,UsuarioFavorito,Funcionario,Unidade,Setor,Cargo,NivelHierarquico,Parceiro,Produto,Vendedor,PedidoVenda,ProdutoVendas,NotaFiscalSaida,Refaturamento" avhubStyle
 ```
 
-**Nota:** `Vendedor.idFuncionario` é o vínculo em migração (backfill já rodou, ver [[RH-Escopo-Row-Level-Security]]). RBAC deste diagrama e o do diagrama 2 (MES) são **duas implementações independentes** — ver [[Achado-Duplicacao-RBAC]].
+**Nota:** `Vendedor.idFuncionario` é o vínculo em migração (backfill já rodou). RBAC deste diagrama e o do diagrama 2 (MES) são **duas implementações independentes** — ver [[Achado-Duplicacao-RBAC]].
 
 > ⚠️ **Reescrito por completo (16/09) após leitura de um dump mais completo do av-hub.** Mudanças:
-> - **`reportaAId` removido de `Funcionario`** — a coluna não existe de verdade na tabela (confirma o que já estava certo em [[Organograma-Visao-Geral]]: o vínculo vive só em `core_organograma.node.parent_id`, nunca foi coluna própria de `funcionarios`).
-> - **`Setor` tem hierarquia própria** (`parentId`/`nivel`, auto-referência) — achado novo, nunca documentado. É provavelmente a base real da "CTE recursiva pra subárvore" já citada em [[RH-Escopo-Row-Level-Security]] (`resolverEscopoSetorSubarvore`).
+> - **`reportaAId` removido de `Funcionario`** — a coluna não existe de verdade na tabela.
+> - **`Setor` tem hierarquia própria** (`parentId`/`nivel`, auto-referência) — achado novo, nunca documentado.
 > - **`Unidade` tem hierarquia matriz/filial** (`matrizId`, auto-referência) — achado novo.
-> - **FK real cruzando schema**: `Cargo.nvlPermissao` referencia `core_organograma.nivel_hierarquico(nivel)` de verdade (constraint `fk_cargos_nivel_hierarquico`) — antes era só "dicionário compartilhado", agora confirmado como FK de banco.
+> - **FK real cruzando schema**: `Cargo.nvlPermissao` tem uma constraint de FK real (`fk_cargos_nivel_hierarquico`) para uma tabela de outro schema — antes era só "dicionário compartilhado", agora confirmado como FK de banco.
 > - **`UsuarioFavorito` adicionado** (`auth.usuarios_favoritos`) — já citado em [[AV-Hub-Bugs-Catalogo]] como rota existente, agora com estrutura confirmada (`tipo`: cliente/pedido).
 > - ⚠️ **Risco de engenharia encontrado**: `auth.usuarios.id_funcionario` é `ON DELETE CASCADE` — apagar um `Funcionario` apaga o `Usuario` vinculado junto, silenciosamente. Vale confirmar se é intencional (ex.: desligamento sempre remove acesso) ou um risco de perda de histórico de auditoria não avaliado.
 
@@ -668,9 +901,6 @@ flowchart LR
         MESAPI["«component»<br/>API NestJS + Prisma"]
         ESTOQUEMOD["«component»<br/>Modulo Estoque<br/>(schema proprio)"]
     end
-    subgraph SYS_ORG[Organograma]
-        ORGFE["«component»<br/>Frontend"]
-    end
     subgraph SYS_ELT[omie-elt-pipeline]
         ELT["«component»<br/>Extrator EL<br/>(BullMQ + node-cron)"]
         SCRAPER["«component»<br/>Scraping Worker<br/>(Playwright)"]
@@ -681,7 +911,6 @@ flowchart LR
     MINIO[("«datastore»<br/>MinIO")]
 
     BFF -->|x-api-key / Bearer| API
-    ORGFE -->|mesma API| API
     MESAPI -->|x-api-key, gateway p/ consultar Omie| API
     API --> PGAVHUB
     MESAPI --> PGMES
@@ -696,7 +925,6 @@ flowchart LR
     style SYS_AVHUB fill:#d9f0ec,stroke:#0f7a6b,stroke-width:2px,color:#181c22
     style SYS_API fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
     style SYS_MES fill:#f3ddd6,stroke:#a8420f,stroke-width:2px,color:#181c22
-    style SYS_ORG fill:#ece0f0,stroke:#7a3f9e,stroke-width:2px,color:#181c22
     style SYS_ELT fill:#fbe8d9,stroke:#c9541a,stroke-width:2px,color:#181c22
 ```
 
@@ -708,11 +936,10 @@ flowchart LR
 flowchart TB
     subgraph VPS1["«device» VPS1 - Coolify/Traefik"]
         AVHUBC["«artifact» av-hub<br/>(Docker, Node 20 alpine)"]
-        ORGC["«artifact» Organograma (Docker)"]
         BLOGC["«artifact» Blog, Backlog Agil (Docker)"]
     end
     subgraph VPS2["«device» VPS2 - Cluster Postgres"]
-        PG["«database» Postgres<br/>core, auth, core_vendas_faturamento,<br/>core_comissionamento, core_organograma,<br/>omie_ctl/omie_raw"]
+        PG["«database» Postgres<br/>core, auth, core_vendas_faturamento,<br/>core_comissionamento,<br/>omie_ctl/omie_raw"]
     end
     subgraph VPS3["«device» VPS3 - MinIO"]
         MINIOD["«datastore» MinIO"]
@@ -726,7 +953,6 @@ flowchart TB
 
     AVHUBC --> PG
     AVHUBC --> MINIOD
-    ORGC --> PG
     MESAPPD --> PGMESD
     MESAPPD --> MINIOD
     AVHUBC -->|x-api-key gateway| MESAPPD
@@ -752,11 +978,11 @@ flowchart TB
     end
     subgraph P_VENDAS[core_vendas_faturamento]
     end
+    subgraph P_COMPRAS[core_compras]
+    end
     subgraph P_COMISSAO[core_comissionamento]
     end
     subgraph P_VAGAS[core_aprovacao_de_vagas]
-    end
-    subgraph P_ORG[core_organograma]
     end
     subgraph P_OMIECTL[omie_ctl / omie_raw]
     end
@@ -765,8 +991,8 @@ flowchart TB
 
     P_AUTH -->|usuarios_unidades| P_CORE
     P_VENDAS -->|vendedores.id_funcionario| P_CORE
+    P_COMPRAS -->|produtos_compras vincula| P_CORE
     P_COMISSAO -->|regras usam| P_VENDAS
-    P_ORG -->|nivel_hierarquico compartilhado| P_CORE
     P_VAGAS -->|solicitante| P_CORE
     P_OMIECTL -.audita.-> P_VENDAS
     P_ESTOQUE -->|projecao read-only| P_CORE
@@ -774,9 +1000,9 @@ flowchart TB
     style P_CORE fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
     style P_AUTH fill:#e3e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style P_VENDAS fill:#d9f0ec,stroke:#0f7a6b,stroke-width:2px,color:#181c22
+    style P_COMPRAS fill:#f3ddd6,stroke:#a8420f,stroke-width:2px,color:#181c22
     style P_COMISSAO fill:#f6dde4,stroke:#a83f5c,stroke-width:2px,color:#181c22
     style P_VAGAS fill:#fbe8d9,stroke:#c9541a,stroke-width:2px,color:#181c22
-    style P_ORG fill:#ece0f0,stroke:#7a3f9e,stroke-width:2px,color:#181c22
     style P_OMIECTL fill:#eef0f2,stroke:#8d95a1,stroke-width:2px,color:#181c22
     style P_ESTOQUE fill:#d9eef2,stroke:#1f7a8c,stroke-width:2px,color:#181c22
 ```
@@ -974,7 +1200,7 @@ gantt
 
 # Parte 2 — Diagramas de apoio ao desenvolvimento (16/09)
 
-> Foco explícito: **Estoque, MES/Produção e a integração av-hub↔MES** — RH/Organograma, Mapas, Portal de Qualidade e Comissionamento ficam de fora por decisão do usuário. Não são UML "puro" em todos os casos, mas são os diagramas que mais ajudam a **desenvolver** o que está sendo discutido.
+> Foco explícito: **Estoque, MES/Produção e a integração av-hub↔MES** — Mapas, Portal de Qualidade e Comissionamento ficam de fora por decisão do usuário. Não são UML "puro" em todos os casos, mas são os diagramas que mais ajudam a **desenvolver** o que está sendo discutido.
 
 ## 17. Modelo de Dados (PK/FK explícitos) — Estoque
 
@@ -1299,7 +1525,7 @@ stateDiagram-v2
 
 ## 21. Mapa Geral — arquitetura de dados (av-hub × MES)
 
-> As duas bases lado a lado, só com o que é relevante pra Estoque/MES (RH, Organograma, Mapas, Qualidade, Comissão deliberadamente fora). Os **2 pontos de integração** (C1 e C19 do [[Fluxo-Compras-Completo]]) marcados explicitamente — é a única fronteira que ainda precisa de mecanismo técnico definido.
+> As duas bases lado a lado, só com o que é relevante pra Estoque/MES (Mapas, Qualidade, Comissão deliberadamente fora). Os **2 pontos de integração** (C1 e C19 do [[Fluxo-Compras-Completo]]) marcados explicitamente — é a única fronteira que ainda precisa de mecanismo técnico definido.
 
 ```mermaid
 flowchart LR

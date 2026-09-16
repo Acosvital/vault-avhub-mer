@@ -21,7 +21,7 @@ Hoje o vendedor tira um pedido no Omie e depois usa uma planilha Excel manual (`
 | Margem líquida real | Letra | % Comissão |
 |---|---|---|
 | ≤ 0% | D | 0% (prejuízo sempre zera) |
-| 0–8,99% | D | 0,5% |
+| \>0–8,99% | D | 0,5% |
 | 9–11,99% | C | 0,7% |
 | 12–14,99% | B | 1,3% |
 | ≥ 15% | A | 2% |

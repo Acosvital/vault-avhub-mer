@@ -78,20 +78,6 @@
       }
     },
     {
-      "query": "tag:#organograma",
-      "color": {
-        "a": 1,
-        "rgb": 8087790
-      }
-    },
-    {
-      "query": "tag:#rh",
-      "color": {
-        "a": 1,
-        "rgb": 3447003
-      }
-    },
-    {
       "query": "tag:#rbac",
       "color": {
         "a": 1,
@@ -130,6 +116,6 @@
   "repelStrength": 10,
   "linkStrength": 1,
   "linkDistance": 250,
-  "scale": 0.5087618855792587,
+  "scale": 0.5087618855792586,
   "close": false
 }

@@ -15,8 +15,7 @@ Padrão em produção, confirmado por leitura direta do código-fonte completo d
 - **`core_vendas_faturamento`** — `vendedores`, `pedidos_vendas`, `pedidos_vendas_status_historico`, `notas_fiscais` (⚠️ nome real confirmado no dump — não `nota_fiscal_saida`), `produto_vendas`, `vw_vendas_base`/`vw_nf_classified` (views curadas), `vw_vendas_planilha`/`vw_faturamento_planilha` + `_resumo` (views cruas), `vw_pedido_venda_itens`, `vw_clientes_inativos`, `blacklist_pedidos`, `blacklist_destinatarios`, `blacklist_vendedor_g5` (substituiu `blacklist_vendedores`, removida 09/2026), `refaturamentos`, `diligenciador_vendedor`, `auxiliar_vendedor`, `metas_mensais`, `fechamento_manual`, `manifestos`, `cfop`, `pessoa_vendedor`, `comissoes_provisoria`. Ver [[AV-Hub-Vendas-Reconciliacao]]. `pedidos_vendas_status_historico` só rastreia 2 campos (`CHECK campo IN ('situacao','data_previsao')`) — log parcial, não histórico completo de toda mudança.
 - **`core_compras`** — schema **novo, confirmado no dump (16/09)**: só `produtos_compras` (vínculo produto↔fornecedor: `id_produto` + `codigo_empresa`, nada além disso) + 4 views (`vw_catalogo_de_produtos`, `vw_fornecedores_com_produtos`, `vw_historico_precos`, `vw_todos_os_fornecedores`). Confirma que **não existe sistema de compras real hoje** no av-hub — é só o vínculo que alimenta o módulo Orçamento.
 - **`core_comissionamento`** — schema **novo, descoberto nesta rodada**: `regra_comissao_fixa`, `blacklist_comissao_vendedor`/`blacklist_comissao_destinatario` (distintas das blacklists G4/G5 — só bloqueiam, não deduzem em cascata), `bloqueio_comissao`, `simulacao`/`simulacao_item`, `simulador_parametro`, `vw_simulacao_resolvida`. Ver [[AV-Hub-Comissao-Modulo]].
-- **`core_aprovacao_de_vagas`** — schema **novo, descoberto nesta rodada**: `vaga` — a tela de Solicitações de Vagas do RH tem schema próprio, separado de `core`.
-- **`core_organograma`** — `node`, `nivel_hierarquico`, mais **`historia`/`historia_imagem`/`historia_timeline`** (seção institucional "Nossa História") e **`welcome_preset`/`welcome_settings`** (onboarding) — mais amplo do que só a árvore hierárquica. Ver [[Organograma-Visao-Geral]].
+- **`core_aprovacao_de_vagas`** — schema **novo, descoberto nesta rodada**: `vaga` — a tela de Solicitações de Vagas (aprovação de headcount) tem schema próprio, separado de `core`.
 - **`omie_ctl`/`omie_raw`** — schemas **próprios do pipeline ELT** (não de negócio): `omie_ctl.run_log` (auditoria de execução por filial/recurso/tier) e `omie_raw.*` (staging jsonb opcional, só se `RAW_AUDIT_ENABLED=true`). Ver [[Omie-ELT-Pipeline]].
 - ~~**`estoque`** (proposto, ainda não criado) — schema isolado do [[PRD-Estoque-Visao-Geral|PRD do Estoque]], mesma convenção.~~ ⚠️ **Desatualizado (16/09):** o Estoque não entra mais neste cluster — passa a morar no banco separado do MES (Prisma). ✅ Resolvido: ganha um schema Postgres próprio lá dentro, seguindo esta mesma convenção — não cai em `public`. Ver [[MES-Arquitetura-Decisoes]].
 
@@ -36,7 +35,5 @@ Padrão recorrente: uma tabela/projeção **crua** com flags booleanas independe
 - [[AV-Hub-Arquitetura-BFF]]
 - [[Estoque-Modelo-Dados]]
 - [[Infraestrutura-Self-Hosted]]
-- [[Organograma-Visao-Geral]]
-- [[RH-Escopo-Row-Level-Security]]
 - [[AV-Hub-Comissao-Modulo]]
 - [[Omie-ELT-Pipeline]]
