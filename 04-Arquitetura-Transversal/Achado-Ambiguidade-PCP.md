@@ -15,7 +15,7 @@ Para os **"diligenciadores"** — pessoas do setor de PCP que acompanham pedidos
 
 O sistema de **Programação e Controle de Produção de chão de fábrica** — fábricas, setores, máquinas, operadores, roteiro de produção. Hoje focado em [[Fabricacao-Flanges|Flanges]]. Ver [[App-PCP-Visao-Geral]].
 
-> ⚠️ **Atualização (16/09):** decisão em andamento — o sistema de fábrica vai se chamar **"MES Aços Vital"** (nome de trabalho, até um nome melhor ser definido) e vai cobrir Estoque + toda a fabricação (Flanges, Chapas, Grades de Piso), não só Flanges. Isso resolve a ambiguidade na prática: "PCP" (a sigla) deixa de ser o nome do sistema; o "Portal PCP" do av-hub continua existindo com esse nome (acompanhamento comercial), sem conflito. Ver [[MES-Arquitetura-Decisoes]].
+> ⚠️ **Atualização (16/09):** decisão em andamento — o sistema de fábrica vai se chamar **"MES Aços Vital"** (nome de trabalho, até um nome melhor ser definido) e vai cobrir Estoque + toda a fabricação (linha aberta: Flanges hoje, Grades de Piso/Chapa Expandida/Caldeiraria etc. conforme forem cadastradas — **Chapas não entra aqui**, corte de chapa é beneficiamento de Revenda, ver [[Fabricacao-Chapas]]), não só Flanges. Isso resolve a ambiguidade na prática: "PCP" (a sigla) deixa de ser o nome do sistema; o "Portal PCP" do av-hub continua existindo com esse nome (acompanhamento comercial), sem conflito. Ver [[MES-Arquitetura-Decisoes]].
 
 ## Por que isso importa
 

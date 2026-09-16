@@ -10,10 +10,10 @@ Vault de análise do projeto de **ERP de altíssimo nível** da Aços Vital: um 
 
 ## Como este vault está organizado
 
-- [[Fluxo-Operacional-Visao-Geral|1. Fluxo Operacional]] — o mapa macro do processo: comercial → PCP → estoque/revenda/fabricação → faturamento.
+- [[Fluxo-Operacional-Visao-Geral|1. Fluxo Operacional]] — o mapa macro do processo: comercial → PCP → estoque/revenda/fabricação → faturamento. Ver também [[Fluxo-Detalhado-Pedido-Item|o mesmo fluxo no nível de item]], [[Modelo-Destinacao-Item|o modelo formal que reconcilia os dois]], [[Setores-Envolvidos-no-Fluxo|todos os setores envolvidos]] os 6 subfluxos conversa-por-conversa (Compras, Recebimento, Qualidade, Produção/OS-OP, Expedição/Faturamento, Estoque) e [[Fluxogramas-Completos|os fluxogramas visuais de tudo isso]].
 - [[PRD-Estoque-Visao-Geral|2. PRD do Sistema de Estoque]] — o primeiro módulo novo planejado (compras, recebimento, estoque).
 - [[AV-Hub-Visao-Geral|3. Sistemas existentes]] — av-hub, app-pcp, [[Organograma-Visao-Geral|Organograma]] e o [[Omie-ELT-Pipeline|pipeline ELT]] — frontends **e** backends reais.
-- [[Schema-Postgres-Multi-Dominio|4. Arquitetura transversal]] — decisões e padrões que atravessam todos os módulos.
+- [[Schema-Postgres-Multi-Dominio|4. Arquitetura transversal]] — ver também [[Diagramas-UML|UML completo]] (classes, casos de uso, estados, componentes, implantação, pacotes) — decisões e padrões que atravessam todos os módulos.
 - [[Equipe-Projeto|5. Pessoas e equipe]]
 - [[Glossario|6. Glossário]]
 
@@ -26,6 +26,8 @@ Vault de análise do projeto de **ERP de altíssimo nível** da Aços Vital: um 
 - ✅ Descobertos 2 schemas de backend novos (`core_comissionamento`, `core_aprovacao_de_vagas`) e conteúdo novo no schema do Organograma (história institucional, onboarding).
 - ✅ Confirmado que a maioria dos bugs antes catalogados como pendentes **já foi corrigida** no backend real — ver [[AV-Hub-Bugs-Catalogo]].
 - ✅ Confirmado que o backend do app-pcp é **muito mais maduro** que o frontend enviado (dashboard de produção, workflow de item por lote, entregas, divergências) — ver [[App-PCP-Backend-Producao]].
+- ✅ **Fluxo detalhado item a item registrado** (16/09, transcrição de áudio do gerente): PCP verifica estoque como primeiro passo (não rota isolada), flag acabado/não-acabado do comprador define método de conferência no Recebimento, Ordem de Serviço/Ordem de Produção emitidas pelo PCP, status por item a caminho do av-hub. Ver [[Fluxo-Detalhado-Pedido-Item]].
+- ✅ **Reclassificação:** corte de chapa (plasma/laser) é beneficiamento de **Revenda**, não uma linha de Fabricação — corrigido em todo o vault. "Chapa Expandida" (produto de linha própria) é diferente de "chapa cortada sob medida" (beneficiamento).
 - ⏳ Próximas etapas: aguardando mais material do usuário sobre o projeto de ERP.
 
 ## Achados-chave
@@ -45,13 +47,14 @@ Ver [[Decisoes-Chave-ERP]] para a lista completa. Destaques:
 Entrada Comercial → PCP (Carteira) → [Estoque | Revenda | Fabricação] → Faturamento/Expedição
 ```
 
-| Fase do fluxo | Sistema que cobre hoje | Status |
-|---|---|---|
-| Entrada comercial (venda) | [[AV-Hub-Visao-Geral\|av-hub]] + [[Omie-ELT-Pipeline\|pipeline ELT]] | ✅ Em produção |
-| Acompanhamento comercial/financeiro | [[AV-Hub-Modulos\|Portal PCP, Portal Vendedor, Portal Gerente]] | ✅ Em produção |
-| Estoque / Recebimento / Compras | [[PRD-Estoque-Visao-Geral\|PRD Estoque]] | 📋 Só planejado (mas Compras pode já ter views de backend — ver [[AV-Hub-Bugs-Catalogo]]) |
-| Fabricação — Flanges | [[App-PCP-Visao-Geral\|app-pcp]] | 🚧 Backend maduro, frontend em construção (Robert) |
-| Fabricação — Chapas / Grades de Piso | — | ❓ Não mapeado em sistema ainda |
-| Faturamento / Expedição | Omie (nota fiscal) + av-hub (visão) | ✅ Parcial (fiscal fica no Omie) |
-| Organograma / hierarquia / cultura | [[Organograma-Visao-Geral\|Organograma]] | ✅ Em produção, frontend fora do escopo enviado |
-| Comissionamento | [[AV-Hub-Comissao-Modulo]] | ✅ Schema de backend em produção, uso ainda a esclarecer |
+| Fase do fluxo                        | Sistema que cobre hoje                                               | Status                                                                                    |
+| ------------------------------------ | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Entrada comercial (venda)            | [[AV-Hub-Visao-Geral\|av-hub]] + [[Omie-ELT-Pipeline\|pipeline ELT]] | ✅ Em produção                                                                             |
+| Acompanhamento comercial/financeiro  | [[AV-Hub-Modulos\|Portal PCP, Portal Vendedor, Portal Gerente]]      | ✅ Em produção                                                                             |
+| Estoque / Recebimento / Compras      | [[PRD-Estoque-Visao-Geral\|PRD Estoque]]                             | 📋 Só planejado (mas Compras pode já ter views de backend — ver [[AV-Hub-Bugs-Catalogo]]) |
+| Fabricação — Flanges                 | [[App-PCP-Visao-Geral\|app-pcp]] / MES Aços Vital                    | 🚧 Backend maduro, frontend em construção (Robert). Única fábrica cadastrada hoje. |
+| Fabricação — Grade de Piso, Chapa Expandida, Caldeiraria etc. | MES Aços Vital (mesmo modelo Fábrica/Setor/Roteiro) | 📋 Sistema definido, fábricas/roteiros ainda não cadastrados (lista aberta, não só essas três) |
+| Revenda — corte de chapa sob medida (plasma/laser) | [[PRD-Estoque-Visao-Geral\|PRD Estoque]] (beneficiamento) | 📋 Reclassificado 16/09: é Revenda, não Fabricação — ver [[Fabricacao-Chapas]] |
+| Faturamento / Expedição              | Omie (nota fiscal) + av-hub (visão)                                  | ✅ Parcial (fiscal fica no Omie)                                                           |
+| Organograma / hierarquia / cultura   | [[Organograma-Visao-Geral\|Organograma]]                             | ✅ Em produção, frontend fora do escopo enviado                                            |
+| Comissionamento                      | [[AV-Hub-Comissao-Modulo]]                                           | ✅ Schema de backend em produção, uso ainda a esclarecer                                   |

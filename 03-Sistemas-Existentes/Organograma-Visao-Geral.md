@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, organograma, rh]
 criado: 2026-09-16
-atualizado: 2026-09-16
+atualizado: 2026-09-16 (mecânica exata do campo "Reporta a" confirmada)
 ---
 
 # Organograma — Terceiro Sistema
@@ -21,6 +21,15 @@ Descoberto indiretamente (via contratos de RH do av-hub) e agora **confirmado po
 - `NIVEL_MINIMO_HIERARQUIA = 4` — níveis 0-1 são raízes globais; 2-3 são só estruturais (setor); nenhum cargo de pessoa usa nível abaixo de 4.
 - `reporta_a_id` no formulário de Funcionário (av-hub) vira `parent_id` do nó da pessoa — só deve ser gravado quando o usuário escolhe manualmente (override permanente); nunca para persistir o cálculo automático do backend (`fn_default_parent_pessoa`), sob risco de "travar" a pessoa e impedir redistribuição automática futura.
 - Ao excluir um funcionário, overrides órfãos de colegas que apontavam pra ele são limpos (`limparOverridesApontandoPara`).
+
+### "Reporta a" — mecânica exata confirmada (16/09)
+
+O campo **"Reporta a"** na tela de Cadastro de Funcionários **não vai pro endpoint de funcionários** — é uma chamada separada, pro Organograma:
+
+- **Backend real**: `POST /organograma_nodes` (cria) e `PUT /organograma_nodes/:id` (atualiza), consumidos via BFF em `app/api/organograma_nodes/route.ts` e `app/api/organograma_nodes/[id]/route.ts`.
+- **Payload**: `{ id, id_ent, parent_id }` — `id`/`id_ent` = o próprio funcionário, `parent_id` = quem ele reporta.
+- **Service que orquestra**: `definirReportaA`, chamado em `funcionarios/page.tsx:382` **só quando o campo muda** (`reportaAMudou`) — não dispara em toda edição de funcionário, só quando esse campo específico é alterado.
+- **Confirmado no código** (`organogramaNodes.ts:63-71`): o banco já calcula um "pai" padrão sozinho quando não existe nó (`fn_default_parent_pessoa`). Uma linha em `organograma.node` é tratada como **override manual permanente** — por isso só se grava aqui quando o usuário escolhe alguém manualmente na tela, nunca o resultado do cálculo automático (o código evita ativamente persistir o valor calculado de volta, exatamente pra não "travar" a redistribuição automática quando o setor muda).
 
 ## O que ainda não sabemos
 

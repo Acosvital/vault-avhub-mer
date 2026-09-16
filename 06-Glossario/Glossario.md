@@ -14,6 +14,8 @@ atualizado: 2026-09-16
 - **Grupo de dedução (G1-G2P-G6/LÍQUIDO)** — classificação mutuamente exclusiva de um pedido/nota na cascata de waterfall: G1 Cancelado, G2 Devolvido, G2P Devolvido Parcial, G3 Recusado/Denegado, G4 blacklist de destinatário, G5 blacklist de vendedor, G6 Refaturamento, LÍQUIDO = resto. Ver [[AV-Hub-Vendas-Reconciliacao]].
 - **`ItemParcial`** — no backend do app-pcp, é o **estado de produção de um lote/fração de item** percorrendo o roteiro (8 estados: CRIADO...CONCLUIDO/CANCELADO) — não é entrega parcial ao cliente (isso é a entidade `Entrega`, separada). Ver [[App-PCP-Backend-Producao]].
 - **`nf_classified`/`vendas_base`** — views curadas que já entregam o grupo de dedução pronto por nota/pedido. Ver [[AV-Hub-Vendas-Reconciliacao]].
+- **OS (Ordem de Serviço)** — emitida pelo PCP pra beneficiamento/retrabalho de um item de Revenda (ex.: corte de chapa) fora de uma linha de fabricação própria. Ver [[Fluxo-Detalhado-Pedido-Item]].
+- **OP (Ordem de Produção)** — emitida pelo PCP pra iniciar a fabricação de um item numa linha própria (Flange etc.). Ver [[Fluxo-Detalhado-Pedido-Item]].
 - **Organograma** — terceiro sistema, servido pela mesma API `api-acos-vital`, com árvore hierárquica de pessoas/setores **e** seções institucionais de história/onboarding. Ver [[Organograma-Visao-Geral]].
 - **PCP** — ambíguo neste projeto. Ver [[Achado-Ambiguidade-PCP]].
 - **`PerfilSetor`** — RBAC paralelo (visualizar/atuar por perfil×setor) no app-pcp, usado só como conveniência de UI na tela de Movimentações — não é fronteira de segurança real.

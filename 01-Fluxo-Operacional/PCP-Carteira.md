@@ -17,3 +17,4 @@ A classificação acontece **por item**, não por pedido inteiro — um mesmo pe
 ## Ver também
 - [[Entrada-Comercial]] (fase anterior)
 - [[Rota-Estoque]], [[Rota-Revenda]], [[Rota-Fabricacao]] (fases seguintes)
+- [[Modelo-Destinacao-Item]] — formaliza que "estoque" não é uma quarta classificação do mesmo tipo, é um eixo de disponibilidade avaliado dentro de Revenda/Fabricação.

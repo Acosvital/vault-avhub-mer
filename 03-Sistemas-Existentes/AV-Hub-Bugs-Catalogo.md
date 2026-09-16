@@ -32,7 +32,7 @@ Consolidado dos contratos técnicos (`docs/*.md`) do av-hub **e agora verificado
 
 | Item | Status |
 |---|---|
-| Backfill de `vendedores.id_funcionario` | Sem migration/script no repositório — hoje o vínculo é feito via `/vendedores/:id/sugestoes` como ferramenta de sugestão em tempo real, não backfill em lote |
+| Backfill de `vendedores.id_funcionario` | ✅ **Já rodou (confirmado 16/09)** — nota anterior ("não rodou ainda", testado ao vivo em 03/09) está desatualizada. Ver [[RH-Escopo-Row-Level-Security]]. |
 | Paginação por pedido (não por linha crua) em `/vendas_planilha` | Ainda não implementado — só ordenação foi endereçada, não a paginação por família |
 | Chave composta em `PUT`/`DELETE /blacklist_pedidos` | Resolvido junto com o bug de criação (ver acima) |
 | `fechamento_manual` | Tabela/rota confirmada existente no inventário de rotas do backend real (`fechamento_manual` está na lista de 65 arquivos de rota) |
@@ -42,10 +42,11 @@ Consolidado dos contratos técnicos (`docs/*.md`) do av-hub **e agora verificado
 
 Rotas já existem no backend para 3 "extras" que o plano do Portal do Vendedor (ver [[AV-Hub-Portal-Vendedor-Plano]]) tratava como "caro"/"parcial"/"precisa de tabela nova":
 - **`usuarios_favoritos`** — rota já existe; "favoritar cliente/pedido" (extra 8.10) pode não precisar de tabela nova.
-- **`pedidos_vendas_status_historico`** — rota já existe; "histórico de status do pedido" (extra 8.11) pode já ter log completo no backend, não só os marcos parciais assumidos.
 - **`clientes_inativos`** — rota já existe; "cliente inativo" (extra 8.9), antes avaliado como caro (N chamadas por mês), pode já ter endpoint dedicado.
 
-Nenhuma dessas 3 foi explorada em profundidade ainda (não fazia parte do escopo desta rodada de análise) — mas a mera existência da rota já muda o "custo estimado" dessas features de "caro/precisa contrato novo" para "possivelmente só falta plugar no frontend". Vale investigar antes de re-priorizar o roadmap do Portal do Vendedor.
+Essas 2 não foram exploradas em profundidade ainda (não fazia parte do escopo desta rodada de análise) — mas a mera existência da rota já muda o "custo estimado" dessas features de "caro/precisa contrato novo" para "possivelmente só falta plugar no frontend". Vale investigar antes de re-priorizar o roadmap do Portal do Vendedor.
+
+> ⚠️ **Correção (16/09):** `pedidos_vendas_status_historico` **não** entra nessa lista de "baixo custo, já existe" — confirmado que é o **histórico vindo do Omie via pipeline** (polling, granularidade grossa dos status do Omie), não um log de transições internas. Não satisfaz o requisito de "histórico de status do pedido" no nível granular que o fluxo detalhado item a item exige (ver [[Fluxo-Detalhado-Pedido-Item]]) — precisamos de um histórico muito mais robusto, mostrando toda transição real (PCP, OS/OP, qualidade), que essa tabela não cobre.
 
 ## Ver também
 - [[AV-Hub-Vendas-Reconciliacao]]

@@ -5,12 +5,17 @@ criado: 2026-09-16
 
 # 3b. Rota Revenda (CCP & Suprimentos)
 
+- PCP verifica se o item já tem saldo em estoque (pronto ou como matéria-prima) — ver [[Fluxo-Detalhado-Pedido-Item]]. Se tem, pula direto pra conferência/beneficiamento; se não tem, segue o fluxo abaixo.
 - Emissão e envio da Ordem de Compra (OC).
 - Gestão de entrega via CCP (follow-up ativo de prazos e trânsito).
-- Liberação no fornecedor e transporte (coleta pela logística interna ou frete CIF).
+- Liberação no fornecedor e transporte — depende do incoterm da OC: **FOB** (Logística de entrada da empresa coleta) ou **CIF** (fornecedor paga e entrega direto). ⚠️ Corrigido 16/09 — o termo certo é CIF×FOB, não "coleta própria ou frete CIF". Ver [[Fluxo-Compras-Completo]].
 - Recebimento físico e alocação preventiva em **quarentena**.
 - Inspeção técnica pelo time de Qualidade.
 - Entrada no estoque regular e liberação na carteira.
+
+## Beneficiamento dentro da Revenda
+
+> ⚠️ **Atualização (16/09, confirmado pelo gerente):** corte a plasma/laser de chapa (cortar sob medida uma chapa comprada inteira) **é um beneficiamento dentro desta rota**, não uma sub-rota de Fabricação — ver [[Fabricacao-Chapas]] (reclassificado). Quando o material que chega precisa desse tipo de processo antes de ir pra Qualidade/Expedição, o item volta pro PCP, que emite uma **Ordem de Serviço (OS)**. Ver [[Fluxo-Detalhado-Pedido-Item]] para o fluxo completo item a item.
 
 ## Perfil de risco
 

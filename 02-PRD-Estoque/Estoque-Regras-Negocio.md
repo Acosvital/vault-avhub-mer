@@ -23,9 +23,11 @@ Levantadas em análise de lacunas contra prática padrão de WMS/ERP e distribui
 
 ## Segregação de função (seção 20 do PRD)
 
-Regra clássica de controle interno: **quem cria o pedido não pode ser quem aprova, nem quem recebe o material**. Perfis: Comprador, Aprovador, Almoxarife, Qualidade, Gestor de estoque — mapeados como grupos no Azure AD já usado no Backlog Ágil.
+Regra clássica de controle interno: **quem cria o pedido não pode ser quem aprova, nem quem recebe o material**. Perfis: Comprador, Aprovador, Almoxarife, Qualidade, Gestor de estoque.
 
-⚠️ **Tensão arquitetural identificada**: nem o [[AV-Hub-RBAC|av-hub]] nem o [[App-PCP-Visao-Geral|app-pcp]] usam grupos do Azure AD para autorização — os dois usam um modelo relacional próprio de perfis/telas/permissões no Postgres, com tela de administração já pronta. Ver [[Achado-Duplicacao-RBAC]] para a discussão completa.
+~~Desenho original: mapeados como grupos no Azure AD já usado no Backlog Ágil.~~
+
+> ⚠️ **Atualização (conversa de arquitetura, 16/09) — tensão resolvida, decisão tomada:** a proposta de grupos do Azure AD foi **descartada**. O RBAC do Estoque segue o mesmo padrão já em produção no backend do MES (`api-pcp`): modelo relacional de telas/perfis/permissões no Postgres + `PerfilSetor` para escopo por instância de setor — **não** nasce como biblioteca compartilhada com o av-hub, são implementações independentes aceitas conscientemente por velocidade de entrega. Os 5 perfis de segregação de função acima continuam válidos como **conceito de negócio**; o que mudou foi só o mecanismo técnico de autorização. Ver [[MES-Arquitetura-Decisoes]] (decisão 3) e [[Decisoes-Chave-ERP]]. A discussão histórica da tensão original (3 modelos de RBAC coexistindo) fica registrada em [[Achado-Duplicacao-RBAC]].
 
 ## Ver também
 - [[Estoque-Modelo-Dados]]

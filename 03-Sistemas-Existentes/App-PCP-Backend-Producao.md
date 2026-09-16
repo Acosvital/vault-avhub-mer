@@ -48,8 +48,17 @@ Além do RBAC de telas idêntico ao padrão do av-hub, existe `PerfilSetor` (vis
 
 `AuditoriaLogin` (toda tentativa de login, base do rate limiting — 5 falhas/usuário ou 20/IP em 15 min, sem Redis, query de janela deslizante contra a própria tabela) e `AuditoriaAcesso` (toda chamada de API, via interceptor global). `Usuario.anonymizedAt` — mesmo padrão de anonimização LGPD do av-hub (preserva a linha para integridade de FK em auditoria, apaga dado pessoal).
 
+## Relação com Ordem de Serviço / Ordem de Produção (achado novo, 16/09)
+
+Os áudios do gerente descrevem o PCP emitindo **Ordem de Serviço (OS)** — pra beneficiamento/retrabalho de um item de Revenda ou Fabricação (ex.: corte de chapa, retrabalho pós-reprovação) — e **Ordem de Produção (OP)** — pra iniciar a fabricação de um item numa linha própria (Flange etc.), conforme a necessidade do fluxo.
+
+**Decidido (16/09): segue a hipótese (a)** — OS e OP são o mesmo mecanismo de `roteiro`/`ItemParcial` (8 estados) já implementado aqui, não entidades novas. Reforça essa escolha o fato de `PedidoAnexo.tipo` **já ter `ORDEM_PRODUCAO`** no enum (ao lado de NOTA/CANHOTO/DESENHO/PEDIDO/COMPROVANTE_ENTREGA) — sugere que o próprio time já modelou "Ordem de Produção" como o **documento** gerado a partir do fluxo do `ItemParcial`, não como uma state machine paralela. OS de beneficiamento de Revenda (ex.: corte de chapa) provavelmente precisa de uma Fábrica/Setor leve cadastrada só pra isso (ex.: "Beneficiamento" → setor "Corte") pra caber no modelo existente — detalhe de modelagem a confirmar com Robert, não decisão de arquitetura.
+
+Ver [[Fluxo-Detalhado-Pedido-Item]] para o fluxo completo descrito pelo gerente.
+
 ## Ver também
 - [[App-PCP-Visao-Geral]]
 - [[App-PCP-Modelo-Producao]]
 - [[Estoque-Riscos]]
 - [[Achado-Duplicacao-RBAC]]
+- [[Fluxo-Detalhado-Pedido-Item]]

@@ -8,7 +8,7 @@ criado: 2026-09-16
 Plano de produto vivo (`docs/portal-vendedor/plano-portal-vendedor.md`), evoluído ao longo de setembro/2026 com decisões do Nathan e achados técnicos sucessivos. Três telas: **Meu Dashboard**, **Meus Pedidos**, **Minhas Notas Fiscais**.
 
 ## Status geral (04/09)
-Vínculo, escopo, resumo do topo, refaturamento (vendas e faturamento), meta individual, filtro por período/cliente e SLA (`data_previsao`) já fechados — os 3 contratos de DBA necessários (`001` data_previsao, `002`, `003`) foram implementados e confirmados ao vivo. Restam 2 pendências, nenhuma bloqueada em backend: dicionário de nomes para `etapa` (em andamento) e status agregado da família de pedido (decisão já tomada, falta implementar).
+Vínculo, escopo, resumo do topo, refaturamento (vendas e faturamento), meta individual, filtro por período/cliente e SLA (`data_previsao`) já fechados — os 3 contratos de DBA necessários (`001` data_previsao, `002`, `003`) foram implementados e confirmados ao vivo. Restam 2 pendências, nenhuma bloqueada em backend: dicionário de nomes para `etapa` (em andamento — provável fonte: `core.etapas_faturamento`, confirmada no dump real com `codigo_etapa`/`descricao_padrao`/`descricao`, ver [[Schema-Postgres-Multi-Dominio]]) e status agregado da família de pedido (decisão já tomada, falta implementar).
 
 ## Meu Dashboard
 Reaproveita os endpoints que hoje só o admin usa (`dashboard/vendas|faturamento/detalhe-vendedor`), travados no(s) código(s) de vendedor do usuário logado. Cor por faixa de meta batida (tiers) aplicada só do lado de Vendas — Faturamento mostra os mesmos números com cor fixa (confirmado como intencional, não lacuna). Seletor de mês compartilhado com as outras duas telas.
@@ -21,7 +21,7 @@ Reaproveita os endpoints que hoje só o admin usa (`dashboard/vendas|faturamento
 - Filtro por período (reaproveita `useDashboardDate`) e por cliente (busca em memória sobre o que já foi carregado — volume pequeno por vendedor/mês) confirmados para a v1.
 
 ## Minhas Notas Fiscais
-Fonte principal: `GET /nf_classified` (não `nota_fiscal_saida` cru) — já vem com `grupo_deducao` pronto por nota. Campos mostrados: `numero_nf`, `data_emissao`/`hora_emissao`, `valor_nf`/`valor_mercadorias`/`valor_ipi`, vínculo com o pedido de origem. Removido a pedido do Nathan: `averbado`.
+Fonte principal: `GET /nf_classified` (não `notas_fiscais` cru, ⚠️ nome real confirmado no dump — não `nota_fiscal_saida`) — já vem com `grupo_deducao` pronto por nota. Campos mostrados: `numero_nf`, `data_emissao`/`hora_emissao`, `valor_nf`/`valor_mercadorias`/`valor_ipi`, vínculo com o pedido de origem. Removido a pedido do Nathan: `averbado`.
 
 ## Rotas Next.js novas
 ```

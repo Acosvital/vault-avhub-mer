@@ -18,5 +18,7 @@ Rota **linear e curta**, com menor superfície de falha — provavelmente a mais
 O [[PRD-Estoque-Visao-Geral|PRD do Estoque]] cobre exatamente esta rota: separação (`ordem_separacao`/`item_separacao`), conferência e etiquetagem por código de barras/QR. Ver [[Estoque-Modelo-Dados]].
 
 ## Ver também
+- [[Fluxo-Estoque-Completo]] — esta rota, conversa por conversa (separação, reserva, contagem cíclica).
+- [[Modelo-Destinacao-Item]] — esta rota é, formalmente, a célula "pronto em estoque" da matriz Revenda×Fabricação, não uma origem própria de item.
 - [[Fluxo-Operacional-Visao-Geral]]
 - [[Faturamento-Expedicao]]

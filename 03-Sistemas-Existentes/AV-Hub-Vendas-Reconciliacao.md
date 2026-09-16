@@ -31,6 +31,10 @@ Implementação concreta, agora **confirmada direto no código-fonte real de `ap
 ## `refaturamentos`
 `status_refaturamento`: `Permitido` | `Proibido` | `Sem Referência`, mais `motivo` (texto livre) e `periodo`. PK é `codigo_pedido_omie`.
 
+## Limitação de dado — devolução parcial (achado 16/09, precisado após leitura do dump real)
+
+`pedidos_vendas.devolucao_parcial` é **só um boolean** (`true`/`false`) — não existe nenhum campo de valor associado na tabela. Ou seja, não é "o Omie mostra o valor errado de devolução parcial", é **não existe valor nenhum capturado**, só a flag de que houve devolução parcial. Isso afeta diretamente a confiabilidade de **G2P** nesta cascata (que precisaria de um valor, não só de um booleano, pra deduzir corretamente). Relevante também pro desenho do ciclo de vida de devolução no Estoque/MES — ver [[Perguntas-Pendentes-MES-Estoque]] (pergunta 3).
+
 ## Divergências de dado catalogadas (achados reais, não hipotéticos)
 
 - **65 notas fiscais órfãs** em `vw_faturamento_planilha_resumo` — corrigidas, motivadaram a tabela `fechamento_manual`.

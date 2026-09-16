@@ -3,17 +3,18 @@ tags: [erp-acos-vital, fluxo-operacional]
 criado: 2026-09-16
 ---
 
-# 3c. Rota Fabricação (PCP & Produção Interna/Externa)
+# 3c. Rota Fabricação (PCP & Produção Interna)
 
-Não é uma rota única — são **três subfluxos heterogêneos** com lógicas próprias:
+> ⚠️ **Correção (16/09, confirmado pelo gerente):** Fabricação **não** inclui corte de chapas — isso é beneficiamento dentro da [[Rota-Revenda|Revenda]], ver [[Fabricacao-Chapas]] (reclassificado). Fabricação é lista **aberta** de linhas de produção reais, cada uma com sua própria fábrica/roteiro no MES: hoje só **Flange** está de fato implementada; **Grade de Piso**, **Chapa Expandida**, **Caldeiraria** e outras entram conforme forem cadastradas — não é uma lista fechada de três itens. O modelo Fábrica/Setor/Roteiro do [[App-PCP-Visao-Geral|app-pcp]]/MES já é genérico o suficiente para qualquer linha nova; só falta cadastrar a fábrica e o roteiro quando a linha entrar em uso. Ver [[MES-Arquitetura-Decisoes]].
 
-- [[Fabricacao-Flanges|Flanges]] — roteadas para o sistema dedicado de cálculo e parâmetros de flange ([[App-PCP-Visao-Geral|app-pcp]]).
-- [[Fabricacao-Chapas|Chapas]] — direcionadas para a esteira de corte e conformação.
+Duas linhas detalhadas neste vault até agora (as demais ainda não foram mapeadas em detalhe):
+
+- [[Fabricacao-Flanges|Flanges]] — roteadas para o sistema dedicado de cálculo e parâmetros de flange ([[App-PCP-Visao-Geral|app-pcp]]/MES), única fábrica de fato cadastrada hoje.
 - [[Fabricacao-Grades-Piso|Grades de piso]] — compra de matéria-prima específica → recebimento → fabricação → envio para industrialização/galvanização externa → retorno e validação.
 
-## Por que tratar como três subsistemas
+## Por que tratar cada linha como subsistema próprio
 
-Cada subfluxo tem perfil de risco e integração diferente — flanges depende de um sistema de cálculo técnico externo ao Hub; chapas é puramente fabril; grades de piso tem dependência de terceiro **duas vezes** (compra de MP e depois galvanização externa), exigindo rastreamento de lote enviado/lote retornado, diferente estruturalmente das outras duas.
+Cada linha de produção tem perfil de risco e integração diferente — flanges depende de um sistema de cálculo técnico próprio; grades de piso tem dependência de terceiro **duas vezes** (compra de MP e depois galvanização externa), exigindo rastreamento de lote enviado/lote retornado. Mas todas compartilham o mesmo modelo de dados (Fábrica/Setor/Roteiro) e o mesmo mecanismo de despacho pelo PCP (emissão de Ordem de Produção) — ver [[Fluxo-Detalhado-Pedido-Item]].
 
 ## Ver também
 - [[Fluxo-Operacional-Visao-Geral]]

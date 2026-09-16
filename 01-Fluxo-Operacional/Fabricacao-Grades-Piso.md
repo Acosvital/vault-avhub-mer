@@ -13,9 +13,11 @@ Compra de MP específica → Recebimento → Fabricação da grade → Envio par
 
 ## Por que é diferente das outras duas
 
-Tem dependência de terceiro **duas vezes** na cadeia: na compra de matéria-prima (igual à [[Rota-Revenda]]) e no meio do processo produtivo (envio para galvanização externa). Isso exige rastreamento de **lote enviado / lote retornado** — algo estruturalmente diferente de [[Fabricacao-Flanges|Flanges]] e [[Fabricacao-Chapas|Chapas]].
+Tem dependência de terceiro **duas vezes** na cadeia: na compra de matéria-prima (igual à [[Rota-Revenda]]) e no meio do processo produtivo (envio para galvanização externa). Isso exige rastreamento de **lote enviado / lote retornado** — algo estruturalmente diferente de [[Fabricacao-Flanges|Flanges]] (a outra linha de fabricação detalhada até agora; corte de chapa **não** é fabricação, foi reclassificado como beneficiamento de Revenda — ver [[Fabricacao-Chapas]]).
 
-**Status:** não identifiquei ainda um sistema dedicado para este subfluxo. Ponto em aberto.
+**Status:** não identifiquei ainda um sistema dedicado para este subfluxo.
+
+> ⚠️ **Atualização (16/09):** resolvido em decisão de arquitetura — Grades de Piso entra no **MES Aços Vital**, junto com Flanges e Chapas. O modelo de dados (Fábrica/Setor/Roteiro) já é genérico o suficiente para cobrir o rastreamento de lote enviado/retornado da galvanização externa; falta cadastrar a fábrica e o roteiro fabril desta linha, não construir sistema novo. Ver [[MES-Arquitetura-Decisoes]] e [[Achado-Ambiguidade-PCP]].
 
 ## Ver também
 - [[Rota-Fabricacao]]

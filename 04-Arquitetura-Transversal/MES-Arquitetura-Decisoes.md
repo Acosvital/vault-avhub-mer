@@ -16,10 +16,12 @@ Registro da conversa de desenho de arquitetura entre av-hub e o sistema de fábr
 ## Decisões tomadas nesta conversa
 
 1. **Fornecedor não tem cadastro próprio no Estoque.** Reaproveita `core.parceiros` (av-hub) com `tipo_parceiro`, que já é sincronizado do Omie pelo pipeline ELT existente. O Estoque recebe uma **projeção read-only** desse dado (mesmo mecanismo de evento que o av-hub usa pra ler status de produção do MES, só que na direção contrária) — evita um 3º cadastro de fornecedor. Isso corrige o PRD original do Estoque, que propunha uma tabela `fornecedor` própria dentro do schema `estoque` — ver nota em [[Estoque-Modelo-Dados]].
-2. **Toda a fabricação (Flanges, Chapas, Grades de Piso) entra no MES desde já**, não só Flanges. Não precisa de sistema novo por linha de produção — o modelo de Fábrica/Setor/Roteiro já é genérico o suficiente; só falta cadastrar as fábricas/roteiros das outras duas linhas quando chegar a hora.
+2. **Toda a fabricação entra no MES desde já**, não só Flanges — lista **aberta** de linhas de produção (Grades de Piso, Chapa Expandida, Caldeiraria etc., conforme forem cadastradas), não uma lista fechada de três. Não precisa de sistema novo por linha de produção — o modelo de Fábrica/Setor/Roteiro já é genérico o suficiente; só falta cadastrar a fábrica/roteiro de cada linha nova quando chegar a hora. **Correção (16/09, confirmado pelo gerente): Chapas não é uma linha de fabricação** — corte de chapa a plasma/laser é beneficiamento dentro da Revenda, não do MES-fabricação. Ver [[Fabricacao-Chapas]] e [[Fluxo-Detalhado-Pedido-Item]].
 3. **RBAC do Estoque segue o padrão já existente no backend do MES** (o mesmo modelo de telas/perfis/permissões + `PerfilSetor` que o `api-pcp` já tem) — não nasce como biblioteca compartilhada com o av-hub agora. Duas implementações independentes, aceitas conscientemente por velocidade de entrega.
-4. **Estoque usa Prisma**, morando dentro do mesmo banco do MES, seguindo a disciplina de migrations que o Prisma já traz em produção — reverte a recomendação original do PRD do Estoque de evitar Prisma (o motivo daquela recomendação, um problema real de build no Backlog Ágil, não se repetiu em ~1 mês de MES em produção).
-5. **Ordem de Compra é decidida no av-hub, referenciada no MES/Estoque** quando o material chega na doca — mesmo padrão que já existe entre av-hub (Pedido de Venda) e MES (execução da produção).
+4. **Estoque usa Prisma**, morando dentro do mesmo banco do MES, seguindo a disciplina de migrations que o Prisma já traz em produção — reverte a recomendação original do PRD do Estoque de evitar Prisma (o motivo daquela recomendação, um problema real de build no Backlog Ágil, não se repetiu em ~1 mês de MES em produção). **Ganha schema Postgres próprio** dentro desse banco (confirmado 16/09), seguindo a mesma convenção de schema-por-domínio do av-hub — não cai em `public`.
+5. **Ordem de Compra é decidida no av-hub, referenciada no MES/Estoque** quando o material chega na doca — mesmo padrão que já existe entre av-hub (Pedido de Venda) e MES (execução da produção). O anexo manual de PDF da OC descrito nos áudios do gerente é só a primeira fase — a intenção é trazer os **dados estruturados da própria Ordem de Compra**, sem depender de upload/parse de PDF.
+
+   **Divisão exata decidida (16/09):** PCP (MES) gera a requisição a partir de saldo/reserva → comprador (av-hub) fecha a compra (fornecedor, preço, aprovação, flag acabado/não-acabado) → só o necessário pra conferência (itens, quantidade, flag) trafega de volta pro MES, não o dado comercial completo — mesma filosofia de "colunas protegidas" do pipeline ELT. Recebimento/conferência/OS/OP seguem 100% no MES. Ver [[Fluxo-Detalhado-Pedido-Item]] e o detalhamento completo, conversa por conversa, em [[Fluxo-Compras-Completo]].
 6. **Quando (no futuro) o av-hub passar a criar Pedido de Venda/Ordem de Compra nativamente, ele empurra para o Omie** (não o contrário) — Omie continua sendo o sistema fiscal/financeiro de registro. Implicações de design já levantadas para quando isso virar prioridade:
    - Escrita via outbox/fila (não síncrona) — grava local primeiro, sincroniza depois, evita travar o usuário numa instabilidade do Omie.
    - Risco de loop: o próximo ciclo do pipeline ELT vai "ler de volta" um pedido que o av-hub acabou de empurrar — precisa reconhecer pelo `codigo_pedido_omie` já preenchido.
@@ -33,6 +35,7 @@ Registro da conversa de desenho de arquitetura entre av-hub e o sistema de fábr
 - **Nome definitivo do MES**: "MES Aços Vital" é só nome de trabalho.
 
 ## Ver também
+- [[Fluxo-Detalhado-Pedido-Item]]
 - [[Perguntas-Pendentes-MES-Estoque]]
 - [[Decisoes-Chave-ERP]]
 - [[Achado-Ambiguidade-PCP]]
