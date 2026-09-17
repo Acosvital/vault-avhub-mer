@@ -10,6 +10,8 @@ criado: 2026-09-16
 > 6 diagramas: 1 mestre (fim a fim, todos os setores) + 5 focados (Compras, Recebimento, Qualidade, Produção/OS-OP, Estoque). Cada raia (subgraph) tem uma cor própria por setor, consistente entre os 6 diagramas.
 >
 > O par correto de incoterm é **CIF × FOB** (ver [[Fluxo-Compras-Completo]]). Os rótulos dos nós usam texto corrido em vez de `<br/>`, mais robusto entre Obsidian e Artifact.
+>
+> **Escopo obrigatório do sistema (confirmado com o usuário, 17/09/2026): o sistema a construir deve implementar TODOS os passos de TODOS os 6 fluxogramas abaixo, sem exceção** — não é um subconjunto ilustrativo nem um "nice to have" além do essencial. Só a primeira caixa do fluxograma mestre (`V1 — Vendedor emite o pedido`, no Omie, sincronizado pro av-hub) é real hoje; cada nó/decisão a partir daí, em qualquer um dos 6 diagramas, é trabalho a fazer. As legendas "MES" nas cores por setor abaixo indicam **onde a funcionalidade vai morar quando construída**, não um sistema já em produção — ver ressalva igual em [[Setores-Envolvidos-no-Fluxo]].
 
 ## Legenda de cores por setor
 

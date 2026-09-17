@@ -11,6 +11,8 @@ Este item **não é uma sub-rota de Fabricação** — é um passo de **benefici
 
 Corte a plasma/laser de chapa (cortar sob medida uma chapa comprada inteira) é um **beneficiamento opcional** de um item de Revenda — não exige um sistema de produção dedicado como Flange. O item continua sendo tratado como Revenda: PCP verifica estoque, se precisa comprar aciona Compras, e se o material que chega precisa de corte, o PCP emite uma **Ordem de Serviço (OS)** para esse corte antes de liberar pra Qualidade/Expedição. Ver [[Fluxo-Detalhado-Pedido-Item]].
 
+> **Confirmado com o usuário (17/09/2026): nada disso existe em sistema hoje** — é parte do mesmo fluxograma-alvo do fluxo detalhado (PCP, requisição de compra, OS, Qualidade), 100% a construir.
+
 ## Não confundir com "Chapa Expandida"
 
 **"Chapa expandida"** é um produto de linha própria (Fabricação, junto com Flange e Grade de Piso), diferente de "chapa cortada sob medida" (Revenda + beneficiamento). Nomes parecidos, categorias diferentes — vale reforçar essa distinção na nomenclatura do sistema pra não confundir compradores/PCP.

@@ -7,6 +7,8 @@ criado: 2026-09-16
 
 Mapa macro do processo operacional da Aços Vital, da venda até a expedição. Estrutura-se em **quatro fases principais**: [[Entrada-Comercial|entrada comercial]], [[PCP-Carteira|triagem no PCP]], rotas de atendimento ([[Rota-Estoque|estoque]], [[Rota-Revenda|revenda]] ou [[Rota-Fabricacao|fabricação]]) e [[Faturamento-Expedicao|faturamento/expedição]].
 
+> **Confirmado com o usuário (17/09/2026):** só a fase 1 (entrada comercial — pedido no Omie, sincronizado pro av-hub) está em produção hoje. A partir da fase 2 (triagem no PCP) em diante, **nada existe em sistema nenhum** — é o processo-alvo que o projeto de ERP unificado precisa construir. Ver ressalva igual, com mais detalhe, em [[Fluxo-Detalhado-Pedido-Item]].
+
 ## Diagrama (visão macro/conceitual)
 
 > Este diagrama é a visão **macro/conceitual** do fluxo — três categorias de destinação de item. Existe uma segunda visão, **operacional/detalhada, item a item** (com PCP verificando estoque como primeiro passo dentro de Revenda/Fabricação, emissão de OS/OP, fluxo de Compras/Recebimento/Qualidade passo a passo) em [[Fluxo-Detalhado-Pedido-Item]] — as duas coexistem deliberadamente como modelos complementares, não uma substitui a outra. Chapas **não** é Fabricação, é beneficiamento de Revenda — ver [[Fabricacao-Chapas]].

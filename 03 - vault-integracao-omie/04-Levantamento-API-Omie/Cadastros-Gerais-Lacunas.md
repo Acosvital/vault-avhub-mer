@@ -11,16 +11,16 @@ Levantamento feito direto na documentação interativa da API (`developer.omie.c
 
 Já extraímos nome, razão social, CPF/CNPJ, contato, endereço básico. **Não extraímos** (e o Omie tem):
 
-| Campo | Por que importa |
-|---|---|
-| inscricao_estadual, inscricao_municipal, inscricao_suframa | Dados fiscais — necessários para emitir NF-e/calcular impostos sem depender do Omie |
-| optante_simples_nacional, contribuinte, cnae, tipo_atividade, produtor_rural, pessoa_fisica | Regime tributário do parceiro — afeta cálculo de imposto na venda |
-| cidade_ibge | Código oficial IBGE — obrigatório em NF-e, hoje só temos nome da cidade em texto |
-| valor_limite_credito, bloquear_faturamento | Regra de negócio de crédito, já existe pronta no Omie |
-| enderecoEntrega | Endereço de entrega **separado** do endereço fiscal (relevante — entrega em obra/canteiro é comum em siderurgia) |
-| dadosBancarios | Banco, agência, conta, chave PIX do parceiro |
-| inativo | Hoje não sincronizamos esse status |
-| nif, documento_exterior | Só relevante para clientes/fornecedores estrangeiros |
+| Campo                                                                                       | Por que importa                                                                                                  |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| inscricao_estadual, inscricao_municipal, inscricao_suframa                                  | Dados fiscais — necessários para emitir NF-e/calcular impostos sem depender do Omie                              |
+| optante_simples_nacional, contribuinte, cnae, tipo_atividade, produtor_rural, pessoa_fisica | Regime tributário do parceiro — afeta cálculo de imposto na venda                                                |
+| cidade_ibge                                                                                 | Código oficial IBGE — obrigatório em NF-e, hoje só temos nome da cidade em texto                                 |
+| valor_limite_credito, bloquear_faturamento                                                  | Regra de negócio de crédito, já existe pronta no Omie                                                            |
+| enderecoEntrega                                                                             | Endereço de entrega **separado** do endereço fiscal (relevante — entrega em obra/canteiro é comum em siderurgia) |
+| dadosBancarios                                                                              | Banco, agência, conta, chave PIX do parceiro                                                                     |
+| inativo                                                                                     | Hoje não sincronizamos esse status                                                                               |
+| nif, documento_exterior                                                                     | Só relevante para clientes/fornecedores estrangeiros                                                             |
 
 **Recomendação**: esse é o gap mais crítico de todo o levantamento — no dia em que o sistema próprio precisar emitir nota fiscal sem o Omie, faltam os dados fiscais básicos do parceiro. Vale estender a extração de `core.parceiros` antes do desligamento, não depois.
 

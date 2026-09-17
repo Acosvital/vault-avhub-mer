@@ -6,6 +6,8 @@ criado: 2026-09-16
 # Modelo de Destinação do Item — Reconciliando Estoque × Revenda × Fabricação
 
 > Formaliza a relação entre o diagrama macro ([[Fluxo-Operacional-Visao-Geral]]) e o fluxo detalhado item a item ([[Fluxo-Detalhado-Pedido-Item]]), que coexistiam por decisão consciente, mas nunca tinham sido modelados juntos de fato.
+>
+> **Confirmado com o usuário (17/09/2026): este é um modelo conceitual para o sistema a construir — nenhuma das duas matrizes/eixos existe implementada hoje.** O sistema precisa cobrir todas as 6 células da matriz abaixo, não um subconjunto.
 
 ## O problema
 

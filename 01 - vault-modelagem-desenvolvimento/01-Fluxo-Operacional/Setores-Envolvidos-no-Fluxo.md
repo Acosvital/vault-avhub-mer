@@ -5,7 +5,9 @@ criado: 2026-09-16
 
 # Setores Envolvidos no Fluxo do Pedido — Referência Completa
 
-> Lista de todo setor/função que participa do ciclo de vida do pedido, do 0 ao 100%. Cada linha diz onde o setor vive (sistema), o que ele faz, e em qual dos fluxos detalhados ele aparece como ator.
+> Lista de todo setor/função que participa do ciclo de vida do pedido, do 0 ao 100%. Cada linha diz onde o setor **vai viver** (sistema-alvo), o que ele faz, e em qual dos fluxos detalhados ele aparece como ator.
+>
+> **Confirmado com o usuário (17/09/2026): a coluna "Sistema" é destino planejado, não sistema em produção.** Só "Vendas → av-hub" já é real hoje (emissão do pedido no Omie, sincronizada pro av-hub). Todas as outras linhas marcadas "MES" — PCP, Compras/CCP/Aprovador (av-hub), Recebimento, Qualidade, Fábrica, Estoque, Expedição, Logística — descrevem **o sistema que o projeto precisa construir**, não algo que já funciona. A única exceção parcial é "Fábrica/Setores de produção": o motor de execução do roteiro já existe e roda em produção pra Flanges (`app-pcp`), mas só a partir do ponto em que uma Ordem de Produção chega até ele — o despacho do PCP pra esse motor não existe.
 
 | Setor | Sistema | O que faz no fluxo | Onde aparece em detalhe |
 |---|---|---|---|

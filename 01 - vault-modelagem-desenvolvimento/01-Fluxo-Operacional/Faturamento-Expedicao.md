@@ -14,9 +14,9 @@ criado: 2026-09-16
 
 ## Onde isso já existe
 
-O [[AV-Hub-Visao-Geral|av-hub]] já tem notas fiscais de saída e dashboards de faturamento — mas a parte fiscal (emissão de NF) permanece sempre no Omie; nenhum sistema analisado até agora emite nota fiscal diretamente.
+O [[AV-Hub-Visao-Geral|av-hub]] já tem notas fiscais de saída e dashboards de faturamento — mas a parte fiscal (emissão de NF) permanece sempre no Omie; nenhum sistema analisado até agora emite nota fiscal diretamente. Isso já é real hoje, mas é **visão pós-fato** (a NF que o Omie já emitiu) — não a decisão operacional de "posso faturar agora".
 
-A decisão parcial × integral depende do estado agregado dos itens da carteira — mesmo padrão de consolidação bottom-up do [[AV-Hub-Vendas-Reconciliacao|waterfall de dedução da Venda Líquida]].
+A decisão parcial × integral depende do estado agregado dos itens da carteira — mesmo padrão de consolidação bottom-up do [[AV-Hub-Vendas-Reconciliacao|waterfall de dedução da Venda Líquida]]. **Confirmado com o usuário (17/09/2026): essa "carteira" e o estado agregado por item não existem hoje** (ver [[PCP-Carteira]]) — então a decisão parcial × integral automatizada também não existe; hoje é decisão humana, sem o dado estruturado por trás.
 
 ## Ver também
 - [[Fluxo-Operacional-Visao-Geral]]

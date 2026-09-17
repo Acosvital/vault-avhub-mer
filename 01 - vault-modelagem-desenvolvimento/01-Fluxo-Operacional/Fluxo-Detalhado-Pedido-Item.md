@@ -6,6 +6,8 @@ criado: 2026-09-16
 # Fluxo Detalhado do Pedido — Nível de Item
 
 > **Relação com [[Fluxo-Operacional-Visao-Geral]]:** são **dois modelos complementares, não um substituindo o outro**. O macro trata Estoque/Revenda/Fabricação como três categorias de destinação; este arquivo descreve o que acontece de fato, item a item, dentro dessas categorias — inclusive o fato de que "ter em estoque" na prática é uma **checagem** feita pelo PCP dentro de Revenda/Fabricação, não uma quarta rota isolada.
+>
+> **Confirmado com o usuário (17/09/2026): nada deste fluxo (aceite do pedido pelo PCP, classificação item a item, checagem de saldo, emissão de requisição/OS/OP) existe em sistema nenhum hoje.** Não é o "Portal PCP" do av-hub (que é só acompanhamento comercial por diligenciadores, ver [[Achado-Ambiguidade-PCP]]) nem o `app-pcp`/MES (que só executa a produção depois que um item já foi destinado à Fábrica). Este documento descreve o **processo-alvo** que o projeto precisa construir, derivado de conversas com o gestor sobre como o fluxo deveria/deve funcionar — hoje essa triagem acontece de forma manual/informal, fora de qualquer sistema.
 
 ## Princípio central
 

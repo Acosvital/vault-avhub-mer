@@ -8,6 +8,8 @@ criado: 2026-09-16
 > Detalha o setor de **Estoque** em si — a operação contínua de guardar saldo, localizar, reservar e separar material — que até agora só existia como conceito ([[Rota-Estoque]], "pronta entrega") ou como célula da matriz em [[Modelo-Destinacao-Item]], mas nunca como sequência de conversas como os outros subfluxos.
 >
 > Cobre dois casos: **(A)** item já pronto em estoque, indo direto pra conferência/expedição sem passar por Compras; **(B)** operação contínua do depósito, independente de qualquer pedido específico (reserva, movimentação, contagem cíclica, ponto de pedido).
+>
+> **Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje** — é escopo obrigatório do sistema a construir, não documentação de processo existente.
 
 ## Atores e sistemas
 

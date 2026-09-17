@@ -6,6 +6,8 @@ criado: 2026-09-16
 # Fluxo de Expedição e Faturamento — conversa por conversa
 
 > Ponto de convergência final: qualquer item aprovado — vindo de Compras+Recebimento ([[Fluxo-Recebimento-Completo]]), de Produção ([[Fluxo-Producao-OS-OP-Completo]]), ou já pronto em estoque ([[Modelo-Destinacao-Item]]) — passa pelo mesmo caminho depois de aprovado pela Qualidade ([[Fluxo-Qualidade-Completo]]).
+>
+> **Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje** (a parte fiscal no Omie é a única exceção real — ver [[Faturamento-Expedicao]]) — o resto é escopo obrigatório do sistema a construir.
 
 ## Atores e sistemas
 

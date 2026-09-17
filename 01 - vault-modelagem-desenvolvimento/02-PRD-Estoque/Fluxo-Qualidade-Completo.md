@@ -6,6 +6,8 @@ criado: 2026-09-16
 # Fluxo de Qualidade — conversa por conversa
 
 > Detalha a inspeção de qualidade, a partir de qualquer um dos pontos de entrada possíveis (Recebimento, conclusão de OS/OP, ou item já pronto em estoque), até a aprovação/reprovação e seus desdobramentos.
+>
+> **Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje** — é escopo obrigatório do sistema a construir, não documentação de processo existente.
 
 ## Atores e sistemas
 

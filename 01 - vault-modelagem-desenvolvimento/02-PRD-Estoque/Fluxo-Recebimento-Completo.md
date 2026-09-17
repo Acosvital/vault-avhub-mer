@@ -6,6 +6,8 @@ criado: 2026-09-16
 # Fluxo de Recebimento — conversa por conversa
 
 > Detalha o que acontece dentro do Recebimento a partir do momento em que a referência da compra chega do av-hub (conversa C7 de [[Fluxo-Compras-Completo]]) até o item ser roteado pra Qualidade ou de volta pro PCP.
+>
+> **Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje** — é escopo obrigatório do sistema a construir, não documentação de processo existente.
 
 ## Atores e sistemas
 

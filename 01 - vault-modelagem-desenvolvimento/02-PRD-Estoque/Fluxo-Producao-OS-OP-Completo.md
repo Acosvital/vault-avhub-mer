@@ -7,7 +7,7 @@ criado: 2026-09-16
 
 > Detalha a execução de uma Ordem de Serviço (beneficiamento de Revenda) ou Ordem de Produção (linha própria de Fabricação), a partir do mecanismo já decidido: OS/OP = `ItemParcial`/roteiro, já implementado no `api-pcp` (ver [[App-PCP-Backend-Producao]]).
 >
-> ⚠️ Diferente dos outros fluxos deste conjunto ([[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]], [[Fluxo-Qualidade-Completo]]), **este é o único subfluxo que já tem mecanismo de estado implementado em produção** — os outros ainda são desenho, este é tradução de código real pra conversa por conversa.
+> ⚠️ Diferente dos outros fluxos deste conjunto ([[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]], [[Fluxo-Qualidade-Completo]]), **este é o único subfluxo que já tem mecanismo de estado implementado em produção** — os outros ainda são desenho, este é tradução de código real pra conversa por conversa. **Precisão (17/09/2026, confirmado com o usuário):** isso vale só pro motor de execução em si (`ItemParcial`/roteiro dentro do `api-pcp`) — o que dispara uma OS/OP a partir do PCP (aceite do pedido, classificação do item, decisão de abrir OS/OP) não existe; é o mesmo fluxo-alvo a construir descrito em [[Fluxo-Detalhado-Pedido-Item]].
 
 ## Atores e sistemas
 

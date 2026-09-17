@@ -6,6 +6,8 @@ criado: 2026-09-16
 # 2. Gestão de Carteira (PCP)
 
 > ⚠️ Não confundir com [[Achado-Ambiguidade-PCP|o "Portal PCP" do av-hub]], que é outra coisa (acompanhamento comercial por diligenciadores). Este PCP é o setor de Planejamento e Controle de Produção.
+>
+> **Confirmado com o usuário (17/09/2026): esta triagem/carteira não existe em nenhum sistema hoje** — nem no Portal PCP (av-hub), nem no app-pcp/MES (que só entra depois que um item já foi destinado à Fábrica). É processo manual/informal hoje, e faz parte do que o projeto precisa construir.
 
 - O pedido entra na fila do PCP com abertura detalhada dos itens.
 - Criação da carteira de atendimento e classificação de **cada item** conforme sua origem operacional: [[Rota-Estoque|estoque]], [[Rota-Revenda|revenda]] ou [[Rota-Fabricacao|produção]].

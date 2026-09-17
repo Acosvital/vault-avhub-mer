@@ -25,7 +25,7 @@ Nota real do [[PRD-Estoque-Visao-Geral|PRD do Estoque]] (seção 18): **não exi
 
 ## Onde isso é implementado (ou planejado)
 
-Cobertura completa no [[PRD-Estoque-Visao-Geral|PRD do Estoque]] — ver [[Estoque-Modelo-Dados]] (pedido_compra, recebimento, inspecao_qualidade, rnc) e [[Estoque-Regras-Negocio]].
+**Nada disto existe hoje** (confirmado com o usuário, 17/09/2026) — toda a rota, do PCP emitindo OC até a entrada em estoque, é manual/informal. Cobertura completa (como planejamento, não sistema construído) no [[PRD-Estoque-Visao-Geral|PRD do Estoque]] — ver [[Estoque-Modelo-Dados]] (pedido_compra, recebimento, inspecao_qualidade, rnc) e [[Estoque-Regras-Negocio]].
 
 ## Ver também
 - [[Fluxo-Operacional-Visao-Geral]]

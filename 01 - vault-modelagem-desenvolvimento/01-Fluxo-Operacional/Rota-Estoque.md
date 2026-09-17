@@ -15,7 +15,7 @@ Rota **linear e curta**, com menor superfície de falha — provavelmente a mais
 
 ## Onde isso é implementado (ou planejado)
 
-O [[PRD-Estoque-Visao-Geral|PRD do Estoque]] cobre exatamente esta rota: separação (`ordem_separacao`/`item_separacao`), conferência e etiquetagem por código de barras/QR. Ver [[Estoque-Modelo-Dados]].
+**Nada disto existe hoje** (confirmado com o usuário, 17/09/2026) — é 100% planejado. O [[PRD-Estoque-Visao-Geral|PRD do Estoque]] cobre exatamente esta rota: separação (`ordem_separacao`/`item_separacao`), conferência e etiquetagem por código de barras/QR. Ver [[Estoque-Modelo-Dados]].
 
 ## Ver também
 - [[Fluxo-Estoque-Completo]] — esta rota, conversa por conversa (separação, reserva, contagem cíclica).
