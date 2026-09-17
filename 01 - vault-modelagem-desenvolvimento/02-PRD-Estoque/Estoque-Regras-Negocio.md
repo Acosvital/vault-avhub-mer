@@ -9,7 +9,7 @@ Levantadas em análise de lacunas contra prática padrão de WMS/ERP e distribui
 
 - **Peso teórico × peso real**: todo material tem peso de tabela e uma tolerância própria (default provisório 5%); a pesagem na entrada é conferida contra peso teórico × quantidade.
 - **Lote sem certificado não libera**: `status_qualidade` não pode sair de PENDENTE sem um `laudo_url` preenchido.
-- **CFOP e ICMS-ST não são capturados por este sistema** — já existe na nota emitida pelo fornecedor e sincronizada do Omie.
+- **CFOP de entrada (nota do fornecedor) e ICMS-ST não são capturados por este sistema** — já existem na nota emitida pelo fornecedor; o Omie não sincroniza Nota de Entrada hoje, então ficam só lá. **Correção**: CFOP do lado da *venda* já é capturado e sincronizado por item em `produto_vendas.cfop` (validado contra whitelist) — é um dado diferente do CFOP de entrada aqui referido, mas relevante saber que já existe do lado de vendas.
 - **Reprovação de qualidade sinaliza devolução, não a cria** — RNC marcada com `nota_devolucao_pendente = true`; emissão da nota de devolução acontece no Omie; o sistema só fecha a RNC quando essa nota volta pela sincronização.
 - **Rastreabilidade para frente** depende de retorno de consumo vindo do PCP — não é algo que este projeto resolve sozinho.
 - **Carga inicial não é recebimento** — lote com `origem = CARGA_INICIAL` não passa pelos estados de aprovação de pedido nem pela conferência quantitativa/qualitativa normal.

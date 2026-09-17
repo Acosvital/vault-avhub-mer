@@ -69,7 +69,7 @@ Esta é uma ramificação **diferente** da reprovação de qualidade (que só ac
 Código de barras/QR por padrão; RFID só no piloto de Flange (maior valor unitário — ver [[Fabricacao-Flanges]] e [[Estoque-Riscos]] pra a ressalva técnica de tag on-metal).
 
 **R9 — Nota fiscal de entrada**
-Só referência (`chave_acesso`) — nunca captura CFOP/ICMS-ST, que fica 100% com o Omie (ver [[Estoque-Regras-Negocio]]).
+Só referência (`chave_acesso`) — nunca captura CFOP/ICMS-ST de entrada, que fica 100% com o Omie (Nota de Entrada não é sincronizada hoje, ver [[Estoque-Regras-Negocio]]). **Correção**: isso vale só pro CFOP da nota de entrada (compra) — o CFOP do lado da venda já é capturado por item (`produto_vendas.cfop`); ICMS-ST continua não capturado em nenhum dos dois lados.
 
 **R10a/R10b — Roteamento final**
 Mesma bifurcação já coberta em [[Fluxo-Compras-Completo]] (C10/C11) — reafirmada aqui como o ponto de saída do Recebimento.

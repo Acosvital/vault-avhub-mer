@@ -14,7 +14,7 @@ O Estoque mora dentro do **banco do MES** (Prisma, banco separado do cluster do 
 - **fornecedor** deixa de ser cadastro próprio do Estoque — reaproveita `core.parceiros` (av-hub), já sincronizado do Omie pelo [[Omie-ELT-Pipeline|pipeline ELT]]; o Estoque recebe uma projeção read-only, não um cadastro paralelo.
 - **pedido_compra** (Ordem de Compra) é decidido/criado no av-hub, não no Estoque. O Estoque só referencia a Ordem de Compra quando o material chega na doca (recebimento) — o fluxo de decisão de compra (fornecedor, preço, aprovação) fica no av-hub, o fluxo de execução (conferência, saldo) fica no Estoque/MES. Ver [[MES-Arquitetura-Decisoes]] para o racional completo.
 - **item_pedido**, **destinacao_item_pedido** — destinação por item (produção específica / venda específica / estoque geral), não por pedido inteiro; continuam existindo no Estoque, referenciando uma Ordem de Compra que vive fora dele.
-- **nota_fiscal_entrada** — só referencia (`chave_acesso`); nunca captura CFOP/ICMS-ST (isso fica com o Omie).
+- **nota_fiscal_entrada** — só referencia (`chave_acesso`); nunca captura CFOP/ICMS-ST de entrada (isso fica com o Omie — Nota de Entrada não é sincronizada hoje). **Correção**: o CFOP do lado da venda já é capturado por item em `produto_vendas.cfop`, sincronizado do Omie; é dado diferente do CFOP de entrada aqui referido. ICMS-ST continua não capturado em nenhum dos dois lados.
 - **recebimento**, **pesagem**, **item_recebido** — duas etapas sequenciais: conferência quantitativa (almoxarife) → conferência qualitativa (qualidade).
 - **lote** — com `origem` (RECEBIMENTO ou CARGA_INICIAL) e `lote_pai_id` (cisão de lote na reprovação parcial).
 - **inspecao_qualidade**, **rnc** (relatório de não conformidade).
