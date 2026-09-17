@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "av-hub",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "npm",
+        "--prefix",
+        "C:\\Users\\nathan.silva\\Desktop\\TI\\NATHAN\\00 - HUB",
+        "run",
+        "dev"
+      ],
+      "port": 3000
+    }
+  ]
+}

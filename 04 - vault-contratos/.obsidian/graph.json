@@ -1,0 +1,51 @@
+{
+  "collapse-filter": true,
+  "search": "",
+  "showTags": true,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": true,
+  "colorGroups": [
+    {
+      "query": "tag:#indice",
+      "color": {
+        "a": 1,
+        "rgb": 9278881
+      }
+    },
+    {
+      "query": "tag:#contrato-sql",
+      "color": {
+        "a": 1,
+        "rgb": 2062988
+      }
+    },
+    {
+      "query": "tag:#contrato-api",
+      "color": {
+        "a": 1,
+        "rgb": 3066993
+      }
+    },
+    {
+      "query": "tag:#achado",
+      "color": {
+        "a": 1,
+        "rgb": 16724530
+      }
+    }
+  ],
+  "collapse-display": false,
+  "showArrow": false,
+  "textFadeMultiplier": 0,
+  "nodeSizeMultiplier": 1,
+  "lineSizeMultiplier": 1,
+  "collapse-forces": true,
+  "centerStrength": 0.518713248970312,
+  "repelStrength": 10,
+  "linkStrength": 1,
+  "linkDistance": 250,
+  "scale": 0.5,
+  "close": false
+}

@@ -9,6 +9,8 @@ Este é o resumo acionável de todo o levantamento (seções 1 a 4). Cada passo 
 
 Convenção: 🟢 extrair do Omie · 🔵 construir nativo no Estoque/MES · 🔴 decisão de arquitetura antes de codificar.
 
+**Contratos de banco**: todo passo 🟢 que precisa de tabela/coluna nova tem um contrato de migração correspondente no vault `04 - vault-contratos` (pasta `01-Contratos-SQL-DBA/`, mesmo formato do contrato já usado para `etapas_faturamento`), pronto para o Gustavo (DBA) revisar e aplicar — nenhum deles foi aplicado ainda, e todos têm pelo menos uma pergunta em aberto documentada no próprio arquivo. Os passos apontam o nome exato do contrato.
+
 ---
 
 ## Fase 1 — Baixo esforço, alto risco se não for feito antes do desligamento
@@ -39,7 +41,7 @@ Campos a adicionar ao mapeamento (`parceiros.ts`), todos já vêm no mesmo paylo
 | `enderecoEntrega` (objeto) | — | tabela nova `parceiros_endereco_entrega` (razao_social, cnpj_cpf, endereço completo, IE do recebedor) |
 | `dadosBancarios` (objeto) | — | tabela nova `parceiros_dados_bancarios` (banco, agência, conta, titular, chave PIX) |
 
-**Não precisa de nova chamada de API** — é o mesmo `ListarClientes` já em produção, só amplia o mapeamento de campos. Ver [[Cadastros-Gerais-Lacunas]].
+**Não precisa de nova chamada de API** — é o mesmo `ListarClientes` já em produção, só amplia o mapeamento de campos. **Contrato de banco**: `04 - vault-contratos/01-Contratos-SQL-DBA/001-Parceiros-Dados-Fiscais.md`. Ver [[Cadastros-Gerais-Lacunas]].
 
 ---
 
@@ -62,7 +64,7 @@ Campos exatos retornados:
 | `codigo_local_estoque` | integer | Local de estoque |
 | `nPrecoUnitario` | decimal | Preço unitário (só na listagem) |
 
-**Bloqueio atual**: código do resource já existe (`estoque.ts`, `enabled: false`) — falta só (a) o DBA criar a tabela de destino, (b) trocar `enabled: true`. **Destino sugerido**: `core.estoque_saldo`, chave `(codigo_empresa, codigo_produto_omie, codigo_local_estoque)`. Ver [[Compras-Estoque-Producao-Lacunas]].
+**Bloqueio atual**: código do resource já existe (`estoque.ts`, `enabled: false`) — falta só (a) o DBA criar a tabela de destino, (b) trocar `enabled: true`. **Destino sugerido**: `core.estoque_saldo`, chave `(codigo_empresa, codigo_produto_omie, codigo_local_estoque)`. **Contrato de banco**: `04 - vault-contratos/01-Contratos-SQL-DBA/002-Estoque-Saldo.md` (tem uma decisão de design em aberto — foto atual vs. série histórica — resolver antes de aplicar). Ver [[Compras-Estoque-Producao-Lacunas]].
 
 ---
 
@@ -87,7 +89,7 @@ Mesma chamada já em produção, só mais um campo no objeto mapeado. Ver [[Comp
 | `lista_parcelas[]` (data, valor, forma) | Condição de pagamento detalhada | Tabela nova `pedidos_vendas_parcelas` (1:N) |
 | `tipo_desconto_pedido`, `perc_desconto_pedido`, `valor_desconto_pedido` | Desconto no nível do pedido (hoje só por item) | Novas colunas em `pedidos_vendas` |
 
-Ver [[Vendas-NFe-Lacunas]].
+**Contrato de banco**: `04 - vault-contratos/01-Contratos-SQL-DBA/003-Pedidos-Vendas-Frete-Parcelas.md`. Ver [[Vendas-NFe-Lacunas]].
 
 ---
 
@@ -105,7 +107,7 @@ Estrutura principal a mapear:
 - **produtos[]** (itens): `nCodProd`, quantidade, valor unitário, desconto, ICMS/IPI/PIS/COFINS por item, `codigo_local_estoque`
 - **parcelas[]**: condição de pagamento
 
-**Novo resource sugerido**: `pedidosCompra.ts`, tabela nova `core_vendas_faturamento.pedidos_compras` + `pedidos_compras_itens`, chave `(codigo_empresa, codigo_pedido_compra_omie)`. Ver [[Compras-Estoque-Producao-Lacunas]].
+**Novo resource sugerido**: `pedidosCompra.ts`, tabela nova `core_vendas_faturamento.pedidos_compras` + `pedidos_compras_itens`, chave `(codigo_empresa, codigo_pedido_compra_omie)`. **Contrato de banco**: `04 - vault-contratos/01-Contratos-SQL-DBA/004-Pedidos-Compras.md` (tem pergunta em aberto sobre identificador estável de item entre resyncs — mesma classe de bug já visto em `produto_vendas` — resolver antes de aplicar). Ver [[Compras-Estoque-Producao-Lacunas]].
 
 ---
 
@@ -125,7 +127,7 @@ Estrutura principal a mapear:
 | `dispOrdemProducao`, `dispConsumoOP`, `dispRemessa`, `dispVenda` | string1 (S/N) | Disponibilidade por finalidade |
 | `consiSugeCompra` | string1 (S/N) | Considerado em sugestão de compra |
 
-Cadastro pequeno (poucos registros) — migrar como carga inicial única, não precisa de sync recorrente. Destino: `core.locais_estoque`.
+Cadastro pequeno (poucos registros) — migrar como carga inicial única, não precisa de sync recorrente. Destino: `core.locais_estoque`. **Contrato de banco**: `04 - vault-contratos/01-Contratos-SQL-DBA/005-Locais-Estoque.md`.
 
 ---
 
@@ -147,7 +149,7 @@ Campos principais: `cabec` (`nCodRem`, `nCodCli`, `dPrevisao`, `nCodVend`, `cNum
 
 Campos retornados: `nCodDevol`, `cNumPed`, `cEtapa`, `cCancelada`, `cFaturada`, **`vTotal`** (valor).
 
-**Implementação sugerida**: job separado do sync padrão — para cada `pedidos_vendas` com `devolucao_parcial = true`, capturar o `nCodDevol` (via `nfconsultar.pedido.nIdPedDev`, já mapeável) e chamar `StatusDevolucaoVenda` para preencher uma nova coluna `pedidos_vendas.valor_devolucao`. **Validar em ambiente de teste** se `vTotal` é o valor da devolução parcial ou o valor total do pedido devolvido antes de confiar no dado. Ver [[Vendas-NFe-Lacunas]].
+**Implementação sugerida**: job separado do sync padrão — para cada `pedidos_vendas` com `devolucao_parcial = true`, capturar o `nCodDevol` (via `nfconsultar.pedido.nIdPedDev`, já mapeável) e chamar `StatusDevolucaoVenda` para preencher uma nova coluna `pedidos_vendas.valor_devolucao`. **Validar em ambiente de teste** se `vTotal` é o valor da devolução parcial ou o valor total do pedido devolvido antes de confiar no dado. **Contrato de banco**: `04 - vault-contratos/01-Contratos-SQL-DBA/006-Pedidos-Vendas-Valor-Devolucao.md` (tem essa mesma validação marcada como pergunta crítica em aberto). Ver [[Vendas-NFe-Lacunas]].
 
 ---
 
@@ -156,7 +158,7 @@ Campos retornados: `nCodDevol`, `cNumPed`, `cEtapa`, `cCancelada`, `cFaturada`, 
 **Endpoint**: `https://app.omie.com.br/api/v1/produtos/etapafat/`
 **Método**: `ListarEtapasFaturamento`
 
-A tabela `core.etapas_faturamento` **já existe** (criada pelo DBA) e o código de extração já está pronto (`etapasFaturamento.ts`). **Ação**: confirmar que o job está de fato habilitado e rodando em produção (não só que a tabela existe) — se sim, ligar ao "dicionário de nomes de etapa" pendente do Portal do Vendedor via `notas_fiscais.oppedido` → `codigo_operacao`. Ver [[Etapas-Faturamento]].
+A tabela `core.etapas_faturamento` **já existe** (criada pelo DBA, confirmado — ver `sql/dba_migrations/005_etapas_faturamento_contrato.md`, status atualizado) e o código de extração já está pronto (`etapasFaturamento.ts`). **Ação**: confirmar que o job está de fato habilitado e rodando em produção (não só que a tabela existe) — se sim, ligar ao "dicionário de nomes de etapa" pendente do Portal do Vendedor via `notas_fiscais.oppedido` → `codigo_operacao`. Ver [[Etapas-Faturamento]].
 
 ---
 

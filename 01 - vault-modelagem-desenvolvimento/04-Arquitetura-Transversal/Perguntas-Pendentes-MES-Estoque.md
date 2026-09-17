@@ -37,7 +37,7 @@ O MES vai suportar **as duas formas** (usuário/senha pro chão de fábrica, e-m
 
 ## Já resolvidas (referência)
 
-- Fornecedor = `core.parceiros` (av-hub), via projeção.
+- Fornecedor = `core.parceiros` (av-hub), via projeção. **Mecanismo dessa projeção ainda em aberto** — ver seção abaixo.
 - Material = projeção de `core.produtos`, com campos extras (peso teórico, tolerância, mínimo/máximo) vindos do Omie quando existirem, ou como colunas novas do lado do Estoque quando não existirem.
 - MES cobre Estoque + toda a fabricação — **lista aberta** (Flanges hoje; Grades de Piso/Chapa Expandida/Caldeiraria etc. conforme cadastradas). Chapas **não** entra — é beneficiamento de Revenda, ver [[Fabricacao-Chapas]].
 - RBAC do Estoque segue o padrão já existente no MES (não nasce compartilhado com av-hub).
@@ -55,6 +55,7 @@ O MES vai suportar **as duas formas** (usuário/senha pro chão de fábrica, e-m
 - **Conceito de "Orçamento"** (ainda não pensado, entra depois).
 - **Nome definitivo do sistema de fábrica** (hoje "MES Aços Vital" é nome de trabalho).
 - **Devolução de cliente**: mecanismo exato (decisão no av-hub vs. nascer no Estoque) ainda em aberto (ver seção acima).
+- **Mecanismo real da projeção read-only de fornecedor/material (av-hub → Estoque)** — não é "o mesmo mecanismo de evento" que outras notas chegaram a citar (esse mecanismo não existe, ver [[Decisoes-Chave-ERP]], item "Casamento av-hub ↔ MES"). Hoje não há webhook nem infraestrutura de evento entre av-hub e MES — o padrão único de sincronização entre sistemas é polling. Candidato mais simples: Estoque consome por polling os endpoints REST já existentes de `api-acos-vital` (`GET /produtos`, `GET /parceiros`), que hoje não têm filtro incremental por data de alteração (`updated_at`) — precisaria ser adicionado para um polling eficiente.
 
 ## Ver também
 - [[MES-Arquitetura-Decisoes]]
