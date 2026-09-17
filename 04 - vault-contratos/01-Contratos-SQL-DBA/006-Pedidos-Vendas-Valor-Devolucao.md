@@ -1,12 +1,14 @@
 ---
 tags: [contrato-sql, dba, omie-elt-pipeline, achado]
-status: proposta
+status: invalidado
 criado: 2026-09-17
 ---
 
 # Contrato 011 — `pedidos_vendas.valor_devolucao`
 
-**Status:** proposta, aguardando revisão e aplicação pelo DBA (Gustavo).
+> **Invalidado (confirmado com o usuário, 17/09/2026): o endpoint `StatusDevolucaoVenda` não existe/não está disponível** — a hipótese abaixo, baseada só na documentação pública do Omie, não se confirmou na prática. **Não aplicar este contrato.** O valor da devolução parcial vai ter que ser tratado por fora do Omie, nativo no sistema da Aços Vital (av-hub ou Estoque/MES, a decidir — ver [[Perguntas-Pendentes-MES-Estoque]]), não sincronizado. Mantido aqui só como registro do caminho já investigado e descartado, pra ninguém reabrir a mesma hipótese sem saber que já foi testada.
+
+**Status:** ~~proposta, aguardando revisão e aplicação pelo DBA (Gustavo).~~
 Nada aplicado ainda. Design **não fechado com o usuário** — vem da
 documentação pública da API (`developer.omie.com.br`, endpoint "Devolução
 de venda - Faturamento"), não de payload real confirmado. Este é o único

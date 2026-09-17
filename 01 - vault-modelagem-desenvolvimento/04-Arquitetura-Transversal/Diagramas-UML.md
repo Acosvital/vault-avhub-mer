@@ -69,6 +69,8 @@ sequenceDiagram
 ## 0b. Atividades (já existe) — preview: Fluxograma mestre
 
 > O diagrama de atividades oficial da UML — decisões, `fork`/`join` (ramificações paralelas), raias por setor. Este é o mestre (fim a fim); os outros 5 focados (Compras, Recebimento, Qualidade, Produção, Estoque) estão em [[Fluxogramas-Completos]].
+>
+> **Corrigido (pente-fino, 17/09/2026):** este preview estava desatualizado em relação ao original — tinha `V2 -->|sim| Q1` (sugerindo que "acompanhamento desde o início" pula a classificação do PCP e vai direto pra Qualidade). Realinhado com [[Fluxogramas-Completos]]: as duas respostas de V2 convergem em P1 (PCP classifica o item) — o acompanhamento da Qualidade desde o início é uma camada em paralelo, nunca um atalho que pula o PCP.
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 45, 'rankSpacing': 60, 'padding': 14}}}%%
@@ -166,7 +168,7 @@ flowchart TD
         O1 --> O2
     end
 
-    V2 -->|sim| Q1
+    V2 -->|sim, com acompanhamento da qualidade| P1
     V2 -->|nao| P1
     P3 -->|pronto em estoque| E1
     P3 -->|materia-prima em estoque| P5
