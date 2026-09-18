@@ -43,5 +43,6 @@ O MES (`api-pcp`) usava só usuário/senha, sem Azure AD — decisão deliberada
 **Equipe:** time de desenvolvimento disponível — [[Equipe-Projeto|Gustavo]] (banco de dados/API) e [[Equipe-Projeto|Robert]] (fullstack sênior) — com Nathan coordenando/product owner.
 
 ## Ver também
+- [[Cronograma-2-Meses]] — as fases 0/A/B/C datadas para 18/09–18/11/2026 (Fase D e E ficam para o ciclo seguinte).
 - [[PRD-Estoque-Visao-Geral]]
 - [[Estoque-Perguntas-Abertas]]

@@ -15,6 +15,7 @@ Vault de análise do projeto de **ERP de altíssimo nível** da Aços Vital: um 
 - [[Schema-Postgres-Multi-Dominio|4. Arquitetura transversal]] — ver também [[Diagramas-UML|UML completo]] (classes, casos de uso, estados, componentes, implantação, pacotes) — decisões e padrões que atravessam todos os módulos.
 - [[Equipe-Projeto|5. Pessoas e equipe]]
 - [[Glossario|6. Glossário]]
+- [[Cronograma-2-Meses|7. Cronograma de 2 meses]] — plano de 18/09 a 18/11/2026 (Fase 0 a C + integração mínima), com marcos, capacidade, decisões bloqueantes e ordem de corte.
 
 ## Estado atual do projeto
 
