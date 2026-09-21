@@ -28,6 +28,7 @@ Consolidado dos contratos técnicos (`docs/*.md`) do av-hub, verificado direto n
 | Paginação por pedido (não por linha crua) em `/vendas_planilha` | Ainda não implementado — só ordenação foi endereçada, não a paginação por família |
 | `fechamento_manual` | Tabela/rota confirmada existente no inventário de rotas do backend real (`fechamento_manual` está na lista de 65 arquivos de rota) |
 | Relação produto↔fornecedor N:N | Já existem views de Compras no backend (`vw_catalogo_de_produtos`, `vw_fornecedores_com_produtos`, `vw_historico_precos`, `vw_todos_os_fornecedores`) — o módulo Orçamento do frontend rodar sobre JSON mockado pode ser só falta de integração, não falta de dado real. Vale investigar essas views antes de assumir que "não existe API própria de compras ainda". |
+| **`codigo_pedido_compra_omie` como `integer` — risco de tipo (achado 21/09)** | Confirmado com o Nathan: o Omie manda esse identificador como **string**, não como número. A coluna real em `core_vendas_faturamento.pedidos_compras.codigo_pedido_compra_omie` é `integer` (o próprio comentário no model já alertava sobre risco de overflow). Guardar um valor que a fonte trata como string numa coluna `integer` pode truncar/quebrar em zero à esquerda ou valores não-numéricos — risco real, não hipotético. Avaliar antes de habilitar sync de compras (contrato SQL 004, ver G-09 em [[Perguntas-em-Aberto-Consolidadas]]). |
 
 ## Pontos a considerar no roadmap do Portal do Vendedor
 

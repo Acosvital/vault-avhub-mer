@@ -100,12 +100,15 @@ O [[Cronograma-2-Meses]] cobre hoje "status por item" só para Fabricação e Re
 
 ## Perguntas em aberto
 
-- SLA por etapa: quem define as metas de cada setor?
-- "Na mão de quem": pessoa nomeada em toda passagem, ou o setor basta no chão de fábrica?
+- ~~SLA por etapa: quem define as metas de cada setor?~~ 🟡 Leaning (21/09, não confirmado): "tempo médio talvez?" — medição histórica em vez de meta manual por setor.
+- ~~"Na mão de quem": pessoa nomeada em toda passagem, ou o setor basta no chão de fábrica?~~ ✅ Respondido (21/09): cada setor tem 1 líder responsável.
 - Qual é o identificador único de pessoa entre av-hub e MES?
 - Genealogia de material (lote da matéria-prima → item entregue): é exigência de cliente ou norma?
-- O vendedor vê só o macro ou também a trilha? Algum dia o cliente externo vê algo?
+- ~~O vendedor vê só o macro ou também a trilha? Algum dia o cliente externo vê algo?~~ ✅ Respondido (21/09): só o vendedor, só o macro (quais itens em quais setores); sem trilha completa, sem acesso externo.
 - Prazo de retenção do log (ver DEC-9, 5 anos por palpite).
+- **Escopo do ciclo 1 (21/09):** respondido como "todas as rotas" — mas isso contradiz o aviso de capacidade desta mesma nota (seção "Impacto no cronograma") e do [[Cronograma-2-Meses]] (9% de folga). Precisa reconciliar antes de fechar a spec F1. Ver [[Perguntas-em-Aberto-Consolidadas]] R-07/R-14.
+
+Ver também [[Campos-e-API-para-Rastreabilidade]] seção 7, que tem as mesmas perguntas com mais contexto técnico — algumas já respondidas em 21/09.
 
 ## Ver também
 - [[Campos-e-API-para-Rastreabilidade]] — tabelas, campos e endpoints que esta proposta exige, e as inconsistências achadas no vault.
