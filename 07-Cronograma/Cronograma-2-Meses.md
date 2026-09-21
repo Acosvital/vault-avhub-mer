@@ -425,7 +425,7 @@ Cada uma tem um *default* escrito: se ninguém decidir até a data, o default va
 | DEC-7 | ~~Contratos SQL: saldo (002); id de item de compra (004); FK de locais (005); exclusão no polling (API 001)~~ ✅ **DECIDIDA em 21/09** — foto atual; id = `(id_pedido_compra, ordem)`; sem FK (por ora); `incluir_deletados=true` resolve a exclusão | Gustavo | 25/09 | ~~Foto atual; id = pedido + sequência do item; sem FK; aceitar a lacuna de exclusão~~ (não se aplica, decidido) | B3, B5, D1, D3 (destravados) |
 | DEC-8 | Compra do hardware do posto de recebimento (impressora industrial + leitor 2D, ~R$ 5-7 mil) | Nathan + Diretoria | 25/09 | Sem hardware: etiqueta em impressora comum (Code128) no piloto | H2, D11 |
 | DEC-9 | ~~Prazo de retenção de auditoria (5 anos é palpite) - validar com contabilidade/fiscal~~ ✅ **DECIDIDA em 21/09** — fica 5 anos | Nathan | 09/10 | ~~5 anos, sem expurgo automático~~ (confirmado) | Não bloqueia a construção |
-| DEC-10 | Devolução de cliente: decisão no av-hub ou nasce no Estoque? Valor da devolução parcial precisa ser capturado nativamente (o Omie não expõe) | Nathan | 13/11 | - | Fase D (ciclo 2) |
+| DEC-10 | ~~Devolução de cliente: decisão no av-hub ou nasce no Estoque?~~ ✅ **DECIDIDA em 21/09** — ciclo completo nasce no Estoque, inclusive captura nativa do valor da devolução parcial | Nathan | 13/11 | ~~-~~ (decidido) | Fase D (ciclo 2, destravada) |
 | DEC-11 | ~~Módulo financeiro nativo (Passo 15): quem decide e quando~~ ✅ **DECIDIDA em 21/09** — adiado, só no futuro, sem data | Nathan → diretoria | 13/11 | ~~-~~ (confirmado: fora do roadmap atual) | Desligamento do Omie (fora do ciclo) |
 
 ## 8. Riscos e gatilhos
