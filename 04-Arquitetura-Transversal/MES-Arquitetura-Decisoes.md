@@ -31,6 +31,13 @@ Registro do desenho de arquitetura entre av-hub e o sistema de fábrica (nome de
    - **Implicação em RBAC (nova, para C2/C3)**: `PerfilSetor` hoje é só `(perfil, setor)` — não basta mais. Precisa ganhar uma dimensão de filial (`perfil × setor × filial`, ou equivalente) para expressar "esse líder só vê o setor X **da filial Y**", já que o mesmo setor pode atender pedidos de filiais diferentes na mesma Fábrica.
    - **Implicação em relatório**: qualquer agregação "produção por filial" tem que entrar pelo `Pedido`/`ItemParcial`, nunca assumir que a Fábrica sozinha identifica a filial.
    - **Implicação fiscal**: nenhuma regra fiscal pode ser cacheada por Fábrica — sempre resolver pelo `codigo_empresa` do pedido em curso.
+8. **DEC-2 — Mecanismo da integração av-hub ↔ MES v1: polling REST bidirecional, autenticado por `x-api-key`.** Decidido em 21/09/2026 por Nathan + Robert + Gustavo. Isso resolve **o "casamento av-hub ↔ MES"** — o maior item em aberto do projeto (ver histórico abaixo). Reaproveita o mesmo padrão já provado em produção (pipeline ELT Omie→av-hub: polling em camadas, sem webhook, sem tempo real) e o mesmo mecanismo de autenticação que a API do av-hub já usa (`apiKeyAuth.js`). Cobre 3 fluxos:
+   - **Requisição**: o MES gera a requisição de compra a partir de saldo/reserva; precisa chegar ao av-hub, onde o comprador fecha a compra.
+   - **Referência da OC**: depois que o av-hub cria a Ordem de Compra, o MES recebe de volta só a referência mínima (número, itens esperados, quantidade) para conferência no Recebimento — não o dado comercial completo (mesma filosofia de "colunas protegidas").
+   - **Status por item**: o MES devolve ao av-hub o andamento da produção item a item, para alimentar o Portal do Vendedor/Carteira do PCP.
+   - **Implicação da DEC-1 (por pedido)**: os 3 fluxos precisam carregar `codigo_empresa` explicitamente em cada payload — nunca assumir a filial a partir da Fábrica.
+   - **Ainda em aberto, não faz parte desta decisão**: G-15 (mesma `x-api-key` compartilhada entre todos os consumidores, ou uma por integração) segue sem resposta — ver [[Perguntas-em-Aberto-Consolidadas]].
+   - Isso destrava a escrita da spec **F1** (prazo 29/09), que passa a ser o detalhamento técnico desses 3 fluxos, não mais a escolha do mecanismo.
 
 ## Dúvidas em aberto (perguntadas, ainda não respondidas)
 

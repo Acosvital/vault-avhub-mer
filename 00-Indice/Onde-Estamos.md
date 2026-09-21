@@ -76,7 +76,7 @@ S2 a S4 e o fechamento seguem o [[Cronograma-2-Meses]]; entram neste quadro quan
 
 ## 6. O que está bloqueando ou em risco agora
 
-1. **10 das 11 decisões (DEC-2 a DEC-11) seguem sem registro no vault.** DEC-1 (Fábrica↔Filial) foi decidida em 21/09 por Nathan+Robert — por pedido, não fixo — ver [[MES-Arquitetura-Decisoes]]; **C2 está destravada**. DEC-4 e DEC-7 (parcial) travam a D1 (início amanhã); DEC-2 trava a integração. Lista com prazo e default em [[Perguntas-em-Aberto-Consolidadas]].
+1. **9 das 11 decisões (DEC-3 a DEC-11) seguem sem registro no vault.** DEC-1 (Fábrica↔Filial: por pedido) e DEC-2 (integração av-hub↔MES: polling REST + `x-api-key`, 3 fluxos) foram decididas em 21/09 por Nathan+Robert(+Gustavo na DEC-2) — ver [[MES-Arquitetura-Decisoes]] itens 7-8; **C2 e a escrita da spec F1 estão destravadas**. DEC-4 e DEC-7 (parcial) seguem travando a D1 (início amanhã). Lista com prazo e default em [[Perguntas-em-Aberto-Consolidadas]].
 2. **Início um dia depois do previsto.** O marco M1 (25/09) tem um dia útil a menos. Decidir se as janelas da S1 são reajustadas ou se o marco permanece.
 3. **Capacidade não confirmada.** O plano assume 40% de foco para o Nathan e 75% para Robert e Pablo, com 9% de folga. O vault não registra a alocação real.
 4. **Rastreabilidade amplia o escopo.** A proposta em [[Campos-e-API-para-Rastreabilidade]] é maior do que o "status por item só para Fabricação e Recebimento" do cronograma. Definir se entra o mínimo ou o completo (pergunta R-14).
