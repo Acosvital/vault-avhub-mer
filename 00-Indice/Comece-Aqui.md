@@ -12,6 +12,7 @@ criado: 2026-09-21
 - **Existe e roda:** a Entrada Comercial. O pedido é criado no Omie, o pipeline ([[Omie-ELT-Pipeline]]) o leva ao av-hub, e o Portal do Vendedor o mostra. Existe também o motor de execução de roteiro de Flanges (`api-pcp`), mas só depois que uma Ordem de Produção chega até ele.
 - **Não existe, é 100% manual hoje:** triagem do PCP, requisição de compra, Compras no sistema, Recebimento, Qualidade, Estoque, Expedição e faturamento operacional. **Tudo isso é o que vamos construir**, cobrindo todos os passos dos 6 fluxogramas de [[Fluxogramas-Completos]].
 - **A execução começa em 22/09/2026.** Até lá o vault é só planejamento; nada do que ele descreve como "a construir" está pronto.
+- **Para saber o ponto exato em que o projeto está** (marcos, quadro de tarefas, bloqueios), abra [[Onde-Estamos]], que é atualizada durante a execução.
 
 ## 2. Leitura comum (todos, nesta ordem)
 

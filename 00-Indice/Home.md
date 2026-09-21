@@ -8,6 +8,8 @@ criado: 2026-09-16
 Vault único do projeto de **ERP de altíssimo nível** da Aços Vital: um sistema que acompanha um pedido de venda de 0 a 100%, de A a Z — da entrada comercial até a expedição. Reúne, numa só estrutura, a modelagem técnica, a integração com o Omie e os contratos de banco e API.
 
 > **Primeira vez aqui?** Comece por [[Comece-Aqui]]: o que existe, o que falta construir, o que ler e o que fazer na primeira semana.
+>
+> **Em que ponto estamos?** [[Onde-Estamos]]: marcos, o que está pronto, quadro de tarefas e bloqueios atuais.
 
 ## Como este vault está organizado
 
