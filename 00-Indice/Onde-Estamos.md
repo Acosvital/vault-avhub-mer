@@ -78,7 +78,8 @@ S2 a S4 e o fechamento seguem o [[Cronograma-2-Meses]]; entram neste quadro quan
 2. **Início um dia depois do previsto.** O marco M1 (25/09) tem um dia útil a menos. Decidir se as janelas da S1 são reajustadas ou se o marco permanece.
 3. **Capacidade não confirmada.** O plano assume 40% de foco para o Nathan e 75% para Robert e Pablo, com 9% de folga. O vault não registra a alocação real.
 4. **Rastreabilidade amplia o escopo.** A proposta em [[Campos-e-API-para-Rastreabilidade]] é maior do que o "status por item só para Fabricação e Recebimento" do cronograma. Definir se entra o mínimo ou o completo (pergunta R-14).
-5. **Dependência de fora do time de dev:** levantamento físico (26–30/10), saneamento do catálogo (13–23/10), hardware e UAT. Todas com data no gantt do cronograma.
+5. **Estados e status com falhas.** A [[Revisao-dos-Estados-e-Status]] achou 3 problemas críticos: status por item quando o item é dividido em parciais, lote congelado sem saída e entidades sem máquina de estados (Recebimento, Requisição, OC, RNC). Os dois primeiros afetam a D1 e a spec F1.
+6. **Dependência de fora do time de dev:** levantamento físico (26–30/10), saneamento do catálogo (13–23/10), hardware e UAT. Todas com data no gantt do cronograma.
 
 ## 7. Como manter esta nota
 

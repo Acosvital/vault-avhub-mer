@@ -23,6 +23,7 @@ Vault único do projeto de **ERP de altíssimo nível** da Aços Vital: um siste
 - [[Indice-Integracao-Omie|8. Integração com o Omie]] — campo a campo do que o pipeline extrai, lacunas contra o que o Estoque/MES precisa, levantamento da API e roteiro de implementação.
 - [[Indice-Contratos|9. Contratos de banco e API]] — DDL para o DBA e contratos de endpoint, com status e perguntas em aberto.
 - [[Rastreabilidade-e-SLA-de-Eventos|Rastreabilidade, custódia e SLA por etapa]] (em `04-Arquitetura-Transversal`) — proposta de log de eventos (quem fez, com quem está, quem autorizou, quem passou, tempo contra SLA) e [[Campos-e-API-para-Rastreabilidade|os campos de banco e endpoints que ela exige]].
+- [[Revisao-dos-Estados-e-Status|Revisão dos estados, status e etapas]] — o que está bem construído, 8 problemas e as correções propostas (a ler antes da D1 e da spec F1).
 - [[Perguntas-em-Aberto-Consolidadas|Perguntas em aberto, consolidadas]] — todas as decisões e dúvidas pendentes, por quem responde.
 
 ## Estado atual do projeto

@@ -106,6 +106,11 @@ Origem: [[Indice-Contratos|os contratos]] (seção "Perguntas em aberto" de cada
 
 ---
 
+## E2. Estados e status
+Origem: [[Revisao-dos-Estados-e-Status]] (seção 5). Sete perguntas novas: entrega parcial de um item, concessão de lote fora de especificação, destino do lote reprovado por completo, timeout da reserva (alerta ou liberação), cancelamento de pedido em produção, regras de `Pedido.status` e `BLOQUEADO` no MES, e se o protótipo Torre de Fluxo deve ser refeito. Os pontos 2.1 a 2.3 da revisão precisam de resposta **antes da D1 e da spec F1**.
+
+---
+
 ## F. Perguntas que já foram respondidas mas ainda aparecem como abertas
 Estas geram ruído. **Não são perguntas novas: são notas a corrigir.**
 

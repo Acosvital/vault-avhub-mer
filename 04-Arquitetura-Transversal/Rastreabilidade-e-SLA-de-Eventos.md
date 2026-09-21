@@ -67,6 +67,8 @@ Os estados do `ItemParcial` (8 estados) cobrem só a produção. O log precisa d
 
 Desvios: `qualidade.reprovado` e `pcp.retorno`, `recebimento.divergencia`, `fabrica.retrabalho`. Nenhum estado fica sem saída, conforme [[Estoque-Riscos]].
 
+> **Atenção: este vocabulário é provisório.** A revisão em [[Revisao-dos-Estados-e-Status]] mostrou que as etapas de fábrica devem ser geradas a partir do roteiro e do `ItemParcial` (não fixas), que `vendas.emitido` deveria ser `pcp.aceite`, que o SLA precisa separar tempo interno de tempo de terceiros (`tipo_tempo`) e que o status por item precisa de uma regra de agregação quando o item é dividido em parciais.
+
 ## SLA em dois níveis
 
 1. **Prazo do pedido** (`data_previsao`): já existe.
