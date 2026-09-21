@@ -76,7 +76,7 @@ S2 a S4 e o fechamento seguem o [[Cronograma-2-Meses]]; entram neste quadro quan
 
 ## 6. O que está bloqueando ou em risco agora
 
-1. **7 das 11 decisões (DEC-4, DEC-5, DEC-6, DEC-8, DEC-9, DEC-10, DEC-11) seguem sem registro no vault.** DEC-1, DEC-2, DEC-3 e DEC-7 já foram decididas em 21/09 — ver [[Decisoes-Chave-ERP]] e [[MES-Arquitetura-Decisoes]] itens 7-8; **C2, E2, a escrita da spec F1, e B3/B5/D1/D3 estão destravados**. Só **DEC-4** ainda trava a D1 (início amanhã). Lista com prazo e default em [[Perguntas-em-Aberto-Consolidadas]].
+1. **6 das 11 decisões (DEC-4, DEC-6, DEC-8, DEC-9, DEC-10, DEC-11) seguem sem registro no vault.** DEC-1, DEC-2, DEC-3, DEC-5 e DEC-7 já foram decididas em 21/09 — ver [[Decisoes-Chave-ERP]] e [[MES-Arquitetura-Decisoes]] itens 7-8; **C2, E2, D6/D7, a escrita da spec F1, e B3/B5/D1/D3 estão destravados**. Só **DEC-4** ainda trava a D1 (início amanhã). Lista com prazo e default em [[Perguntas-em-Aberto-Consolidadas]].
 2. **Início um dia depois do previsto.** O marco M1 (25/09) tem um dia útil a menos. Decidir se as janelas da S1 são reajustadas ou se o marco permanece.
 3. **Capacidade não confirmada.** O plano assume 40% de foco para o Nathan e 75% para Robert e Pablo, com 9% de folga. O vault não registra a alocação real.
 4. **Rastreabilidade completa decidida.** R-07/R-14 respondidas em 21/09: escopo é **todas as rotas**, não o mínimo. Como isso excedia a folga de S1-FC, o cronograma foi estendido de 2 para 3 meses (nova sprint S5, 19/11-18/12) especificamente pra isso — ver [[Cronograma-2-Meses]] seção 5 (S5).
