@@ -206,11 +206,11 @@ Do dia 22/09 (execução real) a 21/12/2026: **63 dias úteis** (13 semanas exat
 |---|---|---|---|---|
 | Nathan | 40% | 9,2 | 11,0 | **-1,8** ⚠️ |
 | Gustavo | 60% | 13,8 | 4,0 | 9,8 |
-| Robert | 75% | 17,25 | 15,0 | 2,25 |
+| Robert | 75% | 17,25 | 15,5 | 1,75 |
 | Pablo | 75% | 17,25 | 5,0 | 12,25 |
-| **Total** | | **57,5** | **35,0** | **22,5** |
+| **Total** | | **57,5** | **35,5** | **22,0** |
 
-Inclui o bloco **J — Genealogia de material** (R-12, resolve L-11), encaixado na S5 em 21/09/2026: +8 pd (Gustavo +2, Robert +3, Pablo +3). Reserva da S5 cai de 30,5 pd pra 22,5 pd, ainda folgada. Robert é quem mais aperta (2,25 pd de reserva só dele) — se mais alguma coisa entrar na S5, é o primeiro a rever.
+Inclui o bloco **J — Genealogia de material** (R-12, resolve L-11), encaixado na S5 em 21/09/2026: +8,5 pd (Gustavo +2, Robert +3,5, Pablo +3 — J3 ganhou +0,5 pd pra cobrir a opção de escolha manual de lote, além do FIFO automático, DEC-12). Reserva da S5 cai de 30,5 pd pra 22,0 pd, ainda folgada. **Robert é quem mais aperta (1,75 pd de reserva só dele)** — se mais alguma coisa entrar na S5, é o primeiro a rever ou redistribuir.
 
 **Sobra bastante reserva (30,5 pd) — de propósito**, depois de uma folga de só 9% no plano original. Duas opções para essa sobra: manter como buffer de verdade (recomendado, dado que é a primeira vez que o time constrói um log de eventos deste tipo) ou puxar algo da Fase D pra dentro do ciclo — decisão sua, não assumida aqui.
 
@@ -409,7 +409,7 @@ Nathan confirmou que a genealogia lote de matéria-prima → item entregue é ne
 | ID | Entrega | Resp. | pd | Janela | Depende de | Pronto quando |
 |---|---|---|---|---|---|---|
 | J2 | Schema: estender `MOVIMENTO_ESTOQUE` com tipo `CONSUMO`, vínculo a `lote` + `ItemParcial` | Pablo | 1 | 19/11–25/11 | D9 | Migration aplicada em homologação |
-| J3 | Backend: consumo de matéria-prima no início/conclusão da OS/OP — aplica a estratégia de alocação de lote (DEC-12), trata consumo parcial entre lotes | Robert | 3 | 26/11–04/12 | J2, I3, DEC-12 | Toda OS/OP concluída baixa saldo do(s) lote(s) certo(s) |
+| J3 | Backend: consumo de matéria-prima no início/conclusão da OS/OP — aplica FIFO por `data_posicao` como padrão, com endpoint pra escolher o lote manualmente (override), trata consumo parcial entre lotes | Robert | 3,5 | 26/11–04/12 | J2, I3, DEC-12 | Toda OS/OP concluída baixa saldo do(s) lote(s) certo(s); operador consegue escolher lote manualmente quando quiser |
 | J4 | Endpoint de genealogia: lote → itens entregues, e item entregue → lote(s) de origem | Gustavo | 2 | 04/12–10/12 | J3 | `GET` retorna a cadeia completa em homologação |
 | J5 | Tela: consulta de genealogia por lote ou por item/pedido | Pablo | 3 | 10/12–18/12 | J4 | Qualidade/Compras conseguem consultar a origem de um item entregue |
 
@@ -440,7 +440,7 @@ Cada uma tem um *default* escrito: se ninguém decidir até a data, o default va
 | DEC-9 | ~~Prazo de retenção de auditoria (5 anos é palpite) - validar com contabilidade/fiscal~~ ✅ **DECIDIDA em 21/09** — fica 5 anos | Nathan | 09/10 | ~~5 anos, sem expurgo automático~~ (confirmado) | Não bloqueia a construção |
 | DEC-10 | ~~Devolução de cliente: decisão no av-hub ou nasce no Estoque?~~ ✅ **DECIDIDA em 21/09** — ciclo completo nasce no Estoque, inclusive captura nativa do valor da devolução parcial | Nathan | 13/11 | ~~-~~ (decidido) | Fase D (ciclo 2, destravada) |
 | DEC-11 | ~~Módulo financeiro nativo (Passo 15): quem decide e quando~~ ✅ **DECIDIDA em 21/09** — adiado, só no futuro, sem data | Nathan → diretoria | 13/11 | ~~-~~ (confirmado: fora do roadmap atual) | Desligamento do Omie (fora do ciclo) |
-| DEC-12 | **Nova (21/09).** Estratégia de alocação de lote no consumo de matéria-prima pela OS/OP: qual lote baixar primeiro quando existe mais de um em estoque? | Robert + Pablo | 20/11 | FIFO por `data_posicao` (lote mais antigo primeiro) | J3 |
+| DEC-12 | ~~Estratégia de alocação de lote no consumo de matéria-prima pela OS/OP~~ ✅ **DECIDIDA em 21/09** — FIFO por `data_posicao` como padrão automático, com opção de escolha manual (override) | Robert + Pablo | 20/11 | ~~FIFO por `data_posicao`~~ (confirmado, mais opção manual) | J3 (destravada) |
 
 ## 8. Riscos e gatilhos
 
