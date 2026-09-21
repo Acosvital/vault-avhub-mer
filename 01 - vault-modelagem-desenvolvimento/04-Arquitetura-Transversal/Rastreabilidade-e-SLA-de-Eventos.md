@@ -76,7 +76,7 @@ Desvios: `qualidade.reprovado` e `pcp.retorno`, `recebimento.divergencia`, `fabr
 
 ## Identidade comum
 
-O MES tem login duplo (usuário/senha no chão de fábrica, e-mail/Azure AD no escritório) e RBAC próprio ([[Achado-Duplicacao-RBAC]], [[MES-Arquitetura-Decisoes]]). Para o av-hub mostrar "quem" da fábrica, e vice-versa, é preciso um **identificador único de pessoa entre os dois sistemas**. Candidatos: `id_funcionario` (já usado em `vendedores`) ou matrícula. Operador sem e-mail precisa ter identificador equivalente. **A definir.**
+O MES tem login duplo (usuário/senha no chão de fábrica, e-mail/Azure AD no escritório) e RBAC próprio ([[Achado-Duplicacao-RBAC]], [[MES-Arquitetura-Decisoes]]). Para o av-hub mostrar "quem" da fábrica, e vice-versa, é preciso um **identificador único de pessoa entre os dois sistemas**. O melhor candidato é `core.funcionarios.id`: `auth.usuarios.id_funcionario` e `vendedores.id_funcionario` já apontam para lá. No MES, `Operador` hoje é só um nome, sem vínculo com usuário nem com funcionário, e operador sem e-mail também precisa de identificador. Detalhes e perguntas em [[Campos-e-API-para-Rastreabilidade]].
 
 ## Transporte entre sistemas
 
@@ -106,6 +106,7 @@ O [[Cronograma-2-Meses]] cobre hoje "status por item" só para Fabricação e Re
 - Prazo de retenção do log (ver DEC-9, 5 anos por palpite).
 
 ## Ver também
+- [[Campos-e-API-para-Rastreabilidade]] — tabelas, campos e endpoints que esta proposta exige, e as inconsistências achadas no vault.
 - [[Fluxo-Detalhado-Pedido-Item]]
 - [[App-PCP-Backend-Producao]]
 - [[Diagramas-UML]]

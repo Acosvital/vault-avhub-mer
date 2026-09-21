@@ -26,6 +26,7 @@ Lista viva de decisões que precisam ser tomadas conscientemente para o "ERP de 
 - [x] **Ordem de Serviço (OS) e Ordem de Produção (OP), emitidas pelo PCP:** mapeiam pro mecanismo já existente de `roteiro`/`ItemParcial` (8 estados) do `api-pcp`, não são entidades novas. Ver [[App-PCP-Backend-Producao]].
 - [x] **Divisão Compras av-hub × MES.** Requisição nasce no MES (PCP, a partir de saldo/reserva); compra em si (fornecedor, preço, aprovação, flag acabado/não-acabado) é decidida no av-hub; só o necessário pra conferência trafega de volta pro MES. Ver [[Fluxo-Detalhado-Pedido-Item]] e [[MES-Arquitetura-Decisoes]].
 - [ ] **Anexo de Ordem de Compra vira dado estruturado, não PDF** — o comprador anexando PDF manualmente (visto nos áudios) é só uma primeira fase; a intenção é trazer os dados da OC diretamente (sem depender de upload/parse de PDF). Ver [[Fluxo-Detalhado-Pedido-Item]].
+- [ ] **Rastreabilidade por etapa, custódia e SLA por etapa (proposta de 21/09/2026).** Log único de eventos imutável, com ator, autorizador, passagem e "com quem está"; identidade de pessoa comum entre av-hub e MES; feed por polling com cursor sequencial. Precisa entrar na spec F1 (até 29/09). Ver [[Rastreabilidade-e-SLA-de-Eventos]] e [[Campos-e-API-para-Rastreabilidade]].
 
 ## Já resolvidas / bem estabelecidas
 
@@ -48,3 +49,4 @@ Lista viva de decisões que precisam ser tomadas conscientemente para o "ERP de 
 - [[Omie-ELT-Pipeline]]
 - [[AV-Hub-Comissao-Modulo]]
 - [[MES-Arquitetura-Decisoes]]
+- [[Rastreabilidade-e-SLA-de-Eventos]]

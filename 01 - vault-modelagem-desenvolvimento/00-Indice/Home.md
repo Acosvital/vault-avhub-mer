@@ -16,6 +16,7 @@ Vault de análise do projeto de **ERP de altíssimo nível** da Aços Vital: um 
 - [[Equipe-Projeto|5. Pessoas e equipe]]
 - [[Glossario|6. Glossário]]
 - [[Cronograma-2-Meses|7. Cronograma de 2 meses]] — plano de 18/09 a 18/11/2026 (Fase 0 a C + integração mínima), com marcos, capacidade, decisões bloqueantes e ordem de corte.
+- [[Rastreabilidade-e-SLA-de-Eventos|8. Rastreabilidade, custódia e SLA por etapa]] — proposta de log de eventos (quem fez, com quem está, quem autorizou, quem passou, tempo contra SLA) e [[Campos-e-API-para-Rastreabilidade|os campos de banco e endpoints que ela exige]].
 
 ## Estado atual do projeto
 

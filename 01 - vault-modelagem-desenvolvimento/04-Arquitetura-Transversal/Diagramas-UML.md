@@ -887,7 +887,7 @@ stateDiagram-v2
     class PENDENTE_PCP,EM_DESPACHO,EM_COMPRA,EM_PRODUCAO,EM_ESTOQUE,EM_RECEBIMENTO,EM_INSPECAO,PRONTO_EXPEDICAO,FATURADO pcpStyle
 ```
 
-**Nota:** esse é o status granular que o "casamento av-hub↔MES" precisaria expor pro vendedor — ver [[Decisoes-Chave-ERP]].
+**Nota:** esse é o status granular que o "casamento av-hub↔MES" precisaria expor pro vendedor — ver [[Decisoes-Chave-ERP]]. São 9 estados; o fluxo real tem cerca de 20 etapas, e a tabela que traduz uma coisa na outra (`etapa_fluxo.estado_macro`) está proposta em [[Campos-e-API-para-Rastreabilidade]].
 
 ## 9. Componentes
 
@@ -1197,6 +1197,8 @@ gantt
 ```
 
 **Nota:** neste exemplo o item **estoura o SLA** — o prazo (`data_previsao`) cai em 11/09, no meio da barra `EM_PRODUCAO`, então a partir daí o item já entraria na régua vermelha/piscando descrita em [[AV-Hub-Portal-Vendedor-Plano]] antes mesmo de chegar na inspeção.
+
+**Versão com dados reais:** este exemplo é estático. O modelo que o alimentaria (log de eventos, SLA por etapa, projeção de estouro) está em [[Rastreabilidade-e-SLA-de-Eventos]]; os 9 estados desta visão são o `estado_macro` de cada etapa do fluxo.
 
 ---
 

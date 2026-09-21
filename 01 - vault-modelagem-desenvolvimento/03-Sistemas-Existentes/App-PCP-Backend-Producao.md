@@ -14,7 +14,7 @@ Cada `ItensPedido` nasce com **um** `ItemParcial` cobrindo 100% da quantidade �
 - **Estados**: `CRIADO → RECEBIDO → EM_ANDAMENTO → EM_TRANSITO → PAUSADO/RETRABALHO → CONCLUIDO`, mais `CANCELADO`.
 - **Ações do workflow** (`itens-parciais.service.ts`): `receber`, `mover` (avança pro próximo passo do roteiro), `concluir` (só no último passo), `pausar`, `retrabalho`, `retomar`, `split` (divide o lote), `devolver` (rejeita de volta pro setor anterior — a linha atual vira `CANCELADO`, nasce uma nova `EM_TRANSITO` ligada por `idDevolvidoDe`), `cancelar`, `desfazerRecebimento`, `consolidar` (junta parciais divididos de volta), e `acaoLote` (ação em lote sobre múltiplos IDs, sucesso/falha por item).
 - **Concorrência**: todas as transições usam `updateMany({where:{id, status: ESPERADO}})` + `count===0 → erro de conflito`, em vez de ler-depois-escrever — retrofit deliberado (24/08/2026) depois de um risco de race condition identificado em 7 ações.
-- **`HistoricoItemParcial`** — trilha de auditoria imutável de toda transição (setor, status, operador/máquina no momento), usada só para timeline/relatórios/dashboard — nunca para saber o estado atual (isso é sempre `ItemParcial`).
+- **`HistoricoItemParcial`** — trilha de auditoria imutável de toda transição (setor, status, operador/máquina no momento), usada só para timeline/relatórios/dashboard — nunca para saber o estado atual (isso é sempre `ItemParcial`). Não guarda autorização, passagem entre pessoas nem "com quem está"; a extensão proposta está em [[Rastreabilidade-e-SLA-de-Eventos]] e [[Campos-e-API-para-Rastreabilidade]].
 
 ## `Entrega` — entrega ao cliente, conceito distinto
 

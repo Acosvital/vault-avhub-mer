@@ -362,7 +362,7 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 - **Fase 0 (arrumar a casa):** decisões e contratos (S1) → alias e cadastros (S2, D4/D5) → saneamento humano (13-23/10, H1) → contagem física em dupla (26-30/10, G2) → carga e conferência (S4, G3/G4) → **marco zero em 13/11**. Nenhum consumo por PCP/Comercial antes disso ([[Estoque-Riscos]]).
 - **Fase A + B (compra → doca):** requisição do PCP (C7) → OC estruturada no av-hub (E1/E2) → referência no MES (F2) → recebimento com pesagem, quarentena, inspeção e RNC (D6-D8). Ver [[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]], [[Fluxo-Qualidade-Completo]].
 - **Fase C (saldo):** backend e telas em S4 (D9/D10); a **reserva só liga depois do marco zero**. Ver [[Fluxo-Estoque-Completo]].
-- **Casamento av-hub ↔ MES (o maior item em aberto de [[Decisoes-Chave-ERP]]):** spec em S1 (F1), fluxos de requisição e OC em S3 (F2), status por item em S4 (F3/E3) — sempre por polling, sem tempo real.
+- **Casamento av-hub ↔ MES (o maior item em aberto de [[Decisoes-Chave-ERP]]):** spec em S1 (F1), fluxos de requisição e OC em S3 (F2), status por item em S4 (F3/E3) — sempre por polling, sem tempo real. A proposta de log de eventos ([[Rastreabilidade-e-SLA-de-Eventos]]) generaliza F3 e amplia o escopo; os campos que ela exige nas migrations do Estoque (D1) estão em [[Campos-e-API-para-Rastreabilidade]].
 
 ## 7. Decisões bloqueantes
 
@@ -419,4 +419,5 @@ O piloto de recebimento (H4) roda de 11/11 a 18/11 em **1 posto**, com material 
 - [[Decisoes-Chave-ERP]]
 - [[MES-Arquitetura-Decisoes]]
 - [[Fluxogramas-Completos]]
+- [[Rastreabilidade-e-SLA-de-Eventos]] e [[Campos-e-API-para-Rastreabilidade]] — proposta de rastreabilidade com impacto em D1, F1 e F3.
 - Outros vaults (abrir manualmente; wikilinks não atravessam vaults): `03 - vault-integracao-omie/05-Plano-de-Execucao/Roteiro-de-Implementacao.md` e `04 - vault-contratos/00-Indice/Home.md`.

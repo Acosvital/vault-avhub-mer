@@ -49,3 +49,4 @@ pergunta em aberto documentada no próprio arquivo.
 ## Ver também (em outros vaults — abrir manualmente, wikilinks não atravessam vaults)
 - `03 - vault-integracao-omie/05-Plano-de-Execucao/Roteiro-de-Implementacao.md`
 - `01 - vault-modelagem-desenvolvimento/04-Arquitetura-Transversal/Decisoes-Chave-ERP.md`
+- `01 - vault-modelagem-desenvolvimento/04-Arquitetura-Transversal/Campos-e-API-para-Rastreabilidade.md` — lista de tabelas, campos e endpoints novos para rastreabilidade; cada bloco vira contrato SQL ou de API aqui depois que a spec F1 for aprovada.

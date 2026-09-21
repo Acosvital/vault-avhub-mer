@@ -38,5 +38,6 @@ Next.js (App Router) + CSS Modules + PostgreSQL. O Estoque mora dentro do mesmo 
 O [[App-PCP-Modelo-Producao|app-pcp]] já **usa Prisma** desde o início — o Estoque segue a mesma escolha, compartilhando a mesma stack de dados por decisão consciente, não por coincidência.
 
 ## Ver também
+- [[Campos-e-API-para-Rastreabilidade]] — campos de autoria, tempo e vínculo com o item do pedido que este modelo ainda não tem (e que devem entrar nas migrations do v1).
 - [[PRD-Estoque-Visao-Geral]]
 - [[Estoque-Regras-Negocio]]

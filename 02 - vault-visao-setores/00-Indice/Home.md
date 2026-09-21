@@ -12,7 +12,7 @@ Este vault reúne, em linguagem simples, a visão de negócio do projeto de ERP 
 - [[Visao-Geral-do-Processo]] — como o processo funciona hoje, do pedido até a entrega. Ver também: [[Vendas-e-Entrada-do-Pedido]], [[Organizacao-do-Pedido-PCP]], [[Comprando-o-que-Falta]], [[Fabricando-Produtos-Proprios]], [[Cortando-Chapas-sob-Medida]], [[Controlando-o-Estoque]], [[Qualidade-e-Conferencia]], [[Faturamento-e-Entrega]] e [[Quem-Faz-o-Que]].
 - [[Visao-Geral]] do Novo Sistema de Estoque — o módulo de Estoque, Recebimento e Compras que está sendo planejado. Ver também: [[Regras-de-Negocio]], [[Como-vai-Funcionar-no-Dia-a-Dia]], [[Cronograma]], [[Riscos-e-Cuidados]] e [[Perguntas-em-Aberto]].
 - [[av-hub]] e demais Sistemas que já Usamos — os sistemas que já estão em funcionamento na empresa hoje. Ver também: [[Como-Vendas-e-Faturamento-Funcionam]], [[Comissoes]], [[Portal-do-Vendedor]], [[Acessos-e-Permissoes]], [[Sistema-de-Producao-Flanges]], [[Integracao-com-o-Omie]] e [[Situacao-Atual]].
-- [[Principais-Decisoes]] do Projeto — as decisões mais importantes tomadas até agora. Ver também: [[Onde-os-Sistemas-Rodam]], [[Duplicacao-de-Acessos]], [[Ambiguidade-do-Nome-PCP]], [[Sistema-de-Fabrica-MES]] e [[Perguntas-Pendentes]].
+- [[Principais-Decisoes]] do Projeto — as decisões mais importantes tomadas até agora. Ver também: [[Onde-os-Sistemas-Rodam]], [[Duplicacao-de-Acessos]], [[Ambiguidade-do-Nome-PCP]], [[Sistema-de-Fabrica-MES]], [[Acompanhamento-de-Cada-Etapa]] (proposta: onde cada pedido está, com quem, e se vai dar tempo) e [[Perguntas-Pendentes]].
 - [[Equipe-do-Projeto]] — quem faz parte do time do projeto e o que cada pessoa faz.
 - [[Glossario]] — explicação dos termos e siglas usados no dia a dia da empresa e no projeto.
 

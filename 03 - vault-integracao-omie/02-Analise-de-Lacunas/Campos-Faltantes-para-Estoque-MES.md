@@ -31,7 +31,7 @@ Todos os endpoints usados pelo pipeline são de leitura (`Listar*`, `Pesquisar*`
 
 ## 5. Histórico granular de status do pedido — não é responsabilidade do pipeline
 
-`pedidos_vendas_status_historico` (schema Postgres) não aparece como destino de nenhuma extração do pipeline — o pipeline só grava em `pedidos_vendas` diretamente; `situacao` inclusive é recalculada por **trigger do banco**, não pelo pipeline. Ou seja: a "granularidade insuficiente" desse histórico não é uma limitação do que o Omie oferece — é uma decisão de schema do lado do banco/DBA. Se o Estoque/MES precisar de histórico mais fino, a solução está inteiramente do lado do Postgres (nova tabela/trigger), não depende de trazer mais dado do Omie.
+`pedidos_vendas_status_historico` (schema Postgres) não aparece como destino de nenhuma extração do pipeline — o pipeline só grava em `pedidos_vendas` diretamente; `situacao` inclusive é recalculada por **trigger do banco**, não pelo pipeline. Ou seja: a "granularidade insuficiente" desse histórico não é uma limitação do que o Omie oferece — é uma decisão de schema do lado do banco/DBA. Se o Estoque/MES precisar de histórico mais fino, a solução está inteiramente do lado do Postgres (nova tabela/trigger), não depende de trazer mais dado do Omie. A proposta concreta (log de eventos, tabelas e campos) está no vault 01: `04-Arquitetura-Transversal/Rastreabilidade-e-SLA-de-Eventos.md` e `Campos-e-API-para-Rastreabilidade.md` (wikilinks não atravessam vaults).
 
 ## Ver também
 - [[Produtos-e-Familias]]
