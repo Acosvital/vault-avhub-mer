@@ -92,7 +92,7 @@ Origem: [[Indice-Contratos|os contratos]] (seção "Perguntas em aberto" de cada
 | M-04 | Contrato API 002 | ~~Alinhar os nomes...~~ ✅ **MOOT em 21/09/2026** — contrato API 002 cancelado (ver M-03), não há mais o que alinhar. |
 | M-05 | [[Estoque-Modelo-Dados]] | ~~Onde entra `destinacao_item_pedido` e `item_pedido` no diagrama (texto e diagrama divergem)?~~ ✅ **DECIDIDO e CONFIRMADO em 21/09/2026 pelo Nathan** (não é mais só recomendação pendente): não viram tabela nova no Estoque. Estoque e a classificação do PCP moram no **mesmo banco** (schemas diferentes, mesmo Postgres do MES) — o Estoque **lê direto** do schema de Produção via JOIN entre schemas, sem duplicar. Mesmo princípio já usado pra fornecedor (projeção, não cadastro próprio). O **diagrama está certo**; o **texto do PRD é que estava desatualizado**. |
 | M-06 | [[Fluxo-Detalhado-Pedido-Item]] e [[Diagramas-UML]] (seção 20) | Qual é o mecanismo de expiração e liberação da reserva de estoque? O `timeout` da seção 20 está "não definido". 🔵 **Explicitamente adiada pelo Nathan (21/09/2026)** — não é esquecimento, fica em aberto por enquanto. Sem timeout definido, v1 provavelmente nasce sem expiração automática (reserva só libera por cancelamento explícito) até essa decisão ser tomada. |
-| M-07 | [[Fluxo-Detalhado-Pedido-Item]] | Como reconciliar a conferência do Recebimento com o modelo genérico `recebimento`/`item_recebido`? 🟡 **campos reais do endpoint de Recebimento do Omie já levantados — ver H** (bom insumo, não resolve a decisão de modelagem interna) |
+| M-07 | [[Fluxo-Detalhado-Pedido-Item]] | ~~Como reconciliar a conferência do Recebimento com o modelo genérico `recebimento`/`item_recebido`?~~ ✅ **DECIDIDO em 21/09/2026 (Nathan confirma recomendação)**: não vira dois fluxos separados. `ITEM_RECEBIDO` ganha `tipo_referencia` (`PEDIDO_VENDA`\|`ORDEM_COMPRA`) + `id_referencia` — a flag acabado/não-acabado (já decidida em Compras) escolhe automaticamente contra o quê conferir, sem o almoxarife precisar escolher. Mesmo padrão polimórfico já em produção no av-hub (`auth.usuarios_favoritos.tipo`+`referencia_id`), só que aqui com FK real em cada lado (alvos fixos e conhecidos). Conferência qualitativa (Qualidade/quarentena) não muda, é igual pros dois casos. |
 | M-08 | [[Perguntas-Pendentes-MES-Estoque]] | ~~Devolução de cliente~~ ✅ **duplicata de DEC-10**, remover daqui |
 
 ---
@@ -147,11 +147,9 @@ Pesagem já existe hoje; há múltiplos depósitos; não há consignação; mat�
 ---
 
 ## H. Perguntas mais concretas, mas ainda sem decisão (achados de código/pesquisa, 21/09)
-Estas **não têm resposta** — continuam precisando de uma pessoa decidir — mas o levantamento contra o dump/código real e os documentos de API do Omie já traz evidência concreta, então a conversa não precisa começar do zero. (R-01, R-06, G-10, G-13, G-16, G-18, M-01 e N-03 saíram daqui em 21/09 — já respondidas, ver blocos A/B/C/D/E.)
+Estas **não têm resposta** — continuam precisando de uma pessoa decidir — mas o levantamento contra o dump/código real e os documentos de API do Omie já traz evidência concreta, então a conversa não precisa começar do zero. (R-01, R-06, G-10, G-13, G-16, G-18, M-01, M-07 e N-03 saíram daqui em 21/09 — já respondidas, ver blocos A/B/C/D/E.)
 
-| ID original | O que o levantamento trouxe                                                                                                                                                                                                                                | O que ainda falta decidir                                                                                                                     |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| M-07        | [[Compras-Estoque-Producao-Lacunas]] traz os campos reais do endpoint de Recebimento do Omie (`nQtdeRecebida`, link a pedido de compra, lote na entrada, local de destino, flags de ciclo completo por transição).                                         | A modelagem interna (conferência contra Pedido de Venda × contra Ordem de Compra) continua sendo desenho próprio, o Omie não resolve sozinho. |
+Vazio por ora — todos os itens que estavam aqui já foram resolvidos.
 
 ---
 
