@@ -1,13 +1,112 @@
 {
   "collapse-filter": true,
   "search": "",
-  "showTags": false,
+  "showTags": true,
   "showAttachments": false,
   "hideUnresolved": false,
   "showOrphans": true,
   "collapse-color-groups": true,
-  "colorGroups": [],
-  "collapse-display": true,
+  "colorGroups": [
+    {
+      "query": "tag:#fluxo-operacional",
+      "color": {
+        "a": 1,
+        "rgb": 4321431
+      }
+    },
+    {
+      "query": "tag:#prd-estoque",
+      "color": {
+        "a": 1,
+        "rgb": 14701138
+      }
+    },
+    {
+      "query": "tag:#av-hub",
+      "color": {
+        "a": 1,
+        "rgb": 1146986
+      }
+    },
+    {
+      "query": "tag:#app-pcp",
+      "color": {
+        "a": 1,
+        "rgb": 15761536
+      }
+    },
+    {
+      "query": "tag:#achado",
+      "color": {
+        "a": 1,
+        "rgb": 16724530
+      }
+    },
+    {
+      "query": "tag:#arquitetura",
+      "color": {
+        "a": 1,
+        "rgb": 3426654
+      }
+    },
+    {
+      "query": "tag:#infraestrutura",
+      "color": {
+        "a": 1,
+        "rgb": 8359053
+      }
+    },
+    {
+      "query": "tag:#decisoes",
+      "color": {
+        "a": 1,
+        "rgb": 2003199
+      }
+    },
+    {
+      "query": "tag:#equipe",
+      "color": {
+        "a": 1,
+        "rgb": 9807270
+      }
+    },
+    {
+      "query": "tag:#glossario",
+      "color": {
+        "a": 1,
+        "rgb": 9936031
+      }
+    },
+    {
+      "query": "tag:#rbac",
+      "color": {
+        "a": 1,
+        "rgb": 10181046
+      }
+    },
+    {
+      "query": "tag:#portal-vendedor",
+      "color": {
+        "a": 1,
+        "rgb": 3066993
+      }
+    },
+    {
+      "query": "tag:#comissao",
+      "color": {
+        "a": 1,
+        "rgb": 15105570
+      }
+    },
+    {
+      "query": "tag:#bugs",
+      "color": {
+        "a": 1,
+        "rgb": 13382400
+      }
+    }
+  ],
+  "collapse-display": false,
   "showArrow": false,
   "textFadeMultiplier": 0,
   "nodeSizeMultiplier": 1,
@@ -17,6 +116,6 @@
   "repelStrength": 10,
   "linkStrength": 1,
   "linkDistance": 250,
-  "scale": 0.7132754626224413,
+  "scale": 0.5087618855792582,
   "close": false
 }
