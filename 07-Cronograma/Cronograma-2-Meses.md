@@ -418,7 +418,7 @@ Cada uma tem um *default* escrito: se ninguém decidir até a data, o default va
 |---|---|---|---|---|---|
 | DEC-1 | Vínculo Fábrica ↔ Filial (codigo_empresa): 1 fábrica = 1 filial fixa, ou vínculo por pedido? | Nathan + Robert | 25/09 | 1 fábrica = 1 filial fixa | C2 |
 | DEC-2 | Integração av-hub ↔ MES v1: polling REST bidirecional (1-5 min) com autenticação entre serviços por x-api-key; 3 fluxos (requisição, referência da OC, status por item) | Nathan + Robert + Gustavo | 29/09 | Polling REST, sem webhook nem tempo real | F1, F2, F3, E1 |
-| DEC-3 | Aprovação condicional de compra: acima de qual valor X e quem aprova? | Nathan + Diretoria | 25/09 | Valor limite vira parâmetro, desligado no v1 | E2 |
+| DEC-3 | ~~Aprovação condicional de compra: acima de qual valor X e quem aprova?~~ ✅ **DECIDIDA em 21/09** — acima de R$ 30.000, o diretor aprova | Nathan + Diretoria | 25/09 | ~~Valor limite vira parâmetro, desligado no v1~~ (não se aplica) | E2 (destravada) |
 | DEC-4 | Lote de carga inicial nasce liberado ou passa pela inspeção de qualidade? | Nathan + Qualidade | 25/09 | Nasce liberado, com dupla conferência | D1, G1, G3 |
 | DEC-5 | Balança: digitação manual no v1 ou integração automática? | Nathan + Operação | 25/09 | Digitação manual | D6, D7 |
 | DEC-6 | Tolerância de peso por categoria de material | Nathan + Qualidade | 25/09 | 5% padrão, ajustável por material | D5 |
