@@ -19,9 +19,9 @@ atualizado: 2026-09-21
 | Data | Marco | Situação |
 |---|---|---|
 | 16/09 a 21/09 | Análise, fluxos, PRD, cronograma, contratos e modelo de rastreabilidade | **Concluído** (planejamento) |
-| **21/09** | **Hoje** | Vault unificado, perguntas consolidadas |
+| **21/09** | **Hoje** | Vault unificado; auditoria contra dump de produção; **8 das 11 DEC decididas em conversa direta** (DEC-1, 2, 3, 5, 7, 9, 10, 11) + DEC-12 nova (genealogia de material); ~45 das ~60 perguntas da lista consolidada fechadas |
 | **22/09** | **Início da execução (S1)**. O cronograma previa S1 desde 18/09, então as janelas estão deslocadas um dia | Próximo |
-| 25/09 | **M1** — DEC-1 a DEC-9 respondidas (ou default adotado por escrito), contratos destravados, hardware aprovado | Em risco: quatro dias úteis e nenhuma decisão registrada |
+| 25/09 | **M1** — DEC-1 a DEC-9 respondidas (ou default adotado por escrito), contratos destravados, hardware aprovado | **Quase lá**: 6 das 9 (DEC-1,2,3,5,7,9) já decididas. Restam DEC-4 (a mais urgente — trava D1), DEC-6 e DEC-8 (adiada de propósito) |
 | 29/09 | Spec da integração av-hub ↔ MES aprovada (F1) | Não iniciada |
 | 02/10 | **M2** — Fundação no ar | Não iniciada |
 | 16/10 | **M3** — Fase 0 (sistema) pronta | Não iniciada |
@@ -43,7 +43,7 @@ Detalhes de cada marco em [[Cronograma-2-Meses]].
 | Contratos SQL (6) e de API (2) | [[Indice-Contratos]] | **5 SQL + 1 API já aplicados em produção** (confirmado por [[Auditoria-Dump-Producao-2026-09-21]] em 21/09); 1 invalidado (006); só o API 002 (Estoque/MES) segue genuinamente proposta |
 | Modelo de rastreabilidade, custódia e SLA | [[Rastreabilidade-e-SLA-de-Eventos]], [[Campos-e-API-para-Rastreabilidade]] | **Proposta**, para a spec F1 |
 | Protótipo de tela (Torre de Fluxo) | [Artifact](https://claude.ai/artifact/SS4C4srRk9cr66UHUS2rE3) | Dados fictícios; não é sistema |
-| Perguntas em aberto consolidadas | [[Perguntas-em-Aberto-Consolidadas]] | 11 DEC + dezenas de perguntas por pessoa |
+| Perguntas em aberto consolidadas | [[Perguntas-em-Aberto-Consolidadas]] | **Finalizada em 21/09**: de ~60 perguntas, só 16 pendências reais restam (seção 0 da nota) — o resto foi decidido, aceito ou ficou moot ao longo do dia |
 | Vault unificado e nota de entrada | [[Comece-Aqui]] | — |
 
 ## 4. O que está construído de verdade
@@ -58,11 +58,11 @@ Estados: **Não iniciada**, **Em andamento**, **Bloqueada**, **Concluída**, **C
 |---|---|---|---|---|---|
 | A1 | Workshop de decisões DEC-1 a DEC-9 | Nathan | 18/09–25/09 | Não iniciada | — |
 | A2 | Hardware do posto e agenda do levantamento físico | Nathan | 21/09–25/09 | Não iniciada | DEC-8 |
-| B1 | Fechar as perguntas dos contratos | Gustavo | 21/09–25/09 | Não iniciada | DEC-7 |
+| B1 | Fechar as perguntas dos contratos | Gustavo | 21/09–25/09 | **Concluída** — G-01 a G-18 todas respondidas em conversa direta com o Gustavo (21/09), ver [[Perguntas-em-Aberto-Consolidadas]] bloco C | DEC-7 |
 | B2 | Homologação do MES/Estoque e backup do banco do MES | Gustavo | 21/09–25/09 | Não iniciada | — |
 | C1 | Login duplo no MES | Robert | 21/09–29/09 | Não iniciada | — |
 | C3 | Desenho do RBAC por setor | Robert | 21/09–29/09 | Não iniciada | — |
-| D1 | Schema Prisma do Estoque v1 | Pablo | 21/09–29/09 | Não iniciada | **DEC-4, DEC-7** |
+| D1 | Schema Prisma do Estoque v1 | Pablo | 21/09–29/09 | Não iniciada | **DEC-4** (DEC-7 já decidida) |
 | F1 | Spec da integração av-hub ↔ MES | Nathan | 21/09–29/09 | Não iniciada | DEC-2 |
 | A3 | Pauta financeira e critérios de aceite | Nathan | 28/09–02/10 | Não iniciada | — |
 | B3 | Aplicar contratos SQL 001 e 005 | Gustavo | 28/09–02/10 | **Concluída** — já aplicado em produção antes do início da S1; confirmado por [[Auditoria-Dump-Producao-2026-09-21]] (21/09). Capacidade do Gustavo nessa janela fica livre | B1 |
@@ -76,13 +76,15 @@ S2 a S4 e o fechamento seguem o [[Cronograma-2-Meses]]; entram neste quadro quan
 
 ## 6. O que está bloqueando ou em risco agora
 
-1. **3 das 11 decisões (DEC-4, DEC-6, DEC-8) seguem sem registro no vault.** DEC-1, DEC-2, DEC-3, DEC-5, DEC-7, DEC-9, DEC-10 e DEC-11 já foram decididas em 21/09 — ver [[Decisoes-Chave-ERP]] e [[MES-Arquitetura-Decisoes]] itens 7-8; **C2, E2, D6/D7, a escrita da spec F1, B3/B5/D1/D3 e a Fase D estão destravados**. Só **DEC-4** ainda trava a D1 (início amanhã). **DEC-8 (hardware) segue explicitamente adiada** pelo Nathan, não é esquecimento. **DEC-10 (devolução de cliente) quebra o padrão "av-hub decide, MES executa"** — aqui o ciclo completo nasce no Estoque, é exceção deliberada, registrar em qualquer nota que assuma o padrão geral. Lista com prazo e default em [[Perguntas-em-Aberto-Consolidadas]].
-2. **Início um dia depois do previsto.** O marco M1 (25/09) tem um dia útil a menos. Decidir se as janelas da S1 são reajustadas ou se o marco permanece.
-3. **Capacidade não confirmada.** O plano assume 40% de foco para o Nathan e 75% para Robert e Pablo, com 9% de folga. O vault não registra a alocação real.
-4. **Rastreabilidade completa decidida.** R-07/R-14 respondidas em 21/09: escopo é **todas as rotas**, não o mínimo. Como isso excedia a folga de S1-FC, o cronograma foi estendido de 2 para 3 meses (nova sprint S5, 19/11-18/12) especificamente pra isso — ver [[Cronograma-2-Meses]] seção 5 (S5).
-5. **Estados e status com falhas.** A [[Revisao-dos-Estados-e-Status]] achou 3 problemas críticos: status por item quando o item é dividido em parciais, lote congelado sem saída e entidades sem máquina de estados (Recebimento, Requisição, OC, RNC). Os dois primeiros afetam a D1 e a spec F1.
-6. **Lacunas de lógica e de domínio.** A [[Lacunas-de-Logica-e-Clareza]] lista 15 pontos, entre eles: dois prazos para o mesmo pedido, marco zero do estoque sem data de corte, dois donos do saldo (Omie e MES), como o pedido chega à fila do PCP, sobras de chapa e consumo de matéria-prima. Os itens L-06 e L-07 entram na spec F1; L-08 precisa ser resolvido com a DEC-4; L-09 (depósito por filial) agora tem um dado a mais — DEC-1 já saiu como "por pedido", o que reforça que `deposito` também precisa pensar em filial, não só em fábrica.
-7. **Dependência de fora do time de dev:** levantamento físico (26–30/10), saneamento do catálogo (13–23/10), hardware e UAT. Todas com data no gantt do cronograma.
+> **Reorganizado em 21/09/2026.** A lista completa e atualizada de pendências reais vive só em [[Perguntas-em-Aberto-Consolidadas]] seção 0 (16 itens) — não duplicada aqui, pra não ter duas fontes de verdade desalinhando. Esta seção lista só os riscos de **cronograma/execução**, não as perguntas de negócio em si.
+
+1. **DEC-4 é o único bloqueio real de amanhã.** Trava a D1 (schema Prisma do Estoque), que começa 22/09. DEC-6 e DEC-8 têm prazo 25/09, sem trava imediata. As outras 8 DEC (incluindo a nova DEC-12) já foram decididas — ver [[Decisoes-Chave-ERP]].
+2. **Início um dia depois do previsto.** O marco M1 (25/09) tem um dia útil a menos — vira a pergunta N-07, ainda sem resposta.
+3. **Capacidade real não confirmada.** Pergunta N-06, ainda sem resposta — o plano segue assumindo 40%/75%/75% de foco sem confirmação.
+4. **Rastreabilidade completa decidida, já encaixada.** R-07/R-14: escopo é todas as rotas. Cronograma estendido pra 3 meses (S5, 19/11-18/12) — ver [[Cronograma-2-Meses]] seção 3.1 e 5. Junto entrou o bloco J (genealogia de material, DEC-12).
+5. **Estados e status — maioria resolvida em 21/09.** Dos 3 problemas críticos originais de [[Revisao-dos-Estados-e-Status]], o ponto 2.1 (status por item com parciais) já tem resposta (atraso medido no nível do pedido). Seguem 6 perguntas da seção 5 dessa nota sem resposta — listadas em [[Perguntas-em-Aberto-Consolidadas]] seção 0.
+6. **Lacunas de lógica — 10 das 11 resolvidas em 21/09.** [[Lacunas-de-Logica-e-Clareza]]: L-01 a L-09 e L-11 têm resposta ou proposta aceita. Só **L-10** (sobras de chapa, perda no corte, conversão de unidade) segue genuinamente sem tratamento.
+7. **Dependência de fora do time de dev:** levantamento físico (26–30/10), saneamento do catálogo (removido do escopo — duplicata de catálogo agora se resolve direto no Omie, ver [[Cronograma-2-Meses]]), hardware e UAT. Datas no gantt do cronograma.
 
 ## 7. Como manter esta nota
 

@@ -16,6 +16,54 @@ atualizado: 2026-09-21
 
 ---
 
+## 0. FINALIZADO em 21/09/2026 — pendências reais que restam
+
+De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o resto está decidido, aceito ou moot — arquivo completo nas seções abaixo). Nada aqui foi fabricado ou assumido por mim — são fatos de negócio, físicos ou de alocação que só quem está na operação sabe responder.
+
+**Decisões bloqueantes (DEC) — 3 restantes**
+
+| ID | Pergunta | Quem | Prazo | Trava |
+|---|---|---|---|---|
+| **DEC-4** | Lote de carga inicial nasce liberado ou passa pela inspeção de qualidade? | Nathan + Qualidade | 25/09 | **D1 — começa amanhã (22/09)** |
+| DEC-6 | Tolerância de peso por categoria de material | Nathan + Qualidade | 25/09 | D5 |
+| DEC-8 | Compra do hardware do posto de recebimento (~R$5-7 mil) — já sinalizada como adiada, não esquecida | Nathan + Diretoria | 25/09 | H2, D11 |
+
+**DEC-4 é a mais urgente de todo o vault agora** — sem ela, a D1 (schema Prisma do Estoque) não tem como travar amanhã de manhã com segurança.
+
+**Negócio e direção (N) — 4 restantes**
+
+| ID | Pergunta | Quem |
+|---|---|---|
+| N-02 | Nome definitivo do sistema de fábrica ("MES Aços Vital" é nome de trabalho) | Nathan |
+| N-05 | Remessa de produtos: a Aços Vital usa? (candidato forte: envio de material pra galvanização externa da Grade de Piso) | Nathan |
+| N-06 | Capacidade real dos devs — o plano assume 40% (Nathan) / 75% (Robert, Pablo), nunca confirmado | Nathan |
+| N-07 | Reajustar as janelas da S1 e o marco M1, já que a execução começou 22/09 e o plano previa 18/09? | Nathan |
+
+**Rastreabilidade (R) — 2 restantes**
+
+| ID | Pergunta | Quem |
+|---|---|---|
+| R-08 | Volume esperado de eventos por dia (define partição/retenção do log `fluxo.evento`) | Todos |
+| R-13 | Confirmar a lista de ações que exigem `autorizado_por` (levantamento provisório já existe) | Nathan |
+
+**Estados e status — 6 restantes** (de [[Revisao-dos-Estados-e-Status]] seção 5; o ponto 2.1 já foi respondido, o timeout da reserva é a M-06, já tratada como explicitamente adiada)
+1. Cliente pode receber entrega parcial de um item? O item fica parcialmente `FATURADO`?
+2. Existe concessão de lote fora de especificação (aceite com restrição)? Quem autoriza?
+3. Lote reprovado 100% (não só parcial): devolução, descarte ou retrabalho — quem decide?
+4. Cancelar um pedido já em produção: o que acontece com as OS/OP em curso e o material já cortado?
+5. `Pedido.status` do MES — alguém escreve isso hoje? `BLOQUEADO` — regra de entrada e de saída?
+6. O protótipo Torre de Fluxo deve ser refeito com `tipo_tempo` e composição por parcial, depois de tudo que mudou hoje?
+
+**Domínio — 1 restante**
+
+| ID | Pergunta | Quem |
+|---|---|---|
+| L-10 | Sobra/retalho de chapa volta ao estoque como material rastreável? Como se pesa o que sobra? Qual a unidade de controle de cada material (kg × peça × metro)? | Nathan + Almoxarifado + Produção |
+
+**Total: 16 pendências reais**, todas fatos de negócio/operação — nenhuma técnica. O resto do documento abaixo é o arquivo completo, com a resposta e a justificativa de cada item já fechado.
+
+---
+
 ## A. Decisões com prazo (DEC-1 a DEC-11)
 
 | ID     | Pergunta                                                                                                                                                                                                                                                      | Quem                      | Prazo | Default se não decidir                                                    | Trava                |
