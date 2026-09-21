@@ -136,11 +136,11 @@ Corrigido nesta mesma rodada com links: Home da seção de modelagem, [[Decisoes
 
 ## 7. Perguntas que travam o desenho
 1. ~~**Robert:** quais colunas reais tem `HistoricoItemParcial`, `Operador` e `Divergencia`? O operador registrado numa ação é quem está logado ou alguém escolhido na tela?~~ ✅ **Respondido (21/09)**: colunas já catalogadas; operador é escolhido na tela pelo líder do setor (ainda não implementado — `idOperador` existe no schema, nenhuma ação seta hoje).
-2. **Nathan / setores:** SLA em horas corridas ou úteis? Se úteis, há calendário e turnos por setor? 🟡 Leaning (21/09, não oficial): "acredito que horas corridas".
+2. ~~**Nathan / setores:** SLA em horas corridas ou úteis?~~ ✅ **Confirmado (21/09)**: horas corridas, com pausa explícita interrompendo a contagem (bate com `PAUSADO`/`RETOMAR` do `ItemParcial`) — calendário/turnos por setor não se aplica.
 3. ~~**Gustavo:** `codigo_item_omie` é estável quando o pedido é parcializado? Os operadores de chão de fábrica existem em `core.funcionarios`?~~ ✅ **Respondido (21/09)**: sim, estável — no `api-pcp` é `ItensPedido.idOmie`. Operadores **não** existem em `core.funcionarios` — cadastro próprio e mínimo no MES.
 4. ~~**Nathan:** a previsão de chegada da OC volta ao MES junto da referência mínima (C7)? Ela é prazo, não dado comercial.~~ ✅ **Respondido (21/09)**: é prazo, confirma o desenho da tabela `PEDIDO_COMPRA` (seção 4.1).
 5. ~~**Nathan:** o log guarda o nome do ator no evento (snapshot) e como isso convive com anonimização LGPD?~~ 🟡 **Esclarecido em parte (21/09)**: no MES/PCP, sem dados sensíveis, só nome do funcionário — reduz o peso do dilema, mas a política de anonimização em si (reconciliar snapshot × direito ao esquecimento) segue sem decisão.
-6. ~~**Todos:** a projeção `item_acompanhado` nasce só para Recebimento, Qualidade e Compras (mínimo do ciclo 1) ou para todas as rotas desde o início?~~ ✅ **Respondido (21/09): todas as rotas.** ⚠️ Contradiz o aviso de capacidade da seção 8 desta mesma nota e do [[Cronograma-2-Meses]] (9% de folga) — precisa reconciliar escopo × capacidade antes de fechar a spec F1.
+6. ~~**Todos:** a projeção `item_acompanhado` nasce só para Recebimento, Qualidade e Compras (mínimo do ciclo 1) ou para todas as rotas desde o início?~~ ✅ **Respondido (21/09): todas as rotas.** Resolvido via extensão do cronograma pra 3 meses (S5, 19/11-18/12) — ver [[Cronograma-2-Meses]] seção 3.1 e 5.
 7. **Volume:** quantos eventos por dia se espera? Define partição e retenção (DEC-9 fala em 5 anos).
 
 ## 8. Encaixe no cronograma

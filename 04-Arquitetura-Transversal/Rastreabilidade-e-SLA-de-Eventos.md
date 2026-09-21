@@ -105,8 +105,9 @@ O [[Cronograma-2-Meses]] cobre hoje "status por item" só para Fabricação e Re
 - Qual é o identificador único de pessoa entre av-hub e MES?
 - Genealogia de material (lote da matéria-prima → item entregue): é exigência de cliente ou norma?
 - ~~O vendedor vê só o macro ou também a trilha? Algum dia o cliente externo vê algo?~~ ✅ Respondido (21/09): só o vendedor, só o macro (quais itens em quais setores); sem trilha completa, sem acesso externo.
-- Prazo de retenção do log (ver DEC-9, 5 anos por palpite).
-- **Escopo do ciclo 1 (21/09):** respondido como "todas as rotas" — mas isso contradiz o aviso de capacidade desta mesma nota (seção "Impacto no cronograma") e do [[Cronograma-2-Meses]] (9% de folga). Precisa reconciliar antes de fechar a spec F1. Ver [[Perguntas-em-Aberto-Consolidadas]] R-07/R-14.
+- ~~Prazo de retenção do log (ver DEC-9, 5 anos por palpite).~~ ✅ Decidido (21/09): 5 anos, confirmado (não é mais palpite, validação formal com contabilidade/fiscal segue pendente).
+- ~~SLA em horas corridas ou úteis?~~ ✅ Confirmado (21/09): horas corridas, com pausa explícita interrompendo a contagem (bate com `PAUSADO`/`RETOMAR` do `ItemParcial`).
+- **Escopo do ciclo 1 (21/09):** respondido como "todas as rotas" — resolvido via extensão do cronograma pra 3 meses (nova sprint S5, 19/11-18/12), sem tirar capacidade de S1-FC. Ver [[Cronograma-2-Meses]] seção 3.1 e 5 (S5).
 
 Ver também [[Campos-e-API-para-Rastreabilidade]] seção 7, que tem as mesmas perguntas com mais contexto técnico — algumas já respondidas em 21/09.
 
