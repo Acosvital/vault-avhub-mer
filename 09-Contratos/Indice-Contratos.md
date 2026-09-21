@@ -37,11 +37,11 @@ própria (001 em diante) independente da numeração do outro repositório.
 
 | Contrato | Tipo | Assunto | Status |
 |---|---|---|---|
-| [[001-Parceiros-Dados-Fiscais]] | SQL | `core.parceiros` + dados fiscais | **aplicada** (confirmado no dump 21/09) |
+| [[001-Parceiros-Dados-Fiscais]] | SQL | `core.parceiros` + dados fiscais | **aplicada** (confirmado no dump 21/09; `dadosBancarios`/`enderecoEntrega` vêm por endpoint próprio; `chave_pix` ajustada para `varchar(255)`) |
 | [[002-Estoque-Saldo]] | SQL | `core.estoque_saldo` (novo) | **aplicada** (confirmado no dump 21/09; "foto atual" confirmado como a implementação real) |
 | [[003-Pedidos-Vendas-Frete-Parcelas]] | SQL | `pedidos_vendas` + frete/parcelas | **aplicada** (confirmado no dump 21/09) |
-| [[004-Pedidos-Compras]] | SQL | `pedidos_compras` (novo) | **aplicada** (confirmado no dump 21/09) — risco do contrato ainda vale: `numero_item_omie` segue sem índice único |
-| [[005-Locais-Estoque]] | SQL | `core.locais_estoque` (novo) | **aplicada** (confirmado no dump 21/09) — pergunta sobre FK para futuro `deposito` do Estoque segue em aberto |
+| [[004-Pedidos-Compras]] | SQL | `pedidos_compras` (novo) | **aplicada** (confirmado no dump 21/09) — risco do `numero_item_omie` **resolvido em 21/09**: identidade do item passou a ser `(id_pedido_compra, ordem)` |
+| [[005-Locais-Estoque]] | SQL | `core.locais_estoque` (novo) | **aplicada** (confirmado no dump 21/09) — sem FK para `deposito` por decisão (tabela ainda não existe); Gustavo adiciona quando ela existir |
 | [[006-Pedidos-Vendas-Valor-Devolucao]] | SQL | `pedidos_vendas.valor_devolucao` | **invalidado** (frontmatter do arquivo já dizia isso desde 17/09; este índice estava com a inconsistência I-02, agora corrigida) |
 | [[001-Produtos-Parceiros-Filtro-Incremental]] | API | `?alterado_desde=` em produtos/parceiros (av-hub) | **aplicada** (confirmado em `src/routes/produtos.js`/`parceiros.js`) |
 | [[002-Material-Alias-Omie-MES]] | API | `material_alias_omie` — vínculo de duplicata (destinatário: MES/Estoque) | proposta (confirmado: segue não implementada, `api-pcp` não tem essa tabela/endpoint) |

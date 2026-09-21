@@ -3,11 +3,13 @@ tags: [erp-acos-vital, cronograma, planejamento]
 criado: 2026-09-18
 ---
 
-# Cronograma de Desenvolvimento — 2 meses (18/09 a 18/11/2026)
+# Cronograma de Desenvolvimento — 3 meses (18/09 a 21/12/2026)
 
-> Plano fechado em **42 dias úteis** (61 corridos, com os feriados de 12/10 e 02/11), montado em cima do que o vault já decidiu: as fases 0/A/B/C de [[Estoque-Roadmap]], o roteiro de extração do Omie, os contratos da seção de contratos e o fluxo dos 6 fluxogramas de [[Fluxogramas-Completos]].
+> **Atualizado em 21/09/2026**: estendido de 2 para 3 meses a pedido do Nathan, especificamente para caber a rastreabilidade **completa** (todas as rotas, não só Recebimento/Qualidade/Compras — ver R-07/R-14 em [[Perguntas-em-Aberto-Consolidadas]]). O plano original (S1 a FC, 18/09-18/11, 42 dias úteis) **não muda uma linha** — só ganha uma **S5 nova** (19/11 a 18/12) depois do piloto, com os 23 dias úteis extras do 3º mês. Ver seção 3 para a conta de capacidade e seção 5 (S5) para o detalhe.
 >
-> **Leia antes de aprovar:** (1) as premissas de capacidade abaixo são deste plano — o vault não registra alocação real, ajuste se for outra; (2) **não cabe tudo** — o vault diz que o sistema final cobre todos os passos dos 6 fluxogramas, mas em 2 meses o que fecha é até a Fase C mais a integração mínima; Fase D, Expedição/Faturamento e o resto ficam para o ciclo 2 (seção 2); (3) o caminho crítico são as decisões de **25/09** (seção 7).
+> Plano original fechado em **42 dias úteis** (61 corridos, feriados 12/10 e 02/11), montado em cima do que o vault já decidiu: as fases 0/A/B/C de [[Estoque-Roadmap]], o roteiro de extração do Omie, os contratos da seção de contratos e o fluxo dos 6 fluxogramas de [[Fluxogramas-Completos]].
+>
+> **Leia antes de aprovar:** (1) as premissas de capacidade abaixo são deste plano — o vault não registra alocação real, ajuste se for outra; (2) **ainda não cabe tudo mesmo com 3 meses** — Fase D, Expedição/Faturamento e o resto seguem fora (seção 2), a extensão cobriu especificamente a rastreabilidade completa, não o roadmap inteiro; (3) o caminho crítico continua sendo as decisões de **25/09** (seção 7).
 
 ## 1. Marcos
 
@@ -18,7 +20,8 @@ criado: 2026-09-18
 | **M3** — Fase 0 (sistema) pronta | 16/10 | Alias, cadastros, RBAC por setor, Carteira do PCP (classificação) e caixa de requisições do av-hub prontos; saneamento e ferramenta de carga em andamento. |
 | **M4** — Fases A + B em homologação | 30/10 | Requisição → OC estruturada → referência no MES → recebimento com pesagem, quarentena, inspeção e RNC funcionando em homologação; levantamento físico executado. |
 | **M5** — Fase 0 fechada + Fase C | 13/11 | Marco zero carregado e conferido em dupla; saldo/movimento/reserva em homologação; status por item no Portal do Vendedor; UAT concluída. |
-| **M6** — Go/no-go do piloto | 18/11 | Piloto de recebimento avaliado; decisão de seguir, ajustar ou parar; backlog do ciclo 2 priorizado. |
+| **M6** — Go/no-go do piloto | 18/11 | Piloto de recebimento avaliado; decisão de seguir, ajustar ou parar; backlog do ciclo 2 priorizado. **Não muda** com a extensão — a rastreabilidade completa não bloqueia o piloto. |
+| **M7** — Rastreabilidade completa (todas as rotas) | 18/12 | Log de eventos (`fluxo.evento`) e `item_acompanhado` cobrindo Compras, Recebimento, Qualidade, Produção e Estoque; Torre de Fluxo (mapa, trilha, tempo por etapa, ranking de gargalos) em homologação. **Novo (21/09).** |
 
 ## 2. O que entra e o que não entra
 
@@ -117,12 +120,13 @@ Em uma frase: entra do catálogo saneado até o recebimento com qualidade, saldo
 - 3 fluxos por polling: requisição (MES → av-hub), referência da OC (av-hub → MES) e status por item (MES → av-hub) (F2, F3)
 - Etapa de cada item no Portal do Vendedor (E3)
 - Projeção read-only de material e parceiro + filtro alterado_desde nas APIs do av-hub (D3, B4)
+- **Novo (S5, 21/09):** rastreabilidade completa — log de eventos (`fluxo.evento`) e `item_acompanhado` cobrindo **todas as rotas** (Compras, Recebimento, Qualidade, Produção, Estoque), Torre de Fluxo (mapa por setor, trilha do item, tempo por etapa, ranking de gargalos) (I1-I7)
 
 **Não entra**
 
 - Tempo real, webhook ou barramento de eventos — só polling
-- Status por item das etapas fora do escopo (inspeção de processo, expedição)
-- Detecção de produto excluído no polling — lacuna aceita por ora (DEC-7)
+- Status por item de Expedição/Faturamento — esse módulo em si não é construído neste ciclo (Fase D), não é escolha de rastreabilidade
+- ~~Detecção de produto excluído no polling — lacuna aceita por ora (DEC-7)~~ ✅ resolvido em 21/09: `?incluir_deletados=true` implementado em `/produtos` e `/parceiros`
 
 ### Acesso e segurança — MES
 
@@ -182,7 +186,7 @@ Em uma frase: entra do catálogo saneado até o recebimento com qualidade, saldo
 
 ## 3. Capacidade e premissas
 
-Base: **42 dias úteis** × fator de foco por pessoa (tempo real de desenvolvimento neste projeto, descontando reunião, suporte e o resto do dia a dia). O vault não traz esses números — são premissa deste plano; cada ±10 p.p. de foco em um dev muda ~4 pd.
+Base original: **42 dias úteis** (S1-FC, 18/09-18/11) × fator de foco por pessoa. O vault não traz esses números — são premissa deste plano; cada ±10 p.p. de foco em um dev muda ~4 pd.
 
 | Pessoa | Papel | Foco | Capacidade (pd) | Planejado (pd) | Stretch (pd) |
 |---|---|---|---|---|---|
@@ -190,9 +194,25 @@ Base: **42 dias úteis** × fator de foco por pessoa (tempo real de desenvolvime
 | Gustavo | Banco de dados, API e pipeline (DBA) | 60% | 25,2 | 21,2 | 2,9 |
 | Robert | Fullstack sênior - MES/PCP | 75% | 31,5 | 29,2 | 0,0 |
 | Pablo | Fullstack - MES/Estoque | 75% | 31,5 | 29,2 | 0,0 |
-| **Total** | | | **105,0** | **95,5** | **2,9** |
+| **Total (S1-FC)** | | | **105,0** | **95,5** | **2,9** |
 
-Reserva de **9,5 pd (9%)**, fora os itens *stretch*, que só entram se sobrar folga. É folga curta: o plano só fecha com as decisões da seção 7 no prazo e a ordem de corte da seção 9 pronta para uso.
+Reserva de **9,5 pd (9%)** em S1-FC, fora os itens *stretch*. É folga curta — não mexida por essa extensão, porque as decisões da seção 7 e a ordem de corte da seção 9 já contam com ela exatamente assim.
+
+### 3.1 Extensão de 3 meses (21/09/2026) — capacidade da S5
+
+Do dia 22/09 (execução real) a 21/12/2026: **63 dias úteis** (13 semanas exatas, feriados 12/10 e 02/11; 15/11 cai num domingo, não conta) — **23 dias úteis a mais** do que os 40 dias úteis restantes do plano original de 2 meses. Isso é o "3º mês" pedido, tratado como capacidade nova, isolada do plano S1-FC:
+
+| Pessoa | Foco | Capacidade extra (pd) | Planejado em S5 (pd) | Reserva (pd) |
+|---|---|---|---|---|
+| Nathan | 40% | 9,2 | 11,0 | **-1,8** ⚠️ |
+| Gustavo | 60% | 13,8 | 2,0 | 11,8 |
+| Robert | 75% | 17,25 | 12,0 | 5,25 |
+| Pablo | 75% | 17,25 | 2,0 | 15,25 |
+| **Total** | | **57,5** | **27,0** | **30,5** |
+
+**Sobra bastante reserva (30,5 pd) — de propósito**, depois de uma folga de só 9% no plano original. Duas opções para essa sobra: manter como buffer de verdade (recomendado, dado que é a primeira vez que o time constrói um log de eventos deste tipo) ou puxar algo da Fase D pra dentro do ciclo — decisão sua, não assumida aqui.
+
+**⚠️ Nathan estoura a própria capacidade extra** (11,0 pd de trabalho contra 9,2 pd disponíveis a 40% foco). Três jeitos de resolver, à escolha: (a) elevar o foco do Nathan pra ~48% só durante a S5; (b) esticar a janela da S5 só para as entregas do Nathan (I5/I6) em ~1 semana; (c) mover parte da I6 (telas da Torre de Fluxo) para o Robert ou o Pablo, que sobram 5-15 pd de folga. Ver seção 5, S5.
 
 Carga por sprint (planejado ÷ capacidade, em pessoa-dia):
 
@@ -208,7 +228,7 @@ Carga por sprint (planejado ÷ capacidade, em pessoa-dia):
 
 ```mermaid
 gantt
-    title Cronograma 18/09 a 18/11/2026 (dias úteis; feriados 12/10 e 02/11)
+    title Cronograma 18/09 a 21/12/2026 (dias úteis; feriados 12/10 e 02/11)
     dateFormat YYYY-MM-DD
     axisFormat %d/%m
     section Marcos
@@ -218,6 +238,7 @@ gantt
     M4 Fases A + B em homologação :milestone, m4, 2026-10-30, 0d
     M5 Fase 0 fechada + Fase C :milestone, m5, 2026-11-13, 0d
     M6 Go/no-go do piloto :milestone, m6, 2026-11-18, 0d
+    M7 Rastreabilidade completa :milestone, m7, 2026-12-18, 0d
     section Decisões e governança
     A1 Decisões bloqueantes (DEC-1..9) :a1, 2026-09-18, 2026-09-26
     A2 Hardware + agenda da contagem :a2, 2026-09-21, 2026-09-26
@@ -276,6 +297,14 @@ gantt
     H2 Hardware do posto :h2, 2026-10-26, 2026-11-05
     H3 UAT com os setores :h3, 2026-10-28, 2026-11-14
     H4 Piloto de Recebimento (1 posto) :h4, 2026-11-11, 2026-11-19
+    section S5 - Rastreabilidade completa
+    I1 Schema fluxo.* completo (MES) :i1, 2026-11-19, 2026-11-25
+    I4 Tabelas novas no av-hub + contratos :i4, 2026-11-19, 2026-11-25
+    I2 Módulo fluxo no api-pcp :i2, 2026-11-23, 2026-12-09
+    I3 Instrumentar ItemParcial/Recebimento/Qualidade/Estoque :i3, 2026-11-23, 2026-12-04
+    I5 Jobs de projeção + BFF Torre de Fluxo :i5, 2026-11-26, 2026-12-09
+    I7 SLA por etapa + regra de autorização :i7, 2026-12-07, 2026-12-10
+    I6 Telas da Torre de Fluxo :i6, 2026-12-07, 2026-12-18
 ```
 
 ## 5. Plano por sprint
@@ -357,12 +386,29 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 | C9 | Correções de UAT e do piloto | Robert | 2,25 | 16/11–18/11 | H3, H4 | Bugs críticos do piloto fechados |
 | D12 | Correções de UAT e do piloto + treinamento no posto | Pablo | 2,25 | 16/11–18/11 | H3, H4 | Bugs críticos do piloto fechados; posto treinado |
 
+### S5 — Rastreabilidade completa: todas as rotas (19/11 a 18/12) — **nova, 21/09/2026**
+
+Não depende do go/no-go de M6 ter dado certo — roda em paralelo/depois, sobre o sistema que S1-S4 já entregou. Detalhe técnico completo em [[Rastreabilidade-e-SLA-de-Eventos]] e [[Campos-e-API-para-Rastreabilidade]].
+
+| ID | Entrega | Resp. | pd | Janela | Depende de | Pronto quando |
+|---|---|---|---|---|---|---|
+| I1 | Schema `fluxo.*` completo no MES: 7 tabelas Prisma (`evento`, `item_acompanhado`, `etapa_fluxo`, `setor_fluxo`, `sla_etapa`, `regra_autorizacao`, `calendario_util`) + migrations | Pablo | 2 | 19/11–25/11 | D1 (já entregue) | Migrations aplicadas em homologação |
+| I4 | Tabelas novas no av-hub (`requisicao_compra`+item, `ordem_compra`+item, `pedido_acompanhamento`, `core_fluxo.evento`, `item_estado_projetado`, `feed_cursor`) — contrato SQL + aplicação | Gustavo | 2 | 19/11–25/11 | - | Tabelas criadas; contrato marcado como aplicada |
+| I2 | Módulo `fluxo` no `api-pcp`: feed (`/eventos`), status, trilha, tempo por etapa, mapa por setor, ações (`assumir`/`passar`/`autorizar`), catálogos | Robert | 7 | 23/11–09/12 | I1 | Todos os endpoints da seção 5.1 de [[Campos-e-API-para-Rastreabilidade]] no ar em homologação |
+| I3 | Instrumentar `ItemParcial` (Produção) e os módulos de Recebimento/Qualidade/Estoque (já entregues em S1-S4) para também escrever em `fluxo.evento` | Robert | 4 | 23/11–04/12 | I1, D6-D10 (já entregues) | Toda transição relevante gera evento, sem duplicar o que `HistoricoItemParcial` já faz |
+| I7 | SLA por etapa configurável (`fluxo.sla_etapa`) + regra de autorização (`fluxo.regra_autorizacao`) | Robert | 1 | 07/12–10/12 | I2 | Metas de tempo por etapa editáveis; ações de DEC-3 exigem `autorizado_por` |
+| I5 | Jobs de projeção do feed (`core_fluxo.item_estado_projetado`) + endpoints BFF (`GET /api/fluxo/torre`, `/itens/{id}`) | Nathan | 4 | 26/11–09/12 | I4, I2 | av-hub projeta o estado de cada item a partir do feed do MES |
+| I6 | Telas da Torre de Fluxo: mapa por setor, trilha do item, tempo por etapa (fila×execução+projeção), ranking de gargalos | Nathan | 7 | 07/12–18/12 | I5 | As 4 telas do protótipo rodando com dado real, em homologação |
+
+**Nunca cortar aqui:** nada — se a S5 estourar, a resposta é estender a janela (já é capacidade extra, não tira de outro lugar), não cortar rastreabilidade parcialmente, porque o pedido explícito foi 100%.
+
 ## 6. Trilhas que atravessam os sprints
 
 - **Fase 0 (arrumar a casa):** decisões e contratos (S1) → alias e cadastros (S2, D4/D5) → saneamento humano (13-23/10, H1) → contagem física em dupla (26-30/10, G2) → carga e conferência (S4, G3/G4) → **marco zero em 13/11**. Nenhum consumo por PCP/Comercial antes disso ([[Estoque-Riscos]]).
 - **Fase A + B (compra → doca):** requisição do PCP (C7) → OC estruturada no av-hub (E1/E2) → referência no MES (F2) → recebimento com pesagem, quarentena, inspeção e RNC (D6-D8). Ver [[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]], [[Fluxo-Qualidade-Completo]].
 - **Fase C (saldo):** backend e telas em S4 (D9/D10); a **reserva só liga depois do marco zero**. Ver [[Fluxo-Estoque-Completo]].
-- **Casamento av-hub ↔ MES:** resolvido em 21/09 como DEC-2 (polling REST + `x-api-key`, 3 fluxos) — spec em S1 (F1), fluxos de requisição e OC em S3 (F2), status por item em S4 (F3/E3) — sempre por polling, sem tempo real. A proposta de log de eventos ([[Rastreabilidade-e-SLA-de-Eventos]]) generaliza F3 e amplia o escopo; os campos que ela exige nas migrations do Estoque (D1) estão em [[Campos-e-API-para-Rastreabilidade]]. **Alerta (21/09):** o escopo do ciclo 1 dessa proposta (R-07/R-14 em [[Perguntas-em-Aberto-Consolidadas]]) acabou de ser respondido como "todas as rotas", não o mínimo (Recebimento/Qualidade/Compras) que este cronograma assumia ao calcular a capacidade de F1/D1. Isso **não está refletido** nos pd/janelas acima — precisa de nova rodada de estimativa antes de travar a spec F1, ou reverter pro mínimo por restrição de capacidade (só 9% de folga, seção 3).
+- **Casamento av-hub ↔ MES:** resolvido em 21/09 como DEC-2 (polling REST + `x-api-key`, 3 fluxos) — spec em S1 (F1), fluxos de requisição e OC em S3 (F2), status por item em S4 (F3/E3) — sempre por polling, sem tempo real.
+- **Rastreabilidade completa (todas as rotas):** R-07/R-14 respondidas em 21/09 como "todas as rotas", não o mínimo. Como isso excedia a folga de 9% do plano de 2 meses, o prazo foi estendido pra 3 meses especificamente por causa disso — vira a **S5** (19/11-18/12), com capacidade própria (seção 3.1), sem tirar nada de S1-FC. Campos e endpoints completos em [[Campos-e-API-para-Rastreabilidade]] e [[Rastreabilidade-e-SLA-de-Eventos]].
 
 ## 7. Decisões bloqueantes
 
@@ -376,7 +422,7 @@ Cada uma tem um *default* escrito: se ninguém decidir até a data, o default va
 | DEC-4 | Lote de carga inicial nasce liberado ou passa pela inspeção de qualidade? | Nathan + Qualidade | 25/09 | Nasce liberado, com dupla conferência | D1, G1, G3 |
 | DEC-5 | Balança: digitação manual no v1 ou integração automática? | Nathan + Operação | 25/09 | Digitação manual | D6, D7 |
 | DEC-6 | Tolerância de peso por categoria de material | Nathan + Qualidade | 25/09 | 5% padrão, ajustável por material | D5 |
-| DEC-7 | Contratos SQL: saldo como foto atual ou série histórica (002); id estável de item de compra (004); FK de locais para depósito (005); exclusão no polling (API 001) | Gustavo | 25/09 | Foto atual; id = pedido + sequência do item; sem FK; aceitar a lacuna de exclusão | B3, B5, D1, D3 |
+| DEC-7 | ~~Contratos SQL: saldo (002); id de item de compra (004); FK de locais (005); exclusão no polling (API 001)~~ ✅ **DECIDIDA em 21/09** — foto atual; id = `(id_pedido_compra, ordem)`; sem FK (por ora); `incluir_deletados=true` resolve a exclusão | Gustavo | 25/09 | ~~Foto atual; id = pedido + sequência do item; sem FK; aceitar a lacuna de exclusão~~ (não se aplica, decidido) | B3, B5, D1, D3 (destravados) |
 | DEC-8 | Compra do hardware do posto de recebimento (impressora industrial + leitor 2D, ~R$ 5-7 mil) | Nathan + Diretoria | 25/09 | Sem hardware: etiqueta em impressora comum (Code128) no piloto | H2, D11 |
 | DEC-9 | Prazo de retenção de auditoria (5 anos é palpite) - validar com contabilidade/fiscal | Nathan | 09/10 | 5 anos, sem expurgo automático | Não bloqueia a construção |
 | DEC-10 | Devolução de cliente: decisão no av-hub ou nasce no Estoque? Valor da devolução parcial precisa ser capturado nativamente (o Omie não expõe) | Nathan | 13/11 | - | Fase D (ciclo 2) |
@@ -394,6 +440,8 @@ Cada uma tem um *default* escrito: se ninguém decidir até a data, o default va
 | Saneamento do catálogo não termina antes da contagem | Média | Médio | Só material canônico confirmado entra na contagem; pendentes ficam em fila. | Mais de 20% dos candidatos sem revisão em 23/10 |
 | Sem QA dedicado: bug vaza para o piloto | Média | Médio | UAT com os setores de 28/10 a 13/11; piloto em 1 posto, em modo sombra; rollback no runbook B7. | Bug crítico aberto em 11/11 |
 | Banco do MES sem backup equivalente ao do av-hub | Média | Alto | B2 confirma o backup na primeira semana; B7 testa a restauração. | Backup não confirmado em 25/09 |
+| **(S5) Nathan estoura a capacidade extra do 3º mês** — 11 pd planejados contra 9,2 pd disponíveis a 40% foco | Alta | Baixo | Elevar foco pra ~48% só na S5, esticar a janela do Nathan em ~1 semana, ou mover parte da I6 (telas) pro Robert/Pablo (que sobram 5-15 pd). Decisão pendente, ver seção 3.1. | I6 sem dono definido até 07/12 |
+| **(S5) Primeira vez que o time constrói um log de eventos append-only** — sem precedente interno pra estimar bem | Média | Médio | 30,5 pd de reserva na S5 (bem mais folgada que os 9% de S1-FC) funcionam como buffer para esse risco de estimativa. | Menos de 15 pd de reserva restante a meio da S5 (~04/12) |
 
 Dependências fora do time de dev (têm dono e data no gantt): saneamento do catálogo por Compras/PCP (13-23/10), levantamento físico pela operação (26-30/10), compra e instalação do hardware (até 04/11), UAT com Almoxarife, Qualidade, PCP e Compras (28/10-13/11).
 
