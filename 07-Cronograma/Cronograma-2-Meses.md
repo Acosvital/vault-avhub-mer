@@ -33,7 +33,6 @@ Em uma frase: entra do catálogo saneado até o recebimento com qualidade, saldo
 
 **Entra**
 
-- Vincular duplicata do catálogo do Omie ao material canônico, sem tocar no Omie (endpoint + tela), e revisão humana por Compras/PCP (D4, H1)
 - Cadastro de material com campos extras (peso teórico, tolerância, mínimo/máximo, ponto de pedido), depósito/warehouse e localização (D5)
 - Ferramenta de carga inicial (dry-run) e folhas de contagem por localização (G1)
 - Levantamento físico em dupla conferência, carga e reconciliação com o saldo do Omie (G2, G3)
@@ -44,6 +43,7 @@ Em uma frase: entra do catálogo saneado até o recebimento com qualidade, saldo
 - Cadastro próprio de fornecedor — o Estoque reaproveita core.parceiros por projeção
 - Inspeção de qualidade sobre a carga inicial — nasce liberada, com dupla conferência (default da DEC-4)
 - Consumo de estoque pelo PCP/Comercial antes de 13/11 — a reserva só liga depois do marco zero
+- **Cancelado em 21/09/2026:** vínculo de duplicata do catálogo (alias) e saneamento humano formal de duplicatas (D4, H1, contrato API 002) — decisão do Nathan: "não quero mais tratar isso aqui, se eles quiserem eles tratam lá no Omie". Duplicata de catálogo deixa de ser problema deste sistema.
 
 ### Compras — Fase A
 
@@ -193,10 +193,10 @@ Base original: **42 dias úteis** (S1-FC, 18/09-18/11) × fator de foco por pess
 | Nathan | Coordenação/PO + av-hub full stack | 40% | 16,8 | 15,8 | 0,0 |
 | Gustavo | Banco de dados, API e pipeline (DBA) | 60% | 25,2 | 21,2 | 2,9 |
 | Robert | Fullstack sênior - MES/PCP | 75% | 31,5 | 29,2 | 0,0 |
-| Pablo | Fullstack - MES/Estoque | 75% | 31,5 | 29,2 | 0,0 |
-| **Total (S1-FC)** | | | **105,0** | **95,5** | **2,9** |
+| Pablo | Fullstack - MES/Estoque | 75% | 31,5 | 26,7 | 0,0 |
+| **Total (S1-FC)** | | | **105,0** | **93,0** | **2,9** |
 
-Reserva de **9,5 pd (9%)** em S1-FC, fora os itens *stretch*. É folga curta — não mexida por essa extensão, porque as decisões da seção 7 e a ordem de corte da seção 9 já contam com ela exatamente assim.
+Reserva de **12,0 pd (~11,4%)** em S1-FC, fora os itens *stretch* — subiu de 9,5 pd porque D4 (Alias, 2,5 pd) foi **cancelada em 21/09/2026** (junto com H1, que já não contava pd de dev). Decisão do Nathan: duplicata de catálogo não é mais tratada por este sistema — "se eles quiserem, tratam lá no Omie".
 
 ### 3.1 Extensão de 3 meses (21/09/2026) — capacidade da S5
 
@@ -221,7 +221,7 @@ Carga por sprint (planejado ÷ capacidade, em pessoa-dia):
 | Sprint | Janela | Dias úteis | Nathan | Gustavo | Robert | Pablo |
 |---|---|---|---|---|---|---|
 | **S1** — Destravar e fundação | 18/09 a 02/10 | 11 | 4,1 ÷ 4,4 | 5,5 ÷ 6,6 | 7,5 ÷ 8,2 | 7,5 ÷ 8,2 |
-| **S2** — Fase 0 (sistema) + núcleo do Estoque | 05/10 a 16/10 | 9 | 3,3 ÷ 3,6 | 4,8 ÷ 5,4 | 6,0 ÷ 6,8 | 6,5 ÷ 6,8 |
+| **S2** — Fase 0 (sistema) + núcleo do Estoque | 05/10 a 16/10 | 9 | 3,3 ÷ 3,6 | 4,8 ÷ 5,4 | 6,0 ÷ 6,8 | 4,0 ÷ 6,8 |
 | **S3** — Fases A + B + levantamento físico | 19/10 a 30/10 | 10 | 3,7 ÷ 4,0 | 4,6 ÷ 6,0 | 7,0 ÷ 7,5 | 7,0 ÷ 7,5 |
 | **S4** — Fase C + integração + marco zero | 02/11 a 13/11 | 9 | 3,6 ÷ 3,6 | 4,5 ÷ 5,4 | 6,5 ÷ 6,8 | 6,0 ÷ 6,8 |
 | **FC** — Fechamento: homologação e go/no-go | 16/11 a 18/11 | 3 | 1,2 ÷ 1,2 | 1,8 ÷ 1,8 | 2,2 ÷ 2,2 | 2,2 ÷ 2,2 |
@@ -272,7 +272,6 @@ gantt
     D1 Schema Prisma estoque v1 :d1, 2026-09-21, 2026-09-30
     D2 Módulo base + testes e2e :d2, 2026-09-28, 2026-10-03
     D3 Projeção de material/parceiro :d3, 2026-09-30, 2026-10-03
-    D4 Alias - vincular duplicata :d4, 2026-10-05, 2026-10-10
     D5 Cadastros - material, depósito, local :d5, 2026-10-08, 2026-10-17
     D6 Recebimento - backend :d6, 2026-10-19, 2026-10-31
     D7 Recebimento - telas :d7, 2026-10-19, 2026-10-29
@@ -295,7 +294,6 @@ gantt
     G3 Carga + reconciliação com Omie :g3, 2026-11-02, 2026-11-11
     G4 Conferência em dupla - fecha Fase 0 :g4, 2026-11-09, 2026-11-14
     section Operação e piloto (fora do dev)
-    H1 Saneamento do catálogo :h1, 2026-10-13, 2026-10-24
     H2 Hardware do posto :h2, 2026-10-26, 2026-11-05
     H3 UAT com os setores :h3, 2026-10-28, 2026-11-14
     H4 Piloto de Recebimento (1 posto) :h4, 2026-11-11, 2026-11-19
@@ -339,14 +337,12 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 |---|---|---|---|---|---|---|
 | B5 | Aplicar contratos SQL 002 (estoque_saldo) e 004 (pedidos_compras) | Gustavo | 2 | 05/10–09/10 | B1, DEC-7 | Tabelas criadas; contratos marcados como aplicada |
 | C5 | RBAC por instância de setor (guard global + PerfilSetor) | Robert | 3 | 05/10–14/10 | C3 | Almoxarife, Qualidade e Gestor de Estoque com escopo por warehouse/setor |
-| D4 | Alias (contrato API 002): endpoint + tela para vincular duplicata ao material canônico | Pablo | 2,5 | 05/10–09/10 | D3 | Comprador/PCP conseguem resolver duplicata sem tocar no Omie |
 | E1 | Compras v1: modelagem + caixa de entrada de requisições vindas do MES | Nathan | 3 | 05/10–16/10 | F1, DEC-2 | Comprador vê as requisições do PCP no av-hub |
 | B6 | Pipeline ELT: Passos 1, 3, 6 e 9 (parceiros fiscais, lead_time, locais, etapas) | Gustavo | 1,5 | 08/10–15/10 | B3, B5 | Parceiros com dados fiscais e locais de estoque sincronizando; etapas confirmadas em produção |
 | C6 | PCP Carteira: classificação natureza × disponibilidade (backend + tela) | Robert | 3 | 08/10–16/10 | C4 | PCP classifica cada item (Revenda/Fabricação × pronto/MP/sem estoque) |
-| D5 | Cadastros: material (campos extras), depósito/warehouse e localização - API + telas | Pablo | 4 | 08/10–16/10 | D4, C5, DEC-6 | Material com peso teórico, tolerância, mín/máx e ponto de pedido; localizações cadastradas |
-| A4 | Coordenar saneamento do catálogo, UAT e treinamento dos setores | Nathan | 1,5 | 13/10–13/11 | D4, H1 | Roteiro de UAT por setor; treinamento do posto de recebimento |
+| D5 | Cadastros: material (campos extras), depósito/warehouse e localização - API + telas | Pablo | 4 | 08/10–16/10 | D3, C5, DEC-6 | Material com peso teórico, tolerância, mín/máx e ponto de pedido; localizações cadastradas |
+| A4 | Coordenar UAT e treinamento dos setores | Nathan | 1,5 | 13/10–13/11 | - | Roteiro de UAT por setor; treinamento do posto de recebimento |
 | G1 | Ferramenta de carga inicial: import → lotes CARGA_INICIAL, dry-run e folhas de contagem | Gustavo | 2,9 | 13/10–23/10 | D5, DEC-4 | Dry-run com dados de teste; folhas de contagem por localização |
-| H1 | Saneamento do catálogo: revisão humana das duplicatas (Compras/PCP) | Operação/negócio | - | 13/10–23/10 | D4 | Duplicatas resolvidas; pendentes ficam em fila e não entram na contagem |
 
 ### S3 — Fases A + B + levantamento físico (19/10 a 30/10)
 
@@ -359,7 +355,7 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 | F2 | API de OC estruturada + jobs de poll (requisições → av-hub; referência da OC → MES) | Gustavo | 3 | 19/10–30/10 | F1, E1 | Requisição e OC trafegam entre os dois sistemas em homologação |
 | B9 | (stretch) Passo 5 - histórico de pedidos de compra do Omie | Gustavo | 2 | 26/10–30/10 | B5 | Só se houver folga; primeiro corte se apertar |
 | D8 | Qualidade (frontend): fila de inspeção, laudo, aprova/reprova, RNC e cisão | Pablo | 3 | 26/10–30/10 | D6 | Qualidade inspeciona, aprova ou reprova; lote reprovado é cindido |
-| G2 | Levantamento físico do estoque em dupla conferência | Operação/negócio | - | 26/10–30/10 | G1, H1, A2 | Contagem completa por warehouse, assinada por duas pessoas |
+| G2 | Levantamento físico do estoque em dupla conferência | Operação/negócio | - | 26/10–30/10 | G1, A2 | Contagem completa por warehouse, assinada por duas pessoas |
 | H2 | Entrega e instalação do hardware do posto (impressora + leitor 2D) | Operação/negócio | - | 26/10–04/11 | A2, DEC-8 | Posto de recebimento equipado |
 | H3 | UAT com os setores (Almoxarife, Qualidade, PCP, Compras) | Operação/negócio | - | 28/10–13/11 | D7, D8, E2 | Roteiros de UAT executados e bugs triados |
 
@@ -417,7 +413,7 @@ Nathan confirmou que a genealogia lote de matéria-prima → item entregue é ne
 
 ## 6. Trilhas que atravessam os sprints
 
-- **Fase 0 (arrumar a casa):** decisões e contratos (S1) → alias e cadastros (S2, D4/D5) → saneamento humano (13-23/10, H1) → contagem física em dupla (26-30/10, G2) → carga e conferência (S4, G3/G4) → **marco zero em 13/11**. Nenhum consumo por PCP/Comercial antes disso ([[Estoque-Riscos]]).
+- **Fase 0 (arrumar a casa):** decisões e contratos (S1) → cadastros (S2, D5) → contagem física em dupla (26-30/10, G2) → carga e conferência (S4, G3/G4) → **marco zero em 13/11**. Nenhum consumo por PCP/Comercial antes disso ([[Estoque-Riscos]]). Alias e saneamento de duplicata do catálogo (D4/H1) **cancelados em 21/09** — quem quiser resolver duplicata, resolve direto no Omie, fora deste sistema.
 - **Fase A + B (compra → doca):** requisição do PCP (C7) → OC estruturada no av-hub (E1/E2) → referência no MES (F2) → recebimento com pesagem, quarentena, inspeção e RNC (D6-D8). Ver [[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]], [[Fluxo-Qualidade-Completo]].
 - **Fase C (saldo):** backend e telas em S4 (D9/D10); a **reserva só liga depois do marco zero**. Ver [[Fluxo-Estoque-Completo]].
 - **Casamento av-hub ↔ MES:** resolvido em 21/09 como DEC-2 (polling REST + `x-api-key`, 3 fluxos) — spec em S1 (F1), fluxos de requisição e OC em S3 (F2), status por item em S4 (F3/E3) — sempre por polling, sem tempo real.

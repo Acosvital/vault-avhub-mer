@@ -1,12 +1,15 @@
 ---
 tags: [contrato-api, mes, estoque]
-status: proposta
+status: rejeitada
 criado: 2026-09-17
+atualizado: 2026-09-21
 ---
 
 # Contrato de API 002 — `material_alias_omie` (a implementar no MES/Estoque)
 
-**Status:** proposta, não implementada. **Destinatário: time do MES/Estoque**, não o av-hub — `material_alias_omie` é entidade do Estoque (schema Prisma próprio, dentro do banco do MES), conforme já corrigido nas notas de modelagem ([[Estoque-Modelo-Dados]]). O av-hub não tem acesso a esse banco nem deveria — este contrato é o que falta o MES expor para que a tela de saneamento (hoje só leitura, em `00 - HUB`) ganhe a ação de vincular duplicata.
+> **Rejeitado em 21/09/2026.** Decisão do Nathan: "não quero mais tratar isso aqui, se eles quiserem eles tratam lá no Omie" — duplicata de catálogo sai do escopo deste sistema. A tela **Produtos — Prováveis Duplicatas** (só leitura, já em produção no av-hub) **continua existindo** — só o que foi cancelado é a ação de vincular/resolver a duplicata dentro do sistema (este contrato, a tarefa D4 do [[Cronograma-2-Meses]] e a tela p1-4b do fluxo de 127 tarefas). Mantido neste arquivo só como histórico.
+
+**Status:** ~~proposta, não implementada~~ rejeitada. **Destinatário: time do MES/Estoque**, não o av-hub — `material_alias_omie` é entidade do Estoque (schema Prisma próprio, dentro do banco do MES), conforme já corrigido nas notas de modelagem ([[Estoque-Modelo-Dados]]). O av-hub não tem acesso a esse banco nem deveria — este contrato é o que falta o MES expor para que a tela de saneamento (hoje só leitura, em `00 - HUB`) ganhe a ação de vincular duplicata.
 
 ## Por quê
 

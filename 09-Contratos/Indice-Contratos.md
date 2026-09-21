@@ -44,7 +44,7 @@ própria (001 em diante) independente da numeração do outro repositório.
 | [[005-Locais-Estoque]] | SQL | `core.locais_estoque` (novo) | **aplicada** (confirmado no dump 21/09) — sem FK para `deposito` por decisão (tabela ainda não existe); Gustavo adiciona quando ela existir |
 | [[006-Pedidos-Vendas-Valor-Devolucao]] | SQL | `pedidos_vendas.valor_devolucao` | **invalidado** (frontmatter do arquivo já dizia isso desde 17/09; este índice estava com a inconsistência I-02, agora corrigida) |
 | [[001-Produtos-Parceiros-Filtro-Incremental]] | API | `?alterado_desde=` em produtos/parceiros (av-hub) | **aplicada** (confirmado em `src/routes/produtos.js`/`parceiros.js`) |
-| [[002-Material-Alias-Omie-MES]] | API | `material_alias_omie` — vínculo de duplicata (destinatário: MES/Estoque) | proposta (confirmado: segue não implementada, `api-pcp` não tem essa tabela/endpoint) |
+| [[002-Material-Alias-Omie-MES]] | API | `material_alias_omie` — vínculo de duplicata (destinatário: MES/Estoque) | **rejeitada em 21/09/2026** — decisão do Nathan: duplicata de catálogo sai do escopo deste sistema, resolve-se direto no Omie |
 
 ## Ver também
 - [[Roteiro-de-Implementacao]]
