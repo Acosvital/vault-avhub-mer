@@ -4,7 +4,7 @@ status: proposta
 criado: 2026-09-17
 ---
 
-# Contrato 010 — `core.locais_estoque`
+# Contrato SQL 005 (antes 010 no omie-elt-pipeline) — `core.locais_estoque`
 
 **Status:** proposta, aguardando criação pelo DBA (Gustavo). Nada aplicado
 ainda. Design **não fechado com o usuário** — vem da documentação pública
@@ -19,7 +19,7 @@ Recurso novo, sem endpoint hoje no pipeline. Cadastro pequeno e
 estrutural (galpões/depósitos) — poucos registros esperados, candidato a
 migrar como carga inicial única (full sync simples, sem janela de data,
 mesmo padrão de `familiaProdutos.ts`). Pré-requisito para `estoque_saldo`
-([[002-Estoque-Saldo|contrato 007]]) e para qualquer FK/lookup futuro por
+([[002-Estoque-Saldo|contrato SQL 002]]) e para qualquer FK/lookup futuro por
 `codigo_local_estoque`.
 
 ## Payload de referência (documentação pública, não confirmado contra conta real)
@@ -98,8 +98,8 @@ CREATE TRIGGER trg_locais_estoque_updated_at
 Avisar o dev para criar `src/omie/resources/locaisEstoque.ts` (novo
 resource, full sync simples sem janela de data) e registrar em
 `src/omie/resources/index.ts`. É pré-requisito para o contrato
-[[002-Estoque-Saldo|007]] (`core.estoque_saldo`) se `estoque_saldo` vier a
-ganhar FK para esta tabela no futuro (hoje o contrato 007 não tem essa FK,
+[[002-Estoque-Saldo|SQL 002]] (`core.estoque_saldo`) se `estoque_saldo` vier a
+ganhar FK para esta tabela no futuro (hoje o contrato SQL 002 não tem essa FK,
 por consistência com o padrão "sem FK entre recursos sincronizados de
 forma independente").
 

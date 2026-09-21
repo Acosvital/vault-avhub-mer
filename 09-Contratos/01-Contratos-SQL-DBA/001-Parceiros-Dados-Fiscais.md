@@ -4,7 +4,7 @@ status: proposta
 criado: 2026-09-17
 ---
 
-# Contrato 006 — `core.parceiros` (dados fiscais) + 2 tabelas novas
+# Contrato SQL 001 (antes 006 no omie-elt-pipeline) — `core.parceiros` (dados fiscais) + 2 tabelas novas
 
 **Status:** proposta, aguardando revisão e aplicação pelo DBA (Gustavo).
 Nada aplicado ainda — o `omie-elt-pipeline` nunca altera schema sozinho.

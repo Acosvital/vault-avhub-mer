@@ -111,6 +111,11 @@ Origem: [[Revisao-dos-Estados-e-Status]] (seção 5). Sete perguntas novas: entr
 
 ---
 
+## E3. Lacunas de lógica e de domínio
+Origem: [[Lacunas-de-Logica-e-Clareza]]. Onze pontos sem decisão: qual prazo manda no SLA (L-01), data de corte do marco zero (L-02), quem é a referência do saldo entre Omie e MES (L-03), OC no av-hub e no Omie (L-04), horizonte fiscal do Omie (L-05), como o pedido chega à fila do PCP (L-06), cruzamentos além dos 3 fluxos da F1 (L-07), exceção da DEC-4 (L-08), depósito por filial (L-09), sobras e unidade de medida (L-10) e consumo de matéria-prima (L-11).
+
+---
+
 ## F. Perguntas que já foram respondidas mas ainda aparecem como abertas
 Estas geram ruído. **Não são perguntas novas: são notas a corrigir.**
 

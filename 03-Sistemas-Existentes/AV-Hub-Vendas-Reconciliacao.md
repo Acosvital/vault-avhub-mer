@@ -34,7 +34,7 @@ Implementação confirmada direto no código-fonte real de `api-acos-vital` (mod
 
 `pedidos_vendas.devolucao_parcial` é **só um boolean** (`true`/`false`) — não existe nenhum campo de valor associado na tabela. Ou seja, não é "o Omie mostra o valor errado de devolução parcial", é **não existe valor nenhum capturado**, só a flag de que houve devolução parcial. Isso afeta diretamente a confiabilidade de **G2P** nesta cascata (que precisaria de um valor, não só de um booleano, pra deduzir corretamente). Relevante também pro desenho do ciclo de vida de devolução no Estoque/MES — ver [[Perguntas-Pendentes-MES-Estoque]] (pergunta 3).
 
-**Confirmado com o usuário (17/09/2026): não tem como vir do Omie.** A hipótese de buscar esse valor via API (endpoint `StatusDevolucaoVenda`, ver [[006-Pedidos-Vendas-Valor-Devolucao|Contrato 011]]) foi testada e invalidada — o endpoint não está disponível. G2P vai continuar sem valor de devolução parcial confiável até que o sistema da Aços Vital capture esse valor nativamente (fora do Omie) e o alimente de volta pra essa cascata — não é mais uma questão de aguardar sincronização.
+**Confirmado com o usuário (17/09/2026): não tem como vir do Omie.** A hipótese de buscar esse valor via API (endpoint `StatusDevolucaoVenda`, ver [[006-Pedidos-Vendas-Valor-Devolucao|contrato SQL 006]]) foi testada e invalidada — o endpoint não está disponível. G2P vai continuar sem valor de devolução parcial confiável até que o sistema da Aços Vital capture esse valor nativamente (fora do Omie) e o alimente de volta pra essa cascata — não é mais uma questão de aguardar sincronização.
 
 ## Divergências de dado catalogadas
 

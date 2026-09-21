@@ -24,9 +24,12 @@ Vault único do projeto de **ERP de altíssimo nível** da Aços Vital: um siste
 - [[Indice-Contratos|9. Contratos de banco e API]] — DDL para o DBA e contratos de endpoint, com status e perguntas em aberto.
 - [[Rastreabilidade-e-SLA-de-Eventos|Rastreabilidade, custódia e SLA por etapa]] (em `04-Arquitetura-Transversal`) — proposta de log de eventos (quem fez, com quem está, quem autorizou, quem passou, tempo contra SLA) e [[Campos-e-API-para-Rastreabilidade|os campos de banco e endpoints que ela exige]].
 - [[Revisao-dos-Estados-e-Status|Revisão dos estados, status e etapas]] — o que está bem construído, 8 problemas e as correções propostas (a ler antes da D1 e da spec F1).
+- [[Lacunas-de-Logica-e-Clareza|Lacunas de lógica, de domínio e de clareza]] — 15 pontos que não fecham (dois prazos, corte do marco zero, dois donos do saldo, sobras de chapa, consumo de MP...) e propostas.
 - [[Perguntas-em-Aberto-Consolidadas|Perguntas em aberto, consolidadas]] — todas as decisões e dúvidas pendentes, por quem responde.
 
-## Estado atual do projeto
+## Histórico da análise
+
+> **A situação atual do projeto (marcos, tarefas, bloqueios) está em [[Onde-Estamos]].** A lista abaixo é o histórico do que já foi analisado e confirmado.
 
 - ✅ Fluxo operacional macro mapeado e analisado.
 - ✅ PRD do sistema de Estoque/Recebimento/Compras recebido e analisado (v1.0, ainda não construído).
@@ -38,7 +41,7 @@ Vault único do projeto de **ERP de altíssimo nível** da Aços Vital: um siste
 - ✅ **Fluxo detalhado item a item registrado**: PCP verifica estoque como primeiro passo (não rota isolada), flag acabado/não-acabado do comprador define método de conferência no Recebimento, Ordem de Serviço/Ordem de Produção emitidas pelo PCP, status por item a caminho do av-hub. Ver [[Fluxo-Detalhado-Pedido-Item]].
 - ✅ **Reclassificação:** corte de chapa (plasma/laser) é beneficiamento de **Revenda**, não uma linha de Fabricação — corrigido em todo o vault. "Chapa Expandida" (produto de linha própria) é diferente de "chapa cortada sob medida" (beneficiamento).
 - ✅ **Confirmado com o usuário (17/09/2026) — marco de escopo importante:** de todo o fluxo operacional documentado em [[Fluxo-Operacional-Visao-Geral]]/[[Fluxo-Detalhado-Pedido-Item]]/[[Fluxogramas-Completos]], **só a Entrada Comercial é real hoje** (pedido criado no Omie, sincronizado pro av-hub pelo pipeline ELT). A partir da triagem do PCP em diante — classificação item a item, requisição de compra, OS/OP, Recebimento, Qualidade, Estoque, Expedição/Faturamento operacional — **nada existe em sistema nenhum**, é 100% manual hoje. Única exceção parcial: o motor de execução de roteiro do `app-pcp` (Flanges) já roda em produção, mas só a partir do ponto em que uma Ordem de Produção chega até ele — o despacho do PCP pra esse motor também não existe. **O sistema a construir deve implementar todos os passos de todos os 6 fluxogramas em [[Fluxogramas-Completos]], sem exceção** — não é um subconjunto. Ver a mesma ressalva repetida em cada nota de fluxo/rota afetada.
-- ⏳ Próximas etapas: aguardando mais material do usuário sobre o projeto de ERP.
+- ✅ Plano de 2 meses, contratos propostos, proposta de rastreabilidade, revisão dos estados e lista de perguntas consolidadas: ver [[Onde-Estamos]].
 
 ## Achados-chave
 

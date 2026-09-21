@@ -4,7 +4,7 @@ status: proposta
 criado: 2026-09-17
 ---
 
-# Contrato 009 — `core_vendas_faturamento.pedidos_compras` + itens
+# Contrato SQL 004 (antes 009 no omie-elt-pipeline) — `core_vendas_faturamento.pedidos_compras` + itens
 
 **Status:** proposta, aguardando criação pelo DBA (Gustavo). Nada aplicado
 ainda. Design **não fechado com o usuário** — vem da documentação pública

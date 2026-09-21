@@ -4,7 +4,7 @@ status: proposta
 criado: 2026-09-17
 ---
 
-# Contrato 007 — `core.estoque_saldo`
+# Contrato SQL 002 (antes 007 no omie-elt-pipeline) — `core.estoque_saldo`
 
 **Status:** proposta, aguardando criação pelo DBA (Gustavo). Nada aplicado
 ainda. Design **não fechado com o usuário** — tipos/campos vêm da

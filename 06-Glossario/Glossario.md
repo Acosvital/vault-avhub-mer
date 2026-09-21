@@ -18,6 +18,7 @@ criado: 2026-09-16
 - **`nf_classified`/`vendas_base`** — views curadas que já entregam o grupo de dedução pronto por nota/pedido. Ver [[AV-Hub-Vendas-Reconciliacao]].
 - **OS (Ordem de Serviço)** — emitida pelo PCP pra beneficiamento/retrabalho de um item de Revenda (ex.: corte de chapa) fora de uma linha de fabricação própria. Ver [[Fluxo-Detalhado-Pedido-Item]].
 - **OP (Ordem de Produção)** — emitida pelo PCP pra iniciar a fabricação de um item numa linha própria (Flange etc.). Ver [[Fluxo-Detalhado-Pedido-Item]].
+- **Parcial** — a palavra tem **três sentidos diferentes**, que não devem ser confundidos: (1) `sequencial` do Omie, uma linha de pedido criada a cada **nota fiscal parcial** (0 = guarda-chuva, 1/2/... = parciais); (2) [[App-PCP-Backend-Producao|`ItemParcial`]] do MES, uma **fração de lote em produção** percorrendo o roteiro; (3) `Entrega`, um evento de **entrega parcial ao cliente**. Um mesmo item pode ter os três ao mesmo tempo.
 - **PCP** — ambíguo neste projeto. Ver [[Achado-Ambiguidade-PCP]].
 - **`PerfilSetor`** — RBAC paralelo (visualizar/atuar por perfil×setor) no app-pcp, usado só como conveniência de UI na tela de Movimentações — não é fronteira de segurança real.
 - **Quarentena** — estado de um lote de material, visível no sistema mas indisponível para uso, até a aprovação da Qualidade.

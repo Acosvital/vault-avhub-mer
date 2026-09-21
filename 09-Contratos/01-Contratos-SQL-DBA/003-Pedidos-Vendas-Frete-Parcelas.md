@@ -4,7 +4,7 @@ status: proposta
 criado: 2026-09-17
 ---
 
-# Contrato 008 — `pedidos_vendas` (desconto) + 2 tabelas novas (frete, parcelas)
+# Contrato SQL 003 (antes 008 no omie-elt-pipeline) — `pedidos_vendas` (desconto) + 2 tabelas novas (frete, parcelas)
 
 **Status:** proposta, aguardando revisão e aplicação pelo DBA (Gustavo).
 Nada aplicado ainda. Design **não fechado com o usuário** — vem da
@@ -121,7 +121,7 @@ não uma entidade sincronizada de forma independente).
 
 1. Confirmar se `lista_parcelas` sempre vem dentro do payload de
    `ListarPedidos` ou só em `ConsultarPedido` — mesma dúvida do contrato
-   [[001-Parceiros-Dados-Fiscais|006]] para `dadosBancarios`.
+   [[001-Parceiros-Dados-Fiscais|contrato SQL 001]] para `dadosBancarios`.
 2. `pedidos_vendas_frete` como 1:1 — confirmar que o Omie nunca manda mais
    de um bloco de frete por pedido (parece ser o caso pela doc, mas não
    validado contra payload real).
