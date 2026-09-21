@@ -55,6 +55,8 @@ Não encontrei nas notas nada sobre **sobra ou retalho de chapa**, **perda no co
 Não há fluxo em que a OS ou a OP **baixe o saldo por lote**. As regras dizem que "rastreabilidade para frente depende de retorno de consumo vindo do PCP" ([[Estoque-Regras-Negocio]]), sem dizer como. Sem isso, a matéria-prima nunca baixa e a genealogia lote → item entregue (pergunta R-12) é impossível.
 **Proposta:** o início ou a conclusão da OS/OP gera um `MOVIMENTO_ESTOQUE` de consumo, com o lote e a quantidade, ligado ao `ItemParcial`. **Decide:** Robert e Pablo, com o PCP.
 
+**⚠️ Atualização (21/09/2026): R-12 respondida — a genealogia É necessária** (Nathan confirmou). Isso tira L-11 da categoria "lacuna a decidir se resolve" e coloca na categoria **"requisito confirmado, falta dimensionar"** — é trabalho de engenharia novo, não coberto em nenhuma tarefa do [[Cronograma-2-Meses]] hoje (nem S1-FC, nem a S5 de rastreabilidade). Precisa entrar no plano com pd próprio, mesmo tratamento dado à rastreabilidade completa.
+
 ## 3. Falta de clareza (corrigida)
 
 | # | O que era | Correção em 21/09/2026 |
