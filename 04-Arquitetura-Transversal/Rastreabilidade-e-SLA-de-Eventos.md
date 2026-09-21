@@ -72,9 +72,9 @@ Desvios: `qualidade.reprovado` e `pcp.retorno`, `recebimento.divergencia`, `fabr
 ## SLA em dois níveis
 
 1. **Prazo do pedido** (`data_previsao`): já existe.
-2. **Meta por etapa**: **premissa nova**, parametrizável por etapa, com valor default por setor. Os números do protótipo (por exemplo, quarentena 24 h, inspeção 6 h, conferência quantitativa 4 h) são **chutes para a demonstração**, não medições. Precisam ser definidos com cada setor.
+2. **Meta por etapa**: **respondido em 21/09** — não é definida manualmente por setor, nasce do **tempo médio histórico**, calculado conforme o sistema acumula uso real. Os números do protótipo (quarentena 24h, inspeção 6h, conferência quantitativa 4h) continuam sendo só chutes de demonstração — não vão virar meta oficial nem depois, porque a meta real vem da métrica acumulada, não de estimativa manual.
 
-**Projeção de estouro:** fim previsto = tempo restante na etapa atual + soma das metas das etapas restantes. Se passar do prazo, o item aparece em risco antes de estar atrasado.
+**Projeção de estouro:** fim previsto = tempo restante na etapa atual + soma das metas das etapas restantes. Se passar do prazo, o item aparece em risco antes de estar atrasado. **Sem meta confiável, essa projeção não funciona no v1** — o sistema nunca rodou, não há histórico ainda. Fica sem base útil até acumular volume suficiente de dados reais; considerar desligar essa funcionalidade especificamente até lá, em vez de mostrar uma projeção calculada sobre número chutado.
 
 ## Identidade comum
 
@@ -100,7 +100,7 @@ O [[Cronograma-2-Meses]] cobre hoje "status por item" só para Fabricação e Re
 
 ## Perguntas em aberto
 
-- ~~SLA por etapa: quem define as metas de cada setor?~~ 🟡 Leaning (21/09, não confirmado): "tempo médio talvez?" — medição histórica em vez de meta manual por setor.
+- ~~SLA por etapa: quem define as metas de cada setor?~~ ✅ Respondido (21/09): ninguém define a dedo — o sistema nunca rodou, sem como saber hoje. Meta nasce do tempo médio histórico, calculado conforme o sistema acumula uso (salva métrica/lead time por etapa). Sem meta real possível no v1 — "projeção de estouro" (seção "SLA em dois níveis" abaixo) fica sem base útil até acumular histórico suficiente.
 - ~~"Na mão de quem": pessoa nomeada em toda passagem, ou o setor basta no chão de fábrica?~~ ✅ Respondido (21/09): cada setor tem 1 líder responsável.
 - Qual é o identificador único de pessoa entre av-hub e MES?
 - Genealogia de material (lote da matéria-prima → item entregue): é exigência de cliente ou norma?
