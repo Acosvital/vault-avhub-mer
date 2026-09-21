@@ -1,6 +1,7 @@
 ---
 tags: [contrato-sql, contrato-api, indice]
 criado: 2026-09-17
+atualizado: 2026-09-21
 ---
 
 # Contratos — ERP Aços Vital
@@ -30,21 +31,20 @@ originais nesse repositório agora apontam pra cá, para não duplicar/
 desatualizar duas cópias — esta seção é a versão viva, com numeração
 própria (001 em diante) independente da numeração do outro repositório.
 
-## Status atual (17/09/2026)
+## Status atual (21/09/2026 — confirmado contra dump de produção)
 
-Nenhum dos contratos abaixo foi aplicado ainda — todos têm pelo menos uma
-pergunta em aberto documentada no próprio arquivo.
+> **Atualização de 21/09:** o dump `dump-avhub_prd_db-202609210741.sql` (produção, gerado 21/09 07:41) mostra que 5 dos 6 contratos SQL e o contrato de API 001 **já estão aplicados** — este índice estava desatualizado desde 17/09. Ver o depara completo, coluna a coluna, em [[Auditoria-Dump-Producao-2026-09-21]]. Cada arquivo de contrato individual ainda precisa ter o próprio frontmatter `status` atualizado por quem tiver posse dele (não alterado aqui para não sobrescrever perguntas em aberto específicas de cada arquivo).
 
 | Contrato | Tipo | Assunto | Status |
 |---|---|---|---|
-| [[001-Parceiros-Dados-Fiscais]] | SQL | `core.parceiros` + dados fiscais | proposta |
-| [[002-Estoque-Saldo]] | SQL | `core.estoque_saldo` (novo) | proposta |
-| [[003-Pedidos-Vendas-Frete-Parcelas]] | SQL | `pedidos_vendas` + frete/parcelas | proposta |
-| [[004-Pedidos-Compras]] | SQL | `pedidos_compras` (novo) | proposta |
-| [[005-Locais-Estoque]] | SQL | `core.locais_estoque` (novo) | proposta |
-| [[006-Pedidos-Vendas-Valor-Devolucao]] | SQL | `pedidos_vendas.valor_devolucao` | proposta |
-| [[001-Produtos-Parceiros-Filtro-Incremental]] | API | `?alterado_desde=` em produtos/parceiros (av-hub) | proposta |
-| [[002-Material-Alias-Omie-MES]] | API | `material_alias_omie` — vínculo de duplicata (destinatário: MES/Estoque) | proposta |
+| [[001-Parceiros-Dados-Fiscais]] | SQL | `core.parceiros` + dados fiscais | **aplicada** (confirmado no dump 21/09) |
+| [[002-Estoque-Saldo]] | SQL | `core.estoque_saldo` (novo) | **aplicada** (confirmado no dump 21/09; "foto atual" confirmado como a implementação real) |
+| [[003-Pedidos-Vendas-Frete-Parcelas]] | SQL | `pedidos_vendas` + frete/parcelas | **aplicada** (confirmado no dump 21/09) |
+| [[004-Pedidos-Compras]] | SQL | `pedidos_compras` (novo) | **aplicada** (confirmado no dump 21/09) — risco do contrato ainda vale: `numero_item_omie` segue sem índice único |
+| [[005-Locais-Estoque]] | SQL | `core.locais_estoque` (novo) | **aplicada** (confirmado no dump 21/09) — pergunta sobre FK para futuro `deposito` do Estoque segue em aberto |
+| [[006-Pedidos-Vendas-Valor-Devolucao]] | SQL | `pedidos_vendas.valor_devolucao` | **invalidado** (frontmatter do arquivo já dizia isso desde 17/09; este índice estava com a inconsistência I-02, agora corrigida) |
+| [[001-Produtos-Parceiros-Filtro-Incremental]] | API | `?alterado_desde=` em produtos/parceiros (av-hub) | **aplicada** (confirmado em `src/routes/produtos.js`/`parceiros.js`) |
+| [[002-Material-Alias-Omie-MES]] | API | `material_alias_omie` — vínculo de duplicata (destinatário: MES/Estoque) | proposta (confirmado: segue não implementada, `api-pcp` não tem essa tabela/endpoint) |
 
 ## Ver também
 - [[Roteiro-de-Implementacao]]

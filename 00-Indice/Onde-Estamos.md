@@ -7,6 +7,8 @@ atualizado: 2026-09-21
 # Onde estamos
 
 > **Atualizado em 21/09/2026 (segunda-feira), um dia antes do início da execução.** Esta é a nota que responde "em que ponto o projeto está". Se ela estiver desatualizada, o projeto está desatualizado: quem muda o estado de uma tarefa atualiza a linha aqui no mesmo dia. Como manter: seção 7.
+>
+> **Adendo do mesmo dia (21/09, à tarde):** auditoria de um dump de produção fresco (`dump-avhub_prd_db-202609210741.sql`) contra o código real de `api-acos-vital` e `api-pcp` achou que **5 contratos SQL e 1 contrato de API que este vault marcava como "proposta" já estão aplicados em produção**, e um risco novo (schema `negocio`/`core_compras` — ver abaixo). Detalhe completo em [[Auditoria-Dump-Producao-2026-09-21]]. As seções 3, 5 e 6 abaixo já refletem isso.
 
 ## 1. Em uma frase
 
@@ -38,7 +40,7 @@ Detalhes de cada marco em [[Cronograma-2-Meses]].
 | Análise dos backends e do pipeline | [[Omie-ELT-Pipeline]], [[App-PCP-Backend-Producao]] | Leitura de código; sem alterações |
 | Levantamento da API do Omie e roteiro de extração | [[Indice-Integracao-Omie]] | Lacunas mapeadas |
 | Cronograma de 2 meses | [[Cronograma-2-Meses]] | Plano, com premissas de capacidade que ainda precisam de confirmação |
-| Contratos SQL (6) e de API (2) | [[Indice-Contratos]] | **Todos em "proposta"; nenhum aplicado** |
+| Contratos SQL (6) e de API (2) | [[Indice-Contratos]] | **5 SQL + 1 API já aplicados em produção** (confirmado por [[Auditoria-Dump-Producao-2026-09-21]] em 21/09); 1 invalidado (006); só o API 002 (Estoque/MES) segue genuinamente proposta |
 | Modelo de rastreabilidade, custódia e SLA | [[Rastreabilidade-e-SLA-de-Eventos]], [[Campos-e-API-para-Rastreabilidade]] | **Proposta**, para a spec F1 |
 | Protótipo de tela (Torre de Fluxo) | [Artifact](https://claude.ai/artifact/SS4C4srRk9cr66UHUS2rE3) | Dados fictícios; não é sistema |
 | Perguntas em aberto consolidadas | [[Perguntas-em-Aberto-Consolidadas]] | 11 DEC + dezenas de perguntas por pessoa |
@@ -63,8 +65,8 @@ Estados: **Não iniciada**, **Em andamento**, **Bloqueada**, **Concluída**, **C
 | D1 | Schema Prisma do Estoque v1 | Pablo | 21/09–29/09 | Não iniciada | **DEC-4, DEC-7** |
 | F1 | Spec da integração av-hub ↔ MES | Nathan | 21/09–29/09 | Não iniciada | DEC-2 |
 | A3 | Pauta financeira e critérios de aceite | Nathan | 28/09–02/10 | Não iniciada | — |
-| B3 | Aplicar contratos SQL 001 e 005 | Gustavo | 28/09–02/10 | Não iniciada | B1 |
-| B4 | API `alterado_desde` em produtos e parceiros | Gustavo | 28/09–02/10 | Não iniciada | B1 |
+| B3 | Aplicar contratos SQL 001 e 005 | Gustavo | 28/09–02/10 | **Concluída** — já aplicado em produção antes do início da S1; confirmado por [[Auditoria-Dump-Producao-2026-09-21]] (21/09). Capacidade do Gustavo nessa janela fica livre | B1 |
+| B4 | API `alterado_desde` em produtos e parceiros | Gustavo | 28/09–02/10 | **Concluída** — já implementado em `produtos.js`/`parceiros.js`; confirmado por [[Auditoria-Dump-Producao-2026-09-21]] (21/09) | B1 |
 | C4 | Carteira do PCP: importar itens do pedido | Robert | 28/09–02/10 | Não iniciada | — |
 | D2 | Módulo base do Estoque e testes e2e | Pablo | 28/09–02/10 | Não iniciada | D1 |
 | C2 | Vínculo Fábrica ↔ Filial | Robert | 30/09–02/10 | Não iniciada | **DEC-1** |
@@ -97,3 +99,4 @@ S2 a S4 e o fechamento seguem o [[Cronograma-2-Meses]]; entram neste quadro quan
 - [[Cronograma-2-Meses]]
 - [[Perguntas-em-Aberto-Consolidadas]]
 - [[Decisoes-Chave-ERP]]
+- [[Auditoria-Dump-Producao-2026-09-21]] — depara completo dump vs. vault vs. código (21/09)
