@@ -74,7 +74,7 @@ Desvios: `qualidade.reprovado` e `pcp.retorno`, `recebimento.divergencia`, `fabr
 1. **Prazo do pedido** (`data_previsao`): já existe.
 2. **Meta por etapa**: **respondido em 21/09** — não é definida manualmente por setor, nasce do **tempo médio histórico**, calculado conforme o sistema acumula uso real. Os números do protótipo (quarentena 24h, inspeção 6h, conferência quantitativa 4h) continuam sendo só chutes de demonstração — não vão virar meta oficial nem depois, porque a meta real vem da métrica acumulada, não de estimativa manual.
 
-**Projeção de estouro:** fim previsto = tempo restante na etapa atual + soma das metas das etapas restantes. Se passar do prazo, o item aparece em risco antes de estar atrasado. **Sem meta confiável, essa projeção não funciona no v1** — o sistema nunca rodou, não há histórico ainda. Fica sem base útil até acumular volume suficiente de dados reais; considerar desligar essa funcionalidade especificamente até lá, em vez de mostrar uma projeção calculada sobre número chutado.
+**Projeção de estouro:** fim previsto = tempo restante na etapa atual + soma das metas das etapas restantes. Se passar do prazo, o item aparece em risco antes de estar atrasado. **Sem meta confiável, essa projeção não funciona no v1** — o sistema nunca rodou, não há histórico ainda. 🟡 **Leaning do Nathan (21/09, "pode ser", não é decisão fechada):** desligar essa funcionalidade específica até acumular histórico suficiente, em vez de mostrar uma projeção calculada sobre número chutado. Falta formalizar (e definir o piso mínimo de amostras pra religar).
 
 ## Identidade comum
 
