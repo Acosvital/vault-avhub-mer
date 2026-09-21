@@ -27,10 +27,13 @@ Registro do desenho de arquitetura entre av-hub e o sistema de fábrica (nome de
    - Risco de loop: o próximo ciclo do pipeline ELT vai "ler de volta" um pedido que o av-hub acabou de empurrar — precisa reconhecer pelo `codigo_pedido_omie` já preenchido.
    - Escrita nova disputa a mesma cota de rate limit do Omie que a leitura já usa — definir prioridade entre elas.
    - **Não confirmado ainda**: se o Omie tem endpoint de criação de Ordem de Compra via API (só vi endpoints de leitura no pipeline ELT analisado) — verificar antes de desenhar essa parte a sério.
+7. **DEC-1 — Vínculo Fábrica ↔ Unidade/Filial: por pedido, não fixo.** Decidido em 21/09/2026 por Nathan + Robert. Motivo: existe hoje uma Fábrica real que atende matriz **e** filiais — o desenho "1 fábrica = 1 filial fixa" (que era o default do cronograma) não reflete a operação. `Fabrica` **não** ganha um campo `codigo_empresa` fixo; a filial de cada Ordem de Produção é sempre resolvida a partir do `codigo_empresa` do `Pedido` que a originou, nunca cacheada/assumida no nível da Fábrica.
+   - **Implicação em RBAC (nova, para C2/C3)**: `PerfilSetor` hoje é só `(perfil, setor)` — não basta mais. Precisa ganhar uma dimensão de filial (`perfil × setor × filial`, ou equivalente) para expressar "esse líder só vê o setor X **da filial Y**", já que o mesmo setor pode atender pedidos de filiais diferentes na mesma Fábrica.
+   - **Implicação em relatório**: qualquer agregação "produção por filial" tem que entrar pelo `Pedido`/`ItemParcial`, nunca assumir que a Fábrica sozinha identifica a filial.
+   - **Implicação fiscal**: nenhuma regra fiscal pode ser cacheada por Fábrica — sempre resolver pelo `codigo_empresa` do pedido em curso.
 
 ## Dúvidas em aberto (perguntadas, ainda não respondidas)
 
-- **Vínculo Fábrica ↔ Unidade/Filial (`codigo_empresa`)**: o `api-pcp` analisado não parece ter esse vínculo explícito hoje. O usuário confirmou que a fábrica **será** vinculada, mas ainda precisa decidir como. Sem isso, não dá para cruzar dado comercial por unidade (Mogi/Uberaba) com status de produção depois — vale resolver antes de generalizar o modelo pras novas linhas de produção (item 2 acima).
 - **Conceito de "Orçamento"**: ainda não foi pensado pelo time — não é budget/verba nem necessariamente a formalização do cálculo de markup/ICMS/margem já visto no protótipo de comissão. Fica em aberto para quando entrar em pauta.
 - **Nome definitivo do MES**: "MES Aços Vital" é só nome de trabalho.
 
