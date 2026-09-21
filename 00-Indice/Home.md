@@ -7,6 +7,8 @@ criado: 2026-09-16
 
 Vault único do projeto de **ERP de altíssimo nível** da Aços Vital: um sistema que acompanha um pedido de venda de 0 a 100%, de A a Z — da entrada comercial até a expedição. Reúne, numa só estrutura, a modelagem técnica, a integração com o Omie e os contratos de banco e API.
 
+> **Primeira vez aqui?** Comece por [[Comece-Aqui]]: o que existe, o que falta construir, o que ler e o que fazer na primeira semana.
+
 ## Como este vault está organizado
 
 - [[Fluxo-Operacional-Visao-Geral|1. Fluxo Operacional]] — o mapa macro do processo: comercial → PCP → estoque/revenda/fabricação → faturamento. Ver também [[Fluxo-Detalhado-Pedido-Item|o mesmo fluxo no nível de item]], [[Modelo-Destinacao-Item|o modelo formal que reconcilia os dois]], [[Setores-Envolvidos-no-Fluxo|todos os setores envolvidos]] os 6 subfluxos conversa-por-conversa (Compras, Recebimento, Qualidade, Produção/OS-OP, Expedição/Faturamento, Estoque) e [[Fluxogramas-Completos|os fluxogramas visuais de tudo isso]].
