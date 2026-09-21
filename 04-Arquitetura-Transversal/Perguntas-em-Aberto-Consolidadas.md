@@ -111,12 +111,12 @@ Origem: [[Indice-Contratos|os contratos]] (seção "Perguntas em aberto" de cada
 ---
 
 ## E2. Estados e status
-Origem: [[Revisao-dos-Estados-e-Status]] (seção 5). Sete perguntas novas: entrega parcial de um item, concessão de lote fora de especificação, destino do lote reprovado por completo, timeout da reserva (alerta ou liberação), cancelamento de pedido em produção, regras de `Pedido.status` e `BLOQUEADO` no MES, e se o protótipo Torre de Fluxo deve ser refeito. Os pontos 2.1 a 2.3 da revisão precisam de resposta **antes da D1 e da spec F1**.
+Origem: [[Revisao-dos-Estados-e-Status]] (seção 5). ~~Ponto 2.1 (status por item com parciais)~~ ✅ **respondido em 21/09/2026** — atraso medido no nível do pedido, não por parcial (ver a nota, seção 2.1). Seguem em aberto as demais: entrega parcial de um item, concessão de lote fora de especificação, destino do lote reprovado por completo, timeout da reserva (= M-06, explicitamente adiada), cancelamento de pedido em produção, regras de `Pedido.status` e `BLOQUEADO` no MES, e se o protótipo Torre de Fluxo deve ser refeito.
 
 ---
 
 ## E3. Lacunas de lógica e de domínio
-Origem: [[Lacunas-de-Logica-e-Clareza]]. Onze pontos sem decisão: qual prazo manda no SLA (L-01), data de corte do marco zero (L-02), quem é a referência do saldo entre Omie e MES (L-03), OC no av-hub e no Omie (L-04), horizonte fiscal do Omie (L-05), como o pedido chega à fila do PCP (L-06), cruzamentos além dos 3 fluxos da F1 (L-07), exceção da DEC-4 (L-08), depósito por filial (L-09), sobras e unidade de medida (L-10) e consumo de matéria-prima (L-11).
+Origem: [[Lacunas-de-Logica-e-Clareza]]. ✅ **L-01 a L-09 e L-11 resolvidas/aceitas em 21/09/2026** (ver a nota — cada uma tem a resposta do Nathan ou a proposta original aceita como está). Só sobra **L-10** (sobras de chapa, perda no corte, conversão de unidade) genuinamente sem resposta — ninguém tratou ainda.
 
 ---
 
@@ -142,7 +142,7 @@ Estas geram ruído. **Não são perguntas novas: são notas a corrigir.**
 ---
 
 ## G. O que já foi respondido e está em uso (para não perguntar de novo)
-Pesagem já existe hoje; há múltiplos depósitos; não há consignação; matéria-prima pode ser importada; não há duplicidade de fornecedor no Omie; cisão de lote é prática real; cotação entre fornecedores fica fora do sistema; depósito é central e compartilhado; login do MES aceita usuário/senha e Azure AD; fornecedor e material são projeções do av-hub; OS e OP usam o mecanismo `ItemParcial`; corte de chapa é Revenda, não Fabricação; o Omie não expõe o valor da devolução parcial.
+Pesagem já existe hoje; há múltiplos depósitos; não há consignação; matéria-prima pode ser importada; não há duplicidade de fornecedor no Omie; cisão de lote é prática real; cotação entre fornecedores fica fora do sistema; depósito é central e compartilhado entre fábricas (mas não incondicionalmente entre filiais — ver L-09); login do MES aceita usuário/senha e Azure AD; fornecedor e material são projeções do av-hub; OS e OP usam o mecanismo `ItemParcial`; corte de chapa é Revenda, não Fabricação; o Omie não expõe o valor da devolução parcial.
 
 ---
 

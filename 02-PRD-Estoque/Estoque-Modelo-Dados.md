@@ -18,7 +18,7 @@ O Estoque mora dentro do **banco do MES** (Prisma, banco separado do cluster do 
 - **recebimento**, **pesagem**, **item_recebido** — duas etapas sequenciais: conferência quantitativa (almoxarife) → conferência qualitativa (qualidade).
 - **lote** — com `origem` (RECEBIMENTO ou CARGA_INICIAL) e `lote_pai_id` (cisão de lote na reprovação parcial).
 - **inspecao_qualidade**, **rnc** (relatório de não conformidade).
-- **deposito** (`warehouse`), **localizacao_estoque**, **movimento_estoque**. Depósito é **central compartilhado**, não vinculado a uma fábrica específica — múltiplos warehouses (Warehouse 01, Warehouse 02...), cada um com saldo próprio e relatório geral; todas as fábricas e a Revenda puxam do mesmo conjunto de depósitos. Ver [[Perguntas-Pendentes-MES-Estoque]] (pergunta 4).
+- **deposito** (`warehouse`), **localizacao_estoque**, **movimento_estoque**. Depósito é **central compartilhado em relação à fábrica** — não vinculado a uma fábrica específica, múltiplos warehouses (Warehouse 01, Warehouse 02...), cada um com saldo próprio; todas as fábricas e a Revenda puxam do mesmo conjunto. **Atualização (21/09/2026, L-09)**: em relação à **filial**, não é incondicional — `deposito.codigo_empresa` existe e é preenchido **quando aquela filial tiver seu próprio setor de compras**; não é regra universal desde o dia 1. Ver [[Perguntas-Pendentes-MES-Estoque]] (pergunta 4) e [[Lacunas-de-Logica-e-Clareza]] (L-09).
 - **etiqueta** (código de barras/QR/RFID).
 - **reserva_estoque** — impede dupla alocação entre PCP e Comercial.
 - **ordem_separacao**, **item_separacao**, **devolucao_cliente**, **contagem_ciclica**.

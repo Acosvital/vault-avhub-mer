@@ -36,6 +36,8 @@ O **núcleo do MES está bem construído**: o `ItemParcial` (8 estados) com escr
 - **SLA por parcial.** O item está atrasado se qualquer parcial estiver.
 - **Perguntar:** o cliente pode receber entrega parcial (a entidade `Entrega` existe)? Se sim, o item pode estar parcialmente `FATURADO`.
 
+**✅ Resolvido em 21/09/2026 (Nathan) — regra de atraso simplificada.** Em vez de estimar atraso por item/parcial individualmente (o roteiro pode ser dinâmico, não dá pra confiar nisso), o atraso é medido **no nível do pedido**: quando a `data de previsão de produção` do pedido chegar, o sistema verifica quantos itens ainda não estão concluídos e lista esses itens como atrasados, agrupados por setor onde estão parados. Exemplo: pedido com 100 itens, 60 concluídos na data prevista → 40 atrasados, mostrados como "20 no Corte, 20 na Furação". A camada de **composição por parcial** (`fluxo.item_acompanhado_parte`, acima) continua valendo pra descrever *onde* o item está agora — a regra nova é só sobre *quando* considerar algo atrasado, mais simples que rastrear atraso parcial a parcial.
+
 ### 2.2 Lote: estado terminal sem saída (crítica)
 **O problema.** No diagrama de Lote/Qualidade, `LOTE_FILHO_CONGELADO` é terminal ("aguardando devolução/RNC"). Não diz o que acontece depois da devolução, do descarte ou de um reteste. A reprovação de 100% do lote também não está modelada (a cisão só cobre a reprovação parcial). Isso quebra a regra do próprio projeto. Além disso, `status_qualidade` mistura "o que a qualidade decidiu" com "o que aconteceu fisicamente".
 

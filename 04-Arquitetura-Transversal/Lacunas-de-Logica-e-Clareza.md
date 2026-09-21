@@ -13,37 +13,55 @@ criado: 2026-09-21
 O Portal do Vendedor mede o SLA por `data_previsao`, que é a **previsão de faturamento** vinda do Omie ([[AV-Hub-Portal-Vendedor-Plano]]). O MES tem `prazoEntrega` ([[App-PCP-Modelo-Producao]]). A requisição de compra leva "prazo (SLA do pedido de origem)" ([[Fluxo-Compras-Completo]]). Não está dito qual delas manda no tempo por etapa.
 **Proposta:** eleger uma como prazo do pedido para o SLA (a de faturamento é a que o vendedor já vê) e tratar a outra como derivada. **Decide:** Nathan com PCP e Comercial.
 
+**✅ RESOLVIDO em 21/09/2026 (Nathan).** Achado técnico importante: `prazoEntrega`, no banco do MES, **já é** a previsão de faturamento do Omie — o campo foi ajustado no frontend (rótulo diferente pra quem usa a tela), mas o valor por trás continua vindo do mesmo lugar, só o nome da coluna no banco ficou desatualizado (`prazoEntrega`). Não são dois prazos concorrentes de verdade, são o mesmo dado com nomes diferentes nos dois sistemas. **`prazoEntrega`/`data_previsao` é quem define se o pedido está atrasado.** Renomear a coluna no banco fica como débito técnico de clareza, não bloqueia nada.
+
 ### L-02. O marco zero do estoque não tem data de corte
 A contagem física é de 26 a 30/10 (G2), a carga e a reconciliação de 02 a 11/11 (G3) e o fechamento em 13/11 (G4). Nesse intervalo as vendas, recebimentos e expedições continuam manuais. O piloto de recebimento (11 a 18/11) cria lotes durante o fechamento. O cronograma afirma que "recebimento não consome estoque, então não depende do marco zero", mas as **entradas alteram o saldo**.
 **Proposta:** definir uma **data e hora de corte** por depósito; movimento manual posterior é lançado como ajuste na carga; o piloto de recebimento só cria lotes com origem `PILOTO` (excluídos do saldo até G4). **Decide:** Nathan com Almoxarifado.
+
+**✅ ACEITO em 21/09/2026** — Nathan optou por seguir esta proposta como está (sem opinião própria, decidiu confiar na análise). Vira requisito de design pra D9/G4: data/hora de corte por depósito, ajuste pra movimento manual pós-corte, lotes do piloto isolados do saldo até o fechamento.
 
 ### L-03. Dois donos do saldo
 O Omie tem saldo (`ListarPosEstoque`) e custo médio (`cmc`), movidos por nota fiscal. O MES terá o saldo físico. A reconciliação só está prevista na carga inicial (G3); depois disso nada diz quem é a referência, e o custo médio do Omie deixa de enxergar os movimentos do MES.
 **Proposta:** decidir explicitamente o período de convivência. Sugestão: o MES é o saldo **físico** oficial; o Omie continua com o **fiscal e o custo**; uma reconciliação periódica (contrato SQL 002) lista divergências, sem corrigir uma fonte pela outra automaticamente. **Decide:** Nathan com Fiscal e Contabilidade.
 
+**✅ ACEITO em 21/09/2026** — Nathan optou por seguir esta proposta como está. MES = saldo físico oficial; Omie = fiscal/custo; reconciliação periódica sem correção automática de uma fonte pela outra, por tempo indefinido (não é uma "convivência temporária" com prazo de término, é o desenho permanente enquanto o Omie for o sistema fiscal).
+
 ### L-04. OC no av-hub e OC no Omie
 A OC estruturada nasce no av-hub (E2). O envio ao Omie é "visão de futuro, não construir agora" ([[MES-Arquitetura-Decisoes]]). Enquanto isso, o Omie (que lança a NF de entrada e o financeiro) não tem a OC, e o espelho do contrato SQL 004 guarda só as OC criadas no Omie. Há duas OC sem vínculo, e o comprador pode digitar nos dois lugares.
 **Proposta:** no ciclo 1, guardar no av-hub o número da OC digitada no Omie (`codigo_pedido_compra_omie`, já previsto) e conciliar por ele; o push automático fica para depois. **Decide:** Nathan com Compras.
+
+**✅ ACEITO em 21/09/2026** — Nathan optou por seguir esta proposta como está. Conciliação manual por `codigo_pedido_compra_omie` digitado no ciclo 1; push automático de criação de OC pro Omie continua como visão de futuro, sem data.
 
 ### L-05. Fiscal: "sempre Omie" ou "desligar o Omie"?
 O princípio é que nenhum módulo emite nota fiscal ([[Decisoes-Chave-ERP]]). Mas o cronograma fala em "antes do desligamento" e a síntese ([[Sintese-Migrar-vs-Nascer-Nativo]]) diz que os dados fiscais do parceiro são "críticos para emitir NF-e sem o Omie no futuro". A DEC-11 cobre só o financeiro.
 **Proposta:** registrar o horizonte: "Omie permanece emissor fiscal no ciclo 1; a decisão de emitir NF-e própria é posterior e depende da DEC-11 ampliada". Assim o princípio vale como temporário e explícito. **Decide:** Nathan e diretoria.
 
+**✅ CONFIRMADO em 21/09/2026** — Nathan concorda com a proposta: "Omie como emissor de notas agora e nosso sistema no horizonte". Nota: DEC-11 (módulo financeiro nativo) já foi decidida como adiada, sem data — a emissão fiscal própria segue o mesmo horizonte indefinido, é o mesmo "futuro sem data", não uma DEC separada com prazo próprio.
+
 ### L-06. Como o pedido chega à fila do PCP?
 O fluxo diz que o pedido "cai na fila do PCP" ([[Fluxo-Detalhado-Pedido-Item]]). A tarefa C4 importa os itens "por número do pedido" pelo gateway, que é uma busca manual. Não existe contrato de API de pedidos novos ou alterados; os únicos com `alterado_desde` são produtos e parceiros ([[001-Produtos-Parceiros-Filtro-Incremental]]).
 **Proposta:** acrescentar um contrato de API `GET /pedidos_vendas?alterado_desde=` (itens incluídos) e um job de polling do MES que cria os itens em `PENDENTE_PCP`. **Decide:** Gustavo e Robert, dentro da spec F1.
+
+**✅ RESOLVIDO em 21/09/2026 (Nathan).** Confirma a direção da proposta (automático em vez de busca manual) e acrescenta um filtro importante: **alimentação automática, todos os pedidos incluídos no mês aparecem pro PCP/MES automaticamente, mas só os que forem venda de verdade — orçamento fica de fora.** Isso vira requisito concreto do contrato de API novo (`GET /pedidos_vendas?alterado_desde=`, dentro da spec F1): o filtro precisa excluir pedido em estágio de orçamento, só deixar passar venda confirmada.
 
 ### L-07. A F1 cobre 3 fluxos; os cruzamentos são mais
 Os três fluxos da DEC-2 são requisição, referência da OC e status por item. Ficam de fora: a escolha de inspeção do vendedor (av-hub → MES), a alteração ou cancelamento do pedido, a mudança da `data_previsao`, a previsão de chegada da OC e o alias de material.
 **Proposta:** listar todos os cruzamentos na spec F1 como uma tabela (origem, destino, dado, dono, frequência), mesmo que só três entrem no ciclo 1. **Decide:** Nathan, Robert e Gustavo.
 
+**✅ ACEITO em 21/09/2026** — Nathan optou por seguir esta proposta. **Atualização da lista de cruzamentos** (dois dos cinco já se resolveram desde que este ponto foi escrito): ~~previsão de chegada da OC~~ já decidida como dado de prazo, viaja junto da referência mínima (R-05); ~~alias de material~~ cancelado por completo, não é mais cruzamento nenhum (contrato API 002 rejeitado). Sobram de verdade: escolha de inspeção do vendedor, alteração/cancelamento de pedido, mudança de `data_previsao` — esses três entram na tabela da spec F1 como cruzamento documentado, mesmo sem entrar no código do ciclo 1.
+
 ### L-08. DEC-4 contradiz uma regra
 O default da DEC-4 é "lote de carga inicial nasce **liberado**". A regra de negócio é que o lote não sai de `PENDENTE` sem `laudo_url` ([[Estoque-Regras-Negocio]]). A carga inicial não tem laudo.
 **Proposta:** registrar a exceção: lote com `origem = CARGA_INICIAL` tem `status_qualidade = NAO_APLICAVEL` e `situacao_lote = DISPONIVEL`, sem laudo, com dupla conferência (ver [[Revisao-dos-Estados-e-Status]], seção 2.2). **Decide:** Nathan e Qualidade.
 
+**✅ ACEITO em 21/09/2026** — Nathan optou por seguir esta proposta como está. `origem = CARGA_INICIAL` vira exceção documentada no schema (`status_qualidade = NAO_APLICAVEL`), a dupla conferência (G2/G4) faz o papel do laudo pra esse caso específico. **Nota**: DEC-4 (o default que gerou essa contradição) ainda não tem registro formal — este L-08 fecha o "como" fica consistente assim que DEC-4 for decidida, mas DEC-4 em si segue aberta.
+
 ### L-09. Depósito compartilhado entre filiais
 O depósito é "central compartilhado, não vinculado a fábrica" ([[Estoque-Modelo-Dados]]), mas `deposito` não tem `codigo_empresa`. O saldo fiscal pertence a um estabelecimento (filial/CNPJ), e a transferência entre estabelecimentos em regra exige nota fiscal de transferência (**confirmar com o Fiscal**). A DEC-1 (Fábrica ↔ Filial) precisa ser decidida junto.
 **Proposta:** decidir se cada depósito pertence a uma filial; se sim, `deposito.codigo_empresa` e movimento entre filiais como evento que sinaliza a NF, sem emiti-la. **Decide:** Nathan com Fiscal, junto da DEC-1.
+
+**✅ RESOLVIDO em 21/09/2026 (Nathan) — assimétrico em relação à DEC-1.** Fábrica **não** é amarrada a uma filial (confirma DEC-1: 1 fábrica atende as 3 filiais). **Depósito é diferente**: pode ser amarrado a uma filial, **condicionalmente** — só a partir do momento em que aquela filial tiver seu próprio setor de compras. Ou seja, `deposito.codigo_empresa` existe e é preenchido quando aplicável, mas não é regra universal desde o dia 1. ⚠️ **Tensão a resolver**: isso ajusta o que já estava registrado como "decidido" em [[Estoque-Modelo-Dados]] e [[Perguntas-Pendentes-MES-Estoque]] — "depósito central compartilhado, sem vínculo fixo com fábrica" — que não mencionava essa condição de "quando existir setor de compras na filial". Precisa atualizar as duas notas pra incluir essa condicional, não é mais um "nunca vinculado" sem exceção.
 
 ## 2. Lacunas de domínio (ausências)
 

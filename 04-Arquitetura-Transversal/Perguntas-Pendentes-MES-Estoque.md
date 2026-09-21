@@ -27,7 +27,7 @@ Ainda em aberto: a devolução nasce como decisão no av-hub (ligada à classifi
 
 ## Depósito × Fábrica
 
-Decidido: **depósito central compartilhado**, não um depósito por fábrica. Modelado como múltiplos *warehouses* (Warehouse 01, Warehouse 02...), cada um com seu próprio conteúdo/saldo rastreado e relatório geral por warehouse. Todas as fábricas e a Revenda puxam desse conjunto de depósitos compartilhados — não há vínculo fixo 1:1 fábrica↔depósito. Isso simplifica o RBAC por instância: escopo é por warehouse, não por fábrica. Ver [[Estoque-Modelo-Dados]].
+Decidido: **depósito central compartilhado em relação à fábrica**, não um depósito por fábrica. Modelado como múltiplos *warehouses* (Warehouse 01, Warehouse 02...), cada um com seu próprio conteúdo/saldo rastreado e relatório geral por warehouse. Todas as fábricas e a Revenda puxam desse conjunto de depósitos compartilhados — não há vínculo fixo 1:1 fábrica↔depósito. Isso simplifica o RBAC por instância: escopo é por warehouse, não por fábrica. **Atualização (21/09/2026, L-09)**: em relação à **filial**, o compartilhamento não é incondicional — `deposito.codigo_empresa` passa a existir quando a filial tiver seu próprio setor de compras. Ver [[Estoque-Modelo-Dados]] e [[Lacunas-de-Logica-e-Clareza]] (L-09).
 
 ## Login do Estoque
 
