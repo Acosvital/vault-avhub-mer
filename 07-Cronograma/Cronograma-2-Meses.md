@@ -205,10 +205,12 @@ Do dia 22/09 (execução real) a 21/12/2026: **63 dias úteis** (13 semanas exat
 | Pessoa | Foco | Capacidade extra (pd) | Planejado em S5 (pd) | Reserva (pd) |
 |---|---|---|---|---|
 | Nathan | 40% | 9,2 | 11,0 | **-1,8** ⚠️ |
-| Gustavo | 60% | 13,8 | 2,0 | 11,8 |
-| Robert | 75% | 17,25 | 12,0 | 5,25 |
-| Pablo | 75% | 17,25 | 2,0 | 15,25 |
-| **Total** | | **57,5** | **27,0** | **30,5** |
+| Gustavo | 60% | 13,8 | 4,0 | 9,8 |
+| Robert | 75% | 17,25 | 15,0 | 2,25 |
+| Pablo | 75% | 17,25 | 5,0 | 12,25 |
+| **Total** | | **57,5** | **35,0** | **22,5** |
+
+Inclui o bloco **J — Genealogia de material** (R-12, resolve L-11), encaixado na S5 em 21/09/2026: +8 pd (Gustavo +2, Robert +3, Pablo +3). Reserva da S5 cai de 30,5 pd pra 22,5 pd, ainda folgada. Robert é quem mais aperta (2,25 pd de reserva só dele) — se mais alguma coisa entrar na S5, é o primeiro a rever.
 
 **Sobra bastante reserva (30,5 pd) — de propósito**, depois de uma folga de só 9% no plano original. Duas opções para essa sobra: manter como buffer de verdade (recomendado, dado que é a primeira vez que o time constrói um log de eventos deste tipo) ou puxar algo da Fase D pra dentro do ciclo — decisão sua, não assumida aqui.
 
@@ -400,7 +402,18 @@ Não depende do go/no-go de M6 ter dado certo — roda em paralelo/depois, sobre
 | I5 | Jobs de projeção do feed (`core_fluxo.item_estado_projetado`) + endpoints BFF (`GET /api/fluxo/torre`, `/itens/{id}`) | Nathan | 4 | 26/11–09/12 | I4, I2 | av-hub projeta o estado de cada item a partir do feed do MES |
 | I6 | Telas da Torre de Fluxo: mapa por setor, trilha do item, tempo por etapa (fila×execução+projeção), ranking de gargalos | Nathan | 7 | 07/12–18/12 | I5 | As 4 telas do protótipo rodando com dado real, em homologação |
 
-**Nunca cortar aqui:** nada — se a S5 estourar, a resposta é estender a janela (já é capacidade extra, não tira de outro lugar), não cortar rastreabilidade parcialmente, porque o pedido explícito foi 100%.
+**Bloco J — Genealogia de material (resolve L-11/R-12) — encaixado em 21/09/2026**
+
+Nathan confirmou que a genealogia lote de matéria-prima → item entregue é necessária. Depende de Fase C (D9, saldo/movimento de estoque, já entregue em S4) e de I3 (instrumentação de eventos, mesma S5).
+
+| ID | Entrega | Resp. | pd | Janela | Depende de | Pronto quando |
+|---|---|---|---|---|---|---|
+| J2 | Schema: estender `MOVIMENTO_ESTOQUE` com tipo `CONSUMO`, vínculo a `lote` + `ItemParcial` | Pablo | 1 | 19/11–25/11 | D9 | Migration aplicada em homologação |
+| J3 | Backend: consumo de matéria-prima no início/conclusão da OS/OP — aplica a estratégia de alocação de lote (DEC-12), trata consumo parcial entre lotes | Robert | 3 | 26/11–04/12 | J2, I3, DEC-12 | Toda OS/OP concluída baixa saldo do(s) lote(s) certo(s) |
+| J4 | Endpoint de genealogia: lote → itens entregues, e item entregue → lote(s) de origem | Gustavo | 2 | 04/12–10/12 | J3 | `GET` retorna a cadeia completa em homologação |
+| J5 | Tela: consulta de genealogia por lote ou por item/pedido | Pablo | 3 | 10/12–18/12 | J4 | Qualidade/Compras conseguem consultar a origem de um item entregue |
+
+**Nunca cortar aqui:** nada — se a S5 estourar, a resposta é estender a janela (já é capacidade extra, não tira de outro lugar), não cortar rastreabilidade nem genealogia pela metade, porque os dois pedidos foram explícitos (100% do pedido; "eu preciso disso").
 
 ## 6. Trilhas que atravessam os sprints
 
@@ -427,6 +440,7 @@ Cada uma tem um *default* escrito: se ninguém decidir até a data, o default va
 | DEC-9 | ~~Prazo de retenção de auditoria (5 anos é palpite) - validar com contabilidade/fiscal~~ ✅ **DECIDIDA em 21/09** — fica 5 anos | Nathan | 09/10 | ~~5 anos, sem expurgo automático~~ (confirmado) | Não bloqueia a construção |
 | DEC-10 | ~~Devolução de cliente: decisão no av-hub ou nasce no Estoque?~~ ✅ **DECIDIDA em 21/09** — ciclo completo nasce no Estoque, inclusive captura nativa do valor da devolução parcial | Nathan | 13/11 | ~~-~~ (decidido) | Fase D (ciclo 2, destravada) |
 | DEC-11 | ~~Módulo financeiro nativo (Passo 15): quem decide e quando~~ ✅ **DECIDIDA em 21/09** — adiado, só no futuro, sem data | Nathan → diretoria | 13/11 | ~~-~~ (confirmado: fora do roadmap atual) | Desligamento do Omie (fora do ciclo) |
+| DEC-12 | **Nova (21/09).** Estratégia de alocação de lote no consumo de matéria-prima pela OS/OP: qual lote baixar primeiro quando existe mais de um em estoque? | Robert + Pablo | 20/11 | FIFO por `data_posicao` (lote mais antigo primeiro) | J3 |
 
 ## 8. Riscos e gatilhos
 
