@@ -10,13 +10,15 @@ criado: 2026-09-18
 > Plano original fechado em **42 dias úteis** (61 corridos, feriados 12/10 e 02/11), montado em cima do que o vault já decidiu: as fases 0/A/B/C de [[Estoque-Roadmap]], o roteiro de extração do Omie, os contratos da seção de contratos e o fluxo dos 6 fluxogramas de [[Fluxogramas-Completos]].
 >
 > **Leia antes de aprovar:** (1) as premissas de capacidade abaixo são deste plano — o vault não registra alocação real, ajuste se for outra; (2) **ainda não cabe tudo mesmo com 3 meses** — Fase D, Expedição/Faturamento e o resto seguem fora (seção 2), a extensão cobriu especificamente a rastreabilidade completa, não o roadmap inteiro; (3) o caminho crítico continua sendo as decisões de **25/09** (seção 7).
+>
+> **Reajustado em 22/09/2026 (N-07):** a execução começou de fato hoje, não em 18/09 como o plano original previa. **S1 foi replanejada** (22/09-05/10, tarefas e marcos M1/M2 deslocados ~1-2 dias úteis) — ver seções 1, 3 e 5. **Do S2 em diante o resto do plano ainda não foi recalculado** e pode estar alguns dias úteis otimista; recalcular quando a folga real de S1 for conhecida, em vez de propagar um ajuste estimado por 50+ tarefas agora.
 
 ## 1. Marcos
 
 | Marco | Data | O que precisa estar pronto |
 |---|---|---|
-| **M1** — Decisões e contratos destravados | 25/09 | DEC-1 a DEC-9 respondidas (ou default adotado por escrito); perguntas dos contratos 001/002/004/005 fechadas; compra do hardware aprovada; levantamento físico agendado. |
-| **M2** — Fundação no ar | 02/10 | ✅ Contratos 001/002/004/005 e `alterado_desde` já aplicados em produção desde antes do início do plano (confirmado 21-22/09) — falta só: schema do Estoque migrado em homologação; login duplo e vínculo Fábrica↔Filial prontos; spec de integração aprovada. |
+| **M1** — Decisões e contratos destravados | ~~25/09~~ **28/09** (reajustado 22/09 — N-07) | DEC-1 a DEC-9 respondidas (ou default adotado por escrito); perguntas dos contratos 001/002/004/005 fechadas; compra do hardware aprovada; levantamento físico agendado. |
+| **M2** — Fundação no ar | ~~02/10~~ **05/10** (reajustado 22/09 — N-07) | ✅ Contratos 001/002/004/005 e `alterado_desde` já aplicados em produção desde antes do início do plano (confirmado 21-22/09) — falta só: schema do Estoque migrado em homologação; login duplo e vínculo Fábrica↔Filial prontos; spec de integração aprovada. |
 | **M3** — Fase 0 (sistema) pronta | 16/10 | Alias, cadastros, RBAC por setor, Carteira do PCP (classificação) e caixa de requisições do av-hub prontos; saneamento e ferramenta de carga em andamento. |
 | **M4** — Fases A + B em homologação | 30/10 | Requisição → OC estruturada → referência no MES → recebimento com pesagem, quarentena, inspeção e RNC funcionando em homologação; levantamento físico executado. |
 | **M5** — Fase 0 fechada + Fase C | 13/11 | Marco zero carregado e conferido em dupla; saldo/movimento/reserva em homologação; status por item no Portal do Vendedor; UAT concluída. |
@@ -149,10 +151,10 @@ Em uma frase: entra do catálogo saneado até o recebimento com qualidade, saldo
 - Saldo do Omie habilitado (Passo 2) para reconciliar a carga inicial (G3)
 - Histórico de pedidos de compra (Passo 5) — só se sobrar folga (B9) *(stretch)*
 - Frete e parcelas do pedido de venda (Passo 4) — só se sobrar folga (B10) *(stretch)*
+- Remessa de produtos (Passo 7) — **confirmado em 22/09/2026 (N-05): a Aços Vital usa** (galvanização externa da Grade de Piso) — sem task/pd alocado ainda neste plano, precisa ser dimensionado e encaixado (provável S2 do ciclo 2 ou folga desta S1-S4)
 
 **Não entra**
 
-- Remessa de produtos (Passo 7) — confirmar antes se a Aços Vital usa
 - Valor da devolução parcial (Passo 8, contrato 006) — o Omie não expõe; captura nativa no ciclo 2
 - Tabela de preços (Passo 14) e sugestão de compra (Passo 13)
 - Módulo financeiro (Passo 15) — só a decisão DEC-11, sem código
@@ -220,7 +222,7 @@ Carga por sprint (planejado ÷ capacidade, em pessoa-dia):
 
 | Sprint | Janela | Dias úteis | Nathan | Gustavo | Robert | Pablo |
 |---|---|---|---|---|---|---|
-| **S1** — Destravar e fundação | 18/09 a 02/10 | 11 | 4,1 ÷ 4,4 | 2,5 ÷ 6,6 | 7,5 ÷ 8,2 | 7,5 ÷ 8,2 |
+| **S1** — Destravar e fundação | ~~18/09~~ **22/09** a ~~02/10~~ **05/10** (reajustado — N-07) | 11 | 4,1 ÷ 4,4 | 2,5 ÷ 6,6 | 7,5 ÷ 8,2 | 7,5 ÷ 8,2 |
 | **S2** — Fase 0 (sistema) + núcleo do Estoque | 05/10 a 16/10 | 9 | 3,3 ÷ 3,6 | 2,8 ÷ 5,4 | 6,0 ÷ 6,8 | 4,0 ÷ 6,8 |
 | **S3** — Fases A + B + levantamento físico | 19/10 a 30/10 | 10 | 3,7 ÷ 4,0 | 4,6 ÷ 6,0 | 7,0 ÷ 7,5 | 7,0 ÷ 7,5 |
 | **S4** — Fase C + integração + marco zero | 02/11 a 13/11 | 9 | 3,6 ÷ 3,6 | 4,5 ÷ 5,4 | 6,5 ÷ 6,8 | 6,0 ÷ 6,8 |
@@ -234,22 +236,22 @@ gantt
     dateFormat YYYY-MM-DD
     axisFormat %d/%m
     section Marcos
-    M1 Decisões e contratos destravados :milestone, m1, 2026-09-25, 0d
-    M2 Fundação no ar :milestone, m2, 2026-10-02, 0d
+    M1 Decisões e contratos destravados :milestone, m1, 2026-09-28, 0d
+    M2 Fundação no ar :milestone, m2, 2026-10-05, 0d
     M3 Fase 0 (sistema) pronta :milestone, m3, 2026-10-16, 0d
     M4 Fases A + B em homologação :milestone, m4, 2026-10-30, 0d
     M5 Fase 0 fechada + Fase C :milestone, m5, 2026-11-13, 0d
     M6 Go/no-go do piloto :milestone, m6, 2026-11-18, 0d
     M7 Rastreabilidade completa :milestone, m7, 2026-12-18, 0d
     section Decisões e governança
-    A1 Decisões bloqueantes (DEC-1..9) :a1, 2026-09-18, 2026-09-26
-    A2 Hardware + agenda da contagem :a2, 2026-09-21, 2026-09-26
-    A3 Pauta financeiro + critérios de aceite :a3, 2026-09-28, 2026-10-03
+    A1 Decisões bloqueantes (DEC-1..9) :a1, 2026-09-22, 2026-09-30
+    A2 Hardware + agenda da contagem :a2, 2026-09-22, 2026-09-29
+    A3 Pauta financeiro + critérios de aceite :a3, 2026-09-29, 2026-10-06
     A4 Coordenação - saneamento, UAT, treino :a4, 2026-10-13, 2026-11-14
     A5 Go/no-go, retro, backlog do ciclo 2 :a5, 2026-11-16, 2026-11-19
     section Banco, pipeline e infra
-    B1 Fechar perguntas dos contratos :b1, 2026-09-21, 2026-09-26
-    B2 Homologação + backup do MES :b2, 2026-09-21, 2026-09-26
+    B1 Fechar perguntas dos contratos :b1, 2026-09-22, 2026-09-29
+    B2 Homologação + backup do MES :b2, 2026-09-22, 2026-09-29
     B3 Aplicar SQL 001 e 005 :done, b3, 2026-09-18, 2026-09-19
     B4 API alterado_desde :done, b4, 2026-09-18, 2026-09-19
     B5 Aplicar SQL 002 e 004 :done, b5, 2026-09-18, 2026-09-19
@@ -259,19 +261,19 @@ gantt
     B9 (stretch) Passo 5 - histórico de OC :active, b9, 2026-10-26, 2026-10-31
     B10 (stretch) Passo 4 - frete e parcelas :active, b10, 2026-11-11, 2026-11-14
     section MES - acesso e PCP
-    C1 Login duplo no MES :c1, 2026-09-21, 2026-09-30
-    C2 Vínculo Fábrica ↔ Filial :c2, 2026-09-30, 2026-10-03
-    C3 Desenho do RBAC por setor :c3, 2026-09-21, 2026-09-30
-    C4 Carteira PCP - importar itens :c4, 2026-09-28, 2026-10-03
+    C1 Login duplo no MES :c1, 2026-09-22, 2026-10-01
+    C2 Vínculo Fábrica ↔ Filial :c2, 2026-10-01, 2026-10-06
+    C3 Desenho do RBAC por setor :c3, 2026-09-22, 2026-10-01
+    C4 Carteira PCP - importar itens :c4, 2026-09-29, 2026-10-06
     C5 RBAC por setor (guard global) :c5, 2026-10-05, 2026-10-15
     C6 Carteira PCP - classificar itens :c6, 2026-10-08, 2026-10-17
     C7 PCP - requisição de compra :c7, 2026-10-19, 2026-10-24
     C8 Carteira PCP - ações :c8, 2026-11-09, 2026-11-14
     C9 Correções de UAT/piloto :c9, 2026-11-16, 2026-11-19
     section Estoque (MES)
-    D1 Schema Prisma estoque v1 :d1, 2026-09-21, 2026-09-30
-    D2 Módulo base + testes e2e :d2, 2026-09-28, 2026-10-03
-    D3 Projeção de material/parceiro :d3, 2026-09-30, 2026-10-03
+    D1 Schema Prisma estoque v1 :d1, 2026-09-22, 2026-10-01
+    D2 Módulo base + testes e2e :d2, 2026-09-29, 2026-10-06
+    D3 Projeção de material/parceiro :d3, 2026-10-01, 2026-10-06
     D5 Cadastros - material, depósito, local :d5, 2026-10-08, 2026-10-17
     D6 Recebimento - backend :d6, 2026-10-19, 2026-10-31
     D7 Recebimento - telas :d7, 2026-10-19, 2026-10-29
@@ -285,7 +287,7 @@ gantt
     E2 Compras - fechar compra + OC :e2, 2026-10-19, 2026-10-31
     E3 Portal - status por item :e3, 2026-11-02, 2026-11-14
     section Integração av-hub ↔ MES
-    F1 Spec da integração v1 :f1, 2026-09-21, 2026-09-30
+    F1 Spec da integração v1 :f1, 2026-09-22, 2026-10-01
     F2 OC estruturada + jobs de poll :f2, 2026-10-19, 2026-10-31
     F3 Endpoint de status por item :f3, 2026-11-09, 2026-11-14
     section Carga inicial (marco zero)
@@ -316,25 +318,25 @@ gantt
 
 Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pablo** (P), **Operação/negócio** (O, sem pd de dev). Itens *stretch* marcados.
 
-### S1 — Destravar e fundação (18/09 a 02/10)
+### S1 — Destravar e fundação (~~18/09 a 02/10~~ **22/09 a 05/10**, reajustado 22/09/2026 — N-07)
 
 | ID | Entrega | Resp. | pd | Janela | Depende de | Pronto quando |
 |---|---|---|---|---|---|---|
-| A1 | Workshop de decisões bloqueantes (DEC-1 a DEC-9) + registro no vault | Nathan | 1,5 | 18/09–25/09 | - | DEC-1..9 respondidas ou com default adotado por escrito |
-| A2 | Hardware do posto: aprovar compra e agendar o levantamento físico com a operação | Nathan | 0,5 | 21/09–25/09 | DEC-8 | Pedido de compra emitido; janela de 26-30/10 reservada com a operação |
-| B1 | Fechar as perguntas abertas dos contratos (SQL 001/002/004/005, API 001/002) | Gustavo | 1 | 21/09–25/09 | DEC-7 | Contratos sem pergunta aberta, prontos para aplicar |
-| B2 | Ambiente de homologação do MES/Estoque + backup/WAL do banco do MES | Gustavo | 1,5 | 21/09–25/09 | - | Banco de homologação no ar; backup do banco do MES confirmado |
-| C1 | Login duplo no MES (usuário/senha + e-mail/Azure AD) | Robert | 3 | 21/09–29/09 | - | Chão de fábrica entra por usuário/senha; escritório por e-mail corporativo |
-| C3 | Desenho do RBAC por instância de setor + revisão do schema do Estoque | Robert | 1,5 | 21/09–29/09 | - | Modelo de permissão por setor aprovado; schema D1 revisado |
-| D1 | Schema Prisma estoque v1 + migrations (material, alias, depósito, localização, lote, movimento) | Pablo | 4 | 21/09–29/09 | DEC-4, DEC-7 | Migrations aplicadas em homologação |
-| F1 | Spec do contrato de integração v1: requisição, referência da OC e status por item + autenticação entre serviços | Nathan | 1,5 | 21/09–29/09 | DEC-2 | Spec aprovada por Robert e Gustavo; polling, idempotência e dono de cada coluna definidos |
-| A3 | Pauta do módulo financeiro (Passo 15) + critérios de aceite por fase | Nathan | 0,6 | 28/09–02/10 | - | Critérios de aceite de Fase 0/A/B/C no vault; pauta financeira enviada a quem decide o roadmap |
+| A1 | Workshop de decisões bloqueantes (DEC-1 a DEC-9) + registro no vault | Nathan | 1,5 | 22/09–29/09 | - | DEC-1..9 respondidas ou com default adotado por escrito |
+| A2 | Hardware do posto: aprovar compra e agendar o levantamento físico com a operação | Nathan | 0,5 | 22/09–28/09 | DEC-8 | Pedido de compra emitido; janela de 26-30/10 reservada com a operação |
+| B1 | Fechar as perguntas abertas dos contratos (SQL 001/002/004/005, API 001/002) | Gustavo | 1 | 22/09–28/09 | DEC-7 | Contratos sem pergunta aberta, prontos para aplicar |
+| B2 | Ambiente de homologação do MES/Estoque + backup/WAL do banco do MES | Gustavo | 1,5 | 22/09–28/09 | - | Banco de homologação no ar; backup do banco do MES confirmado |
+| C1 | Login duplo no MES (usuário/senha + e-mail/Azure AD) | Robert | 3 | 22/09–30/09 | - | Chão de fábrica entra por usuário/senha; escritório por e-mail corporativo |
+| C3 | Desenho do RBAC por instância de setor + revisão do schema do Estoque | Robert | 1,5 | 22/09–30/09 | - | Modelo de permissão por setor aprovado; schema D1 revisado |
+| D1 | Schema Prisma estoque v1 + migrations (material, alias, depósito, localização, lote, movimento) | Pablo | 4 | 22/09–30/09 | DEC-4, DEC-7 | Migrations aplicadas em homologação |
+| F1 | Spec do contrato de integração v1: requisição, referência da OC e status por item + autenticação entre serviços | Nathan | 1,5 | 22/09–30/09 | DEC-2 | Spec aprovada por Robert e Gustavo; polling, idempotência e dono de cada coluna definidos |
+| A3 | Pauta do módulo financeiro (Passo 15) + critérios de aceite por fase | Nathan | 0,6 | 29/09–05/10 | - | Critérios de aceite de Fase 0/A/B/C no vault; pauta financeira enviada a quem decide o roadmap |
 | B3 | ✅ **Já aplicado (confirmado 21-22/09)** — ~~Aplicar~~ contratos SQL 001 (parceiros fiscais) e 005 (locais de estoque) | Gustavo | ~~1,5~~ 0 | — | B1 | Colunas/tabelas já existem em produção (`core.parceiros_dados_bancarios`/`_endereco_entrega`, `core.locais_estoque`) — nada a fazer. Ver [[Auditoria-Dump-Producao-2026-09-21]]. |
 | B4 | ✅ **Já aplicado (confirmado 21/09)** — ~~API~~ `alterado_desde` em /produtos e /parceiros (contrato API 001) | Gustavo | ~~1,5~~ 0 | — | B1 | Filtro incremental já está no ar em `api-acos-vital` (`src/routes/produtos.js:185-234`, `parceiros.js`) — nada a fazer. Ver [[Auditoria-Dump-Producao-2026-09-21]]. |
-| C4 | PCP Carteira (backend): importar itens do pedido pelo gateway | Robert | 1,5 | 28/09–02/10 | - | Itens do pedido de venda disponíveis no MES por número do pedido |
-| D2 | Módulo base do Estoque: guards, seeds e harness de testes e2e | Pablo | 2 | 28/09–02/10 | D1 | Módulo sobe no MES com testes e2e rodando |
-| C2 | Vínculo Fábrica ↔ Unidade/Filial (codigo_empresa) | Robert | 1,5 | 30/09–02/10 | DEC-1 | Toda fábrica com filial; pedido cruzável por unidade |
-| D3 | Projeção read-only de material e parceiro (full sync; incremental após B4) | Pablo | 1,5 | 30/09–02/10 | B4 | core.produtos e core.parceiros projetados no Estoque |
+| C4 | PCP Carteira (backend): importar itens do pedido pelo gateway | Robert | 1,5 | 29/09–05/10 | - | Itens do pedido de venda disponíveis no MES por número do pedido |
+| D2 | Módulo base do Estoque: guards, seeds e harness de testes e2e | Pablo | 2 | 29/09–05/10 | D1 | Módulo sobe no MES com testes e2e rodando |
+| C2 | Vínculo Fábrica ↔ Unidade/Filial (codigo_empresa) | Robert | 1,5 | 01/10–05/10 | DEC-1 | Toda fábrica com filial; pedido cruzável por unidade |
+| D3 | Projeção read-only de material e parceiro (full sync; incremental após B4) | Pablo | 1,5 | 01/10–05/10 | B4 | core.produtos e core.parceiros projetados no Estoque |
 
 ### S2 — Fase 0 (sistema) + núcleo do Estoque (05/10 a 16/10)
 
@@ -433,11 +435,11 @@ Cada uma tem um *default* escrito: se ninguém decidir até a data, o default va
 | DEC-1 | Vínculo Fábrica ↔ Filial (codigo_empresa): 1 fábrica = 1 filial fixa, ou vínculo por pedido? | Nathan + Robert | 25/09 | 1 fábrica = 1 filial fixa | C2 |
 | DEC-2 | Integração av-hub ↔ MES v1: polling REST bidirecional (1-5 min) com autenticação entre serviços por x-api-key; 3 fluxos (requisição, referência da OC, status por item) | Nathan + Robert + Gustavo | 29/09 | Polling REST, sem webhook nem tempo real | F1, F2, F3, E1 |
 | DEC-3 | ~~Aprovação condicional de compra: acima de qual valor X e quem aprova?~~ ✅ **DECIDIDA em 21/09** — acima de R$ 30.000, o diretor aprova | Nathan + Diretoria | 25/09 | ~~Valor limite vira parâmetro, desligado no v1~~ (não se aplica) | E2 (destravada) |
-| DEC-4 | Lote de carga inicial nasce liberado ou passa pela inspeção de qualidade? | Nathan + Qualidade | 25/09 | Nasce liberado, com dupla conferência | D1, G1, G3 |
+| DEC-4 | ~~Lote de carga inicial nasce liberado ou passa pela inspeção de qualidade?~~ ✅ **DECIDIDA em 22/09** — nasce liberado, com dupla conferência | Nathan + Qualidade | 25/09 | ~~Nasce liberado, com dupla conferência~~ (confirmado) | D1, G1, G3 (destravadas) |
 | DEC-5 | ~~Balança: digitação manual no v1 ou integração automática?~~ ✅ **DECIDIDA em 21/09** — manual | Nathan + Operação | 25/09 | ~~Digitação manual~~ (confirmado) | D6, D7 (destravadas) |
-| DEC-6 | Tolerância de peso por categoria de material | Nathan + Qualidade | 25/09 | 5% padrão, ajustável por material | D5 |
+| DEC-6 | ~~Tolerância de peso por categoria de material~~ ✅ **DECIDIDA em 22/09** — 5% padrão único, sem ajuste por categoria | Nathan + Qualidade | 25/09 | ~~5% padrão, ajustável por material~~ (confirmado só o padrão) | D5 (destravada) |
 | DEC-7 | ~~Contratos SQL: saldo (002); id de item de compra (004); FK de locais (005); exclusão no polling (API 001)~~ ✅ **DECIDIDA em 21/09** — foto atual; id = `(id_pedido_compra, ordem)`; sem FK (por ora); `incluir_deletados=true` resolve a exclusão | Gustavo | 25/09 | ~~Foto atual; id = pedido + sequência do item; sem FK; aceitar a lacuna de exclusão~~ (não se aplica, decidido) | B3, B5, D1, D3 (destravados) |
-| DEC-8 | Compra do hardware do posto de recebimento (impressora industrial + leitor 2D, ~R$ 5-7 mil) | Nathan + Diretoria | 25/09 | Sem hardware: etiqueta em impressora comum (Code128) no piloto | H2, D11 |
+| DEC-8 | ~~Compra do hardware do posto de recebimento (impressora industrial + leitor 2D, ~R$ 5-7 mil)~~ ✅ **DECIDIDA em 22/09** — será comprado (impressora industrial + leitor 2D) | Nathan + Diretoria | 25/09 | ~~Sem hardware: etiqueta em impressora comum (Code128) no piloto~~ (não se aplica, decidido: compra o hardware) | H2, D11 (destravadas) |
 | DEC-9 | ~~Prazo de retenção de auditoria (5 anos é palpite) - validar com contabilidade/fiscal~~ ✅ **DECIDIDA em 21/09** — fica 5 anos | Nathan | 09/10 | ~~5 anos, sem expurgo automático~~ (confirmado) | Não bloqueia a construção |
 | DEC-10 | ~~Devolução de cliente: decisão no av-hub ou nasce no Estoque?~~ ✅ **DECIDIDA em 21/09** — ciclo completo nasce no Estoque, inclusive captura nativa do valor da devolução parcial | Nathan | 13/11 | ~~-~~ (decidido) | Fase D (ciclo 2, destravada) |
 | DEC-11 | ~~Módulo financeiro nativo (Passo 15): quem decide e quando~~ ✅ **DECIDIDA em 21/09** — adiado, só no futuro, sem data | Nathan → diretoria | 13/11 | ~~-~~ (confirmado: fora do roadmap atual) | Desligamento do Omie (fora do ciclo) |
