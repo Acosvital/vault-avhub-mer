@@ -16,7 +16,7 @@ criado: 2026-09-18
 | Marco | Data | O que precisa estar pronto |
 |---|---|---|
 | **M1** — Decisões e contratos destravados | 25/09 | DEC-1 a DEC-9 respondidas (ou default adotado por escrito); perguntas dos contratos 001/002/004/005 fechadas; compra do hardware aprovada; levantamento físico agendado. |
-| **M2** — Fundação no ar | 02/10 | Contratos 001/005 aplicados; alterado_desde no ar; schema do Estoque migrado em homologação; login duplo e vínculo Fábrica↔Filial prontos; spec de integração aprovada. |
+| **M2** — Fundação no ar | 02/10 | ✅ Contratos 001/002/004/005 e `alterado_desde` já aplicados em produção desde antes do início do plano (confirmado 21-22/09) — falta só: schema do Estoque migrado em homologação; login duplo e vínculo Fábrica↔Filial prontos; spec de integração aprovada. |
 | **M3** — Fase 0 (sistema) pronta | 16/10 | Alias, cadastros, RBAC por setor, Carteira do PCP (classificação) e caixa de requisições do av-hub prontos; saneamento e ferramenta de carga em andamento. |
 | **M4** — Fases A + B em homologação | 30/10 | Requisição → OC estruturada → referência no MES → recebimento com pesagem, quarentena, inspeção e RNC funcionando em homologação; levantamento físico executado. |
 | **M5** — Fase 0 fechada + Fase C | 13/11 | Marco zero carregado e conferido em dupla; saldo/movimento/reserva em homologação; status por item no Portal do Vendedor; UAT concluída. |
@@ -191,12 +191,12 @@ Base original: **42 dias úteis** (S1-FC, 18/09-18/11) × fator de foco por pess
 | Pessoa | Papel | Foco | Capacidade (pd) | Planejado (pd) | Stretch (pd) |
 |---|---|---|---|---|---|
 | Nathan | Coordenação/PO + av-hub full stack | 40% | 16,8 | 15,8 | 0,0 |
-| Gustavo | Banco de dados, API e pipeline (DBA) | 60% | 25,2 | 21,2 | 2,9 |
+| Gustavo | Banco de dados, API e pipeline (DBA) | 60% | 25,2 | 16,2 | 2,9 |
 | Robert | Fullstack sênior - MES/PCP | 75% | 31,5 | 29,2 | 0,0 |
 | Pablo | Fullstack - MES/Estoque | 75% | 31,5 | 26,7 | 0,0 |
-| **Total (S1-FC)** | | | **105,0** | **93,0** | **2,9** |
+| **Total (S1-FC)** | | | **105,0** | **88,0** | **2,9** |
 
-Reserva de **12,0 pd (~11,4%)** em S1-FC, fora os itens *stretch* — subiu de 9,5 pd porque D4 (Alias, 2,5 pd) foi **cancelada em 21/09/2026** (junto com H1, que já não contava pd de dev). Decisão do Nathan: duplicata de catálogo não é mais tratada por este sistema — "se eles quiserem, tratam lá no Omie".
+Reserva de **17,0 pd (~16,2%)** em S1-FC, fora os itens *stretch* — subiu de 9,5 pd porque D4 (Alias, 2,5 pd) foi **cancelada em 21/09/2026** (junto com H1, que já não contava pd de dev; decisão do Nathan: duplicata de catálogo não é mais tratada por este sistema — "se eles quiserem, tratam lá no Omie") e mais **5,0 pd do Gustavo liberados em 22/09/2026**: B3, B4 e B5 (contratos SQL 001/002/004/005 e o filtro `alterado_desde`) já estão aplicados em produção — confirmado por dois dumps (21/09 e 22/09), não é mais trabalho a fazer. Ver [[Auditoria-Dump-Producao-2026-09-21]] e [[Auditoria-Dump-Producao-2026-09-22]]. Decisão de realocar essa folga (puxar algo de S2 pra S1, por exemplo) fica com o Nathan/Gustavo — não assumida aqui.
 
 ### 3.1 Extensão de 3 meses (21/09/2026) — capacidade da S5
 
@@ -220,8 +220,8 @@ Carga por sprint (planejado ÷ capacidade, em pessoa-dia):
 
 | Sprint | Janela | Dias úteis | Nathan | Gustavo | Robert | Pablo |
 |---|---|---|---|---|---|---|
-| **S1** — Destravar e fundação | 18/09 a 02/10 | 11 | 4,1 ÷ 4,4 | 5,5 ÷ 6,6 | 7,5 ÷ 8,2 | 7,5 ÷ 8,2 |
-| **S2** — Fase 0 (sistema) + núcleo do Estoque | 05/10 a 16/10 | 9 | 3,3 ÷ 3,6 | 4,8 ÷ 5,4 | 6,0 ÷ 6,8 | 4,0 ÷ 6,8 |
+| **S1** — Destravar e fundação | 18/09 a 02/10 | 11 | 4,1 ÷ 4,4 | 2,5 ÷ 6,6 | 7,5 ÷ 8,2 | 7,5 ÷ 8,2 |
+| **S2** — Fase 0 (sistema) + núcleo do Estoque | 05/10 a 16/10 | 9 | 3,3 ÷ 3,6 | 2,8 ÷ 5,4 | 6,0 ÷ 6,8 | 4,0 ÷ 6,8 |
 | **S3** — Fases A + B + levantamento físico | 19/10 a 30/10 | 10 | 3,7 ÷ 4,0 | 4,6 ÷ 6,0 | 7,0 ÷ 7,5 | 7,0 ÷ 7,5 |
 | **S4** — Fase C + integração + marco zero | 02/11 a 13/11 | 9 | 3,6 ÷ 3,6 | 4,5 ÷ 5,4 | 6,5 ÷ 6,8 | 6,0 ÷ 6,8 |
 | **FC** — Fechamento: homologação e go/no-go | 16/11 a 18/11 | 3 | 1,2 ÷ 1,2 | 1,8 ÷ 1,8 | 2,2 ÷ 2,2 | 2,2 ÷ 2,2 |
@@ -250,9 +250,9 @@ gantt
     section Banco, pipeline e infra
     B1 Fechar perguntas dos contratos :b1, 2026-09-21, 2026-09-26
     B2 Homologação + backup do MES :b2, 2026-09-21, 2026-09-26
-    B3 Aplicar SQL 001 e 005 :b3, 2026-09-28, 2026-10-03
-    B4 API alterado_desde :b4, 2026-09-28, 2026-10-03
-    B5 Aplicar SQL 002 e 004 :b5, 2026-10-05, 2026-10-10
+    B3 Aplicar SQL 001 e 005 :done, b3, 2026-09-18, 2026-09-19
+    B4 API alterado_desde :done, b4, 2026-09-18, 2026-09-19
+    B5 Aplicar SQL 002 e 004 :done, b5, 2026-09-18, 2026-09-19
     B6 Pipeline ELT - Passos 1, 3, 6, 9 :b6, 2026-10-08, 2026-10-16
     B7 Backup/WAL + runbook de rollback :b7, 2026-11-09, 2026-11-14
     B8 Suporte do piloto :b8, 2026-11-16, 2026-11-19
@@ -305,6 +305,11 @@ gantt
     I5 Jobs de projeção + BFF Torre de Fluxo :i5, 2026-11-26, 2026-12-09
     I7 SLA por etapa + regra de autorização :i7, 2026-12-07, 2026-12-10
     I6 Telas da Torre de Fluxo :i6, 2026-12-07, 2026-12-18
+    section Genealogia de material
+    J2 Schema - MOVIMENTO_ESTOQUE tipo CONSUMO :j2, 2026-11-19, 2026-11-25
+    J3 Backend - consumo FIFO por OS-OP :j3, 2026-11-26, 2026-12-04
+    J4 Endpoint de genealogia :j4, 2026-12-04, 2026-12-10
+    J5 Tela - consulta de genealogia :j5, 2026-12-10, 2026-12-18
 ```
 
 ## 5. Plano por sprint
@@ -324,8 +329,8 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 | D1 | Schema Prisma estoque v1 + migrations (material, alias, depósito, localização, lote, movimento) | Pablo | 4 | 21/09–29/09 | DEC-4, DEC-7 | Migrations aplicadas em homologação |
 | F1 | Spec do contrato de integração v1: requisição, referência da OC e status por item + autenticação entre serviços | Nathan | 1,5 | 21/09–29/09 | DEC-2 | Spec aprovada por Robert e Gustavo; polling, idempotência e dono de cada coluna definidos |
 | A3 | Pauta do módulo financeiro (Passo 15) + critérios de aceite por fase | Nathan | 0,6 | 28/09–02/10 | - | Critérios de aceite de Fase 0/A/B/C no vault; pauta financeira enviada a quem decide o roadmap |
-| B3 | Aplicar contratos SQL 001 (parceiros fiscais) e 005 (locais de estoque) | Gustavo | 1,5 | 28/09–02/10 | B1 | Colunas/tabelas criadas; contratos marcados como aplicada |
-| B4 | API alterado_desde em /produtos e /parceiros (contrato API 001) | Gustavo | 1,5 | 28/09–02/10 | B1 | Filtro incremental no ar em api-acos-vital |
+| B3 | ✅ **Já aplicado (confirmado 21-22/09)** — ~~Aplicar~~ contratos SQL 001 (parceiros fiscais) e 005 (locais de estoque) | Gustavo | ~~1,5~~ 0 | — | B1 | Colunas/tabelas já existem em produção (`core.parceiros_dados_bancarios`/`_endereco_entrega`, `core.locais_estoque`) — nada a fazer. Ver [[Auditoria-Dump-Producao-2026-09-21]]. |
+| B4 | ✅ **Já aplicado (confirmado 21/09)** — ~~API~~ `alterado_desde` em /produtos e /parceiros (contrato API 001) | Gustavo | ~~1,5~~ 0 | — | B1 | Filtro incremental já está no ar em `api-acos-vital` (`src/routes/produtos.js:185-234`, `parceiros.js`) — nada a fazer. Ver [[Auditoria-Dump-Producao-2026-09-21]]. |
 | C4 | PCP Carteira (backend): importar itens do pedido pelo gateway | Robert | 1,5 | 28/09–02/10 | - | Itens do pedido de venda disponíveis no MES por número do pedido |
 | D2 | Módulo base do Estoque: guards, seeds e harness de testes e2e | Pablo | 2 | 28/09–02/10 | D1 | Módulo sobe no MES com testes e2e rodando |
 | C2 | Vínculo Fábrica ↔ Unidade/Filial (codigo_empresa) | Robert | 1,5 | 30/09–02/10 | DEC-1 | Toda fábrica com filial; pedido cruzável por unidade |
@@ -335,7 +340,7 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 
 | ID | Entrega | Resp. | pd | Janela | Depende de | Pronto quando |
 |---|---|---|---|---|---|---|
-| B5 | Aplicar contratos SQL 002 (estoque_saldo) e 004 (pedidos_compras) | Gustavo | 2 | 05/10–09/10 | B1, DEC-7 | Tabelas criadas; contratos marcados como aplicada |
+| B5 | ✅ **Já aplicado (confirmado 21-22/09)** — ~~Aplicar~~ contratos SQL 002 (estoque_saldo) e 004 (pedidos_compras) | Gustavo | ~~2~~ 0 | — | B1, DEC-7 | `core.estoque_saldo` e `core_vendas_faturamento.pedidos_compras`/`_itens` já existem em produção; risco do `numero_item_omie` também resolvido (`ordem` é a identidade, índice único `uq_pedidos_compras_itens_ordem` aplicado) — nada a fazer. Ver [[Auditoria-Dump-Producao-2026-09-21]] e [[004-Pedidos-Compras]]. |
 | C5 | RBAC por instância de setor (guard global + PerfilSetor) | Robert | 3 | 05/10–14/10 | C3 | Almoxarife, Qualidade e Gestor de Estoque com escopo por warehouse/setor |
 | E1 | ✅ **Adiantado (22/09/2026)** — Compras v1: modelagem + caixa de entrada de requisições vindas do MES | Nathan | 3 | 05/10–16/10 | F1, DEC-2 | Comprador vê as requisições do PCP no av-hub. Backend implementado e testado (contrato SQL [[008-Requisicoes-Compra]], branch local `feat/compras-requisicoes-e1` em `api-acos-vital`) — ainda não deployado em produção. Ver [[AV-Hub-Views-Compras-Investigacao]] e [[Decisoes-Chave-ERP]]. |
 | B6 | Pipeline ELT: Passos 1, 3, 6 e 9 (parceiros fiscais, lead_time, locais, etapas) | Gustavo | 1,5 | 08/10–15/10 | B3, B5 | Parceiros com dados fiscais e locais de estoque sincronizando; etapas confirmadas em produção |
@@ -442,7 +447,7 @@ Cada uma tem um *default* escrito: se ninguém decidir até a data, o default va
 
 | Risco | Prob. | Impacto | Mitigação | Gatilho de alarme |
 |---|---|---|---|---|
-| Decisões atrasam além de 25/09 | Alta | Alto | Cada decisão tem default escrito; se DEC-1/2/7 não saírem até 29/09, o default vale e vira registro no vault. | Contratos e schema (B3, B5, D1) sem data de início em 29/09 |
+| Decisões atrasam além de 25/09 | Alta | Alto | Cada decisão tem default escrito; se DEC-1/2/7 não saírem até 29/09, o default vale e vira registro no vault. | Schema do Estoque (D1) sem data de início em 29/09 — B3/B4/B5 (Gustavo) já não dependem mais disso, contratos já aplicados em produção |
 | Levantamento físico depende da operação (não é trabalho de dev) | Média | Alto | Agendar já em 21/09; contar por warehouse em ondas; dupla conferência obrigatória. | Operação sem equipe dedicada em 19/10 → M5 desliza; o piloto de recebimento segue |
 | Integração av-hub ↔ MES v1 é o maior item em aberto e ainda não foi desenhada | Alta | Alto | Spec F1 na primeira semana; só 3 fluxos por polling; nada de tempo real. | Spec F1 sem aprovação em 02/10 |
 | Robert e Pablo também sustentam o MES em produção | Alta | Alto | Foco fixado em 75%; demanda nova do MES vai para o backlog do ciclo 2. | Mais de 1 dia/semana de suporte não planejado |
