@@ -66,8 +66,8 @@ Entrada Comercial → PCP (Carteira) → [Estoque | Revenda | Fabricação] → 
 | Entrada comercial (venda)            | [[AV-Hub-Visao-Geral\|av-hub]] + [[Omie-ELT-Pipeline\|pipeline ELT]] | ✅ Em produção                                                                             |
 | Acompanhamento comercial/financeiro  | [[AV-Hub-Modulos\|Portal PCP, Portal Vendedor, Portal Gerente]]      | ✅ Em produção                                                                             |
 | Estoque / Recebimento / Compras      | [[PRD-Estoque-Visao-Geral\|PRD Estoque]]                             | 📋 Só planejado (mas Compras pode já ter views de backend — ver [[AV-Hub-Bugs-Catalogo]]) |
-| Fabricação — Flanges                 | [[App-PCP-Visao-Geral\|app-pcp]] / MES Aços Vital                    | 🚧 Backend maduro, frontend em construção (Robert). Única fábrica cadastrada hoje. |
-| Fabricação — Grade de Piso, Chapa Expandida, Caldeiraria etc. | MES Aços Vital (mesmo modelo Fábrica/Setor/Roteiro) | 📋 Sistema definido, fábricas/roteiros ainda não cadastrados (lista aberta, não só essas três) |
+| Fabricação — Flanges                 | [[App-PCP-Visao-Geral\|app-pcp]] / MES                    | 🚧 Backend maduro, frontend em construção (Robert). Única fábrica cadastrada hoje. |
+| Fabricação — Grade de Piso, Chapa Expandida, Caldeiraria etc. | MES (mesmo modelo Fábrica/Setor/Roteiro) | 📋 Sistema definido, fábricas/roteiros ainda não cadastrados (lista aberta, não só essas três) |
 | Revenda — corte de chapa sob medida (plasma/laser) | [[PRD-Estoque-Visao-Geral\|PRD Estoque]] (beneficiamento) | 📋 É Revenda, não Fabricação — ver [[Fabricacao-Chapas]] |
 | Faturamento / Expedição              | Omie (nota fiscal) + av-hub (visão)                                  | ✅ Parcial (fiscal fica no Omie)                                                           |
 | Comissionamento                      | [[AV-Hub-Comissao-Modulo]]                                           | ✅ Schema de backend em produção, uso ainda a esclarecer                                   |

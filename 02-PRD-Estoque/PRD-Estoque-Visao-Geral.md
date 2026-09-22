@@ -22,7 +22,7 @@ Cobre os ramos [[Rota-Estoque|Estoque]] e [[Rota-Revenda|Revenda]] do [[Fluxo-Op
 - **Portal Comercial B2B** (av-hub) — projeto vizinho de verdade (banco/sistema separado do MES); consome saldo de revenda via view somente leitura.
 - **Fiscal** — permanece 100% no Omie; o sistema nunca emite nota, só referencia e sinaliza.
 
-O PCP de **produção** (execução de fábrica/roteiro, hoje `app-pcp`) e o Estoque compartilham o mesmo sistema/banco (MES Aços Vital) — não é um projeto vizinho consumindo view de fora, é consulta interna dentro do mesmo MES. Ver [[MES-Arquitetura-Decisoes]] e [[PCP-Carteira]] (que continua sendo o conceito de classificação de item, não o sistema de execução).
+O PCP de **produção** (execução de fábrica/roteiro, hoje `app-pcp`) e o Estoque compartilham o mesmo sistema/banco (MES) — não é um projeto vizinho consumindo view de fora, é consulta interna dentro do mesmo MES. Ver [[MES-Arquitetura-Decisoes]] e [[PCP-Carteira]] (que continua sendo o conceito de classificação de item, não o sistema de execução).
 
 ## Escopo v1 (dentro)
 

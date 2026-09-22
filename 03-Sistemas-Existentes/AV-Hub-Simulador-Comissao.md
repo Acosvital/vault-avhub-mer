@@ -28,9 +28,10 @@ Hoje o vendedor tira um pedido no Omie e depois usa uma planilha Excel manual (`
 
 Corrige 4 bugs herdados da planilha original (comissão = valor × letra; célula misturando R$ com %; prejuízo não zerava comissão; ICMS do pedido baseado só no primeiro item).
 
-## ⚠️ Ponto a esclarecer com o usuário
+## ✅ Esclarecido (22/09/2026)
 
-Isto parece ser uma frente de trabalho **paralela** à automação de comissão em Python já registrada como projeto separado (integração OMIE + Excel + dashboard Next.js). Vale confirmar se são a mesma iniciativa vista de dois ângulos, ou dois esforços concorrentes que precisam ser reconciliados.
+O projeto Python paralelo (integração OMIE + Excel + dashboard Next.js) **é só um teste do Robert** — confirmado pelo Nathan. Não é uma segunda iniciativa concorrente que precise ser reconciliada com este protótipo nem com o `core_comissionamento` do backend; fica fora do escopo do ERP unificado. Sem impacto no roadmap do Simulador de Comissão nem no schema já existente.
 
 ## Ver também
 - [[AV-Hub-Modulos]]
+- [[AV-Hub-Comissao-Modulo]]

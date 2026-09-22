@@ -64,6 +64,8 @@ O dump tem **12 schemas de negócio + `public`** (só extensões), 74 tabelas, 1
 
 **Resolução (confirmada pelo Nathan em conversa, 21/09):** o schema `negocio` de fato não existe mais — provavelmente hipótese 1 (produção migrou para `core_compras`, código nunca foi atualizado/removido). Os 8 endpoints GET que dependem dele (`/catalogo_de_produtos`(`/:id`), `/fornecedores_com_produtos`(`/:id`), `/historico_precos`, `/todos_os_fornecedores`(`/:id`) — ver `src/app.js:1665-1668`) são **código morto conhecido, não utilizável hoje, sem uso real** — não é um bug afetando alguém agora, é dívida técnica que "será mexida depois". Sem ação imediata necessária; registrar como item de limpeza (remover as 4 rotas + 4 services + os 4 imports em `app.js`, ou migrar de fato pra `core_compras` se algum consumidor real aparecer) em [[AV-Hub-Bugs-Catalogo]] ou equivalente, sem prioridade no cronograma atual.
 
+**Atualização (22/09/2026):** confirmado em runtime, não só em leitura de código — ver [[AV-Hub-Views-Compras-Investigacao]]. As 4 rotas retornam erro real (`relation "negocio.vw_..." does not exist`) ao serem chamadas contra a API rodando. Investigação foi além: mesmo corrigido o bug de schema, a tabela-fonte (`core.parceiros_produtos`) tem zero linhas no dump de produção — a hipótese de que essas views já cobririam o futuro módulo de Compras está fechada, não cobrem.
+
 ---
 
 ## 5. app-pcp / api-pcp (MES) — confirmação
@@ -94,3 +96,4 @@ Modelo Prisma (22 models) lido por completo e comparado com [[App-PCP-Modelo-Pro
 - [[Schema-Postgres-Multi-Dominio]]
 - [[App-PCP-Modelo-Producao]]
 - [[Perguntas-em-Aberto-Consolidadas]] — I-02 (inconsistência do contrato 006) resolvida por esta auditoria
+- [[AV-Hub-Views-Compras-Investigacao]] — achado da seção 4 confirmado em runtime em 22/09

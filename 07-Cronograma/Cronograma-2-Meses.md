@@ -337,7 +337,7 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 |---|---|---|---|---|---|---|
 | B5 | Aplicar contratos SQL 002 (estoque_saldo) e 004 (pedidos_compras) | Gustavo | 2 | 05/10–09/10 | B1, DEC-7 | Tabelas criadas; contratos marcados como aplicada |
 | C5 | RBAC por instância de setor (guard global + PerfilSetor) | Robert | 3 | 05/10–14/10 | C3 | Almoxarife, Qualidade e Gestor de Estoque com escopo por warehouse/setor |
-| E1 | Compras v1: modelagem + caixa de entrada de requisições vindas do MES | Nathan | 3 | 05/10–16/10 | F1, DEC-2 | Comprador vê as requisições do PCP no av-hub |
+| E1 | ✅ **Adiantado (22/09/2026)** — Compras v1: modelagem + caixa de entrada de requisições vindas do MES | Nathan | 3 | 05/10–16/10 | F1, DEC-2 | Comprador vê as requisições do PCP no av-hub. Backend implementado e testado (contrato SQL [[008-Requisicoes-Compra]], branch local `feat/compras-requisicoes-e1` em `api-acos-vital`) — ainda não deployado em produção. Ver [[AV-Hub-Views-Compras-Investigacao]] e [[Decisoes-Chave-ERP]]. |
 | B6 | Pipeline ELT: Passos 1, 3, 6 e 9 (parceiros fiscais, lead_time, locais, etapas) | Gustavo | 1,5 | 08/10–15/10 | B3, B5 | Parceiros com dados fiscais e locais de estoque sincronizando; etapas confirmadas em produção |
 | C6 | PCP Carteira: classificação natureza × disponibilidade (backend + tela) | Robert | 3 | 08/10–16/10 | C4 | PCP classifica cada item (Revenda/Fabricação × pronto/MP/sem estoque) |
 | D5 | Cadastros: material (campos extras), depósito/warehouse e localização - API + telas | Pablo | 4 | 08/10–16/10 | D3, C5, DEC-6 | Material com peso teórico, tolerância, mín/máx e ponto de pedido; localizações cadastradas |
@@ -351,7 +351,7 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 | C7 | PCP: requisição de compra (endpoint + tela; payload C1 do fluxo) | Robert | 2,5 | 19/10–23/10 | C6, F1 | Requisição sai do MES com material, quantidade, prazo e filial |
 | D6 | Recebimento (backend): conferência dupla, divergência com saída, pesagem, quarentena, RNC e cisão de lote | Robert | 4,5 | 19/10–30/10 | D5, F2, DEC-5 | Nenhum estado sem saída; lote nasce em quarentena |
 | D7 | Recebimento (frontend): fila, conferência quantitativa, pesagem, divergência | Pablo | 4 | 19/10–28/10 | D5 | Almoxarife executa o recebimento ponta a ponta em homologação |
-| E2 | Compras: fechar compra (fornecedor, preço, aprovação condicional, acabado/não acabado, CIF/FOB, previsão de chegada) + OC estruturada | Nathan | 3 | 19/10–30/10 | E1, DEC-3 | OC com dados estruturados, sem PDF; CCP registra previsão de chegada |
+| E2 | ✅ **Adiantado (22/09/2026)** — Compras: fechar compra (fornecedor, preço, aprovação condicional, acabado/não acabado, CIF/FOB, previsão de chegada) + OC estruturada | Nathan | 3 | 19/10–30/10 | E1, DEC-3 | OC com dados estruturados, sem PDF; CCP registra previsão de chegada. Backend implementado e testado (contrato SQL [[007-Ordens-Compra-Estruturada]], mesma branch local) — régua de R$30.000 confirmada em BRL e moeda estrangeira; sincronização com o Omie (`IncluirPedCompra`) e parcelas reais (catálogo de condição de pagamento) ficam pendentes. Ainda não deployado. |
 | F2 | API de OC estruturada + jobs de poll (requisições → av-hub; referência da OC → MES) | Gustavo | 3 | 19/10–30/10 | F1, E1 | Requisição e OC trafegam entre os dois sistemas em homologação |
 | B9 | (stretch) Passo 5 - histórico de pedidos de compra do Omie | Gustavo | 2 | 26/10–30/10 | B5 | Só se houver folga; primeiro corte se apertar |
 | D8 | Qualidade (frontend): fila de inspeção, laudo, aprova/reprova, RNC e cisão | Pablo | 3 | 26/10–30/10 | D6 | Qualidade inspeciona, aprova ou reprova; lote reprovado é cindido |
@@ -478,4 +478,5 @@ O piloto de recebimento (H4) roda de 11/11 a 18/11 em **1 posto**, com material 
 - [[MES-Arquitetura-Decisoes]]
 - [[Fluxogramas-Completos]]
 - [[Rastreabilidade-e-SLA-de-Eventos]] e [[Campos-e-API-para-Rastreabilidade]] — proposta de rastreabilidade com impacto em D1, F1 e F3.
+- [[Integracao-AvHub-MES-Especificacao-F1]] — rascunho da spec F1 (requisição, referência da OC, status por item), aguardando aprovação de Robert e Gustavo.
 - Ver também: [[Roteiro-de-Implementacao]] e [[Indice-Contratos]].

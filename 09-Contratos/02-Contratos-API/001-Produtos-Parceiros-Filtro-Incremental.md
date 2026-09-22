@@ -1,15 +1,26 @@
 ---
 tags: [contrato-api, dev, api-acos-vital]
-status: proposta
+status: aplicada
 criado: 2026-09-17
+atualizado: 2026-09-22
 ---
 
 # Contrato de API 001 — filtro incremental `alterado_desde` em `GET /produtos` e `GET /parceiros`
+
+**Status: aplicada.** Confirmado em `src/routes/produtos.js:185-234`/`parceiros.js` contra o código real (21/09/2026) — ver [[Auditoria-Dump-Producao-2026-09-21]]. `GET /produtos` e `GET /parceiros` já implementam `?alterado_desde=` exatamente com o comportamento documentado abaixo. As 3 perguntas em aberto já foram todas resolvidas — ver [[Perguntas-em-Aberto-Consolidadas]] (G-13, G-14, G-15):
+- **Pergunta 1 (exclusão não aparece no filtro):** resolvida em 21/09/2026 — Gustavo implementou `?incluir_deletados=true` em ambas as rotas; os excluídos voltam no mesmo payload incremental, com `deleted_at` preenchido.
+- **Pergunta 2 (nome do parâmetro):** confirmado — `alterado_desde` já está em produção e é o nome esperado pelo time de Estoque.
+- **Pergunta 3 (autenticação do consumidor):** esclarecido, não resolvido — hoje `apiKeyAuth.js` só valida contra a lista do `.env`, sem registrar qual chave bateu; o `requestLogger` grava a chave mascarada, então diferenciar consumidores nos logs é possível **só se cada um tiver chave própria**, decisão ainda não tomada para este contrato. Os contratos [[003-Requisicao-Compra-Integracao-MES]] e [[005-Status-Item-Integracao-MES]] (integração av-hub↔MES) já adotam chave por direção (`MES_API_KEY`) — mesma recomendação poderia se estender a este contrato quando o Estoque virar consumidor real.
+
+<details>
+<summary>Texto original da proposta (17/09/2026), antes da confirmação em produção</summary>
 
 **Status:** proposta, não implementada. Não depende de DDL — os models
 `Produto`/`Parceiro` já têm `updated_at` (Sequelize `timestamps: true`,
 `paranoid: true`). É uma mudança só de rota (`src/routes/produtos.js`,
 `src/routes/parceiros.js`), sem alteração de schema.
+
+</details>
 
 **Repositório de destino:** `api-acos-vital` (`src/routes/produtos.js`, `src/routes/parceiros.js`).
 
@@ -86,3 +97,5 @@ Mesmo bloco (adaptado) em `src/routes/parceiros.js`.
 
 ## Ver também
 - [[Indice-Contratos]]
+- [[Auditoria-Dump-Producao-2026-09-21]]
+- [[Perguntas-em-Aberto-Consolidadas]]

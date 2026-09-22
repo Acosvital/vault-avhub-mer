@@ -5,7 +5,7 @@ criado: 2026-09-16
 
 # MES Aços Vital — Arquitetura e Decisões
 
-Registro do desenho de arquitetura entre av-hub e o sistema de fábrica (nome de trabalho: **MES Aços Vital**, até um nome melhor ser definido). Complementa [[Decisoes-Chave-ERP]] e [[Achado-Ambiguidade-PCP]] — este arquivo é o detalhe, aqueles continuam sendo o resumo executivo.
+Registro do desenho de arquitetura entre av-hub e o sistema de fábrica (nome: **MES** — confirmado pelo Nathan em 22/09/2026, aceito por ora, com abertura para trocar no futuro). Complementa [[Decisoes-Chave-ERP]] e [[Achado-Ambiguidade-PCP]] — este arquivo é o detalhe, aqueles continuam sendo o resumo executivo.
 
 ## Visão geral
 
@@ -37,14 +37,18 @@ Registro do desenho de arquitetura entre av-hub e o sistema de fábrica (nome de
    - **Status por item**: o MES devolve ao av-hub o andamento da produção item a item, para alimentar o Portal do Vendedor/Carteira do PCP.
    - **Implicação da DEC-1 (por pedido)**: os 3 fluxos precisam carregar `codigo_empresa` explicitamente em cada payload — nunca assumir a filial a partir da Fábrica.
    - **Ainda em aberto, não faz parte desta decisão**: G-15 (mesma `x-api-key` compartilhada entre todos os consumidores, ou uma por integração) segue sem resposta — ver [[Perguntas-em-Aberto-Consolidadas]].
-   - Isso destrava a escrita da spec **F1** (prazo 29/09), que passa a ser o detalhamento técnico desses 3 fluxos, não mais a escolha do mecanismo.
+   - Isso destrava a escrita da spec **F1** (prazo 29/09), que passa a ser o detalhamento técnico desses 3 fluxos, não mais a escolha do mecanismo. Rascunho em [[Integracao-AvHub-MES-Especificacao-F1]], aguardando aprovação de Robert e Gustavo.
 
 ## Dúvidas em aberto (perguntadas, ainda não respondidas)
 
 - **Conceito de "Orçamento"**: ainda não foi pensado pelo time — não é budget/verba nem necessariamente a formalização do cálculo de markup/ICMS/margem já visto no protótipo de comissão. Fica em aberto para quando entrar em pauta.
-- **Nome definitivo do MES**: "MES Aços Vital" é só nome de trabalho.
+
+## Resolvidas
+
+- **Nome do MES — resolvido (22/09/2026)**: é **MES**, confirmado pelo Nathan — aceito por ora, com abertura para trocar no futuro.
 
 ## Ver também
+- [[Integracao-AvHub-MES-Especificacao-F1]]
 - [[Fluxo-Detalhado-Pedido-Item]]
 - [[Perguntas-Pendentes-MES-Estoque]]
 - [[Decisoes-Chave-ERP]]

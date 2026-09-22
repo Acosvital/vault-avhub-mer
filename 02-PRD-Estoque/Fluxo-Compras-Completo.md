@@ -157,6 +157,7 @@ Item aprovado sai da quarentena. Se já tinha destinação pra um pedido especí
 - **CCP e Logística de entrada são atores do fluxo** — detalhados em C6/C6b e C7b/C8. Lista completa de setores em [[Setores-Envolvidos-no-Fluxo]].
 
 ## Ver também
+- [[Integracao-AvHub-MES-Especificacao-F1]] — spec técnica dos 3 fluxos por polling que cruzam a fronteira av-hub↔MES (C1, C7, C19 abaixo)
 - [[Setores-Envolvidos-no-Fluxo]]
 - [[Fluxo-Detalhado-Pedido-Item]]
 - [[Modelo-Destinacao-Item]]

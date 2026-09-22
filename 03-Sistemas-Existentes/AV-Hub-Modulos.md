@@ -33,8 +33,13 @@ Roda 100% sobre JSON local (`app/(protected)/orcamento/_data/*.json`), sem API p
 - **Sem Cadastro** — fila de pendência (fornecedores de vínculo sem cadastro em Parceiros).
 - ⚠️ Possível ponto de integração com o módulo de Compras do [[PRD-Estoque-Visao-Geral|PRD do Estoque]], que deixou "cotação entre fornecedores" fora do escopo v1 — ver pendência de relação produto↔fornecedor real em [[AV-Hub-Bugs-Catalogo]].
 
+## Compras (E1/E2)
+Achado em 22/09/2026: o módulo inteiro já existe no frontend (`app/(protected)/compras/*`, `components/Compras/`) — **Requisições** (caixa de entrada + Kanban), **Ordens** (fechamento de compra + Kanban), **Aprovações** (fila dedicada), **Dashboard de Compras** e o fluxo de emissão (`/compras/nova`, `/compras/nova/{requisicaoId}`). Contrato completo do próprio frontend em `docs/ENVIAR - contrato-compras-fluxo-completo.md` (repositório av-hub) — mais detalhado que os contratos originais do vault, usado como fonte da verdade pra escrever os contratos SQL [[007-Ordens-Compra-Estruturada]] e [[008-Requisicoes-Compra]].
+
+Backend real implementado e testado em 22/09/2026 (branch local `feat/compras-requisicoes-e1` em `api-acos-vital`, ainda sem push/deploy): `GET/POST/PATCH /compras/requisicoes` e `/compras/ordens`, mais `GET /compras/fornecedores`/`/compras/transportadoras` (projeção de `core.parceiros`, sem contrato de API formal escrito ainda — pendência). Régua de aprovação de R$ 30.000 confirmada em BRL e em moeda estrangeira (conversão via `cotacao_moeda`). **Duas lacunas conscientes, não escondidas**: sincronização real com o Omie (`IncluirPedCompra`) não implementada — `status_sincronizacao_omie` sempre `pendente`; cálculo de parcelas é um placeholder (split igual + 30 dias) por falta de um catálogo real de condição de pagamento. Ver [[AV-Hub-Views-Compras-Investigacao]] e [[Decisoes-Chave-ERP]].
+
 ## Fechamento
-Fechamento manual por mês/tipo, com regra de transição: até agosto/2026 é 100% manual (totais automáticos "não confiáveis" — ver divergências em [[AV-Hub-Vendas-Reconciliacao]]); a partir de setembro/2026 lê automaticamente dos dashboards, mas um lançamento manual salvo continua tendo prioridade pontual sobre o automático. Depende da tabela `fechamento_manual`, confirmada existente no backend real (ver [[AV-Hub-Bugs-Catalogo]]).
+Fechamento manual por mês/tipo, com regra de transição confirmada em runtime ([[AV-Hub-Fechamento-Manual-Investigacao]], 22/09/2026): até agosto/2026 é 100% manual (16 registros reais confirmados no banco, totais automáticos "não confiáveis" até então — ver divergências em [[AV-Hub-Vendas-Reconciliacao]]); a partir de setembro/2026 lê automaticamente de `fn_dashboard_mensal_vendas`/`fn_dashboard_mensal_faturamento` (confirmado: zero registros manuais desde set/2026). **A "prioridade pontual" do manual sobre o automático não tem nenhum suporte no backend** — os dois caminhos são independentes no código do `api-acos-vital`; se essa prioridade existe, só pode estar implementada no frontend (não verificável sem o repositório do av-hub-main).
 
 ## Cadastros
 - **Acessos**: Usuários (sem anonimização LGPD — a coluna `anonymizedAt` não existe no schema real, só `ativo`/`deleted_at` — ver [[AV-Hub-RBAC]]), Perfis (com `tela_inicial_id`), Permissões (com `BulkPermissaoModal` para edição em lote), Telas (árvore via `id_parent`+`ordem`), Usuários×Perfis, Vendedores (com `id_funcionario` ainda não exposto na UI), Diligenciadores, Auxiliares de vendedor.
@@ -51,3 +56,7 @@ Menu lateral dinâmico (`Menu.tsx`) monta a árvore a partir de `telas`+permiss�
 - [[AV-Hub-Vendas-Reconciliacao]]
 - [[AV-Hub-Bugs-Catalogo]]
 - [[AV-Hub-Portal-Vendedor-Plano]]
+- [[AV-Hub-Fechamento-Manual-Investigacao]]
+- [[AV-Hub-Views-Compras-Investigacao]]
+- [[007-Ordens-Compra-Estruturada]]
+- [[008-Requisicoes-Compra]]

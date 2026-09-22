@@ -1,15 +1,23 @@
 ---
 tags: [contrato-sql, dba, omie-elt-pipeline]
-status: proposta
+status: aplicada
 criado: 2026-09-17
+atualizado: 2026-09-22
 ---
 
 # Contrato SQL 003 (antes 008 no omie-elt-pipeline) — `pedidos_vendas` (desconto) + 2 tabelas novas (frete, parcelas)
+
+**Status: aplicada.** Confirmado contra o dump de produção `dump-avhub_prd_db-202609210741.sql` (21/09/2026) — ver [[Auditoria-Dump-Producao-2026-09-21]]. `core_vendas_faturamento.pedidos_vendas` já tem `tipo_desconto_pedido`/`perc_desconto_pedido`/`valor_desconto_pedido`; `pedidos_vendas_frete` (1:1) e `pedidos_vendas_parcelas` (1:N) já existem com os campos propostos abaixo. Seção original preservada como histórico de design.
+
+<details>
+<summary>Texto original da proposta (17/09/2026), antes da confirmação em produção</summary>
 
 **Status:** proposta, aguardando revisão e aplicação pelo DBA (Gustavo).
 Nada aplicado ainda. Design **não fechado com o usuário** — vem da
 documentação pública da API (`developer.omie.com.br`, endpoint "Pedidos de
 Venda" → tipo `pedido_venda_produto`), não de payload real confirmado.
+
+</details>
 
 **Repositório de origem:** `omie-elt-pipeline` (`sql/dba_migrations/008_pedidos_vendas_frete_parcelas_contrato.md`).
 
@@ -136,3 +144,4 @@ mesmo padrão de `produto_vendas`).
 ## Ver também
 - [[Indice-Contratos]]
 - [[006-Pedidos-Vendas-Valor-Devolucao]]
+- [[Auditoria-Dump-Producao-2026-09-21]]

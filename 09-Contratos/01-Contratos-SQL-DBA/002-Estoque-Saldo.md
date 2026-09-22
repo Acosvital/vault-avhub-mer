@@ -1,15 +1,23 @@
 ---
 tags: [contrato-sql, dba, omie-elt-pipeline]
-status: proposta
+status: aplicada
 criado: 2026-09-17
+atualizado: 2026-09-22
 ---
 
 # Contrato SQL 002 (antes 007 no omie-elt-pipeline) — `core.estoque_saldo`
+
+**Status: aplicada.** Confirmado contra o dump de produção `dump-avhub_prd_db-202609210741.sql` (21/09/2026) — ver [[Auditoria-Dump-Producao-2026-09-21]]. `core.estoque_saldo` já existe, colunas batem quase exatamente com o DDL proposto abaixo. **Pergunta em aberto 1 resolvida na prática**: o model Sequelize `EstoqueSaldo` confirma que a implementação real é "foto atual" (upsert 1 linha por empresa+produto+local), não série histórica. Pergunta em aberto 2 (`cmc`/`preco_unitario`) segue sem confirmação formal registrada. Seção original abaixo preservada como histórico de design.
+
+<details>
+<summary>Texto original da proposta (17/09/2026), antes da confirmação em produção</summary>
 
 **Status:** proposta, aguardando criação pelo DBA (Gustavo). Nada aplicado
 ainda. Design **não fechado com o usuário** — tipos/campos vêm da
 documentação pública da API (`developer.omie.com.br`, endpoint "Consulta
 Estoque"), não de um payload real confirmado contra a conta de produção.
+
+</details>
 
 **Repositório de origem:** `omie-elt-pipeline` (`sql/dba_migrations/007_estoque_saldo_contrato.md`).
 
@@ -113,3 +121,4 @@ sync diário).
 - [[Indice-Contratos]]
 - [[001-Parceiros-Dados-Fiscais]]
 - [[005-Locais-Estoque]]
+- [[Auditoria-Dump-Producao-2026-09-21]]

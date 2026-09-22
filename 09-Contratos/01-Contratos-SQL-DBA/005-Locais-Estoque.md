@@ -1,15 +1,13 @@
 ---
 tags: [contrato-sql, dba, omie-elt-pipeline]
-status: proposta
+status: aplicada
 criado: 2026-09-17
+atualizado: 2026-09-22
 ---
 
 # Contrato SQL 005 (antes 010 no omie-elt-pipeline) — `core.locais_estoque`
 
-**Status:** proposta, aguardando criação pelo DBA (Gustavo). Nada aplicado
-ainda. Design **não fechado com o usuário** — vem da documentação pública
-da API (`developer.omie.com.br`, endpoint "Locais de Estoque"), não de
-payload real confirmado.
+**Status: aplicada — pergunta em aberto sobre FK opcional segue sem resposta.** Confirmado contra o dump de produção `dump-avhub_prd_db-202609210741.sql` (21/09/2026) — ver [[Auditoria-Dump-Producao-2026-09-21]]. `core.locais_estoque` já existe, campos batem com o DDL proposto abaixo. **Sem FK para `deposito`** (tabela `deposito` ainda não existe do lado do Estoque/MES) — Gustavo adiciona quando ela existir; a pergunta em aberto 1 abaixo não é respondível por dump, é decisão de arquitetura ainda pendente.
 
 **Repositório de origem:** `omie-elt-pipeline` (`sql/dba_migrations/010_locais_estoque_contrato.md`).
 
@@ -107,3 +105,4 @@ forma independente").
 - [[Indice-Contratos]]
 - [[002-Estoque-Saldo]]
 - [[004-Pedidos-Compras]]
+- [[Auditoria-Dump-Producao-2026-09-21]]

@@ -15,11 +15,15 @@ Para os **"diligenciadores"** — pessoas do setor de PCP que acompanham pedidos
 
 O sistema de **Programação e Controle de Produção de chão de fábrica** — fábricas, setores, máquinas, operadores, roteiro de produção. Hoje focado em [[Fabricacao-Flanges|Flanges]]. Ver [[App-PCP-Visao-Geral]].
 
-O sistema de fábrica se chama **"MES Aços Vital"** (nome de trabalho, até um nome melhor ser definido) e cobre Estoque + toda a fabricação (linha aberta: Flanges hoje, Grades de Piso/Chapa Expandida/Caldeiraria etc. conforme forem cadastradas — **Chapas não entra aqui**, corte de chapa é beneficiamento de Revenda, ver [[Fabricacao-Chapas]]), não só Flanges. Isso resolve a ambiguidade na prática: "PCP" (a sigla) deixa de ser o nome do sistema; o "Portal PCP" do av-hub continua existindo com esse nome (acompanhamento comercial), sem conflito. Ver [[MES-Arquitetura-Decisoes]].
+O sistema de fábrica se chama **MES** (confirmado pelo Nathan em 22/09/2026 — aceito por ora, com abertura para trocar no futuro) e cobre Estoque + toda a fabricação (linha aberta: Flanges hoje, Grades de Piso/Chapa Expandida/Caldeiraria etc. conforme forem cadastradas — **Chapas não entra aqui**, corte de chapa é beneficiamento de Revenda, ver [[Fabricacao-Chapas]]), não só Flanges. Isso resolve a ambiguidade na prática: "PCP" (a sigla) deixa de ser o nome do sistema; o "Portal PCP" do av-hub continua existindo com esse nome (acompanhamento comercial), sem conflito. Ver [[MES-Arquitetura-Decisoes]].
 
 ## Por que isso importa
 
-É o mesmo departamento da empresa (PCP), mas duas ferramentas com propósitos completamente distintos e o mesmo nome de três letras. Isso já causou confusão nesta própria análise (o autor deste vault inicialmente leu `services/pcp/pedidos.ts` no av-hub como se fosse dado de produção fabril, quando na verdade é acompanhamento de pedido/nota comercial). Vale **desambiguar deliberadamente** na nomenclatura do ERP unificado — por exemplo, "PCP Comercial" (diligenciamento) vs. "PCP Produção" (chão de fábrica), ou nomes completamente diferentes.
+É o mesmo departamento da empresa (PCP), mas duas ferramentas com propósitos aparentemente distintos e o mesmo nome de três letras. Isso já causou confusão nesta própria análise (o autor deste vault inicialmente leu `services/pcp/pedidos.ts` no av-hub como se fosse dado de produção fabril, quando na verdade é acompanhamento de pedido/nota comercial).
+
+## ✅ Resolvido (22/09/2026): não desambiguar — o nome compartilhado está correto
+
+Decisão do Nathan: **não faz sentido desambiguar o nome "PCP"**, porque não é uma coincidência de nomenclatura a corrigir — é o mesmo setor da empresa de verdade, legitimamente presente nos dois sistemas: o setor de PCP é quem a fábrica **responde**, e o PCP **vê tudo** (produção de chão de fábrica, no app-pcp/MES); o "Portal PCP" do av-hub é a mesma função de PCP, só que a fatia voltada para **diligenciadores** acompanhando pedido/nota comercial. Não são dois departamentos distintos disputando o mesmo nome — é um departamento único com dois pontos de contato diferentes, cada um no sistema certo para aquela parte do trabalho dele. A recomendação anterior desta nota ("PCP Comercial" vs. "PCP Produção" ou nomes diferentes) fica **descartada**.
 
 ## Ver também
 - [[AV-Hub-Modulos]]

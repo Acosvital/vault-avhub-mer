@@ -1,15 +1,25 @@
 ---
 tags: [contrato-sql, dba, omie-elt-pipeline]
-status: proposta
+status: aplicada
 criado: 2026-09-17
+atualizado: 2026-09-22
 ---
 
 # Contrato SQL 004 (antes 009 no omie-elt-pipeline) — `core_vendas_faturamento.pedidos_compras` + itens
+
+**Status: aplicada — risco de identidade do item resolvido em 22/09/2026.** Confirmado contra o dump de produção `dump-avhub_prd_db-202609221142.sql` (22/09/2026) — ver [[Auditoria-Dump-Producao-2026-09-22]] (atualiza o achado da auditoria de 21/09, [[Auditoria-Dump-Producao-2026-09-21]]). `core_vendas_faturamento.pedidos_compras` e `pedidos_compras_itens` já existem, campos batem com o proposto abaixo. **Pergunta em aberto 3 (identidade estável de item de compra) está resolvida tanto no design ([[Decisoes-Chave-ERP]], 21/09) quanto agora na migration real**: `ordem` (posição do item no array do payload, `CHECK (ordem >= 1)`) é a chave, com índice único `uq_pedidos_compras_itens_ordem (id_pedido_compra, ordem)` já aplicado em produção. `numero_item_omie` segue nullable, mas agora documentado como campo **complementar** (cruzamento com recebimento/NF de entrada), não como identidade — tem seu próprio índice único parcial (`WHERE numero_item_omie IS NOT NULL`) pronto para quando o campo for confirmado contra payload real. Estratégia de sync recomendada no próprio comentário da tabela: REPLACE-ALL (delete dos itens do pedido + insert do array inteiro, mesma transação) ou upsert por `(id_pedido_compra, ordem)`. Pergunta em aberto 1 (criação nativa de pedido de compra no Estoque/MES em vez do Omie) segue relevante — ver também o contrato SQL [[007-Ordens-Compra-Estruturada]], que resolve essa mesma questão para a OC que o **av-hub** (não o Omie) decide e cria — são tabelas diferentes, não confundir. Seção original preservada como histórico de design.
+
+**Não confundir com [[007-Ordens-Compra-Estruturada]]:** esta tabela (`pedidos_compras`) é um espelho **read-only do histórico do Omie** (extração fiscal via pipeline ELT); a 007 é a Ordem de Compra que o **próprio av-hub decide e cria** internamente (tarefa E2, fluxo de integração av-hub↔MES) — propósitos e ciclos de vida diferentes.
+
+<details>
+<summary>Texto original da proposta (17/09/2026), antes da confirmação em produção</summary>
 
 **Status:** proposta, aguardando criação pelo DBA (Gustavo). Nada aplicado
 ainda. Design **não fechado com o usuário** — vem da documentação pública
 da API (`developer.omie.com.br`, endpoint "Pedidos de Compra"), não de
 payload real confirmado.
+
+</details>
 
 **Repositório de origem:** `omie-elt-pipeline` (`sql/dba_migrations/009_pedidos_compras_contrato.md`).
 
@@ -163,11 +173,10 @@ ordem garantida).
 2. `codigo_pedido_compra_omie` como `integer` — confirmar se o Omie sempre
    devolve um id numérico estável (equivalente ao `codigo_pedido_omie` de
    vendas) ou se existe um identificador mais robusto a usar como chave.
-3. Falta identificar item de compra estável entre resyncs (equivalente ao
+3. ~~Falta identificar item de compra estável entre resyncs (equivalente ao
    `codigo_item_omie` de `produto_vendas`) — sem isso, resync de item pode
    duplicar (mesma classe de bug já corrigida em `produto_vendas`, ver
-   README do `omie-elt-pipeline`, seção "Bug real encontrado..."). Confirmar
-   na doc/payload real antes de aplicar.
+   README do `omie-elt-pipeline`, seção "Bug real encontrado...").~~ ✅ **RESOLVIDO** — decidido em 21/09/2026 ([[Decisoes-Chave-ERP]]) e aplicado em produção confirmado no dump de 22/09 ([[Auditoria-Dump-Producao-2026-09-22]]): a chave é `(id_pedido_compra, ordem)`, com índice único aplicado. `numero_item_omie` fica só como dado complementar.
 
 ## Depois de criada
 
@@ -177,3 +186,6 @@ resource) e registrar em `src/omie/resources/index.ts`.
 ## Ver também
 - [[Indice-Contratos]]
 - [[005-Locais-Estoque]]
+- [[007-Ordens-Compra-Estruturada]] — não confundir; propósito diferente (OC decidida no av-hub, não espelho do Omie)
+- [[Auditoria-Dump-Producao-2026-09-21]]
+- [[Auditoria-Dump-Producao-2026-09-22]]

@@ -1,7 +1,7 @@
 ---
 tags: [contrato-sql, contrato-api, indice]
 criado: 2026-09-17
-atualizado: 2026-09-21
+atualizado: 2026-09-22
 ---
 
 # Contratos — ERP Aços Vital
@@ -11,7 +11,7 @@ Seção dedicada só a **contratos** — documentos formais de mudança que prec
 ## Como está organizado
 
 - **[[001-Produtos-Parceiros-Filtro-Incremental|1. Contratos de API]]** — mudanças de contrato de request/response em endpoints REST já existentes, ou endpoints novos. Pasta `02-Contratos-API/`.
-- **2. Contratos SQL para o DBA** — DDL proposto (CREATE/ALTER TABLE), pronto para o Gustavo revisar e aplicar. Pasta `01-Contratos-SQL-DBA/`: [[001-Parceiros-Dados-Fiscais]], [[002-Estoque-Saldo]], [[003-Pedidos-Vendas-Frete-Parcelas]], [[004-Pedidos-Compras]], [[005-Locais-Estoque]], [[006-Pedidos-Vendas-Valor-Devolucao]].
+- **2. Contratos SQL para o DBA** — DDL proposto (CREATE/ALTER TABLE), pronto para o Gustavo revisar e aplicar. Pasta `01-Contratos-SQL-DBA/`: [[001-Parceiros-Dados-Fiscais]], [[002-Estoque-Saldo]], [[003-Pedidos-Vendas-Frete-Parcelas]], [[004-Pedidos-Compras]], [[005-Locais-Estoque]], [[006-Pedidos-Vendas-Valor-Devolucao]], [[007-Ordens-Compra-Estruturada]], [[008-Requisicoes-Compra]].
 
 ## Convenção de todo contrato
 
@@ -40,13 +40,19 @@ própria (001 em diante) independente da numeração do outro repositório.
 | [[001-Parceiros-Dados-Fiscais]] | SQL | `core.parceiros` + dados fiscais | **aplicada** (confirmado no dump 21/09; `dadosBancarios`/`enderecoEntrega` vêm por endpoint próprio; `chave_pix` ajustada para `varchar(255)`) |
 | [[002-Estoque-Saldo]] | SQL | `core.estoque_saldo` (novo) | **aplicada** (confirmado no dump 21/09; "foto atual" confirmado como a implementação real) |
 | [[003-Pedidos-Vendas-Frete-Parcelas]] | SQL | `pedidos_vendas` + frete/parcelas | **aplicada** (confirmado no dump 21/09) |
-| [[004-Pedidos-Compras]] | SQL | `pedidos_compras` (novo) | **aplicada** (confirmado no dump 21/09) — risco do `numero_item_omie` **resolvido em 21/09**: identidade do item passou a ser `(id_pedido_compra, ordem)` |
+| [[004-Pedidos-Compras]] | SQL | `pedidos_compras` (novo) | **aplicada** — risco do `numero_item_omie` **resolvido na prática em 22/09** (design decidido em 21/09, migration confirmada no dump de 22/09): identidade do item é `(id_pedido_compra, ordem)`, com índice único aplicado |
 | [[005-Locais-Estoque]] | SQL | `core.locais_estoque` (novo) | **aplicada** (confirmado no dump 21/09) — sem FK para `deposito` por decisão (tabela ainda não existe); Gustavo adiciona quando ela existir |
 | [[006-Pedidos-Vendas-Valor-Devolucao]] | SQL | `pedidos_vendas.valor_devolucao` | **invalidado** (frontmatter do arquivo já dizia isso desde 17/09; este índice estava com a inconsistência I-02, agora corrigida) |
 | [[001-Produtos-Parceiros-Filtro-Incremental]] | API | `?alterado_desde=` em produtos/parceiros (av-hub) | **aplicada** (confirmado em `src/routes/produtos.js`/`parceiros.js`) |
 | [[002-Material-Alias-Omie-MES]] | API | `material_alias_omie` — vínculo de duplicata (destinatário: MES/Estoque) | **rejeitada em 21/09/2026** — decisão do Nathan: duplicata de catálogo sai do escopo deste sistema, resolve-se direto no Omie |
+| [[003-Requisicao-Compra-Integracao-MES]] | API | Requisição de compra, MES → av-hub (Fluxo 1 da spec F1) | **proposta** — aprovada por Nathan em 22/09/2026; aprovação formal de Robert e Gustavo ainda pendente |
+| [[004-Referencia-OC-Integracao-MES]] | API | Referência da OC, av-hub → MES (Fluxo 2 da spec F1) | **proposta** — aprovada por Nathan em 22/09/2026; depende do contrato SQL [[007-Ordens-Compra-Estruturada]]; aprovação formal de Robert e Gustavo ainda pendente |
+| [[005-Status-Item-Integracao-MES]] | API | Status por item, MES → av-hub (Fluxo 3 da spec F1) | **proposta** — aprovada por Nathan em 22/09/2026; aprovação formal de Robert e Gustavo ainda pendente |
+| [[007-Ordens-Compra-Estruturada]] | SQL | `core_vendas_faturamento.ordens_compra` + itens + parcelas — OC decidida no av-hub (E2) | **proposta** — reescrita em 22/09/2026 pra bater exatamente com `docs/ENVIAR - contrato-compras-fluxo-completo.md` do repositório av-hub (frontend já implementado, rodando sobre mock); aguardando aplicação do Gustavo |
+| [[008-Requisicoes-Compra]] | SQL | `core_vendas_faturamento.requisicoes_compra` (novo) — caixa de entrada de Compras (E1) | **proposta** — aprovada por Nathan em 22/09/2026, alinhada com o mesmo contrato do frontend; aguardando aplicação do Gustavo |
 
 ## Ver também
 - [[Roteiro-de-Implementacao]]
 - [[Decisoes-Chave-ERP]]
 - [[Campos-e-API-para-Rastreabilidade]] — lista de tabelas, campos e endpoints novos para rastreabilidade; cada bloco vira contrato SQL ou de API aqui depois que a spec F1 for aprovada.
+- [[Auditoria-Dump-Producao-2026-09-21]] e [[Auditoria-Dump-Producao-2026-09-22]] — depara completo contra dump de produção

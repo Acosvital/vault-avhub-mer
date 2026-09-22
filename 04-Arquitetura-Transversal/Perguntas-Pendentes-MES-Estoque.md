@@ -55,7 +55,7 @@ O MES vai suportar **as duas formas** (usuário/senha pro chão de fábrica, e-m
 
 - **Desenho exato do vínculo Fábrica ↔ Unidade/Filial** — confirmado que será criado, mas ainda não definido *como* (1 fábrica = 1 filial fixa? vínculo por pedido?).
 - **Conceito de "Orçamento"** (ainda não pensado, entra depois).
-- **Nome definitivo do sistema de fábrica** (hoje "MES Aços Vital" é nome de trabalho).
+- ~~**Nome definitivo do sistema de fábrica**~~ ✅ **Resolvido em 22/09/2026**: é **MES**, confirmado pelo Nathan — aceito por ora, com abertura para trocar no futuro.
 - **Devolução de cliente**: mecanismo exato (decisão no av-hub vs. nascer no Estoque) ainda em aberto (ver seção acima).
 - **Mecanismo real da projeção read-only de fornecedor/material (av-hub → Estoque)** — não é "o mesmo mecanismo de evento" que outras notas chegaram a citar (esse mecanismo não existe, ver [[Decisoes-Chave-ERP]], item "Casamento av-hub ↔ MES"). Hoje não há webhook nem infraestrutura de evento entre av-hub e MES — o padrão único de sincronização entre sistemas é polling. Candidato mais simples: Estoque consome por polling os endpoints REST já existentes de `api-acos-vital` (`GET /produtos`, `GET /parceiros`), que hoje não têm filtro incremental por data de alteração (`updated_at`) — precisaria ser adicionado para um polling eficiente.
 

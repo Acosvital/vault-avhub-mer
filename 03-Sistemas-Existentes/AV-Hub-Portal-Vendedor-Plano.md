@@ -32,8 +32,11 @@ GET /api/minhas-notas    → mesma lógica, /nf_classified
 Todas com `requirePermission` própria e resolução de vínculo via `getServerSession` — nenhuma aceita filtro de vendedor vindo do cliente.
 
 ## Extras validados (não implementados ainda, sem bloqueio técnico)
-Estados vazios/erro, badge de SLA crítico no menu lateral, comparação com mês anterior, "próximos vencimentos" ranqueado, top clientes do vendedor (via agregação de `detalhe_vendedor_vendas` no cliente — `ranking_clientes_vendas` não filtra por vendedor), copiar nº com 1 clique, "dados atualizados às HH:MM" honesto (usar o `updated_at` mais recente entre os registros carregados, nunca a hora do navegador), exportar CSV/Excel, cliente inativo (caro — exige N chamadas por mês), favoritar cliente/pedido (precisa de tabela nova para sincronizar entre dispositivos), histórico de status do pedido (parcial — só os marcos que já existem como datas), **top produtos vendidos** (✅ viável via `GET /pedido_venda_itens`, view dedicada `vw_pedido_venda_itens` com item a item por pedido/vendedor), ritmo de meta por semana, filtro por status, SLA agregado por cliente.
+Estados vazios/erro, badge de SLA crítico no menu lateral, comparação com mês anterior, "próximos vencimentos" ranqueado, top clientes do vendedor (via agregação de `detalhe_vendedor_vendas` no cliente — `ranking_clientes_vendas` não filtra por vendedor), copiar nº com 1 clique, "dados atualizados às HH:MM" honesto (usar o `updated_at` mais recente entre os registros carregados, nunca a hora do navegador), exportar CSV/Excel, histórico de status do pedido (parcial — só os marcos que já existem como datas), **top produtos vendidos** (✅ viável via `GET /pedido_venda_itens`, view dedicada `vw_pedido_venda_itens` com item a item por pedido/vendedor), ritmo de meta por semana, filtro por status, SLA agregado por cliente.
+
+**Cliente inativo** e **favoritar cliente/pedido** saíram desta lista de "extras caros" — investigados a fundo em [[AV-Hub-Favoritos-Clientes-Inativos-Investigacao]] (22/09/2026), testado em runtime: `GET /clientes_inativos` já funciona de ponta a ponta, pronto, só falta frontend; `favoritar cliente/pedido` (`usuarios_favoritos`) tinha um bug real de backend no `POST` (`id` do model sem `defaultValue`, Sequelize barrava a criação antes de chegar no Postgres) — **já corrigido e testado no mesmo dia** — falta só decidir sobre push/merge e plugar o frontend nos dois.
 
 ## Ver também
 - [[AV-Hub-Modulos]]
 - [[AV-Hub-Vendas-Reconciliacao]]
+- [[AV-Hub-Favoritos-Clientes-Inativos-Investigacao]]

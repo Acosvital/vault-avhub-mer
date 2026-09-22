@@ -1,10 +1,16 @@
 ---
 tags: [contrato-sql, dba, omie-elt-pipeline]
-status: proposta
+status: aplicada
 criado: 2026-09-17
+atualizado: 2026-09-22
 ---
 
 # Contrato SQL 001 (antes 006 no omie-elt-pipeline) — `core.parceiros` (dados fiscais) + 2 tabelas novas
+
+**Status: aplicada.** Confirmado contra o dump de produção `dump-avhub_prd_db-202609210741.sql` (21/09/2026) — ver [[Auditoria-Dump-Producao-2026-09-21]]. `core.parceiros` já tem todas as colunas propostas; `core.parceiros_dados_bancarios` e `core.parceiros_endereco_entrega` já existem como tabelas 1:1 com FK CASCADE, e os models Sequelize correspondentes já estão em uso. Diferenças confirmadas contra o proposto abaixo: `dadosBancarios`/`enderecoEntrega` são servidos por endpoint próprio (não só embutidos em `ListarClientes` — resolve a pergunta aberta 1 original), e `chave_pix` foi ajustada para `varchar(255)` (não os `varchar(100)` propostos na pergunta aberta 3). Seção original abaixo preservada como histórico de design.
+
+<details>
+<summary>Texto original da proposta (17/09/2026), antes da confirmação em produção</summary>
 
 **Status:** proposta, aguardando revisão e aplicação pelo DBA (Gustavo).
 Nada aplicado ainda — o `omie-elt-pipeline` nunca altera schema sozinho.
@@ -14,6 +20,8 @@ já aplicado) — os tipos/tamanhos abaixo vêm da documentação pública da AP
 etc" → `clientes_cadastro`), não de um payload real confirmado contra a
 conta de produção. Confirmar contra um payload real antes de aplicar (ver
 seção final).
+
+</details>
 
 **Repositório de origem:** `omie-elt-pipeline` (`sql/dba_migrations/006_parceiros_dados_fiscais_contrato.md`).
 
@@ -152,3 +160,4 @@ para `core.parceiros_tipos`).
 ## Ver também
 - [[Indice-Contratos]]
 - [[002-Estoque-Saldo]]
+- [[Auditoria-Dump-Producao-2026-09-21]]
