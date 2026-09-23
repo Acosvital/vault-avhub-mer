@@ -39,6 +39,9 @@ e [[008-Requisicoes-Compra]] também já estão aplicados.
   campo contra a doc oficial do Omie em 23/09/2026.
 - **[[16-Compradores-Funcionario]]** — cadastro de compradores por filial, ligado ao funcionário
   (resolve o `nCodCompr` do Omie).
+- **[[20-Compras-Cotacao-Moeda-PTAX]]** — cotação de USD/EUR preenchida sozinha na OC: job
+  diário da PTAX do Banco Central → `core.cotacoes_moeda` → `GET /cotacoes_moeda/atual`, com a
+  origem da cotação (`ptax`/`manual`) gravada na OC.
 - Os mesmos pedidos, separados por destinatário: [[17-Compras-Pedido-DBA-Banco]] (DBA),
   [[18-Compras-Pedido-API-Backend]] (backend) e [[19-Compras-Pedido-Pipeline-Omie]]
   (`omie-elt-pipeline`).

@@ -224,6 +224,10 @@ para o desconto em valor. Frete e seguro também, se forem lançados na moeda de
 formulário mostra os dois em R$, então confirmar). A moeda e a cotação originais só podem ir
 como texto: **vão no bloco AV-HUB de `cObsInt`** (§3.8), com o total e o valor unitário de cada item na moeda original.
 
+A cotação passa a vir preenchida da PTAX do Banco Central, com a origem gravada na OC
+(`cotacao_origem` = `ptax` ou `manual`, e `cotacao_data`): ver
+`ENVIAR - contrato-compras-cotacao-moeda-ptax.md`.
+
 ### 3.4 Frete: `ordens_compra` → `frete_incluir`
 
 | Omie | Vem de | Observação |
@@ -308,7 +312,7 @@ voltar do Omie. Linhas sem valor são omitidas.
 OC: OC-000123 | Requisição: REQ-000045
 Emitida por: Fulano de Tal em 23/09/2026 14:02
 Aprovada por: Beltrano em 23/09/2026 16:40 | E-mail do aprovador: beltrano@acosvital.com.br
-Moeda: USD | Cotação: 5,380000 | Total na moeda: US$ 6.300,00 | Total em R$: 33.894,00
+Moeda: USD | Cotação: 5,380000 (PTAX venda 22/09/2026) | Total na moeda: US$ 6.300,00 | Total em R$: 33.894,00
 Itens:
  1. Não acabado (matéria-prima) | US$ 12,50/KG | Desc. 5% | Local: Galpão 2
  2. Acabado | US$ 40,00/UN

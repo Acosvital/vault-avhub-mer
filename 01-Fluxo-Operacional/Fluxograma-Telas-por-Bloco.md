@@ -439,14 +439,14 @@ Só o FOB (L2) tem trabalho operacional da empresa sem tela. Hoje isso se resolv
 
 Não são raia do fluxograma, mas sem elas nada roda.
 
-| # | Tela | Funcionalidades | Estado | Tarefa |
-|---|---|---|---|---|
-| T.1 | **Login duplo do MES** | Usuário/senha (chão de fábrica, sem e-mail corporativo) **e** e-mail/Azure AD (perfis de escritório: almoxarife, Qualidade, gestor de estoque). Comprador e Aprovador nunca logam no MES | 🆕 | **C1** |
-| T.2 | **Perfis × Setor × Filial** | RBAC por **instância** de setor — um líder de setor só enxerga o próprio setor. DEC-1 acrescentou a dimensão de filial: `PerfilSetor` precisa de `perfil × setor × codigo_empresa`, não só `perfil × setor` | 🆕 | **C3, C5** |
-| T.3 | **Torre de Fluxo — mapa por setor** | Volume e gargalo por setor; itens atrasados, acima da meta de etapa, ou em fila sem dono. [Protótipo já existe](https://claude.ai/artifact/SS4C4srRk9cr66UHUS2rE3) (dados fictícios) | ⏭️ | **I1-I7** (S5) |
-| T.4 | **Torre de Fluxo — trilha do item** | Linha do tempo completa de um item: ator, autorizador, passagem, "com quem está" | ⏭️ | **I1-I7** (S5) |
-| T.5 | **Torre de Fluxo — tempo por etapa** | SLA por etapa; ranking de gargalos | ⏭️ | **I1-I7** (S5) |
-| T.6 | **Auditoria** | Log imutável `fluxo.evento` cobrindo todas as rotas; retenção **5 anos, sem expurgo automático** (DEC-9) | ⏭️ | **I1-I7** (S5) |
+| #   | Tela                                 | Funcionalidades                                                                                                                                                                                             | Estado | Tarefa         |
+| --- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------------- |
+| T.1 | **Login duplo do MES**               | Usuário/senha (chão de fábrica, sem e-mail corporativo) **e** e-mail/Azure AD (perfis de escritório: almoxarife, Qualidade, gestor de estoque). Comprador e Aprovador nunca logam no MES                    | 🆕     | **C1**         |
+| T.2 | **Perfis × Setor × Filial**          | RBAC por **instância** de setor — um líder de setor só enxerga o próprio setor. DEC-1 acrescentou a dimensão de filial: `PerfilSetor` precisa de `perfil × setor × codigo_empresa`, não só `perfil × setor` | 🆕     | **C3, C5**     |
+| T.3 | **Torre de Fluxo — mapa por setor**  | Volume e gargalo por setor; itens atrasados, acima da meta de etapa, ou em fila sem dono. [Protótipo já existe](https://claude.ai/artifact/SS4C4srRk9cr66UHUS2rE3) (dados fictícios)                        | ⏭️     | **I1-I7** (S5) |
+| T.4 | **Torre de Fluxo — trilha do item**  | Linha do tempo completa de um item: ator, autorizador, passagem, "com quem está"                                                                                                                            | ⏭️     | **I1-I7** (S5) |
+| T.5 | **Torre de Fluxo — tempo por etapa** | SLA por etapa; ranking de gargalos                                                                                                                                                                          | ⏭️     | **I1-I7** (S5) |
+| T.6 | **Auditoria**                        | Log imutável `fluxo.evento` cobrindo todas as rotas; retenção **5 anos, sem expurgo automático** (DEC-9)                                                                                                    | ⏭️     | **I1-I7** (S5) |
 
 **As 4 telas de Torre de Fluxo (T.3–T.6) dependem da rastreabilidade completa da S5** (19/11–18/12). O que entra antes disso é só o `/itens/status` do Fluxo 3 — 11 etapas, sem ator nem autorizador. O formato já nasce compatível: o envelope completo entra por adição de coluna, sem quebrar o cursor.
 
