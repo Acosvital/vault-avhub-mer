@@ -578,7 +578,7 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 
 ## Ato 17 · O vendedor acompanha
 
-**Força:** média · **Telas:** 1.1
+**Força:** média · **Telas:** 1.2
 
 - **1 · Chega** — vendedor abre Meus Pedidos.
 - **2 · Busca** — `itens_pedido_status`, a projeção local que o job alimenta a cada 1 a 2 min a partir de `GET /itens/status`.
@@ -587,7 +587,7 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 - **5 · Decide** — nada. É leitura.
 - **6 · Roteia** — nada. Este ato é o espelho de todos os outros.
 
-> **É o ato que justifica os outros 16.** Toda a rastreabilidade existe pra que esta tela possa responder "onde está meu item" sem ninguém ligar pra fábrica.
+> **É o ato que justifica os outros 17.** Toda a rastreabilidade existe pra que esta tela possa responder "onde está meu item" sem ninguém ligar pra fábrica.
 
 ---
 
