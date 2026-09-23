@@ -114,8 +114,8 @@ flowchart LR
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 45, 'rankSpacing': 62, 'padding': 14}}}%%
 flowchart TD
     subgraph SEC_VENDAS[1. Vendas - av-hub · 2 telas]
-        SA[/"polling do Omie para o av-hub. O pedido aparece SO para o vendedor"/]
-        SM[/"projeta a etapa de cada item - FRONTEIRA, polling 1-2 min"/]
+        SA["polling do Omie para o av-hub. O pedido aparece SO para o vendedor"]
+        SM["projeta a etapa de cada item - FRONTEIRA, polling 1-2 min"]
         V1[Vendedor emite o pedido no Omie]
         V2{Precisa de acompanhamento da Qualidade?}
         V3[Vendedor confirma e envia ao PCP]
@@ -127,10 +127,10 @@ flowchart TD
     end
 
     subgraph SEC_PCP[2. PCP - MES · 5 telas]
-        SN[/"o av-hub libera o pedido e o MES le por polling - FRONTEIRA"/]
-        SE[/"abre divergencia na fila Novo norte - nunca beco sem saida"/]
-        SG[/"devolve ao PCP para beneficiamento"/]
-        SK[/"cinde o lote e abre a RNC - nunca emite a nota"/]
+        SN["o av-hub libera o pedido e o MES le por polling - FRONTEIRA"]
+        SE["abre divergencia na fila Novo norte - nunca beco sem saida"]
+        SG["devolve ao PCP para beneficiamento"]
+        SK["cinde o lote e abre a RNC - nunca emite a nota"]
         P1[PCP classifica o item]
         P2{Natureza do item}
         P3{Disponibilidade}
@@ -143,7 +143,7 @@ flowchart TD
     end
 
     subgraph SEC_COMPRAS[3. Compras e CCP - av-hub · 6 telas]
-        SC[/"projeta a requisicao no av-hub - FRONTEIRA, polling 5 min"/]
+        SC["projeta a requisicao no av-hub - FRONTEIRA, polling 5 min"]
         C1[Cotacao e negociacao]
         C2{Acima de R$ 30.000?}
         C3[Aprovacao da diretoria]
@@ -170,7 +170,7 @@ flowchart TD
     end
 
     subgraph SEC_RECEB[6. Recebimento - MES · 5 telas]
-        SD[/"casa a chegada com a referencia da OC - FRONTEIRA"/]
+        SD["casa a chegada com a referencia da OC - FRONTEIRA"]
         R1[Confere Pedido de Venda ou Ordem de Compra]
         R2[Pesagem]
         R3{Bate com o esperado?}
@@ -182,7 +182,7 @@ flowchart TD
     end
 
     subgraph SEC_PROD[7. Fabrica e Beneficiamento - MES · 4 telas fora do ciclo]
-        SH[/"cria o ItemParcial com o roteiro e a filial do Pedido"/]
+        SH["cria o ItemParcial com o roteiro e a filial do Pedido"]
         F1[Abre ItemParcial]
         F2[Percorre o roteiro setor a setor]
         F3[Conclui no ultimo setor]
@@ -190,15 +190,15 @@ flowchart TD
     end
 
     subgraph SEC_ESTOQUE[8. Estoque - MES · 11 telas, 7 no ciclo]
-        SB[/"busca saldo e TRAVA a reserva na mesma operacao"/]
+        SB["busca saldo e TRAVA a reserva na mesma operacao"]
         E1[Confirma disponibilidade fisica]
         E2[Separacao fisica]
         E1 --> E2
     end
 
     subgraph SEC_QUAL[9. Qualidade - MES · 5 telas, 4 no ciclo]
-        SF[/"libera o lote em quarentena para inspecao"/]
-        SI[/"libera a conclusao para inspecao final"/]
+        SF["libera o lote em quarentena para inspecao"]
+        SI["libera a conclusao para inspecao final"]
         Q1[Inspecao]
         Q2{Aprova?}
         Q3[Abre RNC com evidencia]
@@ -208,7 +208,7 @@ flowchart TD
     end
 
     subgraph SEC_EXP[10. Expedicao e Logistica de saida - MES · 4 telas fora do ciclo]
-        SJ[/"tira da quarentena e confirma a reserva"/]
+        SJ["tira da quarentena e confirma a reserva"]
         X1[Embalagem e paletizacao]
         X2{Parcial ou integral?}
         X3[Consolida a carga]
@@ -219,7 +219,7 @@ flowchart TD
     end
 
     subgraph SEC_FISCAL[11. Fiscal - Omie · 1 tela fora do ciclo]
-        SL[/"sinaliza a NF ao Omie PELO GATEWAY do av-hub - o MES nunca fala com o Omie"/]
+        SL["sinaliza a NF ao Omie PELO GATEWAY do av-hub - o MES nunca fala com o Omie"]
         O1[Emite nota fiscal]
         O2[Baixa o item no pedido]
         O1 --> O2
