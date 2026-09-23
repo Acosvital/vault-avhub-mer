@@ -9,6 +9,8 @@ atualizado: 2026-09-22
 
 **Status: aplicada — risco de identidade do item resolvido em 22/09/2026.** Confirmado contra o dump de produção `dump-avhub_prd_db-202609221142.sql` (22/09/2026) — ver [[Auditoria-Dump-Producao-2026-09-22]] (atualiza o achado da auditoria de 21/09, [[Auditoria-Dump-Producao-2026-09-21]]). `core_vendas_faturamento.pedidos_compras` e `pedidos_compras_itens` já existem, campos batem com o proposto abaixo. **Pergunta em aberto 3 (identidade estável de item de compra) está resolvida tanto no design ([[Decisoes-Chave-ERP]], 21/09) quanto agora na migration real**: `ordem` (posição do item no array do payload, `CHECK (ordem >= 1)`) é a chave, com índice único `uq_pedidos_compras_itens_ordem (id_pedido_compra, ordem)` já aplicado em produção. `numero_item_omie` segue nullable, mas agora documentado como campo **complementar** (cruzamento com recebimento/NF de entrada), não como identidade — tem seu próprio índice único parcial (`WHERE numero_item_omie IS NOT NULL`) pronto para quando o campo for confirmado contra payload real. Estratégia de sync recomendada no próprio comentário da tabela: REPLACE-ALL (delete dos itens do pedido + insert do array inteiro, mesma transação) ou upsert por `(id_pedido_compra, ordem)`. Pergunta em aberto 1 (criação nativa de pedido de compra no Estoque/MES em vez do Omie) segue relevante — ver também o contrato SQL [[007-Ordens-Compra-Estruturada]], que resolve essa mesma questão para a OC que o **av-hub** (não o Omie) decide e cria — são tabelas diferentes, não confundir. Seção original preservada como histórico de design.
 
+**⚠️ Correção pendente antes de ligar a pipeline (23/09/2026).** A tabela foi aplicada, mas **quebra no primeiro upsert real**: as colunas de código do Omie são `INTEGER` e os códigos reais já passam do limite (fornecedor `10037044822`, 11 dígitos). Também faltam campos que o Omie devolve (`cNumPedido`, `nQtdeRec`, `cCodIntItem`, descrição e unidade do item, parcelas…), e o payload de referência abaixo tinha erros. O `ALTER` está em [[17-Compras-Pedido-DBA-Banco]] (D5), o de-para campo a campo em [[14-Compras-Omie-Pedido-Compra]] (§2) e o recurso da pipeline em [[19-Compras-Pedido-Pipeline-Omie]] (P1).
+
 **Não confundir com [[007-Ordens-Compra-Estruturada]]:** esta tabela (`pedidos_compras`) é um espelho **read-only do histórico do Omie** (extração fiscal via pipeline ELT); a 007 é a Ordem de Compra que o **próprio av-hub decide e cria** internamente (tarefa E2, fluxo de integração av-hub↔MES) — propósitos e ciclos de vida diferentes.
 
 <details>
@@ -35,44 +37,71 @@ pré-requisito de dado para o módulo de Recebimento do Estoque.
 
 ## Payload de referência (documentação pública, não confirmado contra conta real)
 
+**Corrigido em 23/09/2026** contra a doc oficial (`app.omie.com.br/api/v1/produtos/pedidocompra/`).
+A versão anterior tinha `nRegPorPagina`, um filtro `cEtapa` que não existe, `cNumPedido` no
+lugar de `cNumero`, tamanhos errados e desconto em percentual. O de-para completo está em
+[[14-Compras-Omie-Pedido-Compra]].
+
 ```
 POST https://app.omie.com.br/api/v1/produtos/pedidocompra/
-{"call":"PesquisarPedCompra","param":[{"nPagina":1,"nRegPorPagina":50,
-  "cEtapa":"..."}], ...}
+{"call":"PesquisarPedCompra","param":[{"nPagina":1,"nRegsPorPagina":50,
+  "lExibirPedidosPendentes":"T","lExibirPedidosFaturados":"T",
+  "lExibirPedidosRecebidos":"T","lExibirPedidosCancelados":"T",
+  "lExibirPedidosEncerrados":"T","lExibirPedidosRecParciais":"T",
+  "lExibirPedidosFatParciais":"T",
+  "dDataInicial":"01/09/2026","dDataFinal":"30/09/2026",
+  "lApenasAlterados":"F"}], ...}
+-- não existe filtro por cEtapa: a situação se escolhe pelas 7 flags lExibirPedidos*
+-- resposta: nTotalPaginas, nTotalRegistros, pedidos_pesquisa[] (cada pedido já completo)
 ```
 
 ```
-cabecalho {
+cabecalho_consulta {
   nCodPed            integer
-  cCodIntPed         string(20)
-  cNumPedido         string(15)
+  cCodIntPed         string(20)  -- código no av-hub (numero_ordem, fluxo de envio)
+  dIncData           string(10)
+  cIncHora           string(8)
+  cEtapa             string(2)   -- "Etapa atual". A doc NÃO lista os códigos
+                                 -- (pendente/faturado/... são os nomes das flags da pesquisa)
+  cNumero            string(15)  -- número do pedido NO OMIE
+  cNumPedido         string(30)  -- número do pedido PARA O FORNECEDOR
   dDtPrevisao        string(10)
-  nCodFor            integer   -- fornecedor
-  cCnpjCpfFor        string(20)
-  nCodCompr          integer   -- comprador
-  cContato           string(60)
+  cCodParc           string(3)   -- condição de pagamento ("999" = padrão)
+  nQtdeParc          integer
+  nCodFor            integer     -- fornecedor
+  cCodIntFor         string(20)
+  nCodCompr          integer     -- comprador
+  cContato           string(100)
   cContrato          string(20)
-  nCodCC             integer   -- conta corrente
+  nCodCC             integer     -- conta corrente
+  nCodIntCC          string(20)
   nCodProj           integer
   cCodCateg          string(20)
-  cObs               text
-  cObsInt             text
-  cEmailAprovador     string(100)
-  cEtapa              string(2)  -- pendente/faturado/recebido/cancelado/
-                                  -- encerrado/parcial
+  cObs               text        -- não sai impresso para o fornecedor
+  cObsInt            text        -- só para quem consulta o pedido
 }
-frete { transportadora, tipo_frete, placa, uf, volumes, peso_liquido,
-        peso_bruto, valor_frete, valor_seguro, valor_despesas }
-produtos[] {
+-- cCnpjCpfFor e cEmailAprovador só existem no incluir/upsert, NÃO vêm na consulta
+frete_consulta { nCodTransp (código, não nome), cTpFrete, cPlaca(7), cUF, nQtdVol,
+                 nPesoLiq, nPesoBruto, nValFrete, nValSeguro, nValOutras, ... }
+produtos_consulta[] {
+  cCodIntItem       string(20)
+  nCodItem          integer
   nCodProd          integer
+  cDescricao        string(120)
+  cUnidade          string(6)
+  cNCM              string(13)
   nQtde             decimal
   nValUnit          decimal
-  nPercDesconto     decimal
+  nValMerc          decimal
+  nDesconto         decimal      -- VALOR em R$, não percentual
+  nValTot           decimal
+  nQtdeRec          decimal      -- quantidade já recebida
   codigo_local_estoque integer
-  -- + blocos de ICMS/ICMS-ST/IPI/PIS/COFINS por item
+  cCodCateg         string(20)
+  -- + nValorIcms/St/Ipi/Pis/Cofins, nFrete, nSeguro, nDespesas por item; sem CFOP
 }
-parcelas[] { numero_parcela, data_vencimento, valor_parcela }
-departamentos[] { codigo_departamento, valor_rateio, percentual_rateio }
+parcelas_consulta[] { nParcela, dVencto, nValor, nDias, nPercent, cTipoDoc }
+departamentos_consulta[] { cCodDepto, nPerc, nValor }
 ```
 
 ## DDL

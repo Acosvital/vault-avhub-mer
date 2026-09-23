@@ -1,7 +1,7 @@
 ---
 tags: [contrato-sql, contrato-api, indice]
 criado: 2026-09-17
-atualizado: 2026-09-22
+atualizado: 2026-09-23
 ---
 
 # Contratos — ERP Aços Vital
@@ -11,9 +11,9 @@ Seção dedicada só a **contratos** — documentos formais de mudança que prec
 ## Como está organizado
 
 - **[[001-Produtos-Parceiros-Filtro-Incremental|1. Contratos de API]]** — mudanças de contrato de request/response em endpoints REST já existentes, ou endpoints novos. Pasta `02-Contratos-API/` (ainda em aberto) e `Realizados/02-Contratos-API/` (já aplicados).
-- **2. Contratos SQL para o DBA** — DDL proposto (CREATE/ALTER TABLE), pronto para o Gustavo revisar e aplicar. Pasta `01-Contratos-SQL-DBA/` (ainda em aberto): [[006-Pedidos-Vendas-Valor-Devolucao]], [[007-Ordens-Compra-Estruturada]], [[008-Requisicoes-Compra]].
-- **3. [[Indice-Logica-Fora-do-Backend|Contratos de lógica fora do backend]]** — importados de `av-hub/docs/` (arquivos marcados `ENVIAR`) em 23/09/2026: filtro/ordenação/paginação/permissão que hoje rodam no navegador em vez do banco/API. Pasta `03-Contratos-Logica-Fora-Backend/`. **Prioridade: [[01-Compras-Fluxo-Completo|Compras]]**, por ser o módulo greenfield sem nenhum endpoint hoje.
-- **Realizados** — contratos SQL e de API já aplicados em produção (status `aplicada`). Pasta `Realizados/01-Contratos-SQL-DBA/`: [[001-Parceiros-Dados-Fiscais]], [[002-Estoque-Saldo]], [[003-Pedidos-Vendas-Frete-Parcelas]], [[004-Pedidos-Compras]], [[005-Locais-Estoque]]. Pasta `Realizados/02-Contratos-API/`: [[001-Produtos-Parceiros-Filtro-Incremental]].
+- **2. Contratos SQL para o DBA** — DDL proposto (CREATE/ALTER TABLE), pronto para o Gustavo revisar e aplicar. Pasta `01-Contratos-SQL-DBA/` (ainda em aberto): [[006-Pedidos-Vendas-Valor-Devolucao]].
+- **3. [[Indice-Logica-Fora-do-Backend|Contratos de lógica fora do backend]]** — importados de `av-hub/docs/` (arquivos marcados `ENVIAR`) em 23/09/2026: filtro/ordenação/paginação/permissão que hoje rodam no navegador em vez do banco/API. Pasta `03-Contratos-Logica-Fora-Backend/`. **Prioridade: Compras.** O fluxo base já foi entregue ([[01-Compras-Fluxo-Completo]], em Realizados). O que falta está em [[15-Compras-Pendencias-Pos-Backend]], [[14-Compras-Omie-Pedido-Compra]] (envio da OC ao Omie e espelho dos pedidos de compra) e [[16-Compradores-Funcionario]], com os pedidos separados por destinatário em [[17-Compras-Pedido-DBA-Banco]], [[18-Compras-Pedido-API-Backend]] e [[19-Compras-Pedido-Pipeline-Omie]].
+- **Realizados** — contratos SQL e de API já aplicados em produção (status `aplicada`). Pasta `Realizados/01-Contratos-SQL-DBA/`: [[001-Parceiros-Dados-Fiscais]], [[002-Estoque-Saldo]], [[003-Pedidos-Vendas-Frete-Parcelas]], [[004-Pedidos-Compras]], [[005-Locais-Estoque]], [[007-Ordens-Compra-Estruturada]], [[008-Requisicoes-Compra]]. Pasta `Realizados/02-Contratos-API/`: [[001-Produtos-Parceiros-Filtro-Incremental]]. Pasta `Realizados/03-Contratos-Logica-Fora-Backend/`: [[01-Compras-Fluxo-Completo]].
 
 ## Convenção de todo contrato
 
@@ -48,10 +48,10 @@ própria (001 em diante) independente da numeração do outro repositório.
 | [[001-Produtos-Parceiros-Filtro-Incremental]] | API | `?alterado_desde=` em produtos/parceiros (av-hub) | **aplicada** (confirmado em `src/routes/produtos.js`/`parceiros.js`) |
 | [[002-Material-Alias-Omie-MES]] | API | `material_alias_omie` — vínculo de duplicata (destinatário: MES/Estoque) | **rejeitada em 21/09/2026** — decisão do Nathan: duplicata de catálogo sai do escopo deste sistema, resolve-se direto no Omie |
 | [[003-Requisicao-Compra-Integracao-MES]] | API | Requisição de compra, MES → av-hub (Fluxo 1 da spec F1) | **proposta** — aprovada por Nathan em 22/09/2026; aprovação formal de Robert e Gustavo ainda pendente |
-| [[004-Referencia-OC-Integracao-MES]] | API | Referência da OC, av-hub → MES (Fluxo 2 da spec F1) | **proposta** — aprovada por Nathan em 22/09/2026; depende do contrato SQL [[007-Ordens-Compra-Estruturada]]; aprovação formal de Robert e Gustavo ainda pendente |
+| [[004-Referencia-OC-Integracao-MES]] | API | Referência da OC, av-hub → MES (Fluxo 2 da spec F1) | **proposta** — aprovada por Nathan em 22/09/2026; contrato SQL [[007-Ordens-Compra-Estruturada]] já aplicado; aprovação formal de Robert e Gustavo ainda pendente |
 | [[005-Status-Item-Integracao-MES]] | API | Status por item, MES → av-hub (Fluxo 3 da spec F1) | **proposta** — aprovada por Nathan em 22/09/2026; aprovação formal de Robert e Gustavo ainda pendente |
-| [[007-Ordens-Compra-Estruturada]] | SQL | `core_vendas_faturamento.ordens_compra` + itens + parcelas — OC decidida no av-hub (E2) | **proposta** — reescrita em 22/09/2026 pra bater exatamente com `docs/ENVIAR - contrato-compras-fluxo-completo.md` do repositório av-hub (frontend já implementado, rodando sobre mock); aguardando aplicação do Gustavo |
-| [[008-Requisicoes-Compra]] | SQL | `core_vendas_faturamento.requisicoes_compra` (novo) — caixa de entrada de Compras (E1) | **proposta** — aprovada por Nathan em 22/09/2026, alinhada com o mesmo contrato do frontend; aguardando aplicação do Gustavo |
+| [[007-Ordens-Compra-Estruturada]] | SQL | `core_vendas_faturamento.ordens_compra` + itens + parcelas — OC decidida no av-hub (E2) | **aplicada** — confirmado em 23/09/2026 (`api-acos-vital` PR #273, junto com o 008); o aplicado difere do DDL em nomes e regras (ver o topo do arquivo). Envio ao Omie ainda não existe |
+| [[008-Requisicoes-Compra]] | SQL | `core_vendas_faturamento.requisicoes_compra` (novo) — caixa de entrada de Compras (E1) | **aplicada** — confirmado em 23/09/2026 (`api-acos-vital` PR #273, junto com o 007); o aplicado difere do DDL em nomes e nulidade (ver o topo do arquivo) |
 
 ## Ver também
 - [[Roteiro-de-Implementacao]]

@@ -1,5 +1,17 @@
 # Contrato — Módulo de Compras: requisição → ordem de compra → sincronização com o Omie
 
+> **✅ Implementado — backend entregue em 22/09/2026** (`api-acos-vital` commit `ec2a42b`, PR #273).
+> Front ligado em 23/09/2026 (branch `feat/compras-integracao-backend`): os dados de exemplo foram
+> apagados e o BFF não calcula mais a régua. **Confirmado ao vivo em `api-test` (23/09):** as listagens,
+> o detalhe (404 real), a validação de status e a busca de fornecedor/transportadora por unidade.
+> **Ainda não testado ao vivo:** POST/PATCH (emitir, aprovar/cancelar, mover requisição), porque o
+> banco de teste está vazio. O que o backend entregou diferente ou deixou de fora está em
+> `docs/ENVIAR - contrato-compras-pendencias-pos-backend.md` (C1–C8), principalmente os nomes na OC,
+> o resumo, a sincronização com o Omie (não existe) e `pode_aprovar`.
+>
+> O texto abaixo é o pedido original, mantido como histórico. As seções "O que existe hoje" e
+> "Gambiarra" descrevem o estado ANTES da entrega.
+
 **Criado em:** 21/09/2026, ao implementar a primeira versão do módulo de Compras no av-hub
 (`app/(protected)/compras/*`, `components/Compras/`). **É greenfield**: não existe hoje nenhum
 endpoint no backend para requisições de compra nem para ordens de compra — a tela roda inteira

@@ -1,11 +1,30 @@
 ---
 tags: [contrato-sql, dba, integracao-av-hub-mes, compras]
-status: proposta
+status: aplicada
 criado: 2026-09-22
-atualizado: 2026-09-22
+atualizado: 2026-09-23
 ---
 
 # Contrato SQL 007 — `core_vendas_faturamento.ordens_compra` + itens + parcelas (novo)
+
+**Status: aplicada — confirmado em 23/09/2026.** Entregue em `api-acos-vital` (commit `ec2a42b`, PR #273, mergeado em `main` em 22/09) junto com o [[008-Requisicoes-Compra]]. O av-hub já está ligado nele (branch `feat/compras-integracao-backend`), e as leituras foram confirmadas ao vivo em `api-test`. Produção não foi conferida.
+
+**O que foi aplicado difere do DDL abaixo** (o DDL fica como histórico de design; vale o que está no banco):
+
+| No DDL deste contrato | Como ficou aplicado |
+|---|---|
+| `numero_pedido` | `numero_ordem` (varchar 30, gerado `OC-000001` por unidade) |
+| `id_requisicao` | `requisicao_id` |
+| `codigo_comprador uuid NOT NULL` | **não existe**; só `created_by`. O comprador do Omie virou um contrato novo (tabela `compradores` + `ordens_compra.id_comprador`, em [[16-Compradores-Funcionario]]) |
+| `codigo_fornecedor`/`codigo_transportadora` varchar(40) | varchar(60) |
+| `status` default `rascunho` | default `aguardando_aprovacao`; o `status` do POST é **ignorado** e a trigger libera para `aprovado` abaixo do limite |
+| limite fixo de R$ 30.000 (pergunta 4) | tabela **`parametros_compras.limite_aprovacao`** por unidade (default 30.000), lida pela trigger |
+| `valor_total`/`valor_total_brl` pela aplicação (pergunta 1) | **calculados por trigger** a partir dos itens |
+| parcelas: `numero_parcela`, `data_vencimento`, `valor` | + `percentual` e `calculo_provisorio` (partes iguais a cada 30 dias enquanto não houver catálogo; pergunta 6) |
+| `id_ordem_compra` nos itens | `ordem_compra_id` |
+| `codigo_pedido_omie integer` | `BIGINT`; também há `sincronizado_em` |
+
+**Continua em aberto** (não é deste contrato): o envio real ao Omie (`status_sincronizacao_omie` sempre `pendente`), `pode_aprovar` e histórico de decisão. Está em [[15-Compras-Pendencias-Pos-Backend]] e [[14-Compras-Omie-Pedido-Compra]], com os pedidos separados por destinatário em [[17-Compras-Pedido-DBA-Banco]], [[18-Compras-Pedido-API-Backend]] e [[19-Compras-Pedido-Pipeline-Omie]].
 
 **Status:** proposta, aprovada por Nathan em 22/09/2026, **reescrita no mesmo dia** para bater exatamente com o contrato já escrito pelo frontend (`docs/ENVIAR - contrato-compras-fluxo-completo.md`, no repositório `av-hub`, criado 21/09/2026 ao construir `app/(protected)/compras/*`) — aquele documento é mais detalhado e vem do código real (domínio TypeScript já implementado, rodando hoje sobre dados de exemplo). Este contrato foi alinhado a ele campo a campo. **Gustavo: aplicar esta versão, não uma anterior.**
 

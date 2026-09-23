@@ -98,16 +98,16 @@ Mesma chamada já em produção, só mais um campo no objeto mapeado. Ver [[Comp
 ### Passo 5 🟢 — Extrair Pedidos de Compra (histórico)
 
 **Endpoint**: `https://app.omie.com.br/api/v1/produtos/pedidocompra/`
-**Método de leitura**: `PesquisarPedCompra` (busca por etapa: pendente/faturado/recebido/cancelado/encerrado/parcial) ou `ConsultarPedCompra` (por ID)
-**Método de escrita (confirmado existir, útil se o Estoque for criar pedidos programaticamente no futuro)**: `IncluirPedCompra`/`AlteraPedCompra`/`UpsertPedCompra`
+**Método de leitura**: `PesquisarPedCompra` (paginada por `nPagina`/`nRegsPorPagina`, janela `dDataInicial`/`dDataFinal`; **não existe filtro por etapa**: a situação se escolhe por 7 flags `lExibirPedidos*` — pendentes, faturados, recebidos, cancelados, encerrados, recebidos parcialmente, faturados parcialmente — e para o espelho vão todas em `T`) ou `ConsultarPedCompra` (por `nCodPed`, `cCodIntPed` ou `cNumero`). A pesquisa já traz cada pedido completo, então não precisa de um `ConsultarPedCompra` por pedido.
+**Método de escrita (confirmado existir)**: `IncluirPedCompra`/`AlteraPedCompra`/`UpsertPedCompra`. Já tem uso: é por ele que a OC do av-hub vai para o Omie (ver [[14-Compras-Omie-Pedido-Compra]], §3).
 
-Estrutura principal a mapear:
-- **cabecalho**: `nCodPed`, `cNumPedido`, `dDtPrevisao`, `nCodFor` (fornecedor), `nCodCompr` (comprador), `cCodCateg`, `cEtapa`
-- **frete**: transportadora, peso, valor frete/seguro
-- **produtos[]** (itens): `nCodProd`, quantidade, valor unitário, desconto, ICMS/IPI/PIS/COFINS por item, `codigo_local_estoque`
-- **parcelas[]**: condição de pagamento
+Estrutura principal a mapear (corrigida contra a doc oficial em 23/09/2026):
+- **cabecalho_consulta**: `nCodPed`, `cCodIntPed`, `cNumero` (número no Omie; `cNumPedido` é o número **para o fornecedor**), `dIncData`/`cIncHora`, `dDtPrevisao`, `cCodParc`/`nQtdeParc`, `nCodFor` (fornecedor), `nCodCompr` (comprador), `cCodCateg`, `cEtapa` (código de 2 caracteres; a doc não lista os valores)
+- **frete_consulta**: `nCodTransp` (código da transportadora), `cTpFrete`, peso, valor frete/seguro/outras
+- **produtos_consulta[]** (itens): `cCodIntItem`, `nCodItem`, `nCodProd`, `cDescricao`, `cUnidade`, quantidade, valor unitário, `nDesconto` (**valor** em R$), `nValTot`, `nQtdeRec` (quantidade já recebida), ICMS/IPI/PIS/COFINS por item, `codigo_local_estoque`
+- **parcelas_consulta[]**: `nParcela`, `dVencto`, `nValor`, `nDias`, `nPercent`
 
-**Novo resource sugerido**: `pedidosCompra.ts`, tabela nova `core_vendas_faturamento.pedidos_compras` + `pedidos_compras_itens`, chave `(codigo_empresa, codigo_pedido_compra_omie)`. **Contrato de banco**: [[004-Pedidos-Compras]] (tem pergunta em aberto sobre identificador estável de item entre resyncs — mesma classe de bug já visto em `produto_vendas` — resolver antes de aplicar). Ver [[Compras-Estoque-Producao-Lacunas]].
+**Novo resource sugerido**: `pedidosCompras.ts`, tabela `core_vendas_faturamento.pedidos_compras` + `pedidos_compras_itens` (já aplicadas), chave `(codigo_empresa, codigo_pedido_compra_omie)`. **Contrato de banco**: [[004-Pedidos-Compras]] (identidade do item resolvida: `(id_pedido_compra, ordem)`). **Antes de ligar**, aplicar o `ALTER` de [[17-Compras-Pedido-DBA-Banco]] (D5): as colunas `INTEGER` estouram com os códigos reais do Omie. Detalhe do recurso em [[19-Compras-Pedido-Pipeline-Omie]] (P1). Ver [[Compras-Estoque-Producao-Lacunas]].
 
 ---
 

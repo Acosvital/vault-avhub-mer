@@ -20,16 +20,30 @@ Enquanto o backend não entrega, o que estiver fora do lugar fica **marcado no c
 ```
 
 Para listar tudo no repositório `av-hub`: `grep -rn "GAMBIARRA(" app components lib services utils hooks`
-(hoje são 46 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
-contrato, apagar a marca no `av-hub` e marcar aqui o arquivo correspondente como `aplicada`.
+(hoje são 52 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
+contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contratos-Logica-Fora-Backend/`.
 
 ## Prioridade: módulo de Compras
 
-- **[[01-Compras-Fluxo-Completo]]** — requisição (MES) → Ordem de Compra → sincronização com o Omie.
-  Greenfield: hoje não existe nenhum endpoint no backend, a tela roda toda sobre dados de exemplo.
-  Depende do contrato SQL [[007-Ordens-Compra-Estruturada]] e [[008-Requisicoes-Compra]] (pasta
-  `01-Contratos-SQL-DBA/`) e dos contratos de API [[003-Requisicao-Compra-Integracao-MES]] e
-  [[004-Referencia-OC-Integracao-MES]] (pasta `02-Contratos-API/`).
+**Já entregue:** [[01-Compras-Fluxo-Completo]] (requisição → OC → régua de aprovação), backend
+em 22/09/2026 (`api-acos-vital` PR #273) e front ligado em 23/09/2026. Movido para
+`Realizados/03-Contratos-Logica-Fora-Backend/`. Os contratos SQL [[007-Ordens-Compra-Estruturada]]
+e [[008-Requisicoes-Compra]] também já estão aplicados.
+
+**Em aberto (importados em 23/09/2026):**
+
+- **[[15-Compras-Pendencias-Pos-Backend]]** — o que faltou depois da entrega: nomes na OC, filtro
+  por unidade, busca, resumo, limite de aprovação, envio ao Omie, `pode_aprovar` (C1–C8).
+- **[[14-Compras-Omie-Pedido-Compra]]** — de-para completo com a API do Omie: puxar os pedidos de
+  compra para o espelho `pedidos_compras` e enviar a OC com `UpsertPedCompra`. Conferido campo a
+  campo contra a doc oficial do Omie em 23/09/2026.
+- **[[16-Compradores-Funcionario]]** — cadastro de compradores por filial, ligado ao funcionário
+  (resolve o `nCodCompr` do Omie).
+- Os mesmos pedidos, separados por destinatário: [[17-Compras-Pedido-DBA-Banco]] (DBA),
+  [[18-Compras-Pedido-API-Backend]] (backend) e [[19-Compras-Pedido-Pipeline-Omie]]
+  (`omie-elt-pipeline`).
+- Contratos de API da integração com o MES, ainda em proposta:
+  [[003-Requisicao-Compra-Integracao-MES]] e [[004-Referencia-OC-Integracao-MES]].
 - **[[13-Fornecedores-por-Produto]]** — fornecedor por produto (relacionado a Compras/Comissão).
 
 ## Contratos abertos criados no ciclo de 20/09/2026
@@ -65,7 +79,7 @@ contrato, apagar a marca no `av-hub` e marcar aqui o arquivo correspondente como
 | Permissão e escopo | `lib/api/{requirePermission,escopoUnidade,portalPcp}.ts`, `hooks/usePermission.ts`, `app/(protected)/page.tsx`, `app/api/auth/[...nextauth]/route.ts` |
 | Segurança de borda | `lib/auth/loginRateLimiter.ts`, `lib/s3/fotos.ts` |
 | Dados em arquivo | `lib/orcamento/dados.ts`, `lib/comissoes/coordenadores.ts`, `app/(protected)/dashboards/dash-comissoes/page.tsx` |
-| Compras (módulo inteiro, greenfield) | `lib/compras/dados.ts`, `app/api/compras/{requisicoes,ordens,fornecedores,transportadoras}/**`, `components/Compras/{useCompras,acoes}.ts`, `components/Compras/Kanban/**` (inclui `POST /compras/requisicoes` — criação manual, `POST /compras/ordens` sem requisição de origem, `PATCH /compras/requisicoes/{id}` — transição de status via kanban da aba "Visão geral", e `GET /compras/transportadoras` — transportadora é projeção de `core.parceiros`, igual fornecedor) |
+| Compras (pendências depois da entrega do backend, [[15-Compras-Pendencias-Pos-Backend]]) | `app/api/compras/ordens/[id]/route.ts`, `components/Compras/{useCompras,helpers}.ts`, `lib/domain/compras-ordem.ts` |
 
 ## Fora deste ciclo (levantar antes de mexer)
 

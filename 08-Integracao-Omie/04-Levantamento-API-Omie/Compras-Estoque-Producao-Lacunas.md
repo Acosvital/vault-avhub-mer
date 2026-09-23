@@ -11,7 +11,7 @@ Este é o domínio direto do PRD de Estoque/MES. Levantamento feito na documenta
 
 ### (a) O Omie tem API de criação de Ordem/Pedido de Compra? — **SIM, confirmado**
 
-`produtos/pedidocompra/` tem CRUD completo: `IncluirPedCompra`, `AlteraPedCompra`, `ExcluirPedCompra`, `UpsertPedCompra`, mais consulta e pesquisa por etapa (pendente/faturado/recebido/cancelado/encerrado/parcial). Inclui fluxo de aprovação por e-mail, rateio por departamento, parcelamento e frete. **Isso resolve a pergunta 4 de [[Perguntas-em-Aberto]] — atualizar aquela nota.**
+`produtos/pedidocompra/` tem CRUD completo: `IncluirPedCompra`, `AlteraPedCompra`, `ExcluirPedCompra`, `UpsertPedCompra`, mais `ConsultarPedCompra` e `PesquisarPedCompra`. A pesquisa **não filtra por etapa**: a situação se escolhe por 7 flags `lExibirPedidos*` (pendentes, faturados, recebidos, cancelados, encerrados, recebidos parcialmente, faturados parcialmente) — corrigido em 23/09/2026 contra a doc oficial. Inclui aprovação por e-mail (`cEmailAprovador`, que já grava o pedido como aprovado dentro do Omie), rateio por departamento, parcelamento e frete. **Isso resolve a pergunta 4 de [[Perguntas-em-Aberto]] — atualizar aquela nota.**
 
 ### (b) Existem campos de estoque mínimo/máximo/ponto de pedido/tolerância de peso? — **Parcial**
 
@@ -45,8 +45,16 @@ Só leitura (`ConsultarLote`/`ListarLotes`) — datas, quantidades, saldo. **Sem
 ### Requisições de Compra
 Estágio anterior ao Pedido de Compra (sugestão interna). Não extraído. Como o Estoque vai controlar ponto de pedido nativamente, esse fluxo inteiro (a lógica de "quando comprar", que o Omie não modela de forma robusta) deve nascer nativo.
 
+Conferido na doc em 23/09/2026: `produtos/requisicaocompra/` (`IncluirReq`, `AlterarReq`, `UpsertReq`, `ConsultarReq`, `PesquisarReq`, `ExcluirReq`) só guarda categoria, projeto, data sugerida, observações e itens (produto, quantidade, preço sugerido). **Não tem status, fornecedor nem aprovação**, e o pedido de compra do Omie **não tem campo que aponte para a requisição**. A requisição do av-hub ([[008-Requisicoes-Compra]]) segue nativa e não é enviada ao Omie; o número dela vai como texto no `cObsInt` da OC ([[14-Compras-Omie-Pedido-Compra]], §3.8).
+
 ### Pedidos de Compra
-CRUD completo confirmado (ver pergunta a acima). Estrutura rica: cabeçalho, frete, itens com impostos, parcelas, departamentos, `cEtapa` (pendente/faturado/recebido/cancelado/encerrado/parcial). Não extraído hoje. **Recomendação**: migrar histórico de pedidos já feitos (para rastreabilidade de fornecedor), mas o fluxo de criação de novos pedidos deve nascer nativo no Estoque/MES assim que ele virar sistema de registro — exportando para o Omie via API só enquanto ele continuar ativo para fins fiscais/financeiros.
+CRUD completo confirmado (ver pergunta a acima). Estrutura rica: cabeçalho, frete, itens com impostos, parcelas, departamentos, `cEtapa` (código de 2 caracteres; **a doc não lista os valores** — pendente/faturado/recebido/cancelado/encerrado/parcial são os nomes das flags da pesquisa, não os códigos do campo). Não extraído hoje. **Recomendação**: migrar histórico de pedidos já feitos (para rastreabilidade de fornecedor), mas o fluxo de criação de novos pedidos deve nascer nativo no Estoque/MES assim que ele virar sistema de registro — exportando para o Omie via API só enquanto ele continuar ativo para fins fiscais/financeiros.
+
+**Atualização de 23/09/2026:** a OC já nasce no av-hub ([[007-Ordens-Compra-Estruturada]], aplicado) e vai para o Omie por `UpsertPedCompra`. De-para campo a campo, conferido contra a doc oficial, em [[14-Compras-Omie-Pedido-Compra]]. Pontos da doc que pesam nesse envio:
+- o Omie **não tem campo de moeda**: valores vão convertidos para R$;
+- `nDesconto` do item é **valor**, não percentual;
+- `cObs` do cabeçalho não sai impresso para o fornecedor, `cObsInt` é só para quem consulta, e o `cObs` do item é o único que sai impresso;
+- a resposta do envio só devolve `nCodPed`/`cNumero`, nenhum código de item. A ligação item a item volta pelo `cCodIntItem` no espelho.
 
 ### Ordens de Produção
 Modela "produto + quantidade + BOM explodida com reserva de item", mas **sem conceito de roteiro/etapas de operação** (centro de trabalho, tempo padrão, sequência) — mais raso que um MES real. Não extraído. Recomenda-se nascer nativo (roteiro real com apontamento por etapa), não migrar esse modelo simplificado.

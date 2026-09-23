@@ -1,12 +1,30 @@
 ---
 tags: [contrato-sql, dba, integracao-av-hub-mes, compras]
-status: proposta
+status: aplicada
 criado: 2026-09-22
+atualizado: 2026-09-23
 ---
 
 # Contrato SQL 008 — `core_vendas_faturamento.requisicoes_compra` (novo)
 
-**Status:** proposta, aprovada por Nathan em 22/09/2026, alinhada campo a campo com `docs/ENVIAR - contrato-compras-fluxo-completo.md` (repositório `av-hub`, 21/09/2026) e com `lib/domain/compras-requisicao.ts` (domínio TypeScript já implementado no frontend, hoje rodando sobre dados de exemplo).
+**Status: aplicada — confirmado em 23/09/2026.** Entregue em `api-acos-vital` (commit `ec2a42b`, PR #273, mergeado em `main` em 22/09) junto com o [[007-Ordens-Compra-Estruturada]]. O av-hub já está ligado nele (branch `feat/compras-integracao-backend`), e as leituras e a validação de status foram confirmadas ao vivo em `api-test`. Produção não foi conferida.
+
+**O que foi aplicado difere do DDL abaixo** (o DDL fica como histórico; vale o que está no banco):
+
+| No DDL deste contrato | Como ficou aplicado |
+|---|---|
+| `id_ordem_compra` | `ordem_compra_id` |
+| `material varchar(60)` nullable | `text NOT NULL` |
+| `prazo_necessidade date NOT NULL` | **nullable**; sem prazo vai para o fim da fila |
+| `solicitante varchar(100)` | `text` |
+| `quantidade numeric(14,3)` | `numeric(15,4)` |
+| `id_origem` (id do lado do MES) | **não está no model da API**: conferir se existe no banco antes da integração com o MES ([[003-Requisicao-Compra-Integracao-MES]]) |
+| transições validadas "no backend" | validadas **por trigger no banco**: `aberta ↔ em_cotacao ↔ cancelada`; `atendida` só pela trigger da OC (emitir marca `atendida`, cancelar a OC devolve para `aberta`) |
+| `numero_requisicao` sempre do MES | na criação manual, a API gera `REQ-000001` por unidade quando não vem no corpo |
+
+**Pergunta 2 (ordem de aplicação com o 007):** resolvida, porque os dois foram aplicados juntos. A **pergunta 1** (formato do número vindo do MES) continua aberta no contrato de API 003.
+
+**Status original:** proposta, aprovada por Nathan em 22/09/2026, alinhada campo a campo com `docs/ENVIAR - contrato-compras-fluxo-completo.md` (repositório `av-hub`, 21/09/2026) e com `lib/domain/compras-requisicao.ts` (domínio TypeScript já implementado no frontend, hoje rodando sobre dados de exemplo).
 
 **✅ Backend implementado e testado em 22/09/2026** (`GET/POST/PATCH /compras/requisicoes`, `.../requisicoes/{id}`, branch local `feat/compras-requisicoes-e1` em `api-acos-vital`) — DDL abaixo aplicado e validado no ambiente de teste local. **Ainda não deployado em produção nem enviado ao remoto** — aguardando o Gustavo aplicar este contrato de fato em produção.
 
