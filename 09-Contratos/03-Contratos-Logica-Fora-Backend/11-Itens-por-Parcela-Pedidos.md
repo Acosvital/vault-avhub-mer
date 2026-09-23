@@ -132,6 +132,10 @@ Com o pedido 27645 da empresa `759979bd-2b2d-41f2-b1b7-db6fae89ee59`:
   direto do dado, sem nenhuma conciliação no cliente.
 - Mesmo dado alimenta a futura visão de acompanhamento por etapa (o que cada parcela contém e em
   que etapa está).
+- Com o `GET /pedidos_venda` agregado por pedido
+  ([`05-Pedidos-Notas-Dashboards-Agregacao-no-Banco.md`](./05-Pedidos-Notas-Dashboards-Agregacao-no-Banco.md)),
+  a lista traz `parciais[]` sem itens; os itens de um parcial são buscados sob demanda por este
+  contrato, usando o `codigo_pedido_omie` de `parciais[]`.
 
 ## 7. Não bloqueia
 

@@ -6,7 +6,7 @@ Dashboards). Complementa — e não repete — estes contratos, que continuam va
 - [`ENVIAR - contrato-paginacao-por-pedido-vendas-planilha.md`](./ENVIAR%20-%20contrato-paginacao-por-pedido-vendas-planilha.md)
 - [`ENVIAR - contrato-ordenacao-listagens.md`](./ENVIAR%20-%20contrato-ordenacao-listagens.md)
 - [`ENVIAR - contrato-chave-composta-blacklist-pedidos.md`](./ENVIAR%20-%20contrato-chave-composta-blacklist-pedidos.md)
-- [`ENVIAR - contrato-itens-por-parcela-pedidos.md`](./ENVIAR%20-%20contrato-itens-por-parcela-pedidos.md)
+- [`11-Itens-por-Parcela-Pedidos.md`](./11-Itens-por-Parcela-Pedidos.md)
 
 **Princípio:** o navegador (e o BFF) não devem recalcular o que o banco já sabe. Os pontos abaixo
 estão marcados com `GAMBIARRA(` no código.
@@ -38,6 +38,29 @@ estão marcados com `GAMBIARRA(` no código.
 - `GET /vendas_planilha_resumo` e `/faturamento_planilha_resumo` aceitam `data_inicio`/`data_fim`
   (intervalo, não só `mes/ano`) e devolvem já consolidado, com `pctTotal` correto.
 - A **ordem das etapas** vem do cadastro de etapas (campo `ordem_fluxo`), não de constante do front.
+
+**Formato de `parciais[]`** (em `GET /pedidos_venda` e em `GET /pedidos_venda/{codigo_empresa}/{pedido_venda}`):
+agregar por pedido muda só a unidade de contagem/paginação — a tela continua mostrando cada
+parcial dentro do card do pedido. Cada item de `parciais[]` é uma linha do que hoje vem de
+`/vendas_planilha`, ordenado por `sequencial` (0 = cabeçalho), com no mínimo:
+
+| campo | uso na tela |
+|---|---|
+| `codigo_pedido_omie` | chave do parcial (histórico de status, observações do PCP, itens) |
+| `sequencial` | ordem e rótulo ("Pedido original", "Entrega 1"…) |
+| `total_pedido_venda` | valor do parcial (a soma dos parciais = `valor_total` do pedido) |
+| `etapa`, `etapa_descricao` | etapa do parcial no fluxo |
+| `situacao` + flags `autorizado`, `denegado`, `faturado`, `cancelado`, `devolvido`, `devolucao_parcial`, `encerrado`, `manual` | situação do parcial |
+| `data_previsao`, `prazo`, `dias_para_prazo` | prazo/SLA do parcial (mesma regra do pedido, por parcial) |
+| `data_faturamento`, `nota_fiscal` | faturamento do parcial |
+| `categoria`, `obs_pedido` | detalhe do parcial |
+
+**Itens (produtos) de cada parcial NÃO vêm na listagem** — pesaria demais. A tela busca sob
+demanda (página do pedido / ao expandir um parcial) pelo `codigo_pedido_omie` do parcial, o que
+depende do [`11-Itens-por-Parcela-Pedidos.md`](./11-Itens-por-Parcela-Pedidos.md)
+(itens com `codigo_pedido_omie`/`sequencial` de origem). Se o backend preferir, o
+`GET /pedidos_venda/{codigo_empresa}/{pedido_venda}` pode já devolver `parciais[].itens[]` —
+mas só no detalhe, nunca na lista.
 
 ## 2. Notas (`components/Notas/`)
 
