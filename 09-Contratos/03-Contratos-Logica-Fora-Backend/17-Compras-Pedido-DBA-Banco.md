@@ -1,5 +1,8 @@
 # Compras — pedido para o DBA (banco)
 
+> **⚠️ Substituído em 23/09/2026 por `../ENVIAR - contrato-compras-backend.md`**, que tem a lista atualizada: o que já foi entregue
+> (conferido no `develop`), o que falta e o que está errado. Este arquivo fica como histórico.
+
 **Data:** 23/09/2026 · **Para:** DBA
 **Contratos completos, só para referência:**
 `../ENVIAR - contrato-compradores-funcionario.md`,
@@ -238,6 +241,28 @@ Omie. Essas tabelas vêm num pedido separado.
 - **Tela `compradores`** na matriz de permissões (`pode_visualizar`, `pode_editar`) e item de
   menu. Só o administrador vai editar.
 - **Ação `pode_aprovar`** para aprovar e reprovar OC. Hoje o av-hub usa `pode_editar`.
+
+## D8. Campos da OC para o PDF do fornecedor
+
+Vêm do pedido de compra que o Omie imprime (detalhe em
+`../ENVIAR - contrato-compras-pendencias-pos-backend.md`, C9):
+
+```sql
+ALTER TABLE core_vendas_faturamento.ordens_compra_itens
+  ADD COLUMN observacao       text,            -- para o FORNECEDOR (vai no cObs do item no Omie)
+  ADD COLUMN valor_desconto   numeric(15,2),   -- quantidade × unitário × desconto% (trigger)
+  ADD COLUMN valor_total_item numeric(15,2);   -- já com desconto (trigger)
+
+ALTER TABLE core_vendas_faturamento.ordens_compra
+  ADD COLUMN numero_pedido_fornecedor varchar(30),  -- cNumPedido no Omie
+  ADD COLUMN valor_mercadorias        numeric(15,2), -- Σ quantidade × unitário (trigger)
+  ADD COLUMN valor_descontos          numeric(15,2); -- Σ valor_desconto dos itens (trigger)
+
+-- core.unidades: inscrição estadual da unidade compradora (sai no pedido)
+ALTER TABLE core.unidades ADD COLUMN inscricao_estadual varchar(20);
+```
+
+A trigger que já calcula `valor_total` passa a gravar também os campos de valor (na moeda da OC).
 
 ---
 

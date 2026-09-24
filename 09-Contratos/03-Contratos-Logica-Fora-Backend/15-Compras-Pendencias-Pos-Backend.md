@@ -19,7 +19,9 @@ Abaixo, o que **ainda** está fora do lugar. Cada item está marcado no código 
 `GET /compras/ordens` e `GET /compras/ordens/{id}` só devolvem códigos: `codigo_fornecedor`,
 `codigo_transportadora`, `created_by` e `aprovado_por` (uuid). A tela não tem como mostrar o nome
 sem um JOIN, e a busca de parceiros não aceita filtro por código. **Hoje a tela mostra
-"Fornecedor 10037044822"** e esconde "Emitida por" e "Aprovada por".
+"Fornecedor 10037044822"** e esconde "Emitida por" e "Aprovada por". O **PDF da OC** que vai ao
+fornecedor (`GET /api/compras/ordens/{id}/pdf`, desde 23/09/2026) também sai com o código no
+lugar do nome e sem CNPJ do fornecedor até isso chegar.
 
 Peço estes campos nas duas rotas, na listagem e no detalhe:
 
@@ -30,6 +32,21 @@ Peço estes campos nas duas rotas, na listagem e no detalhe:
 | `nome_transportadora` | `core.parceiros.nome_fantasia` pelo `codigo_transportadora` |
 | `nome_criado_por` | nome do usuário `created_by` |
 | `nome_aprovado_por` | nome do usuário `aprovado_por` |
+| `nome_comprador` | nome do usuário `codigo_comprador` (obrigatório na OC desde 23/09/2026) |
+
+**Para o PDF da OC (ampliado em 23/09/2026).** O pedido de compra que o Omie imprime mostra o
+fornecedor completo, e o PDF do av-hub precisa do mesmo. No **detalhe** (`GET /compras/ordens/{id}`),
+além dos campos acima:
+
+| Campo | Origem |
+|---|---|
+| `razao_social_fornecedor` | `core.parceiros.razao_social` |
+| `inscricao_estadual_fornecedor` | `core.parceiros` (inscrição estadual) |
+| `endereco_fornecedor` | `core.parceiros`: logradouro, número, complemento, bairro, cidade, UF e CEP (objeto ou campos separados) |
+| `email_fornecedor`, `telefone_fornecedor` | `core.parceiros` |
+
+E no cadastro de unidades (`GET /unidades/{id}`), a **inscrição estadual** da unidade compradora,
+que também sai no pedido e hoje não existe em `core.unidades`.
 
 O JOIN precisa usar `codigo_empresa`. Em `api-test`, o mesmo fornecedor aparece com códigos
 diferentes em cada unidade (ex.: RUSPRISTEEL, ANANDA METAIS, ALUMIPLAST), porque cada unidade
@@ -48,7 +65,7 @@ chamada direta à API ainda passa.
 
 ## C3. Busca `q` de OC pelo nome do fornecedor
 
-Hoje `q` em `GET /compras/ordens` procura só em `numero_ordem`, `codigo_fornecedor` e
+Hoje `q` em `GET /compras/ordens` procura só em `numero_pedido` (antes `numero_ordem`), `codigo_fornecedor` e
 `contato`. Quem procura uma OC digita o **nome** do fornecedor. Depende do C1.
 
 ## C4. Indicadores (resumo)
@@ -110,6 +127,45 @@ original: "nunca silenciosamente `pendente` para sempre sem explicação". Preci
 `core.parceiros.nome_fantasia` traz texto como `&apos;DALS&apos;-DESTILARIA DE ALCOOL LOPES DA
 SILVA` e `&apos;IMPERIUNS MATERIAIS DE CONSTRUCAO&apos;`: o ELT do Omie grava sem decodificar.
 Aparece assim na busca de fornecedor. É correção de dado no pipeline, não na tela.
+
+## C9. Campos da OC para o PDF do fornecedor
+
+Pedidos novos, a partir do PDF do pedido de compra do Omie (nº 46618, 23/09/2026):
+
+1. **Observação por item, para o fornecedor.** No Omie, o `cObs` do item sai impresso no pedido e é
+   onde o comprador combina entregas parciais (ex.: "100 PÇS — entregar em 24/09/2026 / 191 PÇS —
+   entregar em 24/10/2026"). Peço `ordens_compra_itens.observacao text` (nulo), aceita no
+   `POST /compras/ordens` (`CAMPOS_ITEM`) e devolvida no detalhe. No envio ao Omie ela vai no `cObs`
+   do item (`ENVIAR - contrato-compras-omie-pedidocompra.md`, §3.5). O PDF já mostra o campo quando
+   ele vier. **No formulário o campo já existe, mas desabilitado** até a coluna existir, para não
+   perder o que o comprador digitar.
+2. **Número do pedido para o fornecedor** (`cNumPedido` no Omie, 30 caracteres):
+   `ordens_compra.numero_pedido_fornecedor varchar(30)` (nulo), aceito no POST e devolvido nas rotas.
+3. **Valores da OC já somados pelo banco.** O PDF mostra "Mercadorias" e "Descontos" somando as
+   linhas, porque só `valor_total` vem pronto. Peço `valor_mercadorias` (Σ quantidade × unitário) e
+   `valor_descontos` (Σ desconto em valor), calculados pela mesma trigger de `valor_total`, na moeda
+   da OC. E, por item, `valor_desconto` e `valor_total_item`, para a tela e o PDF não recalcularem.
+4. **Impostos (IPI, ICMS ST).** O pedido do Omie traz IPI e ICMS ST e o total com impostos. A OC não
+   registra impostos hoje. Fica para quando o item escolher o produto do cadastro (`core.produtos`,
+   com NCM), que é o que permite calcular o imposto; o PDF mostra o total sem impostos até lá.
+
+Os campos 1 e 3 já estão marcados com `GAMBIARRA(` no av-hub (`lib/domain/compras-ordem.ts`,
+`lib/compras/OrdemCompraPdf.tsx`).
+
+## C10. Categorias para a OC (`GET /categorias`)
+
+A OC passou a escolher a categoria de uma lista, vinda de `GET /categorias` (`core.categorias`,
+23/09/2026). A rota é um CRUD genérico: **sem busca (`q`), sem filtro por unidade e sem separar
+categorias de compra** (despesa, "2.x") das de venda. O BFF junta todas as páginas e a tela mostra
+todas. Peço:
+
+- `q` (código ou descrição) e `sort/order`;
+- `codigo_empresa`, se as categorias forem por conta Omie (hoje `codigo_categoria` é único no
+  banco inteiro, então duas contas não podem ter a mesma categoria com descrições diferentes —
+  confirmar se isso é verdade no Omie);
+- um filtro de tipo (`tipo=despesa` ou por prefixo), para a OC listar só as de compra.
+
+Marcado com `GAMBIARRA(` em `app/api/compras/categorias/route.ts`.
 
 ## Aceite
 

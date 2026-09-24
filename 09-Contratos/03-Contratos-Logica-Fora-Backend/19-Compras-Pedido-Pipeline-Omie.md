@@ -1,5 +1,8 @@
 # Compras — pedido para a pipeline (`omie-elt-pipeline`)
 
+> **⚠️ Substituído em 23/09/2026 por `../ENVIAR - contrato-compras-pipeline.md`**, que tem a lista atualizada: o que já foi entregue
+> (conferido no `develop`), o que falta e o que está errado. Este arquivo fica como histórico.
+
 **Data:** 23/09/2026 · **Para:** quem mantém a `omie-elt-pipeline`
 **Depende de:** `01 - DBA - banco.md` (D1, D5 e D6 precisam existir antes).
 **Contrato completo, só para referência:** `../ENVIAR - contrato-compras-omie-pedidocompra.md`,
@@ -87,16 +90,15 @@ depois de confirmado.** Resumo do que o worker faz (detalhe na §3 do contrato c
     placa sem hífen (`cPlaca` tem 7 caracteres).
 - **Comprador:** `nCodCompr` = `compradores.codigo_comprador_omie` do `ordens_compra.id_comprador`.
 - **Não mandar `cEmailAprovador`**: ele aprova o pedido dentro do Omie.
-- **`cObsInt` (aprovado):** bloco `[AV-HUB]…[/AV-HUB]` com tudo que o Omie não tem campo, seguido
-  das duas observações da OC (`observacao` e `observacao_interna`):
-  - OC e requisição;
-  - quem emitiu e quem aprovou, com data, e o e-mail do aprovador;
-  - moeda, cotação e total na moeda;
-  - por item: tipo de material, unitário na moeda, desconto % e local de estoque.
-
-  O formato está na §3.8 do contrato completo. As duas observações da OC são **só para o
-  pessoal interno**: o `cObs` do cabeçalho vai vazio, e o `cObs` do item não é usado (é o único
-  que sai impresso no pedido enviado ao fornecedor).
+- **Observações (§3.8 do contrato completo):**
+  - `cObs` do cabeçalho ← `observacao` (observação do pedido, **para o fornecedor**; sai impressa
+    no pedido do Omie);
+  - `cObs` de cada item ← `ordens_compra_itens.observacao` (para o fornecedor, C9);
+  - `cObsInt` ← bloco `[AV-HUB]…[/AV-HUB]` com tudo que o Omie não tem campo (OC e requisição;
+    quem emitiu e quem aprovou, com data, e o e-mail do aprovador; moeda, cotação e total na
+    moeda; por item: tipo de material, unitário na moeda, desconto % e local de estoque),
+    **seguido** da `observacao_interna` do comprador;
+  - em todos: quebra de linha vira `|` e nada de "•"/aspas tipográficas (viram "¿¿¿" no Omie).
 - **Retorno:**
   - sucesso: `codigo_pedido_omie ← nCodPed`, `numero_pedido_omie ← cNumero`,
     `status_sincronizacao_omie = 'sincronizado'` e `sincronizado_em`;
@@ -110,4 +112,4 @@ depois de confirmado.** Resumo do que o worker faz (detalhe na §3 do contrato c
    erro.
 4. Se o Omie gera as parcelas sozinho com `cCodParc` e sem `parcelas_incluir`.
 5. Se `nCodProd` é obrigatório no item, ou se aceita só `cDescricao` + `cUnidade`.
-6. Os códigos de `cTpFrete` (`0` = CIF, `1` = FOB).
+6. Os códigos de `cTpFrete`: `0` = CIF **confirmado** no pedido 46618; falta confirmar `1` = FOB.

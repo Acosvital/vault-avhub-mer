@@ -1,5 +1,8 @@
 # Compras — pedido para a API (`api-acos-vital`)
 
+> **⚠️ Substituído em 23/09/2026 por `../ENVIAR - contrato-compras-backend.md`**, que tem a lista atualizada: o que já foi entregue
+> (conferido no `develop`), o que falta e o que está errado. Este arquivo fica como histórico.
+
 **Data:** 23/09/2026 · **Para:** backend
 **Depende de:** `01 - DBA - banco.md` (tabelas D1, D3, D4, D6).
 **Contratos completos, só para referência:**
@@ -106,3 +109,16 @@ O segundo é uma projeção da tabela D6, no mesmo formato de `/compras/forneced
 - Aprovar e reprovar passam a exigir `pode_aprovar` (D7).
 - Registrar histórico de decisão (quem, quando, de → para). Ao cancelar hoje só fica o
   `motivo_reprovacao`.
+
+## A9. OC completa para o PDF do fornecedor
+
+- `POST /compras/ordens`: aceitar `numero_pedido_fornecedor` no cabeçalho e `observacao` no item
+  (`CAMPOS_ITEM`) — colunas do D8.
+- `GET /compras/ordens/{id}`: devolver `valor_mercadorias`, `valor_descontos`,
+  `numero_pedido_fornecedor`, `nome_comprador` e, por item, `observacao`, `valor_desconto` e
+  `valor_total_item`. Além do A1, o fornecedor completo: `razao_social_fornecedor`,
+  `inscricao_estadual_fornecedor`, endereço, `email_fornecedor` e `telefone_fornecedor`
+  (`core.parceiros`, sempre com `codigo_empresa`).
+- `GET /unidades/{id}`: devolver `inscricao_estadual`.
+
+Detalhe e motivo: `../ENVIAR - contrato-compras-pendencias-pos-backend.md`, C1 e C9.

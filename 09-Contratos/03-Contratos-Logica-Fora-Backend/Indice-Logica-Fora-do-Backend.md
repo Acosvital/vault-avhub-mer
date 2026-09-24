@@ -20,7 +20,7 @@ Enquanto o backend não entrega, o que estiver fora do lugar fica **marcado no c
 ```
 
 Para listar tudo no repositório `av-hub`: `grep -rn "GAMBIARRA(" app components lib services utils hooks`
-(hoje são 52 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
+(hoje são 58 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
 contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contratos-Logica-Fora-Backend/`.
 
 ## Prioridade: módulo de Compras
@@ -30,7 +30,20 @@ em 22/09/2026 (`api-acos-vital` PR #273) e front ligado em 23/09/2026. Movido pa
 `Realizados/03-Contratos-Logica-Fora-Backend/`. Os contratos SQL [[007-Ordens-Compra-Estruturada]]
 e [[008-Requisicoes-Compra]] também já estão aplicados.
 
-**Em aberto (importados em 23/09/2026):**
+**Em aberto — comece pelos dois consolidados (23/09/2026, fim do dia):**
+
+- **[[22-Compras-Backend-Consolidado]]** — lista de trabalho do backend (banco + API): o que já foi
+  entregue, a tabela teste × produção dos dumps de 23/09 e os itens B0–B9 (B0: levar para
+  produção tudo o que está no teste; B1: espelho `pedidos_compras` ainda em `INTEGER`; B2: comprador
+  em dois campos; B3: número aceito do corpo; B4: rotas do envio ao Omie; B5–B9: nomes, campos do
+  PDF, catálogos, listagem/limite, permissões).
+- **[[23-Compras-Pipeline-Consolidado]]** — lista de trabalho da `omie-elt-pipeline`: L1–L10 (PTAX,
+  compradores, espelho, envio da OC, catálogos, entidades HTML, testes). L1–L3 e L5–L9 já estão
+  implementados na branch `feat/compras-omie` (desligados até o banco ter as tabelas).
+- **[[21-Compras-Projetos-Omie]]** — projetos do Omie (`ListarProjetos`) em `core.projetos`, para o
+  select de Projeto da OC.
+
+Contratos de detalhe (os consolidados apontam para eles):
 
 - **[[15-Compras-Pendencias-Pos-Backend]]** — o que faltou depois da entrega: nomes na OC, filtro
   por unidade, busca, resumo, limite de aprovação, envio ao Omie, `pode_aprovar` (C1–C8).
@@ -42,9 +55,9 @@ e [[008-Requisicoes-Compra]] também já estão aplicados.
 - **[[20-Compras-Cotacao-Moeda-PTAX]]** — cotação de USD/EUR preenchida sozinha na OC: job
   diário da PTAX do Banco Central → `core.cotacoes_moeda` → `GET /cotacoes_moeda/atual`, com a
   origem da cotação (`ptax`/`manual`) gravada na OC.
-- Os mesmos pedidos, separados por destinatário: [[17-Compras-Pedido-DBA-Banco]] (DBA),
-  [[18-Compras-Pedido-API-Backend]] (backend) e [[19-Compras-Pedido-Pipeline-Omie]]
-  (`omie-elt-pipeline`).
+- ~~[[17-Compras-Pedido-DBA-Banco]], [[18-Compras-Pedido-API-Backend]] e
+  [[19-Compras-Pedido-Pipeline-Omie]]~~ — **substituídos em 23/09/2026** pelos dois consolidados
+  (o DBA concluiu a parte deles; o que sobrou foi para o 22 e o 23). Ficam como histórico.
 - Contratos de API da integração com o MES, ainda em proposta:
   [[003-Requisicao-Compra-Integracao-MES]] e [[004-Referencia-OC-Integracao-MES]].
 - **[[13-Fornecedores-por-Produto]]** — fornecedor por produto (relacionado a Compras/Comissão).

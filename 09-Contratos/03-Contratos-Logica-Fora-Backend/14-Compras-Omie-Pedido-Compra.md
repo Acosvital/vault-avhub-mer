@@ -108,7 +108,7 @@ A resposta traz `nTotalPaginas`, `nTotalRegistros` e `pedidos_pesquisa[]`. Cada 
 | `cCodCateg` | string20 | `codigo_categoria` | |
 | `nCodCC` | integer | `codigo_conta_corrente` INTEGER | ⚠️ §2.3 |
 | `nCodProj` | integer | `codigo_projeto` INTEGER | ⚠️ §2.3 |
-| `cObs` / `cObsInt` | text | `observacao` / `observacao_interna` | Nenhum dos dois sai impresso para o fornecedor (doc do Omie). Nos pedidos que nasceram no av-hub, `cObsInt` volta com o bloco `[AV-HUB]` e as duas observações da OC (§3.8), e `cObs` volta vazio |
+| `cObs` / `cObsInt` | text | `observacao` / `observacao_interna` | `cObs` é a observação **para o fornecedor** (sai impressa no pedido do Omie, apesar do que a doc diz; ver §2.4). `cObsInt` é interna; nos pedidos que nasceram no av-hub, volta com o bloco `[AV-HUB]` em cima (§3.8), e o espelho separa o bloco do texto. Quebra de linha chega como barra vertical e aspas como `&quot;` (§2.4) |
 | — | — | `email_aprovador` | **Não vem na consulta.** `cEmailAprovador` só existe no incluir/upsert. A coluna vai ficar sempre nula no espelho |
 | — | — | `valor_total_pedido` | **Não existe no cabeçalho.** Calcular como Σ `nValTot` dos itens |
 | — | — | `cnpj_cpf_fornecedor` | **Não vem na consulta** (só existe no incluir). Tirar de `core.parceiros`, ou deixar nulo |
@@ -152,6 +152,33 @@ A resposta traz `nTotalPaginas`, `nTotalRegistros` e `pedidos_pesquisa[]`. Cada 
 seriam descartados. Precisam de `pedidos_compras_parcelas` se o financeiro ou o dashboard for
 usar vencimentos.
 
+### 2.4 Conferido com um pedido real (nº 46618, Mogi, 21/09/2026)
+
+Payload de `ConsultarPedCompra` enviado pelo usuário em 23/09/2026. O que ele confirma ou corrige:
+
+- **`cObs` do cabeçalho sai impresso** no pedido do Omie (contradiz a doc). É onde os compradores
+  põem o texto "IMPORTANTE…" das instruções ao fornecedor.
+- **Quebra de linha é `|`** nos campos de texto (`cObs` do item: `"100/ PÇS - ENTREGAR…|191/ PÇS - ENTREGAR…"`).
+  O envio troca cada quebra de linha por `|`; o espelho faz o inverso.
+- **Aspas chegam como entidade HTML** (`&quot;`, também em `cDescricao`: `3/8&quot; K`). O
+  espelho precisa decodificar, como nos parceiros (C8).
+- **`cEtapa` = `"15"`** nesse pedido (incluído, ainda não faturado nem recebido). Primeiro código
+  real; os demais continuam a confirmar.
+- **Códigos passam de INTEGER** (§2.3, confirmado): `nCodPed` 10467753709, `nCodFor` 10363934283,
+  `nCodCompr` 10219958954, `nCodCC` 10364415646, `nCodItem` 10467754866.
+- **`codigo_local_estoque` vem como texto** (`"9764544941"`), não integer como diz a doc.
+- **`nValTot` = `nValMerc` − `nDesconto` + `nValorIpi`** (218.529,36 − 2.601,54 + 7.102,20 =
+  223.030,02). O ICMS (`nValorIcms` 25.911,34) não soma.
+- **`cCodParc` = `"U10"`** (código da condição, não os dias; o PDF mostra "30/40/50/60/70") e
+  **`cCodCateg` = `"2.01.03"`** (código, o PDF mostra "Compras de Materia Prima"). Confirma que os
+  dois precisam de catálogo para virar nome.
+- **`nPercent` das parcelas** vem com arredondamento (`19.99999`, `20.00004`).
+- **Existe `caracteristicas_consulta[]`**, que a doc não cita.
+- **Vínculo com o pedido de venda:** `cNumPedido` = `"27645"` e `cObsInt` = `"PV 27645 - GABRIEL
+  NICOLAU"`. O comprador usa esses campos para ligar a compra ao pedido de venda que ela atende
+  (apesar de o PDF chamar `cNumPedido` de "Nº do Pedido do Fornecedor"). A OC do av-hub ainda não
+  tem esse vínculo; será tratado à parte.
+
 ### 2.3 ⚠️ Estouro de INTEGER (corrigir antes de ligar o pipeline)
 
 `pedidos_compras` usa `INTEGER` (int4, máximo 2.147.483.647) para códigos do Omie. Os
@@ -188,10 +215,11 @@ existem na API.
 2. **Usar `UpsertPedCompra` com `cCodIntPed`**, não `IncluirPedCompra`. Se o envio der timeout
    depois de o Omie ter gravado, o reenvio com o mesmo `cCodIntPed` **altera** em vez de
    **duplicar**.
-3. **`cCodIntPed` = `numero_ordem`**, só o número, como texto (ex.: `"123"`). Ele é gerado por
-   sequência do banco e o prefixo "OC-" é só de exibição no av-hub. Um `bigint` cabe nos 20
-   caracteres do campo. O `id` uuid (36 caracteres) não cabe.
-4. A mesma OC volta pelo fluxo A (o espelho), com `codigo_pedido_integracao = numero_ordem`.
+3. **`cCodIntPed` = `numero_pedido`** da OC, como está no banco: `"OC-000123"`. (O campo se
+   chamava `numero_ordem` até 23/09/2026.) O banco gera por trigger, com contador por unidade e
+   6 dígitos (`fn_proximo_numero_documento`, conferido no dump de teste de 23/09). Cabe nos 20
+   caracteres do campo e é único dentro de cada conta Omie. O `id` uuid (36 caracteres) não cabe.
+4. A mesma OC volta pelo fluxo A (o espelho), com `codigo_pedido_integracao = numero_pedido`.
    É por esse campo que as duas tabelas se ligam.
 5. **Unidade sem conta Omie** (a HRM não tem nenhum parceiro em `core.parceiros`): a OC não
    tem para onde ir. Definir se ela é bloqueada na emissão ou fica sem sincronizar.
@@ -200,7 +228,7 @@ existem na API.
 
 | Omie | Obrigatório? | Vem de | Situação hoje |
 |---|---|---|---|
-| `cCodIntPed` string20 | chave do upsert | `numero_ordem` | ok (limitar a 20) |
+| `cCodIntPed` string20 | chave do upsert | `numero_pedido` (`OC-000123`) | ok (limitar a 20) |
 | `dDtPrevisao` `dd/mm/aaaa` | provavelmente sim | `data_previsao_chegada` | ok (o form exige) |
 | `cCodParc` string3 | sim (`"999"` = padrão) | `codigo_condicao_pagamento` | ❌ **hoje é texto livre.** Precisa virar select do `ListarFormasPagCompras` da unidade |
 | `nQtdeParc` | sim | `quantidade_parcelas` | ok, mas deveria vir do `nQtdeParc` da condição escolhida |
@@ -211,9 +239,9 @@ existem na API.
 | `nCodProj` integer | opcional | `codigo_projeto` | texto livre |
 | `cContato` string100 | opcional | `contato` | ok |
 | `cContrato` string20 | opcional | `contrato` | ok |
-| `cNumPedido` string30 | opcional | — | não existe: número do pedido no fornecedor |
-| `cObs` | opcional | — | **vai vazio.** As duas observações da OC são internas e vão no `cObsInt` (§3.8) |
-| `cObsInt` | opcional | **bloco AV-HUB (§3.8)** + `observacao` + `observacao_interna` | recebe tudo o que o av-hub tem e o Omie não tem campo, e as duas observações digitadas na OC |
+| `cNumPedido` string30 | opcional | `numero_pedido_fornecedor` (nova, C9) | número do pedido no fornecedor |
+| `cObs` | opcional | `observacao` (observação do pedido, para o fornecedor) | nasce com o texto padrão "IMPORTANTE…" (`OBSERVACAO_PADRAO_PEDIDO`); quebra de linha vira barra vertical no envio (§2.4) |
+| `cObsInt` | opcional | **bloco AV-HUB (§3.8)** + `observacao_interna` | o que o av-hub tem e o Omie não tem campo, **em cima** do texto interno do comprador |
 | `cEmailAprovador` string120 | opcional | `email_aprovador` | ⚠️ pela doc, **ao informar este campo o pedido entra na etapa de aprovação do Omie "com status de aprovado"**, e o usuário precisa ter permissão lá. Como a aprovação é feita no av-hub, **não mandar**: o e-mail do aprovador e quem aprovou, com data, vão no bloco AV-HUB de `cObsInt` (§3.8) |
 
 ### 3.3 ⚠️ Moeda estrangeira: o Omie não tem campo de moeda
@@ -245,7 +273,7 @@ A cotação passa a vir preenchida da PTAX do Banco Central, com a origem gravad
 
 | Omie | Vem de | Situação hoje |
 |---|---|---|
-| `cCodIntItem` string20 | `numero_ordem` + `-` + `ordem` | ok (limitar a 20). Volta no espelho em `pedidos_compras_itens.codigo_item_integracao` (§2.2): é por ele que o item do Omie se liga de novo ao item da OC |
+| `cCodIntItem` string20 | `numero_pedido` + `-` + `ordem` (`OC-000123-1`) | ok (limitar a 20). Volta no espelho em `pedidos_compras_itens.codigo_item_integracao` (§2.2): é por ele que o item do Omie se liga de novo ao item da OC |
 | `nCodProd` integer | `codigo_produto` | ❌ **o formulário não escolhe produto**: `codigo_produto` vai `null` e só há descrição livre. O Omie precisa de `nCodProd` (ou `cCodIntProd`) para vincular ao cadastro e ao estoque. **O item precisa virar busca em `core.produtos` da unidade**, como foi feito com o fornecedor |
 | `cDescricao` string120 | `descricao_produto` | ok (cortar em 120) |
 | `cUnidade` string6 | `unidade_medida` | ok. Deveria vir do cadastro do produto |
@@ -255,7 +283,7 @@ A cotação passa a vir preenchida da PTAX do Banco Central, com a origem gravad
 | `nDesconto` | `quantidade × valor_unitario × desconto / 100` | a OC guarda **percentual** e o Omie quer **valor** |
 | `codigo_local_estoque` integer | `local_estoque` | ❌ texto livre. Ideal: select de `estoque/local`. Enquanto for texto livre, **manda vazio (local padrão) e o texto vai no bloco AV-HUB** (§3.8) |
 | `cCodCateg` | — | opcional por item |
-| `cObs` | — | **não usar**: é a única observação do Omie que sai impressa no pedido enviado ao fornecedor, e a OC não manda observação para o fornecedor (§3.8) |
+| `cObs` | `ordens_compra_itens.observacao` (nova, C9) | **observação do item para o fornecedor**: sai impressa embaixo do item no pedido do Omie (ex.: entregas parciais, "100/ PÇS - ENTREGAR NO DIA 24/09/2026"). Nunca dado interno (§3.8) |
 | impostos (`nValorIcms`...) | — | opcionais. Não mandar na v1 |
 | `tipo_material` | — | **sem equivalente no Omie**: vai no bloco AV-HUB de `cObsInt`, por item (§3.8) |
 
@@ -293,17 +321,23 @@ no campo de observações do pedido no Omie. Nada é descartado no envio.
 
 **Campo: `cObsInt` (observação interna do cabeçalho). ✅ Aprovado em 23/09/2026.**
 
-**As duas observações da OC são internas (decisão de 23/09/2026):** `observacao` e
-`observacao_interna` servem só para o pessoal interno e **nada da OC vai para o fornecedor
-como observação**. O que a doc do Omie diz de cada campo:
+**As três observações (decisão de 23/09/2026, revista com o pedido 46618 real):**
 
-| Campo do Omie | Doc do Omie | Uso aqui |
-|---|---|---|
-| `cObs` do cabeçalho | "não serão impressas no pedido enviado ao fornecedor" | **vai vazio** |
-| `cObsInt` do cabeçalho | "exibidas apenas para quem consultar o pedido de compra" | bloco AV-HUB + as duas observações da OC |
-| `cObs` do item | "serão impressas no pedido enviado ao fornecedor" | **não usar** |
+| Na OC do av-hub | Quem vê | No PDF da OC | No Omie |
+|---|---|---|---|
+| `observacao` (do pedido) | fornecedor | sai, no quadro "Observações" | `cObs` do cabeçalho — **sai impresso no pedido do Omie** (o "IMPORTANTE…" do 46618) |
+| `ordens_compra_itens.observacao` (do item, C9) | fornecedor | sai embaixo do item | `cObs` do item (sai impresso) |
+| `observacao_interna` | só o pessoal interno | não sai | `cObsInt`, **abaixo** do bloco `[AV-HUB]` |
 
-**Formato:** um bloco delimitado, sempre no topo, seguido das duas observações digitadas na OC.
+⚠️ A doc do Omie diz que o `cObs` do cabeçalho "não será impresso no pedido enviado ao
+fornecedor". **O pedido real diz o contrário** (46618: o `cObs` é o "IMPORTANTE…" da página 2 do
+PDF). Vale o comportamento real.
+
+A observação do pedido nasce com o texto padrão que os compradores já usam no Omie
+(`OBSERVACAO_PADRAO_PEDIDO` em `lib/domain/compras-ordem.ts`, igual nas três unidades), e o
+comprador pode editar. **Sem "•" nem aspas tipográficas**: no PDF do Omie eles viram "¿¿¿".
+
+**Formato do `cObsInt`:** um bloco delimitado, sempre no topo, seguido da observação interna digitada pelo comprador.
 O delimitador permite que o fluxo A (o espelho) reconheça e separe o bloco quando o pedido
 voltar do Omie. Linhas sem valor são omitidas.
 
@@ -317,15 +351,14 @@ Itens:
  1. Não acabado (matéria-prima) | US$ 12,50/KG | Desc. 5% | Local: Galpão 2
  2. Acabado | US$ 40,00/UN
 [/AV-HUB]
-Observação: <observacao>
-Observação interna: <observacao_interna>
+<observacao_interna digitada pelo comprador>
 ```
 
 **O que entra no bloco (lista fechada; um campo novo só entra aqui se não tiver campo no Omie):**
 
 | Dado do av-hub | Por que vai na observação |
 |---|---|
-| `numero_ordem` | já é o `cCodIntPed`, mas a observação deixa legível para quem abre o pedido no Omie |
+| `numero_pedido` | já é o `cCodIntPed`, mas a observação deixa legível para quem abre o pedido no Omie |
 | `numero_requisicao` (origem) | o Omie não tem vínculo com requisição |
 | quem emitiu e quando (`created_by`/`created_at`) | não há de-para para `nCodCompr` |
 | quem aprovou e quando (`aprovado_por`/`aprovado_em`) e `email_aprovador` | a aprovação é do av-hub, e `cEmailAprovador` não é enviado |
