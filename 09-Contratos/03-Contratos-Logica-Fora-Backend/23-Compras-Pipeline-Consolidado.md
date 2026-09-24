@@ -41,8 +41,10 @@ O que é banco e API está em `ENVIAR - contrato-compras-backend.md`.
 >   Rodar de novo não duplica nada, e item/parcela que não existem mais no Omie são apagados.
 > - **Dois erros achados e corrigidos na pipeline:** a janela filtrava por previsão (L3) e a
 >   descrição da condição era cortada em 30 caracteres sem aviso (L8).
-> - Catálogos de categorias, contas correntes e projetos: sem tabela no banco; só medidos os
->   tamanhos (cabem no DDL do B7).
+> - **Categorias, contas correntes e projetos:** tabelas criadas no local com o DDL do B7 (e do
+>   contrato de projetos). 312 + 262 categorias, 107 + 13 contas e 59 + 47 projetos, sem erro e sem
+>   duplicar ao rodar de novo. Os códigos do 46618 viram "16 - Revenda", "01 - Boleto/Pix/TED" e
+>   "Compras de Materia Prima", como no PDF do Omie.
 >
 > **Continua pendente:** L4 (envio da OC, espera decisão), L10 (campos obrigatórios e FOB) e
 > marcar como inativo o que sumir do Omie nos catálogos.

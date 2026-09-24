@@ -57,8 +57,8 @@ CREATE TABLE core.projetos (
   ativo               boolean      NOT NULL DEFAULT true,  -- NOT inativo ("S" -> false)
   incluido_em_omie    timestamptz,             -- info.data_inc + hora_inc (fuso de São Paulo)
   alterado_em_omie    timestamptz,             -- info.data_alt + hora_alt
-  usuario_inclusao_omie  varchar(10),          -- info.user_inc
-  usuario_alteracao_omie varchar(10),          -- info.user_alt
+  usuario_inclusao_omie  varchar(20),          -- info.user_inc ("P000794537": já tem 10)
+  usuario_alteracao_omie varchar(20),          -- info.user_alt
   created_at          timestamptz NOT NULL DEFAULT now(),
   updated_at          timestamptz NOT NULL DEFAULT now(),
   deleted_at          timestamptz

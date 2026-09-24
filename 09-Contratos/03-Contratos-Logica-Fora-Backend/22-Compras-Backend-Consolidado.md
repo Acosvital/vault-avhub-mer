@@ -272,6 +272,11 @@ CREATE TABLE core.contas_correntes (
 );
 CREATE UNIQUE INDEX uq_contas_correntes_empresa_codigo
   ON core.contas_correntes (codigo_empresa, codigo_conta_omie);
+CREATE INDEX idx_contas_correntes_empresa_ativo
+  ON core.contas_correntes (codigo_empresa, ativo) WHERE deleted_at IS NULL;
+-- A pipeline não mexe no updated_at: quem atualiza é a trigger, como no resto do banco.
+CREATE TRIGGER trg_contas_correntes_updated_at BEFORE UPDATE ON core.contas_correntes
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- Categorias: hoje codigo_categoria é ÚNICO NO BANCO INTEIRO e não há unidade.
 -- As categorias são por conta Omie; e a OC só deve listar as de DESPESA ativas.
@@ -284,13 +289,30 @@ ALTER TABLE core.categorias
   ADD COLUMN nao_exibir          boolean,                         -- nao_exibir = "S"
   ADD COLUMN categoria_superior  varchar(20),
   ADD COLUMN tipo_categoria      varchar(3);
--- trocar a unicidade de (codigo_categoria) para (codigo_empresa, codigo_categoria),
--- depois que a pipeline preencher codigo_empresa.
+-- Trocar a unicidade de (codigo_categoria) para (codigo_empresa, codigo_categoria).
+-- Se a tabela estiver VAZIA (é o caso do teste/produção em 23/09), dá para fazer tudo de uma vez,
+-- com codigo_empresa já NOT NULL:
+ALTER TABLE core.categorias ALTER COLUMN codigo_empresa SET NOT NULL;
+ALTER TABLE core.categorias DROP CONSTRAINT uq_core_categorias_codigo;
+CREATE UNIQUE INDEX uq_categorias_empresa_codigo
+  ON core.categorias (codigo_empresa, codigo_categoria);   -- SEM WHERE: é o ON CONFLICT da pipeline
+CREATE INDEX idx_categorias_empresa_despesa
+  ON core.categorias (codigo_empresa, conta_despesa, ativo) WHERE deleted_at IS NULL;
+CREATE TRIGGER trg_categorias_updated_at BEFORE UPDATE ON core.categorias
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 ```
 
 Rotas: todas com `codigo_empresa`, `ativo` (padrão `true`), `q` (código ou descrição, sem acento),
 ordem por código/descrição. Em `/categorias`, também `tipo=despesa` (só `conta_despesa`, não
 totalizadora, não `nao_exibir`), que é o que a OC usa.
+
+**Testado no banco local em 24/09/2026** (este DDL + o de `core.projetos`, e a pipeline com os
+três catálogos ligados): 59 + 47 projetos, 107 + 13 contas correntes e 312 + 262 categorias
+(Mogi + Uberaba), nenhum erro; rodar de novo não duplica e a trigger atualiza o `updated_at`. Os
+códigos do pedido 46618 viram os nomes do PDF do Omie: projeto 9779703251 = "16 - Revenda", conta
+10364415646 = "01 - Boleto/Pix/TED", categoria `2.01.03` = "Compras de Materia Prima" (despesa, não
+totalizadora; o grupo `2.01` é totalizador). Categorias de despesa lançáveis e ativas: 123 em Mogi e
+120 em Uberaba, que é o que o select da OC deve listar.
 
 **Depois:** a trigger de `ordens_compra_parcelas` usa `condicoes_pagamento_compras.lista_dias` da
 condição escolhida e marca `calculo_provisorio = false` (hoje é "partes iguais a cada 30 dias").
