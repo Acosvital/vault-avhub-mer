@@ -27,7 +27,7 @@ Está pronto para rodar, na ordem, nos **Apêndices A a D**.
 | Limite de aprovação | **R$ 30.000 nas duas unidades**, em reais já convertidos; abaixo disso aprova sozinha | Apêndice C |
 | HRM Caldeiraria | **Por enquanto compra pela unidade de Mogi** (sem conta Omie própria); depois terá um método específico | B14 + Apêndices B e C |
 | Produto no item (B12) | **Opcional, com busca** no cadastro de produtos da unidade; material não cadastrado continua em texto livre | B12 |
-| Vínculo com pedido de venda (B10) | a detalhar em conversa própria | B10 |
+| Vínculo com pedido de venda (B10) | finalidade escolhida antes; vínculo por item; `cNumPedido` = nº do fornecedor | `ENVIAR - contrato-compras-vinculo-pedido-venda.md` |
 
 ---
 
@@ -178,6 +178,11 @@ emitiu é `created_by`, e `codigo_comprador` não tem mais papel.
   comprador (B5) sai de `id_comprador`. Depois disso, a coluna pode ser removida.
 - **av-hub:** hoje manda `codigo_comprador` = usuário da sessão; para de mandar quando a API deixar
   de exigir.
+- 🐞 **Bug na `develop` (achado em 24/09, API local):** o model `ordem_compra.js` **não declara
+  `id_comprador`**. O POST resolve o comprador pela sessão e põe em `cab.id_comprador`, mas o
+  Sequelize descarta atributo que não está no model: **o `id_comprador` nunca é gravado** e a OC iria
+  ao Omie sem `nCodCompr`. Correção: declarar a coluna no model (feito e testado na API local,
+  branch `feat/compras-contrato`, commit `e3174ee`).
 
 ### B3. Número da OC e da requisição: sempre do contador, e fixo
 
@@ -405,8 +410,10 @@ as compras dela saem como OC de Mogi**; depois terá um método próprio.
 
 ## 3. 🟡 Depois
 
-- **B10. Vínculo OC ↔ pedido de venda** (hoje o comprador escreve "PV 27645 - GABRIEL NICOLAU" no
-  `cObsInt` e o número no `cNumPedido`). Vai ter contrato próprio; o Nathan vai detalhar.
+- **B10. Vínculo OC ↔ pedido de venda** — **contrato próprio (24/09):**
+  `ENVIAR - contrato-compras-vinculo-pedido-venda.md`, com SQL testado no banco local e API
+  implementada na API local (finalidade da OC, vínculo por item com quantidade na unidade da OC,
+  várias requisições numa OC, itens do PV com saldo a comprar e "compras deste pedido").
 - **B11. Impostos na OC** (IPI, ICMS ST): só depois de o item escolher o produto do cadastro
   (`core.produtos`, com NCM). Até lá o PDF mostra o total sem impostos.
 - **B12. Produto do cadastro no item — decidido (24/09): opcional, com busca.** O item pode ser

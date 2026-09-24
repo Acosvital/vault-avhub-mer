@@ -40,6 +40,7 @@ e [[008-Requisicoes-Compra]] também já estão aplicados.
 - **[[23-Compras-Pipeline-Consolidado]]** — lista de trabalho da `omie-elt-pipeline`: L1–L10 (PTAX,
   compradores, espelho, envio da OC, catálogos, entidades HTML, testes). L1–L3 e L5–L9 já estão
   implementados na branch `feat/compras-omie` (desligados até o banco ter as tabelas).
+- **[[24-Compras-Vinculo-Pedido-Venda]]** — vínculo da OC com o pedido de venda: finalidade, vínculo por item (quantidade na unidade da OC), várias requisições numa OC, saldo a comprar do PV e "compras deste pedido". SQL e API testados no local (24/09/2026).
 - **[[21-Compras-Projetos-Omie]]** — projetos do Omie (`ListarProjetos`) em `core.projetos`, para o
   select de Projeto da OC.
 
