@@ -191,7 +191,7 @@ aprovada leva até alguns minutos para aparecer no Omie.
   Ação `excluir` → `ExcluirPedCompra` com `nCodPed = codigo_pedido_omie`:
   - sucesso → `PATCH …/sincronizacao` `{ status: "sincronizado" }` e marcar `deleted_at` no
     `pedidos_compras` do mesmo `codigo_pedido_compra_omie` (o pedido some das pesquisas seguintes);
-  - o Omie recusa (pedido já recebido/faturado) → `{ status: "erro", erro: "<description>" }`: a OC
+  - o Omie recusa → `{ status: "erro", erro: "<description>" }`: a OC
     fica cancelada no av-hub e viva no Omie até alguém resolver lá. **Nunca** tentar de novo sozinho
     em loop; só pelo "Reenviar" da tela.
   - A trigger do banco é que devolve a OC cancelada para `pendente` (Apêndice B do contrato do
@@ -285,6 +285,11 @@ contrato do backend, com o `ALTER`). Em Uberaba o maior é 29.
 4. Se o Omie gera as parcelas sozinho com `cCodParc` e sem `parcelas_incluir`.
 5. Se `nCodProd` é obrigatório no item, ou se aceita só `cDescricao` + `cUnidade`.
 6. `cTpFrete = "1"` para FOB.
+7. **Quando o `ExcluirPedCompra` é aceito.** A doc não diz. Testar na conta de teste, com pedidos
+   criados só para isso: (a) incluído, sem recebimento; (b) com recebimento parcial; (c) recebido,
+   com a nota de entrada; (d) com o pedido aprovado dentro do Omie. Anotar a `description` de cada
+   recusa. O esperado é (a) aceita e (c) recusa; (b) e (d) não se sabe. Também testar a exclusão por
+   `cCodIntPed` (o número da OC), que evita depender do `nCodPed`.
 
 ---
 

@@ -22,7 +22,7 @@ Está pronto para rodar, na ordem, nos **Apêndices A a D**.
 |---|---|---|
 | Comprador (B2) | **Só `id_comprador`.** `codigo_comprador` deixa de ser obrigatório e sai depois; quem emitiu é `created_by`; ninguém emite em nome de outro | Apêndice B + API |
 | Envio ao Omie (B4/L4) | **A pipeline envia, por fila** (busca as OCs aprovadas e pendentes na API a cada poucos minutos) | B4 + contrato da pipeline |
-| Cancelar OC já enviada | **Cancela no Omie também.** Como a API do Omie não tem "cancelar" pedido de compra, a pipeline **exclui** (`ExcluirPedCompra`); se o Omie recusar (já recebido/faturado), a OC fica com erro | Apêndice B + B4 + L4 |
+| Cancelar OC já enviada | **Cancela no Omie também.** Como a API do Omie não tem "cancelar" pedido de compra, a pipeline **exclui** (`ExcluirPedCompra`); se o Omie recusar, a OC fica com erro. **Quando o Omie aceita excluir não está na doc: a confirmar (L10)** | Apêndice B + B4 + L4 |
 | Quem aprova e cancela (B9) | **Perfil "Gerência de Compras"** (`pode_aprovar`) | Apêndice C + API + av-hub |
 | Limite de aprovação | **R$ 30.000 nas duas unidades**, em reais já convertidos; abaixo disso aprova sozinha | Apêndice C |
 | HRM Caldeiraria | **Por enquanto compra pela unidade de Mogi** (sem conta Omie própria); depois terá um método específico | B14 + Apêndices B e C |
@@ -221,9 +221,11 @@ O PATCH de sincronização **não pode** mexer em nada além desses campos.
 - **Banco (Apêndice B, testado no T10):** ao cancelar uma OC com `status_sincronizacao_omie =
   'sincronizado'`, a trigger devolve para `'pendente'` (mantém o `codigo_pedido_omie`). É isso que a
   põe na fila como "excluir".
-- **Pipeline:** exclui no Omie e responde `sincronizado`. Se o Omie recusar (pedido já recebido ou
-  faturado), responde `erro` com a mensagem, e a OC fica cancelada aqui e **viva no Omie** até alguém
-  resolver lá.
+- **Pipeline:** exclui no Omie e responde `sincronizado`. Se o Omie recusar, responde `erro` com a
+  mensagem, e a OC fica cancelada aqui e **viva no Omie** até alguém resolver lá. **A doc do Omie não
+  diz quando a exclusão é aceita** (só os parâmetros: `nCodPed` ou `cCodIntPed`). O esperado é que
+  pedido sem recebimento e sem nota possa ser excluído, e com nota não, mas isso **precisa ser
+  confirmado na conta de teste** (L10 da pipeline) antes de ligar.
 - **Espelho:** depois da exclusão, o pedido some das próximas pesquisas do Omie; a pipeline marca
   `deleted_at` no `pedidos_compras` correspondente.
 
