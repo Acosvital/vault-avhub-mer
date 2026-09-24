@@ -26,7 +26,9 @@ O que é banco e API está em `ENVIAR - contrato-compras-backend.md`.
 > `SYNC_COMPRADORES`, `SYNC_COTACAO_PTAX`, `SYNC_PEDIDOS_COMPRAS` e
 > `SYNC_CONDICOES_PAGAMENTO_COMPRAS`; em **produção**, nenhum. Como os itens do espelho no teste
 > ainda não têm `codigo_item_integracao` nem `observacao`, a pipeline grava só as colunas que
-> existem e avisa no log (commit `229a419`). Commits na branch: `95c2db4`, `3f16868`, `ae919fd`,
+> existem e avisa no log (commit `229a419`). **No local, com as duas colunas criadas (Apêndice B do
+> contrato do backend), a pipeline passou a gravar a observação do item sem aviso** (573 de 1.370
+> itens; no 46618, as duas linhas de entrega). Commits na branch: `95c2db4`, `3f16868`, `ae919fd`,
 > `229a419` e `c7aba1b` (correções do teste local de 24/09).
 >
 > **Testado no local em 24/09/2026** (banco local com a estrutura do teste e os dados de

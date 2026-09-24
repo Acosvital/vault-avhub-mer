@@ -14,6 +14,11 @@ apagados, e o BFF não cai mais para mock nem calcula a régua.
 Abaixo, o que **ainda** está fora do lugar. Cada item está marcado no código com
 `GAMBIARRA(docs/ENVIAR - contrato-compras-pendencias-pos-backend.md)`.
 
+> **24/09/2026:** a parte de **banco** destes itens está consolidada, com SQL testado, no
+> `ENVIAR - contrato-compras-backend.md` (Apêndices A–D): C7 (histórico, `cancelado_por/_em`;
+> `pode_aprovar` já existe na matriz), C9 (colunas do PDF, valores por trigger, IE da unidade) e
+> C10 (categorias por unidade). O que sobra aqui é o lado da **API** e do av-hub.
+
 ## C1. Nomes na ordem de compra (fornecedor, transportadora, quem emitiu e quem aprovou)
 
 `GET /compras/ordens` e `GET /compras/ordens/{id}` só devolvem códigos: `codigo_fornecedor`,
@@ -113,14 +118,16 @@ original: "nunca silenciosamente `pendente` para sempre sem explicação". Preci
 ## C7. Permissão de aprovar e histórico de decisão
 
 - O backend não confere permissão nenhuma nas rotas de Compras (só `x-api-key`). Quem decide
-  é o BFF, com `pode_editar` da tela `compras` para aprovar e reprovar. A matriz não tem
-  `pode_aprovar` (mesmo caso de `contrato-vagas-fila-decisao-no-banco.md`, V5, e
+  é o BFF, com `pode_editar` da tela `compras` para aprovar e reprovar. A coluna `pode_aprovar`
+  **existe** em `auth.permissoes` (teste e produção), mas nenhum perfil tem marcado e a API não usa
+  (mesmo caso de `contrato-vagas-fila-decisao-no-banco.md`, V5, e
   `contrato-permissoes-e-escopo-no-banco.md`).
 - `aprovado_por`, `created_by` e `updated_by` são aceitos **do corpo** do request. O av-hub
   preenche a partir da sessão, nunca do navegador, mas uma chamada direta pode aprovar "em nome"
   de qualquer uuid.
 - Não existe histórico de decisão (quem/quando/de→para). Hoje o cancelamento guarda só o
-  `motivo_reprovacao`: não há `cancelado_por`/`cancelado_em`.
+  `motivo_reprovacao`: não há `cancelado_por`/`cancelado_em`. **Banco resolvido no Apêndice B do
+  contrato do backend** (tabela `ordens_compra_historico` preenchida por trigger), testado no local.
 
 ## C8. Entidades HTML nos nomes de parceiro
 
