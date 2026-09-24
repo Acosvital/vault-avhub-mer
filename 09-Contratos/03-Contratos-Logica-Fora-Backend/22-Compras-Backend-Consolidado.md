@@ -16,6 +16,19 @@ O que é da pipeline (extrair do Omie, enviar a OC, job da PTAX) está em
 banco de teste de 23/09 + dados de produção), com a pipeline rodando de verdade contra o Omie.
 Está pronto para rodar, na ordem, nos **Apêndices A a D**.
 
+## Decisões do Nathan (24/09/2026)
+
+| Assunto | Decisão | Onde entra |
+|---|---|---|
+| Comprador (B2) | **Só `id_comprador`.** `codigo_comprador` deixa de ser obrigatório e sai depois; quem emitiu é `created_by`; ninguém emite em nome de outro | Apêndice B + API |
+| Envio ao Omie (B4/L4) | **A pipeline envia, por fila** (busca as OCs aprovadas e pendentes na API a cada poucos minutos) | B4 + contrato da pipeline |
+| Cancelar OC já enviada | **Cancela no Omie também.** Como a API do Omie não tem "cancelar" pedido de compra, a pipeline **exclui** (`ExcluirPedCompra`); se o Omie recusar (já recebido/faturado), a OC fica com erro | Apêndice B + B4 + L4 |
+| Quem aprova e cancela (B9) | **Perfil "Gerência de Compras"** (`pode_aprovar`) | Apêndice C + API + av-hub |
+| Limite de aprovação | **R$ 30.000 nas duas unidades**, em reais já convertidos; abaixo disso aprova sozinha | Apêndice C |
+| HRM Caldeiraria | **Por enquanto compra pela unidade de Mogi** (sem conta Omie própria); depois terá um método específico | B14 + Apêndices B e C |
+| Produto no item (B12) | **Opcional, com busca** no cadastro de produtos da unidade; material não cadastrado continua em texto livre | B12 |
+| Vínculo com pedido de venda (B10) | a detalhar em conversa própria | B10 |
+
 ---
 
 ## Resumo: o que é de quem
@@ -24,16 +37,17 @@ Está pronto para rodar, na ordem, nos **Apêndices A a D**.
 |---|---|---|---|---|
 | **B0** | Levar tudo para produção | aplicar as migrations do teste + Apêndices A–C | publicar a `develop` | — |
 | **B1** | Espelho `pedidos_compras` | teste: 2 colunas (Apêndice B); produção: o B1 inteiro | models `bigint` + colunas novas | ✅ pipeline grava a observação do item |
-| **B2** | Comprador em dois campos | depende da decisão | depende da decisão | — |
+| **B2** | Comprador: só `id_comprador` (decidido) | ✅ `codigo_comprador` opcional (Apêndice B) | parar de exigir `codigo_comprador` | ✅ T11 |
 | **B3** | Número da OC/requisição | ✅ trigger sempre numera (Apêndice B) | tirar `numero_pedido` de `CAMPOS` | ✅ T1, T4, T9 |
-| **B4** | Envio da OC ao Omie | colunas já existem | 3 rotas | — |
+| **B4** | Envio da OC ao Omie (pela pipeline, decidido) | ✅ cancelar OC já enviada volta para a fila (Apêndice B) | 3 rotas | ✅ T10 |
 | **B5** | Nomes e dados na OC | IE da unidade (Apêndice B + C) | JOINs na listagem e no detalhe | IE preenchida do Omie |
 | **B6** | Campos do PDF | ✅ colunas + cálculo por trigger (Apêndice B) | aceitar `observacao` do item e `numero_pedido_fornecedor` | ✅ T1 |
 | **B7** | Catálogos do Omie | ✅ tabelas (Apêndice A) | 4 rotas de leitura | ✅ pipeline carregou os 4 |
 | **B7b** | Parcelas pela condição | ✅ trigger (Apêndice B) | — | ✅ T2, T3, T5 |
 | **B8** | Listagem, indicadores, limite | — | rotas `/resumo` e `/parametros` | — |
-| **B9** | Permissões e histórico | ✅ histórico, cancelamento, tela (Apêndice B) | usar `pode_aprovar`; mandar `updated_by` | ✅ T6–T8 |
+| **B9** | Permissões e histórico | ✅ histórico, cancelamento, tela (B) e `pode_aprovar` da Gerência de Compras (C) | usar `pode_aprovar`; mandar `updated_by` | ✅ T6–T8, T12 |
 | **B13** | Furos de status (novo) | ✅ fechados na trigger (Apêndice B) | tratar o erro 23514 no PATCH | ✅ T6, T7 |
+| **B14** | Unidades de compra (HRM → Mogi) | ✅ `id_unidade_compra` + trava na criação da OC (B, C) | `GET /unidades?compra=true`; erro 23514 → 400 | ✅ T12, T13 |
 
 **Ordem para o banco de TESTE:** Apêndice A → Apêndice B → Apêndice C → rodar o Apêndice D (é só
 teste, termina em `ROLLBACK`) e comparar com o resultado esperado. **Produção:** B0 primeiro.
@@ -150,19 +164,20 @@ compra do Omie não tem, vai ficar sempre nulo.
 no 46618, "100/ PÇS - ENTREGAR NO DIA 24/09/2026" e "191/ PÇS - …" em duas linhas). O
 `codigo_item_integracao` só vem preenchido nos pedidos que o av-hub enviar (B4).
 
-### B2. O comprador está em dois campos — decidir e tirar um
+### B2. Comprador: só `id_comprador` (decidido em 24/09)
 
 Hoje a OC tem **`codigo_comprador`** (uuid de `auth.usuarios`, **obrigatório** no POST desde
 `7918357`) **e** **`id_comprador`** (FK para `compradores`, resolvido pela sessão desde `8715549`).
+O que o Omie precisa é o `nCodCompr`, e ele só sai de `id_comprador` → `compradores.codigo_comprador_omie`.
 
-- O que o Omie precisa é o `nCodCompr`, e ele só sai de `id_comprador` → `compradores.codigo_comprador_omie`.
-- O comentário do model diz que `codigo_comprador` existe para "um admin criar a OC em nome de outro
-  comprador". **A regra combinada é o contrário: ninguém emite em nome de outro** (A3). O av-hub
-  manda `codigo_comprador` = usuário da sessão, que é sempre igual a `created_by`.
+**Decisão:** o comprador é **`id_comprador`**. Ninguém emite em nome de outro (A3), então quem
+emitiu é `created_by`, e `codigo_comprador` não tem mais papel.
 
-**Proposta:** manter só `id_comprador` como "o comprador" e tirar a obrigatoriedade de
-`codigo_comprador` (ou remover a coluna; `created_by` já diz quem emitiu). **Decisão do Nathan antes
-de mexer.** (Por isso não está em nenhum apêndice.)
+- **Banco (Apêndice B):** `codigo_comprador` deixa de ser `NOT NULL` e fica marcado como obsoleto.
+- **API:** tirar a obrigatoriedade de `codigo_comprador` no POST e parar de gravar; o nome do
+  comprador (B5) sai de `id_comprador`. Depois disso, a coluna pode ser removida.
+- **av-hub:** hoje manda `codigo_comprador` = usuário da sessão; para de mandar quando a API deixar
+  de exigir.
 
 ### B3. Número da OC e da requisição: sempre do contador, e fixo
 
@@ -179,13 +194,17 @@ de mexer.** (Por isso não está em nenhum apêndice.)
 
 ### B4. Rotas para o envio da OC ao Omie (quem envia é a pipeline)
 
-Toda OC fica `status_sincronizacao_omie = 'pendente'` para sempre. As **colunas já existem**; o envio
-em si é da pipeline (contrato da pipeline, L4, **decisão em aberto**). O backend precisa dar a ela:
+Toda OC fica `status_sincronizacao_omie = 'pendente'` para sempre. As **colunas já existem**. **Decisão
+(24/09): quem envia é a pipeline, por fila** (contrato da pipeline, L4). O backend precisa dar a ela:
 
 ```
-GET   /compras/ordens?status=aprovado&status_sincronizacao_omie=pendente&limit=
-        → a fila de envio (com itens, parcelas, nomes e o comprador do Omie resolvido:
-          codigo_comprador_omie de compradores)
+GET   /compras/ordens/fila-omie?limit=
+        → a fila: status_sincronizacao_omie = 'pendente' E
+            (status = 'aprovado'                              → enviar (UpsertPedCompra)
+             OU status = 'cancelado' com codigo_pedido_omie   → excluir (ExcluirPedCompra))
+          com itens, parcelas, nomes e o comprador do Omie resolvido
+          (codigo_comprador_omie de compradores); cada OC diz a ação: "enviar" ou "excluir".
+          OC cancelada que nunca chegou ao Omie não entra na fila.
 PATCH /compras/ordens/{id}/sincronizacao
         body sucesso: { status: "sincronizado", codigo_pedido_omie, numero_pedido_omie }
         body falha:   { status: "erro", erro: "<description do omie_fail>" }
@@ -195,6 +214,18 @@ POST  /compras/ordens/{id}/reenviar
 ```
 
 O PATCH de sincronização **não pode** mexer em nada além desses campos.
+
+**Cancelar uma OC que já está no Omie (decisão 24/09: cancela lá também).** A API do Omie **não tem
+"cancelar" pedido de compra**: só `ExcluirPedCompra`. Então:
+
+- **Banco (Apêndice B, testado no T10):** ao cancelar uma OC com `status_sincronizacao_omie =
+  'sincronizado'`, a trigger devolve para `'pendente'` (mantém o `codigo_pedido_omie`). É isso que a
+  põe na fila como "excluir".
+- **Pipeline:** exclui no Omie e responde `sincronizado`. Se o Omie recusar (pedido já recebido ou
+  faturado), responde `erro` com a mensagem, e a OC fica cancelada aqui e **viva no Omie** até alguém
+  resolver lá.
+- **Espelho:** depois da exclusão, o pedido some das próximas pesquisas do Omie; a pipeline marca
+  `deleted_at` no `pedidos_compras` correspondente.
 
 ---
 
@@ -321,12 +352,15 @@ indicadores.
 - **Cancelamento:** `cancelado_por` e `cancelado_em`, carimbados pela trigger (`cancelado_por` =
   `updated_by`, se for um usuário que existe).
 - **Tela `compradores`** em `auth.telas`, dentro de Compras.
-- `auth.permissoes.pode_aprovar` **já existe** (teste e produção), mas **nenhum perfil tem marcado**.
+- `auth.permissoes.pode_aprovar` **já existe** (teste e produção), mas nenhum perfil tinha marcado.
+  **Decisão (24/09): a "Gerência de Compras" aprova e cancela** → Apêndice C marca `pode_aprovar` nas
+  telas `compras` (é a que o av-hub confere) e `aprovacoes`.
 
 **API:**
 
 - Usar **`pode_aprovar`** para aprovar e cancelar OC (hoje o av-hub usa `pode_editar`, e quem cadastra
-  pode aprovar). Marcar quem aprova é decisão do Nathan (sugestão: "Gerência de Compras").
+  pode aprovar). **Ordem:** primeiro o Apêndice C no banco do ambiente, depois a API e o av-hub
+  passam a exigir `pode_aprovar` — ao contrário, ninguém consegue aprovar.
 - Mandar `updated_by` no PATCH de cancelamento (é de onde sai `cancelado_por`).
 - Devolver o histórico no detalhe da OC.
 - Só o administrador edita o vínculo do comprador (tela `compradores`).
@@ -349,8 +383,21 @@ Lendo as triggers do teste e o `PATCH /compras/ordens/{id}` da `develop`:
    `aguardando`. Agora `rascunho` e `cancelado` não mudam com o recálculo. (A API não cria rascunho
    hoje; não muda nada no fluxo atual.)
 
-**Pendente, fora deste contrato:** o que fazer com uma OC **já sincronizada** com o Omie que é
-cancelada (hoje só muda no av-hub). Vai junto com o L4.
+**Resolvido em 24/09:** OC **já sincronizada** com o Omie que é
+cancelada volta para a fila e a pipeline exclui o pedido no Omie (ver B4; testado no T10).
+
+### B14. Unidades de compra: a HRM compra pela unidade de Mogi (decisão 24/09)
+
+A HRM Caldeiraria não tem conta Omie (sem compradores, catálogos, parceiros nem IE). **Por enquanto,
+as compras dela saem como OC de Mogi**; depois terá um método próprio.
+
+- **Banco (Apêndices B e C):** coluna `core.unidades.id_unidade_compra` (preenchida = a unidade
+  compra pela apontada; nula = compra por si), com a HRM apontando para Mogi. A trigger que cria a
+  OC **recusa** OC numa unidade que compra por outra (erro `23514`, "Esta unidade compra pela
+  unidade Aços Vital: emita a OC nela"). Quando a HRM ganhar o método próprio, basta limpar a coluna.
+- **API:** `GET /unidades?compra=true` → só as unidades com `id_unidade_compra` nulo (hoje Mogi e
+  Uberaba), para o select de unidade da OC e da requisição; o erro `23514` do POST vira `400`.
+- **av-hub:** o select de unidade da tela de emissão passa a usar `?compra=true` (hoje lista todas).
 
 ---
 
@@ -360,16 +407,19 @@ cancelada (hoje só muda no av-hub). Vai junto com o L4.
   `cObsInt` e o número no `cNumPedido`). Vai ter contrato próprio; o Nathan vai detalhar.
 - **B11. Impostos na OC** (IPI, ICMS ST): só depois de o item escolher o produto do cadastro
   (`core.produtos`, com NCM). Até lá o PDF mostra o total sem impostos.
-- **B12. Produto do cadastro no item** (`codigo_produto` hoje vai nulo; o Omie precisa de
-  `nCodProd` para vincular ao estoque): busca em `core.produtos` por unidade, como o fornecedor.
+- **B12. Produto do cadastro no item — decidido (24/09): opcional, com busca.** O item pode ser
+  escolhido do cadastro de produtos da unidade (`core.produtos`, busca por código/descrição como a do
+  fornecedor), e aí preenche descrição, unidade e NCM e grava `codigo_produto` (vai no `nCodProd` do
+  Omie, que dá entrada no estoque). Material ainda não cadastrado continua em texto livre.
+  Precisa de `GET /produtos?codigo_empresa=&q=&limit=` (confirmar se a rota atual filtra por unidade).
 
 ---
 
 ## 4. Ordem sugerida
 
 1. **Banco do teste:** Apêndices A, B e C, e o D para conferir. É só SQL, já testado.
-2. **API do que o banco já resolveu:** B1 (models), B3, B6, B9 e B13 (ajustes pequenos).
-3. **B2** (decisão) e **B7** (rotas dos catálogos) — a pipeline liga os catálogos junto.
+2. **API do que o banco já resolveu:** B1 (models), B2 (`codigo_comprador` opcional), B3, B6, B9 e B13 (ajustes pequenos).
+3. **B7** (rotas dos catálogos) — a pipeline liga os catálogos junto.
 4. **B5** e **B8** (a tela e o PDF da OC dependem deles).
 5. **B4** junto com o L4 da pipeline (envio ao Omie).
 6. **B0** (produção) quando o teste estiver fechado.
@@ -386,7 +436,10 @@ cancelada (hoje só muda no av-hub). Vai junto com o L4.
 - Condição de pagamento, categoria, conta corrente e projeto são escolhidos de listas da unidade, a
   OC grava os códigos que o Omie aceita e as parcelas saem da condição escolhida.
 - `POST /compras/ordens` com `numero_pedido` no corpo é ignorado; o número sai só do contador.
-- Só quem tem `pode_aprovar` aprova ou cancela; OC cancelada não volta.
+- Só quem tem `pode_aprovar` (Gerência de Compras) aprova ou cancela; OC cancelada não volta.
+- Cancelar uma OC que já está no Omie exclui o pedido lá, ou deixa a OC com o erro do Omie.
+- `POST /compras/ordens` sem `codigo_comprador` funciona; o comprador vem de `id_comprador`.
+- A tela de emissão só oferece Mogi e Uberaba; uma OC na HRM é recusada.
 
 ---
 
@@ -469,15 +522,16 @@ CREATE TRIGGER trg_categorias_updated_at BEFORE UPDATE ON core.categorias
 COMMIT;
 ```
 
-## Apêndice B — SQL das regras (B1, B3, B6, B7b, B9, B13)
+## Apêndice B — SQL das regras (B1, B2, B3, B4, B6, B7b, B9, B13, B14)
 
 Troca `fn_ordens_compra_numerar`, `fn_requisicoes_compra_numerar`, `fn_ordens_compra_recalcular`,
-`fn_ordens_compra_parcelas` e `fn_ordens_compra_status`, e cria as triggers novas. **Depende do
+`fn_ordens_compra_parcelas`, `fn_ordens_compra_status` e `fn_ordens_compra_nascer`, cria as triggers
+novas, deixa `codigo_comprador` opcional (B2) e cria `core.unidades.id_unidade_compra` (B14). **Depende do
 Apêndice A** (a trigger de parcelas lê `condicoes_pagamento_compras`).
 
 ```sql
 -- =============================================================================
--- Compras: tudo o que falta no BANCO (contrato compras-backend: B1, B3, B6, B7, B9)
+-- Compras: tudo o que falta no BANCO (contrato compras-backend: B1, B2, B3, B4, B6, B7b, B9, B13)
 -- Pressupõe o banco de TESTE de 23/09/2026 (PR #273, 7918357, bf9d86a, 8715549)
 -- e o B7 dos catálogos (condicoes_pagamento_compras, core.projetos,
 -- core.contas_correntes, core.categorias por unidade).
@@ -776,6 +830,12 @@ BEGIN
   END IF;
   IF NEW.status = 'cancelado' THEN
     NEW.cancelado_em  := now();
+    -- B4 (decisão 24/09): cancelar uma OC que JÁ ESTÁ no Omie volta para a fila, e a
+    -- pipeline exclui lá (ExcluirPedCompra: o Omie não tem "cancelar" pedido de compra).
+    IF OLD.status_sincronizacao_omie = 'sincronizado' THEN
+      NEW.status_sincronizacao_omie := 'pendente';
+      NEW.erro_sincronizacao_omie   := NULL;
+    END IF;
     -- só se updated_by for um usuário de verdade (senão a FK derrubaria o cancelamento)
     NEW.cancelado_por := COALESCE(NEW.cancelado_por,
       (SELECT u.id FROM auth.usuarios u WHERE u.id = NEW.updated_by));
@@ -835,6 +895,47 @@ CREATE TRIGGER trg_ordens_compra_historico
   AFTER INSERT OR UPDATE OF status ON core_vendas_faturamento.ordens_compra
   FOR EACH ROW EXECUTE FUNCTION core_vendas_faturamento.fn_ordens_compra_historico();
 
+-- -----------------------------------------------------------------------------
+-- B2 (decisão 24/09): o comprador é id_comprador; quem emitiu é created_by.
+-- -----------------------------------------------------------------------------
+ALTER TABLE core_vendas_faturamento.ordens_compra ALTER COLUMN codigo_comprador DROP NOT NULL;
+COMMENT ON COLUMN core_vendas_faturamento.ordens_compra.codigo_comprador IS
+  'OBSOLETO desde 24/09/2026: o comprador é id_comprador e quem emitiu é created_by. Sai quando a API parar de gravar.';
+
+-- -----------------------------------------------------------------------------
+-- Unidades de compra (decisão 24/09): a HRM, sem conta Omie, compra pela unidade de Mogi.
+-- -----------------------------------------------------------------------------
+ALTER TABLE core.unidades
+  ADD COLUMN id_unidade_compra uuid REFERENCES core.unidades(id);
+COMMENT ON COLUMN core.unidades.id_unidade_compra IS
+  'Preenchida = a unidade não emite OC própria e compra pela unidade apontada (HRM -> Mogi, 24/09/2026). NULL = compra por si.';
+
+-- A OC só nasce numa unidade que compra por si. (Resto igual ao do teste.)
+CREATE OR REPLACE FUNCTION core_vendas_faturamento.fn_ordens_compra_nascer()
+ RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE
+  v_compra_por text;
+BEGIN
+  SELECT c.nome_fantasia INTO v_compra_por
+    FROM core.unidades u
+    JOIN core.unidades c ON c.id = u.id_unidade_compra
+   WHERE u.id = NEW.codigo_empresa;
+  IF v_compra_por IS NOT NULL THEN
+    RAISE EXCEPTION 'Esta unidade compra pela unidade %: emita a OC nela', v_compra_por
+      USING ERRCODE = '23514';
+  END IF;
+
+  -- Toda OC nasce pendente de decisão. Quem libera é a trigger de recálculo,
+  -- depois de saber o valor dos itens -- e só abaixo do limite.
+  IF NEW.status <> 'rascunho' THEN
+    NEW.status := 'aguardando_aprovacao';
+  END IF;
+  -- Aprovação não se declara na criação.
+  NEW.aprovado_por := NULL;
+  NEW.aprovado_em  := NULL;
+  RETURN NEW;
+END $$;
+
 -- Tela "Compradores" na matriz de permissões (B9), dentro de Compras.
 INSERT INTO auth.telas (nome, slug, id_parent, ordem, ativo)
 SELECT 'Compradores', 'compradores', t.id, 1, true
@@ -845,20 +946,53 @@ SELECT 'Compradores', 'compradores', t.id, 1, true
 COMMIT;
 ```
 
-## Apêndice C — Dados
+## Apêndice C — Dados e decisões
 
 ```sql
 -- =============================================================================
--- Apêndice C — Dados: inscrição estadual das unidades (B5/B6)
--- Fonte: Omie, geral/empresas → ListarEmpresas → inscricao_estadual (lido em 24/09/2026).
--- A HRM não tem conta Omie na pipeline: fica nula até alguém informar.
+-- Apêndice C — Dados (decisões e valores do Omie, 24/09/2026)
 -- =============================================================================
+BEGIN;
+
+-- Inscrição estadual das unidades (B5/B6). Fonte: Omie, geral/empresas → ListarEmpresas.
+-- A HRM não tem conta Omie: por decisão de 24/09 ela compra pela unidade de Mogi.
 UPDATE core.unidades
    SET inscricao_estadual = CASE cnpj
          WHEN '23.440.235/0001-08' THEN '454.462.423.112'   -- Aços Vital (Mogi)
          WHEN '62.270.345/0001-12' THEN '52792850060'       -- Aços Uberaba
        END
  WHERE cnpj IN ('23.440.235/0001-08', '62.270.345/0001-12');
+
+-- Uberaba estava sem codigo_empresa_omie (Mogi tem 9763924701). ListarEmpresas: 10980164678.
+UPDATE core.unidades SET codigo_empresa_omie = '10980164678'
+ WHERE cnpj = '62.270.345/0001-12' AND codigo_empresa_omie IS NULL;
+
+-- Decisão 24/09: a HRM compra pela unidade de Mogi (id_unidade_compra, Apêndice B).
+UPDATE core.unidades h
+   SET id_unidade_compra = m.id
+  FROM core.unidades m
+ WHERE h.cnpj = '04.394.837/0001-13' AND m.cnpj = '23.440.235/0001-08';
+
+-- B9 (decisão 24/09): quem aprova e cancela OC é a "Gerência de Compras". Na tela
+-- 'compras' (é a que o av-hub confere) e na 'aprovacoes'.
+UPDATE auth.permissoes pm
+   SET pode_aprovar = true
+  FROM auth.perfis p, auth.telas t
+ WHERE pm.id_perfil = p.id AND pm.id_tela = t.id
+   AND p.nome = 'Gerência de Compras' AND p.deleted_at IS NULL
+   AND t.slug IN ('compras', 'aprovacoes')
+   AND pm.deleted_at IS NULL;
+
+-- Limite de aprovação (decisão 24/09: R$ 30.000, abaixo disso aprova sozinha). Hoje vale
+-- pelo padrão da trigger; a linha explícita é o que GET /compras/parametros vai ler (B8).
+INSERT INTO core_vendas_faturamento.parametros_compras (codigo_empresa, limite_aprovacao)
+SELECT u.id, 30000.00
+  FROM core.unidades u
+ WHERE u.cnpj IN ('23.440.235/0001-08', '62.270.345/0001-12')
+   AND NOT EXISTS (SELECT 1 FROM core_vendas_faturamento.parametros_compras x
+                    WHERE x.codigo_empresa = u.id);
+
+COMMIT;
 ```
 
 ## Apêndice D — Roteiro de teste (termina em ROLLBACK)
@@ -981,6 +1115,41 @@ INSERT INTO core_vendas_faturamento.requisicoes_compra
 SELECT 'MES-4471', empresa, 'CHAPA 3/8', 10, 'PC', DATE '2026-10-30' FROM ctx
 RETURNING numero_requisicao, numero_requisicao_mes;
 
+\echo '== T10: OC já sincronizada com o Omie, cancelada -> volta para a fila (pendente) para ser excluída lá'
+INSERT INTO core_vendas_faturamento.ordens_compra
+  (codigo_empresa, codigo_fornecedor, tipo_frete, data_previsao_chegada, contato, created_by)
+SELECT empresa, '10363934283', 'CIF', DATE '2026-10-24', 'T10', usuario FROM ctx;
+CREATE TEMP TABLE oc3 AS SELECT id FROM core_vendas_faturamento.ordens_compra WHERE contato = 'T10' AND created_at = now();
+\echo '   (T11 junto: OC sem codigo_comprador é aceita — B2)'
+SELECT numero_pedido, codigo_comprador IS NULL AS sem_codigo_comprador
+  FROM core_vendas_faturamento.ordens_compra WHERE id = (SELECT id FROM oc3);
+UPDATE core_vendas_faturamento.ordens_compra
+   SET status_sincronizacao_omie = 'sincronizado', codigo_pedido_omie = 10467753709,
+       numero_pedido_omie = '46999', sincronizado_em = now()
+ WHERE id = (SELECT id FROM oc3);
+UPDATE core_vendas_faturamento.ordens_compra o SET status = 'cancelado', motivo_reprovacao = 'fornecedor desistiu', updated_by = ctx.usuario
+  FROM ctx WHERE o.id = (SELECT id FROM oc3);
+SELECT status, status_sincronizacao_omie, codigo_pedido_omie
+  FROM core_vendas_faturamento.ordens_compra WHERE id = (SELECT id FROM oc3);
+
+\echo '== T12: dados do Apêndice C'
+SELECT u.nome_fantasia, u.inscricao_estadual, u.codigo_empresa_omie,
+       (SELECT limite_aprovacao FROM core_vendas_faturamento.parametros_compras p WHERE p.codigo_empresa = u.id) AS limite,
+       (SELECT c.nome_fantasia FROM core.unidades c WHERE c.id = u.id_unidade_compra) AS compra_por
+  FROM core.unidades u ORDER BY u.nome_fantasia;
+SELECT t.slug, pm.pode_aprovar
+  FROM auth.permissoes pm JOIN auth.perfis p ON p.id = pm.id_perfil JOIN auth.telas t ON t.id = pm.id_tela
+ WHERE p.nome = 'Gerência de Compras' AND pm.deleted_at IS NULL AND pm.pode_aprovar;
+
+\echo '== T13: OC na HRM é recusada (ela compra pela unidade de Mogi)'
+SAVEPOINT antes_da_hrm;
+\set ON_ERROR_STOP 0
+INSERT INTO core_vendas_faturamento.ordens_compra
+  (codigo_empresa, codigo_fornecedor, tipo_frete, created_by)
+SELECT u.id, '1', 'CIF', ctx.usuario FROM core.unidades u, ctx WHERE u.cnpj = '04.394.837/0001-13';
+\set ON_ERROR_STOP 1
+ROLLBACK TO SAVEPOINT antes_da_hrm;
+
 ROLLBACK;
 ```
 
@@ -992,9 +1161,13 @@ ROLLBACK;
 | T4 | continua `OC-000001` |
 | T5 | `OC-000002`, USD 10.000,00 → R$ 51.414,00, `aguardando_aprovacao`, 1 parcela de 10.000,00 em 24/10/2026 (condição `000`) |
 | T6 | aprova com aprovador; depois de subir para 12.000 → R$ 61.696,80, volta para `aguardando_aprovacao`, `aprovado_por` e `aprovado_em` nulos |
-| T7 | `cancelado` com `cancelado_em` e `cancelado_por`; aprovar depois dá `ERROR: OC cancelada não muda de status (tentativa: aprovado)` |
+| T7 | `cancelado` com `cancelado_em` e `cancelado_por`; aprovar depois dá `ERROR: OC cancelada não muda de status (tentativa: aprovado)` (erro esperado) |
 | T8 | histórico: OC-000001 `→ aguardando_aprovacao`, `aguardando_aprovacao → aprovado` (automática, sem usuário); OC-000002 `→ aguardando`, `→ aprovado` (com usuário), `aprovado → aguardando_aprovacao` ("valor subiu acima do limite"), `→ cancelado` ("preço fora", com usuário) |
 | T9 | `numero_requisicao` = `REQ-000001`, `numero_requisicao_mes` = `MES-4471` |
+| T10 | OC `OC-000003` marcada como sincronizada (código Omie 10467753709) e cancelada → `cancelado`, `status_sincronizacao_omie` = `pendente`, código do Omie mantido (vai para a fila como "excluir") |
+| T11 | a mesma OC nasceu sem `codigo_comprador` (aceita) |
+| T12 | Aços Uberaba: IE 52792850060, `codigo_empresa_omie` 10980164678, limite 30.000,00; Aços Vital: IE 454.462.423.112, 9763924701, 30.000,00; HRM sem IE nem limite, comprando por Aços Vital. Gerência de Compras com `pode_aprovar` em `compras` e `aprovacoes` |
+| T13 | OC na HRM → `ERROR: Esta unidade compra pela unidade Aços Vital: emita a OC nela` |
 
 Os números `OC-000001`/`REQ-000001` supõem o contador zerado na unidade; num banco com OCs, saem
 os próximos. O `ROLLBACK` final desfaz tudo, inclusive o contador.

@@ -20,7 +20,7 @@ Enquanto o backend não entrega, o que estiver fora do lugar fica **marcado no c
 ```
 
 Para listar tudo no repositório `av-hub`: `grep -rn "GAMBIARRA(" app components lib services utils hooks`
-(hoje são 58 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
+(hoje são 57 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
 contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contratos-Logica-Fora-Backend/`.
 
 ## Prioridade: módulo de Compras

@@ -376,7 +376,7 @@ de pagamento, categoria, conta corrente, projeto). Esses precisam virar select c
 Omie (§4). Mandá-los só como observação deixaria o pedido no Omie sem a condição de pagamento
 real.
 
-### 3.9 Onde implementar o envio (decisão em aberto)
+### 3.9 Onde implementar o envio — **decidido em 24/09: opção 1 (pipeline, por fila)**
 
 - **Opção 1: um worker no `omie-elt-pipeline`.** Ele já tem as credenciais das duas contas, o
   limitador de taxa do Omie (incidente de 429 em 21/08) e o BullMQ. Contra: o pipeline foi
@@ -385,8 +385,11 @@ real.
   credenciais e o limitador de taxa, e as duas contas passam a competir pelo mesmo limite do
   Omie em dois processos (foi exatamente a causa do 429 de 21/08).
 
-Recomendação: **opção 1**, como um worker separado de escrita no mesmo repositório, com uma
-fila própria e o mesmo limitador de taxa.
+**Decisão do Nathan (24/09/2026): opção 1**, como um worker separado de escrita no mesmo
+repositório, com uma fila própria e o mesmo limitador de taxa. E **cancelar uma OC já enviada
+cancela no Omie também**: como a API do Omie não tem "cancelar" pedido de compra, a pipeline usa
+`ExcluirPedCompra` (detalhes no L4 de `ENVIAR - contrato-compras-pipeline.md` e no B4 de
+`ENVIAR - contrato-compras-backend.md`).
 
 ---
 
@@ -395,7 +398,7 @@ fila própria e o mesmo limitador de taxa.
 - Condição de pagamento, categoria, conta corrente, projeto e local de estoque deixam de ser
   texto livre e viram select com o catálogo Omie da unidade. **Depende de o backend expor esses
   catálogos** (projeções, igual `/compras/fornecedores`).
-- O item da OC passa a escolher o **produto** em `core.produtos` (busca por unidade).
+- O item da OC **pode** escolher o **produto** em `core.produtos` (busca por unidade); é opcional, e material não cadastrado continua em texto livre (decisão de 24/09, B12).
 - A tela da OC mostra a situação do envio ao Omie com a mensagem de erro real (a tela já está
   pronta, só falta o dado).
 - Uma tela nova de **histórico de compras do Omie** (fluxo A), lendo `/pedidos_compras`,

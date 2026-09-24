@@ -48,7 +48,8 @@ O que é banco e API está em `ENVIAR - contrato-compras-backend.md`.
 >   duplicar ao rodar de novo. Os códigos do 46618 viram "16 - Revenda", "01 - Boleto/Pix/TED" e
 >   "Compras de Materia Prima", como no PDF do Omie.
 >
-> **Continua pendente:** L4 (envio da OC, espera decisão), L10 (campos obrigatórios e FOB) e
+> **Continua pendente:** L4 (envio da OC; **decidido em 24/09: pela pipeline, com exclusão no
+> Omie ao cancelar**; falta implementar), L10 (campos obrigatórios e FOB) e
 > marcar como inativo o que sumir do Omie nos catálogos.
 >
 > **Dados reais vistos no teste (Mogi):** etapas do pedido de compra `10`, `15` e `20`; ~57
@@ -146,15 +147,19 @@ pedido real quebra com `integer out of range`.
 - **Testar:** `lApenasAlterados = "T"` ("apenas pedidos alterados no período"). Se filtrar de fato
   por alteração, compras ganha sync incremental.
 
-### L4. Envio da OC ao Omie (`UpsertPedCompra`) — **decisão em aberto**
+### L4. Envio da OC ao Omie (`UpsertPedCompra` / `ExcluirPedCompra`) — **decidido em 24/09**
 
-**Onde fica:** a recomendação é **um worker de escrita nesta pipeline**, com fila própria e o mesmo
-limitador de taxa. Ela já tem as credenciais das duas contas; se a API também chamasse o Omie, os
-dois processos disputariam o mesmo limite (foi a causa do 429 de 21/08). **Só começar depois de o
-Nathan confirmar.**
+**Decisão do Nathan: a pipeline envia, por fila.** Um worker de escrita nesta pipeline, com fila
+própria e o mesmo limitador de taxa. Ela já tem as credenciais das duas contas; se a API também
+chamasse o Omie, os dois processos disputariam o mesmo limite (foi a causa do 429 de 21/08). A OC
+aprovada leva até alguns minutos para aparecer no Omie.
 
-- **O que envia:** a fila `GET /compras/ordens?status=aprovado&status_sincronizacao_omie=pendente`
-  (B4 do backend). OC `aguardando_aprovacao` **não** vai.
+- **O que envia:** a fila `GET /compras/ordens/fila-omie` (B4 do backend), que traz a **ação** de
+  cada OC:
+  - `enviar` — OC `aprovado` + `pendente`. OC `aguardando_aprovacao` **não** vai;
+  - `excluir` — OC `cancelado` + `pendente` com `codigo_pedido_omie` (já estava no Omie).
+- **HRM Caldeiraria:** não tem conta Omie. **Por decisão de 24/09, compra pela unidade de Mogi**:
+  não existe OC da HRM para enviar (a tela só oferece Mogi e Uberaba). Método próprio depois.
 - **Como:** `UpsertPedCompra` com `cCodIntPed = numero_pedido` (≤ 20 caracteres). Reenvio altera
   em vez de duplicar.
 - **Cabeçalho:** `dDtPrevisao ← data_previsao_chegada` (`dd/mm/aaaa`); `cCodParc ←
@@ -181,6 +186,16 @@ Nathan confirmar.**
   o Omie gerar sozinho (a testar, §3).
 - **Retorno:** `PATCH /compras/ordens/{id}/sincronizacao` (B4): sucesso → `nCodPed`, `cNumero`;
   falha (`omie_fail`) → `status: "erro"` com a `description`.
+- **Cancelamento (decisão 24/09: cancela no Omie também).** A API do Omie **não tem "cancelar"
+  pedido de compra** (métodos: Incluir, Altera, Upsert, Consultar, Pesquisar e `ExcluirPedCompra`).
+  Ação `excluir` → `ExcluirPedCompra` com `nCodPed = codigo_pedido_omie`:
+  - sucesso → `PATCH …/sincronizacao` `{ status: "sincronizado" }` e marcar `deleted_at` no
+    `pedidos_compras` do mesmo `codigo_pedido_compra_omie` (o pedido some das pesquisas seguintes);
+  - o Omie recusa (pedido já recebido/faturado) → `{ status: "erro", erro: "<description>" }`: a OC
+    fica cancelada no av-hub e viva no Omie até alguém resolver lá. **Nunca** tentar de novo sozinho
+    em loop; só pelo "Reenviar" da tela.
+  - A trigger do banco é que devolve a OC cancelada para `pendente` (Apêndice B do contrato do
+    backend, testado).
 
 ---
 
@@ -282,7 +297,7 @@ contrato do backend, com o `ALTER`). Em Uberaba o maior é 29.
 2. **L9** (entidades HTML): pequeno, e a função é reaproveitada por todos.
 3. **L5–L8** (catálogos), assim que o B7 do backend criar as tabelas.
 4. **L3** (espelho), depois do B1 do backend.
-5. **L4** (envio da OC), depois da decisão e do B4 do backend.
+5. **L4** (envio da OC e exclusão ao cancelar), depois do B4 do backend.
 
 ## 5. Aceite
 
