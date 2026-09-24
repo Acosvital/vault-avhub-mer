@@ -14,7 +14,7 @@ O que é banco e API está em `ENVIAR - contrato-compras-backend.md`.
 `/compras/compradores`, `/cotacoes_moeda/atual` e `/categorias` respondem vazios.
 
 > **Atualização (23/09/2026, fim do dia): L1, L2, L3, L5, L6, L7, L8 e L9 estão implementados** na
-> branch `feat/compras-omie` da pipeline (commits `95c2db4`, `3f16868`, `ae919fd` e `229a419`, ainda sem push). **Todos
+> branch `feat/compras-omie` da pipeline (commits `95c2db4`, `3f16868`, `ae919fd`, `229a419` e `c7aba1b`). **Todos
 > nascem desligados** e são ligados pelo `.env` (`SYNC_COMPRADORES`, `SYNC_COTACAO_PTAX`,
 > `SYNC_PEDIDOS_COMPRAS`, `SYNC_CONDICOES_PAGAMENTO_COMPRAS`, `SYNC_PROJETOS`,
 > `SYNC_CONTAS_CORRENTES`, `SYNC_CATEGORIAS`) depois que o banco do ambiente tiver as tabelas.
@@ -27,10 +27,25 @@ O que é banco e API está em `ENVIAR - contrato-compras-backend.md`.
 > `SYNC_CONDICOES_PAGAMENTO_COMPRAS`; em **produção**, nenhum. Como os itens do espelho no teste
 > ainda não têm `codigo_item_integracao` nem `observacao`, a pipeline grava só as colunas que
 > existem e avisa no log (commit `229a419`). Commits na branch: `95c2db4`, `3f16868`, `ae919fd`,
-> `229a419`.
+> `229a419` e `c7aba1b` (correções do teste local de 24/09).
 >
-> **Continua pendente:** L4 (envio da OC, espera decisão), L10 (testes de `lApenasAlterados`,
-> campos obrigatórios e FOB) e marcar como inativo o que sumir do Omie nos catálogos.
+> **Testado no local em 24/09/2026** (banco local com a estrutura do teste e os dados de
+> produção; workers e fila de verdade; Omie e Banco Central reais, só leitura):
+> - **PTAX:** 5 dias úteis de USD e EUR gravados (USD 23/09 venda 5,1414).
+> - **Compradores:** 56 (Mogi) + 8 (Uberaba). Um vínculo feito à mão (`id_funcionario`,
+>   `nome_exibicao`) **sobreviveu** à sincronização seguinte.
+> - **Condições de pagamento:** 326 + 40, **depois de aumentar as colunas** (ver L8: 5 condições
+>   de Mogi não cabiam em `varchar(30)`).
+> - **Espelho:** 469 pedidos na janela 20–25/09; o 46618 confere campo a campo com o payload
+>   (códigos `bigint`, total 223.030,02, 5 parcelas, observação com aspas e quebras de linha).
+>   Rodar de novo não duplica nada, e item/parcela que não existem mais no Omie são apagados.
+> - **Dois erros achados e corrigidos na pipeline:** a janela filtrava por previsão (L3) e a
+>   descrição da condição era cortada em 30 caracteres sem aviso (L8).
+> - Catálogos de categorias, contas correntes e projetos: sem tabela no banco; só medidos os
+>   tamanhos (cabem no DDL do B7).
+>
+> **Continua pendente:** L4 (envio da OC, espera decisão), L10 (campos obrigatórios e FOB) e
+> marcar como inativo o que sumir do Omie nos catálogos.
 >
 > **Dados reais vistos no teste (Mogi):** etapas do pedido de compra `10`, `15` e `20`; ~57
 > compradores, **~325 condições de pagamento** (`000`, `A05`, `A15`, `U10`…), ~108 contas
@@ -94,7 +109,12 @@ pedido real quebra com `integer out of range`.
   `listResponseKey: 'pedidos_pesquisa'`, `idField: 'cabecalho_consulta.nCodPed'`,
   `getMethod: 'ConsultarPedCompra'`, `getIdParam: 'nCodPed'`.
 - Parâmetros: `nPagina`, **`nRegsPorPagina`** (não `nRegPorPagina`), `dDataInicial`/`dDataFinal`,
-  e **as 7 flags `lExibirPedidos*` = `"T"`**. Não existe filtro `cEtapa`.
+  **`lApenasAlterados = "T"`** e **as 7 flags `lExibirPedidos*` = `"T"`**. Não existe filtro `cEtapa`.
+- ⚠️ **`lApenasAlterados` muda o sentido das datas** (conferido em 24/09/2026, Mogi, janela
+  20–25/09). Com `"F"`, o período filtra pela **data de previsão** (mais os pendentes já
+  atrasados): vieram 452 pedidos e o 46618 (incluído em 21/09, previsão 24/10) **não veio**. Com
+  `"T"`, filtra pelo que foi **incluído ou alterado** no período: vieram 455, com ele. O espelho
+  usa `"T"` na janela e no full sync; com `"F"`, pedido com previsão futura nunca entraria.
 - Cada pedido já vem completo (cabeçalho, frete, itens, parcelas, departamentos): não precisa de
   `ConsultarPedCompra` por pedido.
 - **Chaves:** pedido em `(codigo_empresa, codigo_pedido_compra_omie)`; itens e parcelas em
@@ -221,6 +241,12 @@ número, como "Logística"), `inativo` → `ativo`, `info.*` → datas e usuári
 | `cListaParc` | `lista_dias` |
 | `nDiasParc` | `dias_deslocamento` |
 
+⚠️ **Tamanho real maior que a doc** (teste local de 24/09/2026): em Mogi, 5 das 326 condições têm
+descrição e lista de dias com até **71** caracteres (ex.: `A08` = "180/210/…/690", 18 parcelas).
+Com as colunas em `varchar(30)` esses 5 não entram. A pipeline **não corta** nada (cortar a lista
+de dias gravaria um prazo errado): o banco precisa de `varchar(100)` nas duas colunas (B7 do
+contrato do backend, com o `ALTER`). Em Uberaba o maior é 29.
+
 ---
 
 ## 3. 🟡 Correções e testes
@@ -233,8 +259,9 @@ número, como "Logística"), `inativo` → `ativo`, `info.*` → datas e usuári
 
 ### L10. Confirmar com uma chamada real (conta de teste)
 
-1. Os demais códigos de `cEtapa` (o `"15"` já foi visto no 46618: incluído, sem faturar).
-2. Se `lApenasAlterados` filtra por data de alteração.
+1. Os demais códigos de `cEtapa` (vistos até agora: `"10"`, `"15"` e `"20"`).
+2. ~~Se `lApenasAlterados` filtra por data de alteração.~~ **Respondido em 24/09/2026**: sim, com
+   `"T"` o período é de inclusão/alteração; com `"F"` é de previsão (ver L3). A pipeline usa `"T"`.
 3. Quais campos do `UpsertPedCompra` são obrigatórios de fato: mandar um payload mínimo e ler o erro.
 4. Se o Omie gera as parcelas sozinho com `cCodParc` e sem `parcelas_incluir`.
 5. Se `nCodProd` é obrigatório no item, ou se aceita só `cDescricao` + `cUnidade`.

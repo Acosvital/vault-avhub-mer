@@ -38,7 +38,7 @@ O que é da pipeline (extrair do Omie, enviar a OC, job da PTAX) está em
 | **B1** espelho `pedidos_compras`: `bigint`, colunas novas, `pedidos_compras_parcelas` | ✅ **quase**: faltam `pedidos_compras_itens.codigo_item_integracao` e `.observacao` | ❌ ainda `INTEGER` |
 | **B3** número da OC/requisição | ✅ trigger + `contadores_documento`: **`OC-000001` / `REQ-000001` por unidade** (6 dígitos) — o formato está definido. Falta só a API parar de aceitar `numero_pedido` no corpo | ❌ |
 | **B6** colunas do PDF (`ordens_compra_itens.observacao`, `valor_desconto`, `valor_total_item`; `ordens_compra.numero_pedido_fornecedor`, `valor_mercadorias`, `valor_descontos`; `core.unidades.inscricao_estadual`) | ❌ | ❌ |
-| **B7** `condicoes_pagamento_compras` | ✅ (índice `(codigo_empresa, codigo_omie)`) | ❌ |
+| **B7** `condicoes_pagamento_compras` | ✅ (índice `(codigo_empresa, codigo_omie)`), **mas `descricao` e `lista_dias` em `varchar(30)` são curtas**: aumentar para `varchar(100)` (ver o B7) | ❌ |
 | **B7** `core.projetos`, `core.contas_correntes` | ❌ | ❌ |
 | **B7** `core.categorias` com `codigo_empresa` e marcações | ❌ (ainda único pelo código no banco inteiro) | ❌ |
 
@@ -235,9 +235,9 @@ CREATE TABLE core_vendas_faturamento.condicoes_pagamento_compras (
   id                  uuid PRIMARY KEY DEFAULT uuidv7(),
   codigo_empresa      uuid NOT NULL REFERENCES core.unidades(id),
   codigo_omie         varchar(3)  NOT NULL,   -- cCodigo ("U10"; "999" = padrão)
-  descricao           varchar(30) NOT NULL,   -- cDescricao ("30/40/50/60/70")
+  descricao           varchar(100) NOT NULL,  -- cDescricao ("30/40/50/60/70")
   quantidade_parcelas integer,                -- nQtdeParc
-  lista_dias          varchar(30),            -- cListaParc
+  lista_dias          varchar(100),           -- cListaParc
   dias_deslocamento   integer,                -- nDiasParc
   ativo               boolean NOT NULL DEFAULT true,
   created_at          timestamptz NOT NULL DEFAULT now(),
@@ -245,6 +245,14 @@ CREATE TABLE core_vendas_faturamento.condicoes_pagamento_compras (
 );
 CREATE UNIQUE INDEX uq_condicoes_pagamento_compras
   ON core_vendas_faturamento.condicoes_pagamento_compras (codigo_empresa, codigo_omie);
+
+-- ⚠️ No TESTE a tabela já existe com varchar(30), e isso não basta. No teste local da pipeline
+-- (24/09/2026), 5 das 326 condições de Mogi não entraram: o Omie devolve descrição e lista de
+-- dias com até 71 caracteres (ex.: "A08" = "180/210/240/.../690", 18 parcelas). A doc do Omie
+-- fala em 30, mas o dado real passa. Aplicar no teste (e já nascer assim em produção):
+ALTER TABLE core_vendas_faturamento.condicoes_pagamento_compras
+  ALTER COLUMN descricao  TYPE varchar(100),
+  ALTER COLUMN lista_dias TYPE varchar(100);
 
 -- Contas correntes (ListarContasCorrentes)
 CREATE TABLE core.contas_correntes (
