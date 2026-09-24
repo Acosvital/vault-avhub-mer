@@ -137,6 +137,12 @@ isso que permite o saldo quando o produto comprado é o mesmo do vendido.
    previsão de chegada, situação e o que foi comprado, incluindo as compras antigas do Omie.
 4. **Requisições:** marcar várias e "Gerar uma OC com as selecionadas".
 
+**Situação (24/09/2026):** as quatro telas estão feitas no av-hub, na branch local
+`feat/compras-vinculo-pv` (commits `4509f34` e `b9760b3`). Foram conferidas no navegador contra a
+API e o banco locais: o PV 25970 carrega com cliente e vendedor, os itens entram ligados ao PV, o
+detalhe da OC mostra "PV 25970 · 24 PC · estoque · 6 PC", e o pedido de venda mostra "Compras deste
+pedido". A branch não vai para o PR #89 enquanto a API do ambiente não tiver as rotas deste contrato.
+
 ## 7. Pendente
 
 - **A requisição do MES já sabe o PV** (pela ordem de produção)? Se souber, a requisição ganha

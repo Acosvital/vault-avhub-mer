@@ -303,7 +303,10 @@ Hoje condição de pagamento, conta corrente e projeto são **texto livre**, e a
 
 Rotas: todas com `codigo_empresa`, `ativo` (padrão `true`), `q` (código ou descrição, sem acento),
 ordem por código/descrição. Em `/categorias`, também `tipo=despesa` (só `conta_despesa`, não
-`totalizadora`, não `nao_exibir`), que é o que a OC usa.
+`totalizadora`, não `nao_exibir`), que é o que a OC usa. **`/categorias` com esses filtros já está
+feita na API local** (branch `feat/compras-contrato`, commit `a9e8ca2`): Mogi devolve 122 categorias
+de despesa lançáveis, sem código repetido. Sem o filtro, com as duas unidades no banco, o select da
+OC repetia códigos (a mesma categoria em Mogi e em Uberaba).
 
 **Tamanhos conferidos no Omie real (24/09):** condições de pagamento com descrição e lista de dias de
 até **71** caracteres (5 de 326 em Mogi; a doc do Omie fala em 30), por isso `varchar(100)`; contas
