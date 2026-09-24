@@ -41,6 +41,11 @@ e [[008-Requisicoes-Compra]] também já estão aplicados.
   compradores, espelho, envio da OC, catálogos, entidades HTML, testes). L1–L3 e L5–L9 já estão
   implementados na branch `feat/compras-omie` (desligados até o banco ter as tabelas).
 - **[[24-Compras-Vinculo-Pedido-Venda]]** — vínculo da OC com o pedido de venda: finalidade, vínculo por item (quantidade na unidade da OC), várias requisições numa OC, saldo a comprar do PV e "compras deste pedido". SQL e API testados no local (24/09/2026).
+- **[[25-Compras-Historico-Unificado]]** — estende o mesmo mecanismo de dedup do 24 (por
+  `codigo_pedido_integracao`) para fora do escopo de um PV: a listagem geral de Ordens de compra e
+  o Dashboard de compras passam a mostrar o histórico do Omie (pedidos de antes do av-hub existir)
+  junto com as OCs do av-hub, uma identidade só. Pedido do Nathan em 24/09/2026 ("senão eu perco
+  meu histórico"). Depende do B4/L4 (envio da OC ao Omie) e do C4 (indicadores).
 - **[[21-Compras-Projetos-Omie]]** — projetos do Omie (`ListarProjetos`) em `core.projetos`, para o
   select de Projeto da OC.
 
