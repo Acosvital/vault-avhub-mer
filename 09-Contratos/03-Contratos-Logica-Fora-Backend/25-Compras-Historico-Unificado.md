@@ -107,12 +107,14 @@ não inventar uma coluna nova em `pedidos_compras`.
 
 ## 3. Perguntas em aberto
 
-- **Status amigável para o Omie-só.** `pedidos_compras.etapa` é o código cru do Omie ("10", "15",
-  "20"...). A tela de Ordens de compra mostra `STATUS_ORDEM_LABEL` (rascunho/aguardando
-  aprovação/aprovado/cancelado) — precisa de um de-para de `etapa` pra alguma coisa exibível
-  (ex.: "10" → "Incluído", sem inventar que passou pela aprovação do av-hub). Confirmar o de-para
-  completo dos códigos de `cEtapa` (o [[23-Compras-Pipeline-Consolidado]], L10, já lista isso como
-  pendente de confirmar na conta de teste).
+- **Status amigável para o Omie-só — é trabalho do DBA, não do av-hub.** `pedidos_compras.etapa` já
+  está no banco (cru, "10"/"15"/"20" — 399/4.758/277 linhas no teste local de 24/09/2026), mas
+  **decidido em 24/09/2026: quem traduz é o DBA (Gustavo)**, não o av-hub tentando adivinhar pelo
+  padrão dos dados. A doc oficial do Omie não lista os códigos (só diz "etapa atual do pedido" —
+  [[14-Compras-Omie-Pedido-Compra]]); o Gustavo tem acesso de suporte pra confirmar direto com o
+  Omie ou achar a lista completa. Só depois de traduzido: de-para de `etapa` pra alguma coisa
+  exibível na tela de Ordens de compra (ex.: "10" → "Incluído"), sem inventar que passou pela
+  aprovação do av-hub. Mesma pendência do [[23-Compras-Pipeline-Consolidado]], L10.
 - **Paginação de verdade antes de ligar.** Com 5000+ linhas de espelho, a gambiarra atual do
   `useCompras.ts` (baixa tudo, pagina no navegador) não aguenta — H1 só devia ir para a tela depois
   do C3 (paginação/filtro no servidor) estar pronto, senão o navegador trava.
