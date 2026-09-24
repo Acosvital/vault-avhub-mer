@@ -48,9 +48,16 @@ Está pronto para rodar, na ordem, nos **Apêndices A a D**.
 | **B9** | Permissões e histórico | ✅ histórico, cancelamento, tela (B) e `pode_aprovar` da Gerência de Compras (C) | usar `pode_aprovar`; mandar `updated_by` | ✅ T6–T8, T12 |
 | **B13** | Furos de status (novo) | ✅ fechados na trigger (Apêndice B) | tratar o erro 23514 no PATCH | ✅ T6, T7 |
 | **B14** | Unidades de compra (HRM → Mogi) | ✅ `id_unidade_compra` + trava na criação da OC (B, C) | `GET /unidades?compra=true`; erro 23514 → 400 | ✅ T12, T13 |
+| **B15** | Mensagem das travas chega ao usuário (novo) | — | `errorHandler` devolve a mensagem da trigger | ✅ pela API |
 
 **Ordem para o banco de TESTE:** Apêndice A → Apêndice B → Apêndice C → rodar o Apêndice D (é só
 teste, termina em `ROLLBACK`) e comparar com o resultado esperado. **Produção:** B0 primeiro.
+
+**A parte da API também já está escrita e testada** (API local): são os patches da pasta
+`docs/ENVIAR - compras-api/` do repositório `av-hub`, aplicáveis sobre a `develop` (ver o Apêndice E). **Conferido em
+24/09:** um banco montado só com o SQL dos Apêndices A–C + o Apêndice A do contrato do vínculo fica
+com a estrutura **idêntica** à do banco local testado. Os patches, aplicados sobre a `origin/develop`,
+reproduzem a API testada sem nenhuma diferença.
 
 ---
 
@@ -408,6 +415,17 @@ as compras dela saem como OC de Mogi**; depois terá um método próprio.
 - **API:** `GET /unidades?compra=true` → só as unidades com `id_unidade_compra` nulo (hoje Mogi e
   Uberaba), para o select de unidade da OC e da requisição; o erro `23514` do POST vira `400`.
 - **av-hub:** o select de unidade da tela de emissão passa a usar `?compra=true` (hoje lista todas).
+
+### B15. Mensagem das travas do banco chega ao usuário (novo, 24/09)
+
+As travas deste contrato são `RAISE EXCEPTION ... USING ERRCODE = '23514'` nas triggers, com a
+mensagem escrita para o usuário ("OC cancelada não muda de status", "Esta unidade compra pela
+unidade Aços Vital: emita a OC nela", "Vínculos somam 31 PC, mais que a quantidade do item").
+O `handleSequelizeError` da `develop` transforma **todo** `23514` em "Valor fora do permitido por
+uma restrição da tabela", e a mensagem se perde. **API:** quando o `23514` vem **sem** nome de
+restrição (é trigger, não `CHECK`), devolver a mensagem original (`src/utils/errorHandler.js`, no
+patch 0001). Também no patch: mensagens legíveis para os índices únicos novos ("Uma das requisições
+já está em outra ordem de compra", "O mesmo pedido de venda aparece duas vezes no mesmo item").
 
 ---
 
@@ -1183,3 +1201,26 @@ ROLLBACK;
 
 Os números `OC-000001`/`REQ-000001` supõem o contador zerado na unidade; num banco com OCs, saem
 os próximos. O `ROLLBACK` final desfaz tudo, inclusive o contador.
+
+## Apêndice E — Código da API (patches, testados na API local)
+
+Pasta `docs/ENVIAR - compras-api/`. Aplicar sobre a `develop` do `api-acos-vital`, **depois** do SQL:
+
+```
+git checkout -b feat/compras-contrato origin/develop
+git am "<caminho>/docs/ENVIAR - compras-api/"*.patch
+```
+
+| Patch | O que faz | Itens |
+|---|---|---|
+| `0001-feat-compras-passo-1-…` | models do espelho em `bigint` + colunas novas; `codigo_comprador` opcional e fora do POST; **`id_comprador` declarado no model** (bug); `numero_pedido` fora do POST; `numero_requisicao_mes`; observação do item e `numero_pedido_fornecedor`; histórico no detalhe; `cancelado_por/_em`; 409 nas transições barradas; `GET /unidades?compra=true` e OC recusada em unidade que compra por outra; mensagem das travas (B15) | B1, B2, B3, B6, B9, B13, B14, B15 |
+| `0002-feat-compras-vinculo-…` | `finalidade`, `itens[].vinculos[]`, `itens[].id_requisicao`; `GET /compras/pedidos-venda/{numero}` e `/{numero}/compras` | contrato do vínculo |
+| `0003-feat-categorias-filtro-…` | `GET /categorias?codigo_empresa=&tipo=despesa&ativo=&q=`; model com as colunas do B7 | B7 |
+
+**Testes que passaram na API local:** 19 do passo 1 (número do contador, `codigo_comprador` ignorado,
+observação do item, valores 75,60 / 4.964,40, parcelas da U10, histórico, cancelar e tentar aprovar
+→ 409, OC na HRM recusada, `/unidades?compra=true`, número do MES, espelho com código acima de
+INTEGER) e 22 do vínculo (PV carregado com cliente e vendedor, saldo 24 → 0, fabricação, HRM não
+conferido, duas requisições numa OC e de volta à fila ao cancelar, compras antigas do Omie, 5 erros
+com mensagem, transação sem OC pela metade).
+

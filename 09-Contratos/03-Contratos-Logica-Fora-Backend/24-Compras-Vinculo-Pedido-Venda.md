@@ -82,6 +82,9 @@ nunca pelo id de uma linha.
 
 ## 4. API (implementada na API local)
 
+O código está no patch `docs/ENVIAR - compras-api/0002-feat-compras-vinculo-…patch` (aplicar depois
+do 0001; instruções no Apêndice E de `ENVIAR - contrato-compras-backend.md`).
+
 ```
 POST /compras/ordens
   { ..., "finalidade": "pedidos_venda",
