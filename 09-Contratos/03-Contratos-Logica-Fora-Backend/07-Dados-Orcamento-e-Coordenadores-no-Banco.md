@@ -46,11 +46,11 @@ repositório e do histórico**.
 
 Ajuda de custo e percentual de comissão de coordenadores **nominais**, importados como constante.
 
-| # | Gambiarra hoje | Onde |
-|---|---|---|
-| C1 | Parâmetros de remuneração de pessoas nominais em arquivo versionado | `lib/comissoes/coordenadores.json`, `coordenadores.ts` |
-| C2 | A comissão dos coordenadores é **calculada no navegador** (`percentual × faturamento total`) e somada ao ranking | `app/(protected)/dashboards/dash-comissoes/page.tsx` (`mapCoordenadorToRow`) |
-| C3 | Ranking de gerência (ordem por total) montado no navegador | mesma página |
+| #   | Gambiarra hoje                                                                                                   | Onde                                                                         |
+| --- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| C1  | Parâmetros de remuneração de pessoas nominais em arquivo versionado                                              | `lib/comissoes/coordenadores.json`, `coordenadores.ts`                       |
+| C2  | A comissão dos coordenadores é **calculada no navegador** (`percentual × faturamento total`) e somada ao ranking | `app/(protected)/dashboards/dash-comissoes/page.tsx` (`mapCoordenadorToRow`) |
+| C3  | Ranking de gerência (ordem por total) montado no navegador                                                       | mesma página                                                                 |
 
 ### O que peço
 

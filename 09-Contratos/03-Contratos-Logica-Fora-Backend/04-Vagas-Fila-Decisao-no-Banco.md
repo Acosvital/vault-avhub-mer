@@ -1,19 +1,17 @@
 # Contrato — Solicitações de vagas: fila, decisão e permissões no banco
 
-> **🟡 Backend implementado, mas o contrato NÃO está fechado — testado ao vivo em
-> `api-test.acosvital.com.br` em 25/09/2026.** 3 dos 4 itens do "5. Aceite" passam: `custo_total` nunca diverge de `quantidade × (...)` mesmo mandando outro valor no corpo; `GET /vagas/resumo` bate
-> com a soma da listagem; toda decisão aparece em `vagas_decisoes` com quem e quando (histórico
-> confirmado, incluindo uma decisão "legado" de um PUT direto). **O item que falta é o que dá
-> segurança ao contrato:** com `VAGAS_TRAVAS_DECISAO` **desligada** (padrão do ambiente, de
-> propósito — ver comentário no topo de `src/routes/vagas.js`), um usuário com `pode_editar` e SEM
-> `pode_aprovar` consegue chamar `POST /vagas/{id}/decisao` e mudar `situacao` via `PUT` sem
-> restrição — nenhum 403, nenhum 400 `SITUACAO_SO_PELA_DECISAO`. O código já trata os dois casos
-> corretamente quando a chave está ligada; ela só está desligada esperando duas coisas, na ordem: (1)
-> conceder `pode_aprovar` na tela `solicitacoes-de-vagas` a quem decide (a tela de Permissões já tem o
-> switch — ver `BulkPermissaoModal.tsx`, adicionado em 25/09), e (2) o front de Vagas passar a chamar
-> `/decisao` em vez de `PUT` direto. **O front de Vagas (`components/Vagas/*`) ainda não foi
-> adaptado** — só a tela de Permissões (pré-requisito) foi. Continua aberto até isso acontecer e o
-> item 1 do Aceite ser reconfirmado com a chave ligada.
+> **🟡 Situação em 25/09/2026 (tarde) — falta ligar a trava e a regra da §3.3.1.**
+>
+> | Item | Situação |
+> |---|---|
+> | Backend (listagem, resumo, custo gerado, `/decisao`, `vagas_decisoes`) | ✅ na `api-test` |
+> | Tela (`components/Vagas/*`), sem nenhuma gambiarra de Vagas | ✅ na `develop` do av-hub (PR #90, 25/09) |
+> | `pode_aprovar` na tela `solicitacoes-de-vagas` | ✅ perfis **RH - Joanes** e **Admin (Dev)** (conferido na `api-test`); "RH - Gerencia" edita e não aprova |
+> | Aprovar/reprovar de verdade | ✅ feito pelo Nathan em 25/09 |
+> | **`VAGAS_TRAVAS_DECISAO` ligada** | ❌ **desligada na `api-test`** (testado em 25/09, vaga de teste criada e apagada): `PUT` com `situacao: "aprovado"` → **200** (esperado 400 `SITUACAO_SO_PELA_DECISAO`); `POST /decisao` com `decidido_por` de usuário sem `pode_aprovar` → **200** (esperado 403). Pelo av-hub a decisão continua barrada (o BFF exige `pode_aprovar`), mas pela API direta não. **Ação: ligar a variável no ambiente da API** (e depois em produção) e repetir os dois testes. O código da `develop` trata os dois casos certo quando ligada. |
+> | Editar vaga já decidida | ❌ **decidido em 25/09: volta para pendente** (§3.3.1). Hoje, com a trava ligada, a API recusa com 409 `VAGA_DECIDIDA`: precisa mudar. A tela já avisa e mostra o resultado (branch `fix/vagas-edicao-volta-pendente`). |
+>
+> Fecha quando: trava ligada e os dois testes acima dando 400/403, e a §3.3.1 no backend.
 
 **Criado em:** 20/09/2026, ao oficializar a tela nova de Solicitações de vagas (`components/Vagas/`).
 
@@ -31,6 +29,10 @@ com `GAMBIARRA(` no código.
 como filtro, sem busca em vários campos, sem agregação.
 
 ## 2. Onde a tela contorna
+
+> V1–V8 abaixo descrevem a tela **em produção** hoje. No front já portado (worktree
+> `wt-rh-contratos`, não commitado) V1–V8 já sumiram todos — inclusive V7 (o painel já lê
+> `decidido_em`/`decidido_por_nome` do banco, não mais `updated_at`).
 
 | # | Gambiarra hoje | Onde |
 |---|---|---|
@@ -86,9 +88,7 @@ só exibe uma prévia (o mesmo cálculo, apenas para feedback enquanto digita).
   nunca obrigatória. O diretor não cadastra nem edita os dados da vaga.
 - A regra vale no **banco/backend**, não só na tela: hoje quem tem `pode_editar` consegue mudar `situacao`
   chamando `PUT /vagas/{id}` direto (a tela nova já não oferece esse campo ao RH).
-- **Pergunta em aberto para o negócio:** se o RH editar salário/quantidade de uma vaga **já decidida**, a
-  decisão continua valendo ou a solicitação volta para `pendente`? Hoje a tela só avisa que a decisão não
-  muda por ali; o banco precisa de uma regra (recomendação: voltar a `pendente` e registrar no histórico).
+- **Editar vaga já decidida — decidido em 25/09/2026: volta para `pendente`.** Ver §3.3.1.
 
 ### 3.3 Decisão como operação própria, com permissão própria
 
@@ -104,6 +104,27 @@ só exibe uma prévia (o mesmo cálculo, apenas para feedback enquanto digita).
 - regra opcional a decidir com o negócio: quem **registrou** a solicitação não pode decidi-la.
 
 `PUT /vagas/{id}` passa a **rejeitar** mudança de `situacao`/`observacao_situacao` (ou ignorá-las).
+
+### 3.3.1 Editar dados de uma vaga já decidida devolve para `pendente` (decisão de 25/09/2026)
+
+Hoje (`develop`, `atualizarVaga` em `src/routes/vagas.js`), com `VAGAS_TRAVAS_DECISAO` ligada, `PUT/PATCH`
+que altere algum dado de uma vaga `aprovado`/`reprovado` responde **409 `VAGA_DECIDIDA`**. Passa a ser:
+
+- a alteração **é gravada**, e na mesma transação a vaga volta para `situacao = 'pendente'`, com
+  `decidido_por` e `decidido_em` limpos (a `observacao_situacao` da decisão anterior fica no histórico, não
+  na vaga);
+- registra em `vagas_decisoes`: `situacao_anterior` = a decisão que caiu, `situacao_nova = 'pendente'`,
+  `origem = 'edicao'`, `decidido_por` = quem editou (`updated_by`/usuário autenticado) e, em `observacao`,
+  os campos alterados (ex.: "Dados alterados: salario, quantidade"). Uma linha só (sem a linha "legado" do
+  gatilho de mudança de situação);
+- reenviar o registro igual (a tela manda o formulário inteiro) continua não mudando nada: só volta para
+  `pendente` se algum campo de dados mudou de fato (a comparação `mesmoValor` que já existe);
+- `situacao`/`observacao_situacao` no corpo continuam proibidas (400 `SITUACAO_SO_PELA_DECISAO`);
+- a resposta é a vaga já em `pendente` (a tela lê a situação dela e avisa o usuário).
+
+**av-hub (feito, branch `fix/vagas-edicao-volta-pendente`):** o formulário de uma vaga decidida avisa que
+salvar a devolve para pendente, o botão vira "Salvar e voltar para pendente" e, depois de salvar, a tela
+mostra "voltou para pendente". O tratamento do 409 `VAGA_DECIDIDA` fica enquanto a API antiga estiver no ar.
 `GET /vagas` devolve `decidido_por_nome` e `decidido_em`.
 
 ### 3.4 Parâmetros de negócio no banco
@@ -124,6 +145,8 @@ equivalente), lido pelo banco ao calcular `atencao`/`com_atencao`.
 
 - Um usuário com `pode_editar` sem `pode_aprovar` recebe `403` ao chamar `/decisao` e não consegue mudar
   `situacao` via `PUT`.
+- Editar salário/quantidade de uma vaga aprovada a devolve para `pendente`, com uma linha `origem = 'edicao'`
+  em `vagas_decisoes`.
 - `custo_total` nunca diverge de `quantidade × (…)`, mesmo se o cliente mandar outro valor.
 - `GET /vagas/resumo` bate com a contagem/soma das listagens filtradas.
 - Toda decisão aparece em `vagas_decisoes` com quem e quando.

@@ -78,7 +78,7 @@ as marcas `GAMBIARRA(` de F1–F7 continuam no repositório até esse commit aco
 
 | Contrato | Cobre | Itens |
 |---|---|---|
-| [[04-Vagas-Fila-Decisao-no-Banco]] | Solicitações de vagas: filtros/ordem/resumo, custo gerado, decisão com `pode_decidir` e histórico. Backend pronto e confirmado (3 de 4 itens do Aceite); falta ligar `VAGAS_TRAVAS_DECISAO` (depende de conceder `pode_aprovar` e o front usar `/decisao`) e adaptar `components/Vagas/*` | V1–V8 |
+| [[04-Vagas-Fila-Decisao-no-Banco]] | Solicitações de vagas: filtros/ordem/resumo, custo gerado, decisão com `pode_aprovar` e histórico. Backend pronto e confirmado (3 de 4 itens do Aceite); falta ligar `VAGAS_TRAVAS_DECISAO` (depende de conceder `pode_aprovar` e o front usar `/decisao`) e adaptar `components/Vagas/*` | V1–V8 |
 | [[05-Pedidos-Notas-Dashboards-Agregacao-no-Banco]] | Pedidos, Notas e Dashboards: agrupamento por pedido, prazo, blacklist, indicadores e agregados no banco | P1–P8, N1–N3, D1–D3 |
 | [[06-Permissoes-e-Escopo-no-Banco]] | Identidade propagada, permissão por ação, escopos, perfis como dado, auditoria, rate limit | S1–S11 |
 | [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | Orçamento e coordenadores fora do repositório, com filtro/paginação/ordem no servidor | O1–O5, C1–C3 |
