@@ -30,6 +30,8 @@ status: rascunho
 
 Corresponde à conversa **C1** de [[Fluxo-Compras-Completo]]: o PCP conclui, pelo [[Modelo-Destinacao-Item]], que um item não tem estoque e precisa de compra.
 
+> **Gatilho decidido em 24/09/2026** ([[Encaixe-Estoque-Revenda-no-PCP]]): a requisição nasce **automaticamente quando o parcial entra no setor Compras** do roteiro da fábrica Revenda. Por isso `origem.id_item_parcial` passa a vir **sempre preenchido** na requisição reativa (só fica `null` na preventiva, de ponto de pedido — Fase D). O parcial fica parado no setor Compras até o recebimento (Fluxo 2 + D6) liberar.
+
 ### `GET /requisicoes-compra?alterado_desde=&codigo_empresa=&incluir_deletados=`
 
 **Response 200** (array):

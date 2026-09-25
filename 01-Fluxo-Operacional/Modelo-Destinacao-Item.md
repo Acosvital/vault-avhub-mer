@@ -1,13 +1,14 @@
 ---
 tags: [erp-acos-vital, fluxo-operacional, modelagem, pcp]
 criado: 2026-09-16
+atualizado: 2026-09-24
 ---
 
 # Modelo de Destinação do Item — Reconciliando Estoque × Revenda × Fabricação
 
 > Formaliza a relação entre o diagrama macro ([[Fluxo-Operacional-Visao-Geral]]) e o fluxo detalhado item a item ([[Fluxo-Detalhado-Pedido-Item]]), que coexistiam por decisão consciente, mas nunca tinham sido modelados juntos de fato.
 >
-> **Confirmado com o usuário (17/09/2026): este é um modelo conceitual para o sistema a construir — nenhuma das duas matrizes/eixos existe implementada hoje.** O sistema precisa cobrir todas as 6 células da matriz abaixo, não um subconjunto.
+> **Atualizado em 24/09/2026 com o encaixe do Estoque e da Revenda no MES** ([[Encaixe-Estoque-Revenda-no-PCP]]). Duas mudanças: o **eixo 1 deixa de ser fixo por material** — é escolhido por item, a cada rodada, pela fábrica para onde o PCP manda o item; e o **eixo 2 é resolvido no setor Estoque** (etapa 1 de todo roteiro), com split do `ItemParcial` e reserva, não numa tela de classificação do PCP. A matriz continua válida como mapa dos casos; o que mudou foi **onde** cada eixo é decidido.
 
 ## O problema
 
@@ -19,40 +20,45 @@ O diagrama macro trata `[ESTOQUE]`, `[REVENDA]`, `[FABRICAÇÃO]` como três ram
 - **Revenda** — comprado de terceiro, revendido (com ou sem beneficiamento, ex.: corte de chapa — ver [[Fabricacao-Chapas]]).
 - **Fabricação** — produzido internamente numa linha própria (Flange hoje; Grade de Piso, Chapa Expandida, Caldeiraria etc. conforme cadastradas — ver [[Rota-Fabricacao]]).
 
-Praticamente fixo por tipo de material/produto — não muda pedido a pedido.
+**Decidido por item, a cada rodada, pela fábrica escolhida** (24/09/2026). A natureza é o `Fabrica.tipo` (`FABRICACAO` \| `REVENDA`) da fábrica para onde o PCP manda o item na Carteira — não um atributo fixo do produto. Em emergência, poucas unidades de um produto que normalmente fabricamos podem ser compradas para completar a entrega: essas vão para a fábrica Revenda, o restante para a de fabricação (OPs diferentes, mesmo produto). Não existe campo de natureza no item: ela vem de `Pedidos.idFabrica → Fabrica.tipo`.
 
-**Eixo 2 — Disponibilidade física no momento em que o PCP avalia.** O que existe fisicamente agora:
+~~Praticamente fixo por tipo de material/produto — não muda pedido a pedido.~~ *(substituído em 24/09/2026)*
+
+**Eixo 2 — Disponibilidade física no momento da checagem.** O que existe fisicamente agora:
 - **Pronto em estoque** — já existe como produto acabado.
 - **Matéria-prima em estoque** — existe, mas precisa de beneficiamento/produção antes de liberar.
 - **Sem estoque** — não existe fisicamente, precisa ser originado (compra, pra Revenda; início de produção, pra Fabricação).
 
-Dinâmico — muda a cada verificação, depende do saldo no momento (e da reserva, ver eixo 3).
+Dinâmico — muda a cada verificação. **Resolvido no setor Estoque (etapa 1 de todo roteiro)**: o parcial chega lá, a parte que o saldo disponível cobre vira um split atendido (reserva + conclusão), e o restante segue o roteiro. Nesta fase só **produto acabado** é checado; matéria-prima fica para a J3 (genealogia).
 
 **Eixo 3 — Destinação da reserva**, já modelada no PRD como `destinacao_item_pedido` (ver [[Estoque-Regras-Negocio]]). Pra que serve o saldo, uma vez que existe em estoque:
 - **Específica pra este pedido** (reservado).
 - **Específica pra produção** (reservado pra uma OS/OP em andamento).
 - **Estoque geral** (não reservado, disponível pra qualquer demanda futura).
 
+Desde 24/09/2026 a reserva de um pedido é a tabela `Reserva` (lote + `ItemParcial` do split atendido + quantidade + status `ATIVA`/`CONSUMIDA`/`LIBERADA`, sem expiração).
+
 ## A matriz resultante (eixo 1 × eixo 2)
 
 | | Pronto em estoque | Matéria-prima em estoque | Sem estoque |
 |---|---|---|---|
-| **Revenda** | Direto pra conferência → Qualidade → Expedição — é exatamente o que [[Rota-Estoque]] descreve ("pronta entrega") | PCP abre **OS** de beneficiamento antes de Qualidade (ex.: corte de chapa) | PCP gera requisição de compra — fluxo clássico de [[Rota-Revenda]] |
-| **Fabricação** | Raro, mas possível — item de linha própria já concluído em estoque → Qualidade → Expedição | PCP inicia produção (**OP**) direto, sem esperar compra de MP | PCP gera requisição de compra de MP específica pra aquela linha, depois OP |
+| **Revenda** (fábrica Revenda) | Split atendido no setor Estoque (etapa 1): reserva + conclusão → entrega. É o que [[Rota-Estoque]] descreve ("pronta entrega") | Consumo de MP fica para a J3. Até lá o beneficiamento (ex.: corte de chapa) é um setor `PRODUTIVO` opcional no roteiro da Revenda | Split segue para o setor Compras → requisição → Recebimento → (beneficiamento) → Qualidade → **volta ao setor Estoque** (entrada + reserva) → entrega — [[Rota-Revenda]] |
+| **Fabricação** (fábrica da linha) | Split atendido no setor Estoque (etapa 1): reserva + conclusão → entrega | Consumo de MP fica para a J3; a OP segue pelos setores produtivos | Split segue pelos setores produtivos da linha → Qualidade → entrega. Compra de MP para a linha fica para a J3 |
 
 ## O que isso resolve
 
-- **`[ESTOQUE]` no diagrama macro não é um quarto ramo** — é o cruzamento "Pronto em estoque" das duas colunas de Revenda e Fabricação. [[Rota-Estoque]] (separação, conferência, liberação imediata) descreve exatamente essa célula da matriz, não uma origem própria de item.
+- **`[ESTOQUE]` no diagrama macro não é um quarto ramo** — é o cruzamento "Pronto em estoque" das duas colunas de Revenda e Fabricação. No MES isso ganhou forma concreta: é o **setor Estoque, etapa 1 de todo roteiro**, onde o split atendido termina.
 - **`destinacao_item_pedido` (eixo 3) é ortogonal aos outros dois** — um item pode estar "pronto em estoque" (eixo 2) e já reservado pra produção específica (eixo 3) ao mesmo tempo, sem contradição.
-- **Reserva de estoque** (já decidida como necessária, ver [[Fluxo-Detalhado-Pedido-Item]]) é o mecanismo que liga o eixo 2 ao eixo 3 no exato momento em que o PCP marca "tenho em estoque" — é aí que a célula da matriz vira uma reserva de verdade, não só uma leitura de saldo.
+- **A reserva liga o eixo 2 ao eixo 3** no momento em que o setor Estoque atende o split — e, para o item comprado, no momento em que ele volta da Qualidade para o Estoque. Nos dois casos ela nasce sobre lote já liberado.
 
-## Como isso deveria mudar a implementação
+## Como isso muda a implementação
 
-- `destinacao_item_pedido` (eixo 3) continua como está no PRD, mas precisa de um campo/consulta **separado** pra representar o eixo 2 (disponibilidade no momento da checagem) — hoje os dois estão implicitamente misturados na descrição do PRD original.
-- O diagrama macro em [[Fluxo-Operacional-Visao-Geral]] pode continuar existindo como visão simplificada (ex.: pra relatório gerencial, visão de alto nível pro vendedor) — mas qualquer tela operacional (PCP, Compras, Recebimento) deveria ser desenhada em cima do modelo de 2 eixos (natureza × disponibilidade) descrito aqui, não do modelo de 3 ramos paralelos.
-- O eixo 1 (Revenda/Fabricação) é decidido **uma vez**, por tipo de material/produto — não precisa ser reavaliado a cada pedido. O eixo 2 é reavaliado a cada verificação de saldo pelo PCP.
+- **Não existe tela de "classificação natureza × disponibilidade".** O eixo 1 é a escolha da fábrica na tela Ordem de Produção (a partir da Carteira); o eixo 2 é a ação "atender X do estoque" no setor Estoque. Ver [[Encaixe-Estoque-Revenda-no-PCP]] seção 4.
+- `destinacao_item_pedido` (eixo 3) continua como está no PRD; a disponibilidade (eixo 2) é o saldo disponível na filial do pedido = saldo do lote liberado − reservas `ATIVAS`.
+- O diagrama macro em [[Fluxo-Operacional-Visao-Geral]] pode continuar existindo como visão simplificada, mas qualquer tela operacional é desenhada em cima do roteiro tipado (Fábrica/Setor com tipo), não do modelo de 3 ramos paralelos.
 
 ## Ver também
+- [[Encaixe-Estoque-Revenda-no-PCP]] — o encaixe completo, decisões e pendências.
 - [[Fluxo-Operacional-Visao-Geral]]
 - [[Fluxo-Detalhado-Pedido-Item]]
 - [[PCP-Carteira]]

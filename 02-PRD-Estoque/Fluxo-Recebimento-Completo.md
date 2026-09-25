@@ -8,6 +8,8 @@ criado: 2026-09-16
 > Detalha o que acontece dentro do Recebimento a partir do momento em que a referência da compra chega do av-hub (conversa C7 de [[Fluxo-Compras-Completo]]) até o item ser roteado pra Qualidade ou de volta pro PCP.
 >
 > **Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje** — é escopo obrigatório do sistema a construir, não documentação de processo existente.
+>
+> **Atualizado em 24/09/2026 com o encaixe do MES** ([[Encaixe-Estoque-Revenda-no-PCP]]): Recebimento é um setor do roteiro da fábrica Revenda (`ESTOQUE` → `COMPRAS` → **Recebimento** → [beneficiamento] → Qualidade → `ESTOQUE`). A conferência bem-sucedida **libera o parcial que estava parado no setor Compras** (tarefa D6), e o item não acabado segue para o setor de beneficiamento do roteiro em vez de voltar ao PCP.
 
 ## Atores e sistemas
 
@@ -39,10 +41,14 @@ sequenceDiagram
         Receb->>Receb: R7 · cria o lote (origem=RECEBIMENTO, status_qualidade=PENDENTE)
         Receb->>Receb: R8 · etiquetagem (código de barras/QR, ou RFID se piloto)
         Receb->>Receb: R9 · associa nota_fiscal_entrada (só chave_acesso)
-        alt item acabado
+        Receb->>Receb: R9b · libera o parcial parado no setor Compras
+        alt roteiro sem beneficiamento
             Receb->>Qual: R10a · libera pra inspeção
-        else item não acabado
-            Receb->>PCP: R10b · "chegou, precisa beneficiamento"
+        else roteiro com beneficiamento (ex.: corte)
+            Receb->>Receb: R10b · parcial segue pro setor de beneficiamento do roteiro
+        end
+        opt não acabado e roteiro sem beneficiamento
+            Receb->>PCP: R10c · fila "Novo norte": PCP ajusta o roteiro
         end
     end
 ```
@@ -73,8 +79,11 @@ Código de barras/QR por padrão; RFID só no piloto de Flange (maior valor unit
 **R9 — Nota fiscal de entrada**
 Só referência (`chave_acesso`) — nunca captura CFOP/ICMS-ST de entrada, que fica 100% com o Omie (Nota de Entrada não é sincronizada hoje, ver [[Estoque-Regras-Negocio]]). **Correção**: isso vale só pro CFOP da nota de entrada (compra) — o CFOP do lado da venda já é capturado por item (`produto_vendas.cfop`); ICMS-ST continua não capturado em nenhum dos dois lados.
 
-**R10a/R10b — Roteamento final**
-Mesma bifurcação já coberta em [[Fluxo-Compras-Completo]] (C10/C11) — reafirmada aqui como o ponto de saída do Recebimento.
+**R9b — Libera o parcial do setor Compras (24/09/2026)**
+O parcial do item comprado esperava no setor Compras desde a requisição. A conferência aprovada o move para o próximo setor do roteiro da Revenda.
+
+**R10a/R10b/R10c — Roteamento final**
+Mesma bifurcação já coberta em [[Fluxo-Compras-Completo]] (C10/C11) — reafirmada aqui como o ponto de saída do Recebimento. Desde 24/09/2026 quem decide é o **roteiro** montado pelo PCP (tem ou não setor de beneficiamento), não a volta ao PCP. A flag acabado/não-acabado continua decidindo contra o que conferir (R2/R3); se ela disser "não acabado" e o roteiro não tiver beneficiamento, o parcial vai para a fila "Novo norte" do PCP (R10c). Depois da Qualidade, o item comprado aprovado **volta ao setor Estoque** — ver [[Fluxo-Qualidade-Completo]] Q6a.
 
 ## Nenhum estado é beco sem saída
 
@@ -90,6 +99,7 @@ Mesma bifurcação já coberta em [[Fluxo-Compras-Completo]] (C10/C11) — reafi
 - **Peso fora da tolerância ainda não tem caminho de decisão definido** — hoje só "bate/não bate" está mapeado; fica em aberto se entra na mesma ramificação de divergência de quantidade.
 
 ## Ver também
+- [[Encaixe-Estoque-Revenda-no-PCP]]
 - [[Setores-Envolvidos-no-Fluxo]]
 - [[Fluxo-Compras-Completo]]
 - [[Fluxo-Qualidade-Completo]]

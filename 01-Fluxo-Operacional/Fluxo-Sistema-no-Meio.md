@@ -1,15 +1,18 @@
 ---
 tags: [erp-acos-vital, fluxo-operacional, sistema, interacao, atos]
 criado: 2026-09-22
+atualizado: 2026-09-24
 ---
 
-# O Sistema no Meio — os 18 atos do fluxo
+# O Sistema no Meio — os 19 atos do fluxo
 
 > **O que muda em relação ao fluxograma mestre.** Em [[Fluxogramas-Completos]] os setores conversam entre si: uma seta sai do PCP e chega em Compras. Isso descreve o **processo**, mas esconde a coisa mais importante do sistema a construir — **nenhum setor vai falar com outro setor; todos vão falar com o sistema.** O PCP não manda uma requisição pro comprador; o PCP grava uma requisição, e o sistema a entrega ao comprador.
 >
-> Esta nota redesenha o mesmo fluxo com o sistema no centro de cada passagem. Cada interação vira um **ato**, e todo ato tem exatamente a mesma forma — os **6 tempos**. São 18 atos, cobrindo do pedido ao faturamento.
+> Esta nota redesenha o mesmo fluxo com o sistema no centro de cada passagem. Cada interação vira um **ato**, e todo ato tem exatamente a mesma forma — os **6 tempos**. São 19 atos, cobrindo do pedido ao faturamento.
 >
 > **Por que isso não é só reescrever bonito.** A gramática dos 6 tempos tem um efeito de diagnóstico: quando um ato não tem o que preencher no tempo 2 (buscar) ou no tempo 3 (fazer), o sistema não está mediando nada ali — está só guardando o que a pessoa digitou. Esses são os **pontos cegos**, e eles ficam visíveis sozinhos. Achamos 3 — ver a seção final.
+>
+> **Atualizado em 24/09/2026 com o encaixe do Estoque e da Revenda no MES** ([[Encaixe-Estoque-Revenda-no-PCP]]). Mudaram os atos 2 a 5 (o PCP monta a rodada e escolhe a fábrica; o **setor Estoque é a etapa 1 de todo roteiro** e reserva; a requisição nasce sozinha no **setor Compras**), os atos 12, 13, 14 e 16, e entrou o **ato 14b**: o item comprado aprovado pela Qualidade **volta ao Estoque** (entrada + reserva) antes de sair — não vai direto para a Expedição.
 
 ## Os 6 tempos
 
@@ -28,32 +31,30 @@ Os tempos 2, 3, 4 e 6 são do sistema. O ator só aparece nas pontas — no 1 e 
 
 ### Anatomia de um ato
 
-O ato 2 (PCP classifica o item), desenhado inteiro:
+O ato 2 (PCP monta a rodada), desenhado inteiro:
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'actorBkg': '#dce8ef', 'actorBorder': '#2f6f8f', 'noteBkgColor': '#f7edd0', 'noteBorderColor': '#a8860f'}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'actorBkg': '#dce8ef', 'actorBorder': '#2f6f8f', 'noteBkgColor': '#f7edd0', 'noteBorderColor': '#a8860f'}}}%%
 sequenceDiagram
     actor PCP as PCP (pessoa)
     participant SIS as ⬛ SISTEMA
-    participant CAT as Catalogo (core.produtos)
-    participant EST as Saldo (estoque)
+    participant GW as Gateway av-hub (Omie)
+    participant FAB as Fabricas e roteiros
 
-    PCP->>SIS: 1 · abre um item da Carteira
-    SIS->>CAT: 2 · busca natureza do item
-    CAT-->>SIS: Revenda ou Fabricacao propria
-    SIS->>EST: 2 · busca saldo por material, deposito e lote
-    EST-->>SIS: disponivel x reservado
-    SIS->>SIS: 3 · cruza os dois eixos da matriz de destinacao
-    SIS->>SIS: 3 · testa o prazo do pedido contra o lead time
-    SIS-->>PCP: 4 · mostra a rota sugerida e o saldo que a sustenta
-    PCP->>SIS: 5 · confirma a rota, ou escolhe outra com motivo
-    SIS->>SIS: 6 · grava a destinacao do item
-    SIS-->>PCP: 6 · entrega o item ao setor da rota escolhida
+    PCP->>SIS: 1 · abre um pedido da Carteira
+    SIS->>GW: 2 · busca itens e quantidades do pedido
+    GW-->>SIS: itens, e o que ja foi enviado em rodadas anteriores
+    SIS->>FAB: 2 · busca fabricas (FABRICACAO ou REVENDA) e setores
+    SIS->>SIS: 3 · calcula o restante de cada item e limita o envio a ele
+    SIS-->>PCP: 4 · mostra itens, restante e fabricas, inclusive a Revenda
+    PCP->>SIS: 5 · escolhe quantidade e fabrica de cada item, monta o roteiro
+    SIS->>SIS: 6 · grava uma OP por fabrica, com o setor Estoque na etapa 1
+    SIS-->>PCP: 6 · cada parcial nasce no setor Estoque (ato 3)
 
-    Note over SIS,EST: Forca do sistema: FORTE — ele calcula a sugestao,<br/>a pessoa confirma. Nao e um formulario em branco.
+    Note over SIS,FAB: Forca do sistema: FORTE — limita a quantidade ao restante<br/>e forca o Estoque na etapa 1. A natureza vem da fabrica.
 ```
 
-**Compare com o fluxograma mestre:** lá isso é um nó só (`P1 — PCP classifica o item`) e uma decisão (`P2 — Natureza do item`). Aqui aparecem as duas buscas, o cruzamento da matriz e o teste de prazo — que é o trabalho que o sistema precisa fazer para que aquele nó exista.
+**Compare com o fluxograma mestre:** lá isso é um nó só (`P1 — Carteira`) seguido de outro (`P2 — Ordem de Produção`). Aqui aparecem as duas buscas, o cálculo do restante e a inserção do setor Estoque — que é o trabalho que o sistema precisa fazer para que aqueles nós existam. *(Até 24/09/2026 este ato também cruzava a matriz natureza × disponibilidade; a disponibilidade passou para o ato 3.)*
 
 ## O sistema como centro de tudo
 
@@ -63,11 +64,12 @@ O mesmo fluxo, visto de cima: 11 setores, nenhuma seta entre eles.
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px'}, 'flowchart': {'nodeSpacing': 30, 'rankSpacing': 50}}%%
 flowchart LR
     VEN[Vendas<br/>atos 1, 17]
-    PCP[PCP<br/>atos 2-5, 11]
+    PCP[PCP<br/>atos 2, 11]
+    SCO[Setor Compras<br/>ato 5]
     COM[Compras e CCP<br/>atos 6-8]
     REC[Recebimento<br/>atos 9-12]
     FAB[Fabrica<br/>ato 13]
-    EST[Estoque<br/>ato 3]
+    EST[Setor Estoque<br/>atos 3, 4, 14b]
     QUA[Qualidade<br/>atos 14-15]
     EXP[Expedicao<br/>ato 16]
 
@@ -78,6 +80,7 @@ flowchart LR
 
     VEN <--> SIS
     PCP <--> SIS
+    SCO <--> SIS
     COM <--> SIS
     REC <--> SIS
     FAB <--> SIS
@@ -91,6 +94,7 @@ flowchart LR
     style VEN fill:#d9f0ec,stroke:#0f7a6b,stroke-width:1.5px,color:#181c22
     style PCP fill:#dce8ef,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
     style COM fill:#e3e0f5,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
+    style SCO fill:#e3e0f5,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style REC fill:#e1eede,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
     style FAB fill:#f3ddd6,stroke:#a8420f,stroke-width:1.5px,color:#181c22
     style EST fill:#d9eef2,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
@@ -104,11 +108,11 @@ flowchart LR
 
 ## O fluxograma mestre com o sistema interposto
 
-> O mesmo diagrama de atividades de [[Fluxogramas-Completos]], nó por nó, com duas camadas somadas: cada raia carrega **quantas telas ela custa** (de [[Fluxograma-Telas-por-Bloco]]) e entre uma raia e outra aparece **o que o sistema faz na passagem**. São **14 passagens mediadas e 1 fora** — a do fornecedor.
+> O mesmo diagrama de atividades de [[Fluxogramas-Completos]], nó por nó, com duas camadas somadas: cada raia carrega **quantas telas ela custa** (de [[Fluxograma-Telas-por-Bloco]]) e entre uma raia e outra aparece **o que o sistema faz na passagem**. São **15 passagens mediadas e 1 fora** — a do fornecedor.
 >
-> **Como ler:** caixa branca = passo de um setor · paralelogramo escuro = o sistema · caixa vermelha = fora do sistema. Cada ação do sistema mora **dentro da raia onde o resultado dela aterrissa** — por isso o PCP tem quatro: é pra lá que tudo volta.
+> **Como ler:** caixa branca = passo de um setor · paralelogramo escuro = o sistema · caixa vermelha = fora do sistema. Cada ação do sistema mora **dentro da raia onde o resultado dela aterrissa** — por isso o PCP tem três: é pra lá que as exceções voltam.
 >
-> **Repare no Estoque:** os nós "verifica saldo no warehouse" e "cria reserva" sumiram da raia e viraram um nó escuro. Não é simplificação do desenho — é trabalho que sai da pessoa e passa a ser do sistema, que busca o saldo e trava a reserva **na mesma operação**, pra dois pedidos não disputarem o mesmo lote. O mesmo movimento acontece no Recebimento e na Qualidade.
+> **Repare no Estoque:** desde 24/09/2026 é por ele que **todo** item entra no roteiro (etapa 1) — e é por ele que o item comprado sai, depois da Qualidade. A busca de saldo e a reserva viraram um nó escuro: é trabalho que sai da pessoa e passa a ser do sistema, que busca o saldo e trava a reserva **na mesma operação**, pra dois pedidos não disputarem o mesmo lote. O mesmo movimento acontece no Recebimento e na Qualidade.
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 45, 'rankSpacing': 62, 'padding': 14}}}%%
@@ -129,17 +133,12 @@ flowchart TD
     subgraph SEC_PCP[2. PCP - MES · 5 telas]
         SN["o av-hub libera o pedido e o MES le por polling - FRONTEIRA"]
         SE["abre divergencia na fila Novo norte - nunca beco sem saida"]
-        SG["devolve ao PCP para beneficiamento"]
         SK["cinde o lote e abre a RNC - nunca emite a nota"]
-        P1[PCP classifica o item]
-        P2{Natureza do item}
-        P3{Disponibilidade}
-        P4[Gera requisicao de compra]
-        P5[Abre OS ou OP]
+        P1[Carteira: escolhe itens, quantidades e fabrica da rodada]
+        P2[Ordem de Producao: uma OP por fabrica, Estoque como etapa 1]
+        K1[Setor Compras: gera a requisicao ao receber o parcial]
         P6[Decide o novo norte]
         P1 --> P2
-        P2 -->|Revenda| P3
-        P2 -->|Fabricacao propria| P3
     end
 
     subgraph SEC_COMPRAS[3. Compras e CCP - av-hub · 6 telas]
@@ -175,25 +174,31 @@ flowchart TD
         R2[Pesagem]
         R3{Bate com o esperado?}
         R4[Cria lote em quarentena]
-        R5{Item acabado?}
+        R5{Roteiro tem beneficiamento?}
         R1 --> R2 --> R3
         R3 -->|nao| R6[Divergencia]
         R3 -->|sim| R4 --> R5
     end
 
     subgraph SEC_PROD[7. Fabrica e Beneficiamento - MES · 4 telas fora do ciclo]
-        SH["cria o ItemParcial com o roteiro e a filial do Pedido"]
-        F1[Abre ItemParcial]
-        F2[Percorre o roteiro setor a setor]
-        F3[Conclui no ultimo setor]
-        F1 --> F2 --> F3
+        SH["move o parcial para o proximo setor produtivo do roteiro"]
+        F1[Percorre os setores produtivos do roteiro]
+        F2[Conclui a etapa produtiva]
+        F1 --> F2
     end
 
-    subgraph SEC_ESTOQUE[8. Estoque - MES · 11 telas, 7 no ciclo]
-        SB["busca saldo e TRAVA a reserva na mesma operacao"]
-        E1[Confirma disponibilidade fisica]
-        E2[Separacao fisica]
-        E1 --> E2
+    subgraph SEC_ESTOQUE[8. Estoque - MES · 12 telas, 8 no ciclo]
+        SB["busca saldo na filial do pedido e TRAVA a reserva na mesma operacao"]
+        SR["move o restante pelo roteiro"]
+        SQ["tira da quarentena e devolve o item comprado ao Estoque"]
+        E1{Saldo cobre o item?}
+        E2[Almoxarife atende e separa]
+        E5[Entrada do lote na localizacao de guarda]
+        SB --> E1
+        E1 -->|sim, tudo ou parte| E2
+        E1 -->|nao, ou o restante| SR
+        SQ --> E5
+        E5 --> SB
     end
 
     subgraph SEC_QUAL[9. Qualidade - MES · 5 telas, 4 no ciclo]
@@ -203,12 +208,14 @@ flowchart TD
         Q2{Aprova?}
         Q3[Abre RNC com evidencia]
         Q4[Cisao de lote]
+        Q5{Origem do item}
         Q1 --> Q2
         Q2 -->|nao| Q3 --> Q4
+        Q2 -->|sim| Q5
     end
 
     subgraph SEC_EXP[10. Expedicao e Logistica de saida - MES · 4 telas fora do ciclo]
-        SJ["tira da quarentena e confirma a reserva"]
+        SJ["recebe o concluido: do Estoque, reservado, ou da Qualidade, fabricado"]
         X1[Embalagem e paletizacao]
         X2{Parcial ou integral?}
         X3[Consolida a carga]
@@ -228,11 +235,10 @@ flowchart TD
 
     V3 --> SN
     SN --> P1
-    P3 -->|pronto em estoque| SB
-    SB --> E1
-    P3 -->|materia-prima em estoque| P5
-    P3 -->|sem estoque| P4
-    P4 --> SC
+    P2 --> SB
+    SR -->|Fabricacao| SH
+    SR -->|Revenda| K1
+    K1 --> SC
     SC --> C1
     C5 -.-> SGAP
     SGAP -.-> FN1
@@ -241,21 +247,20 @@ flowchart TD
     SD --> R1
     R6 --> SE
     SE --> P6
-    P6 -->|reabre compra| P4
-    R5 -->|sim, acabado| SF
+    P6 -->|reabre compra| K1
+    R5 -->|nao| SF
     SF --> Q1
-    R5 -->|nao, precisa beneficiamento| SG
-    SG --> P5
-    P5 --> SH
+    R5 -->|sim| SH
     SH --> F1
-    F3 --> SI
-    E2 --> SI
+    F2 --> SI
     SI --> Q1
-    Q2 -->|sim| SJ
+    Q5 -->|comprado| SQ
+    Q5 -->|fabricado| SJ
+    E2 --> SJ
     SJ --> X1
     Q4 --> SK
     SK --> P6
-    P6 -->|retrabalho ou nova OS/OP| SH
+    P6 -->|retrabalho| SH
     X4 --> SL
     SL --> O1
     SD -.-> SM
@@ -277,11 +282,12 @@ flowchart TD
     style SA fill:#252c34,stroke:#8d95a1,stroke-width:1.5px,color:#eef1f4
     style SN fill:#252c34,stroke:#8d95a1,stroke-width:1.5px,color:#eef1f4
     style SB fill:#252c34,stroke:#8d95a1,stroke-width:1.5px,color:#eef1f4
+    style SR fill:#252c34,stroke:#8d95a1,stroke-width:1.5px,color:#eef1f4
+    style SQ fill:#252c34,stroke:#8d95a1,stroke-width:1.5px,color:#eef1f4
     style SC fill:#252c34,stroke:#8d95a1,stroke-width:1.5px,color:#eef1f4
     style SD fill:#252c34,stroke:#8d95a1,stroke-width:1.5px,color:#eef1f4
     style SE fill:#252c34,stroke:#8d95a1,stroke-width:1.5px,color:#eef1f4
     style SF fill:#252c34,stroke:#8d95a1,stroke-width:1.5px,color:#eef1f4
-    style SG fill:#252c34,stroke:#8d95a1,stroke-width:1.5px,color:#eef1f4
     style SH fill:#252c34,stroke:#8d95a1,stroke-width:1.5px,color:#eef1f4
     style SI fill:#252c34,stroke:#8d95a1,stroke-width:1.5px,color:#eef1f4
     style SJ fill:#252c34,stroke:#8d95a1,stroke-width:1.5px,color:#eef1f4
@@ -296,9 +302,7 @@ flowchart TD
     style V4 fill:#ffffff,stroke:#0f7a6b,stroke-width:1.5px,color:#181c22
     style P1 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
     style P2 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style P3 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style P4 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style P5 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
+    style K1 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style P6 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
     style C1 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style C2 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
@@ -318,13 +322,14 @@ flowchart TD
     style R6 fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
     style F1 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
     style F2 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
-    style F3 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
     style E1 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style E2 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style E5 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style Q1 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style Q2 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style Q3 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style Q4 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
+    style Q5 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style X1 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
     style X2 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
     style X3 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
@@ -381,53 +386,53 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 
 # Movimento 2 — Despacho (PCP)
 
-## Ato 2 · PCP classifica o item
+## Ato 2 · PCP monta a rodada (Carteira → Ordem de Produção)
 
 **Força:** forte · **Telas:** 2.1, 2.2
 
-- **1 · Chega** — PCP abre um item na Carteira.
-- **2 · Busca** — natureza do item no catálogo (`core.produtos`); saldo disponível por material × depósito × lote.
-- **3 · Faz** — cruza os dois eixos do [[Modelo-Destinacao-Item]] (natureza × disponibilidade); testa se o prazo do pedido cabe no lead time.
-- **4 · Mostra** — a célula da matriz com a rota sugerida **e o saldo que sustenta a sugestão**.
-- **5 · Decide** — PCP confirma a rota ou escolhe outra, com motivo.
-- **6 · Roteia** — uma das três: Estoque (ato 3), Fábrica (ato 4) ou Compras (ato 5).
+- **1 · Chega** — PCP abre um pedido na Carteira.
+- **2 · Busca** — os itens e quantidades do pedido no Omie (pelo gateway do av-hub) e o que já foi enviado em rodadas anteriores; as fábricas cadastradas (tipo `FABRICACAO` ou `REVENDA`) e seus setores.
+- **3 · Faz** — calcula o restante de cada item e **não deixa enviar mais que o restante**; para cada fábrica usada, **insere o setor Estoque como etapa 1** do roteiro; `codigo_empresa` vem do pedido (DEC-1).
+- **4 · Mostra** — itens com total, já enviado e restante; as fábricas, inclusive a Revenda.
+- **5 · Decide** — PCP escolhe quantidade e **fábrica** de cada item (a natureza do item é o tipo da fábrica) e monta o roteiro.
+- **6 · Roteia** — grava **uma OP por fábrica**; cada parcial nasce no **setor Estoque** (ato 3).
 
-## Ato 3 · Rota estoque: a reserva
+> **Mudou em 24/09/2026.** Antes, este ato cruzava a matriz natureza × disponibilidade e roteava para três rotas. A disponibilidade saiu daqui: é resolvida no setor Estoque, para todo item. Ver [[Encaixe-Estoque-Revenda-no-PCP]].
 
-**Força:** forte · **Telas:** 8.4, 8.5
+## Ato 3 · Setor Estoque: atende do saldo e reserva
 
-- **1 · Chega** — PCP confirmou "pronto em estoque".
-- **2 · Busca** — lotes daquele material que estejam aprovados e não reservados.
-- **3 · Faz** — **cria a reserva no mesmo passo em que lê o saldo**, por escrita condicional. Não é ler-depois-escrever: é a trava contra dois pedidos disputarem o mesmo lote.
-- **4 · Mostra** — lote reservado, localização e quantidade.
-- **5 · Decide** — Almoxarife confirma que o material está fisicamente lá.
-- **6 · Roteia** — separação física → Qualidade, se o lote nunca foi inspecionado.
+**Força:** forte · **Telas:** 8.12 (8.4 e 8.5 como consulta)
 
-> **Lacuna conhecida:** se o pedido de origem for cancelado depois, a reserva precisa de **liberação explícita**. O mecanismo ainda não está desenhado.
+- **1 · Chega** — o parcial entra no setor Estoque, etapa 1 de todo roteiro.
+- **2 · Busca** — lotes do material (por `codigo_empresa` + `id_omie`) **liberados pela Qualidade**, na filial do pedido, menos as reservas ativas.
+- **3 · Faz** — **cria a reserva no mesmo passo em que lê o saldo**, por escrita condicional, e faz o **split** do parcial: a parte atendida vira um `ItemParcial` próprio, reservado e concluído. Não é ler-depois-escrever: é a trava contra dois pedidos disputarem o mesmo lote.
+- **4 · Mostra** — saldo disponível, lote reservado, localização e quantidade.
+- **5 · Decide** — almoxarife confirma o atendimento (e que o material está fisicamente lá) e envia o restante.
+- **6 · Roteia** — o split atendido segue pra entrega (ato 16); o restante vai para os setores produtivos (ato 4) ou para o setor Compras (ato 5).
 
-## Ato 4 · Rota fabricação: abre a OS/OP
+> **Liberação decidida em 24/09/2026:** a reserva não expira; é liberada explicitamente quando o pedido ou a OP é cancelado. **Saldo zero** — passa automático ou exige clique — segue em aberto (sugestão: automático). Antes do marco zero (13/11), todo parcial passa como saldo zero.
 
-**Força:** forte · **Telas:** 2.3
+## Ato 4 · Rota fabricação: o restante segue o roteiro
 
-- **1 · Chega** — PCP confirmou fabricação própria ou beneficiamento.
-- **2 · Busca** — o roteiro da fábrica para aquele item, com os setores na ordem.
-- **3 · Faz** — cria o `ItemParcial` em `CRIADO` e carimba o `codigo_empresa` **vindo do Pedido, nunca da Fábrica** (DEC-1: uma fábrica atende matriz e filiais).
-- **4 · Mostra** — a OS/OP criada, com o roteiro setor a setor.
-- **5 · Decide** — PCP confirma quantidade e split inicial.
-- **6 · Roteia** — primeiro setor do roteiro (ato 13).
+**Força:** forte · **Telas:** 8.12, 7.1
 
-## Ato 5 · Rota compra: a requisição
+- **1 · Chega** — restante de um item de fábrica tipo `FABRICACAO`, saindo do setor Estoque.
+- **2 · Busca** — o próximo setor do roteiro daquele item.
+- **3 · Faz** — move o parcial (`EM_TRANSITO`) para o primeiro setor produtivo; o tempo que ele passou no Estoque fica no histórico do `ItemParcial`.
+- **4 · Mostra** — o parcial na fila do setor produtivo.
+- **5 · Decide** — o setor recebe.
+- **6 · Roteia** — ato 13.
 
-**Força:** média · **Telas:** 2.4
+## Ato 5 · Rota compra: a requisição nasce no setor Compras
 
-- **1 · Chega** — PCP confirmou "sem estoque".
-- **2 · Busca** — material canônico, unidade, prazo do pedido de origem e filial.
-- **3 · Faz** — cria a requisição em `ABERTA` e a expõe em `GET /requisicoes-compra`.
-- **4 · Mostra** — a requisição na fila do PCP.
-- **5 · Decide** — PCP confirma e envia.
-- **6 · Roteia** — **atravessa a fronteira av-hub ↔ MES**: o job do av-hub faz polling a cada 5 min e projeta a requisição na caixa de entrada do comprador (ato 6).
+**Força:** forte · **Telas:** 2.4
 
-> **Aqui o sistema é dois sistemas.** É o único ponto do despacho onde o dado muda de banco. Ver [[Integracao-AvHub-MES-Especificacao-F1]], Fluxo 1.
+- **1 · Chega** — restante de um item da fábrica **Revenda** entra no setor Compras.
+- **2 · Busca** — material, unidade, quantidade do parcial, prazo do pedido de origem e filial.
+- **3 · Faz** — **gera a requisição sozinho**, em `ABERTA`, vinculada ao `ItemParcial`, e a expõe em `GET /requisicoes-compra`. O parcial fica parado no setor Compras.
+- **4 · Mostra** — a requisição e o estado dela na fila do setor Compras.
+- **5 · Decide** — ninguém: a decisão foi tomada no ato 2, ao escolher a fábrica Revenda.
+- **6 · Roteia** — **atravessa a fronteira av-hub ↔ MES**: o job do av-hub faz polling a cada 5 min e projeta a requisição na caixa de entrada do comprador (ato 6). O parcial só sai do setor Compras quando o recebimento o libera (ato 12).
 
 ---
 
@@ -518,7 +523,7 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 - **3 · Faz** — cria o lote com a **quantidade real, não a esperada**; `origem = RECEBIMENTO` e `status_qualidade = PENDENTE` — **quarentena por padrão, sempre**; gera o código da etiqueta.
 - **4 · Mostra** — o lote criado e a etiqueta pronta pra impressão.
 - **5 · Decide** — almoxarife imprime, cola e informa a chave de acesso da NF de entrada.
-- **6 · Roteia** — acabado → Qualidade (ato 14); não acabado → PCP abre OS/OP (ato 4).
+- **6 · Roteia** — libera o parcial que esperava no setor Compras e segue o roteiro: setor de beneficiamento, se houver (ato 13), ou Qualidade (ato 14). Veio não acabado e o roteiro não prevê beneficiamento → fila Novo norte (ato 11).
 
 > **A quarentena não é opcional.** Nenhum lote nasce liberado neste caminho — só os da carga inicial, por decisão explícita (DEC-4).
 
@@ -531,7 +536,7 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 - **3 · Faz** — cada transição é **escrita condicional** (`where status = o esperado`). Se outro operador já mexeu, dá conflito em vez de sobrescrever.
 - **4 · Mostra** — **só as ações válidas naquele estado**, não o menu inteiro.
 - **5 · Decide** — operador recebe, inicia, pausa, retoma, retrabalha, divide, devolve ou conclui.
-- **6 · Roteia** — próximo setor do roteiro; no último, conclui → Qualidade (ato 14).
+- **6 · Roteia** — próximo setor do roteiro; no último setor produtivo, segue pra Qualidade (ato 14). O beneficiamento da Revenda (ex.: corte de chapa) é um setor deste mesmo board.
 
 > **Devolver nunca edita a linha antiga** — cria uma nova, ligada por `idDevolvidoDe`. O histórico é imutável por construção, não por disciplina.
 
@@ -543,12 +548,25 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 
 **Força:** forte · **Telas:** 9.1, 9.2
 
-- **1 · Chega** — item liberado por uma das **três origens** que convergem aqui: recebimento, fábrica ou estoque.
+- **1 · Chega** — item liberado por uma das **duas origens** que convergem aqui: recebimento (comprado) ou fábrica/beneficiamento. O item atendido pelo estoque não passa aqui — o saldo só conta lote já liberado.
 - **2 · Busca** — o lote, a origem, o histórico e o laudo anexado.
 - **3 · Faz** — **trava dura**: o status não sai de `PENDENTE` sem `laudo_url` preenchido. A trava vem antes de decidir, não depois.
 - **4 · Mostra** — o formulário de inspeção, com a trava visível.
 - **5 · Decide** — inspetor aprova ou reprova.
-- **6 · Roteia** — aprovado sai da quarentena, confirma a reserva e segue pra Expedição; reprovado vai pro ato 15.
+- **6 · Roteia** — aprovado sai da quarentena: **item comprado volta ao setor Estoque (ato 14b)**; item fabricado segue pra Expedição (ato 16). Reprovado vai pro ato 15.
+
+## Ato 14b · O Estoque recebe o item comprado
+
+**Força:** forte · **Telas:** 8.12
+
+- **1 · Chega** — o parcial do item comprado, aprovado pela Qualidade, volta ao setor Estoque (última etapa do roteiro da Revenda).
+- **2 · Busca** — o lote liberado, o recebimento de origem e a localização de guarda.
+- **3 · Faz** — dá **entrada** do lote no saldo (`MovimentoEstoque` `ENTRADA`, referência ao recebimento) e cria a **reserva** para o split que esperava a compra, na mesma operação; conclui o split.
+- **4 · Mostra** — lote guardado, reserva ativa e split concluído.
+- **5 · Decide** — almoxarife confirma a guarda.
+- **6 · Roteia** — entrega (ato 16), pela mesma porta do item que já estava em estoque.
+
+> **Regra do Nathan (24/09/2026):** item comprado não vai da Qualidade direto para a Expedição. Assim toda saída de revenda passa pelo Estoque com reserva, e o lote comprado entra no saldo antes de sair.
 
 ## Ato 15 · Reprovação: cisão e RNC
 
@@ -567,9 +585,9 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 
 **Força:** forte · **Telas:** 10.1, 10.2, 11.1
 
-- **1 · Chega** — itens aprovados chegam à Expedição.
+- **1 · Chega** — itens concluídos chegam à Expedição por **duas portas**: o setor Estoque (atendido pelo saldo ou comprado, já reservados) e a Qualidade (fabricado).
 - **2 · Busca** — todos os itens do mesmo pedido e o estado de cada um. **É o único ato que volta a olhar o pedido inteiro** — até aqui cada item correu sozinho.
-- **3 · Faz** — aplica a regra parcial × integral: se for integral, **segura a carga** até o último item concluir.
+- **3 · Faz** — aplica a regra parcial × integral: se for integral, **segura a carga** até o último item concluir. Na saída, a reserva do item de estoque vira consumida.
 - **4 · Mostra** — o pedido inteiro, com o que ainda falta pra fechar.
 - **5 · Decide** — expedição embala, paletiza e libera.
 - **6 · Roteia** — sinaliza a NF ao Omie; a nota volta pela sincronização e o item migra de "em aberto" pra "faturado".
@@ -587,13 +605,13 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 - **5 · Decide** — nada. É leitura.
 - **6 · Roteia** — nada. Este ato é o espelho de todos os outros.
 
-> **É o ato que justifica os outros 17.** Toda a rastreabilidade existe pra que esta tela possa responder "onde está meu item" sem ninguém ligar pra fábrica.
+> **É o ato que justifica os outros 18.** Toda a rastreabilidade existe pra que esta tela possa responder "onde está meu item" sem ninguém ligar pra fábrica.
 
 ---
 
 # Os 3 pontos cegos
 
-O que a gramática revelou. Em todos os outros 14 atos o sistema busca alguma coisa e aplica alguma regra antes de a pessoa decidir. Nestes três, não:
+O que a gramática revelou. Em todos os outros 15 atos o sistema busca alguma coisa e aplica alguma regra antes de a pessoa decidir. Nestes três, não:
 
 | # | Ato | O que falta | Saída possível |
 |---|---|---|---|
@@ -613,16 +631,17 @@ Segunda consequência: **a tela 1.1 não tem tarefa no [[Cronograma-2-Meses]]** 
 
 ## O que este recorte deixa explícito
 
-- **O sistema é ator em 17 atos, e em 14 deles ele decide alguma coisa antes da pessoa.** Não é um formulário que guarda o que digitaram — ele cruza a matriz de destinação, aplica a régua de R$ 30.000, trava a reserva contra corrida, testa a tolerância de peso, impede sair da quarentena sem laudo e segura a carga integral.
-- **Só uma passagem do fluxo inteiro não passa pelo sistema:** Compras → Fornecedor, por telefone. Todas as outras 16 são mediadas.
+- **O sistema é ator em 18 atos, e em 15 deles ele decide alguma coisa antes da pessoa.** Não é um formulário que guarda o que digitaram — ele força o Estoque na etapa 1 de todo roteiro, gera a requisição sozinho, aplica a régua de R$ 30.000, trava a reserva contra corrida, testa a tolerância de peso, impede sair da quarentena sem laudo e segura a carga integral.
+- **Só uma passagem do fluxo inteiro não passa pelo sistema:** Compras → Fornecedor, por telefone. Todas as outras 17 são mediadas.
 - **A fronteira av-hub ↔ MES aparece em 3 atos** (5, 9 e 17) — e nos três ela é polling, nunca evento. O resto do fluxo acontece dentro de um banco só.
-- **Três atos não têm decisão humana** (1, e parcialmente 17): são pipeline puro. Todo o resto tem uma pessoa confirmando no tempo 5 — nenhum estado do sistema muda sozinho num caminho crítico.
+- **Poucos atos não têm decisão humana** (1, 5 e, parcialmente, 17): são pipeline puro. Todo o resto tem uma pessoa confirmando no tempo 5 — nenhum estado do sistema muda sozinho num caminho crítico.
 
 ## Ver também
-- [[Fluxograma-Telas-por-Bloco]] — as 49 telas em que estes 17 atos acontecem
+- [[Encaixe-Estoque-Revenda-no-PCP]] — o encaixe que mudou os atos 2 a 5, 12 a 16 e criou o 14b (24/09/2026)
+- [[Fluxograma-Telas-por-Bloco]] — as 51 telas em que estes atos acontecem
 - [[Fluxogramas-Completos]] — o mesmo fluxo com os setores conversando entre si, sem o sistema no meio
 - [[Diagramas-UML]] — o diagrama 0b (Atividades), origem deste recorte
 - [[Integracao-AvHub-MES-Especificacao-F1]] — os 3 atos que atravessam a fronteira (5, 9, 17)
-- [[Modelo-Destinacao-Item]] — a matriz que o ato 2 cruza
+- [[Modelo-Destinacao-Item]] — a matriz que os atos 2 (fábrica) e 3 (saldo) resolvem
 - [[Rastreabilidade-e-SLA-de-Eventos]] — o log que o ato 17 lê
 - [[Decisoes-Chave-ERP]] — DEC-1, DEC-3, DEC-4, DEC-5

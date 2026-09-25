@@ -10,7 +10,7 @@ criado: 2026-09-22
 
 ## Por quê
 
-Corresponde à conversa **C1** de [[Fluxo-Compras-Completo]]: o PCP, ao classificar um item pelo [[Modelo-Destinacao-Item]], conclui que não tem estoque e precisa comprar. Hoje **não existe nenhum mecanismo** para essa requisição chegar ao comprador no av-hub — é o primeiro dos 3 fluxos que resolvem o "casamento av-hub↔MES" (DEC-2, [[MES-Arquitetura-Decisoes]]). Sem este contrato, a tarefa E1 (caixa de entrada de requisições) não tem o que exibir.
+Corresponde à conversa **C1** de [[Fluxo-Compras-Completo]]: o PCP, ao classificar um item pelo [[Modelo-Destinacao-Item]], conclui que não tem estoque e precisa comprar. **Gatilho decidido em 24/09/2026** ([[Encaixe-Estoque-Revenda-no-PCP]]): a requisição nasce da **entrada do parcial no setor Compras** do roteiro da fábrica Revenda, então `origem.id_item_parcial` vem sempre preenchido na requisição reativa (`null` só na preventiva, Fase D). Hoje **não existe nenhum mecanismo** para essa requisição chegar ao comprador no av-hub — é o primeiro dos 3 fluxos que resolvem o "casamento av-hub↔MES" (DEC-2, [[MES-Arquitetura-Decisoes]]). Sem este contrato, a tarefa E1 (caixa de entrada de requisições) não tem o que exibir.
 
 ## Onde isso mora
 

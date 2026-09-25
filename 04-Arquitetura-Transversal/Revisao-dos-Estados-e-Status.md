@@ -64,11 +64,13 @@ Recebimento e Lote precisam estar definidos **antes da D1**; Requisição e OC, 
 ### 2.4 Reserva de estoque (alta)
 **O problema.** A reserva nasce de duas origens diferentes, misturadas no mesmo diagrama: (a) o PCP marca "tem em estoque" sobre saldo já aprovado e (b) a **destinação** feita na compra reserva algo que ainda não chegou. O diagrama confirma a reserva "quando a Qualidade aprova o lote", o que só faz sentido em (b), mas as regras do Estoque dizem que lote em quarentena não fica disponível. `RESERVA_ESTOQUE` também não tem coluna `status`, e o timeout de expiração está "não definido".
 
-**Proposta.**
+**Proposta (21/09).**
 - Estados: `PREVISTA` (sobre item de OC, lote ainda inexistente) → `ATIVA` (sobre lote aprovado) → `CONSUMIDA`, ou `LIBERADA`.
 - A aprovação da Qualidade transforma `PREVISTA` em `ATIVA`. Reserva sobre lote reprovado vira `LIBERADA` e o item volta ao PCP.
 - `EXPIRADA` deixa de ser um estado: vira `LIBERADA` com `motivo = EXPIRACAO`.
 - **Sugestão sobre o timeout:** não liberar sozinho; após N dias sem consumo, **alertar o PCP**. Liberar em silêncio pode prometer a outro pedido um material que o primeiro ainda espera. **Decisão do Nathan e do PCP.**
+
+**✅ Resolvido em 24/09/2026** ([[Encaixe-Estoque-Revenda-no-PCP]]). As duas origens deixaram de existir como problema: **toda reserva nasce no setor Estoque, sobre lote já liberado** — (a) na etapa 1, quando o saldo existente atende o split; (b) quando o **item comprado, aprovado na Qualidade, volta ao Estoque** (regra do Nathan: comprado vai para o Estoque, não para a Expedição), que dá entrada no lote e reserva. Não há reserva sobre lote que ainda não chegou, então `PREVISTA` não é necessária. Estados finais: **`ATIVA` → `CONSUMIDA` \| `LIBERADA`**, **sem expiração** (liberação explícita no cancelamento do pedido/OP — decisão do Robert). A reserva aponta para **lote + `ItemParcial`** (o split atendido) + quantidade.
 
 ### 2.5 Vocabulário de etapas que eu propus (alta)
 Falhas do que está em [[Rastreabilidade-e-SLA-de-Eventos]] e no protótipo Torre de Fluxo:

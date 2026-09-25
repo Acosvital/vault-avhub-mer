@@ -18,7 +18,7 @@ criado: 2026-09-21
 
 1. [[Setores-Envolvidos-no-Fluxo]] — quem participa do pedido e onde cada setor vai viver (av-hub, MES ou Omie).
 2. [[Fluxo-Detalhado-Pedido-Item]] — o fluxo item a item, que é a espinha do sistema.
-3. [[Modelo-Destinacao-Item]] — como o PCP classifica cada item (Revenda ou Fabricação × pronto, matéria-prima ou sem estoque).
+3. [[Modelo-Destinacao-Item]] — como cada item é classificado (Revenda ou Fabricação × pronto, matéria-prima ou sem estoque) e [[Encaixe-Estoque-Revenda-no-PCP]] — como isso virou roteiro no MES (24/09/2026): a fábrica escolhida define a natureza e o setor Estoque, etapa 1 de todo roteiro, resolve a disponibilidade.
 4. [[Fluxogramas-Completos]] — os 6 fluxos visuais.
 5. [[Cronograma-2-Meses]] — o plano de 18/09 a 18/11: marcos, quem faz o quê, o que entra e o que não entra.
 6. [[Perguntas-em-Aberto-Consolidadas]] — o que ainda não está decidido e quem responde.

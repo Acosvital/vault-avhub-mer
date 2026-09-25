@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, pendencias, perguntas, consolidado]
 criado: 2026-09-21
-atualizado: 2026-09-21
+atualizado: 2026-09-24
 ---
 
 # Perguntas em aberto — lista consolidada
@@ -29,7 +29,7 @@ De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o r
 | R-08 | Volume esperado de eventos por dia (define partição/retenção do log `fluxo.evento`) | Todos |
 | R-13 | Confirmar a lista de ações que exigem `autorizado_por` (levantamento provisório já existe) | Nathan |
 
-**Estados e status — 6 restantes** (de [[Revisao-dos-Estados-e-Status]] seção 5; o ponto 2.1 já foi respondido, o timeout da reserva é a M-06, já tratada como explicitamente adiada)
+**Estados e status — 6 restantes** (de [[Revisao-dos-Estados-e-Status]] seção 5; o ponto 2.1 já foi respondido, o timeout da reserva é a M-06, **decidida em 24/09/2026: sem expiração**)
 1. Cliente pode receber entrega parcial de um item? O item fica parcialmente `FATURADO`?
 2. Existe concessão de lote fora de especificação (aceite com restrição)? Quem autoriza?
 3. Lote reprovado 100% (não só parcial): devolução, descarte ou retrabalho — quem decide?
@@ -42,6 +42,18 @@ De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o r
 | ID | Pergunta | Quem |
 |---|---|---|
 | L-10 | Sobra/retalho de chapa volta ao estoque como material rastreável? Como se pesa o que sobra? Qual a unidade de controle de cada material (kg × peça × metro)? | Nathan + Almoxarifado + Produção |
+
+**Encaixe do Estoque e da Revenda no MES — 7 novas (24/09/2026)** — detalhe e sugestões em [[Encaixe-Estoque-Revenda-no-PCP]] seção 6
+
+| ID | Pergunta | Quem |
+|---|---|---|
+| EN-01 | Saldo zero: o parcial passa automático pelo setor Estoque (registrando o tempo) ou exige clique? Sugestão: automático, e vale para todo parcial antes do marco zero (13/11) | Robert (C6) |
+| EN-02 | Nome na tela: manter "Fábrica" ou renomear para "Linha"? | Robert + Nathan |
+| EN-03 | Setor Estoque aparece duas vezes no roteiro da Revenda (início e fim). `ItemParcial` passa a apontar a etapa do roteiro, ou cadastram-se dois setores tipo `ESTOQUE`? | Robert (C6) |
+| EN-04 | Produto fabricado também deve terminar no Estoque, como o comprado? Hoje não | Nathan |
+| EN-05 | `Material.natureza` (cadastro D5) fica só como classificação do material, sem decidir rota? | Pablo + Robert |
+| EN-06 | Item comprado "não acabado" num roteiro sem setor de beneficiamento: volta à fila "Novo norte" para o PCP ajustar o roteiro? | PCP + Robert |
+| EN-07 | Confirmar no banco que `Pedidos.idUnidade` (UUID) é o mesmo id de `Material.codigoEmpresa` | Gustavo |
 
 **Total: 10 pendências reais** (era 16 até ontem), todas fatos de negócio/operação — nenhuma técnica. O resto do documento abaixo é o arquivo completo, com a resposta e a justificativa de cada item já fechado.
 
@@ -122,7 +134,7 @@ Origem: [[Indice-Contratos|os contratos]] (seção "Perguntas em aberto" de cada
 | M-03 | Contrato API 002 (alias) | ~~Quem chama o endpoint de vínculo de duplicata?~~ ✅ **MOOT em 21/09/2026** — contrato API 002 (`material_alias_omie`) **cancelado**. Nathan: "não quero mais tratar isso aqui, se eles quiserem eles tratam lá no Omie". Duplicata de catálogo sai do escopo deste sistema. |
 | M-04 | Contrato API 002 | ~~Alinhar os nomes...~~ ✅ **MOOT em 21/09/2026** — contrato API 002 cancelado (ver M-03), não há mais o que alinhar. |
 | M-05 | [[Estoque-Modelo-Dados]] | ~~Onde entra `destinacao_item_pedido` e `item_pedido` no diagrama (texto e diagrama divergem)?~~ ✅ **DECIDIDO e CONFIRMADO em 21/09/2026 pelo Nathan** (não é mais só recomendação pendente): não viram tabela nova no Estoque. Estoque e a classificação do PCP moram no **mesmo banco** (schemas diferentes, mesmo Postgres do MES) — o Estoque **lê direto** do schema de Produção via JOIN entre schemas, sem duplicar. Mesmo princípio já usado pra fornecedor (projeção, não cadastro próprio). O **diagrama está certo**; o **texto do PRD é que estava desatualizado**. |
-| M-06 | [[Fluxo-Detalhado-Pedido-Item]] e [[Diagramas-UML]] (seção 20) | Qual é o mecanismo de expiração e liberação da reserva de estoque? O `timeout` da seção 20 está "não definido". 🔵 **Explicitamente adiada pelo Nathan (21/09/2026)** — não é esquecimento, fica em aberto por enquanto. Sem timeout definido, v1 provavelmente nasce sem expiração automática (reserva só libera por cancelamento explícito) até essa decisão ser tomada. |
+| M-06 | [[Fluxo-Detalhado-Pedido-Item]] e [[Diagramas-UML]] (seção 20) | Qual é o mecanismo de expiração e liberação da reserva de estoque? O `timeout` da seção 20 está "não definido". ~~🔵 Explicitamente adiada pelo Nathan (21/09/2026).~~ ✅ **Decidida em 24/09/2026 (Robert):** **sem expiração** — a reserva só é liberada explicitamente quando o pedido ou a OP é cancelado. Reserva aponta para lote + `ItemParcial` (split atendido), status `ATIVA`/`CONSUMIDA`/`LIBERADA`. Ver [[Encaixe-Estoque-Revenda-no-PCP]]. |
 | M-07 | [[Fluxo-Detalhado-Pedido-Item]] | ~~Como reconciliar a conferência do Recebimento com o modelo genérico `recebimento`/`item_recebido`?~~ ✅ **DECIDIDO em 21/09/2026 (Nathan confirma recomendação)**: não vira dois fluxos separados. `ITEM_RECEBIDO` ganha `tipo_referencia` (`PEDIDO_VENDA`\|`ORDEM_COMPRA`) + `id_referencia` — a flag acabado/não-acabado (já decidida em Compras) escolhe automaticamente contra o quê conferir, sem o almoxarife precisar escolher. Mesmo padrão polimórfico já em produção no av-hub (`auth.usuarios_favoritos.tipo`+`referencia_id`), só que aqui com FK real em cada lado (alvos fixos e conhecidos). Conferência qualitativa (Qualidade/quarentena) não muda, é igual pros dois casos. |
 | M-08 | [[Perguntas-Pendentes-MES-Estoque]] | ~~Devolução de cliente~~ ✅ **duplicata de DEC-10**, remover daqui |
 

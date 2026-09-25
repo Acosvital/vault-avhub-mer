@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, status, indice]
 criado: 2026-09-21
-atualizado: 2026-09-21
+atualizado: 2026-09-24
 ---
 
 # Onde estamos
@@ -9,6 +9,8 @@ atualizado: 2026-09-21
 > **Atualizado em 21/09/2026 (segunda-feira), um dia antes do início da execução.** Esta é a nota que responde "em que ponto o projeto está". Se ela estiver desatualizada, o projeto está desatualizado: quem muda o estado de uma tarefa atualiza a linha aqui no mesmo dia. Como manter: seção 7.
 >
 > **Adendo do mesmo dia (21/09, à tarde):** auditoria de um dump de produção fresco (`dump-avhub_prd_db-202609210741.sql`) contra o código real de `api-acos-vital` e `api-pcp` achou que **5 contratos SQL e 1 contrato de API que este vault marcava como "proposta" já estão aplicados em produção**, e um risco novo (schema `negocio`/`core_compras` — ver abaixo). Detalhe completo em [[Auditoria-Dump-Producao-2026-09-21]]. As seções 3, 5 e 6 abaixo já refletem isso.
+
+> **Adendo de 24/09/2026 — encaixe do Estoque e da Revenda no MES.** O Robert fechou como o Estoque e a Revenda entram no fluxo Carteira → Ordem de Produção → execução, e o Nathan acrescentou a regra do item comprado (aprovado na Qualidade, vai para o Estoque, não para a Expedição). Tudo em [[Encaixe-Estoque-Revenda-no-PCP]]. Efeito no quadro: **C6** muda de conteúdo (tipos de Fábrica/Setor, fábrica Revenda, Estoque como etapa 1), **C7** passa a ser disparada pelo setor Compras, **C8** encolhe para a fila "Novo norte", **D6/D8/D9** ganham o modelo de reserva e a entrada do item comprado. Também registrado: a **Carteira de Pedidos** e a tela **Ordem de Produção** já rodam no `app-pcp` `develop` (23-24/09) — o critério de pronto da **C4** ("itens do pedido de venda disponíveis no MES por número do pedido") parece atendido, falta o Robert confirmar — e as telas de Estoque e Qualidade do Pablo (D5, D8, D10) estão em `develop` sobre mock. 7 perguntas novas (EN-01 a EN-07) em [[Perguntas-em-Aberto-Consolidadas]].
 
 ## 1. Em uma frase
 
@@ -35,7 +37,7 @@ Detalhes de cada marco em [[Cronograma-2-Meses]].
 
 | Item | Onde | Observação |
 |---|---|---|
-| Fluxo operacional mapeado (macro e item a item, 6 subfluxos) | [[Fluxo-Detalhado-Pedido-Item]], [[Fluxogramas-Completos]] | É o processo-alvo; não está em nenhum sistema ainda |
+| Fluxo operacional mapeado (macro e item a item, 6 subfluxos) | [[Fluxo-Detalhado-Pedido-Item]], [[Fluxogramas-Completos]] | É o processo-alvo; não está em nenhum sistema ainda. Encaixe do Estoque e da Revenda no MES decidido em 24/09 — [[Encaixe-Estoque-Revenda-no-PCP]] |
 | PRD do Estoque, Recebimento e Compras | [[PRD-Estoque-Visao-Geral]] | Só planejamento, **não construído** |
 | Análise dos backends e do pipeline | [[Omie-ELT-Pipeline]], [[App-PCP-Backend-Producao]] | Leitura de código; sem alterações |
 | Levantamento da API do Omie e roteiro de extração | [[Indice-Integracao-Omie]] | Lacunas mapeadas |

@@ -1,6 +1,7 @@
 ---
 tags: [erp-acos-vital, fluxo-operacional, fluxogramas, setores]
 criado: 2026-09-16
+atualizado: 2026-09-24
 ---
 
 # Fluxogramas Completos — Todos os Setores, Todas as Possibilidades
@@ -12,6 +13,8 @@ criado: 2026-09-16
 > O par correto de incoterm é **CIF × FOB** (ver [[Fluxo-Compras-Completo]]). Os rótulos dos nós usam texto corrido em vez de `<br/>`, mais robusto entre Obsidian e Artifact.
 >
 > **Escopo obrigatório do sistema (confirmado com o usuário, 17/09/2026): o sistema a construir deve implementar TODOS os passos de TODOS os 6 fluxogramas abaixo, sem exceção** — não é um subconjunto ilustrativo nem um "nice to have" além do essencial. Só a primeira caixa do fluxograma mestre (`V1 — Vendedor emite o pedido`, no Omie, sincronizado pro av-hub) é real hoje; cada nó/decisão a partir daí, em qualquer um dos 6 diagramas, é trabalho a fazer. As legendas "MES" nas cores por setor abaixo indicam **onde a funcionalidade vai morar quando construída**, não um sistema já em produção — ver ressalva igual em [[Setores-Envolvidos-no-Fluxo]].
+>
+> **Redesenhado em 24/09/2026 com o encaixe do Estoque e da Revenda no MES** ([[Encaixe-Estoque-Revenda-no-PCP]]). O que mudou nos diagramas 1, 3, 4, 5 e 6: o PCP escolhe a **fábrica** na Carteira (a Revenda é uma fábrica) e gera a Ordem de Produção; o **Estoque é a etapa 1 de todo roteiro** (atende do saldo com split + reserva, envia o restante); a requisição nasce no **setor Compras** do roteiro da Revenda; o beneficiamento é um setor do próprio roteiro; e o **item comprado aprovado na Qualidade volta ao Estoque** (entrada + reserva) em vez de ir direto para a Expedição. O diagrama 2 (Compras) não mudou, só a origem da requisição.
 
 ## Legenda de cores por setor
 
@@ -19,7 +22,7 @@ criado: 2026-09-16
 |---|---|
 | Vendas (av-hub) | 🟢 verde-azulado |
 | PCP (MES) | 🔵 azul-aço |
-| Compras + CCP (av-hub) | 🟣 índigo |
+| Setor Compras (MES) e Compras + CCP (av-hub) | 🟣 índigo |
 | Fornecedor (externo) | ⚪ cinza-quente |
 | Logística de entrada | 🟠 âmbar |
 | Recebimento (MES) | 🟢 verde-musgo |
@@ -41,15 +44,26 @@ flowchart TD
     end
 
     subgraph SEC_PCP[PCP - MES]
-        P1[PCP classifica o item]
-        P2{Natureza do item}
-        P3{Disponibilidade}
-        P4[Gera requisicao de compra]
-        P5[Abre OS ou OP]
+        P1[Carteira: escolhe itens, quantidades e fabrica da rodada]
+        P2[Ordem de Producao: uma OP por fabrica, Estoque como etapa 1]
         P6[Decide o novo norte]
         P1 --> P2
-        P2 -->|Revenda| P3
-        P2 -->|Fabricacao propria| P3
+    end
+
+    subgraph SEC_ESTOQUE[Estoque - MES]
+        E1[Saldo disponivel na filial do pedido]
+        E2{Saldo cobre o item?}
+        E3[Split atendido: reserva no lote e conclui]
+        E4{Tipo da fabrica}
+        E5[Entrada do item comprado no saldo]
+        E1 --> E2
+        E2 -->|sim, tudo ou parte| E3
+        E2 -->|nao, ou o restante| E4
+        E5 --> E3
+    end
+
+    subgraph SEC_SCOMP[Setor Compras - MES]
+        K1[Parcial aguarda: requisicao enviada ao av-hub]
     end
 
     subgraph SEC_COMPRAS[Compras e CCP - av-hub]
@@ -82,24 +96,16 @@ flowchart TD
         R2[Pesagem]
         R3{Bate com o esperado?}
         R4[Cria lote em quarentena]
-        R5{Item acabado?}
+        R5{Roteiro tem beneficiamento?}
         R1 --> R2 --> R3
         R3 -->|nao| R6[Divergencia]
         R3 -->|sim| R4 --> R5
     end
 
     subgraph SEC_PROD[Fabrica e Beneficiamento - MES]
-        F1[Abre ItemParcial]
-        F2[Percorre o roteiro setor a setor]
-        F3[Conclui no ultimo setor]
-        F1 --> F2 --> F3
-    end
-
-    subgraph SEC_ESTOQUE[Estoque - MES]
-        E1[Verifica saldo no warehouse]
-        E2[Cria reserva]
-        E3[Separacao fisica]
-        E1 --> E2 --> E3
+        F1[Percorre os setores produtivos do roteiro]
+        F2[Conclui a etapa produtiva]
+        F1 --> F2
     end
 
     subgraph SEC_QUAL[Qualidade - MES]
@@ -107,8 +113,10 @@ flowchart TD
         Q2{Aprova?}
         Q3[Abre RNC com evidencia]
         Q4[Cisao de lote]
+        Q5{Origem do item}
         Q1 --> Q2
         Q2 -->|nao| Q3 --> Q4
+        Q2 -->|sim| Q5
     end
 
     subgraph SEC_EXP[Expedicao e Logistica de saida - MES]
@@ -129,28 +137,28 @@ flowchart TD
 
     V2 -->|sim, com acompanhamento da qualidade| P1
     V2 -->|nao| P1
-    P3 -->|pronto em estoque| E1
-    P3 -->|materia-prima em estoque| P5
-    P3 -->|sem estoque| P4
-    P4 --> C1
+    P2 --> E1
+    E4 -->|Fabricacao| F1
+    E4 -->|Revenda| K1
+    K1 --> C1
     C5 --> FN1
     FN1 --> L1
     L4 --> R1
     R6 --> P6
-    P6 -->|reabre compra| P4
-    R5 -->|sim| Q1
-    R5 -->|nao| P5
-    P5 --> F1
-    F3 --> Q1
-    E3 --> Q1
-    Q2 -->|sim| X1
-    Q3 --> Q4
+    P6 -->|reabre compra| K1
+    R5 -->|sim| F1
+    R5 -->|nao| Q1
+    F2 --> Q1
+    Q5 -->|comprado: volta ao Estoque| E5
+    Q5 -->|fabricado| X1
+    E3 --> X1
     Q4 --> P6
-    P6 -->|retrabalho ou nova OS/OP| F1
+    P6 -->|retrabalho| F1
     X4 --> O1
 
     style SEC_VENDAS fill:#d9f0ec,stroke:#0f7a6b,stroke-width:2px,color:#181c22
     style SEC_PCP fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
+    style SEC_SCOMP fill:#e3e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style SEC_COMPRAS fill:#e3e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style SEC_FORN fill:#ece8e3,stroke:#8a7a63,stroke-width:2px,color:#181c22
     style SEC_LOG fill:#fbe8d9,stroke:#c9541a,stroke-width:2px,color:#181c22
@@ -165,10 +173,13 @@ flowchart TD
     style V2 fill:#ffffff,stroke:#0f7a6b,stroke-width:1.5px,color:#181c22
     style P1 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
     style P2 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style P3 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style P4 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style P5 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
     style P6 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
+    style E1 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style E2 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style E3 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style E4 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style E5 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style K1 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style C1 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style C2 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style C3 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
@@ -187,14 +198,11 @@ flowchart TD
     style R6 fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
     style F1 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
     style F2 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
-    style F3 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
-    style E1 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
-    style E2 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
-    style E3 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style Q1 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style Q2 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style Q3 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style Q4 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
+    style Q5 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style X1 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
     style X2 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
     style X3 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
@@ -205,24 +213,26 @@ flowchart TD
 
 ## 2. Compras — cotação até a doca
 
-**Setores:** PCP (MES) · Compras e CCP (av-hub) · Fornecedor (externo) · Logística de entrada
+**Setores:** Setor Compras (MES) · Compras e CCP (av-hub) · Fornecedor (externo) · Logística de entrada
+
+> Desde 24/09/2026 a requisição (nó A) nasce da **entrada do parcial no setor Compras** do roteiro da fábrica Revenda, não de uma ação manual do PCP. O parcial fica parado ali até o recebimento.
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 40, 'rankSpacing': 55, 'padding': 12}}}%%
 flowchart TD
-    subgraph SEC_PCP[PCP - MES]
-        A[PCP gera requisicao]
+    subgraph SEC_PCP[Setor Compras - MES]
+        A[Entrada do parcial gera a requisicao]
     end
 
     subgraph SEC_COMPRAS[Compras e CCP - av-hub]
         B[Comprador escolhe fornecedor e negocia]
-        C{Valor acima do limite definido?}
+        C{Valor acima de R$ 30.000?}
         D[Aprovacao da diretoria]
         E[Emite Ordem de Compra, define CIF ou FOB]
         H[CCP acompanha prazo]
         I{Fornecedor confirma a chegada?}
         B --> C
-        C -->|sim, regra ainda a definir| D
+        C -->|sim| D
         C -->|nao| E
         D -->|aprovado| E
         D -->|reprovado| B
@@ -248,12 +258,12 @@ flowchart TD
     E --> G
     I -->|confirmado| J
 
-    style SEC_PCP fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
+    style SEC_PCP fill:#e3e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style SEC_COMPRAS fill:#e3e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style SEC_FORN fill:#ece8e3,stroke:#8a7a63,stroke-width:2px,color:#181c22
     style SEC_LOG fill:#fbe8d9,stroke:#c9541a,stroke-width:2px,color:#181c22
 
-    style A fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
+    style A fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style B fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style C fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style D fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
@@ -269,7 +279,7 @@ flowchart TD
 
 ## 3. Recebimento — conferência e roteamento
 
-**Setores:** Recebimento (MES) · PCP (MES)
+**Setores:** Recebimento (MES) · Fábrica e Beneficiamento (MES) · PCP (MES)
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 40, 'rankSpacing': 55, 'padding': 12}}}%%
@@ -285,27 +295,32 @@ flowchart TD
         J[Lote nasce em quarentena]
         K[Etiquetagem]
         L[Associa nota fiscal de entrada]
-        M{Item acabado?}
+        S[Libera o parcial parado no setor Compras]
+        M{Roteiro tem beneficiamento?}
         N[Libera para Qualidade]
         A --> B --> C --> D --> E
         E -->|nao| F
         E -->|sim| H
-        H --> J --> K --> L --> M
-        M -->|sim| N
+        H --> J --> K --> L --> S --> M
+        M -->|nao| N
+    end
+
+    subgraph SEC_PROD[Fabrica e Beneficiamento - MES]
+        O[Setor de beneficiamento do roteiro da Revenda]
     end
 
     subgraph SEC_PCP[PCP - MES]
         Gd{PCP decide}
         I[Nova requisicao de compra]
-        O[Volta para o PCP abrir OS ou OP]
     end
 
     F --> Gd
     Gd -->|aceita parcial| H
     Gd -->|reabre compra| I
-    M -->|nao| O
+    M -->|sim| O
 
     style SEC_RECEB fill:#e1eede,stroke:#5a7d3a,stroke-width:2px,color:#181c22
+    style SEC_PROD fill:#f3ddd6,stroke:#a8420f,stroke-width:2px,color:#181c22
     style SEC_PCP fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
 
     style A fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
@@ -318,16 +333,17 @@ flowchart TD
     style J fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
     style K fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
     style L fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
+    style S fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
     style M fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
     style N fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
+    style O fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
     style Gd fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
     style I fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style O fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
 ```
 
 ## 4. Qualidade — das duas filas até aprovação/reprovação
 
-**Setores:** Vendas (av-hub) · origem interna (MES) · Qualidade (MES) · Fiscal (Omie)
+**Setores:** Vendas (av-hub) · origem interna (MES) · Qualidade (MES) · Estoque (MES) · Fiscal (Omie)
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 40, 'rankSpacing': 55, 'padding': 12}}}%%
@@ -336,7 +352,7 @@ flowchart TD
         A1[Vendedor marca acompanhamento desde o inicio]
     end
 
-    subgraph SEC_ORIGEM[Recebimento, Producao ou Estoque - MES]
+    subgraph SEC_ORIGEM[Recebimento ou Producao - MES]
         A2[Item liberado para inspecao final]
     end
 
@@ -347,8 +363,8 @@ flowchart TD
         E{Laudo preenchido?}
         F{Aprova?}
         G[Lote sai da quarentena]
-        H[Confirma reserva, se houver]
-        I[Segue para Expedicao]
+        H{Origem do item}
+        I2[Item fabricado segue para Expedicao]
         J[Anexa motivo e evidencia]
         K[Cisao de lote: aprovado segue, reprovado congela]
         L[Volta para o PCP decidir novo norte]
@@ -357,8 +373,13 @@ flowchart TD
         D --> E
         E -->|nao| D
         E -->|sim| F
-        F -->|sim| G --> H --> I
+        F -->|sim| G --> H
+        H -->|fabricado| I2
         F -->|nao| J --> K --> L
+    end
+
+    subgraph SEC_ESTOQUE[Estoque - MES]
+        I1[Item comprado volta ao Estoque: entrada, reserva e conclusao]
     end
 
     subgraph SEC_FISCAL[Fiscal - Omie]
@@ -370,11 +391,13 @@ flowchart TD
 
     A1 --> B
     A2 --> C
+    H -->|comprado| I1
     K --> M
 
     style SEC_VENDAS fill:#d9f0ec,stroke:#0f7a6b,stroke-width:2px,color:#181c22
     style SEC_ORIGEM fill:#e7ebee,stroke:#5c6570,stroke-width:2px,color:#181c22
     style SEC_QUAL fill:#f7edd0,stroke:#a8860f,stroke-width:2px,color:#181c22
+    style SEC_ESTOQUE fill:#d9eef2,stroke:#1f7a8c,stroke-width:2px,color:#181c22
     style SEC_FISCAL fill:#f6dde4,stroke:#a83f5c,stroke-width:2px,color:#181c22
 
     style A1 fill:#ffffff,stroke:#0f7a6b,stroke-width:1.5px,color:#181c22
@@ -386,10 +409,11 @@ flowchart TD
     style F fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style G fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style H fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
-    style I fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
+    style I2 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style J fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style K fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style L fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
+    style I1 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style M fill:#ffffff,stroke:#a83f5c,stroke-width:1.5px,color:#181c22
     style N fill:#ffffff,stroke:#a83f5c,stroke-width:1.5px,color:#181c22
     style O fill:#ffffff,stroke:#a83f5c,stroke-width:1.5px,color:#181c22
@@ -397,34 +421,60 @@ flowchart TD
 
 ## 5. Produção — OS/OP como máquina de estados (`ItemParcial`)
 
-**Setor:** Fábrica e Beneficiamento (MES) — único subfluxo já implementado em produção, não apenas desenhado.
+**Setores:** Estoque (etapa 1) e Fábrica e Beneficiamento (MES) — único subfluxo já implementado em produção, não apenas desenhado. A etapa 1 no setor Estoque é o que entra com o encaixe de 24/09/2026.
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 40, 'rankSpacing': 55, 'padding': 12}}}%%
 flowchart TD
-    subgraph SEC_PROD[Fabrica e Beneficiamento - MES]
-        S0([CRIADO]) --> S1[RECEBIDO]
-        S1 --> S2[EM_ANDAMENTO]
-        S2 --> S3{Acao do setor}
-        S3 -->|mover para o proximo setor| S4[EM_TRANSITO]
-        S4 --> S1
-        S3 -->|pausar| S5[PAUSADO]
-        S5 -->|retomar| S2
-        S3 -->|retrabalho| S6[RETRABALHO]
-        S6 --> S2
-        S3 -->|split| S7[Divide em multiplos ItemParcial]
-        S7 --> S1
-        S3 -->|devolver ao setor anterior| S8[Linha atual: CANCELADO definitivo]
-        S8 --> S9[Nasce nova linha EM_TRANSITO, ligada por idDevolvidoDe]
-        S9 --> S1
-        S3 -->|concluir, so no ultimo setor| S10([CONCLUIDO])
-        S10 --> S11[Libera para Qualidade]
-        S7 -.depois, se fizer sentido.-> S12[Consolidar de volta]
+    subgraph SEC_EST[Etapa 1 - setor Estoque - MES]
+        S0([CRIADO no setor Estoque])
+        SE{Saldo disponivel na filial?}
+        SR[Split atendido: Reserva no lote]
+        SC([CONCLUIDO: segue para a entrega])
+        S0 --> SE
+        SE -->|sim, tudo ou parte| SR --> SC
     end
 
+    subgraph SEC_PROD[Setores seguintes do roteiro - MES]
+        S4[EM_TRANSITO]
+        S1[RECEBIDO]
+        S2[EM_ANDAMENTO]
+        S3{Acao do setor}
+        S5[PAUSADO]
+        S6[RETRABALHO]
+        S7[Divide em multiplos ItemParcial]
+        S8[Linha atual: CANCELADO definitivo]
+        S9[Nasce nova linha EM_TRANSITO, ligada por idDevolvidoDe]
+        S10([CONCLUIDO])
+        S11[Libera para Qualidade]
+        S12[Consolidar de volta]
+        S4 --> S1
+        S1 --> S2
+        S2 --> S3
+        S3 -->|mover para o proximo setor| S4
+        S3 -->|pausar| S5
+        S5 -->|retomar| S2
+        S3 -->|retrabalho| S6
+        S6 --> S2
+        S3 -->|split| S7
+        S7 --> S1
+        S3 -->|devolver ao setor anterior| S8
+        S8 --> S9
+        S9 --> S1
+        S3 -->|concluir, so no ultimo setor| S10
+        S10 --> S11
+        S7 -.depois, se fizer sentido.-> S12
+    end
+
+    SE -->|restante, ou saldo zero| S4
+
+    style SEC_EST fill:#d9eef2,stroke:#1f7a8c,stroke-width:2px,color:#181c22
     style SEC_PROD fill:#f3ddd6,stroke:#a8420f,stroke-width:2px,color:#181c22
 
-    style S0 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
+    style S0 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style SE fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style SR fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style SC fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style S1 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
     style S2 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
     style S3 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
@@ -439,28 +489,36 @@ flowchart TD
     style S12 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
 ```
 
-## 6. Estoque — matriz de destinação + operação contínua
+## 6. Estoque — setor da etapa 1, entrada do comprado e operação contínua
 
-**Setores:** PCP (MES) · Estoque/Almoxarife (MES)
+**Setores:** PCP (MES) · Qualidade (MES) · Estoque/Almoxarife (MES)
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 40, 'rankSpacing': 55, 'padding': 12}}}%%
 flowchart TD
     subgraph SEC_PCP[PCP - MES]
-        A[PCP avalia o item]
-        B{Natureza: Revenda ou Fabricacao}
-        C{Disponibilidade no warehouse}
-        H[PCP abre OS/OP direto]
-        I[PCP gera requisicao de compra]
-        A --> B --> C
+        A[Carteira: escolhe fabrica e quantidade da rodada]
+        B[Ordem de Producao com Estoque na etapa 1]
+        I[Requisicao preventiva de compra]
+        A --> B
+    end
+
+    subgraph SEC_QUAL[Qualidade - MES]
+        Q[Aprova o lote do item comprado]
     end
 
     subgraph SEC_ESTOQUE[Estoque / Almoxarife - MES]
-        D[Verifica saldo]
-        E[Cria reserva]
-        F[Separacao fisica]
-        G[Segue para Qualidade]
-        D --> E --> F --> G
+        D[Parcial chega na etapa 1]
+        C{Saldo disponivel na filial do pedido?}
+        E[Split atendido: reserva ATIVA no lote]
+        F[Conclui o split e separa]
+        G[Restante segue o roteiro: setores produtivos ou setor Compras]
+        P[Entrada do item comprado no saldo]
+        X[Segue para a entrega, reserva vira CONSUMIDA]
+        D --> C
+        C -->|sim, tudo ou parte| E --> F --> X
+        C -->|nao, ou o restante| G
+        P --> E
 
         subgraph OPERACAO[Operacao continua do deposito]
             J[Movimentacao entre warehouses]
@@ -471,24 +529,26 @@ flowchart TD
         end
     end
 
-    C -->|pronto em estoque| D
-    C -->|materia-prima em estoque| H
-    C -->|sem estoque| I
+    B --> D
+    Q --> P
     N -->|sim| I
 
     style SEC_PCP fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
+    style SEC_QUAL fill:#f7edd0,stroke:#a8860f,stroke-width:2px,color:#181c22
     style SEC_ESTOQUE fill:#d9eef2,stroke:#1f7a8c,stroke-width:2px,color:#181c22
     style OPERACAO fill:#eef0f2,stroke:#8d95a1,stroke-width:1.5px,color:#181c22
 
     style A fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
     style B fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style C fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style H fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
     style I fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
+    style Q fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style D fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style C fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style E fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style F fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style G fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style P fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style X fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style J fill:#ffffff,stroke:#8d95a1,stroke-width:1.5px,color:#181c22
     style K fill:#ffffff,stroke:#8d95a1,stroke-width:1.5px,color:#181c22
     style L fill:#ffffff,stroke:#8d95a1,stroke-width:1.5px,color:#181c22
@@ -497,6 +557,7 @@ flowchart TD
 ```
 
 ## Ver também
+- [[Encaixe-Estoque-Revenda-no-PCP]] — o encaixe que redesenhou estes fluxogramas em 24/09/2026.
 - [[Setores-Envolvidos-no-Fluxo]]
 - [[Modelo-Destinacao-Item]]
 - [[Fluxo-Detalhado-Pedido-Item]]

@@ -5,7 +5,9 @@ criado: 2026-09-16
 
 # Fluxo de Expedição e Faturamento — conversa por conversa
 
-> Ponto de convergência final: qualquer item aprovado — vindo de Compras+Recebimento ([[Fluxo-Recebimento-Completo]]), de Produção ([[Fluxo-Producao-OS-OP-Completo]]), ou já pronto em estoque ([[Modelo-Destinacao-Item]]) — passa pelo mesmo caminho depois de aprovado pela Qualidade ([[Fluxo-Qualidade-Completo]]).
+> Ponto de convergência final: qualquer item concluído passa pelo mesmo caminho daqui em diante.
+>
+> **Atualizado em 24/09/2026** ([[Encaixe-Estoque-Revenda-no-PCP]]): a Expedição recebe de **duas portas**, não de uma. **Setor Estoque** — item atendido pelo saldo (etapa 1) e item comprado que voltou da Qualidade e foi reservado (regra do Nathan: comprado aprovado vai para o Estoque, não para a Expedição). **Qualidade** — só o item fabricado aprovado ([[Fluxo-Qualidade-Completo]] Q6b). Na saída física, a reserva do item de estoque vira `CONSUMIDA`.
 >
 > **Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje** (a parte fiscal no Omie é a única exceção real — ver [[Faturamento-Expedicao]]) — o resto é escopo obrigatório do sistema a construir.
 
@@ -23,6 +25,7 @@ criado: 2026-09-16
 
 ```mermaid
 sequenceDiagram
+    participant Est as Setor Estoque
     participant Qual as Qualidade
     participant Exp as Expedição
     participant Log as Logística
@@ -30,7 +33,11 @@ sequenceDiagram
     participant Vend as Vendedor (av-hub)
     participant Cli as Cliente
 
-    Qual->>Exp: E1 · item aprovado, libera pra embalagem
+    alt item de estoque ou comprado (reservado no Estoque)
+        Est->>Exp: E1a · split concluído e reservado, na saída a reserva vira CONSUMIDA
+    else item fabricado
+        Qual->>Exp: E1b · item aprovado, libera pra embalagem
+    end
     Exp->>Exp: E2 · embalagem/paletização
     Exp->>Exp: E3 · consolida carga (aguarda outros itens, se faturamento integral)
     Log->>Log: E4 · define transporte e roteiro de entrega
@@ -42,8 +49,8 @@ sequenceDiagram
 
 ## Conversa por conversa
 
-**E1 — Qualidade → Expedição: item aprovado**
-Ponto de entrada único, independente de qual dos três caminhos o item percorreu antes (compra, produção, ou já pronto em estoque) — reforça que [[Modelo-Destinacao-Item]] descreve bem: os eixos convergem aqui.
+**E1a/E1b — Estoque ou Qualidade → Expedição**
+~~Ponto de entrada único (Qualidade), independente do caminho.~~ Desde 24/09/2026 são duas entradas: o **setor Estoque** entrega o item atendido pelo saldo e o item comprado (que voltou da Qualidade, entrou no saldo e foi reservado) — E1a, com `MovimentoEstoque` `SAIDA` consumindo a reserva; a **Qualidade** entrega o item fabricado aprovado — E1b. Os eixos de [[Modelo-Destinacao-Item]] continuam convergindo aqui; só a porta mudou.
 
 **E2 — Embalagem/paletização**
 `PedidoEmbalagem` (identificação + total de unidades) e `PedidoEmbalagemPallet` (identificação + peso) — entidades já existentes no backend do app-pcp (ver [[App-PCP-Backend-Producao]]), sem campo de código de barras dedicado hoje.
@@ -76,6 +83,8 @@ Item migra de "em aberto" pra "faturado" na carteira — depende do mesmo "casam
 - **Faturamento integral travado por 1 item nunca resolvido** é um risco real que ainda não tem gatilho de decisão explícito (diferente de compra/produção, que já têm `CANCELADO` como saída) — vale desenhar antes de construir.
 
 ## Ver também
+- [[Encaixe-Estoque-Revenda-no-PCP]]
+- [[Fluxo-Estoque-Completo]]
 - [[Fluxo-Qualidade-Completo]]
 - [[Faturamento-Expedicao]]
 - [[AV-Hub-Vendas-Reconciliacao]]

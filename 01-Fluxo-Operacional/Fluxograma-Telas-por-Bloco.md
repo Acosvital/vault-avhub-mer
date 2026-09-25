@@ -1,6 +1,7 @@
 ---
 tags: [erp-acos-vital, fluxo-operacional, fluxogramas, telas, escopo, execucao]
 criado: 2026-09-22
+atualizado: 2026-09-24
 ---
 
 # Fluxograma de Telas — quantas telas e quais funcionalidades por bloco
@@ -9,9 +10,11 @@ criado: 2026-09-22
 >
 > É o **mesmo fluxograma mestre**, copiado nó por nó, só que cada raia agora carrega a contagem de telas no próprio rótulo. Abaixo do diagrama, um bloco por raia, com a lista nominal de telas, as funcionalidades de cada uma, o que já existe hoje e a tarefa correspondente do [[Cronograma-2-Meses]].
 >
-> **Não é escopo novo.** Toda tela listada aqui sai de um passo que já está em [[Fluxogramas-Completos]] ou nos 6 `Fluxo-*-Completo`. Onde este documento inventa alguma coisa, está marcado como **decisão em aberto** na seção final — são 7, e nenhuma delas trava o início.
+> **Não é escopo novo.** Toda tela listada aqui sai de um passo que já está em [[Fluxogramas-Completos]] ou nos 6 `Fluxo-*-Completo`. Onde este documento inventa alguma coisa, está marcado como **decisão em aberto** na seção final — são 9, e nenhuma delas trava o início.
 >
-> **Contagem total: 50 telas.** 31 neste ciclo (até 18/11), 4 na S5 (rastreabilidade, 19/11–18/12) e 15 fora do ciclo (Fase D e backlog do Robert). Das 31 do ciclo, **5 já têm frontend construído** (Compras) e 1 é evolução de tela existente — restam **~25 telas genuinamente novas em 2 meses**.
+> **Contagem total: 51 telas** (atualizada em 24/09/2026). 32 neste ciclo (até 18/11), 4 na S5 (rastreabilidade, 19/11–18/12) e 15 fora do ciclo (Fase D e backlog do Robert). Das 32 do ciclo, **15 já têm frontend construído sobre dados de exemplo** (Compras 5, Estoque 6 e Qualidade 4 — as do Pablo entraram no `app-pcp` `develop` em 23/09) e **4 são evolução de tela existente** (1.2 e as 3 do PCP que já rodam em `develop`) — restam **13 telas genuinamente novas**.
+>
+> **Encaixe do Estoque e da Revenda (24/09/2026)** — ver [[Encaixe-Estoque-Revenda-no-PCP]]. O fluxograma abaixo e os blocos 2, 8, 9 e 10 já refletem: o PCP escolhe a **fábrica** na Carteira (Revenda é uma fábrica) e gera a Ordem de Produção; o **setor Estoque é a etapa 1 de todo roteiro** e ganhou a tela **8.12**; a requisição nasce no **setor Compras** (tela 2.4); e o **item comprado aprovado na Qualidade volta ao Estoque** (entrada + reserva) antes da Expedição.
 
 ## Como ler
 
@@ -27,18 +30,18 @@ criado: 2026-09-22
 | # | Bloco (raia) | Telas | Neste ciclo | Fora do ciclo |
 |---|---|---|---|---|
 | 1 | Vendas — av-hub | 2 | 2 (1 nova + 1 evolução) | — |
-| 2 | PCP — MES | 5 | 5 | — |
+| 2 | PCP — MES | 5 | 5 (3 evolução + 2 novas) | — |
 | 3 | Compras e CCP — av-hub | 6 | 6 (5 com frontend pronto) | — |
 | 4 | Fornecedor — externo | 0 | — | — |
 | 5 | Logística de entrada | 1 | — | 1 |
 | 6 | Recebimento — MES | 5 | 5 | — |
 | 7 | Fábrica e Beneficiamento — MES | 4 | — | 4 |
-| 8 | Estoque — MES | 11 | 7 | 4 |
-| 9 | Qualidade — MES | 5 | 4 | 1 |
+| 8 | Estoque — MES | 12 | 8 (6 com frontend pronto) | 4 |
+| 9 | Qualidade — MES | 5 | 4 (frontend pronto) | 1 |
 | 10 | Expedição e Log. de saída — MES | 4 | — | 4 |
 | 11 | Fiscal — Omie | 1 | — | 1 |
 | — | **Transversais** (não são raia) | 6 | 2 | 4 |
-| | **Total** | **50** | **31** | **19** |
+| | **Total** | **51** | **32** | **19** |
 
 ## Fluxograma mestre — com a contagem de telas por raia
 
@@ -57,15 +60,11 @@ flowchart TD
     end
 
     subgraph SEC_PCP[2. PCP - MES · 5 telas]
-        P1[PCP classifica o item]
-        P2{Natureza do item}
-        P3{Disponibilidade}
-        P4[Gera requisicao de compra]
-        P5[Abre OS ou OP]
+        P1[Carteira: escolhe itens, quantidades e fabrica da rodada]
+        P2[Ordem de Producao: uma OP por fabrica, Estoque como etapa 1]
+        K1[Setor Compras: parcial aguarda, requisicao enviada ao av-hub]
         P6[Decide o novo norte]
         P1 --> P2
-        P2 -->|Revenda| P3
-        P2 -->|Fabricacao propria| P3
     end
 
     subgraph SEC_COMPRAS[3. Compras e CCP - av-hub · 6 telas]
@@ -98,24 +97,28 @@ flowchart TD
         R2[Pesagem]
         R3{Bate com o esperado?}
         R4[Cria lote em quarentena]
-        R5{Item acabado?}
+        R5{Roteiro tem beneficiamento?}
         R1 --> R2 --> R3
         R3 -->|nao| R6[Divergencia]
         R3 -->|sim| R4 --> R5
     end
 
     subgraph SEC_PROD[7. Fabrica e Beneficiamento - MES · 4 telas fora do ciclo]
-        F1[Abre ItemParcial]
-        F2[Percorre o roteiro setor a setor]
-        F3[Conclui no ultimo setor]
-        F1 --> F2 --> F3
+        F1[Percorre os setores produtivos do roteiro]
+        F2[Conclui a etapa produtiva]
+        F1 --> F2
     end
 
-    subgraph SEC_ESTOQUE[8. Estoque - MES · 11 telas, 7 no ciclo]
-        E1[Verifica saldo no warehouse]
-        E2[Cria reserva]
-        E3[Separacao fisica]
-        E1 --> E2 --> E3
+    subgraph SEC_ESTOQUE[8. Estoque - MES · 12 telas, 8 no ciclo]
+        E1[Saldo disponivel na filial do pedido]
+        E2{Saldo cobre o item?}
+        E3[Split atendido: reserva no lote e conclui]
+        E4{Tipo da fabrica}
+        E5[Entrada do item comprado no saldo]
+        E1 --> E2
+        E2 -->|sim, tudo ou parte| E3
+        E2 -->|nao, ou o restante| E4
+        E5 --> E3
     end
 
     subgraph SEC_QUAL[9. Qualidade - MES · 5 telas, 4 no ciclo]
@@ -123,8 +126,10 @@ flowchart TD
         Q2{Aprova?}
         Q3[Abre RNC com evidencia]
         Q4[Cisao de lote]
+        Q5{Origem do item}
         Q1 --> Q2
         Q2 -->|nao| Q3 --> Q4
+        Q2 -->|sim| Q5
     end
 
     subgraph SEC_EXP[10. Expedicao e Logistica de saida - MES · 4 telas fora do ciclo]
@@ -144,24 +149,23 @@ flowchart TD
     end
 
     V3 --> P1
-    P3 -->|pronto em estoque| E1
-    P3 -->|materia-prima em estoque| P5
-    P3 -->|sem estoque| P4
-    P4 --> C1
+    P2 --> E1
+    E4 -->|Fabricacao| F1
+    E4 -->|Revenda| K1
+    K1 --> C1
     C5 --> FN1
     FN1 --> L1
     L4 --> R1
     R6 --> P6
-    P6 -->|reabre compra| P4
-    R5 -->|sim| Q1
-    R5 -->|nao| P5
-    P5 --> F1
-    F3 --> Q1
-    E3 --> Q1
-    Q2 -->|sim| X1
-    Q3 --> Q4
+    P6 -->|reabre compra| K1
+    R5 -->|sim| F1
+    R5 -->|nao| Q1
+    F2 --> Q1
+    Q5 -->|comprado: volta ao Estoque| E5
+    Q5 -->|fabricado| X1
+    E3 --> X1
     Q4 --> P6
-    P6 -->|retrabalho ou nova OS/OP| F1
+    P6 -->|retrabalho| F1
     X4 --> O1
 
     style SEC_VENDAS fill:#d9f0ec,stroke:#0f7a6b,stroke-width:2px,color:#181c22
@@ -181,9 +185,7 @@ flowchart TD
     style V3 fill:#ffffff,stroke:#0f7a6b,stroke-width:1.5px,color:#181c22
     style P1 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
     style P2 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style P3 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style P4 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style P5 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
+    style K1 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style P6 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
     style C1 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style C2 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
@@ -203,14 +205,16 @@ flowchart TD
     style R6 fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
     style F1 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
     style F2 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
-    style F3 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
     style E1 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style E2 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style E3 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style E4 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style E5 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style Q1 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style Q2 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style Q3 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style Q4 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
+    style Q5 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style X1 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
     style X2 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
     style X3 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
@@ -244,21 +248,21 @@ O pedido nasce no **Omie** e o polling entrega ao **av-hub, e só ao av-hub** �
 
 ## 2. PCP — MES · 5 telas
 
-**Nós cobertos:** P1 (classifica), P2 (natureza), P3 (disponibilidade), P4 (requisição), P5 (abre OS/OP), P6 (novo norte).
+**Nós cobertos:** P1 (Carteira), P2 (Ordem de Produção), K1 (setor Compras), P6 (novo norte).
 
-Este é o bloco que **não existe de forma nenhuma hoje** e que mais decide o resto: é o PCP que despacha o item para uma das três rotas. O motor de execução da produção existe ([[App-PCP-Backend-Producao]]), mas *o que dispara uma OS/OP* não.
+**Mudou em 23-24/09/2026.** A **Carteira de Pedidos** e a **tela Ordem de Produção** já existem no `app-pcp` (branch `develop`) com backend real: o PCP escolhe itens, quantidades e **fábrica** por rodada e gera uma OP por fábrica. O encaixe de 24/09 ([[Encaixe-Estoque-Revenda-no-PCP]]) tirou do PCP a checagem de saldo e a requisição de compra — viraram os **setores Estoque** (bloco 8, tela 8.12) e **Compras** (tela 2.4) do roteiro. O motor de execução da produção continua sendo o [[App-PCP-Backend-Producao]].
 
 | # | Tela | Funcionalidades | Estado | Tarefa |
 |---|---|---|---|---|
-| 2.1 | **Carteira do PCP** | Importa os itens do pedido de venda (via gateway `GET /pedido_venda_itens/{numero}`); lista item a item, não pedido a pedido; filtro por filial (`codigo_empresa`), prazo, natureza e estado; destaque de atraso medido **no nível do pedido**; seleção em lote | 🆕 | **C4** |
-| 2.2 | **Classificação do item** | Eixo 1 (Revenda × Fabricação própria) × eixo 2 (disponibilidade) do [[Modelo-Destinacao-Item]]; consulta de saldo embutida (lê o bloco 8); resultado da matriz sugere a ação, operador confirma | 🆕 | **C6** |
-| 2.3 | **Abertura de OS/OP** | Escolhe fábrica e roteiro (`RoteiroPedido` ou `RoteiroItem`); `codigo_empresa` **vem do Pedido, nunca da Fábrica** (DEC-1); quantidade e split inicial; cria o `ItemParcial` em `CRIADO` | 🆕 | **C8** |
-| 2.4 | **Nova requisição de compra** | Material, quantidade, unidade, prazo, filial, `restricao_acabado`, observação; nasce `ABERTA`; exposta ao av-hub pelo Fluxo 1 (polling 5 min) | 🆕 | **C7** |
-| 2.5 | **Fila "Novo norte"** | Fila única de decisões que voltaram pro PCP, com **duas origens**: divergência de recebimento (R5/R6) e reprovação de qualidade (Q9). Ações: aceitar parcial, reabrir compra, mandar pra retrabalho/nova OS | 🆕 | **C8** |
+| 2.1 | **Carteira de Pedidos** | Pedidos de venda do av-hub/Omie com status de envio (não enviado, parcial, total) e de produção (aguardando, em produção, concluída); filtro por filial e período; abre a Ordem de Produção do pedido. Existe em `develop` (`/carteira`, `GET /pedidos/carteira`) | 🔧 | **C4** |
+| 2.2 | **Ordem de Produção (nova rodada)** | Itens do pedido vindos do Omie, sem digitação manual; por item, **quantidade desta rodada** e **fábrica** (linha de fabricação ou **Revenda**); roteiro por fábrica, com o **setor Estoque inserido como etapa 1** pelo backend; uma OP por fábrica; `codigo_empresa` vem do Pedido (DEC-1). Existe em `develop` (`/ordens-producao/novo`); **falta a fábrica Revenda** — hoje item sem fábrica é descartado | 🔧 | **C6** |
+| 2.3 | **Ordens de Produção — lista e detalhe** | Lista das OPs; detalhe com mini-roteiro por item, parciais por setor, histórico, anexos e embalagem. Existe em `develop` (`/ordens-producao`, `/ordens-producao/[id]`); precisa mostrar o split atendido pelo estoque e a reserva | 🔧 | **C6** |
+| 2.4 | **Setor Compras — parciais aguardando compra** | Fila dos parciais no setor Compras (roteiro da Revenda); a **entrada do parcial gera a requisição** automaticamente (material, quantidade, prazo, filial, `id_item_parcial`), exposta ao av-hub pelo Fluxo 1 (polling 5 min); mostra o estado da requisição/OC; a saída é liberada pelo Recebimento (D6) | 🆕 | **C7** |
+| 2.5 | **Fila "Novo norte"** | Fila única de decisões que voltaram pro PCP: divergência de recebimento (R5/R6), reprovação de qualidade (Q9) e item comprado não acabado num roteiro sem beneficiamento. Ações: aceitar parcial, reabrir compra, retrabalho, ajustar o roteiro | 🆕 | **C8** |
 
 **Sobre a 2.5 — a fila que fecha os ciclos.** [[Fluxo-Recebimento-Completo]] deixa a pergunta explícita: divergência e reprovação merecem a mesma tela ou telas distintas? **Recomendação deste documento: uma tela só, com a origem como coluna.** São gatilhos diferentes, mas o conjunto de ações do PCP é o mesmo (aceita / reabre / redireciona), e duas filas separadas dobram a chance de uma delas ficar sem dono. Registrado como decisão em aberto **T-01**.
 
-**Sobre a 2.2 — a reserva nasce aqui.** A checagem de saldo **cria a reserva no mesmo passo**, não só lê — decisão já tomada em [[Fluxo-Detalhado-Pedido-Item]] para evitar a corrida entre pedidos disputando o mesmo saldo. Isso só liga depois do **marco zero (13/11)**.
+**A reserva não nasce mais no PCP (24/09/2026).** Nasce no setor Estoque (tela 8.12), no mesmo passo em que o saldo é lido — evita a corrida entre pedidos disputando o mesmo saldo. Liga só depois do **marco zero (13/11)**; até lá o setor Estoque trata todo parcial como saldo zero.
 
 ---
 
@@ -331,7 +335,7 @@ Só o FOB (L2) tem trabalho operacional da empresa sem tela. Hoje isso se resolv
 
 ## 7. Fábrica e Beneficiamento — MES · 4 telas, todas fora do ciclo
 
-**Nós cobertos:** F1 (abre ItemParcial), F2 (percorre o roteiro), F3 (conclui).
+**Nós cobertos:** F1 (percorre os setores produtivos do roteiro), F2 (conclui a etapa produtiva). Desde 24/09/2026 inclui o beneficiamento da Revenda (ex.: corte), que é um setor `PRODUTIVO` do roteiro da fábrica Revenda.
 
 **Situação invertida em relação ao resto do vault: aqui o backend está pronto e falta 100% de UI.** `GET /dashboard` e `GET /dashboard/tv` já existem e respondem; a máquina de 8 estados do `ItemParcial` está implementada e testada em produção (é o único subfluxo com motor real). O cronograma tira isso do escopo explicitamente — *"Frontend do board/dashboard de produção do MES — backlog do Robert fora deste plano"*.
 
@@ -342,15 +346,17 @@ Só o FOB (L2) tem trabalho operacional da empresa sem tela. Hoje isso se resolv
 | 7.3 | **Dashboard de produção** | Contagem por status, atrasados, urgentes, breakdown por setor, últimas movimentações — backend `GET /dashboard` pronto | ⏭️ | backlog Robert |
 | 7.4 | **Painel TV do chão de fábrica** | Mesma informação em formato de painel, sem interação — backend `GET /dashboard/tv` pronto | ⏭️ | backlog Robert |
 
-**O que entra neste ciclo deste bloco é só o despacho** — a tela 2.3 (Abertura de OS/OP), que vive no PCP, não aqui.
+**O que entra neste ciclo deste bloco é só o despacho** — a tela 2.2 (Ordem de Produção), que vive no PCP e já roda em `develop`, e a passagem do setor Estoque para o primeiro setor produtivo (8.12).
 
 **Adjacente, não contado:** a tela de **Divergências de produção** (`Divergencia`, com `tipo` e `status`) existe no modelo do `api-pcp` mas não aparece no fluxograma mestre. Tem o problema conhecido de estado terminal sem reabertura (`RESOLVIDA`/`CANCELADA` não voltam) — tratamento adiado por decisão.
 
 ---
 
-## 8. Estoque — MES · 11 telas, 7 no ciclo
+## 8. Estoque — MES · 12 telas, 8 no ciclo
 
-**Nós cobertos:** E1 (verifica saldo), E2 (cria reserva), E3 (separação física) — mais toda a **operação contínua do depósito** de [[Fluxo-Estoque-Completo]] caso B, que não tem nó próprio no fluxograma mestre mas é metade do trabalho.
+**Nós cobertos:** E1 (saldo na filial do pedido), E2 (saldo cobre?), E3 (split atendido e reserva), E4 (tipo da fábrica do restante), E5 (entrada do item comprado) — mais toda a **operação contínua do depósito** de [[Fluxo-Estoque-Completo]] caso B, que não tem nó próprio no fluxograma mestre mas é metade do trabalho.
+
+**Mudou em 23-24/09/2026.** As telas 8.1, 8.2 e 8.4–8.7 foram construídas pelo Pablo em `develop` **sobre mock** (`lib/mocks/estoqueOperacaoStore.ts`). O encaixe de 24/09 acrescentou a **8.12, a tela operacional do setor Estoque** — etapa 1 de todo roteiro e porta de entrada do item comprado — e transformou Saldo (8.4) e Reservas (8.5) em **consulta**.
 
 **É o maior bloco do projeto.** O [[Estoque-Roadmap]] estimava ~21 telas para o módulo inteiro; este recorte conta 11 porque exclui as telas de Gestão (dashboards, auditoria, relatórios — ~4 telas, fora do ciclo) e o que já foi cortado (alias de catálogo, cancelado em 21/09).
 
@@ -358,18 +364,19 @@ Só o FOB (L2) tem trabalho operacional da empresa sem tela. Hoje isso se resolv
 
 | # | Tela | Funcionalidades | Estado | Tarefa |
 |---|---|---|---|---|
-| 8.1 | **Cadastro de material** | Material é **projeção read-only de `core.produtos`** — só os campos extras do Estoque são editáveis: peso teórico, tolerância, mínimo/máximo, ponto de pedido | 🆕 | **D5** |
-| 8.2 | **Depósitos e localizações** | Warehouse (depósito compartilhado, não vinculado a fábrica); localização (corredor, prateleira); hierarquia | 🆕 | **D5** |
+| 8.1 | **Cadastro de material** | Material é **projeção read-only de `core.produtos`** — só os campos extras do Estoque são editáveis: peso teórico, tolerância, mínimo/máximo, ponto de pedido. Liga ao item do pedido por `(codigo_empresa, id_omie)`; a `natureza` do material **não decide rota** (quem decide é a fábrica da rodada) | 🔧 frontend pronto | **D5** |
+| 8.2 | **Depósitos e localizações** | Warehouse (depósito compartilhado, não vinculado a fábrica); `codigo_empresa` no depósito (L-09); localização (corredor, prateleira); hierarquia | 🔧 frontend pronto | **D5** |
 | 8.3 | **Carga inicial** | Importação com **dry-run** antes de gravar; folhas de contagem por localização; dupla conferência; reconciliação com o saldo do Omie; lote nasce com `origem = CARGA_INICIAL` e **já liberado**, sem inspeção (default da DEC-4) | 🆕 | **G1, G3** |
 
 ### Fase C — operação
 
 | # | Tela | Funcionalidades | Estado | Tarefa |
 |---|---|---|---|---|
-| 8.4 | **Consulta de saldo** | Saldo por material × warehouse × localização × lote; disponível vs. reservado; usada pela tela 2.2 do PCP | 🆕 | **D9, D10** |
-| 8.5 | **Reservas** | Lista de reservas por pedido/item; criar (a partir da 2.2); **liberar explicitamente** quando o pedido de origem é cancelado; expiração; liga só depois do **marco zero (13/11)** | 🆕 | **D9, D10** |
-| 8.6 | **Movimentação e ajuste** | Transferência entre warehouses; ajuste de saldo com **motivo obrigatório** — nunca silencioso; histórico de movimentos | 🆕 | **D9, D10** |
-| 8.7 | **Detalhe do lote** | Genealogia pai/filho (cisão); movimentos; etiquetas; status de qualidade; localização atual; origem | 🆕 | **D9, D10** |
+| 8.12 | **Setor Estoque — atendimento do parcial** | Fila dos parciais no setor Estoque; **saldo disponível na filial do pedido** (lote liberado − reservas ativas); **atender X do estoque** (split + reserva + conclusão) e **enviar restante** (mover); na volta do item comprado aprovado pela Qualidade: **entrada do lote** (`ENTRADA`) + reserva + conclusão. Saldo zero: passa automático ou exige clique (**T-08**) | 🆕 | **C6, D9** |
+| 8.4 | **Consulta de saldo** | Saldo por material × warehouse × localização × lote; disponível vs. reservado; **consulta** — quem usa o saldo para atender é a 8.12 | 🔧 frontend pronto | **D9, D10** |
+| 8.5 | **Reservas** | **Consulta** de reservas: lote + `ItemParcial` (split atendido) + quantidade; `ATIVA`/`CONSUMIDA`/`LIBERADA`, **sem expiração**; **liberar explicitamente** quando o pedido ou a OP é cancelado; criadas pela 8.12, não à mão; liga só depois do **marco zero (13/11)** | 🔧 frontend pronto | **D9, D10** |
+| 8.6 | **Movimentação e ajuste** | Movimentos com tipo `ENTRADA`/`SAIDA`/`TRANSFERENCIA`/`AJUSTE`, destino opcional e referência à origem (reserva, recebimento, OP); ajuste de saldo com **motivo obrigatório** — nunca silencioso; histórico | 🔧 frontend pronto | **D9, D10** |
+| 8.7 | **Detalhe do lote** | Genealogia pai/filho (cisão); movimentos; etiquetas; status de qualidade; localização atual; origem | 🔧 frontend pronto | **D9, D10** |
 
 ### Fase D — fora do ciclo
 
@@ -380,7 +387,7 @@ Só o FOB (L2) tem trabalho operacional da empresa sem tela. Hoje isso se resolv
 | 8.10 | **Ponto de pedido** | Alerta de saldo cruzando o limiar; sugestão automática de compra — origem **preventiva** de requisição (EB5) | ⏭️ | D |
 | 8.11 | **Devolução de cliente** | Ciclo completo nasce e é decidido **no Estoque** (DEC-10, exceção deliberada ao padrão "av-hub decide"); inclui capturar o valor da devolução parcial, que o Omie não expõe | ⏭️ | D |
 
-**Duas origens de requisição de compra, um destino.** A reativa (2.4, vem de um pedido sem saldo) e a preventiva (8.10, vem do ponto de pedido cruzado) convergem na mesma caixa de entrada 3.1, mas só a primeira tem `pedido_venda_origem`. Decisão em aberto **T-03**: mesmo formulário com campo opcional, ou dois formulários? Como a 8.10 é Fase D, dá pra decidir depois — mas o schema da 2.4 já deveria deixar o campo nulável.
+**Duas origens de requisição de compra, um destino.** A reativa (2.4, nasce da entrada do parcial no setor Compras) e a preventiva (8.10, vem do ponto de pedido cruzado) convergem na mesma caixa de entrada 3.1, mas só a primeira tem `pedido_venda_origem`. Decisão em aberto **T-03**: mesmo formulário com campo opcional, ou dois formulários? Como a 8.10 é Fase D, dá pra decidir depois — mas o schema da 2.4 já deveria deixar o campo nulável.
 
 **Nomenclatura:** "Devolução de Cliente" (8.11) e "RNC / Devolução a Fornecedor" (9.3) são fluxos, atores e telas completamente distintos. [[Fluxo-Qualidade-Completo]] pede explicitamente que sejam batizados diferente desde o início, pra não confundir operador.
 
@@ -388,14 +395,16 @@ Só o FOB (L2) tem trabalho operacional da empresa sem tela. Hoje isso se resolv
 
 ## 9. Qualidade — MES · 5 telas, 4 no ciclo
 
-**Nós cobertos:** Q1 (inspeção), Q2 (aprova?), Q3 (RNC com evidência), Q4 (cisão de lote).
+**Nós cobertos:** Q1 (inspeção), Q2 (aprova?), Q3 (RNC com evidência), Q4 (cisão de lote), Q5 (origem do item: comprado volta ao Estoque, fabricado segue pra Expedição).
+
+As telas 9.1–9.4 foram construídas pelo Pablo em `develop` **sobre mock** (`lib/mocks/qualidadeStore.ts`), 23/09/2026.
 
 | # | Tela | Funcionalidades | Estado | Tarefa |
 |---|---|---|---|---|
-| 9.1 | **Fila de inspeção final** | Lotes em quarentena das **três origens** que convergem aqui: recebimento (item acabado), conclusão de OS/OP, item já pronto em estoque; priorização por prazo do pedido | 🆕 | **D8** |
-| 9.2 | **Execução da inspeção** | **`laudo_url` preenchido é trava dura antes de decidir** — não é preferência, o `status_qualidade` não sai de `PENDENTE` sem ele; aprovar (sai da quarentena, confirma a reserva) ou reprovar | 🆕 | **D8** |
-| 9.3 | **RNC / Devolução a Fornecedor** | Motivo + evidência fotográfica obrigatória; marca `nota_devolucao_pendente = true`; **o sistema nunca cria a nota** — só sinaliza, o Omie emite; fechamento **manual** neste ciclo | 🆕 | **D8** |
-| 9.4 | **Cisão de lote** | Quantidade aprovada segue no lote original; lote filho nasce congelado com a quantidade reprovada (`lote_pai_id`), aguardando devolução; envia pra fila 2.5 do PCP | 🆕 | **D8** |
+| 9.1 | **Fila de inspeção final** | Lotes em quarentena das **duas origens** que convergem aqui: recebimento (item acabado comprado) e conclusão de OS/OP (fabricado ou beneficiado). O item atendido pelo estoque não volta à inspeção — o saldo só conta lote já liberado; priorização por prazo do pedido | 🔧 frontend pronto | **D8** |
+| 9.2 | **Execução da inspeção** | **`laudo_url` preenchido é trava dura antes de decidir** — não é preferência, o `status_qualidade` não sai de `PENDENTE` sem ele; aprovar ou reprovar. **Aprovado (24/09/2026): item comprado vai para o setor Estoque (8.12: entrada + reserva), não para a Expedição; item fabricado segue para a Expedição** | 🔧 frontend pronto | **D8** |
+| 9.3 | **RNC / Devolução a Fornecedor** | Motivo + evidência fotográfica obrigatória; marca `nota_devolucao_pendente = true`; **o sistema nunca cria a nota** — só sinaliza, o Omie emite; fechamento **manual** neste ciclo | 🔧 frontend pronto | **D8** |
+| 9.4 | **Cisão de lote** | Quantidade aprovada segue no lote original; lote filho nasce congelado com a quantidade reprovada (`lote_pai_id`), aguardando devolução; envia pra fila 2.5 do PCP | 🔧 frontend pronto | **D8** |
 | 9.5 | **Fila de inspeção de processo** | Itens marcados pelo vendedor em V2; inspeção **documental**, não física; gatilho totalmente diferente da 9.1 — nasce na emissão do pedido, não na conclusão de uma etapa | ⏭️ | ciclo 2 |
 
 **9.1 e 9.5 são telas distintas, não uma fila com filtro.** [[Fluxo-Qualidade-Completo]] é explícito: *"não são a mesma fila com prioridades diferentes, são entradas de dados distintas que precisam de telas distintas"*.
@@ -408,7 +417,7 @@ Só o FOB (L2) tem trabalho operacional da empresa sem tela. Hoje isso se resolv
 
 **Nós cobertos:** X1 (embalagem), X2 (parcial ou integral), X3 (consolida carga), X4 (define transporte).
 
-**Bloco inteiro na Fase D.** É o único ponto do fluxo onde todos os caminhos (Compras, Produção, Estoque-pronto) se reencontram — e onde a decisão parcial × integral exige olhar o pedido como um todo de novo, não item a item.
+**Bloco inteiro na Fase D.** É o ponto onde todos os caminhos se reencontram — desde 24/09/2026 por **duas portas**: o setor Estoque (item atendido pelo saldo e item comprado, já reservados) e a Qualidade (item fabricado) — e onde a decisão parcial × integral exige olhar o pedido como um todo de novo, não item a item.
 
 | # | Tela | Funcionalidades | Estado | Fase |
 |---|---|---|---|---|
@@ -465,13 +474,16 @@ Nenhuma trava o início da execução. Estão aqui para não virarem descoberta 
 | **T-05** | A tela 3.6 (follow-up do CCP) é tela própria ou aba dentro de Ordens (3.3)? O frontend existente não tem nenhuma das duas | Nathan + dev do av-hub | Antes da E2 |
 | **T-06** | Faturamento integral travado por 1 item que nunca chega (10.2): muda pra parcial automaticamente ou exige decisão manual? | Comercial + Expedição | Antes da Fase D |
 | **T-07** | O vendedor confirma pedido a pedido (1.1)? E se nunca confirmar — o pedido fica represado, invisível pro PCP. SLA, liberação automática ou fila de represados? | Nathan + Comercial | Antes da E3 |
+| **T-08** | Setor Estoque com saldo zero (8.12): o parcial passa automático, só registrando o tempo, ou exige clique? *Sugestão: automático* (EN-01) | Robert | Antes da C6 |
+| **T-09** | O setor Estoque aparece duas vezes no roteiro da Revenda (início e fim). A 2.2 e o mini-roteiro da 2.3 hoje não aceitam setor repetido: o parcial passa a apontar a etapa, ou cadastram-se dois setores tipo Estoque? (EN-03) | Robert | Antes da C6 |
 
 ## Onde o esforço se concentra
 
-- **25 telas genuinamente novas em 2 meses**: PCP (5), Recebimento (5), Estoque (7), Qualidade (4), mais acesso (2), o follow-up do CCP (1) e a caixa de entrada do vendedor (1).
+- **13 telas genuinamente novas** (recontado em 24/09/2026): Recebimento (5), PCP (2 — setor Compras e Novo norte), Estoque (2 — setor Estoque e carga inicial), acesso (2), o follow-up do CCP (1) e a caixa de entrada do vendedor (1).
+- **Estoque e Qualidade viraram "plugar backend"** — 10 telas do Pablo já existem sobre mock; o trabalho é o backend (D6–D9) com o modelo de reserva decidido em 24/09, mais a tela nova do setor Estoque (8.12).
 - **Compras é o bloco mais barato** — 5 das 6 telas já têm frontend; o trabalho é plugar backend real no lugar da `GAMBIARRA` e resolver as duas lacunas conscientes (sync Omie e parcelas).
 - **Fábrica é o inverso** — 4 telas de puro frontend sobre backend pronto, e mesmo assim fora do plano. É a maior reserva de valor rápido caso abra folga.
-- **PCP é o bloco mais crítico e o mais do zero.** Sem as 5 telas dele, nenhum item sai do pedido para uma rota — os outros blocos ficam sem entrada.
+- **PCP deixou de ser o bloco do zero.** Carteira e Ordem de Produção já rodam em `develop`; falta o encaixe (fábrica Revenda, setor Estoque como etapa 1, setor Compras) e a fila Novo norte. Continua sendo o bloco mais crítico: sem ele nenhum item entra no roteiro.
 
 ## Ver também
 - [[Fluxogramas-Completos]] — os 6 fluxogramas de origem, sem a camada de telas
@@ -479,7 +491,8 @@ Nenhuma trava o início da execução. Estão aqui para não virarem descoberta 
 - [[Cronograma-2-Meses]] — as tarefas (C4, D6, E1…) citadas em cada linha
 - [[Onde-Estamos]] — estado real de cada tarefa hoje
 - [[Integracao-AvHub-MES-Especificacao-F1]] — os 3 fluxos de polling que alimentam 1.1, 3.1 e 6.1
-- [[Modelo-Destinacao-Item]] — a matriz que a tela 2.2 implementa
+- [[Encaixe-Estoque-Revenda-no-PCP]] — o encaixe de 24/09/2026 que mudou os blocos 2, 8, 9 e 10
+- [[Modelo-Destinacao-Item]] — a matriz que a 2.2 (fábrica) e a 8.12 (saldo) implementam
 - [[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]], [[Fluxo-Qualidade-Completo]], [[Fluxo-Producao-OS-OP-Completo]], [[Fluxo-Expedicao-Faturamento-Completo]], [[Fluxo-Estoque-Completo]]
 - [[Estoque-Roadmap]] — a estimativa original de ~21 telas do módulo de Estoque
 - [[Decisoes-Chave-ERP]] — DEC-1, DEC-3, DEC-4, DEC-5, DEC-9, DEC-10

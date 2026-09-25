@@ -8,25 +8,33 @@ criado: 2026-09-16
 > Detalha a execução de uma Ordem de Serviço (beneficiamento de Revenda) ou Ordem de Produção (linha própria de Fabricação), a partir do mecanismo já decidido: OS/OP = `ItemParcial`/roteiro, já implementado no `api-pcp` (ver [[App-PCP-Backend-Producao]]).
 >
 > ⚠️ Diferente dos outros fluxos deste conjunto ([[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]], [[Fluxo-Qualidade-Completo]]), **este é o único subfluxo que já tem mecanismo de estado implementado em produção** — os outros ainda são desenho, este é tradução de código real pra conversa por conversa. **Precisão (17/09/2026, confirmado com o usuário):** isso vale só pro motor de execução em si (`ItemParcial`/roteiro dentro do `api-pcp`) — o que dispara uma OS/OP a partir do PCP (aceite do pedido, classificação do item, decisão de abrir OS/OP) não existe; é o mesmo fluxo-alvo a construir descrito em [[Fluxo-Detalhado-Pedido-Item]].
+>
+> **Atualização (23-24/09/2026):** o disparo já existe em `develop` — Carteira de Pedidos → tela **Ordem de Produção** → `POST /pedidos/completo` (uma OP por fábrica em cada rodada). E o encaixe foi decidido ([[Encaixe-Estoque-Revenda-no-PCP]]): o backend insere o **setor Estoque como etapa 1** de todo roteiro (o antigo setor "Emissão de Ordens" sai), os setores ganham tipo (`PRODUTIVO`, `ESTOQUE`, `COMPRAS`), e a **OS de beneficiamento de Revenda é um setor `PRODUTIVO` opcional dentro do roteiro da fábrica Revenda** — resolve a "fábrica leve" que este documento deixava em aberto.
 
 ## Atores e sistemas
 
 | Ator | Onde vive |
 |---|---|
-| **PCP** | MES |
-| **Setor** (cada etapa do roteiro) | MES, operado por Operador/Máquina |
-| **Qualidade** | MES — destino final |
+| **PCP** | MES — tela Ordem de Produção |
+| **Setor Estoque** (etapa 1) | MES — atende do saldo ou envia o restante |
+| **Setor** (cada etapa produtiva do roteiro) | MES, operado por Operador/Máquina |
+| **Qualidade** | MES — destino final da etapa produtiva |
 
 ## Diagrama
 
 ```mermaid
 sequenceDiagram
     participant PCP
+    participant Est as Setor Estoque (etapa 1)
     participant SetorN as Setor N (roteiro)
     participant SetorN1 as Setor N+1
     participant Qual as Qualidade
 
-    PCP->>SetorN: OS1 · abre OS/OP (cria ItemParcial em CRIADO, associa ao roteiro)
+    PCP->>Est: OS1 · gera a OP (ItemParcial nasce no setor Estoque, etapa 1)
+    opt saldo disponivel cobre parte ou tudo
+        Est->>Est: OS1a · split atendido: Reserva + CONCLUIDO (termina aqui)
+    end
+    Est->>SetorN: OS1b · envia o restante (mover) para o primeiro setor produtivo
     SetorN->>SetorN: OS2 · receber (CRIADO→RECEBIDO)
     SetorN->>SetorN: OS3 · inicia trabalho (RECEBIDO→EM_ANDAMENTO)
     alt fluxo normal
@@ -47,8 +55,11 @@ sequenceDiagram
 
 ## Conversa por conversa
 
-**OS1 — PCP abre a OS/OP**
-Cria o `ItemParcial` em `CRIADO`, associado ao roteiro (sequência ordenada de setores) da fábrica correspondente. Pra beneficiamento de Revenda (ex.: corte de chapa), pressupõe uma fábrica/setor "leve" cadastrada só pra isso — item ainda em aberto, ver [[App-PCP-Backend-Producao]].
+**OS1 — PCP gera a OP**
+Na tela Ordem de Produção, a partir da Carteira. Cria o `ItemParcial` em `CRIADO`, associado ao roteiro (sequência ordenada de setores) da fábrica correspondente, **com o setor Estoque como etapa 1**, inserido pelo backend. ~~Pra beneficiamento de Revenda, pressupõe uma fábrica/setor "leve" cadastrada só pra isso — item ainda em aberto.~~ **Resolvido em 24/09/2026:** o beneficiamento de Revenda (ex.: corte de chapa) é um setor `PRODUTIVO` opcional no roteiro da fábrica Revenda.
+
+**OS1a/OS1b — Setor Estoque atende ou envia o restante**
+A parte que o saldo disponível cobre vira um split atendido (reserva no lote + `CONCLUIDO`) e termina ali. O restante é movido para o primeiro setor produtivo — ou, na fábrica Revenda, para o setor Compras (ver [[Fluxo-Compras-Completo]]). Ver [[Fluxo-Estoque-Completo]] Caso A.
 
 **OS2 — Setor recebe**
 `receber`: `CRIADO → RECEBIDO`.
@@ -75,7 +86,7 @@ Rejeita de volta pro setor anterior: a linha atual vira `CANCELADO` **permanente
 Só permitido no último passo do roteiro — `concluir` fecha o `ItemParcial` como pronto.
 
 **OS7 — Libera pra Qualidade**
-Mesmo ponto de entrada Q2 de [[Fluxo-Qualidade-Completo]].
+Mesmo ponto de entrada Q2 de [[Fluxo-Qualidade-Completo]]. Depois da aprovação: item **fabricado** segue para a entrega; item de **Revenda** (comprado, com ou sem beneficiamento) volta ao **setor Estoque**, última etapa do roteiro da Revenda, para entrada no saldo e reserva (regra de 24/09/2026).
 
 **OS8 — Consolidar (condicional)**
 Se o lote foi dividido (OS5d), pode ser reagrupado de volta antes ou depois da inspeção.
@@ -92,11 +103,13 @@ Toda transição usa `updateMany({where:{id, status: ESPERADO}}) + count===0 →
 
 ## O que este modelo deixa explícito
 
-- **Este é o único dos quatro subfluxos que não precisa de desenho novo** — só precisa confirmar se o mecanismo de fábrica/setor "leve" pra beneficiamento de Revenda é viável, ou se exige ajuste no modelo.
+- **Este é o único dos quatro subfluxos que não precisa de desenho novo** — ~~só precisa confirmar se o mecanismo de fábrica/setor "leve" pra beneficiamento de Revenda é viável~~ confirmado em 24/09/2026: o modelo existente serve, com **tipo** na Fábrica (`FABRICACAO`/`REVENDA`) e no Setor (`PRODUTIVO`/`ESTOQUE`/`COMPRAS`). O ajuste real no motor é outro: o setor Estoque aparece **duas vezes** no roteiro da Revenda (início e fim), e hoje o front indexa a etapa pelo setor — ver pendência 3 de [[Encaixe-Estoque-Revenda-no-PCP]].
+- **`ItemParcial` tem 9 estados no front de `develop`** (`CRIADO`, `RECEBIDO`, `EM_ANDAMENTO`, `EM_TRANSITO`, `PAUSADO`, `REPROVADO`, `CONCLUIDO`, `RETRABALHO`, `CANCELADO`) — `REPROVADO` entrou depois da análise original.
 - **`HistoricoItemParcial` já dá a trilha de auditoria completa de toda essa sequência** — é candidato natural a alimentar o "histórico muito mais robusto" que ficou pendente pro status por item no av-hub (ver [[AV-Hub-Bugs-Catalogo]]).
 - **O padrão `devolver` (cria novo linkado, nunca edita o antigo) é uma pista de design pra resolver a Divergência sem reabertura** — mesma filosofia aplicada a uma entidade diferente do mesmo backend.
 
 ## Ver também
+- [[Encaixe-Estoque-Revenda-no-PCP]]
 - [[App-PCP-Backend-Producao]]
 - [[Fluxo-Qualidade-Completo]]
 - [[Fluxo-Recebimento-Completo]]

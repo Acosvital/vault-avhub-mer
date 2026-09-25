@@ -14,7 +14,9 @@ Levantadas em análise de lacunas contra prática padrão de WMS/ERP e distribui
 - **Rastreabilidade para frente** depende de retorno de consumo vindo do PCP — não é algo que este projeto resolve sozinho.
 - **Carga inicial não é recebimento** — lote com `origem = CARGA_INICIAL` não passa pelos estados de aprovação de pedido nem pela conferência quantitativa/qualitativa normal.
 - **Fornecedor não tem acesso ao sistema** — sem estado "em trânsito" verificável; data de entrega é sempre manual.
-- **Destinação de item de pedido, não só do pedido inteiro** — decidido pelo comprador ao montar/revisar o pedido; vira sugestão automática de reserva assim que o lote é aprovado.
+- **Destinação de item de pedido, não só do pedido inteiro** — decidido pelo comprador ao montar/revisar o pedido; vira sugestão automática de reserva assim que o lote é aprovado. **Como ficou no MES (24/09/2026):** a requisição nasce vinculada ao `ItemParcial` que entrou no setor Compras; aprovado na Qualidade, o item comprado **volta ao setor Estoque**, que dá entrada do lote e cria a reserva para aquele split — a "sugestão automática" virou passo do roteiro. Ver [[Encaixe-Estoque-Revenda-no-PCP]].
+- **Reserva sem expiração (24/09/2026)** — liberação só explícita, quando o pedido ou a OP é cancelado. Reserva aponta para lote + `ItemParcial` (split atendido) e nasce sempre sobre lote já liberado pela Qualidade.
+- **Toda saída de item de revenda passa pelo Estoque (24/09/2026)** — o item comprado não vai da Qualidade direto para a Expedição: entra no saldo, é reservado e sai do Estoque, igual ao item que já estava em estoque.
 - **Saneamento do catálogo Omie é pré-requisito, não opcional** — mapeado numa camada própria (`material_alias_omie`), sem corrigir o catálogo do Omie diretamente.
 - **Múltiplos depósitos confirmados** — `deposito` é tabela própria; transferência entre depósitos é operação real.
 - **Sem consignação** — confirmado que não existe estoque consignado (nem com cliente, nem com fornecedor).
@@ -28,5 +30,6 @@ Regra clássica de controle interno: **quem cria o pedido não pode ser quem apr
 O RBAC do Estoque segue o mesmo padrão já em produção no backend do MES (`api-pcp`): modelo relacional de telas/perfis/permissões no Postgres + `PerfilSetor` para escopo por instância de setor — não nasce como biblioteca compartilhada com o av-hub, são implementações independentes aceitas conscientemente por velocidade de entrega. Os 5 perfis de segregação de função acima valem como **conceito de negócio**, independente do mecanismo técnico de autorização. Ver [[MES-Arquitetura-Decisoes]] (decisão 3) e [[Decisoes-Chave-ERP]]. A discussão da tensão entre os 3 modelos de RBAC que chegaram a coexistir fica registrada em [[Achado-Duplicacao-RBAC]].
 
 ## Ver também
+- [[Encaixe-Estoque-Revenda-no-PCP]]
 - [[Estoque-Modelo-Dados]]
 - [[Estoque-Perguntas-Abertas]]

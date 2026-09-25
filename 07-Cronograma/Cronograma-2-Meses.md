@@ -11,6 +11,8 @@ criado: 2026-09-18
 >
 > **Leia antes de aprovar:** (1) as premissas de capacidade abaixo são deste plano — o vault não registra alocação real, ajuste se for outra; (2) **ainda não cabe tudo mesmo com 3 meses** — Fase D, Expedição/Faturamento e o resto seguem fora (seção 2), a extensão cobriu especificamente a rastreabilidade completa, não o roadmap inteiro; (3) o caminho crítico continua sendo as decisões de **25/09** (seção 7).
 >
+> **Encaixe do Estoque e da Revenda no MES (24/09/2026)** — ver [[Encaixe-Estoque-Revenda-no-PCP]]. Muda o conteúdo (não a janela) de **C6** (vira a implementação de `Fabrica.tipo`/`Setor.tipo`, fábrica Revenda, setor Estoque obrigatório como etapa 1 e a ação de atendimento pelo estoque), **C7** (requisição disparada pela entrada do parcial no setor Compras), **C8** (encolhe: sobra a fila "Novo norte"), **D6** (o recebimento libera o parcial parado no setor Compras), **D8** (a aprovação move o item comprado para o setor Estoque, não para a Expedição — regra do Nathan) e **D9** (reserva por lote + `ItemParcial`, sem expiração; `MovimentoEstoque` com tipo; entrada do item comprado). As telas D8/D10 do Pablo já existem em `develop` sobre mock e esperam esse backend.
+>
 > **Reajustado em 22/09/2026 (N-07):** a execução começou de fato hoje, não em 18/09 como o plano original previa. **S1 foi replanejada** (22/09-05/10, tarefas e marcos M1/M2 deslocados ~1-2 dias úteis) — ver seções 1, 3 e 5. **Do S2 em diante o resto do plano ainda não foi recalculado** e pode estar alguns dias úteis otimista; recalcular quando a folga real de S1 for conhecida, em vez de propagar um ajuste estimado por 50+ tarefas agora.
 
 ## 1. Marcos
@@ -89,7 +91,7 @@ Em uma frase: entra do catálogo saneado até o recebimento com qualidade, saldo
 
 - Saldo por warehouse, localização e lote (D9, D10)
 - Movimentação com motivo obrigatório e ajuste de saldo (D9, D10)
-- Reserva de estoque PCP × Comercial — liga só depois do marco zero (D9, D10)
+- Reserva de estoque PCP × Comercial — liga só depois do marco zero (D9, D10). Modelo decidido em 24/09/2026: reserva por lote + `ItemParcial`, sem expiração, criada pelo setor Estoque (etapa 1 e entrada do item comprado)
 
 **Não entra**
 
@@ -103,8 +105,8 @@ Em uma frase: entra do catálogo saneado até o recebimento com qualidade, saldo
 
 **Entra**
 
-- Carteira do PCP: importar os itens do pedido de venda e classificar cada item (natureza × disponibilidade) (C4, C6)
-- Ações a partir da classificação: reservar, abrir OS/OP, gerar requisição (C8)
+- Carteira do PCP: importar os itens do pedido de venda (C4) — **já em `develop` desde 23/09** — e, desde 24/09/2026, escolher a **fábrica** de cada item por rodada, com a Revenda como fábrica, tipos em Fábrica/Setor e o setor Estoque como etapa 1 de todo roteiro (C6)
+- ~~Ações a partir da classificação: reservar, abrir OS/OP, gerar requisição (C8)~~ — reservar virou ação do setor Estoque (C6), abrir OP é a própria tela Ordem de Produção e gerar requisição virou a entrada no setor Compras (C7); a C8 fica só com a fila "Novo norte"
 - Vínculo Fábrica ↔ Unidade/Filial (codigo_empresa) (C2)
 
 **Não entra**
@@ -266,9 +268,9 @@ gantt
     C3 Desenho do RBAC por setor :c3, 2026-09-22, 2026-10-01
     C4 Carteira PCP - importar itens :c4, 2026-09-29, 2026-10-06
     C5 RBAC por setor (guard global) :c5, 2026-10-05, 2026-10-15
-    C6 Carteira PCP - classificar itens :c6, 2026-10-08, 2026-10-17
+    C6 Encaixe Estoque e Revenda no PCP :c6, 2026-10-08, 2026-10-17
     C7 PCP - requisição de compra :c7, 2026-10-19, 2026-10-24
-    C8 Carteira PCP - ações :c8, 2026-11-09, 2026-11-14
+    C8 Fila Novo norte do PCP :c8, 2026-11-09, 2026-11-14
     C9 Correções de UAT/piloto :c9, 2026-11-16, 2026-11-19
     section Estoque (MES)
     D1 Schema Prisma estoque v1 :d1, 2026-09-22, 2026-10-01
@@ -346,7 +348,7 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 | C5 | RBAC por instância de setor (guard global + PerfilSetor) | Robert | 3 | 05/10–14/10 | C3 | Almoxarife, Qualidade e Gestor de Estoque com escopo por warehouse/setor |
 | E1 | ✅ **Adiantado (22/09/2026)** — Compras v1: modelagem + caixa de entrada de requisições vindas do MES | Nathan | 3 | 05/10–16/10 | F1, DEC-2 | Comprador vê as requisições do PCP no av-hub. Backend implementado e testado (contrato SQL [[008-Requisicoes-Compra]], branch local `feat/compras-requisicoes-e1` em `api-acos-vital`) — ainda não deployado em produção. Ver [[AV-Hub-Views-Compras-Investigacao]] e [[Decisoes-Chave-ERP]]. |
 | B6 | Pipeline ELT: Passos 1, 3, 6 e 9 (parceiros fiscais, lead_time, locais, etapas) | Gustavo | 1,5 | 08/10–15/10 | B3, B5 | Parceiros com dados fiscais e locais de estoque sincronizando; etapas confirmadas em produção |
-| C6 | PCP Carteira: classificação natureza × disponibilidade (backend + tela) | Robert | 3 | 08/10–16/10 | C4 | PCP classifica cada item (Revenda/Fabricação × pronto/MP/sem estoque) |
+| C6 | ~~PCP Carteira: classificação natureza × disponibilidade (backend + tela)~~ **Encaixe Estoque/Revenda (24/09/2026):** enums `Fabrica.tipo`/`Setor.tipo` + seed (fábrica Revenda, setores Estoque e Compras); backend força o setor Estoque como etapa 1 e remove Emissão de Ordens; Nova Ordem envia item de revenda à fábrica Revenda; tela do setor Estoque com "atender X do estoque" (split + reserva + conclusão) e "enviar restante" | Robert | 3 | 08/10–16/10 | C4 | Item de revenda vira OP da fábrica Revenda; todo parcial nasce no setor Estoque; o split atendido termina ali com reserva. Ver [[Encaixe-Estoque-Revenda-no-PCP]] |
 | D5 | Cadastros: material (campos extras), depósito/warehouse e localização - API + telas | Pablo | 4 | 08/10–16/10 | D3, C5, DEC-6 | Material com peso teórico, tolerância, mín/máx e ponto de pedido; localizações cadastradas |
 | A4 | Coordenar UAT e treinamento dos setores | Nathan | 1,5 | 13/10–13/11 | - | Roteiro de UAT por setor; treinamento do posto de recebimento |
 | G1 | Ferramenta de carga inicial: import → lotes CARGA_INICIAL, dry-run e folhas de contagem | Gustavo | 2,9 | 13/10–23/10 | D5, DEC-4 | Dry-run com dados de teste; folhas de contagem por localização |
@@ -355,13 +357,13 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 
 | ID | Entrega | Resp. | pd | Janela | Depende de | Pronto quando |
 |---|---|---|---|---|---|---|
-| C7 | PCP: requisição de compra (endpoint + tela; payload C1 do fluxo) | Robert | 2,5 | 19/10–23/10 | C6, F1 | Requisição sai do MES com material, quantidade, prazo e filial |
-| D6 | Recebimento (backend): conferência dupla, divergência com saída, pesagem, quarentena, RNC e cisão de lote | Robert | 4,5 | 19/10–30/10 | D5, F2, DEC-5 | Nenhum estado sem saída; lote nasce em quarentena |
+| C7 | PCP: requisição de compra (endpoint + tela; payload C1 do fluxo). **Desde 24/09/2026: disparada pela entrada do parcial no setor Compras** do roteiro da Revenda, vinculada ao `ItemParcial`; tela = fila do setor Compras | Robert | 2,5 | 19/10–23/10 | C6, F1 | Requisição sai do MES com material, quantidade, prazo, filial e `id_item_parcial`, sem ação manual |
+| D6 | Recebimento (backend): conferência dupla, divergência com saída, pesagem, quarentena, RNC e cisão de lote. **Desde 24/09/2026:** a conferência libera o parcial parado no setor Compras e o move para o próximo setor do roteiro | Robert | 4,5 | 19/10–30/10 | D5, F2, DEC-5 | Nenhum estado sem saída; lote nasce em quarentena |
 | D7 | Recebimento (frontend): fila, conferência quantitativa, pesagem, divergência | Pablo | 4 | 19/10–28/10 | D5 | Almoxarife executa o recebimento ponta a ponta em homologação |
 | E2 | ✅ **Adiantado (22/09/2026)** — Compras: fechar compra (fornecedor, preço, aprovação condicional, acabado/não acabado, CIF/FOB, previsão de chegada) + OC estruturada | Nathan | 3 | 19/10–30/10 | E1, DEC-3 | OC com dados estruturados, sem PDF; CCP registra previsão de chegada. Backend implementado e testado (contrato SQL [[007-Ordens-Compra-Estruturada]], mesma branch local) — régua de R$30.000 confirmada em BRL e moeda estrangeira; sincronização com o Omie (`IncluirPedCompra`) e parcelas reais (catálogo de condição de pagamento) ficam pendentes. Ainda não deployado. |
 | F2 | API de OC estruturada + jobs de poll (requisições → av-hub; referência da OC → MES) | Gustavo | 3 | 19/10–30/10 | F1, E1 | Requisição e OC trafegam entre os dois sistemas em homologação |
 | B9 | (stretch) Passo 5 - histórico de pedidos de compra do Omie | Gustavo | 2 | 26/10–30/10 | B5 | Só se houver folga; primeiro corte se apertar |
-| D8 | Qualidade (frontend): fila de inspeção, laudo, aprova/reprova, RNC e cisão | Pablo | 3 | 26/10–30/10 | D6 | Qualidade inspeciona, aprova ou reprova; lote reprovado é cindido |
+| D8 | Qualidade (frontend): fila de inspeção, laudo, aprova/reprova, RNC e cisão. **Tela já em `develop` sobre mock (23/09).** **Regra de 24/09/2026:** item comprado aprovado vai para o setor Estoque (entrada + reserva), não para a Expedição | Pablo | 3 | 26/10–30/10 | D6 | Qualidade inspeciona, aprova ou reprova; lote reprovado é cindido; aprovado comprado chega ao setor Estoque |
 | G2 | Levantamento físico do estoque em dupla conferência | Operação/negócio | - | 26/10–30/10 | G1, A2 | Contagem completa por warehouse, assinada por duas pessoas |
 | H2 | Entrega e instalação do hardware do posto (impressora + leitor 2D) | Operação/negócio | - | 26/10–04/11 | A2, DEC-8 | Posto de recebimento equipado |
 | H3 | UAT com os setores (Almoxarife, Qualidade, PCP, Compras) | Operação/negócio | - | 28/10–13/11 | D7, D8, E2 | Roteiros de UAT executados e bugs triados |
@@ -370,13 +372,13 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 
 | ID | Entrega | Resp. | pd | Janela | Depende de | Pronto quando |
 |---|---|---|---|---|---|---|
-| D10 | Fase C (frontend): saldo, movimentos, ajuste com motivo e reserva | Pablo | 3 | 02/11–10/11 | D9 | Gestor de estoque consulta e ajusta saldo |
-| D9 | Fase C (backend): saldo, movimento com motivo obrigatório, reserva PCP × Comercial | Robert | 3,5 | 02/11–10/11 | D6 | Saldo por warehouse/localização/lote; reserva liberada só após o marco zero |
+| D10 | Fase C (frontend): saldo, movimentos, ajuste com motivo e reserva. **Telas já em `develop` sobre mock (23/09); viram consulta e trocam o mock pelo backend real (D9)** | Pablo | 3 | 02/11–10/11 | D9 | Gestor de estoque consulta e ajusta saldo |
+| D9 | Fase C (backend): saldo, movimento com motivo obrigatório, reserva PCP × Comercial. **Modelo de 24/09/2026:** tabela `Reserva` (lote + `ItemParcial` + quantidade + `ATIVA`/`CONSUMIDA`/`LIBERADA`, sem expiração); `MovimentoEstoque` com tipo `ENTRADA`/`SAIDA`/`TRANSFERENCIA`/`AJUSTE`, destino e referência; saldo disponível = lote liberado − reservas ativas; lote com localização atual; entrada do item comprado vindo da Qualidade | Robert | 3,5 | 02/11–10/11 | D6 | Saldo por warehouse/localização/lote; reserva liberada só após o marco zero; item comprado aprovado entra no saldo reservado |
 | E3 | Portal do Vendedor: status por item (poll + etapa na tela) | Nathan | 3 | 02/11–13/11 | F3 | Vendedor vê a etapa de cada item do pedido |
 | G3 | Carga: importar, reconciliar com o saldo do Omie (Passo 2) e listar divergências | Gustavo | 3 | 02/11–10/11 | G2, B5 | Divergências contagem × Omie explicadas ou aprovadas |
 | D11 | Etiquetagem código de barras/QR + leitor 2D no recebimento e na movimentação | Pablo | 3 | 03/11–10/11 | H2, DEC-8 | Etiqueta impressa e lida no posto de recebimento |
 | B7 | Backup/WAL do MES em produção + runbook de rollback do piloto | Gustavo | 1,5 | 09/11–13/11 | B2 | Runbook testado; restauração simulada |
-| C8 | PCP Carteira: ações (reservar / abrir OS-OP / gerar requisição) | Robert | 1 | 09/11–13/11 | C7, D9 | Ação por item a partir da classificação |
+| C8 | ~~PCP Carteira: ações (reservar / abrir OS-OP / gerar requisição)~~ **Encolhe em 24/09/2026:** reservar virou ação do setor Estoque (C6), abrir OP é a tela Ordem de Produção (já existe), gerar requisição virou a entrada no setor Compras (C7). Sobra a **fila "Novo norte"** (divergência, reprovação, comprado não acabado sem beneficiamento no roteiro) | Robert | 1 | 09/11–13/11 | C7, D9 | PCP decide o novo norte de todo parcial que voltou, sem estado sem saída |
 | F3 | Endpoint de status por item no MES (/itens/status?alterado_desde=) | Robert | 2 | 09/11–13/11 | F1, D9 | av-hub consegue ler o estado de cada item por polling |
 | G4 | Conferência da carga em dupla e fechamento da Fase 0 | Operação/negócio | - | 09/11–13/11 | G3 | Marco zero aprovado; consumo liberado para PCP/Comercial |
 | B10 | (stretch) Passo 4 - frete e parcelas do pedido de venda | Gustavo | 0,9 | 11/11–13/11 | B3 | Só se houver folga; primeiro corte se apertar |
@@ -467,7 +469,7 @@ Dependências fora do time de dev (têm dono e data no gantt): saneamento do cat
 Se algo estourar, o escopo cede — a data não. Cortar nesta ordem:
 
 - 1. Stretch: B9 (Passo 5, histórico de pedidos de compra) e B10 (Passo 4, frete/parcelas) - saem primeiro.
-- 2. C8 - ações da Carteira (reservar / abrir OS-OP / gerar requisição): o PCP faz a ação fora do sistema.
+- 2. C8 - fila "Novo norte" (desde 24/09/2026 é o que sobrou da C8): o PCP decide fora do sistema.
 - 3. F3 + E3 - status por item só para Fabricação e Recebimento (as demais etapas ficam pro ciclo 2).
 - 4. D11 - etiqueta simples em Code128 em vez de QR com layout rico.
 - 5. D9/D10 - reserva de estoque sai; Fase C entrega só saldo e movimento.

@@ -83,9 +83,11 @@ Corrigido nesta mesma rodada com links: Home da seção de modelagem, [[Decisoes
 | `LOTE` | `criado_por`, `criado_em`, `quarentena_desde`, `liberado_por`, `liberado_em` | Tempo em quarentena, que tem SLA próprio. |
 | `INSPECAO_QUALIDADE` | `tipo` (PROCESSO/FINAL), `inspetor_id`, `iniciada_em`, `concluida_em`, `motivo_reprovacao`, `evidencia_url`, `destino_reprovacao`, `id_item_acompanhado` | Hoje só há `laudo_url` e `aprovado`; a foto de avaria e o destino são regra do fluxo. |
 | `RNC` | `aberta_por/em`, `fechada_por/em`, `evidencia_url`, `nota_devolucao_ref` | Ciclo de vida da RNC. |
-| `RESERVA_ESTOQUE` | `status` (5 estados), `criada_por`, `criada_em`, `confirmada_em`, `consumida_em`, `liberada_por`, `id_item_acompanhado` (no lugar do `pedido_origem_id` solto), `destinacao` | Corrige a inconsistência 2; liga ao item. |
+| `RESERVA_ESTOQUE` | `status` (**3 estados desde 24/09/2026: `ATIVA`/`CONSUMIDA`/`LIBERADA`**, sem expiração), `criada_por`, `criada_em`, `consumida_em`, `liberada_por`, **`id_item_parcial`** (o split atendido — decidido em 24/09/2026, no lugar do `pedido_origem_id` solto e do `pedidoNumero` em texto do mock), `id_lote`, `quantidade`, `destinacao` | Corrige a inconsistência 2; liga ao item. Ver [[Encaixe-Estoque-Revenda-no-PCP]]. |
 | `MOVIMENTO_ESTOQUE` | `usuario_id`, `ocorrido_em`, `localizacao_origem_id`, `localizacao_destino_id`, `autorizado_por` (ajuste), `id_evento` | Quem moveu e quem autorizou o ajuste. |
-| `MATERIAL` | `natureza` (REVENDA/FABRICACAO) se `tipo` não cobrir | Eixo 1 do [[Modelo-Destinacao-Item]]. |
+| ~~`MATERIAL`~~ | ~~`natureza` (REVENDA/FABRICACAO) se `tipo` não cobrir~~ | **Descartado em 24/09/2026:** a natureza do item (eixo 1 do [[Modelo-Destinacao-Item]]) vem de `Pedidos.idFabrica → Fabrica.tipo` (`FABRICACAO`/`REVENDA`), por item e por rodada — não é atributo do material. Ver [[Encaixe-Estoque-Revenda-no-PCP]]. |
+| `FABRICA` / `SETOR` | `Fabrica.tipo` (`FABRICACAO`/`REVENDA`); `Setor.tipo` (`PRODUTIVO`/`ESTOQUE`/`COMPRAS`) | Encaixe de 24/09/2026: a etapa do `ItemParcial` passa a dizer em que subsistema o item está (estoque, compra, produção). |
+| `MOVIMENTO_ESTOQUE` | `tipo` (`ENTRADA`/`SAIDA`/`TRANSFERENCIA`/`AJUSTE`), destino opcional, referência à origem (reserva, recebimento, OP) | Encaixe de 24/09/2026; a J2 acrescenta `CONSUMO`. |
 | `PEDIDO_COMPRA` (referência no Estoque) | `id_oc_av_hub`, `previsao_chegada` | Só a referência mínima; o dado comercial não trafega. A previsão é dado de prazo, não comercial. **(decisão)** |
 | Diagrama 17 | Incluir `item_pedido` e `destinacao_item_pedido` | Corrige a inconsistência 1. |
 

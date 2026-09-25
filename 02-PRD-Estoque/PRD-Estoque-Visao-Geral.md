@@ -18,7 +18,7 @@ O módulo mora dentro do **banco do MES** (o sistema de fábrica, Prisma, banco 
 
 ## Onde isso se encaixa no fluxo operacional
 
-Cobre os ramos [[Rota-Estoque|Estoque]] e [[Rota-Revenda|Revenda]] do [[Fluxo-Operacional-Visao-Geral|fluxo operacional]], mais o cadastro de matéria-prima que alimenta indiretamente a [[Rota-Fabricacao|Fabricação]]. Deixa de fora deliberadamente:
+Cobre os ramos [[Rota-Estoque|Estoque]] e [[Rota-Revenda|Revenda]] do [[Fluxo-Operacional-Visao-Geral|fluxo operacional]], mais o cadastro de matéria-prima que alimenta indiretamente a [[Rota-Fabricacao|Fabricação]]. **Desde 24/09/2026** o Estoque entra no roteiro do MES como **setor tipo `ESTOQUE`, etapa 1 de todo roteiro**, e a Revenda como **fábrica tipo `REVENDA`** — ver [[Encaixe-Estoque-Revenda-no-PCP]]. Deixa de fora deliberadamente:
 - **Portal Comercial B2B** (av-hub) — projeto vizinho de verdade (banco/sistema separado do MES); consome saldo de revenda via view somente leitura.
 - **Fiscal** — permanece 100% no Omie; o sistema nunca emite nota, só referencia e sinaliza.
 
@@ -47,6 +47,7 @@ Impressora industrial (Elgin TT042 Plus, ~R$4,1–5,2 mil) + leitor 2D de mão (
 ## Ver também
 - [[Setores-Envolvidos-no-Fluxo]] — todo setor participante, com onde vive e onde aparece em detalhe.
 - [[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]], [[Fluxo-Qualidade-Completo]], [[Fluxo-Producao-OS-OP-Completo]], [[Fluxo-Expedicao-Faturamento-Completo]], [[Fluxo-Estoque-Completo]] — o fluxo completo, do 0 ao 100%, detalhado conversa por conversa em cada subfluxo.
+- [[Encaixe-Estoque-Revenda-no-PCP]] — como o Estoque e a Revenda entram no roteiro do MES (24/09/2026).
 - [[Estoque-Modelo-Dados]]
 - [[Estoque-Regras-Negocio]]
 - [[Estoque-Riscos]]

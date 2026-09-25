@@ -7,7 +7,9 @@ criado: 2026-09-16
 
 > Detalha a inspeção de qualidade, a partir de qualquer um dos pontos de entrada possíveis (Recebimento, conclusão de OS/OP, ou item já pronto em estoque), até a aprovação/reprovação e seus desdobramentos.
 >
-> **Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje** — é escopo obrigatório do sistema a construir, não documentação de processo existente.
+> **Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje** — é escopo obrigatório do sistema a construir, não documentação de processo existente. *(Em 23/09 a fila de inspeção com aprovar/reprovar, laudo, RNC e cisão entrou no `app-pcp` `develop`, sobre mock — tarefa D8.)*
+>
+> **Regra de 24/09/2026 (Nathan):** item **comprado** aprovado **vai para o setor Estoque, não para a Expedição** — ver Q6 abaixo e [[Encaixe-Estoque-Revenda-no-PCP]] seção 3.4.
 
 ## Atores e sistemas
 
@@ -18,12 +20,13 @@ criado: 2026-09-16
 | **Recebimento** / **Fábrica-Beneficiamento** | MES — origem do item |
 | **Vendedor** | av-hub — só define o tipo de acompanhamento na emissão do pedido |
 | **Omie** | externo — devolução ao fornecedor |
-| **Expedição** | MES — destino se aprovado |
+| **Setor Estoque** | MES — destino do item **comprado** aprovado (entrada + reserva) |
+| **Expedição** | MES — destino do item **fabricado** aprovado |
 
 ## Duas entradas na fila da Qualidade
 
 1. **Inspeção de processo** — itens marcados pelo vendedor pra acompanhamento desde o início (documentação, validação de entrada). Entrada nasce na emissão do pedido, não depende de Recebimento/Fábrica.
-2. **Inspeção final** — itens acabados liberados por [[Fluxo-Recebimento-Completo]] (R10a) ou por conclusão de OS/OP (ver [[Fluxo-Producao-OS-OP-Completo]]), ou item que já estava pronto em estoque (célula correspondente de [[Modelo-Destinacao-Item]]).
+2. **Inspeção final** — itens acabados liberados por [[Fluxo-Recebimento-Completo]] (R10a) ou por conclusão de OS/OP (ver [[Fluxo-Producao-OS-OP-Completo]]). ~~Ou item que já estava pronto em estoque.~~ Desde 24/09/2026 o item atendido pelo saldo não volta à Qualidade: o saldo disponível só conta lote já liberado por ela.
 
 ## Diagrama
 
@@ -34,6 +37,7 @@ sequenceDiagram
     participant Qual as Qualidade
     participant PCP
     participant Omie
+    participant Est as Setor Estoque
     participant Exp as Expedição
 
     Vend->>Qual: Q1 · marca acompanhamento desde o início (na emissão do pedido)
@@ -42,7 +46,11 @@ sequenceDiagram
     Qual->>Qual: Q4 · exige laudo_url preenchido antes de decidir
     alt aprovado
         Qual->>Qual: Q5 · status_qualidade sai de PENDENTE
-        Qual->>Exp: Q6 · item segue pra expedição
+        alt item comprado (fábrica Revenda)
+            Qual->>Est: Q6a · volta ao setor Estoque: entrada + reserva + conclusão
+        else item fabricado
+            Qual->>Exp: Q6b · segue pra expedição
+        end
     else reprovado
         Qual->>Qual: Q7 · anexa motivo + evidência (foto)
         Qual->>Qual: Q8 · cisão de lote (lote_pai_id)
@@ -58,7 +66,7 @@ sequenceDiagram
 Nasce na emissão do pedido (checkbox descrito em [[Fluxo-Detalhado-Pedido-Item]]), não na chegada do material. Se o vendedor não marcar, Qualidade só é acionada na inspeção final (Q2) — evita sobrecarregar o setor.
 
 **Q2 — Origem → Qualidade: libera pra inspeção final**
-Três origens possíveis, mesmo destino: Recebimento (item acabado comprado), conclusão de OS/OP (item beneficiado/fabricado), ou item que já estava pronto em estoque. Ver [[Modelo-Destinacao-Item]] pra entender por que essas três origens convergem aqui.
+Duas origens, mesmo destino: Recebimento (item acabado comprado) e conclusão de OS/OP (item beneficiado/fabricado). ~~Ou item que já estava pronto em estoque~~ — desde 24/09/2026 esse é atendido no setor Estoque sobre lote já liberado, sem nova inspeção. Ver [[Modelo-Destinacao-Item]].
 
 **Q3 — Execução da inspeção**
 Interna à Qualidade — varia conforme o tipo (documental pra inspeção de processo, física pra inspeção final).
@@ -67,7 +75,9 @@ Interna à Qualidade — varia conforme o tipo (documental pra inspeção de pro
 Regra de negócio já fixada: `status_qualidade` **não pode sair de PENDENTE sem `laudo_url` preenchido** (ver [[Estoque-Regras-Negocio]]) — trava antes mesmo de decidir aprovar ou reprovar.
 
 **Q5/Q6 — Aprovado**
-Lote sai da quarentena. Se já tinha `destinacao_item_pedido` pra um pedido específico, a reserva se confirma aqui (ver [[Fluxo-Compras-Completo]], conversa C19). Segue pra Expedição — ver [[Fluxo-Expedicao-Faturamento-Completo]].
+Lote sai da quarentena. O destino depende da origem (regra de 24/09/2026):
+- **Q6a — Item comprado** (fábrica Revenda, com ou sem beneficiamento): **vai para o setor Estoque, não para a Expedição.** O Estoque dá entrada do lote no saldo, cria a reserva para o split que esperava a compra e o conclui — ver [[Fluxo-Estoque-Completo]] Caso C e [[Fluxo-Compras-Completo]] C19. A reserva não "se confirma" na Qualidade: ela nasce no Estoque, sobre o lote já liberado.
+- **Q6b — Item fabricado**: segue pra Expedição — ver [[Fluxo-Expedicao-Faturamento-Completo]].
 
 **Q7 — Reprovado: motivo + evidência**
 Campo pra anexar foto da avaria, além do motivo em texto (ver [[Fluxo-Detalhado-Pedido-Item]]).
@@ -95,6 +105,7 @@ Campo pra anexar foto da avaria, além do motivo em texto (ver [[Fluxo-Detalhado
 - **A exigência de `laudo_url` (Q4) é uma trava dura antes da decisão**, não uma preferência — vale confirmar se isso vale igual pra inspeção de processo (documental) ou só pra inspeção final (física).
 
 ## Ver também
+- [[Encaixe-Estoque-Revenda-no-PCP]]
 - [[Fluxo-Recebimento-Completo]]
 - [[Fluxo-Producao-OS-OP-Completo]]
 - [[Fluxo-Expedicao-Faturamento-Completo]]

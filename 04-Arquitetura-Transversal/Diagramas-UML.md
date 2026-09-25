@@ -9,6 +9,8 @@ criado: 2026-09-16
 >
 > **Diagramas 0a-0b:** Sequência e Atividades — os 2 que ficavam só citados em texto antes, agora com preview real. **Parte 1 (diagramas 1-16):** cobertura completa dos demais tipos UML — 3 de Classes, 1 de Casos de Uso, 4 de Estados, 1 de Componentes, 1 de Implantação, 1 de Pacotes, 1 de Comunicação, 1 de Objetos, 1 de Estrutura Composta, 1 de Visão Geral de Interação, 1 de Tempo. Diagrama de Perfil (Profile) deliberadamente fora do escopo — não se aplica a documentar uma aplicação de negócio como esta.
 >
+> **Atualizado em 24/09/2026 com o encaixe do Estoque e da Revenda no MES** ([[Encaixe-Estoque-Revenda-no-PCP]]): diagramas 0a, 0b, 1, 2, 4b, 8, 12, 13, 15, 16, 17, 18, 19, 20 e 21 revistos — Revenda como fábrica (`Fabrica.tipo`), Estoque e Compras como setores tipados (`Setor.tipo`), Estoque como etapa 1 de todo roteiro, reserva por lote + `ItemParcial` sem expiração, `MovimentoEstoque` com tipo e referência, e o item comprado aprovado voltando ao Estoque (não direto para a Expedição).
+>
 > **Parte 2 (diagramas 17-22):** foco em desenvolvimento — modelo de dados com PK/FK explícitos de Estoque e MES (17/18, originalmente tentados como `erDiagram`, convertidos pra `classDiagram` por limitação de renderização — ver nota no 17), mais um Objetos, um Estados (proposta de Reserva de Estoque), um mapa geral de arquitetura de dados e um Fluxo de Dados. Deliberadamente fora: Mapas, Portal de Qualidade, Comissionamento.
 
 ## 0a. Sequência (já existe) — preview: Fluxo de Compras
@@ -18,17 +20,20 @@ criado: 2026-09-16
 ```mermaid
 sequenceDiagram
     participant PCP
+    participant SCom as Setor Compras (MES)
     participant Compras as Comprador (av-hub)
     participant CCP
     participant Aprov as Aprovador (condicional)
     participant Forn as Fornecedor (externo)
     participant LogEnt as Logística de entrada
     participant Receb as Recebimento (MES)
-    participant Qual as Qualidade (MES)
     participant Fab as Fábrica/Beneficiamento
+    participant Qual as Qualidade (MES)
+    participant Est as Setor Estoque (MES)
     participant Omie
 
-    PCP->>Compras: C1 · requisição (material, qtd, prazo, filial)
+    PCP->>SCom: C0 · OP da fábrica Revenda: restante sem saldo sai do Estoque e entra no setor Compras
+    SCom->>Compras: C1 · requisição gerada pela entrada do parcial (material, qtd, prazo, filial, id_item_parcial)
     Compras->>Forn: C2 · cotação/negociação (fora do sistema)
     opt acima do valor X
         Compras->>Aprov: C3 · pedido de aprovação
@@ -46,21 +51,21 @@ sequenceDiagram
         Forn->>Receb: C8b · fornecedor entrega direto na doca
     end
     Receb->>Receb: C9 · confere (contra Pedido de Venda OU contra OC) + pesagem
-    alt item não acabado
-        Receb->>PCP: C10 · "chegou, precisa beneficiamento"
-        PCP->>Fab: C12 · abre OS/OP
+    Receb->>SCom: C9b · recebimento libera o parcial parado no setor Compras
+    alt roteiro com beneficiamento (ex.: corte de chapa)
+        Receb->>Fab: C10 · parcial segue pro setor de beneficiamento do roteiro
         Fab->>Qual: C13 · conclui, libera pra inspeção
-    else item acabado
+    else sem beneficiamento
         Receb->>Qual: C11 · libera pra inspeção
     end
     Qual->>Qual: C14 · aprova ou reprova
     alt reprovado
         Qual->>PCP: C15 · "reprovado, decide novo norte"
-        PCP->>Compras: C16 · nova requisição (volta pra C1)
+        PCP->>SCom: C16 · parcial volta ao setor Compras, nova requisição (volta pra C1)
         Qual->>Omie: C17 · sinaliza necessidade de devolução (RNC)
         Omie-->>Qual: C18 · nota de devolução (fecha RNC)
     else aprovado
-        Qual->>Compras: C19 · status "disponível" (via casamento av-hub↔MES)
+        Qual->>Est: C19 · volta ao setor Estoque: entrada do lote + reserva + CONCLUIDO
     end
 ```
 
@@ -82,15 +87,26 @@ flowchart TD
     end
 
     subgraph SEC_PCP[PCP - MES]
-        P1[PCP classifica o item]
-        P2{Natureza do item}
-        P3{Disponibilidade}
-        P4[Gera requisicao de compra]
-        P5[Abre OS ou OP]
+        P1[Carteira: escolhe itens, quantidades e fabrica da rodada]
+        P2[Ordem de Producao: uma OP por fabrica, Estoque como etapa 1]
         P6[Decide o novo norte]
         P1 --> P2
-        P2 -->|Revenda| P3
-        P2 -->|Fabricacao propria| P3
+    end
+
+    subgraph SEC_ESTOQUE[Estoque - MES]
+        E1[Saldo disponivel na filial do pedido]
+        E2{Saldo cobre o item?}
+        E3[Split atendido: reserva no lote e conclui]
+        E4{Tipo da fabrica}
+        E5[Entrada do item comprado no saldo]
+        E1 --> E2
+        E2 -->|sim, tudo ou parte| E3
+        E2 -->|nao, ou o restante| E4
+        E5 --> E3
+    end
+
+    subgraph SEC_SCOMP[Setor Compras - MES]
+        K1[Parcial aguarda: requisicao enviada ao av-hub]
     end
 
     subgraph SEC_COMPRAS[Compras e CCP - av-hub]
@@ -123,24 +139,16 @@ flowchart TD
         R2[Pesagem]
         R3{Bate com o esperado?}
         R4[Cria lote em quarentena]
-        R5{Item acabado?}
+        R5{Roteiro tem beneficiamento?}
         R1 --> R2 --> R3
         R3 -->|nao| R6[Divergencia]
         R3 -->|sim| R4 --> R5
     end
 
     subgraph SEC_PROD[Fabrica e Beneficiamento - MES]
-        F1[Abre ItemParcial]
-        F2[Percorre o roteiro setor a setor]
-        F3[Conclui no ultimo setor]
-        F1 --> F2 --> F3
-    end
-
-    subgraph SEC_ESTOQUE[Estoque - MES]
-        E1[Verifica saldo no warehouse]
-        E2[Cria reserva]
-        E3[Separacao fisica]
-        E1 --> E2 --> E3
+        F1[Percorre os setores produtivos do roteiro]
+        F2[Conclui a etapa produtiva]
+        F1 --> F2
     end
 
     subgraph SEC_QUAL[Qualidade - MES]
@@ -148,8 +156,10 @@ flowchart TD
         Q2{Aprova?}
         Q3[Abre RNC com evidencia]
         Q4[Cisao de lote]
+        Q5{Origem do item}
         Q1 --> Q2
         Q2 -->|nao| Q3 --> Q4
+        Q2 -->|sim| Q5
     end
 
     subgraph SEC_EXP[Expedicao e Logistica de saida - MES]
@@ -170,28 +180,28 @@ flowchart TD
 
     V2 -->|sim, com acompanhamento da qualidade| P1
     V2 -->|nao| P1
-    P3 -->|pronto em estoque| E1
-    P3 -->|materia-prima em estoque| P5
-    P3 -->|sem estoque| P4
-    P4 --> C1
+    P2 --> E1
+    E4 -->|Fabricacao| F1
+    E4 -->|Revenda| K1
+    K1 --> C1
     C5 --> FN1
     FN1 --> L1
     L4 --> R1
     R6 --> P6
-    P6 -->|reabre compra| P4
-    R5 -->|sim| Q1
-    R5 -->|nao| P5
-    P5 --> F1
-    F3 --> Q1
-    E3 --> Q1
-    Q2 -->|sim| X1
-    Q3 --> Q4
+    P6 -->|reabre compra| K1
+    R5 -->|sim| F1
+    R5 -->|nao| Q1
+    F2 --> Q1
+    Q5 -->|comprado: volta ao Estoque| E5
+    Q5 -->|fabricado| X1
+    E3 --> X1
     Q4 --> P6
-    P6 -->|retrabalho ou nova OS/OP| F1
+    P6 -->|retrabalho| F1
     X4 --> O1
 
     style SEC_VENDAS fill:#d9f0ec,stroke:#0f7a6b,stroke-width:2px,color:#181c22
     style SEC_PCP fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
+    style SEC_SCOMP fill:#e3e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style SEC_COMPRAS fill:#e3e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style SEC_FORN fill:#ece8e3,stroke:#8a7a63,stroke-width:2px,color:#181c22
     style SEC_LOG fill:#fbe8d9,stroke:#c9541a,stroke-width:2px,color:#181c22
@@ -206,10 +216,13 @@ flowchart TD
     style V2 fill:#ffffff,stroke:#0f7a6b,stroke-width:1.5px,color:#181c22
     style P1 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
     style P2 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style P3 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style P4 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
-    style P5 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
     style P6 fill:#ffffff,stroke:#2f6f8f,stroke-width:1.5px,color:#181c22
+    style E1 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style E2 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style E3 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style E4 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style E5 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style K1 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style C1 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style C2 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
     style C3 fill:#ffffff,stroke:#5b3fae,stroke-width:1.5px,color:#181c22
@@ -228,14 +241,11 @@ flowchart TD
     style R6 fill:#ffffff,stroke:#5a7d3a,stroke-width:1.5px,color:#181c22
     style F1 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
     style F2 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
-    style F3 fill:#ffffff,stroke:#a8420f,stroke-width:1.5px,color:#181c22
-    style E1 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
-    style E2 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
-    style E3 fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style Q1 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style Q2 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style Q3 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style Q4 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
+    style Q5 fill:#ffffff,stroke:#a8860f,stroke-width:1.5px,color:#181c22
     style X1 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
     style X2 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
     style X3 fill:#ffffff,stroke:#7a3f9e,stroke-width:1.5px,color:#181c22
@@ -252,6 +262,8 @@ flowchart TD
 classDiagram
     class Material:::estoqueStyle {
         +UUID id
+        +UUID codigoEmpresa
+        +string codigoProdutoOmie
         +string tipo
         +string categoria
         +decimal pesoTeorico
@@ -310,6 +322,7 @@ classDiagram
     class Deposito:::estoqueStyle {
         +string nome
         +string codigo
+        +UUID codigoEmpresa
     }
     class LocalizacaoEstoque:::estoqueStyle {
         +string corredor
@@ -319,11 +332,15 @@ classDiagram
         +string tipo
         +string motivo
         +decimal quantidade
+        +UUID depositoDestinoId
+        +string referenciaTipo
+        +UUID referenciaId
     }
     class ReservaEstoque:::estoqueStyle {
-        +UUID pedidoOrigemId
-        +string tipo
-        +datetime dataExpiracao
+        +UUID loteId
+        +UUID itemParcialId
+        +decimal quantidade
+        +string status
     }
     class Etiqueta:::estoqueStyle {
         +string tipo
@@ -373,6 +390,8 @@ classDiagram
 
 **Nota:** `Material`/`PedidoCompra` (fornecedor) são projeções de `core.produtos`/`core.parceiros` do av-hub — não cadastros paralelos. Ver [[Estoque-Modelo-Dados]].
 
+**Encaixe de 24/09/2026:** `ReservaEstoque` aponta para lote + `ItemParcial` (o split atendido, no domínio MES), com `status` `ATIVA`/`CONSUMIDA`/`LIBERADA` e **sem expiração**; `MovimentoEstoque.tipo` = `ENTRADA`/`SAIDA`/`TRANSFERENCIA`/`AJUSTE`, com destino opcional e referência à origem; `Deposito` ganha `codigoEmpresa`; `Material` liga ao item do pedido por `(codigoEmpresa, codigoProdutoOmie)`. Ver [[Encaixe-Estoque-Revenda-no-PCP]].
+
 > **Notas de cardinalidade:** **Recebimento→PedidoCompra** é 0..* (uma OC pode ter várias entregas parciais); **ItemRecebido→Lote** não é obrigatório 1:1, porque carga inicial gera lote sem passar por recebimento (`Lote.origem = CARGA_INICIAL`); **ReservaEstoque→Lote** e **ItemSeparacao→Lote** também não são obrigatórios 1:1, já que a maioria dos lotes fica em estoque geral, sem reserva nem separação. O vínculo entre `ContagemCiclica` e `LocalizacaoEstoque` está presente, indicando onde cada contagem aconteceu.
 
 ## 2. Classes — Domínio MES / Produção
@@ -408,11 +427,13 @@ classDiagram
     class Fabrica:::mesStyle {
         +string codigo
         +string nome
+        +string tipo
     }
     class Setor:::mesStyle {
         +string codigo
         +string nome
         +boolean exigeMaquinaOperador
+        +string tipo
     }
     class Maquina:::mesStyle {
         +string codigo
@@ -539,6 +560,7 @@ classDiagram
 > - **`ItemParcialObservacao`** é uma entidade separada de `ItemParcialAnexo`, nunca documentada.
 > - **`Usuario.anonymizedAt` existe de verdade aqui** (diferente do av-hub, onde não existe).
 > - `PerfilSetor` é tabela de junção com atributos próprios (`podeVisualizar`/`podeAtuar`).
+> - **Encaixe de 24/09/2026 (a construir):** `Fabrica.tipo` (`FABRICACAO`/`REVENDA`) e `Setor.tipo` (`PRODUTIVO`/`ESTOQUE`/`COMPRAS`); o backend insere o setor Estoque como etapa 1 de todo roteiro e o setor Emissão de Ordens sai. Ver [[Encaixe-Estoque-Revenda-no-PCP]].
 
 ## 3. Classes — av-hub Comercial + RBAC
 
@@ -704,18 +726,23 @@ flowchart LR
 ```mermaid
 flowchart LR
     PCP(["PCP"])
+    ALM(["Almoxarife - setor Estoque"])
     subgraph SISTEMA[Sistema]
-        UC4([Classificar Item do Pedido])
-        UC5([Verificar Saldo em Estoque])
-        UC6([Gerar Requisicao de Compra])
-        UC7([Abrir Ordem de Servico ou Producao])
+        UC4([Escolher itens, quantidades e fabrica da rodada])
+        UC5([Gerar Ordem de Producao, uma por fabrica])
+        UC6([Atender do estoque: split e reserva])
+        UC7([Enviar o restante pelo roteiro])
+        UC9([Dar entrada do item comprado e reservar])
+        UC10([Gerar requisicao ao entrar no setor Compras])
         UC8([Decidir Novo Norte])
     end
     PCP --> UC4
     PCP --> UC5
-    PCP --> UC6
-    PCP --> UC7
     PCP --> UC8
+    ALM --> UC6
+    ALM --> UC7
+    ALM --> UC9
+    UC7 -.->|restante da Revenda| UC10
 
     style SISTEMA fill:#eef0f2,stroke:#33475a,stroke-width:2px,color:#181c22
 ```
@@ -869,25 +896,25 @@ stateDiagram-v2
 ```mermaid
 stateDiagram-v2
     [*] --> PENDENTE_PCP
-    PENDENTE_PCP --> EM_DESPACHO : PCP aceita
-    EM_DESPACHO --> EM_COMPRA
-    EM_DESPACHO --> EM_PRODUCAO
-    EM_DESPACHO --> EM_ESTOQUE
+    PENDENTE_PCP --> EM_ESTOQUE : PCP gera a OP, Estoque e a etapa 1
+    EM_ESTOQUE --> PRONTO_EXPEDICAO : atendido pelo saldo e reservado
+    EM_ESTOQUE --> EM_COMPRA : restante, fabrica Revenda
+    EM_ESTOQUE --> EM_PRODUCAO : restante, fabrica de Fabricacao
     EM_COMPRA --> EM_RECEBIMENTO
-    EM_RECEBIMENTO --> EM_PRODUCAO : nao acabado
-    EM_RECEBIMENTO --> EM_INSPECAO : acabado
+    EM_RECEBIMENTO --> EM_PRODUCAO : beneficiamento no roteiro
+    EM_RECEBIMENTO --> EM_INSPECAO : sem beneficiamento
     EM_PRODUCAO --> EM_INSPECAO
-    EM_ESTOQUE --> EM_INSPECAO
-    EM_INSPECAO --> EM_DESPACHO : reprovado, volta pro PCP
-    EM_INSPECAO --> PRONTO_EXPEDICAO : aprovado
+    EM_INSPECAO --> PENDENTE_PCP : reprovado, volta pro PCP
+    EM_INSPECAO --> EM_ESTOQUE : aprovado, item comprado
+    EM_INSPECAO --> PRONTO_EXPEDICAO : aprovado, item fabricado
     PRONTO_EXPEDICAO --> FATURADO
     FATURADO --> [*]
 
     classDef pcpStyle fill:#dce8ef,stroke:#2f6f8f,color:#181c22
-    class PENDENTE_PCP,EM_DESPACHO,EM_COMPRA,EM_PRODUCAO,EM_ESTOQUE,EM_RECEBIMENTO,EM_INSPECAO,PRONTO_EXPEDICAO,FATURADO pcpStyle
+    class PENDENTE_PCP,EM_COMPRA,EM_PRODUCAO,EM_ESTOQUE,EM_RECEBIMENTO,EM_INSPECAO,PRONTO_EXPEDICAO,FATURADO pcpStyle
 ```
 
-**Nota:** esse é o status granular que o "casamento av-hub↔MES" precisaria expor pro vendedor — ver [[Decisoes-Chave-ERP]]. São 9 estados; o fluxo real tem cerca de 20 etapas, e a tabela que traduz uma coisa na outra (`etapa_fluxo.estado_macro`) está proposta em [[Campos-e-API-para-Rastreabilidade]].
+**Nota:** esse é o status granular que o "casamento av-hub↔MES" precisaria expor pro vendedor — ver [[Decisoes-Chave-ERP]]. **Revisto em 24/09/2026:** `EM_DESPACHO` saiu (o PCP gera a OP e o item já nasce no setor Estoque), e o item comprado aprovado volta a `EM_ESTOQUE` antes de `PRONTO_EXPEDICAO`. São 8 estados; o fluxo real tem cerca de 20 etapas, e a tabela que traduz uma coisa na outra (`etapa_fluxo.estado_macro`) está proposta em [[Campos-e-API-para-Rastreabilidade]].
 
 ## 9. Componentes
 
@@ -1017,42 +1044,45 @@ flowchart TB
 flowchart TD
     Vendedor((Vendedor))
     PCP((PCP))
+    Estoque((Setor Estoque))
+    SCompras((Setor Compras))
     Compras((Compras/CCP))
     Fornecedor((Fornecedor))
     LogEnt((Log. Entrada))
     Receb((Recebimento))
     Fabrica((Fabrica))
-    Estoque((Estoque))
     Qualidade((Qualidade))
     Expedicao((Expedicao))
     Fiscal((Fiscal/Omie))
 
     Vendedor -- "1: emite pedido" --> PCP
-    PCP -- "2: classifica item" --> PCP
-    PCP -- "3: requisicao de compra" --> Compras
-    PCP -- "3a: abre OS/OP" --> Fabrica
-    PCP -- "3b: verifica saldo" --> Estoque
-    Compras -- "4: negocia OC" --> Fornecedor
-    Compras -- "5: follow-up" --> Fornecedor
+    PCP -- "2: gera OP, Estoque na etapa 1" --> Estoque
+    Estoque -- "3: split atendido e reservado" --> Expedicao
+    Estoque -- "3a: restante, Fabricacao" --> Fabrica
+    Estoque -- "3b: restante, Revenda" --> SCompras
+    SCompras -- "4: requisicao de compra" --> Compras
+    Compras -- "5: negocia OC e follow-up" --> Fornecedor
     Fornecedor -- "6: entrega CIF / coleta FOB" --> LogEnt
     LogEnt -- "7: chegada na doca" --> Receb
     Receb -- "8: divergencia?" --> PCP
     Receb -- "9: libera pra inspecao" --> Qualidade
+    Receb -- "9a: beneficiamento no roteiro" --> Fabrica
     Fabrica -- "10: conclui" --> Qualidade
-    Estoque -- "10: pronto" --> Qualidade
     Qualidade -- "11: reprova, novo norte" --> PCP
-    Qualidade -- "12: aprova" --> Expedicao
+    Qualidade -- "12: aprova comprado, entrada e reserva" --> Estoque
+    Qualidade -- "12a: aprova fabricado" --> Expedicao
     Expedicao -- "13: emite NF" --> Fiscal
     Fiscal -- "14: baixa o item" --> Vendedor
 
     style Vendedor fill:#ffffff,stroke:#0f7a6b,stroke-width:2px,color:#181c22
     style PCP fill:#ffffff,stroke:#2f6f8f,stroke-width:2px,color:#181c22
+    style Estoque fill:#ffffff,stroke:#1f7a8c,stroke-width:2px,color:#181c22
+    style SCompras fill:#ffffff,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style Compras fill:#ffffff,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style Fornecedor fill:#ffffff,stroke:#8a7a63,stroke-width:2px,color:#181c22
     style LogEnt fill:#ffffff,stroke:#c9541a,stroke-width:2px,color:#181c22
     style Receb fill:#ffffff,stroke:#5a7d3a,stroke-width:2px,color:#181c22
     style Fabrica fill:#ffffff,stroke:#a8420f,stroke-width:2px,color:#181c22
-    style Estoque fill:#ffffff,stroke:#1f7a8c,stroke-width:2px,color:#181c22
     style Qualidade fill:#ffffff,stroke:#a8860f,stroke-width:2px,color:#181c22
     style Expedicao fill:#ffffff,stroke:#7a3f9e,stroke-width:2px,color:#181c22
     style Fiscal fill:#ffffff,stroke:#a83f5c,stroke-width:2px,color:#181c22
@@ -1066,32 +1096,42 @@ flowchart TD
 flowchart TD
     PV["pv-58231 : PedidoVenda — codigoPedidoOmie=58231, situacao=Faturado"]
     IP["item-3 : ItemPedido — codigo=CHP-2000x6, quantidade=4, quantidadeConcluida=4"]
+    FAB["fab-rev : Fabrica — tipo=REVENDA, roteiro=Estoque, Compras, Recebimento, Corte, Qualidade, Estoque"]
+    IPARC["itemParcial-501 : ItemParcial — status=CONCLUIDO, setorAtual=Estoque (ultima etapa)"]
     PC["oc-9012 : PedidoCompra — fornecedorId=parceiro-771, incoterm=FOB, status=Recebido"]
     IPC["itemOC-1 : ItemPedidoCompra — quantidade=4, acabado=false"]
     REC["receb-4471 : Recebimento — referenciaTipo=ORDEM_COMPRA, data=2026-09-09"]
     LOTE["lote-8890 : Lote — origem=RECEBIMENTO, statusQualidade=APROVADO"]
-    IPARC["itemParcial-501 : ItemParcial — status=CONCLUIDO, setorAtual=Corte"]
     INSP["insp-201 : InspecaoQualidade — aprovado=true, laudoUrl=laudo-201.pdf"]
+    MOV["mov-3301 : MovimentoEstoque — tipo=ENTRADA, referencia=receb-4471"]
+    RES["res-77 : Reserva — lote=lote-8890, itemParcial=501, quantidade=4, status=ATIVA"]
 
     PV --> IP
-    IP --> IPC
+    IP --> FAB
+    IP --> IPARC
+    IPARC -->|requisicao| IPC
     PC --> IPC
     IPC --> REC
     REC --> LOTE
-    LOTE --> IPARC
     LOTE --> INSP
+    LOTE --> MOV
+    RES --> LOTE
+    RES --> IPARC
 
     style PV fill:#ffffff,stroke:#0f7a6b,stroke-width:2px,color:#181c22
     style IP fill:#ffffff,stroke:#0f7a6b,stroke-width:2px,color:#181c22
+    style FAB fill:#ffffff,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style PC fill:#ffffff,stroke:#1f7a8c,stroke-width:2px,color:#181c22
     style IPC fill:#ffffff,stroke:#1f7a8c,stroke-width:2px,color:#181c22
     style REC fill:#ffffff,stroke:#5a7d3a,stroke-width:2px,color:#181c22
     style LOTE fill:#ffffff,stroke:#1f7a8c,stroke-width:2px,color:#181c22
     style IPARC fill:#ffffff,stroke:#a8420f,stroke-width:2px,color:#181c22
     style INSP fill:#ffffff,stroke:#a8860f,stroke-width:2px,color:#181c22
+    style MOV fill:#ffffff,stroke:#1f7a8c,stroke-width:2px,color:#181c22
+    style RES fill:#ffffff,stroke:#1f7a8c,stroke-width:2px,color:#181c22
 ```
 
-**Nota:** repara que `IPC.acabado=false` é o gatilho de todo o resto do cenário — se fosse `true`, `REC` conferiria contra `PV` em vez de `PC`, e não existiria `IPARC` nenhum (ia direto pra `INSP`). Ver [[Fluxo-Recebimento-Completo]].
+**Nota (revista em 24/09/2026):** o item foi enviado à fábrica **Revenda** (`FAB`), cujo roteiro tem o setor Corte (beneficiamento). `IPC.acabado=false` decide que `REC` confere contra `PC`, não contra `PV`. Aprovado na inspeção, o lote **dá entrada no Estoque** (`MOV`, tipo `ENTRADA`) e a reserva `RES` liga o lote ao parcial, que conclui no setor Estoque — a regra de que item comprado aprovado vai para o Estoque, não direto para a Expedição. Ver [[Fluxo-Recebimento-Completo]] e [[Encaixe-Estoque-Revenda-no-PCP]].
 
 ## 14. Estrutura Composta — `Pedido` como composição
 
@@ -1130,16 +1170,24 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    START((Inicio)) --> REF1["ref: Fluxo de Compras"]
-    REF5["ref: Fluxo de Estoque<br>(item ja pronto)"] --> REF4
+    START((Inicio)) --> REF5["ref: Fluxo de Estoque, etapa 1"]
+    REF5 --> DEC0{Saldo cobre o item?}
+    DEC0 -- sim --> REF6["ref: Fluxo de Expedicao e Faturamento"]
+    DEC0 -- restante --> DECF{Tipo da fabrica}
+    DECF -- Revenda --> REF1["ref: Fluxo de Compras"]
+    DECF -- Fabricacao --> REF3["ref: Fluxo de Producao (OS/OP)"]
     REF1 --> REF2["ref: Fluxo de Recebimento"]
-    REF2 --> DEC{Item acabado?}
-    DEC -- nao --> REF3["ref: Fluxo de Producao (OS/OP)"]
-    DEC -- sim --> REF4["ref: Fluxo de Qualidade"]
+    REF2 --> DEC{Roteiro tem beneficiamento?}
+    DEC -- sim --> REF3
+    DEC -- nao --> REF4["ref: Fluxo de Qualidade"]
     REF3 --> REF4
     REF4 --> DEC2{Aprovado?}
-    DEC2 -- nao --> REF1
-    DEC2 -- sim --> REF6["ref: Fluxo de Expedicao e Faturamento"]
+    DEC2 -- nao --> PCPN["PCP decide o novo norte"]
+    PCPN --> REF1
+    PCPN --> REF3
+    DEC2 -- sim, comprado --> REF7["ref: Fluxo de Estoque, entrada e reserva"]
+    DEC2 -- sim, fabricado --> REF6
+    REF7 --> REF6
     REF6 --> END((Fim))
 
     style REF1 fill:#ffffff,stroke:#5b3fae,stroke-width:2px,color:#181c22
@@ -1147,10 +1195,12 @@ flowchart TD
     style REF3 fill:#ffffff,stroke:#a8420f,stroke-width:2px,color:#181c22
     style REF4 fill:#ffffff,stroke:#a8860f,stroke-width:2px,color:#181c22
     style REF5 fill:#ffffff,stroke:#1f7a8c,stroke-width:2px,color:#181c22
+    style REF7 fill:#ffffff,stroke:#1f7a8c,stroke-width:2px,color:#181c22
     style REF6 fill:#ffffff,stroke:#7a3f9e,stroke-width:2px,color:#181c22
+    style PCPN fill:#ffffff,stroke:#2f6f8f,stroke-width:2px,color:#181c22
 ```
 
-> ⚠️ Único diagrama novo com `<br>` num rótulo (dentro de `REF5`) — mantido curto de propósito pra reduzir risco do problema já visto antes (texto colado se o `<br>` não virar quebra de linha nesse renderizador). Se aparecer colado, é só remover o `<br>` e deixar numa linha só.
+> Revisto em 24/09/2026: o fluxo começa no **Estoque (etapa 1)** para todo item, e o item comprado aprovado volta ao **Estoque (entrada e reserva)** antes da Expedição. Sem `<br>` nos rótulos.
 
 ## 16. Tempo (Timing) — ciclo de vida do item vs. SLA
 
@@ -1184,19 +1234,20 @@ gantt
     dateFormat YYYY-MM-DD
     axisFormat %d/%m
     section Estado do item
-    PENDENTE_PCP         :done, s1, 2026-09-01, 1d
-    EM_DESPACHO           :done, s2, 2026-09-02, 1d
+    PENDENTE_PCP          :done, s1, 2026-09-01, 1d
+    ESTOQUE_ETAPA_1       :done, s2, 2026-09-02, 1d
     EM_COMPRA             :done, s3, 2026-09-03, 6d
     EM_RECEBIMENTO        :done, s4, 2026-09-09, 1d
     EM_PRODUCAO           :active, s5, 2026-09-10, 2d
     EM_INSPECAO           :s6, 2026-09-12, 1d
-    PRONTO_EXPEDICAO      :s7, 2026-09-13, 1d
-    FATURADO              :s8, 2026-09-14, 1d
+    ENTRADA_ESTOQUE       :s7, 2026-09-13, 1d
+    PRONTO_EXPEDICAO      :s8, 2026-09-14, 1d
+    FATURADO              :s9, 2026-09-15, 1d
     section SLA
     Prazo (data_previsao) :crit, milestone, 2026-09-11, 0d
 ```
 
-**Nota:** neste exemplo o item **estoura o SLA** — o prazo (`data_previsao`) cai em 11/09, no meio da barra `EM_PRODUCAO`, então a partir daí o item já entraria na régua vermelha/piscando descrita em [[AV-Hub-Portal-Vendedor-Plano]] antes mesmo de chegar na inspeção.
+**Nota:** item de Revenda com beneficiamento, no roteiro de 24/09/2026 — passa pelo Estoque na etapa 1 (saldo zero), compra, recebimento, corte, inspeção e **entrada no Estoque** antes da expedição. Neste exemplo o item **estoura o SLA** — o prazo (`data_previsao`) cai em 11/09, no meio da barra `EM_PRODUCAO`, então a partir daí o item já entraria na régua vermelha/piscando descrita em [[AV-Hub-Portal-Vendedor-Plano]] antes mesmo de chegar na inspeção.
 
 **Versão com dados reais:** este exemplo é estático. O modelo que o alimentaria (log de eventos, SLA por etapa, projeção de estouro) está em [[Rastreabilidade-e-SLA-de-Eventos]]; os 9 estados desta visão são o `estado_macro` de cada etapa do fluxo.
 
@@ -1214,6 +1265,8 @@ gantt
 classDiagram
     class MATERIAL:::estoqueStyle {
         +UUID id «PK»
+        +UUID codigo_empresa
+        +string codigo_produto_omie
         +string tipo
         +string categoria
         +decimal peso_teorico
@@ -1269,6 +1322,7 @@ classDiagram
         +UUID id «PK»
         +string codigo
         +string nome
+        +UUID codigo_empresa
     }
     class LOCALIZACAO_ESTOQUE:::estoqueStyle {
         +UUID id «PK»
@@ -1279,9 +1333,9 @@ classDiagram
     class RESERVA_ESTOQUE:::estoqueStyle {
         +UUID id «PK»
         +UUID lote_id «FK»
-        +UUID pedido_origem_id
-        +string tipo
-        +datetime data_expiracao
+        +UUID id_item_parcial «FK»
+        +decimal quantidade
+        +string status
     }
     class ORDEM_SEPARACAO:::estoqueStyle {
         +UUID id «PK»
@@ -1308,6 +1362,9 @@ classDiagram
         +string tipo
         +string motivo
         +decimal quantidade
+        +UUID deposito_destino_id «FK»
+        +string referencia_tipo
+        +UUID referencia_id
     }
     class ETIQUETA:::estoqueStyle {
         +string tipo
@@ -1358,12 +1415,14 @@ classDiagram
         +UUID id «PK»
         +string codigo
         +string nome
+        +string tipo
     }
     class SETOR:::mesStyle {
         +UUID id «PK»
         +string codigo
         +string nome
         +boolean exige_maquina_operador
+        +string tipo
     }
     class MAQUINA:::mesStyle {
         +UUID id «PK»
@@ -1473,63 +1532,69 @@ classDiagram
 
 ```mermaid
 flowchart TD
-    PED["pedido2451 : Pedido — ordemProducao=OP-2451, fabrica=Flanges, status=EM_PRODUCAO"]
+    PED["pedido2451 : Pedido — ordemProducao=OP-2451, fabrica=Flanges (tipo=FABRICACAO), status=EM_PRODUCAO"]
     IT1["item-1 : ItemPedido — codigo=FLG-150-2, quantidade=10, quantidadeConcluida=6"]
     IT2["item-2 : ItemPedido — codigo=FLG-300-4, quantidade=5, quantidadeConcluida=5"]
+    RI0["roteiroItem-0 : RoteiroItem — setor=Estoque (tipo ESTOQUE), ordem=0, inserido pelo backend"]
     RI1["roteiroItem-1 : RoteiroItem — setor=Corte, ordem=1 (de item-1)"]
     RI2["roteiroItem-2 : RoteiroItem — setor=Furacao, ordem=2 (de item-1)"]
-    IP1["itemParcial-501 : ItemParcial — status=EM_ANDAMENTO, setorAtual=Furacao"]
+    IP0["itemParcial-500 : ItemParcial — split de 6, status=CONCLUIDO, setorAtual=Estoque (atendido pelo saldo)"]
+    RES["reserva-31 : Reserva — lote=lote-7710, itemParcial=500, quantidade=6, status=ATIVA"]
+    IP1["itemParcial-501 : ItemParcial — split de 4, status=EM_ANDAMENTO, setorAtual=Furacao"]
     IP2["itemParcial-502 : ItemParcial — status=CONCLUIDO, setorAtual=Acabamento"]
     HIST["historico-9001 : HistoricoItemParcial — statusAnterior=EM_TRANSITO, statusNovo=EM_ANDAMENTO"]
 
     PED --> IT1
     PED --> IT2
+    IT1 --> RI0
     IT1 --> RI1
     IT1 --> RI2
+    IT1 --> IP0
     IT1 --> IP1
+    IP0 --> RES
     IT2 --> IP2
     IP1 --> HIST
 
     style PED fill:#ffffff,stroke:#33475a,stroke-width:2px,color:#181c22
     style IT1 fill:#ffffff,stroke:#2f6f8f,stroke-width:2px,color:#181c22
     style IT2 fill:#ffffff,stroke:#2f6f8f,stroke-width:2px,color:#181c22
+    style RI0 fill:#ffffff,stroke:#1f7a8c,stroke-width:2px,color:#181c22
     style RI1 fill:#ffffff,stroke:#5c6570,stroke-width:2px,color:#181c22
     style RI2 fill:#ffffff,stroke:#5c6570,stroke-width:2px,color:#181c22
+    style IP0 fill:#ffffff,stroke:#1f7a8c,stroke-width:2px,color:#181c22
+    style RES fill:#ffffff,stroke:#1f7a8c,stroke-width:2px,color:#181c22
     style IP1 fill:#ffffff,stroke:#a8420f,stroke-width:2px,color:#181c22
     style IP2 fill:#ffffff,stroke:#a8420f,stroke-width:2px,color:#181c22
     style HIST fill:#ffffff,stroke:#8d95a1,stroke-width:2px,color:#181c22
 ```
 
-**Nota:** `item-1` está parcialmente concluído (6 de 10) e ainda tem um `ItemParcial` em andamento em Furação; `item-2` já concluiu tudo. Isso é normal — cada item do mesmo pedido avança de forma independente pelo seu próprio roteiro.
+**Nota:** `item-1` está parcialmente concluído (6 de 10): no setor Estoque (etapa 1, inserida pelo backend) 6 unidades foram atendidas pelo saldo — split `IP0` concluído com a reserva `RES` — e as outras 4 seguem em Furação (`IP1`); `item-2` já concluiu tudo. Isso é normal — cada item do mesmo pedido avança de forma independente pelo seu próprio roteiro.
 
-## 20. Estados — Reserva de Estoque (proposta, não construído ainda)
+## 20. Estados — Reserva de Estoque (decidido em 24/09/2026, não construído ainda)
 
-> ⚠️ **Isto é proposta de design, não fato confirmado** — preenche a lacuna já identificada em [[Fluxo-Detalhado-Pedido-Item]] e [[Fluxo-Estoque-Completo]]: falta desenhar o mecanismo de expiração/liberação da reserva. Serve como ponto de partida pra discussão, não como decisão fechada.
+> ✅ **Decidido em 24/09/2026** ([[Encaixe-Estoque-Revenda-no-PCP]]): a proposta anterior (`CRIADA → CONFIRMADA`, com `EXPIRADA` por timeout) foi substituída. A reserva nasce `ATIVA` no setor Estoque, sempre sobre lote já liberado — na etapa 1 ou na volta do item comprado aprovado —, aponta para lote + `ItemParcial` e **não expira**: só vira `LIBERADA` por cancelamento explícito do pedido/OP.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> CRIADA : PCP marca "tem em estoque"
-    CRIADA --> CONFIRMADA : Qualidade aprova o lote
-    CRIADA --> EXPIRADA : timeout sem confirmacao
-    CONFIRMADA --> CONSUMIDA : item separado/expedido
-    CONFIRMADA --> LIBERADA : pedido cancelado
-    EXPIRADA --> [*]
+    [*] --> ATIVA : setor Estoque atende o split ou recebe o item comprado aprovado
+    ATIVA --> CONSUMIDA : saida fisica para a entrega
+    ATIVA --> LIBERADA : pedido ou OP cancelado
     CONSUMIDA --> [*]
     LIBERADA --> [*]
 
-    note right of EXPIRADA
-        Mecanismo de timeout ainda
-        nao definido - proposta em
-        aberto, ver Fluxo-Estoque-Completo
+    note right of ATIVA
+        Sem expiracao (24/09/2026).
+        Aponta para lote + ItemParcial.
+        So nasce sobre lote liberado.
     end note
 
     classDef estoqueStyle fill:#d9eef2,stroke:#1f7a8c,color:#181c22
-    class CRIADA,CONFIRMADA,EXPIRADA,CONSUMIDA,LIBERADA estoqueStyle
+    class ATIVA,CONSUMIDA,LIBERADA estoqueStyle
 ```
 
 ## 21. Mapa Geral — arquitetura de dados (av-hub × MES)
 
-> As duas bases lado a lado, só com o que é relevante pra Estoque/MES (Mapas, Qualidade, Comissão deliberadamente fora). Os **2 pontos de integração** (C1 e C19 do [[Fluxo-Compras-Completo]]) marcados explicitamente — é a única fronteira que ainda precisa de mecanismo técnico definido.
+> As duas bases lado a lado, só com o que é relevante pra Estoque/MES (Mapas, Qualidade, Comissão deliberadamente fora). Os pontos de integração marcados explicitamente: C1 (requisição, que desde 24/09/2026 nasce da entrada do parcial no setor Compras) e o status por item (Fluxo 3 da F1). O antigo C19 virou interno ao MES — Qualidade → setor Estoque — e a reserva liga Produção e Estoque dentro do mesmo banco.
 
 ```mermaid
 flowchart LR
@@ -1553,7 +1618,8 @@ flowchart LR
     CORE -.projecao read-only.-> ESTOQUEDB
     COMPRAS -.OC decidida aqui.-> ESTOQUEDB
     PROD -->|"C1: requisicao de compra"| COMPRAS
-    ESTOQUEDB -->|"C19: status disponivel"| VENDAS
+    ESTOQUEDB -->|"status por item - Fluxo 3"| VENDAS
+    PROD <-->|"setor Estoque: Reserva por ItemParcial"| ESTOQUEDB
 
     style AVHUB fill:#e3e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style MES fill:#f3ddd6,stroke:#a8420f,stroke-width:2px,color:#181c22
@@ -1565,7 +1631,7 @@ flowchart LR
     style ESTOQUEDB fill:#ffffff,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
 ```
 
-**Nota:** as duas setas `C1`/`C19` cruzando a fronteira dos bancos são exatamente os 2 pontos que dependem do "casamento av-hub↔MES" ainda não desenhado — ver [[Decisoes-Chave-ERP]]. Todo o resto do diagrama já existe ou já foi decidido.
+**Nota:** as duas setas cruzando a fronteira dos bancos (requisição e status por item) são os pontos do "casamento av-hub↔MES" — resolvido como polling REST na DEC-2, contratos em [[Integracao-AvHub-MES-Especificacao-F1]]. Todo o resto do diagrama já existe ou já foi decidido.
 
 ## 22. Fluxo de Dados — Omie até o Estoque
 
@@ -1597,6 +1663,7 @@ flowchart LR
 **Nota:** essa é a velocidade **hoje confirmada** (polling em camadas, sem webhook). Se "status por item em tempo real" (C19 do mapa acima) for levado a sério, esse desenho precisa de um caminho novo — não existe hoje.
 
 ## Ver também
+- [[Encaixe-Estoque-Revenda-no-PCP]] — o encaixe que revisou estes diagramas em 24/09/2026.
 - [[Fluxogramas-Completos]] — diagramas de atividade (equivalente UML), com raias por setor.
 - [[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]], [[Fluxo-Qualidade-Completo]], [[Fluxo-Producao-OS-OP-Completo]], [[Fluxo-Expedicao-Faturamento-Completo]], [[Fluxo-Estoque-Completo]] — diagramas de sequência.
 - [[Setores-Envolvidos-no-Fluxo]]
