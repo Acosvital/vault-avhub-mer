@@ -474,8 +474,8 @@ Nenhuma trava o início da execução. Estão aqui para não virarem descoberta 
 | **T-05** | A tela 3.6 (follow-up do CCP) é tela própria ou aba dentro de Ordens (3.3)? O frontend existente não tem nenhuma das duas | Nathan + dev do av-hub | Antes da E2 |
 | **T-06** | Faturamento integral travado por 1 item que nunca chega (10.2): muda pra parcial automaticamente ou exige decisão manual? | Comercial + Expedição | Antes da Fase D |
 | **T-07** | O vendedor confirma pedido a pedido (1.1)? E se nunca confirmar — o pedido fica represado, invisível pro PCP. SLA, liberação automática ou fila de represados? | Nathan + Comercial | Antes da E3 |
-| **T-08** | Setor Estoque com saldo zero (8.12): o parcial passa automático, só registrando o tempo, ou exige clique? *Sugestão: automático* (EN-01) | Robert | Antes da C6 |
-| **T-09** | O setor Estoque aparece duas vezes no roteiro da Revenda (início e fim). A 2.2 e o mini-roteiro da 2.3 hoje não aceitam setor repetido: o parcial passa a apontar a etapa, ou cadastram-se dois setores tipo Estoque? (EN-03) | Robert | Antes da C6 |
+| **T-08** | ~~Setor Estoque com saldo zero (8.12): o parcial passa automático, só registrando o tempo, ou exige clique?~~ ✅ **RESPONDIDO em 25/09/2026 (EN-01)**: exige clique — há casos de compra de matéria-prima cuja descrição não bate com a do produto vendido. | Robert | — |
+| **T-09** | ~~O setor Estoque aparece duas vezes no roteiro da Revenda (início e fim). O parcial passa a apontar a etapa, ou cadastram-se dois setores tipo Estoque?~~ ✅ **RESPONDIDO em 25/09/2026 (EN-03)**: o 1º Estoque é etapa fixa do roteiro; o 2º é adicionado manualmente na montagem do roteiro. | Robert | — |
 
 ## Onde o esforço se concentra
 

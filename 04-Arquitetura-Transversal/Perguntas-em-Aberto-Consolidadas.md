@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, pendencias, perguntas, consolidado]
 criado: 2026-09-21
-atualizado: 2026-09-24
+atualizado: 2026-09-25
 ---
 
 # Perguntas em aberto — lista consolidada
@@ -18,7 +18,9 @@ atualizado: 2026-09-24
 
 ## 0. FINALIZADO em 21/09/2026 — pendências reais que restam
 
-> **Atualizado em 22/09/2026**: DEC-4, DEC-6, DEC-8, N-05, N-06 e N-07 foram respondidas hoje — ver seções A e E abaixo para o detalhe de cada uma. **Total caiu de 16 para 10 pendências reais.**
+> **Atualizado em 22/09/2026**: DEC-4, DEC-6, DEC-8, N-05, N-06 e N-07 foram respondidas hoje — ver seções A e E abaixo para o detalhe de cada uma. **Total caiu de 16 para 9 pendências reais.**
+>
+> **Atualizado em 25/09/2026**: as 7 perguntas novas do bloco "Encaixe do Estoque e da Revenda" (EN-01 a EN-07, levantadas em 24/09) foram todas respondidas hoje — ver [[Encaixe-Estoque-Revenda-no-PCP]] seção 5. O bloco sai desta lista.
 
 De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o resto está decidido, aceito ou moot — arquivo completo nas seções abaixo). Nada aqui foi fabricado ou assumido por mim — são fatos de negócio, físicos ou de alocação que só quem está na operação sabe responder.
 
@@ -43,19 +45,9 @@ De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o r
 |---|---|---|
 | L-10 | Sobra/retalho de chapa volta ao estoque como material rastreável? Como se pesa o que sobra? Qual a unidade de controle de cada material (kg × peça × metro)? | Nathan + Almoxarifado + Produção |
 
-**Encaixe do Estoque e da Revenda no MES — 7 novas (24/09/2026)** — detalhe e sugestões em [[Encaixe-Estoque-Revenda-no-PCP]] seção 6
+**Total: 9 pendências reais**, todas fatos de negócio/operação — nenhuma técnica. O resto do documento abaixo é o arquivo completo, com a resposta e a justificativa de cada item já fechado.
 
-| ID | Pergunta | Quem |
-|---|---|---|
-| EN-01 | Saldo zero: o parcial passa automático pelo setor Estoque (registrando o tempo) ou exige clique? Sugestão: automático, e vale para todo parcial antes do marco zero (13/11) | Robert (C6) |
-| EN-02 | Nome na tela: manter "Fábrica" ou renomear para "Linha"? | Robert + Nathan |
-| EN-03 | Setor Estoque aparece duas vezes no roteiro da Revenda (início e fim). `ItemParcial` passa a apontar a etapa do roteiro, ou cadastram-se dois setores tipo `ESTOQUE`? | Robert (C6) |
-| EN-04 | Produto fabricado também deve terminar no Estoque, como o comprado? Hoje não | Nathan |
-| EN-05 | `Material.natureza` (cadastro D5) fica só como classificação do material, sem decidir rota? | Pablo + Robert |
-| EN-06 | Item comprado "não acabado" num roteiro sem setor de beneficiamento: volta à fila "Novo norte" para o PCP ajustar o roteiro? | PCP + Robert |
-| EN-07 | Confirmar no banco que `Pedidos.idUnidade` (UUID) é o mesmo id de `Material.codigoEmpresa` | Gustavo |
-
-**Total: 10 pendências reais** (era 16 até ontem), todas fatos de negócio/operação — nenhuma técnica. O resto do documento abaixo é o arquivo completo, com a resposta e a justificativa de cada item já fechado.
+> O bloco "Encaixe do Estoque e da Revenda no MES" (EN-01 a EN-07, levantado em 24/09) teve as 7 perguntas respondidas em 25/09/2026 — ver [[Encaixe-Estoque-Revenda-no-PCP]] seção 5. Não conta mais como pendência.
 
 ---
 

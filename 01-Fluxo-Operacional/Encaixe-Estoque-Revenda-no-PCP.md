@@ -1,12 +1,15 @@
 ---
 tags: [erp-acos-vital, fluxo-operacional, pcp, estoque, revenda, mes, decisao]
 criado: 2026-09-24
+atualizado: 2026-09-25
 fonte: "MES-Encaixe-Estoque-Revenda.pdf — Robert Wilson, 24/09/2026"
 ---
 
 # Encaixe do Estoque e da Revenda no fluxo do PCP (MES)
 
 > **Fonte única do encaixe.** Proposta do Robert ("MES — Encaixe do Estoque e da Revenda no fluxo do PCP", PDF de 24/09/2026 enviado ao Nathan), com uma regra complementar do Nathan no mesmo dia: **item comprado, depois de aprovado pela Qualidade, vai para o Estoque, não para a Expedição** (seção 3.4). As demais notas do vault apontam para cá em vez de repetir o detalhe.
+>
+> **Atualização de 25/09/2026:** as 7 perguntas da seção 6 (EN-01 a EN-07) foram todas respondidas — ver seção 5. A seção 6 fica vazia.
 >
 > **Conferido contra o código** do `app-pcp` (branch `develop`, 24/09/2026): a Carteira de Pedidos e a Nova Ordem de Produção já existem com backend real; as telas de Estoque e Qualidade do Pablo (D5, D8, D10) rodam sobre mock. Achados na seção 4.
 
@@ -43,16 +46,16 @@ O MES mantém o desenho **Fábrica → Setor → Roteiro → ItemParcial** e só
 
 | Fábrica | Roteiro |
 |---|---|
-| **Fabricação** (Flange hoje; outras linhas conforme cadastradas) | `ESTOQUE` → setores `PRODUTIVOS` da linha → Qualidade → entrega |
+| **Fabricação** (Flange hoje; outras linhas conforme cadastradas) | `ESTOQUE` → setores `PRODUTIVOS` da linha → Qualidade → **`ESTOQUE`** → entrega |
 | **Revenda** | `ESTOQUE` → `COMPRAS` → Recebimento → [beneficiamento, opcional] → Qualidade → **`ESTOQUE`** → entrega |
 
-O **backend insere o setor Estoque como etapa 1** de todo roteiro (substitui o papel que o setor Estoque tinha no sistema antigo). O setor "Emissão de Ordens" sai do roteiro.
+O **backend insere o setor Estoque como etapa 1** de todo roteiro (substitui o papel que o setor Estoque tinha no sistema antigo). O setor "Emissão de Ordens" sai do roteiro. **Atualização (25/09/2026, EN-03/EN-04):** o Estoque do início é sempre fixo (inserido pelo backend); o Estoque do fim — agora presente também na Fabricação, não só na Revenda (EN-04) — é adicionado manualmente na montagem do roteiro, não é automático.
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 35, 'rankSpacing': 45, 'padding': 12}}}%%
 flowchart LR
     subgraph FAB[Fabrica tipo FABRICACAO]
-        A1[ESTOQUE - etapa 1] --> A2[Setores PRODUTIVOS] --> A3[Qualidade] --> A4([Entrega])
+        A1[ESTOQUE - etapa 1] --> A2[Setores PRODUTIVOS] --> A3[Qualidade] --> A4b[ESTOQUE - entrada e reserva] --> A4([Entrega])
     end
     subgraph REV[Fabrica tipo REVENDA]
         B1[ESTOQUE - etapa 1] --> B2[COMPRAS] --> B3[Recebimento] --> B4[Beneficiamento - opcional] --> B5[Qualidade] --> B6[ESTOQUE - entrada e reserva] --> B7([Entrega])
@@ -64,6 +67,7 @@ flowchart LR
     style REV fill:#e3e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style A1 fill:#d9eef2,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style B1 fill:#d9eef2,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
+    style A4b fill:#d9eef2,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
     style B6 fill:#d9eef2,stroke:#1f7a8c,stroke-width:1.5px,color:#181c22
 ```
 
@@ -105,7 +109,7 @@ Um item que **não tem em estoque e é comprado** passa por todo o processo já 
 - **A reserva só nasce sobre lote liberado**, sempre no setor Estoque. Some a reserva "prevista" sobre um lote que ainda não chegou (proposta da seção 2.4 de [[Revisao-dos-Estados-e-Status]]) e o conflito com a regra "lote em quarentena não fica disponível".
 - **Genealogia coerente.** O lote comprado entra no saldo antes de sair, então a cadeia lote → item entregue (J4) fica igual para as duas origens.
 
-**O que não muda.** Reprovação na Qualidade continua voltando ao PCP (novo norte), com cisão de lote e RNC. Na **Fabricação**, Qualidade aprovada segue para a entrega; se o produto fabricado também deve passar pelo Estoque fica em aberto (seção 6).
+**O que não muda.** Reprovação na Qualidade continua voltando ao PCP (novo norte), com cisão de lote e RNC. **Atualização (25/09/2026, EN-04): na Fabricação a regra passa a ser a mesma do item comprado** — Qualidade aprovada também vai para o Estoque (entrada + reserva), não direto pra entrega. Ver seção 5.
 
 ### 3.5 Natureza por item, não fixa por produto
 
@@ -113,7 +117,7 @@ A natureza do item é o **tipo da fábrica escolhida naquela rodada**. Em emerg�
 
 Isso **substitui** o que [[Modelo-Destinacao-Item]] dizia (eixo 1 "praticamente fixo por tipo de material").
 
-> **Atenção ao cadastro de material do Pablo (D5):** `Material.natureza` (`MATERIA_PRIMA` \| `REVENDA`) existe na tela `cadastros/estoque/materiais`. Pela proposta, ele não decide rota. Pode ficar como classificação do material no estoque (o que é matéria-prima e o que é produto de revenda), sem papel no roteiro. Ver seção 6.
+> **Atenção ao cadastro de material do Pablo (D5):** `Material.natureza` (`MATERIA_PRIMA` \| `REVENDA`) existe na tela `cadastros/estoque/materiais`. Pela proposta, ele não decide rota. Pode ficar como classificação do material no estoque (o que é matéria-prima e o que é produto de revenda), sem papel no roteiro. **RESOLVIDO em 25/09/2026 — ver seção 5 (EN-05).**
 
 ### 3.6 Ligação item do pedido ↔ Material
 
@@ -148,7 +152,7 @@ Isso **substitui** o que [[Modelo-Destinacao-Item]] dizia (eixo 1 "praticamente 
 
 **O que o código de `develop` mostra hoje (24/09):**
 - `ordens-producao/novo/page.tsx` — item sem fábrica e nunca enviado é tratado como revenda e **fica fora do payload** ("não entra no controle de produção do PCP"). É o comportamento que a mudança 3 troca.
-- `toggleEtapaRoteiro` (mesmo arquivo) não deixa o mesmo setor entrar duas vezes no roteiro, e `ordens-producao/pipeline.ts` indexa a ordem por `idSetor`. A regra de 3.4 coloca o setor Estoque **no início e no fim** do roteiro da Revenda — ver seção 6.
+- `toggleEtapaRoteiro` (mesmo arquivo) não deixa o mesmo setor entrar duas vezes no roteiro, e `ordens-producao/pipeline.ts` indexa a ordem por `idSetor`. A regra de 3.4 coloca o setor Estoque **no início e no fim** do roteiro da Revenda — **RESOLVIDO em 25/09/2026 (EN-03): o 1º é fixo (inserido pelo backend), o 2º é adicionado manualmente na montagem do roteiro. Ver seção 5.**
 - `estoque-operacao/reservas/types.ts` — `Reserva` com `pedidoNumero` em texto, status `ATIVA | LIBERADA | EXPIRADA` e `dataExpiracao`. Troca pelo modelo de 3.7.
 - `estoque-operacao/movimentacao/types.ts` — `TipoMovimento = 'TRANSFERENCIA' | 'AJUSTE'`. Ganha `ENTRADA` e `SAIDA`.
 - `lib/mocks/estoqueOperacaoStore.ts` — o próprio comentário do mock diz que o modelo real de reserva "é decisão do Robert (D9)". Esta nota é essa decisão.
@@ -166,21 +170,17 @@ Isso **substitui** o que [[Modelo-Destinacao-Item]] dizia (eixo 1 "praticamente 
 | Fabricação × MP | Só produto acabado agora; MP na J3 | Fechada (Robert, 24/09) |
 | Reserva | Sem expiração; liberação explícita no cancelamento | Fechada (Robert, 24/09) |
 | Item comprado | Aprovado na Qualidade, vai para o Estoque (entrada + reserva), não para a Expedição | **Fechada (Nathan, 24/09)** |
-| `codigoEmpresa` | `idUnidade` do pedido é UUID, mesmo id do Material | Fechada (Robert) — **confirmar no banco** |
-| Saldo zero | Parcial passa automático pelo Estoque (registrando tempo) ou exige clique? | Em aberto (sugestão: automático) |
-| Nome na tela | Manter "Fábrica" ou renomear para "Linha" | Em aberto |
+| `codigoEmpresa` | `idUnidade` do pedido é UUID, mesmo id do Material | **Fechada (Gustavo, 25/09) — confirmado no banco, é o mesmo id (EN-07)** |
+| Saldo zero | **Exige clique** — há casos de compra de matéria-prima cuja descrição não bate com a do produto vendido, então não dá pra resolver automático sem risco de erro | **Fechada (25/09, EN-01)** |
+| Nome na tela | Renomeado para **"Destino"** (nem "Fábrica", nem "Linha") | **Fechada (Robert + Nathan, 25/09, EN-02)** |
+| Estoque duas vezes no roteiro da Revenda | O **1º Estoque é etapa fixa** do roteiro (inserida pelo backend); o **2º Estoque (fim) é adicionado manualmente** na montagem do roteiro — não é automático nem fixo como o primeiro | **Fechada (25/09, EN-03)** |
+| Produto fabricado termina no Estoque? | **Sim** — a regra de 3.4 (Qualidade → Estoque, não Expedição) passa a valer também para o produto fabricado, não só o comprado | **Fechada (Nathan, 25/09, EN-04)** |
+| `Material.natureza` × natureza por rodada | Fica **só como classificação** do material no estoque — serve pra filtro, relatório e distinguir matéria-prima de produto de revenda no saldo, mas **não decide a rota nem trava a escolha da fábrica**. No máximo, a tela Ordem de Produção pode usá-lo pra **sugerir** a fábrica padrão, e o PCP troca quando precisar | **Fechada (Pablo + Robert, 25/09, EN-05)** |
+| Comprado "não acabado" sem setor de beneficiamento no roteiro | Usa o **roteiro individual do item** — foge do roteiro padrão definido, ajustado item a item | **Fechada (PCP + Robert, 25/09, EN-06)** |
 
 ## 6. Em aberto
 
-| # | Pergunta | Sugestão | Decide |
-|---|---|---|---|
-| 1 | **Saldo zero:** o parcial passa automático pelo setor Estoque (registrando o tempo) ou exige um clique? | Automático. Vale também para todo parcial antes do marco zero (13/11). | Robert, na C6 |
-| 2 | **Nome na tela:** "Fábrica" ou "Linha"? | — | Robert + Nathan |
-| 3 | **Setor Estoque duas vezes no roteiro da Revenda** (início e fim, regra de 3.4). Hoje o front impede setor repetido e indexa a etapa pelo setor. | (a) O `ItemParcial` passa a apontar a **etapa** do roteiro (ordem), não só o setor — mais correto; ou (b) dois setores tipo `ESTOQUE` ("Estoque · atendimento" e "Estoque · entrada"), sem mexer no motor. | Robert, na C6 |
-| 4 | **Produto fabricado também termina no Estoque?** A regra de 3.4 vale para item comprado. | Manter Qualidade → entrega na Fabricação até alguém pedir o contrário. | Nathan |
-| 5 | **`Material.natureza` do cadastro (D5)** conflita com "natureza por rodada"? | Manter como classificação do material, sem papel na rota. | Pablo + Robert |
-| 6 | **Comprado "não acabado" sem setor de beneficiamento no roteiro.** A flag acabado/não-acabado continua decidindo contra o que o Recebimento confere; se o roteiro não previu o beneficiamento, quem ajusta? | Volta para a fila "Novo norte" do PCP, que ajusta o roteiro do parcial. | PCP + Robert |
-| 7 | **`codigoEmpresa` = `idUnidade`**: confirmar no banco que o UUID do pedido bate com o do Material. | — | Gustavo |
+Vazio — as 7 perguntas (EN-01 a EN-07) foram todas respondidas em 25/09/2026. Ver seção 5.
 
 ## 7. Impacto no cronograma
 

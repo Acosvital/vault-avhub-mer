@@ -10,7 +10,7 @@ atualizado: 2026-09-24
 >
 > **Adendo do mesmo dia (21/09, à tarde):** auditoria de um dump de produção fresco (`dump-avhub_prd_db-202609210741.sql`) contra o código real de `api-acos-vital` e `api-pcp` achou que **5 contratos SQL e 1 contrato de API que este vault marcava como "proposta" já estão aplicados em produção**, e um risco novo (schema `negocio`/`core_compras` — ver abaixo). Detalhe completo em [[Auditoria-Dump-Producao-2026-09-21]]. As seções 3, 5 e 6 abaixo já refletem isso.
 
-> **Adendo de 24/09/2026 — encaixe do Estoque e da Revenda no MES.** O Robert fechou como o Estoque e a Revenda entram no fluxo Carteira → Ordem de Produção → execução, e o Nathan acrescentou a regra do item comprado (aprovado na Qualidade, vai para o Estoque, não para a Expedição). Tudo em [[Encaixe-Estoque-Revenda-no-PCP]]. Efeito no quadro: **C6** muda de conteúdo (tipos de Fábrica/Setor, fábrica Revenda, Estoque como etapa 1), **C7** passa a ser disparada pelo setor Compras, **C8** encolhe para a fila "Novo norte", **D6/D8/D9** ganham o modelo de reserva e a entrada do item comprado. Também registrado: a **Carteira de Pedidos** e a tela **Ordem de Produção** já rodam no `app-pcp` `develop` (23-24/09) — o critério de pronto da **C4** ("itens do pedido de venda disponíveis no MES por número do pedido") parece atendido, falta o Robert confirmar — e as telas de Estoque e Qualidade do Pablo (D5, D8, D10) estão em `develop` sobre mock. 7 perguntas novas (EN-01 a EN-07) em [[Perguntas-em-Aberto-Consolidadas]].
+> **Adendo de 24/09/2026 — encaixe do Estoque e da Revenda no MES.** O Robert fechou como o Estoque e a Revenda entram no fluxo Carteira → Ordem de Produção → execução, e o Nathan acrescentou a regra do item comprado (aprovado na Qualidade, vai para o Estoque, não para a Expedição). Tudo em [[Encaixe-Estoque-Revenda-no-PCP]]. Efeito no quadro: **C6** muda de conteúdo (tipos de Fábrica/Setor, fábrica Revenda, Estoque como etapa 1), **C7** passa a ser disparada pelo setor Compras, **C8** encolhe para a fila "Novo norte", **D6/D8/D9** ganham o modelo de reserva e a entrada do item comprado. Também registrado: a **Carteira de Pedidos** e a tela **Ordem de Produção** já rodam no `app-pcp` `develop` (23-24/09) — o critério de pronto da **C4** ("itens do pedido de venda disponíveis no MES por número do pedido") parece atendido, falta o Robert confirmar — e as telas de Estoque e Qualidade do Pablo (D5, D8, D10) estão em `develop` sobre mock. 7 perguntas novas (EN-01 a EN-07) em [[Perguntas-em-Aberto-Consolidadas]] — **todas respondidas em 25/09/2026**, ver [[Encaixe-Estoque-Revenda-no-PCP]] seção 5.
 
 ## 1. Em uma frase
 
@@ -45,7 +45,7 @@ Detalhes de cada marco em [[Cronograma-2-Meses]].
 | Contratos SQL (6) e de API (2) | [[Indice-Contratos]] | **5 SQL + 1 API já aplicados em produção** (confirmado por [[Auditoria-Dump-Producao-2026-09-21]] em 21/09); 1 invalidado (006); só o API 002 (Estoque/MES) segue genuinamente proposta |
 | Modelo de rastreabilidade, custódia e SLA | [[Rastreabilidade-e-SLA-de-Eventos]], [[Campos-e-API-para-Rastreabilidade]] | **Proposta**, para a spec F1 |
 | Protótipo de tela (Torre de Fluxo) | [Artifact](https://claude.ai/artifact/SS4C4srRk9cr66UHUS2rE3) | Dados fictícios; não é sistema |
-| Perguntas em aberto consolidadas | [[Perguntas-em-Aberto-Consolidadas]] | **Finalizada em 21/09**: de ~60 perguntas, só 16 pendências reais restam (seção 0 da nota) — o resto foi decidido, aceito ou ficou moot ao longo do dia |
+| Perguntas em aberto consolidadas | [[Perguntas-em-Aberto-Consolidadas]] | Atualizada em 25/09: de ~60 perguntas, só 9 pendências reais restam (seção 0 da nota) — o resto foi decidido, aceito ou ficou moot |
 | Vault unificado e nota de entrada | [[Comece-Aqui]] | — |
 
 ## 4. O que está construído de verdade
@@ -78,7 +78,7 @@ S2 a S4 e o fechamento seguem o [[Cronograma-2-Meses]]; entram neste quadro quan
 
 ## 6. O que está bloqueando ou em risco agora
 
-> **Reorganizado em 21/09/2026.** A lista completa e atualizada de pendências reais vive só em [[Perguntas-em-Aberto-Consolidadas]] seção 0 (16 itens) — não duplicada aqui, pra não ter duas fontes de verdade desalinhando. Esta seção lista só os riscos de **cronograma/execução**, não as perguntas de negócio em si.
+> **Reorganizado em 21/09/2026, contagem atualizada em 25/09.** A lista completa e atualizada de pendências reais vive só em [[Perguntas-em-Aberto-Consolidadas]] seção 0 (9 itens) — não duplicada aqui, pra não ter duas fontes de verdade desalinhando. Esta seção lista só os riscos de **cronograma/execução**, não as perguntas de negócio em si.
 
 1. **DEC-4 é o único bloqueio real de amanhã.** Trava a D1 (schema Prisma do Estoque), que começa 22/09. DEC-6 e DEC-8 têm prazo 25/09, sem trava imediata. As outras 8 DEC (incluindo a nova DEC-12) já foram decididas — ver [[Decisoes-Chave-ERP]].
 2. **Início um dia depois do previsto.** O marco M1 (25/09) tem um dia útil a menos — vira a pergunta N-07, ainda sem resposta.
