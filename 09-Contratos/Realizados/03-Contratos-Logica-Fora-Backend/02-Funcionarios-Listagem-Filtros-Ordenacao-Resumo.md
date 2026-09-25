@@ -1,5 +1,19 @@
 # Contrato — Funcionários: filtro, busca, ordenação, paginação e resumo no servidor
 
+> **✅ Implementado e confirmado ao vivo contra `api-test.acosvital.com.br` em 25/09/2026.** Todos os
+> itens do "5. Aceite" testados com dado real (197 funcionários): busca `q` sem acento/caixa em
+> nome+e-mail+cargo+setor (4 termos, cada um batendo exatamente com o esperado), `sort=data_admissao
+> &order=desc` ordenando de fato com nulos no fim, paginação estável (197 únicos em 197, sem repetir
+> nem pular), `GET /funcionarios/resumo` batendo com a listagem em 8 combinações de filtro
+> (unidade/situação/pendência/busca), `situacao` e `pendencias` corretas nas 197 linhas,
+> `campos=completo` na listagem recusado (400), documentos nunca na visão lista.
+> Mascaramento de CPF/RG/CNPJ testado por permissão: quem tem `pode_editar` vê completo, quem só
+> visualiza vê mascarado (`documentos_mascarados: true`), e reenviar o valor mascarado no PUT é
+> recusado (400) sem apagar o real.
+> **Front adaptado** (`components/Funcionarios/useFuncionarios.ts` e o restante da tela, que passam a
+> chamar a API paginada em vez de baixar tudo) — testado localmente contra o mesmo ambiente, **ainda
+> não commitado/deployado**.
+
 **Criado em:** 20/09/2026, ao oficializar a tela nova de Funcionários (`components/Funcionarios/`).
 
 **Princípio:** filtro, busca, ordenação, paginação e agregação são responsabilidade do **banco/API**.

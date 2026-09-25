@@ -68,13 +68,17 @@ Contratos de detalhe (os consolidados apontam para eles):
   [[003-Requisicao-Compra-Integracao-MES]] e [[004-Referencia-OC-Integracao-MES]].
 - **[[13-Fornecedores-por-Produto]]** — fornecedor por produto (relacionado a Compras/Comissão).
 
+**Já entregue e confirmado ao vivo em `api-test` (25/09/2026):** [[02-Funcionarios-Listagem-Filtros-Ordenacao-Resumo]]
+e [[03-Funcionarios-Cadastro-Organograma-Transacional]] — movidos para
+`Realizados/03-Contratos-Logica-Fora-Backend/`. O front (`components/Funcionarios/*`) já foi
+adaptado e testado contra o mesmo ambiente, mas **só localmente — ainda não commitado no `av-hub`**;
+as marcas `GAMBIARRA(` de F1–F7 continuam no repositório até esse commit acontecer.
+
 ## Contratos abertos criados no ciclo de 20/09/2026
 
 | Contrato | Cobre | Itens |
 |---|---|---|
-| [[02-Funcionarios-Listagem-Filtros-Ordenacao-Resumo]] | Funcionários: busca/filtros/ordenação/paginação/resumo, situação e pendências no banco, projeção de campos | F1–F7 |
-| [[03-Funcionarios-Cadastro-Organograma-Transacional]] | Salvar/excluir funcionário com o organograma numa transação; ciclo validado no backend | — |
-| [[04-Vagas-Fila-Decisao-no-Banco]] | Solicitações de vagas: filtros/ordem/resumo, custo gerado, decisão com `pode_decidir` e histórico | V1–V8 |
+| [[04-Vagas-Fila-Decisao-no-Banco]] | Solicitações de vagas: filtros/ordem/resumo, custo gerado, decisão com `pode_decidir` e histórico. Backend pronto e confirmado (3 de 4 itens do Aceite); falta ligar `VAGAS_TRAVAS_DECISAO` (depende de conceder `pode_aprovar` e o front usar `/decisao`) e adaptar `components/Vagas/*` | V1–V8 |
 | [[05-Pedidos-Notas-Dashboards-Agregacao-no-Banco]] | Pedidos, Notas e Dashboards: agrupamento por pedido, prazo, blacklist, indicadores e agregados no banco | P1–P8, N1–N3, D1–D3 |
 | [[06-Permissoes-e-Escopo-no-Banco]] | Identidade propagada, permissão por ação, escopos, perfis como dado, auditoria, rate limit | S1–S11 |
 | [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | Orçamento e coordenadores fora do repositório, com filtro/paginação/ordem no servidor | O1–O5, C1–C3 |

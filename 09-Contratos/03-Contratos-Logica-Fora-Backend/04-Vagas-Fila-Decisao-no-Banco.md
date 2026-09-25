@@ -1,5 +1,21 @@
 # Contrato — Solicitações de vagas: fila, decisão e permissões no banco
 
+> **🟡 Backend implementado, mas o contrato NÃO está fechado — testado ao vivo em
+> `api-test.acosvital.com.br` em 25/09/2026.** 3 dos 4 itens do "5. Aceite" passam: `custo_total`
+> nunca diverge de `quantidade × (...)` mesmo mandando outro valor no corpo; `GET /vagas/resumo` bate
+> com a soma da listagem; toda decisão aparece em `vagas_decisoes` com quem e quando (histórico
+> confirmado, incluindo uma decisão "legado" de um PUT direto). **O item que falta é o que dá
+> segurança ao contrato:** com `VAGAS_TRAVAS_DECISAO` **desligada** (padrão do ambiente, de
+> propósito — ver comentário no topo de `src/routes/vagas.js`), um usuário com `pode_editar` e SEM
+> `pode_decidir` consegue chamar `POST /vagas/{id}/decisao` e mudar `situacao` via `PUT` sem
+> restrição — nenhum 403, nenhum 400 `SITUACAO_SO_PELA_DECISAO`. O código já trata os dois casos
+> corretamente quando a chave está ligada; ela só está desligada esperando duas coisas, na ordem: (1)
+> conceder `pode_aprovar` na tela `solicitacoes-de-vagas` a quem decide (a tela de Permissões já tem o
+> switch — ver `BulkPermissaoModal.tsx`, adicionado em 25/09), e (2) o front de Vagas passar a chamar
+> `/decisao` em vez de `PUT` direto. **O front de Vagas (`components/Vagas/*`) ainda não foi
+> adaptado** — só a tela de Permissões (pré-requisito) foi. Continua aberto até isso acontecer e o
+> item 1 do Aceite ser reconfirmado com a chave ligada.
+
 **Criado em:** 20/09/2026, ao oficializar a tela nova de Solicitações de vagas (`components/Vagas/`).
 
 **Princípio:** listagem, filtro, ordenação, agregação, cálculo de custo **e quem pode decidir** são

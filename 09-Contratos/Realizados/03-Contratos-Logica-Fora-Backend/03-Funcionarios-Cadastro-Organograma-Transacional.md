@@ -1,5 +1,16 @@
 # Contrato — Funcionários: salvar/excluir com o organograma numa operação só
 
+> **✅ Implementado e confirmado ao vivo contra `api-test.acosvital.com.br` em 25/09/2026.** Os 3
+> itens do "4. Aceite": dois usuários fechando ciclo ao mesmo tempo — exatamente 1 recebe 409
+> `CICLO_HIERARQUIA` (3/3 rodadas concorrentes testadas); falha no organograma desfaz o cadastro
+> inteiro (POST com superior de outro setor: 400 `SUPERIOR_INVALIDO`, nada gravado — confirmado
+> buscando pelo nome depois); excluir um superior com 5 subordinados manuais é uma chamada e todos
+> voltam ao automático (`subordinados_liberados`). Também testado: `GET /funcionarios/{id}` devolve
+> `reporta_a_id` (manual) e `reporta_a_efetivo_id` (o que vale hoje); superior desligado é recusado;
+> `GET /funcionarios/{id}/equipe` traz os subordinados diretos efetivos, na visão lista.
+> **Front adaptado** (aba "Equipe" nova no `FuncionarioPainel`, ciclo tratado pelo 409 do backend em
+> vez de subir a cadeia no navegador) — testado localmente, **ainda não commitado/deployado**.
+
 **Criado em:** 20/09/2026, ao oficializar a tela nova de Funcionários.
 
 **Problema:** hoje, salvar um funcionário é uma **sequência de chamadas feitas pelo navegador**, sem
