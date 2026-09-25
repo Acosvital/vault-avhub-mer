@@ -1,13 +1,12 @@
 # Contrato — Solicitações de vagas: fila, decisão e permissões no banco
 
 > **🟡 Backend implementado, mas o contrato NÃO está fechado — testado ao vivo em
-> `api-test.acosvital.com.br` em 25/09/2026.** 3 dos 4 itens do "5. Aceite" passam: `custo_total`
-> nunca diverge de `quantidade × (...)` mesmo mandando outro valor no corpo; `GET /vagas/resumo` bate
+> `api-test.acosvital.com.br` em 25/09/2026.** 3 dos 4 itens do "5. Aceite" passam: `custo_total` nunca diverge de `quantidade × (...)` mesmo mandando outro valor no corpo; `GET /vagas/resumo` bate
 > com a soma da listagem; toda decisão aparece em `vagas_decisoes` com quem e quando (histórico
 > confirmado, incluindo uma decisão "legado" de um PUT direto). **O item que falta é o que dá
 > segurança ao contrato:** com `VAGAS_TRAVAS_DECISAO` **desligada** (padrão do ambiente, de
 > propósito — ver comentário no topo de `src/routes/vagas.js`), um usuário com `pode_editar` e SEM
-> `pode_decidir` consegue chamar `POST /vagas/{id}/decisao` e mudar `situacao` via `PUT` sem
+> `pode_aprovar` consegue chamar `POST /vagas/{id}/decisao` e mudar `situacao` via `PUT` sem
 > restrição — nenhum 403, nenhum 400 `SITUACAO_SO_PELA_DECISAO`. O código já trata os dois casos
 > corretamente quando a chave está ligada; ela só está desligada esperando duas coisas, na ordem: (1)
 > conceder `pode_aprovar` na tela `solicitacoes-de-vagas` a quem decide (a tela de Permissões já tem o
@@ -95,8 +94,10 @@ só exibe uma prévia (o mesmo cálculo, apenas para feedback enquanto digita).
 
 `POST /vagas/{id}/decisao` com `{ "situacao": "aprovado|reprovado|pendente", "observacao": "…" }`:
 
-- exige a permissão **`pode_decidir`** na tela `solicitacoes-de-vagas` (nova ação na matriz de
-  permissões; hoje inferida por combinação de outras). Quem tem só `pode_editar` **não** decide;
+- exige a permissão **`pode_aprovar`** na tela `solicitacoes-de-vagas` (renomeada de `pode_decidir`
+  — decisão de 24/09/2026: reaproveita a MESMA flag `pode_aprovar` já criada para Compras/B9, em vez
+  de uma ação nova só para Vagas; a matriz de permissões ganha uma coluna, não duas). Quem tem só
+  `pode_editar` **não** decide;
 - só altera `situacao`, `observacao_situacao`, `decidido_por` (id do usuário autenticado) e
   `decidido_em` (timestamp gravado pelo banco) — nunca outros campos;
 - registra histórico (`vagas_decisoes`: vaga, situação anterior/nova, observação, usuário, quando);
@@ -116,12 +117,12 @@ equivalente), lido pelo banco ao calcular `atencao`/`com_atencao`.
   fatiamento e `resumir`.
 - `acoes.ts`: `decidirSolicitacao` vira `POST /vagas/{id}/decisao`; `payloadDoForm` deixa de enviar
   `custo_total` e `situacao`.
-- `VagaPainel.tsx`/`VagasLista.tsx`: `aprovador = can('pode_decidir')`; some o `canOnly`.
+- `VagaPainel.tsx`/`VagasLista.tsx`: `aprovador = can('pode_aprovar')`; some o `canOnly`.
 - `helpers.ts`: some `DIAS_PENDENTE_ATENCAO`; `textoRelativo` fica só para exibir.
 
 ## 5. Aceite
 
-- Um usuário com `pode_editar` sem `pode_decidir` recebe `403` ao chamar `/decisao` e não consegue mudar
+- Um usuário com `pode_editar` sem `pode_aprovar` recebe `403` ao chamar `/decisao` e não consegue mudar
   `situacao` via `PUT`.
 - `custo_total` nunca diverge de `quantidade × (…)`, mesmo se o cliente mandar outro valor.
 - `GET /vagas/resumo` bate com a contagem/soma das listagens filtradas.
