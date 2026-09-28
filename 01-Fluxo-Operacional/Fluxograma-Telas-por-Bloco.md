@@ -235,14 +235,16 @@ O pedido nasce no **Omie** e o polling entrega ao **av-hub, e só ao av-hub** �
 
 | # | Tela | Funcionalidades | Estado | Tarefa |
 |---|---|---|---|---|
-| 1.1 | **Caixa de entrada do vendedor** | Pedidos recém-chegados do Omie, ainda não liberados; marcação de **acompanhamento da Qualidade (sim/não)**; confirma e envia ao PCP. Nada chega à Carteira sem passar aqui | 🆕 | **sem tarefa** ⚠️ |
+| 1.1 | **Caixa de entrada do vendedor** | Pedidos recém-chegados do Omie, ainda não liberados; marcação de **acompanhamento da Qualidade (sim/não)**; confirma e envia ao PCP. Nada chega à Carteira sem passar aqui | 🔧 feita no av-hub (local, 28/09) | **[[26-Vendas-Liberacao-Pedido]]** |
 | 1.2 | **Meus Pedidos — etapa por item** | Etapa atual de cada item (as 11 etapas de `/itens/status`); linha do tempo das transições; quantidade em cada etapa (item pode estar partido); SLA até a previsão de faturamento; filtro por etapa | 🔧 evolução | **E3** |
 
 **Funcionalidade de dado, não de tela:** a etapa vem do **Fluxo 3** de [[Integracao-AvHub-MES-Especificacao-F1]] (`GET /itens/status`, polling 1–2 min), projetado em `itens_pedido_status` no av-hub para a tela não re-pollar o MES a cada carregamento.
 
 **A marcação da Qualidade é capturada agora, consumida depois.** O campo nasce na tela 1.1 neste ciclo; a fila que ele alimenta (inspeção de processo, tela 9.5) segue fora da Fase B — ver bloco 9.
 
-⚠️ **A tela 1.1 é escopo novo, sem tarefa no [[Cronograma-2-Meses]]**, e cria uma **quarta travessia av-hub↔MES** que a spec [[Integracao-AvHub-MES-Especificacao-F1]] não cobre — ela tem três fluxos. Ver [[Fluxo-Sistema-no-Meio]] para o detalhe e o risco de pedido represado.
+**Atualização 28/09/2026:** a tela 1.1 foi construída (branch `feat/vendas-liberacao-pedidos` do av-hub, testada no local) junto com a visão do gerente (*Liberação da equipe*), e a quarta travessia virou o **Fluxo 4** (`GET /pedidos_liberados`, o MES faz polling) — contrato [[26-Vendas-Liberacao-Pedido]]. Decisões: marcação por pedido, só pedidos novos (data de corte), editável até o MES importar.
+
+~~⚠️ **A tela 1.1 é escopo novo, sem tarefa no [[Cronograma-2-Meses]]**, e cria uma **quarta travessia av-hub↔MES** que a spec [[Integracao-AvHub-MES-Especificacao-F1]] não cobre — ela tem três fluxos. Ver [[Fluxo-Sistema-no-Meio]] para o detalhe e o risco de pedido represado.~~
 
 ---
 

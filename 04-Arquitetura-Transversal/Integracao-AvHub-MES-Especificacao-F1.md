@@ -131,6 +131,15 @@ Corresponde à conversa **C19** de [[Fluxo-Compras-Completo]] e ao ponto de inte
 
 > **Relação com a proposta de rastreabilidade completa ([[Rastreabilidade-e-SLA-de-Eventos]]):** aquele documento propõe substituir este endpoint por um feed de eventos mais genérico (`origem`, `ator`, `autorizado_por`, `passou_para` etc.), cobrindo Compras, Comercial, Recebimento, Qualidade e Estoque, não só Fabricação/Recebimento. Este documento **não implementa essa versão completa** — ela foi conscientemente movida para a S5 (19/11–18/12, ver [[Cronograma-2-Meses]] seção 3.1), para não estourar a folga de 9% do plano de 2 meses. O formato de `/itens/status` acima já nasce **compatível por construção** com essa evolução: `etapa`, `ocorrido_em` e a chave composta acima podem crescer para o envelope completo de evento (`ator`, `autorizado_por`, `setor`, `passou_para`) por adição de coluna, sem mudar a forma de paginação/cursor nem quebrar o que for implementado agora. Isso é a leitura do "mínimo recomendado" da seção "Impacto no cronograma" daquele documento.
 
+## 4b. Fluxo 4 — Pedidos liberados pelo vendedor (av-hub → MES) — acrescentado em 28/09/2026
+
+Mesmo princípio 2 (quem tem o dado expõe, quem precisa faz polling): o av-hub expõe
+`GET /pedidos_liberados?alterado_desde=&codigo_empresa=` com **só** os pedidos em que o vendedor já
+marcou o acompanhamento da Qualidade; o MES troca a origem da Carteira (hoje `/vendas_planilha`) por
+ele, lê os itens em `/pedidos_liberados/{numero}/itens` (409 se não liberado) e confirma a
+importação em `POST /pedidos_liberados/{numero}/importado`. Contrato completo:
+[[26-Vendas-Liberacao-Pedido]].
+
 ## 5. Tabelas novas necessárias no av-hub (ainda sem contrato SQL)
 
 | Tabela proposta | Motivo | Bloqueia |

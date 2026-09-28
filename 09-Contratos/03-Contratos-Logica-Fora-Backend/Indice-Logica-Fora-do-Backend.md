@@ -23,6 +23,16 @@ Para listar tudo no repositório `av-hub`: `grep -rn "GAMBIARRA(" app components
 (hoje são 57 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
 contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contratos-Logica-Fora-Backend/`.
 
+## Novo: módulo de Vendas (28/09/2026)
+
+- **[[26-Vendas-Liberacao-Pedido]]** — o pedido que chega do Omie fica travado até o vendedor marcar
+  se a **Qualidade acompanha desde o início** (Sim/Não); só pedido marcado vai ao MES, que faz GET
+  (polling) no novo **Fluxo 4** (`/pedidos_liberados`). Tela do vendedor (*Liberar pedidos*) e do
+  gerente (*Liberação da equipe*, só leitura). Banco, API e telas testados no local; SQL nos
+  apêndices, patch da API em `26-anexos/`. Pendente: DBA/backend aplicarem (L1–L3), `api-pcp` trocar
+  a origem da Carteira (L4). A partir deste contrato, **o contrato vive no vault** (não mais em
+  `av-hub/docs/ENVIAR - *`); as marcas `GAMBIARRA(` apontam para cá.
+
 ## Prioridade: módulo de Compras
 
 **Já entregue:** [[01-Compras-Fluxo-Completo]] (requisição → OC → régua de aprovação), backend

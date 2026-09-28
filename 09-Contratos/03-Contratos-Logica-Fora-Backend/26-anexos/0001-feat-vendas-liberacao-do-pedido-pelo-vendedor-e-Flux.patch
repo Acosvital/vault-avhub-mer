@@ -1,0 +1,607 @@
+From cd926c4f6eea5fea99a7ae694c57ce54f19b09a2 Mon Sep 17 00:00:00 2001
+From: oluccaa <101234415+oluccaa@users.noreply.github.com>
+Date: Mon, 28 Sep 2026 14:29:34 -0300
+Subject: [PATCH] feat(vendas): liberacao do pedido pelo vendedor e Fluxo 4
+ para o MES
+
+GET/PUT /pedidos_liberacao (caixa do vendedor) e GET /pedidos_liberados,
+GET /pedidos_liberados/:numero/itens, POST /pedidos_liberados/:numero/importado
+(MES faz polling; pedido sem marcacao nao aparece).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app.js                        |   4 +
+ src/middlewares/escopoVendedor.js |   3 +
+ src/routes/pedidos_liberacao.js   | 289 ++++++++++++++++++++++++++++++
+ src/routes/pedidos_liberados.js   | 247 +++++++++++++++++++++++++
+ 4 files changed, 543 insertions(+)
+ create mode 100644 src/routes/pedidos_liberacao.js
+ create mode 100644 src/routes/pedidos_liberados.js
+
+diff --git a/src/app.js b/src/app.js
+index 45463b6..7bcf3fa 100644
+--- a/src/app.js
++++ b/src/app.js
+@@ -238,6 +238,8 @@ import pedidosVendasParcelasRouter            from "./routes/pedidos_vendas_parc
+ import pedidosComprasRouter                   from "./routes/pedidos_compras.js";
+ import pedidosComprasItensRouter              from "./routes/pedidos_compras_itens.js";
+ import pedidoObservacaoPcpRouter              from "./routes/pedido_observacao_pcp.js";
++import pedidosLiberacaoRouter                from "./routes/pedidos_liberacao.js";   // caixa de liberação do vendedor (acompanhamento da Qualidade)
++import pedidosLiberadosRouter                 from "./routes/pedidos_liberados.js";   // Fluxo 4 av-hub -> MES: só pedidos liberados
+ import comprasRequisicoesRouter               from "./routes/compras_requisicoes.js";
+ import comprasOrdensRouter                    from "./routes/compras_ordens.js";
+ import comprasParceirosRouter                 from "./routes/compras_parceiros.js";
+@@ -1871,6 +1873,8 @@ app.use("/pedidos_vendas_parcelas",                                       pedido
+ app.use("/pedidos_compras",                                               pedidosComprasRouter);
+ app.use("/pedidos_compras_itens",                                         pedidosComprasItensRouter);
+ app.use("/pedido_observacao_pcp",                                         pedidoObservacaoPcpRouter);
++app.use("/pedidos_liberacao", pedidosLiberacaoRouter);
++app.use("/pedidos_liberados", pedidosLiberadosRouter);
+ // Módulo de Compras. /compras/fornecedores e /compras/transportadoras saem
+ // do mesmo router, porque os dois são projeção de core.parceiros.
+ app.use("/compras/requisicoes",                                           comprasRequisicoesRouter);
+diff --git a/src/middlewares/escopoVendedor.js b/src/middlewares/escopoVendedor.js
+index 6fa5a36..7925c61 100644
+--- a/src/middlewares/escopoVendedor.js
++++ b/src/middlewares/escopoVendedor.js
+@@ -46,6 +46,9 @@ const ROTAS = {
+   pedido_venda_itens:          { params: ["codigo_vendedor_omie"], formato: "unico", empresa: true },
+   pedidos_vendas:              { formato: "dono", dono: "pedido_omie" },
+   pedido_observacao_pcp:       { formato: "dono", dono: "observacao" },
++  // Caixa de liberação: lista pelo par EMPRESA:CODIGO; o PUT
++  // /pedidos_liberacao/:empresa/:numero confere o dono do pedido.
++  pedidos_liberacao:           { params: ["vendedor"], formato: "par", detalhe: "pedido_venda" },
+ };
+ const ROTAS_DASHBOARD = {
+   vendedor: { params: ["vendedor"], formato: "par" },
+diff --git a/src/routes/pedidos_liberacao.js b/src/routes/pedidos_liberacao.js
+new file mode 100644
+index 0000000..bd11ae5
+--- /dev/null
++++ b/src/routes/pedidos_liberacao.js
+@@ -0,0 +1,289 @@
++import { Router } from "express";
++import { QueryTypes } from "sequelize";
++import sequelize from "../db.js";
++import { handleSequelizeError } from "../utils/errorHandler.js";
++
++// Liberação do pedido de venda pelo VENDEDOR (caixa de entrada do av-hub).
++// Contrato 26 do vault-avhub-mer: 09-Contratos/03-Contratos-Logica-Fora-Backend/26-Vendas-Liberacao-Pedido.md.
++//
++// O pedido chega do Omie e fica travado até o vendedor marcar se a Qualidade
++// acompanha desde o início (SIM/NÃO). Só pedido marcado é visto pelo MES
++// (/pedidos_liberados). A regra de quem entra na caixa, o status e a trava
++// depois da importação do MES são do BANCO (vw_pedidos_liberacao e as
++// triggers de pedidos_vendas_liberacao); esta rota só filtra, pagina e grava.
++//
++// GRÃO: (codigo_empresa, numero_pedido) — o PEDIDO, não a parcial. As parciais
++// que o pipeline cria depois herdam a marcação.
++const router = Router();
++
++const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
++const STATUS = new Set(["pendente", "liberado", "importado", "todos"]);
++
++// Chave da query -> coluna. O desempate fixo (empresa, número) mantém a ordem
++// estável entre páginas quando duas linhas empatam na coluna escolhida.
++const ORDENAVEIS = {
++  data_inclusao: "v.data_inclusao",
++  data_previsao: "to_date(nullif(v.data_previsao, ''), 'DD/MM/YYYY')",
++  total_pedido_venda: "v.total_pedido_venda",
++  cliente: "v.cliente",
++  numero_pedido: "v.numero_pedido",
++  liberado_em: "v.liberado_em",
++};
++
++const NOME_USUARIO = (alias) =>
++  `(SELECT coalesce(f.nome_completo, u.username)
++      FROM auth.usuarios u LEFT JOIN core.funcionarios f ON f.id = u.id_funcionario
++     WHERE u.id = ${alias})`;
++
++const COLUNAS = `
++  v.codigo_empresa, v.filial, v.numero_pedido, v.codigo_pedido_omie,
++  v.data_inclusao, v.hora_inclusao, v.data_previsao,
++  v.codigo_cliente, v.cliente, v.razao_social_destinatario, v.cnpj_cpf_destinatario,
++  v.codigo_vendedor, v.vendedor, v.etapa, v.etapa_descricao, v.situacao, v.total_pedido_venda,
++  v.status_liberacao, v.acompanhamento_qualidade,
++  v.liberado_em, v.liberado_por, ${NOME_USUARIO("v.liberado_por")} AS nome_liberado_por,
++  v.liberacao_alterada_em, v.alterado_por, ${NOME_USUARIO("v.alterado_por")} AS nome_alterado_por,
++  v.importado_mes_em`;
++
++class ErroParametro extends Error {}
++
++// vendedor=EMPRESA:CODIGO,EMPRESA:CODIGO — o mesmo código Omie existe em
++// unidades diferentes para pessoas diferentes, por isso o par.
++function parseVendedores(bruto) {
++  if (bruto === undefined || bruto === "") return null;
++  if (typeof bruto !== "string") throw new ErroParametro("vendedor deve aparecer uma vez só (lista separada por vírgula)");
++  const pares = bruto.split(",").map((s) => s.trim()).filter(Boolean).map((p) => {
++    const [emp, cod] = p.split(":");
++    if (!UUID.test(emp ?? "") || !/^\d+$/.test(cod ?? "")) {
++      throw new ErroParametro(`vendedor inválido: "${p}" (formato EMPRESA_UUID:CODIGO_VENDEDOR)`);
++    }
++    return { emp: emp.toLowerCase(), cod };
++  });
++  if (pares.length > 50) throw new ErroParametro("vendedor aceita no máximo 50 pares");
++  return pares;
++}
++
++function montarFiltros(query) {
++  const where = [];
++  const rep = {};
++
++  const vendedores = parseVendedores(query.vendedor);
++  if (vendedores) {
++    where.push(`(${vendedores.map((_, i) => `(v.codigo_empresa = :ve${i}::uuid AND v.codigo_vendedor = :vc${i})`).join(" OR ")})`);
++    vendedores.forEach((v, i) => { rep[`ve${i}`] = v.emp; rep[`vc${i}`] = v.cod; });
++  }
++  if (query.codigo_empresa) {
++    if (!UUID.test(String(query.codigo_empresa))) throw new ErroParametro("codigo_empresa deve ser um uuid");
++    where.push("v.codigo_empresa = :empresa::uuid");
++    rep.empresa = query.codigo_empresa;
++  }
++  const busca = typeof query.busca === "string" ? query.busca.trim() : "";
++  if (busca) {
++    where.push("(v.numero_pedido ILIKE :busca OR v.cliente ILIKE :busca OR v.razao_social_destinatario ILIKE :busca OR v.vendedor ILIKE :busca)");
++    rep.busca = `%${busca.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
++  }
++  return { where, rep };
++}
++
++/**
++ * @swagger
++ * tags:
++ *   name: Vendas — Liberação do pedido
++ *   description: >
++ *     Caixa de entrada do vendedor. O pedido que chega do Omie fica travado até
++ *     o vendedor marcar se a Qualidade acompanha desde o início (SIM/NÃO); só
++ *     então o MES o enxerga em /pedidos_liberados. Grão: o PEDIDO
++ *     (codigo_empresa + numero_pedido), não a parcial.
++ *
++ * /pedidos_liberacao:
++ *   get:
++ *     summary: Pedidos na caixa de entrada do vendedor (ou da equipe, sem ?vendedor=)
++ *     tags: ['Vendas — Liberação do pedido']
++ *     security:
++ *       - ApiKeyAuth: []
++ *     description: >
++ *       Entram os pedidos incluídos a partir de parametros_vendas.data_inicio_liberacao
++ *       que ainda estão Pendentes, e os já liberados (esses continuam visíveis
++ *       depois de faturados). `contagem` traz os totais por status com os mesmos
++ *       filtros, sem o de status — é o número das abas.
++ *     parameters:
++ *       - { in: query, name: vendedor, schema: { type: string }, description: "EMPRESA_UUID:CODIGO,... (com token e escopo de vendedor, a API preenche e confere)" }
++ *       - { in: query, name: codigo_empresa, schema: { type: string, format: uuid } }
++ *       - { in: query, name: status, schema: { type: string, enum: [pendente, liberado, importado, todos], default: pendente } }
++ *       - { in: query, name: busca, schema: { type: string }, description: "número do pedido, cliente ou vendedor" }
++ *       - { in: query, name: sort, schema: { type: string, enum: [data_inclusao, data_previsao, total_pedido_venda, cliente, numero_pedido, liberado_em], default: data_inclusao } }
++ *       - { in: query, name: order, schema: { type: string, enum: [asc, desc], default: desc } }
++ *       - { in: query, name: page, schema: { type: integer, default: 1 } }
++ *       - { in: query, name: limit, schema: { type: integer, default: 25, maximum: 200 } }
++ *     responses:
++ *       200:
++ *         description: "{ total, page, limit, total_pages, contagem: { pendente, liberado, importado }, data_inicio_liberacao, data: [...] }"
++ *       400:
++ *         description: Parâmetro inválido
++ */
++router.get("/", async (req, res) => {
++  try {
++    const status = String(req.query.status || "pendente");
++    if (!STATUS.has(status)) {
++      return res.status(400).json({ detail: "status deve ser pendente, liberado, importado ou todos" });
++    }
++    const sortKey = String(req.query.sort || "data_inclusao");
++    const coluna = ORDENAVEIS[sortKey];
++    if (!coluna) {
++      return res.status(400).json({ detail: `sort deve ser um de: ${Object.keys(ORDENAVEIS).join(", ")}` });
++    }
++    const order = String(req.query.order || "desc").toLowerCase() === "asc" ? "ASC" : "DESC";
++    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
++    const limit = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 25));
++
++    const { where, rep } = montarFiltros(req.query);
++    const base = where.length ? `WHERE ${where.join(" AND ")}` : "";
++
++    // Um passo só: a view é cara (vw_vendas_planilha por baixo), então lê uma
++    // vez e deriva página, total e contagem por status do mesmo conjunto.
++    const linhas = await sequelize.query(
++      `WITH base AS MATERIALIZED (
++         SELECT ${COLUNAS}, ${coluna} AS _ordem
++           FROM core_vendas_faturamento.vw_pedidos_liberacao v
++           ${base}
++       ), filtrado AS (
++         SELECT * FROM base WHERE :status = 'todos' OR status_liberacao = :status
++       )
++       SELECT f.*,
++              (SELECT count(*) FROM filtrado)::int AS _total,
++              (SELECT json_build_object(
++                  'pendente',  count(*) FILTER (WHERE status_liberacao = 'pendente'),
++                  'liberado',  count(*) FILTER (WHERE status_liberacao = 'liberado'),
++                  'importado', count(*) FILTER (WHERE status_liberacao = 'importado'))
++                 FROM base) AS _contagem
++         FROM filtrado f
++        ORDER BY f._ordem ${order} NULLS LAST, f.codigo_empresa, f.numero_pedido
++        LIMIT :limit OFFSET :offset`,
++      { replacements: { ...rep, status, limit, offset: (page - 1) * limit }, type: QueryTypes.SELECT }
++    );
++
++    let total = linhas[0]?._total;
++    let contagem = linhas[0]?._contagem;
++    if (linhas.length === 0) {
++      // Página vazia (ou além do fim): a contagem ainda precisa voltar.
++      const [c] = await sequelize.query(
++        `SELECT count(*) FILTER (WHERE status_liberacao = 'pendente')::int  AS pendente,
++                count(*) FILTER (WHERE status_liberacao = 'liberado')::int  AS liberado,
++                count(*) FILTER (WHERE status_liberacao = 'importado')::int AS importado
++           FROM core_vendas_faturamento.vw_pedidos_liberacao v ${base}`,
++        { replacements: rep, type: QueryTypes.SELECT }
++      );
++      contagem = c;
++      total = status === "todos" ? c.pendente + c.liberado + c.importado : c[status];
++    }
++
++    const [param] = await sequelize.query(
++      "SELECT data_inicio_liberacao FROM core_vendas_faturamento.parametros_vendas WHERE id = 1",
++      { type: QueryTypes.SELECT }
++    );
++
++    return res.json({
++      total: total ?? 0,
++      page,
++      limit,
++      total_pages: Math.ceil((total ?? 0) / limit),
++      contagem: contagem ?? { pendente: 0, liberado: 0, importado: 0 },
++      data_inicio_liberacao: param?.data_inicio_liberacao ?? null,
++      data: linhas.map(({ _ordem, _total, _contagem, ...l }) => l),
++    });
++  } catch (err) {
++    if (err instanceof ErroParametro) return res.status(400).json({ detail: err.message });
++    return handleSequelizeError(err, res);
++  }
++});
++
++/**
++ * @swagger
++ * /pedidos_liberacao/{codigo_empresa}/{numero_pedido}:
++ *   put:
++ *     summary: Libera o pedido (ou corrige a marcação antes de o MES importar)
++ *     tags: ['Vendas — Liberação do pedido']
++ *     security:
++ *       - ApiKeyAuth: []
++ *     description: >
++ *       Primeira chamada libera o pedido (liberado_por = updated_by); as
++ *       seguintes só trocam a marcação. Depois que o MES confirma a importação
++ *       (POST /pedidos_liberados/{numero}/importado) responde 409
++ *       PEDIDO_IMPORTADO_MES. Com token de usuário, updated_by é o do token.
++ *     parameters:
++ *       - { in: path, name: codigo_empresa, required: true, schema: { type: string, format: uuid } }
++ *       - { in: path, name: numero_pedido, required: true, schema: { type: string } }
++ *     requestBody:
++ *       required: true
++ *       content:
++ *         application/json:
++ *           schema:
++ *             type: object
++ *             required: [acompanhamento_qualidade, updated_by]
++ *             properties:
++ *               acompanhamento_qualidade: { type: boolean, description: "true = Qualidade acompanha desde o início" }
++ *               updated_by: { type: string, format: uuid }
++ *     responses:
++ *       200: { description: O pedido, no mesmo formato de um item do GET }
++ *       400: { description: Corpo inválido }
++ *       404: { description: Pedido fora da caixa de entrada (não existe, anterior à data de corte, cancelado/faturado sem liberação, ou não é pedido líquido) }
++ *       409: { description: PEDIDO_IMPORTADO_MES }
++ */
++router.put("/:codigo_empresa/:numero_pedido", async (req, res) => {
++  try {
++    const { codigo_empresa: empresa, numero_pedido: numero } = req.params;
++    const { acompanhamento_qualidade: acompanha, updated_by: usuario } = req.body ?? {};
++
++    if (!UUID.test(empresa)) return res.status(400).json({ detail: "codigo_empresa deve ser um uuid" });
++    if (typeof acompanha !== "boolean") {
++      return res.status(400).json({ detail: "acompanhamento_qualidade é obrigatório e deve ser true ou false" });
++    }
++    if (!usuario || !UUID.test(String(usuario))) {
++      return res.status(400).json({ detail: "updated_by é obrigatório e deve ser um uuid (vem da sessão no BFF)" });
++    }
++
++    const [atual] = await sequelize.query(
++      `SELECT status_liberacao, importado_mes_em FROM core_vendas_faturamento.vw_pedidos_liberacao
++        WHERE codigo_empresa = :empresa::uuid AND numero_pedido = :numero`,
++      { replacements: { empresa, numero }, type: QueryTypes.SELECT }
++    );
++    if (!atual) {
++      return res.status(404).json({
++        codigo: "PEDIDO_FORA_DA_LIBERACAO",
++        detail: `Pedido ${numero} não está na caixa de liberação desta unidade.`,
++      });
++    }
++    if (atual.status_liberacao === "importado") {
++      // A trigger também barra; checar antes dá o código próprio (409).
++      return res.status(409).json({
++        codigo: "PEDIDO_IMPORTADO_MES",
++        detail: `Pedido ${numero} já foi importado pelo PCP: o acompanhamento da Qualidade não pode mais ser alterado aqui.`,
++      });
++    }
++
++    await sequelize.query(
++      `INSERT INTO core_vendas_faturamento.pedidos_vendas_liberacao
++              (codigo_empresa, numero_pedido, acompanhamento_qualidade, liberado_por, updated_by)
++       VALUES (:empresa::uuid, :numero, :acompanha, :usuario::uuid, :usuario::uuid)
++       ON CONFLICT (codigo_empresa, numero_pedido) DO UPDATE
++          SET acompanhamento_qualidade = EXCLUDED.acompanhamento_qualidade,
++              updated_by = EXCLUDED.updated_by`,
++      { replacements: { empresa, numero, acompanha, usuario }, type: QueryTypes.INSERT }
++    );
++
++    const [linha] = await sequelize.query(
++      `SELECT ${COLUNAS} FROM core_vendas_faturamento.vw_pedidos_liberacao v
++        WHERE v.codigo_empresa = :empresa::uuid AND v.numero_pedido = :numero`,
++      { replacements: { empresa, numero }, type: QueryTypes.SELECT }
++    );
++    return res.json(linha);
++  } catch (err) {
++    const codigo = err.original?.code ?? err.parent?.code;
++    if (codigo === "23503") {
++      return res.status(400).json({ detail: "updated_by não corresponde a nenhum usuário cadastrado" });
++    }
++    return handleSequelizeError(err, res);
++  }
++});
++
++export default router;
+diff --git a/src/routes/pedidos_liberados.js b/src/routes/pedidos_liberados.js
+new file mode 100644
+index 0000000..04c685e
+--- /dev/null
++++ b/src/routes/pedidos_liberados.js
+@@ -0,0 +1,247 @@
++import { Router } from "express";
++import { QueryTypes } from "sequelize";
++import sequelize from "../db.js";
++import { handleSequelizeError } from "../utils/errorHandler.js";
++import PedidoVendaItensRouter from "./vw_pedido_venda_itens.js";
++
++// Fluxo 4 da integração av-hub <-> MES: pedidos LIBERADOS pelo vendedor.
++// Contrato 26 do vault-avhub-mer: 09-Contratos/03-Contratos-Logica-Fora-Backend/26-Vendas-Liberacao-Pedido.md.
++//
++// Mesmo padrão dos fluxos 1-3 (DEC-2): quem tem o dado expõe, quem precisa faz
++// polling. O av-hub não empurra nada; o MES lê daqui por alterado_desde.
++//
++//   GET  /pedidos_liberados                      carteira do PCP (só liberados)
++//   GET  /pedidos_liberados/:numero/itens        itens — 409 se não liberado
++//   POST /pedidos_liberados/:numero/importado    MES confirma a importação;
++//                                                a marcação trava no av-hub
++//
++// Pedido sem marcação NÃO aparece aqui: é isso que impede o MES de puxá-lo.
++const router = Router();
++
++const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
++
++// Os nomes de /vendas_planilha (que a Carteira do MES já lê) mais os da
++// liberação: trocar a URL no api-pcp basta, o parse atual continua valendo.
++const COLUNAS = `
++  v.codigo_pedido_omie, v.codigo_empresa, v.filial, v.numero_pedido AS pedido_venda,
++  v.data_inclusao, v.data_previsao,
++  v.cliente AS destinatario, v.razao_social_destinatario, v.codigo_cliente,
++  v.vendedor, v.codigo_vendedor, v.etapa, v.etapa_descricao, v.situacao,
++  v.total_pedido_venda,
++  v.status_liberacao, v.acompanhamento_qualidade,
++  v.liberado_em, v.liberacao_alterada_em, v.importado_mes_em`;
++
++async function buscarLiberacao(empresa, numero) {
++  const [linha] = await sequelize.query(
++    `SELECT ${COLUNAS} FROM core_vendas_faturamento.vw_pedidos_liberacao v
++      WHERE v.codigo_empresa = :empresa::uuid AND v.numero_pedido = :numero`,
++    { replacements: { empresa, numero }, type: QueryTypes.SELECT }
++  );
++  return linha ?? null;
++}
++
++function empresaObrigatoria(req, res) {
++  const empresa = req.query.codigo_empresa;
++  if (!empresa || !UUID.test(String(empresa))) {
++    res.status(400).json({ detail: "codigo_empresa (uuid da unidade do pedido) é obrigatório" });
++    return null;
++  }
++  return String(empresa);
++}
++
++const naoLiberado = (res, numero) => res.status(409).json({
++  codigo: "PEDIDO_NAO_LIBERADO",
++  detail: `Pedido ${numero} ainda não foi liberado pelo vendedor (acompanhamento da Qualidade não marcado).`,
++});
++
++/**
++ * @swagger
++ * tags:
++ *   name: Integração MES — Pedidos liberados (Fluxo 4)
++ *   description: >
++ *     Pedidos de venda que o vendedor liberou no av-hub, marcando se a Qualidade
++ *     acompanha desde o início. É a única fonte de pedidos para a Carteira do
++ *     MES: pedido sem marcação não aparece. O MES faz polling por alterado_desde.
++ *
++ * /pedidos_liberados:
++ *   get:
++ *     summary: Pedidos liberados (carteira do PCP)
++ *     tags: ['Integração MES — Pedidos liberados (Fluxo 4)']
++ *     security:
++ *       - ApiKeyAuth: []
++ *     description: >
++ *       Polling: passe alterado_desde (ISO 8601) com o maior liberacao_alterada_em
++ *       já lido; a ordem é liberacao_alterada_em crescente. Sem alterado_desde,
++ *       a lista vem por data de inclusão, mais recente primeiro (tela), e
++ *       aceita mes/ano como /vendas_planilha. Campos com os mesmos nomes de
++ *       /vendas_planilha, mais acompanhamento_qualidade e os da liberação.
++ *     parameters:
++ *       - { in: query, name: codigo_empresa, schema: { type: string, format: uuid } }
++ *       - { in: query, name: alterado_desde, schema: { type: string, format: date-time } }
++ *       - { in: query, name: mes, schema: { type: integer, minimum: 1, maximum: 12 } }
++ *       - { in: query, name: ano, schema: { type: integer } }
++ *       - { in: query, name: importado, schema: { type: boolean }, description: "false = só os que o MES ainda não confirmou" }
++ *       - { in: query, name: page, schema: { type: integer, default: 1 } }
++ *       - { in: query, name: limit, schema: { type: integer, default: 50, maximum: 200 } }
++ *     responses:
++ *       200: { description: "{ total, page, limit, total_pages, data: [...] }" }
++ *       400: { description: Parâmetro inválido }
++ */
++router.get("/", async (req, res) => {
++  try {
++    const where = ["v.status_liberacao IN ('liberado', 'importado')"];
++    const rep = {};
++    const q = req.query;
++
++    if (q.codigo_empresa) {
++      if (!UUID.test(String(q.codigo_empresa))) return res.status(400).json({ detail: "codigo_empresa deve ser um uuid" });
++      where.push("v.codigo_empresa = :empresa::uuid");
++      rep.empresa = q.codigo_empresa;
++    }
++    const polling = q.alterado_desde !== undefined && q.alterado_desde !== "";
++    if (polling) {
++      if (Number.isNaN(Date.parse(String(q.alterado_desde)))) {
++        return res.status(400).json({ detail: "alterado_desde deve ser uma data/hora ISO 8601" });
++      }
++      where.push("v.liberacao_alterada_em > :desde::timestamptz");
++      rep.desde = q.alterado_desde;
++    }
++    if (q.mes || q.ano) {
++      const mes = parseInt(q.mes, 10);
++      const ano = parseInt(q.ano, 10);
++      if (!(mes >= 1 && mes <= 12) || !(ano >= 2000 && ano <= 2100)) {
++        return res.status(400).json({ detail: "mes (1-12) e ano vão juntos" });
++      }
++      where.push("date_part('month', v.data_inclusao) = :mes AND date_part('year', v.data_inclusao) = :ano");
++      Object.assign(rep, { mes, ano });
++    }
++    if (q.importado === "true") where.push("v.importado_mes_em IS NOT NULL");
++    if (q.importado === "false") where.push("v.importado_mes_em IS NULL");
++
++    const page = Math.max(1, parseInt(q.page, 10) || 1);
++    const limit = Math.min(200, Math.max(1, parseInt(q.limit, 10) || 50));
++    const ordem = polling
++      ? "v.liberacao_alterada_em ASC, v.codigo_empresa, v.numero_pedido"
++      : "v.data_inclusao DESC, v.codigo_empresa, v.numero_pedido";
++
++    const linhas = await sequelize.query(
++      `SELECT ${COLUNAS}, count(*) OVER ()::int AS _total
++         FROM core_vendas_faturamento.vw_pedidos_liberacao v
++        WHERE ${where.join(" AND ")}
++        ORDER BY ${ordem}
++        LIMIT :limit OFFSET :offset`,
++      { replacements: { ...rep, limit, offset: (page - 1) * limit }, type: QueryTypes.SELECT }
++    );
++    const total = linhas[0]?._total ?? 0;
++    return res.json({
++      total, page, limit, total_pages: Math.ceil(total / limit),
++      data: linhas.map(({ _total, ...l }) => l),
++    });
++  } catch (err) {
++    return handleSequelizeError(err, res);
++  }
++});
++
++/**
++ * @swagger
++ * /pedidos_liberados/{numero}/itens:
++ *   get:
++ *     summary: Itens de um pedido liberado
++ *     tags: ['Integração MES — Pedidos liberados (Fluxo 4)']
++ *     security:
++ *       - ApiKeyAuth: []
++ *     description: >
++ *       Mesma resposta de GET /pedido_venda_itens/{numero} (aceita os mesmos
++ *       parâmetros, ex. sequencial=0), mais o objeto `liberacao`. Pedido não
++ *       liberado responde 409 PEDIDO_NAO_LIBERADO.
++ *     parameters:
++ *       - { in: path, name: numero, required: true, schema: { type: string } }
++ *       - { in: query, name: codigo_empresa, required: true, schema: { type: string, format: uuid } }
++ *     responses:
++ *       200: { description: Pedido e itens }
++ *       404: { description: Pedido não existe na unidade ou está fora da liberação }
++ *       409: { description: PEDIDO_NAO_LIBERADO }
++ */
++router.get("/:numero/itens", async (req, res, next) => {
++  try {
++    const empresa = empresaObrigatoria(req, res);
++    if (!empresa) return;
++    const numero = req.params.numero;
++    const lib = await buscarLiberacao(empresa, numero);
++    if (!lib) return res.status(404).json({ detail: `Pedido ${numero} não está entre os pedidos de liberação desta unidade.` });
++    if (lib.status_liberacao === "pendente") return naoLiberado(res, numero);
++
++    // Reaproveita o handler de /pedido_venda_itens/:numero_pedido: a resposta
++    // é idêntica à que o api-pcp já lê, só que atrás do portão da liberação.
++    const liberacao = {
++      acompanhamento_qualidade: lib.acompanhamento_qualidade,
++      liberado_em: lib.liberado_em,
++      importado_mes_em: lib.importado_mes_em,
++    };
++    const json = res.json.bind(res);
++    res.json = (body) => json(res.statusCode < 300 && body && typeof body === "object" && !Array.isArray(body)
++      ? { ...body, liberacao }
++      : body);
++    const qs = new URLSearchParams(req.query).toString();
++    req.url = `/${encodeURIComponent(numero)}${qs ? `?${qs}` : ""}`;
++    return PedidoVendaItensRouter(req, res, next);
++  } catch (err) {
++    return handleSequelizeError(err, res);
++  }
++});
++
++/**
++ * @swagger
++ * /pedidos_liberados/{numero}/importado:
++ *   post:
++ *     summary: MES confirma que importou o pedido
++ *     tags: ['Integração MES — Pedidos liberados (Fluxo 4)']
++ *     security:
++ *       - ApiKeyAuth: []
++ *     description: >
++ *       Depois disso o vendedor não troca mais a marcação no av-hub. Idempotente:
++ *       confirmar de novo devolve 200 com a data da primeira confirmação.
++ *     parameters:
++ *       - { in: path, name: numero, required: true, schema: { type: string } }
++ *       - { in: query, name: codigo_empresa, required: true, schema: { type: string, format: uuid } }
++ *     requestBody:
++ *       content:
++ *         application/json:
++ *           schema:
++ *             type: object
++ *             properties:
++ *               referencia: { type: string, maxLength: 60, description: "id do pedido/OP no MES, para rastrear" }
++ *     responses:
++ *       200: { description: O pedido liberado, com importado_mes_em }
++ *       404: { description: Pedido fora da liberação }
++ *       409: { description: PEDIDO_NAO_LIBERADO }
++ */
++router.post("/:numero/importado", async (req, res) => {
++  try {
++    const empresa = empresaObrigatoria(req, res);
++    if (!empresa) return;
++    const numero = req.params.numero;
++    const referencia = req.body?.referencia ?? null;
++    if (referencia !== null && (typeof referencia !== "string" || referencia.length > 60)) {
++      return res.status(400).json({ detail: "referencia deve ser texto de até 60 caracteres" });
++    }
++
++    const lib = await buscarLiberacao(empresa, numero);
++    if (!lib) return res.status(404).json({ detail: `Pedido ${numero} não está entre os pedidos de liberação desta unidade.` });
++    if (lib.status_liberacao === "pendente") return naoLiberado(res, numero);
++
++    if (!lib.importado_mes_em) {
++      await sequelize.query(
++        `UPDATE core_vendas_faturamento.pedidos_vendas_liberacao
++            SET importado_mes_em = now(), importado_mes_referencia = :referencia
++          WHERE codigo_empresa = :empresa::uuid AND numero_pedido = :numero AND importado_mes_em IS NULL`,
++        { replacements: { empresa, numero, referencia }, type: QueryTypes.UPDATE }
++      );
++    }
++    return res.json(await buscarLiberacao(empresa, numero));
++  } catch (err) {
++    return handleSequelizeError(err, res);
++  }
++});
++
++export default router;
+-- 
+2.53.0.windows.1
+
