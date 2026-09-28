@@ -1,5 +1,7 @@
 # Contrato — Cotação de moeda automática (PTAX do Banco Central) na Ordem de Compra
 
+> **✅ Backend entregue pelo DBA — conferido em 28/09/2026:** rotas `GET /cotacoes_moeda/atual` e `?data=` no ar e a OC guarda `cotacao_data`/`cotacao_origem`. **`core.cotacoes_moeda` está vazia na `api-test`** (404 "Nenhuma cotação encontrada para USD"): falta o job da PTAX da pipeline (L1 do [[23-Compras-Pipeline-Consolidado]]) gravar nesse banco.
+
 **Criado em:** 23/09/2026.
 
 **Objetivo:** quando o comprador emite uma OC em moeda estrangeira (USD ou EUR), o campo

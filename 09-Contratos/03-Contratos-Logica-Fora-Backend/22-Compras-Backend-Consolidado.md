@@ -1,5 +1,7 @@
 # Contrato — Compras: tudo o que falta no BACKEND (banco + API)
 
+> **✅ Backend entregue pelo DBA — conferido em 28/09/2026:** conferido no código (`origin/develop` até `04de3fe`) e ao vivo na `api-test`: B1 (`bigint`), B2, B3 (número fora de `CAMPOS`), B4 (`/fila-omie`, `PATCH /:id/sincronizacao`, `POST /:id/reenviar`), B5 (`nome_fornecedor`), B6, B7 (4 catálogos respondem), B8 (`/compras/ordens/resumo`, `/compras/requisicoes/resumo`, `/compras/parametros` → limite R$ 30.000), B9 (`pode_aprovar`), B13/B15 (23514 vira mensagem), B14 (`/unidades?compra=true` → Mogi e Uberaba). **Pendente: B0** — em produção as rotas novas não existem (`/compras/ordens/resumo` cai em `/:id`, `/compras/pedidos-venda` 404). **Catálogos vazios na `api-test`** (condições de pagamento, contas correntes, categorias, compradores): dependem da pipeline gravar lá.
+
 **Criado em:** 23/09/2026 · **Revisado em:** 24/09/2026 · **Para:** DBA e backend (`api-acos-vital`)
 
 **Este documento substitui, como lista de trabalho,** `ENVIAR - compras/01 - DBA - banco.md` e

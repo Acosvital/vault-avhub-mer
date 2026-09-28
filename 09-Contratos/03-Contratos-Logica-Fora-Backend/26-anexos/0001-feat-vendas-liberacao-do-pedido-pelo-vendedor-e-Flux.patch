@@ -1,4 +1,4 @@
-From cd926c4f6eea5fea99a7ae694c57ce54f19b09a2 Mon Sep 17 00:00:00 2001
+From a6695b9bb6ef74d0ffc5c5c8ef2e69b9ca4469b3 Mon Sep 17 00:00:00 2001
 From: oluccaa <101234415+oluccaa@users.noreply.github.com>
 Date: Mon, 28 Sep 2026 14:29:34 -0300
 Subject: [PATCH] feat(vendas): liberacao do pedido pelo vendedor e Fluxo 4
@@ -19,10 +19,10 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  create mode 100644 src/routes/pedidos_liberados.js
 
 diff --git a/src/app.js b/src/app.js
-index 45463b6..7bcf3fa 100644
+index 3993098..8baa6a8 100644
 --- a/src/app.js
 +++ b/src/app.js
-@@ -238,6 +238,8 @@ import pedidosVendasParcelasRouter            from "./routes/pedidos_vendas_parc
+@@ -239,6 +239,8 @@ import pedidosVendasParcelasRouter            from "./routes/pedidos_vendas_parc
  import pedidosComprasRouter                   from "./routes/pedidos_compras.js";
  import pedidosComprasItensRouter              from "./routes/pedidos_compras_itens.js";
  import pedidoObservacaoPcpRouter              from "./routes/pedido_observacao_pcp.js";
@@ -31,7 +31,7 @@ index 45463b6..7bcf3fa 100644
  import comprasRequisicoesRouter               from "./routes/compras_requisicoes.js";
  import comprasOrdensRouter                    from "./routes/compras_ordens.js";
  import comprasParceirosRouter                 from "./routes/compras_parceiros.js";
-@@ -1871,6 +1873,8 @@ app.use("/pedidos_vendas_parcelas",                                       pedido
+@@ -1882,6 +1884,8 @@ app.use("/pedidos_vendas_parcelas",                                       pedido
  app.use("/pedidos_compras",                                               pedidosComprasRouter);
  app.use("/pedidos_compras_itens",                                         pedidosComprasItensRouter);
  app.use("/pedido_observacao_pcp",                                         pedidoObservacaoPcpRouter);
@@ -41,7 +41,7 @@ index 45463b6..7bcf3fa 100644
  // do mesmo router, porque os dois são projeção de core.parceiros.
  app.use("/compras/requisicoes",                                           comprasRequisicoesRouter);
 diff --git a/src/middlewares/escopoVendedor.js b/src/middlewares/escopoVendedor.js
-index 6fa5a36..7925c61 100644
+index 5131127..ea1de74 100644
 --- a/src/middlewares/escopoVendedor.js
 +++ b/src/middlewares/escopoVendedor.js
 @@ -46,6 +46,9 @@ const ROTAS = {

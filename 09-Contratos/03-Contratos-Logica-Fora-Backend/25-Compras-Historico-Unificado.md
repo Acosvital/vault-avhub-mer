@@ -1,5 +1,7 @@
 # Contrato — Compras: histórico único (OC do av-hub + pedido de compra antigo do Omie)
 
+> **✅ Backend entregue pelo DBA — conferido em 28/09/2026:** `vw_ordens_compra_historico` (migration 025) e a API no ar na `api-test`: `GET /compras/ordens?origem=todas|av-hub|omie` e `/compras/ordens/resumo` com `por_origem`. **Atrás da chave `HISTORICO_UNIFICADO`**: sem ela e sem `?origem=`, só `av-hub`. Sem dados para ver a unificação (espelho vazio no teste). **Front (badge de origem, detalhe só-leitura do Omie, KPIs) não feito.** A migration 025 não está no repositório da API — o SQL fica com o DBA.
+
 **Criado em:** 24/09/2026 · **Para:** DBA, backend (`api-acos-vital`), pipeline e av-hub
 
 Estende a decisão do [[24-Compras-Vinculo-Pedido-Venda]] (que já resolve isso só dentro do card

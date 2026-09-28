@@ -16,7 +16,7 @@ de 25/09 + esta feature no container `api-acos-vital-vendas`; av-hub na branch
 |---|---|---|
 | Banco — estrutura | [Apêndice A](#apêndice-a--estrutura) | DBA |
 | Banco — telas e permissões | [Apêndice B](#apêndice-b--telas-e-permissões) | DBA |
-| API | `26-anexos/0001-feat-vendas-liberacao-...patch` (sobre a `develop` em `75425ee`; branch local `feat/vendas-liberacao-pedidos` do clone `Desktop/api-acos-vital`) | backend |
+| API | `26-anexos/0001-feat-vendas-liberacao-...patch` (sobre a `develop` em `04de3fe`, aplica limpo; branch local `feat/vendas-liberacao-pedidos` do clone `Desktop/api-acos-vital`) | backend |
 | Tela | av-hub, branch `feat/vendas-liberacao-pedidos` | já feito |
 
 ---

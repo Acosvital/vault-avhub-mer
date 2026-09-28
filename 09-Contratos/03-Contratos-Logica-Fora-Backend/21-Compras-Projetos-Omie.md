@@ -1,5 +1,7 @@
 # Contrato — Projetos do Omie no av-hub (banco e pipeline)
 
+> **✅ Backend entregue pelo DBA — conferido em 28/09/2026:** `GET /projetos?codigo_empresa=&ativo=&q=` no ar (200, paginado). **`core.projetos` vazia na `api-test`**: falta a pipeline carregar (`SYNC_PROJETOS`, [[23-Compras-Pipeline-Consolidado]]). `nome_projeto` no detalhe da OC já trata projeto apagado no Omie (`19927fe`).
+
 **Criado em:** 23/09/2026.
 
 **Objetivo:** o campo **Projeto** da Ordem de Compra deixar de ser texto livre e virar uma lista

@@ -33,6 +33,17 @@ contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contr
   a origem da Carteira (L4). A partir deste contrato, **o contrato vive no vault** (não mais em
   `av-hub/docs/ENVIAR - *`); as marcas `GAMBIARRA(` apontam para cá.
 
+## Compras: backend do DBA conferido em 28/09/2026 (20, 21, 22, 24, 25)
+
+O DBA entregou [[20-Compras-Cotacao-Moeda-PTAX]], [[21-Compras-Projetos-Omie]], [[22-Compras-Backend-Consolidado]],
+[[24-Compras-Vinculo-Pedido-Venda]] e [[25-Compras-Historico-Unificado]] na `develop` da API (até `04de3fe`),
+publicados na `api-test`. Conferido ao vivo (só leitura) e no código — detalhe no topo de cada contrato.
+**Não foram para `Realizados/`** porque falta: (1) **B0**, produção ainda não tem as rotas; (2) os
+**catálogos e o espelho estão vazios na `api-test`** — é a pipeline ([[23-Compras-Pipeline-Consolidado]],
+branch `feat/compras-omie`) que precisa gravar lá; (3) **front**: telas do 24 prontas só na branch
+local `feat/compras-vinculo-pv`, telas do 25 não feitas, e as marcas de [[15-Compras-Pendencias-Pos-Backend]]
+que o backend novo já resolve ainda estão no av-hub.
+
 ## Prioridade: módulo de Compras
 
 **Já entregue:** [[01-Compras-Fluxo-Completo]] (requisição → OC → régua de aprovação), backend

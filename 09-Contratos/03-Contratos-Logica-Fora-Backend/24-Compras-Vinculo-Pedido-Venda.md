@@ -1,5 +1,7 @@
 # Contrato — Compras: vínculo da ordem de compra com o pedido de venda
 
+> **✅ Backend entregue pelo DBA — conferido em 28/09/2026:** API no ar na `api-test` (`04de3fe`): `GET /compras/pedidos-venda/25970` devolve cliente, vendedor e 68 itens com vendido/pendente/em OC/saldo; PV inexistente → 404 com mensagem; `?finalidade=` na listagem. "Compras deste pedido" volta vazio porque o espelho `pedidos_compras` está vazio no teste. **Travas de escrita (vínculo, finalidade, requisição) não testadas na `api-test`** (exigem criar OC lá). **Front:** as 4 telas continuam na branch local `feat/compras-vinculo-pv` (40 commits atrás da `develop`) — falta rebasear, testar contra a `api-test` e abrir PR.
+
 **Criado em:** 24/09/2026 · **Para:** DBA, backend (`api-acos-vital`), pipeline e av-hub
 
 Completa `ENVIAR - contrato-compras-backend.md` (item B10) e usa as decisões registradas lá.
