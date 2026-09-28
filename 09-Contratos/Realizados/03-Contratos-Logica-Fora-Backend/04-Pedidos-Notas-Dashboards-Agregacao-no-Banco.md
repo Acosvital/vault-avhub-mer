@@ -3,10 +3,10 @@
 **Criado em:** 20/09/2026, inventário das telas oficializadas neste ciclo (Pedidos, Notas e os três
 Dashboards). Complementa — e não repete — estes contratos, que continuam valendo:
 
-- [`ENVIAR - contrato-paginacao-por-pedido-vendas-planilha.md`](./ENVIAR%20-%20contrato-paginacao-por-pedido-vendas-planilha.md)
-- [`ENVIAR - contrato-ordenacao-listagens.md`](./ENVIAR%20-%20contrato-ordenacao-listagens.md)
-- [`ENVIAR - contrato-chave-composta-blacklist-pedidos.md`](./ENVIAR%20-%20contrato-chave-composta-blacklist-pedidos.md)
-- [`11-Itens-por-Parcela-Pedidos.md`](./11-Itens-por-Parcela-Pedidos.md)
+- [`09-Paginacao-por-Pedido-Vendas-Planilha.md`](../../03-Contratos-Logica-Fora-Backend/09-Paginacao-por-Pedido-Vendas-Planilha.md) — ainda aberto (backend não implementou, ver nota nele)
+- [`06-Ordenacao-Listagens.md`](./06-Ordenacao-Listagens.md) — já entregue
+- [`07-Chave-Composta-Blacklist-Pedidos.md`](./07-Chave-Composta-Blacklist-Pedidos.md) — já entregue
+- [`08-Itens-por-Parcela-Pedidos.md`](./08-Itens-por-Parcela-Pedidos.md) — já entregue
 
 **Princípio:** o navegador (e o BFF) não devem recalcular o que o banco já sabe. Os pontos abaixo
 estão marcados com `GAMBIARRA(` no código.
@@ -57,8 +57,8 @@ parcial dentro do card do pedido. Cada item de `parciais[]` é uma linha do que 
 
 **Itens (produtos) de cada parcial NÃO vêm na listagem** — pesaria demais. A tela busca sob
 demanda (página do pedido / ao expandir um parcial) pelo `codigo_pedido_omie` do parcial, o que
-depende do [`11-Itens-por-Parcela-Pedidos.md`](./11-Itens-por-Parcela-Pedidos.md)
-(itens com `codigo_pedido_omie`/`sequencial` de origem). Se o backend preferir, o
+dependia do [`08-Itens-por-Parcela-Pedidos.md`](./08-Itens-por-Parcela-Pedidos.md)
+(itens com `codigo_pedido_omie`/`sequencial` de origem) — já entregue. Se o backend preferir, o
 `GET /pedidos_venda/{codigo_empresa}/{pedido_venda}` pode já devolver `parciais[].itens[]` —
 mas só no detalhe, nunca na lista.
 

@@ -67,6 +67,9 @@ Contratos de detalhe (os consolidados apontam para eles):
 - Contratos de API da integração com o MES, ainda em proposta:
   [[003-Requisicao-Compra-Integracao-MES]] e [[004-Referencia-OC-Integracao-MES]].
 - **[[13-Fornecedores-por-Produto]]** — fornecedor por produto (relacionado a Compras/Comissão).
+  Endpoint entregue e confirmado (28/09/2026), mas ainda não dá pra ligar: o simulador
+  (`experimental/simulador-comissao`) roda sobre dataset legado com IDs incompatíveis com a
+  tabela real `produtos` — falta a migração do módulo antes de usar o endpoint.
 
 **Já entregue e confirmado ao vivo em `api-test` (25/09/2026):** [[02-Funcionarios-Listagem-Filtros-Ordenacao-Resumo]]
 e [[03-Funcionarios-Cadastro-Organograma-Transacional]] — movidos para
@@ -91,6 +94,25 @@ as marcas `GAMBIARRA(` de F1–F7 continuam no repositório até esse commit aco
 
 Movidos para `Realizados/03-Contratos-Logica-Fora-Backend/` (renumerados 04, 05, 06).
 
+**Também já entregues e mergeadas (28/09/2026, mesmo dia — DBA avisou que 09 a 13 estavam prontos;
+conferido ao vivo um a um antes de mexer no front):**
+
+- [[07-Chave-Composta-Blacklist-Pedidos]] — `PUT`/`DELETE /blacklist_pedidos/:numero` aceitam
+  `codigo_empresa` (404 se não bater), `GET` filtra por ele. PR #97.
+- [[08-Itens-por-Parcela-Pedidos]] — `vw_pedido_venda_itens` ganhou `codigo_pedido_omie`/
+  `sequencial` por item, aditivo. Bateu todos os critérios de aceite (pedidos 27645 e 27787). PR #98.
+- [[09-Ordenacao-Sistema-Vendedores]] — `GET /vendedores?sort=nome_unidade` ordena pelo nome da
+  unidade via join, não pelo código bruto. PR #99.
+
+Renumerados 07, 08, 09 em `Realizados/03-Contratos-Logica-Fora-Backend/`.
+
+**Da mesma leva, NÃO entregues apesar do aviso do DBA** (ver os arquivos pra detalhe do teste):
+
+- [[09-Paginacao-por-Pedido-Vendas-Planilha]] — continua aberto, backend não implementou de
+  verdade (só simulou não dar erro, mas o comportamento não mudou).
+- [[13-Fornecedores-por-Produto]] — endpoint existe, mas o frontend que ele alimentaria não pode
+  usá-lo ainda (dataset legado com IDs incompatíveis).
+
 ## Contratos abertos criados no ciclo de 20/09/2026
 
 | Contrato | Cobre | Itens |
@@ -104,10 +126,8 @@ ver "Já entregues" acima ([[04-Pedidos-Notas-Dashboards-Agregacao-no-Banco]],
 
 ## Contratos anteriores que continuam abertos e se relacionam
 
-- [[09-Paginacao-por-Pedido-Vendas-Planilha]] — paginar por pedido.
-- [[10-Chave-Composta-Blacklist-Pedidos]] — blacklist por chave composta.
-- [[11-Itens-por-Parcela-Pedidos]] — itens por parcela.
-- [[12-Ordenacao-Sistema-Vendedores]] — ordenação em Vendedores.
+- [[09-Paginacao-por-Pedido-Vendas-Planilha]] — paginar por pedido. Backend ainda não entregou de
+  verdade (ver status no arquivo, 28/09/2026).
 
 ## Onde estão as marcas, por assunto (no repositório `av-hub`)
 
@@ -129,7 +149,7 @@ ver "Já entregues" acima ([[04-Pedidos-Notas-Dashboards-Agregacao-no-Banco]],
 
 Telas mais antigas (Cadastros, Comissões, Vendas, RH restante, Organograma) **não foram inventariadas**
 linha a linha: elas seguem o padrão antigo (`SearchFilterBar` + paginação do servidor onde a API
-suporta, ordenação ausente — ver [[08-Ordenacao-Listagens]]). Ao migrar cada uma para o padrão
+suporta, ordenação ausente — ver [[06-Ordenacao-Listagens]]). Ao migrar cada uma para o padrão
 novo, aplicar a mesma regra e marcar o que sobrar.
 
 ## Ver também

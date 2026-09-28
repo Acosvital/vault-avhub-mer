@@ -2,6 +2,20 @@
 
 **Criado em:** 10/09/2026, horário de Brasília
 
+**Status (28/09/2026):** o DBA entregou `GET /produtos/:id/fornecedores` — confirmado ao vivo em
+`api-test.acosvital.com.br`, rota responde 200 com o formato pedido em 2.1 (testei ~2.800 produtos
+reais; todos vieram `[]` porque `GET /compras/ordens` está com `total: 0` neste ambiente — sem
+nenhuma OC cadastrada, não é bug do endpoint, é ausência de dado de origem pra popular a relação).
+**Mesmo assim, não deu pra ligar no frontend ainda**: o protótipo mudou de lugar desde que este
+contrato foi escrito — hoje é `app/(protected)/experimental/simulador-comissao` (o antigo
+`orcamento/simulador-comissao` não existe mais) — e continua rodando 100% sobre o dataset legado
+estático (`lib/orcamento/data/produtos.json`, o mesmo descrito na seção 1). O `id_produto_omie`
+desse dataset é na verdade o `codigo_produto` (ex.: `"CHME"`), **não o UUID** da tabela real
+`produtos` que o endpoint novo espera — ligar um no outro sempre daria `[]`/errado, silenciosamente.
+Falta a migração do módulo pra consumir a tabela real `produtos` (já mencionada na criação deste
+contrato: "pro dia em que o módulo de compras/orçamento ganhar uma API própria") antes de o
+endpoint poder ser usado de verdade.
+
 **Objetivo:** o "Simulador de Comissão" (protótipo local em
 `app/(protected)/orcamento/simulador-comissao`, ainda não conectado a nenhuma API própria)
 deixa o vendedor escolher um produto do catálogo e depois buscar um fornecedor pra aquele

@@ -2,6 +2,16 @@
 
 **Criado em:** 15/09/2026, achado num review de correção de dados.
 
+**Status (28/09/2026):** DBA avisou que este contrato (junto com 10, 11, 12 e 13) tinha sido
+entregue. Testado ao vivo em `api-test.acosvital.com.br` — **não foi resolvido**. `total`/
+`total_pages` de `GET /vendas_planilha?pedido_venda=27320` ainda conta linha crua (total=5 pro
+pedido com 5 parciais, deveria ser 1 se contasse por pedido). Testei contiguidade em 5.000 linhas
+sem filtro: parciais do mesmo pedido continuam espalhados, não adjacentes (`pedido 25940`
+apareceu em 4 blocos não-contíguos, por exemplo). O parâmetro `agrupar_por=pedido_venda` (Opção B)
+é ignorado silenciosamente — mesmo comportamento de um parâmetro inventado ao acaso (`?parametro_
+que_nao_existe_xyz=abc` também não dá erro, a API só ignora parâmetro desconhecido). Continua
+pendente — reconfirmar com o DBA antes de assumir resolvido de novo.
+
 **Objetivo:** `GET /vendas_planilha` devolve **1 linha por parcial/sequencial**, não 1 linha por
 pedido — um `pedido_venda` com 4 parciais gera 4 registros com `codigo_pedido_omie` diferentes
 cada (confirmado ao vivo, pedido_venda "27320"). O frontend agrupa essas linhas de volta em 1
