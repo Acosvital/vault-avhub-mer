@@ -40,22 +40,28 @@ contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contr
   fornecedor, comprador, etapa e as descrições dos catálogos (mesmo JOIN por unidade das OCs, B5).
   Só API, aditivo. Hoje a tela do pedido feito no Omie (contrato 25) mostra só códigos.
 
-## Compras: backend do DBA conferido em 28/09/2026 (20, 21, 22, 24, 25)
+## Compras: concluídos em 28/09/2026 — movidos para `Realizados/` (renumerados 10 a 15)
 
-O DBA entregou [[20-Compras-Cotacao-Moeda-PTAX]], [[21-Compras-Projetos-Omie]], [[22-Compras-Backend-Consolidado]],
-[[24-Compras-Vinculo-Pedido-Venda]] e [[25-Compras-Historico-Unificado]] na `develop` da API (até `04de3fe`),
-publicados na `api-test`. Conferido ao vivo (só leitura) e no código — detalhe no topo de cada contrato.
-**Front feito e mergeado na `develop` em 28/09/2026:** 24 em [av-hub#104](https://github.com/Acosvital/av-hub/pull/104);
-20, 21, 22 e 25 em [av-hub#105](https://github.com/Acosvital/av-hub/pull/105), que também tirou as marcas de
-[[15-Compras-Pendencias-Pos-Backend]] e bloqueou abrir `/api/*` direto no navegador (só o PDF da OC abre).
-Testado contra a `api-test`.
-**Não foram para `Realizados/`** porque falta: (1) **B0**, produção ainda não tem as rotas; (2) os
-**catálogos, a PTAX e o espelho estão vazios na `api-test`** — é a pipeline ([[23-Compras-Pipeline-Consolidado]],
-branch `feat/compras-omie`) que precisa gravar lá; por isso as listas do Omie, a cotação automática e o
-histórico do Omie só foram testados vazios; (3) [[27-Compras-Pedido-Omie-Nomes]] (nomes no detalhe do pedido
-do Omie). **Decisões pendentes:** quando ligar as chaves da API `COMPRAS_VINCULO_EXIGIR_PV_EXISTENTE`,
-`COMPRAS_EXIGIR_PODE_APROVAR` e `COMPRAS_HISTORICO_UNIFICADO` (o av-hub já pede `?origem=todas` sozinho);
-avisar que os KPIs de aprovadas sobem de uma vez quando o histórico do Omie tiver dados.
+Backend entregue pelo DBA na `develop` da API (até `04de3fe`, publicado na `api-test`) e front mergeado
+na `develop` do av-hub ([av-hub#104](https://github.com/Acosvital/av-hub/pull/104) e
+[av-hub#105](https://github.com/Acosvital/av-hub/pull/105)), testado contra a `api-test`:
+
+| Novo nº | Contrato (antes) | O quê |
+|---|---|---|
+| 10 | [[10-Compras-Pendencias-Pos-Backend]] (15) | pendências pós-backend C1–C10; marcas `GAMBIARRA(` removidas |
+| 11 | [[11-Compras-Cotacao-Moeda-PTAX]] (20) | cotação USD/EUR pela PTAX na OC |
+| 12 | [[12-Compras-Projetos-Omie]] (21) | projetos do Omie no select da OC |
+| 13 | [[13-Compras-Backend-Consolidado]] (22) | banco + API de Compras (B1–B15) |
+| 14 | [[14-Compras-Vinculo-Pedido-Venda]] (24) | vínculo da OC com o pedido de venda |
+| 15 | [[15-Compras-Historico-Unificado]] (25) | histórico único av-hub + Omie |
+
+**O que ainda depende de outros contratos (não reabre estes):** produção (B0 do 13) e a pipeline
+gravar catálogos, PTAX e espelho na `api-test` ([[23-Compras-Pipeline-Consolidado]]) — até lá as listas
+do Omie, a cotação automática e o histórico do Omie só foram testados vazios; nomes no detalhe do pedido
+do Omie ([[27-Compras-Pedido-Omie-Nomes]]). **Decisões pendentes:** quando ligar as chaves da API
+`COMPRAS_VINCULO_EXIGIR_PV_EXISTENTE`, `COMPRAS_EXIGIR_PODE_APROVAR` e `COMPRAS_HISTORICO_UNIFICADO`
+(o av-hub já pede `?origem=todas` sozinho); avisar que os KPIs de aprovadas sobem de uma vez quando o
+histórico do Omie tiver dados.
 
 ## Prioridade: módulo de Compras
 
@@ -64,40 +70,27 @@ em 22/09/2026 (`api-acos-vital` PR #273) e front ligado em 23/09/2026. Movido pa
 `Realizados/03-Contratos-Logica-Fora-Backend/`. Os contratos SQL [[007-Ordens-Compra-Estruturada]]
 e [[008-Requisicoes-Compra]] também já estão aplicados.
 
-**Em aberto — comece pelos dois consolidados (23/09/2026, fim do dia):**
+**Também concluídos (28/09/2026):** os seis da tabela acima, em `Realizados/`.
 
-- **[[22-Compras-Backend-Consolidado]]** — lista de trabalho do backend (banco + API): o que já foi
-  entregue, a tabela teste × produção dos dumps de 23/09 e os itens B0–B9 (B0: levar para
-  produção tudo o que está no teste; B1: espelho `pedidos_compras` ainda em `INTEGER`; B2: comprador
-  em dois campos; B3: número aceito do corpo; B4: rotas do envio ao Omie; B5–B9: nomes, campos do
-  PDF, catálogos, listagem/limite, permissões).
+**Em aberto:**
+
 - **[[23-Compras-Pipeline-Consolidado]]** — lista de trabalho da `omie-elt-pipeline`: L1–L10 (PTAX,
   compradores, espelho, envio da OC, catálogos, entidades HTML, testes). L1–L3 e L5–L9 já estão
-  implementados na branch `feat/compras-omie` (desligados até o banco ter as tabelas).
-- **[[24-Compras-Vinculo-Pedido-Venda]]** — vínculo da OC com o pedido de venda: finalidade, vínculo por item (quantidade na unidade da OC), várias requisições numa OC, saldo a comprar do PV e "compras deste pedido". SQL e API testados no local (24/09/2026).
-- **[[25-Compras-Historico-Unificado]]** — estende o mesmo mecanismo de dedup do 24 (por
-  `codigo_pedido_integracao`) para fora do escopo de um PV: a listagem geral de Ordens de compra e
-  o Dashboard de compras passam a mostrar o histórico do Omie (pedidos de antes do av-hub existir)
-  junto com as OCs do av-hub, uma identidade só. Pedido do Nathan em 24/09/2026 ("senão eu perco
-  meu histórico"). Depende do B4/L4 (envio da OC ao Omie) e do C4 (indicadores).
-- **[[21-Compras-Projetos-Omie]]** — projetos do Omie (`ListarProjetos`) em `core.projetos`, para o
-  select de Projeto da OC.
+  implementados na branch `feat/compras-omie` (desligados até o banco ter as tabelas). É o que falta
+  para as telas de Compras terem dados na `api-test`.
+- **[[27-Compras-Pedido-Omie-Nomes]]** — nomes no detalhe do pedido feito no Omie.
 
-Contratos de detalhe (os consolidados apontam para eles):
+Contratos de detalhe:
 
-- **[[15-Compras-Pendencias-Pos-Backend]]** — o que faltou depois da entrega: nomes na OC, filtro
-  por unidade, busca, resumo, limite de aprovação, envio ao Omie, `pode_aprovar` (C1–C8).
 - **[[14-Compras-Omie-Pedido-Compra]]** — de-para completo com a API do Omie: puxar os pedidos de
   compra para o espelho `pedidos_compras` e enviar a OC com `UpsertPedCompra`. Conferido campo a
   campo contra a doc oficial do Omie em 23/09/2026.
 - **[[16-Compradores-Funcionario]]** — cadastro de compradores por filial, ligado ao funcionário
   (resolve o `nCodCompr` do Omie).
-- **[[20-Compras-Cotacao-Moeda-PTAX]]** — cotação de USD/EUR preenchida sozinha na OC: job
-  diário da PTAX do Banco Central → `core.cotacoes_moeda` → `GET /cotacoes_moeda/atual`, com a
-  origem da cotação (`ptax`/`manual`) gravada na OC.
 - ~~[[17-Compras-Pedido-DBA-Banco]], [[18-Compras-Pedido-API-Backend]] e
   [[19-Compras-Pedido-Pipeline-Omie]]~~ — **substituídos em 23/09/2026** pelos dois consolidados
-  (o DBA concluiu a parte deles; o que sobrou foi para o 22 e o 23). Ficam como histórico.
+  (o DBA concluiu a parte deles; o que sobrou foi para o [[13-Compras-Backend-Consolidado]], já
+  realizado, e o [[23-Compras-Pipeline-Consolidado]]). Ficam como histórico.
 - Contratos de API da integração com o MES, ainda em proposta:
   [[003-Requisicao-Compra-Integracao-MES]] e [[004-Referencia-OC-Integracao-MES]].
 - **[[13-Fornecedores-por-Produto]]** — fornecedor por produto (relacionado a Compras/Comissão).
@@ -177,7 +170,7 @@ ver "Já entregues" acima ([[04-Pedidos-Notas-Dashboards-Agregacao-no-Banco]],
 | Permissão e escopo | `lib/api/{requirePermission,escopoUnidade,portalPcp}.ts`, `hooks/usePermission.ts`, `app/(protected)/page.tsx`, `app/api/auth/[...nextauth]/route.ts` |
 | Segurança de borda | `lib/auth/loginRateLimiter.ts`, `lib/s3/fotos.ts` |
 | Dados em arquivo | `lib/orcamento/dados.ts`, `lib/comissoes/coordenadores.ts`, `app/(protected)/dashboards/dash-comissoes/page.tsx` |
-| Compras | `components/Compras/PedidoOmieDetalhe.tsx` ([[27-Compras-Pedido-Omie-Nomes]]), `app/api/compras/compradores/funcionarios/route.ts` ([[16-Compradores-Funcionario]]). As do [[15-Compras-Pendencias-Pos-Backend]] saíram em 28/09/2026 |
+| Compras | `components/Compras/PedidoOmieDetalhe.tsx` ([[27-Compras-Pedido-Omie-Nomes]]), `app/api/compras/compradores/funcionarios/route.ts` ([[16-Compradores-Funcionario]]). As do [[10-Compras-Pendencias-Pos-Backend]] saíram em 28/09/2026 |
 
 ## Fora deste ciclo (levantar antes de mexer)
 

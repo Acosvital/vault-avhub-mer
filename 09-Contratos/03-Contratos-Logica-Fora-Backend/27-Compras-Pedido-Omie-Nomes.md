@@ -8,7 +8,7 @@ status: proposta
 
 **Criado em:** 28/09/2026 · **Para:** backend (`api-acos-vital`) · **Só API, sem SQL novo**
 
-Complementa o [[25-Compras-Historico-Unificado]].
+Complementa o [[15-Compras-Historico-Unificado]].
 
 ---
 
@@ -27,7 +27,7 @@ ninguém.
 **A tela não vai montar esses nomes sozinha.** Seriam 5 ou 6 chamadas a mais por pedido (parceiros,
 compradores, catálogos), com o JOIN pela unidade feito no navegador. É o mesmo JOIN que o backend
 já faz para as OCs do av-hub (`ATRIBUTOS_NOMES` em `src/routes/compras_ordens.js`, B5 do
-[[22-Compras-Backend-Consolidado]]).
+[[13-Compras-Backend-Consolidado]]).
 
 ## 2. O contrato
 

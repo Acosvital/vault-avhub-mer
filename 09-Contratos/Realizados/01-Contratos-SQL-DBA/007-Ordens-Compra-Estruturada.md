@@ -24,7 +24,7 @@ atualizado: 2026-09-23
 | `id_ordem_compra` nos itens | `ordem_compra_id` |
 | `codigo_pedido_omie integer` | `BIGINT`; também há `sincronizado_em` |
 
-**Continua em aberto** (não é deste contrato): o envio real ao Omie (`status_sincronizacao_omie` sempre `pendente`), `pode_aprovar` e histórico de decisão. Está em [[15-Compras-Pendencias-Pos-Backend]] e [[14-Compras-Omie-Pedido-Compra]], com os pedidos separados por destinatário em [[17-Compras-Pedido-DBA-Banco]], [[18-Compras-Pedido-API-Backend]] e [[19-Compras-Pedido-Pipeline-Omie]].
+**Continua em aberto** (não é deste contrato): o envio real ao Omie (`status_sincronizacao_omie` sempre `pendente`), `pode_aprovar` e histórico de decisão. Está em [[10-Compras-Pendencias-Pos-Backend]] e [[14-Compras-Omie-Pedido-Compra]], com os pedidos separados por destinatário em [[17-Compras-Pedido-DBA-Banco]], [[18-Compras-Pedido-API-Backend]] e [[19-Compras-Pedido-Pipeline-Omie]].
 
 **Status:** proposta, aprovada por Nathan em 22/09/2026, **reescrita no mesmo dia** para bater exatamente com o contrato já escrito pelo frontend (`docs/ENVIAR - contrato-compras-fluxo-completo.md`, no repositório `av-hub`, criado 21/09/2026 ao construir `app/(protected)/compras/*`) — aquele documento é mais detalhado e vem do código real (domínio TypeScript já implementado, rodando hoje sobre dados de exemplo). Este contrato foi alinhado a ele campo a campo. **Gustavo: aplicar esta versão, não uma anterior.**
 

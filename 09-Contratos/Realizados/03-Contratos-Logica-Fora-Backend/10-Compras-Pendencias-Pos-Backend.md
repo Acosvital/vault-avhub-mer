@@ -1,12 +1,13 @@
 # Contrato — Compras: o que ficou faltando depois da entrega do backend
 
 > **Situação em 28/09/2026:** o backend de C1–C10 foi entregue pelo contrato
-> [[22-Compras-Backend-Consolidado]] (na `api-test`). O av-hub já usa tudo e **as marcas
+> [[13-Compras-Backend-Consolidado]] (na `api-test`). O av-hub já usa tudo e **as marcas
 > `GAMBIARRA(` deste contrato saíram do código** ([av-hub#105](https://github.com/Acosvital/av-hub/pull/105),
 > mergeado na `develop`). Isso inclui nomes na OC, busca pelo fornecedor, `/resumo`, limite por unidade,
 > `pode_aprovar`, histórico, campos do PDF e categorias por unidade. **O que ainda falta vem da pipeline**
 > ([[23-Compras-Pipeline-Consolidado]]): C6 (envio da OC ao Omie, L4) e C8 (entidades HTML nos nomes),
-> e o B0 (produção). Fica fora de `Realizados/` até isso chegar.
+> e o B0 (produção) — acompanhados nesses contratos. **Movido para `Realizados/` em 28/09/2026**
+> (era o contrato 15).
 
 **Criado em:** 23/09/2026, ao ligar o av-hub no backend real de Compras.
 

@@ -1,5 +1,7 @@
 # Contrato — Projetos do Omie no av-hub (banco e pipeline)
 
+> **Concluído — movido para `Realizados/` em 28/09/2026** (era o contrato 21). Backend na `api-test` e front mergeado na `develop` do av-hub. O que ainda falta (produção e dados da pipeline) é acompanhado no [[23-Compras-Pipeline-Consolidado]] e no B0 do [[13-Compras-Backend-Consolidado]].
+>
 > **✅ Backend entregue pelo DBA — conferido em 28/09/2026:** `GET /projetos?codigo_empresa=&ativo=&q=` no ar (200, paginado). **`core.projetos` vazia na `api-test`**: falta a pipeline carregar (`SYNC_PROJETOS`, [[23-Compras-Pipeline-Consolidado]]). `nome_projeto` no detalhe da OC já trata projeto apagado no Omie (`19927fe`).
 >
 > **Front feito em 28/09/2026** ([av-hub#105](https://github.com/Acosvital/av-hub/pull/105), **mergeado na `develop` em 28/09/2026**): Projeto é select dos projetos ativos da unidade; o detalhe mostra `nome_projeto`. Com `core.projetos` vazia, o select mostra "Nenhum projeto cadastrado".

@@ -1,16 +1,18 @@
 # Contrato — Compras: histórico único (OC do av-hub + pedido de compra antigo do Omie)
 
+> **Concluído — movido para `Realizados/` em 28/09/2026** (era o contrato 25). Backend na `api-test` e front mergeado na `develop` do av-hub. O que ainda falta (produção e dados da pipeline) é acompanhado no [[23-Compras-Pipeline-Consolidado]] e no B0 do [[13-Compras-Backend-Consolidado]].
+>
 > **✅ Backend entregue pelo DBA — conferido em 28/09/2026:** `vw_ordens_compra_historico` (migration 025) e a API no ar na `api-test`: `GET /compras/ordens?origem=todas|av-hub|omie` e `/compras/ordens/resumo` com `por_origem`. **Atrás da chave `HISTORICO_UNIFICADO`**: sem ela e sem `?origem=`, só `av-hub`. Sem dados para ver a unificação (espelho vazio no teste). A migration 025 não está no repositório da API — o SQL fica com o DBA.
 >
 > **Front feito em 28/09/2026** ([av-hub#105](https://github.com/Acosvital/av-hub/pull/105), **mergeado na `develop` em 28/09/2026**): a listagem pede `?origem=todas` por padrão (filtro Origem: av-hub/Omie), paginada no servidor, com marca "Omie" e detalhe só leitura em `/compras/pedido-omie/{id}` (GET /pedidos_compras/{id}); KPIs com `por_origem`. **Pedido ao backend:** nomes no GET /pedidos_compras/{id} → [[27-Compras-Pedido-Omie-Nomes]].
 
 **Criado em:** 24/09/2026 · **Para:** DBA, backend (`api-acos-vital`), pipeline e av-hub
 
-Estende a decisão do [[24-Compras-Vinculo-Pedido-Venda]] (que já resolve isso só dentro do card
+Estende a decisão do [[14-Compras-Vinculo-Pedido-Venda]] (que já resolve isso só dentro do card
 "Compras deste pedido") para as telas **Ordens de compra**, **Dashboard de compras** e
-**Requisições**. Depende do **B4**/**L4** ([[22-Compras-Backend-Consolidado]] /
+**Requisições**. Depende do **B4**/**L4** ([[13-Compras-Backend-Consolidado]] /
 [[23-Compras-Pipeline-Consolidado]] — envio da OC ao Omie) e do **C4**
-([[15-Compras-Pendencias-Pos-Backend]] — `GET /compras/ordens/resumo`).
+([[10-Compras-Pendencias-Pos-Backend]] — `GET /compras/ordens/resumo`).
 
 ---
 
@@ -137,9 +139,9 @@ não inventar uma coluna nova em `pedidos_compras`.
 
 ## Ver também
 
-- [[24-Compras-Vinculo-Pedido-Venda]] — o mecanismo original (`codigo_pedido_integracao`),
+- [[14-Compras-Vinculo-Pedido-Venda]] — o mecanismo original (`codigo_pedido_integracao`),
   escopado por pedido de venda.
-- [[22-Compras-Backend-Consolidado]] (B4) e [[23-Compras-Pipeline-Consolidado]] (L4) — pré-requisito:
+- [[13-Compras-Backend-Consolidado]] (B4) e [[23-Compras-Pipeline-Consolidado]] (L4) — pré-requisito:
   sem o envio da OC ao Omie, `codigo_pedido_integracao` nunca é preenchido pelo lado do av-hub.
-- [[15-Compras-Pendencias-Pos-Backend]] (C3, C4) — paginação/filtro no servidor e os endpoints de
+- [[10-Compras-Pendencias-Pos-Backend]] (C3, C4) — paginação/filtro no servidor e os endpoints de
   resumo que H2 estende.
