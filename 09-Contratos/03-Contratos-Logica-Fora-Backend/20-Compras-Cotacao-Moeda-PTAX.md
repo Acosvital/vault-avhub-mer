@@ -1,6 +1,8 @@
 # Contrato — Cotação de moeda automática (PTAX do Banco Central) na Ordem de Compra
 
 > **✅ Backend entregue pelo DBA — conferido em 28/09/2026:** rotas `GET /cotacoes_moeda/atual` e `?data=` no ar e a OC guarda `cotacao_data`/`cotacao_origem`. **`core.cotacoes_moeda` está vazia na `api-test`** (404 "Nenhuma cotação encontrada para USD"): falta o job da PTAX da pipeline (L1 do [[23-Compras-Pipeline-Consolidado]]) gravar nesse banco.
+>
+> **Front feito em 28/09/2026** ([av-hub#105](https://github.com/Acosvital/av-hub/pull/105), **mergeado na `develop` em 28/09/2026**): moeda USD/EUR busca `/cotacoes_moeda/atual` e preenche a cotação com a PTAX de venda, com a legenda da data; alterar grava `cotacao_origem = manual`; sem PTAX, o campo fica vazio e obrigatório. Detalhe da OC mostra "PTAX de dd/mm" ou "digitada". Testado só o caminho sem PTAX (tabela vazia na api-test).
 
 **Criado em:** 23/09/2026.
 

@@ -29,20 +29,33 @@ contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contr
   se a **Qualidade acompanha desde o início** (Sim/Não); só pedido marcado vai ao MES, que faz GET
   (polling) no novo **Fluxo 4** (`/pedidos_liberados`). Tela do vendedor (*Liberar pedidos*) e do
   gerente (*Liberação da equipe*, só leitura). Banco, API e telas testados no local; SQL nos
-  apêndices, patch da API em `26-anexos/`. Pendente: DBA/backend aplicarem (L1–L3), `api-pcp` trocar
-  a origem da Carteira (L4). A partir deste contrato, **o contrato vive no vault** (não mais em
+  apêndices, patch da API em `26-anexos/`. **Telas mergeadas na `develop` em 28/09/2026
+  ([av-hub#103](https://github.com/Acosvital/av-hub/pull/103))**, mas sem backend na `api-test` (rotas 404).
+  Pendente: DBA/backend aplicarem (L1–L3), `api-pcp` trocar a origem da Carteira (L4). A partir deste contrato, **o contrato vive no vault** (não mais em
   `av-hub/docs/ENVIAR - *`); as marcas `GAMBIARRA(` apontam para cá.
+
+## Novo: Compras — nomes no detalhe do pedido do Omie (28/09/2026)
+
+- **[[27-Compras-Pedido-Omie-Nomes]]** — `GET /pedidos_compras/{id}` passa a devolver nome/CNPJ do
+  fornecedor, comprador, etapa e as descrições dos catálogos (mesmo JOIN por unidade das OCs, B5).
+  Só API, aditivo. Hoje a tela do pedido feito no Omie (contrato 25) mostra só códigos.
 
 ## Compras: backend do DBA conferido em 28/09/2026 (20, 21, 22, 24, 25)
 
 O DBA entregou [[20-Compras-Cotacao-Moeda-PTAX]], [[21-Compras-Projetos-Omie]], [[22-Compras-Backend-Consolidado]],
 [[24-Compras-Vinculo-Pedido-Venda]] e [[25-Compras-Historico-Unificado]] na `develop` da API (até `04de3fe`),
 publicados na `api-test`. Conferido ao vivo (só leitura) e no código — detalhe no topo de cada contrato.
+**Front feito e mergeado na `develop` em 28/09/2026:** 24 em [av-hub#104](https://github.com/Acosvital/av-hub/pull/104);
+20, 21, 22 e 25 em [av-hub#105](https://github.com/Acosvital/av-hub/pull/105), que também tirou as marcas de
+[[15-Compras-Pendencias-Pos-Backend]] e bloqueou abrir `/api/*` direto no navegador (só o PDF da OC abre).
+Testado contra a `api-test`.
 **Não foram para `Realizados/`** porque falta: (1) **B0**, produção ainda não tem as rotas; (2) os
-**catálogos e o espelho estão vazios na `api-test`** — é a pipeline ([[23-Compras-Pipeline-Consolidado]],
-branch `feat/compras-omie`) que precisa gravar lá; (3) **front**: telas do 24 prontas só na branch
-local `feat/compras-vinculo-pv`, telas do 25 não feitas, e as marcas de [[15-Compras-Pendencias-Pos-Backend]]
-que o backend novo já resolve ainda estão no av-hub.
+**catálogos, a PTAX e o espelho estão vazios na `api-test`** — é a pipeline ([[23-Compras-Pipeline-Consolidado]],
+branch `feat/compras-omie`) que precisa gravar lá; por isso as listas do Omie, a cotação automática e o
+histórico do Omie só foram testados vazios; (3) [[27-Compras-Pedido-Omie-Nomes]] (nomes no detalhe do pedido
+do Omie). **Decisões pendentes:** quando ligar as chaves da API `COMPRAS_VINCULO_EXIGIR_PV_EXISTENTE`,
+`COMPRAS_EXIGIR_PODE_APROVAR` e `COMPRAS_HISTORICO_UNIFICADO` (o av-hub já pede `?origem=todas` sozinho);
+avisar que os KPIs de aprovadas sobem de uma vez quando o histórico do Omie tiver dados.
 
 ## Prioridade: módulo de Compras
 
@@ -164,7 +177,7 @@ ver "Já entregues" acima ([[04-Pedidos-Notas-Dashboards-Agregacao-no-Banco]],
 | Permissão e escopo | `lib/api/{requirePermission,escopoUnidade,portalPcp}.ts`, `hooks/usePermission.ts`, `app/(protected)/page.tsx`, `app/api/auth/[...nextauth]/route.ts` |
 | Segurança de borda | `lib/auth/loginRateLimiter.ts`, `lib/s3/fotos.ts` |
 | Dados em arquivo | `lib/orcamento/dados.ts`, `lib/comissoes/coordenadores.ts`, `app/(protected)/dashboards/dash-comissoes/page.tsx` |
-| Compras (pendências depois da entrega do backend, [[15-Compras-Pendencias-Pos-Backend]]) | `app/api/compras/ordens/[id]/route.ts`, `components/Compras/{useCompras,helpers}.ts`, `lib/domain/compras-ordem.ts` |
+| Compras | `components/Compras/PedidoOmieDetalhe.tsx` ([[27-Compras-Pedido-Omie-Nomes]]), `app/api/compras/compradores/funcionarios/route.ts` ([[16-Compradores-Funcionario]]). As do [[15-Compras-Pendencias-Pos-Backend]] saíram em 28/09/2026 |
 
 ## Fora deste ciclo (levantar antes de mexer)
 

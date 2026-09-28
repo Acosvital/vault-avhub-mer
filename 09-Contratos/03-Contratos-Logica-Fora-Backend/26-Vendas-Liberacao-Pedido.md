@@ -6,6 +6,12 @@ status: proposta
 
 # Contrato 26 — Vendas: liberação do pedido pelo vendedor (acompanhamento da Qualidade) + Fluxo 4 para o MES
 
+> **Situação em 28/09/2026 (fim da tarde):** **front mergeado na `develop`** do av-hub
+> ([av-hub#103](https://github.com/Acosvital/av-hub/pull/103)). **Backend ainda não aplicado:** na
+> `api-test`, `/pedidos_liberacao` e `/pedidos_liberados` respondem "Rota não encontrada". Falta o
+> DBA aplicar os Apêndices A e B (sem o B, as telas não aparecem no menu) e o backend aplicar o patch
+> de `26-anexos/`. Até lá, as telas abrem sem dados.
+
 **Criado em:** 28/09/2026 · **Para:** DBA, backend (`api-acos-vital`) e MES (`api-pcp`, Robert)
 
 **Tudo aqui foi aplicado e testado no ambiente local** (banco `omie-test-db`; API da `origin/develop`
@@ -17,7 +23,7 @@ de 25/09 + esta feature no container `api-acos-vital-vendas`; av-hub na branch
 | Banco — estrutura | [Apêndice A](#apêndice-a--estrutura) | DBA |
 | Banco — telas e permissões | [Apêndice B](#apêndice-b--telas-e-permissões) | DBA |
 | API | `26-anexos/0001-feat-vendas-liberacao-...patch` (sobre a `develop` em `04de3fe`, aplica limpo; branch local `feat/vendas-liberacao-pedidos` do clone `Desktop/api-acos-vital`) | backend |
-| Tela | av-hub, branch `feat/vendas-liberacao-pedidos` | já feito |
+| Tela | av-hub, mergeada na `develop` ([av-hub#103](https://github.com/Acosvital/av-hub/pull/103), 28/09/2026) | ✅ feito |
 
 ---
 
@@ -107,7 +113,7 @@ Os campos de `GET /pedidos_liberados` têm **os mesmos nomes de `/vendas_planilh
 4. Guardar `acompanhamento_qualidade` no pedido do MES: alimenta a fila de inspeção de processo da
    Qualidade (tela 9.5 de [[Fluxograma-Telas-por-Bloco]], fora da Fase B).
 
-## 5. O que muda no av-hub (já feito, branch `feat/vendas-liberacao-pedidos`)
+## 5. O que muda no av-hub (já feito, mergeado na `develop` pelo av-hub#103)
 
 | Tela | Onde | Quem | Faz |
 |---|---|---|---|
