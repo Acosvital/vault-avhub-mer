@@ -74,18 +74,36 @@ e [[03-Funcionarios-Cadastro-Organograma-Transacional]] — movidos para
 adaptado e testado contra o mesmo ambiente, mas **só localmente — ainda não commitado no `av-hub`**;
 as marcas `GAMBIARRA(` de F1–F7 continuam no repositório até esse commit acontecer.
 
+**Já entregues, front commitado e PRs mergeadas na `develop` do `av-hub` (28/09/2026):**
+
+- [[04-Pedidos-Notas-Dashboards-Agregacao-no-Banco]] — Pedidos, Notas e Dashboards agregados no
+  banco (PR #94). Único item pendente: P6 (ordem do fluxo de etapas) — o DBA ainda não preencheu
+  `ordem_fluxo` em `etapas_faturamento` (sempre `null`); pedido formalizado em
+  `docs/ENVIAR - contrato-05-pendencia-ordem-etapas-fluxo.md` no `av-hub`, que continua fora do
+  `Realizados/` até isso ser resolvido.
+- [[05-Permissoes-e-Escopo-no-Banco]] — identidade propagada via Bearer token, permissão/escopo
+  lidos de `/me/permissoes` (PR #95). As travas do backend (`IDENTIDADE_EXIGIR_TOKEN`,
+  `PERMISSOES_ROTA_MODO`, `ESCOPO_VENDEDORES_EXIGIR`) seguem desligadas por padrão — o BFF já manda
+  o token, a segurança aperta sozinha quando a infra ligar os flags.
+- [[06-Ordenacao-Listagens]] — `sort/order` em todas as telas de prioridade alta e baixa (PR #96).
+  Permissões (agregado client-side) e Diligenciadores (paginação 100% cliente) ficaram fora de
+  propósito, sem headers de tabela pra ordenar.
+
+Movidos para `Realizados/03-Contratos-Logica-Fora-Backend/` (renumerados 04, 05, 06).
+
 ## Contratos abertos criados no ciclo de 20/09/2026
 
 | Contrato | Cobre | Itens |
 |---|---|---|
 | [[04-Vagas-Fila-Decisao-no-Banco]] | Solicitações de vagas: filtros/ordem/resumo, custo gerado, decisão com `pode_aprovar` e histórico. Backend pronto e confirmado (3 de 4 itens do Aceite); falta ligar `VAGAS_TRAVAS_DECISAO` (depende de conceder `pode_aprovar` e o front usar `/decisao`) e adaptar `components/Vagas/*` | V1–V8 |
-| [[05-Pedidos-Notas-Dashboards-Agregacao-no-Banco]] | Pedidos, Notas e Dashboards: agrupamento por pedido, prazo, blacklist, indicadores e agregados no banco | P1–P8, N1–N3, D1–D3 |
-| [[06-Permissoes-e-Escopo-no-Banco]] | Identidade propagada, permissão por ação, escopos, perfis como dado, auditoria, rate limit | S1–S11 |
 | [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | Orçamento e coordenadores fora do repositório, com filtro/paginação/ordem no servidor | O1–O5, C1–C3 |
+
+Pedidos/Notas/Dashboards e Permissões/Escopo (P1–P8/N1–N3/D1–D3 e S1–S11) já saíram desta lista —
+ver "Já entregues" acima ([[04-Pedidos-Notas-Dashboards-Agregacao-no-Banco]],
+[[05-Permissoes-e-Escopo-no-Banco]]).
 
 ## Contratos anteriores que continuam abertos e se relacionam
 
-- [[08-Ordenacao-Listagens]] — `sort/order` nas demais listagens (agora inclui `/funcionarios` e `/vagas`, ver os contratos acima).
 - [[09-Paginacao-por-Pedido-Vendas-Planilha]] — paginar por pedido.
 - [[10-Chave-Composta-Blacklist-Pedidos]] — blacklist por chave composta.
 - [[11-Itens-por-Parcela-Pedidos]] — itens por parcela.
