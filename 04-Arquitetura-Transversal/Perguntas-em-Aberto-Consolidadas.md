@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, pendencias, perguntas, consolidado]
 criado: 2026-09-21
-atualizado: 2026-09-25
+atualizado: 2026-09-28
 ---
 
 # Perguntas em aberto — lista consolidada
@@ -21,6 +21,10 @@ atualizado: 2026-09-25
 > **Atualizado em 22/09/2026**: DEC-4, DEC-6, DEC-8, N-05, N-06 e N-07 foram respondidas hoje — ver seções A e E abaixo para o detalhe de cada uma. **Total caiu de 16 para 9 pendências reais.**
 >
 > **Atualizado em 25/09/2026**: as 7 perguntas novas do bloco "Encaixe do Estoque e da Revenda" (EN-01 a EN-07, levantadas em 24/09) foram todas respondidas hoje — ver [[Encaixe-Estoque-Revenda-no-PCP]] seção 5. O bloco sai desta lista.
+>
+> **Atualizado em 28/09/2026 (PDF do Robert, manhã, "MES — Estoque no fluxo do PCP")**: C6 e D9 implementadas e testadas — **confirmado direto no código** (`api-pcp`/`app-pcp`, branch `develop`, clonados e inspecionados em 28/09). Três mudanças de desenho (Material deixa de ser projeção, parte atendida vai pra Expedição em vez de concluir no Estoque, novo setor "Requisições de compras"). **EN-05 volta a ser pendência** — a resposta de 25/09 não chegou ao Robert, que listou EN-05 como "sem resposta ainda" no PDF de 28/09; ver [[Encaixe-Estoque-Revenda-no-PCP]] seção 6 item 1. Mais 5 itens novos em aberto (mesma seção 6, itens 2-6): inspeção de Qualidade por lote×parcial, baixa de MP além do requisitado, `RoteiroItem` na C8, dupla conferência da carga inicial (DEC-4) e o modelo de dados de `RequisicaoCompra`.
+>
+> **Atualizado de novo em 28/09/2026, à tarde (PDF do Robert, "MES — Módulos Estoque, Compras, Logística e Qualidade")**: revisa o item "Requisições de compras" antes dele virar código — setor Estoque único, circuito de compra fixo fora do roteiro, baixa no despacho do Estoque (não mais no recebimento da Embalagem). **Nenhuma das duas propostas de 28/09 tem código ainda** (confirmado: não existe model `Requisicao*`, nem enum `REQUISICAO`/`LOGISTICA_ENTRADA`/`QUALIDADE`, nem pasta de UI própria). Mais 4 itens novos em aberto: manter Reserva ou não nesse novo desenho, inspeção de saída obrigatória ou opcional, reprovação na inspeção de entrada (auto-recompra ou decisão manual), e validar o desenho completo antes de codificar. Ver [[Encaixe-Estoque-Revenda-no-PCP]] seção 6, itens 7-10.
 
 De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o resto está decidido, aceito ou moot — arquivo completo nas seções abaixo). Nada aqui foi fabricado ou assumido por mim — são fatos de negócio, físicos ou de alocação que só quem está na operação sabe responder.
 
@@ -45,9 +49,21 @@ De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o r
 |---|---|---|
 | L-10 | Sobra/retalho de chapa volta ao estoque como material rastreável? Como se pesa o que sobra? Qual a unidade de controle de cada material (kg × peça × metro)? | Nathan + Almoxarifado + Produção |
 
-**Total: 9 pendências reais**, todas fatos de negócio/operação — nenhuma técnica. O resto do documento abaixo é o arquivo completo, com a resposta e a justificativa de cada item já fechado.
+**Encaixe Estoque/Revenda — 1 reaberta + 5 novas (28/09/2026)** — detalhe em [[Encaixe-Estoque-Revenda-no-PCP]] seção 6
 
-> O bloco "Encaixe do Estoque e da Revenda no MES" (EN-01 a EN-07, levantado em 24/09) teve as 7 perguntas respondidas em 25/09/2026 — ver [[Encaixe-Estoque-Revenda-no-PCP]] seção 5. Não conta mais como pendência.
+| ID | Pergunta | Quem |
+|---|---|---|
+| EN-05 | **Reaberta**: `Material.natureza` fica só como classificação, sem decidir rota? Resposta de 25/09 existe, mas o PDF do Robert de 28/09 lista como "sem resposta ainda" — alinhar quem tem a versão vigente. | Pablo + Robert + Nathan |
+| EC-01 | Qualidade: inspeção por lote (entidade) e/ou pela parcial — o que o setor Qualidade faz na fila quando há lote comprado? | Robert |
+| EC-02 | Baixa de matéria-prima consumida além do requisitado (sobras, perdas de corte) — como tratar? | Robert + Produção |
+| EC-03 | C8: mover e a busca da etapa de Expedição respeitando o `RoteiroItem` quando o item tiver roteiro próprio | Robert |
+| EC-04 | Modelo de dados de `RequisicaoCompra`/`RequisicaoCompraItem` e o setor "Requisições de compras" — **superseded pela proposta da tarde de 28/09**, ver EC-05 a EC-08 | Robert + Pablo |
+| EC-05 | Reserva: manter para "separar sem despachar" ou retirar de vez, agora que a baixa é proposta pro despacho do Estoque? | Robert |
+| EC-06 | Inspeção de saída obrigatória em todo roteiro de fabricação, ou opcional por destino? | Robert |
+| EC-07 | Reprovação na inspeção de entrada: volta pra Compras automaticamente (recompra) ou fica aguardando decisão? | Robert |
+| EC-08 | Validar o desenho completo da proposta da tarde de 28/09 (Estoque único, circuito de compra fixo, baixa no despacho, tipos `REQUISICAO`/`LOGISTICA_ENTRADA`/`QUALIDADE`, menus por módulo) antes de codificar | Nathan + Robert + Pablo |
+
+**Total: 18 pendências reais** (9 + EN-05 reaberta + EC-01 a EC-08), todas fatos de negócio/operação ou desenho ainda em validação — nenhuma puramente técnica. (DEC-4 já está decidida — só falta implementar a dupla conferência da carga inicial, é acompanhamento de execução, não pendência de decisão nova.) O resto do documento abaixo é o arquivo completo, com a resposta e a justificativa de cada item já fechado.
 
 ---
 

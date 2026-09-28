@@ -1,6 +1,7 @@
 ---
 tags: [erp-acos-vital, prd-estoque, compras, fluxo-detalhado]
 criado: 2026-09-16
+atualizado: 2026-09-28
 ---
 
 # Fluxo de Compras — do 0 ao 100%, conversa por conversa
@@ -11,7 +12,14 @@ criado: 2026-09-16
 >
 > **Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje** — é escopo obrigatório do sistema a construir, não documentação de processo existente.
 >
-> **Atualizado em 24/09/2026 com o encaixe do MES** ([[Encaixe-Estoque-Revenda-no-PCP]]): a requisição (C1) passa a nascer da **entrada do parcial no setor Compras** do roteiro da fábrica Revenda, vinculada ao `ItemParcial`; o beneficiamento é um setor do próprio roteiro (C10 não volta mais ao PCP); e o item **aprovado na Qualidade volta ao setor Estoque** (C19), não segue direto pra Expedição.
+> **Atualizado em 24/09/2026 com o encaixe do MES** ([[Encaixe-Estoque-Revenda-no-PCP]]): a requisição (C1) passa a nascer da **entrada do parcial no setor Compras** do roteiro da fábrica Revenda, vinculada ao `ItemParcial`; o beneficiamento é um setor do próprio roteiro (C10 não volta mais ao PCP); e o item **aprovado na Qualidade volta ao setor Estoque** (C19).
+>
+> **Atualizado em 28/09/2026 (Robert) — a C19 abaixo ficou incompleta, e o C1 ganhou uma etapa nova.** Duas mudanças, detalhadas em [[Encaixe-Estoque-Revenda-no-PCP]] seções 3.4/5/6:
+> 1. **C19 não termina no Estoque — o item segue para a Expedição** (novo setor tipo `EXPEDICAO`: Embalagem → Logística). O Estoque dá entrada + reserva `ATIVA`, mas a baixa real (reserva `CONSUMIDA`, saída do lote) só acontece quando a **Embalagem recebe** o item. Ver C19 revisada abaixo.
+> 2. **A requisição (C1) passa por um novo setor "Requisições de compras" (PCP), antes de Compras** — ainda não implementado. É lá que a matéria-prima fica amarrada ao item/parcial que a originou. Vale tanto para revenda quanto para matéria-prima de fabricação.
+> 3. **Recebimento parcial (C9) é permitido, com split**: o que chegou avança para a Qualidade, o restante continua aguardando em Compras. Sobra de compra (lote mínimo do fornecedor) fica livre no estoque, registrando de qual requisição veio.
+>
+> **⚠️ Atualizado de novo em 28/09/2026 à tarde (proposta, não implementada) — ver [[Encaixe-Estoque-Revenda-no-PCP]] callout da tarde de 28/09.** Robert propôs revisar este fluxo de novo, antes mesmo do item 2 acima virar código: o recebimento passa a acontecer na **Logística de Entrada** (não em Compras); a requisição/compra vira um **circuito fixo do sistema disparado pelo próprio Estoque**, fora do roteiro do PCP; e a baixa de saldo passa a ocorrer no **despacho do Estoque**, não mais no recebimento da Embalagem. As conversas C1-C19 abaixo ainda descrevem o desenho de 24-25/09 (que é o que está em produção); não reescrevi C1-C19 porque a proposta da tarde de 28/09 ainda não foi validada nem codificada.
 
 ## Atores e sistemas
 
@@ -151,8 +159,8 @@ Nova requisição — **volta pra C1** (o parcial volta ao setor Compras), fecha
 **C17/C18 — Sinalização de devolução via Omie (condicional, reprovado)**
 RNC marca `nota_devolucao_pendente = true`; o sistema nunca cria a nota, só sinaliza. Omie emite a nota de devolução; a sincronização de volta fecha a RNC (ver [[Estoque-Regras-Negocio]]). Limitação de dado: `devolucao_parcial` no av-hub é só um boolean, sem nenhum campo de valor associado (ver [[AV-Hub-Vendas-Reconciliacao]]).
 
-**C19 — Qualidade → setor Estoque (condicional, aprovado) — regra de 24/09/2026**
-Item aprovado sai da quarentena e **vai para o setor Estoque, não para a Expedição**: o Estoque dá entrada do lote no saldo (`MovimentoEstoque` `ENTRADA`, referência ao recebimento), cria a **Reserva `ATIVA`** do lote para o split que esperava a compra e conclui o split. Só então o item segue pro fluxo de Expedição/Faturamento, detalhado em [[Fluxo-Expedicao-Faturamento-Completo]] (Expedição embala/consolida, só a Expedição fala com o Omie, e a baixa chega ao Vendedor — não ao Comprador). O status por item chega ao vendedor pelo Fluxo 3 da F1 (polling), como em qualquer etapa. Ver [[Fluxo-Estoque-Completo]] Caso C.
+**C19 — Qualidade → setor Estoque·Entrada → Expedição (condicional, aprovado) — regra de 24/09/2026, revisada 25/09/2026**
+Item aprovado sai da quarentena e vai primeiro para o setor **Estoque·Entrada**: dá entrada do lote no saldo (`MovimentoEstoque` `ENTRADA`, referência ao recebimento) e cria a **Reserva `ATIVA`** do lote para o split que esperava a compra. **Atualização de 25/09/2026: o split não conclui aqui** — segue em trânsito para a **Expedição** (novo setor tipo `EXPEDICAO`: Embalagem → Logística), ainda com a reserva `ATIVA`. A baixa real (reserva `CONSUMIDA`, `MovimentoEstoque` `SAIDA`) só acontece quando a **Embalagem recebe** o item — é aí que o item entra de fato no fluxo de Expedição/Faturamento, detalhado em [[Fluxo-Expedicao-Faturamento-Completo]] (Expedição embala/consolida, só a Expedição fala com o Omie, e a baixa chega ao Vendedor — não ao Comprador). Desfazer o recebimento na Embalagem estorna (nova entrada, reserva volta a `ATIVA`); devolver ao Estoque libera a reserva e o Estoque decide de novo. O status por item chega ao vendedor pelo Fluxo 3 da F1 (polling), como em qualquer etapa. Ver [[Fluxo-Estoque-Completo]] Caso C.
 
 ## Nenhum estado é beco sem saída — verificação
 
