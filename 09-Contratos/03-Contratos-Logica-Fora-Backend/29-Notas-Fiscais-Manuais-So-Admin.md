@@ -56,6 +56,21 @@ precisa estar no backend.
 - Recomendado: histórico das alterações de valor (valor anterior → novo, quem, quando), no mesmo molde
   do histórico da OC.
 
+### P4. Conferido em 29/09/2026: `PERMISSOES_ROTA_MODO=exigir` sozinho não protege
+
+Na `api-test` a variável já estava em `exigir`, e um `POST /nota_fiscal_saida/manual` **só com a `x-api-key`**, sem
+usuário, criou a nota (201; apagada em seguida — o número de teste `TST29` ficou ocupado em Mogi). É o que o
+`identidadeUsuario.js` faz: **sem token a permissão não é conferida** (só barra se a chave exigir usuário). Para valer:
+
+1. **Exigir token**: `IDENTIDADE_EXIGIR_TOKEN=true` ou a chave do av-hub marcada como "exige usuário".
+2. **O av-hub mandar o token**: hoje a sessão do av-hub está **sem `backendToken`** (a API precisa do segredo de token do
+   contrato de permissões configurado). Ligar o item 1 antes deste derruba o av-hub inteiro (401 em tudo).
+3. **Mapear as rotas** em `auth.rotas_telas`: `POST /nota_fiscal_saida/manual` → `notas-fiscais-manuais.pode_criar`;
+   `PUT`/`DELETE /nota_fiscal_saida/*` → `pode_editar`/`pode_deletar`. Com `exigir`, rota **sem mapa** dá 403 para quem
+   manda token: **todas** as rotas que o av-hub usa precisam estar mapeadas antes de o token passar a ir.
+
+**Ordem segura:** mapear → `observar` e ler o log do que seria 403 → configurar o token → `exigir` → exigir token.
+
 ## 3. Depois de aplicado (av-hub)
 
 - Nada muda nas permissões do av-hub se o slug for `notas-fiscais-manuais`.
