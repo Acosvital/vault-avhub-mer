@@ -1,5 +1,10 @@
 # Contrato — Dados de Orçamento e de coordenadores no banco (fora do repositório)
 
+> **Conferido em 29/09/2026: não entregue.** O DBA avisou que terminou os contratos desta pasta, mas
+> na `api-test` nenhuma rota deste existe (`/orcamento/fornecedores`, `/produtos`, `/cotacoes`,
+> `/vinculos`, `/categorias`, `/familias` e `/dashboard/comissoes` respondem "Rota não encontrada"),
+> e não há nada de orçamento ou coordenadores na `develop` da API (até `163b58b`). **Voltar ao DBA.**
+
 **Criado em:** 20/09/2026, achado da auditoria de segurança (`docs/seguranca/auditoria-2026-09-19.md`).
 
 **Problema:** dois conjuntos de dados **reais** vivem em arquivos JSON dentro do repositório e são

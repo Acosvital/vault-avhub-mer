@@ -1,5 +1,7 @@
 # Compras — pedido para o DBA (banco)
 
+> **Concluído — movido para `Realizados/` em 29/09/2026.** Histórico: o que sobrou foi para o [[13-Compras-Backend-Consolidado]], já realizado.
+
 > **⚠️ Substituído em 23/09/2026 por `../ENVIAR - contrato-compras-backend.md`**, que tem a lista atualizada: o que já foi entregue
 > (conferido no `develop`), o que falta e o que está errado. Este arquivo fica como histórico.
 

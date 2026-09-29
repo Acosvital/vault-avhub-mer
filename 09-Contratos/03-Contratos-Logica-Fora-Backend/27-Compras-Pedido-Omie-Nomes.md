@@ -6,6 +6,14 @@ status: proposta
 
 # Contrato 27 — Compras: nomes no detalhe do pedido de compra do Omie
 
+> **Conferido em 29/09/2026: backend entregue** (API `163b58b`). Testado na `api-test` com um pedido de
+> teste no espelho (fornecedor GERDAU, Mogi, depois apagado): `nome_fornecedor`, `razao_social_fornecedor`,
+> `cpf_cnpj_fornecedor` e `etapa_descricao` ("Incluído") vieram certos; comprador e descrições dos
+> catálogos vieram `null` porque esses cadastros estão vazios no teste. **Front** em
+> [av-hub#106](https://github.com/Acosvital/av-hub/pull/106) (detalhe do pedido do Omie com os nomes),
+> aguardando merge; depois do merge vai para `Realizados/`. No mesmo teste, a listagem unificada do
+> [[15-Compras-Historico-Unificado]] mostrou a linha do Omie e o KPI "0 no av-hub · 1 no Omie".
+
 **Criado em:** 28/09/2026 · **Para:** backend (`api-acos-vital`) · **Só API, sem SQL novo**
 
 Complementa o [[15-Compras-Historico-Unificado]].

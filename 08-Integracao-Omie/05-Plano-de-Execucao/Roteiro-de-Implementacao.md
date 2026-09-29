@@ -107,7 +107,7 @@ Estrutura principal a mapear (corrigida contra a doc oficial em 23/09/2026):
 - **produtos_consulta[]** (itens): `cCodIntItem`, `nCodItem`, `nCodProd`, `cDescricao`, `cUnidade`, quantidade, valor unitário, `nDesconto` (**valor** em R$), `nValTot`, `nQtdeRec` (quantidade já recebida), ICMS/IPI/PIS/COFINS por item, `codigo_local_estoque`
 - **parcelas_consulta[]**: `nParcela`, `dVencto`, `nValor`, `nDias`, `nPercent`
 
-**Novo resource sugerido**: `pedidosCompras.ts`, tabela `core_vendas_faturamento.pedidos_compras` + `pedidos_compras_itens` (já aplicadas), chave `(codigo_empresa, codigo_pedido_compra_omie)`. **Contrato de banco**: [[004-Pedidos-Compras]] (identidade do item resolvida: `(id_pedido_compra, ordem)`). **Antes de ligar**, aplicar o `ALTER` de [[17-Compras-Pedido-DBA-Banco]] (D5): as colunas `INTEGER` estouram com os códigos reais do Omie. Detalhe do recurso em [[19-Compras-Pedido-Pipeline-Omie]] (P1). Ver [[Compras-Estoque-Producao-Lacunas]].
+**Novo resource sugerido**: `pedidosCompras.ts`, tabela `core_vendas_faturamento.pedidos_compras` + `pedidos_compras_itens` (já aplicadas), chave `(codigo_empresa, codigo_pedido_compra_omie)`. **Contrato de banco**: [[004-Pedidos-Compras]] (identidade do item resolvida: `(id_pedido_compra, ordem)`). **Antes de ligar**, aplicar o `ALTER` de [[16-Compras-Pedido-DBA-Banco]] (D5): as colunas `INTEGER` estouram com os códigos reais do Omie. Detalhe do recurso em [[19-Compras-Pedido-Pipeline-Omie]] (P1). Ver [[Compras-Estoque-Producao-Lacunas]].
 
 ---
 

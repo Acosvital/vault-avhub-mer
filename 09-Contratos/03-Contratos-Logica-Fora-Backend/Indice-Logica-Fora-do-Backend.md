@@ -23,6 +23,21 @@ Para listar tudo no repositório `av-hub`: `grep -rn "GAMBIARRA(" app components
 (hoje são 57 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
 contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contratos-Logica-Fora-Backend/`.
 
+## Conferência de 29/09/2026 (DBA: "terminei todos, menos 04 e 09; 13 desconsiderar")
+
+Conferido ao vivo na `api-test` e no código da API (`develop` até `163b58b`):
+
+| Contrato | Resultado |
+|---|---|
+| [[26-Vendas-Liberacao-Pedido]] | ✅ backend no ar e telas no menu; **falta a data de corte** (`parametros_vendas` vazia) e o L4 do `api-pcp` (Robert) |
+| [[27-Compras-Pedido-Omie-Nomes]] | ✅ backend testado com pedido de teste; front em [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), aguardando merge |
+| [[16-Compradores-Funcionario]] | ✅ `/funcionarios` devolve setor e unidade; última gambiarra removida em [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), aguardando merge |
+| [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | ❌ **não entregue**: nenhuma rota existe — voltar ao DBA |
+| [[14-Compras-Omie-Pedido-Compra]], [[19-Compras-Pedido-Pipeline-Omie]], [[23-Compras-Pipeline-Consolidado]] | não são do DBA: dependem da `omie-elt-pipeline` (branch `feat/compras-omie`, sem commits novos desde 24/09; L4, envio da OC, ainda não existe) |
+| [[16-Compras-Pedido-DBA-Banco]] e [[17-Compras-Pedido-API-Backend]] (eram 17 e 18) | históricos, concluídos pelo [[13-Compras-Backend-Consolidado]] → **movidos para `Realizados/`** |
+| [[04-Vagas-Fila-Decisao-no-Banco]], [[09-Paginacao-por-Pedido-Vendas-Planilha]] | DBA ainda corrigindo |
+| [[13-Fornecedores-por-Produto]] | desconsiderar (pedido do Nathan) |
+
 ## Novo: módulo de Vendas (28/09/2026)
 
 - **[[26-Vendas-Liberacao-Pedido]]** — o pedido que chega do Omie fica travado até o vendedor marcar
@@ -87,7 +102,7 @@ Contratos de detalhe:
   campo contra a doc oficial do Omie em 23/09/2026.
 - **[[16-Compradores-Funcionario]]** — cadastro de compradores por filial, ligado ao funcionário
   (resolve o `nCodCompr` do Omie).
-- ~~[[17-Compras-Pedido-DBA-Banco]], [[18-Compras-Pedido-API-Backend]] e
+- ~~[[16-Compras-Pedido-DBA-Banco]], [[17-Compras-Pedido-API-Backend]] e
   [[19-Compras-Pedido-Pipeline-Omie]]~~ — **substituídos em 23/09/2026** pelos dois consolidados
   (o DBA concluiu a parte deles; o que sobrou foi para o [[13-Compras-Backend-Consolidado]], já
   realizado, e o [[23-Compras-Pipeline-Consolidado]]). Ficam como histórico.
@@ -170,7 +185,7 @@ ver "Já entregues" acima ([[04-Pedidos-Notas-Dashboards-Agregacao-no-Banco]],
 | Permissão e escopo | `lib/api/{requirePermission,escopoUnidade,portalPcp}.ts`, `hooks/usePermission.ts`, `app/(protected)/page.tsx`, `app/api/auth/[...nextauth]/route.ts` |
 | Segurança de borda | `lib/auth/loginRateLimiter.ts`, `lib/s3/fotos.ts` |
 | Dados em arquivo | `lib/orcamento/dados.ts`, `lib/comissoes/coordenadores.ts`, `app/(protected)/dashboards/dash-comissoes/page.tsx` |
-| Compras | `components/Compras/PedidoOmieDetalhe.tsx` ([[27-Compras-Pedido-Omie-Nomes]]), `app/api/compras/compradores/funcionarios/route.ts` ([[16-Compradores-Funcionario]]). As do [[10-Compras-Pendencias-Pos-Backend]] saíram em 28/09/2026 |
+| Compras | nenhuma depois do [av-hub#106](https://github.com/Acosvital/av-hub/pull/106) (27 e 16). As do [[10-Compras-Pendencias-Pos-Backend]] saíram em 28/09/2026 |
 
 ## Fora deste ciclo (levantar antes de mexer)
 

@@ -1,5 +1,12 @@
 # Contrato — Compradores (Omie) ↔ Funcionário (RH)
 
+> **Conferido em 29/09/2026: backend entregue.** Rotas de compradores no ar na `api-test`, e o
+> `/funcionarios` passou a devolver `nome_setor` e `nome_unidade` — com isso saiu a última marca
+> `GAMBIARRA(` (o BFF buscava setores e unidades à parte). **Front** em
+> [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), aguardando merge; depois do merge vai para
+> `Realizados/`. A tela de Compradores não foi testada pela interface: o perfil Admin (Dev) não tem
+> `pode_editar` nela.
+
 **Criado em:** 23/09/2026.
 
 **Objetivo:** ter no av-hub o cadastro de compradores, no mesmo esquema do vendedor
