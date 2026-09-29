@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, prd-estoque, regras-de-negocio]
 criado: 2026-09-16
-atualizado: 2026-09-28
+atualizado: 2026-09-29
 ---
 
 # PRD Estoque — Regras de Negócio Adicionais
@@ -16,8 +16,8 @@ Levantadas em análise de lacunas contra prática padrão de WMS/ERP e distribui
 - **Carga inicial não é recebimento** — lote com `origem = CARGA_INICIAL` não passa pelos estados de aprovação de pedido nem pela conferência quantitativa/qualitativa normal.
 - **Fornecedor não tem acesso ao sistema** — sem estado "em trânsito" verificável; data de entrega é sempre manual.
 - **Destinação de item de pedido, não só do pedido inteiro** — decidido pelo comprador ao montar/revisar o pedido; vira sugestão automática de reserva assim que o lote é aprovado. **Como ficou no MES (24/09/2026):** a requisição nasce vinculada ao `ItemParcial` que entrou no setor Compras; aprovado na Qualidade, o item comprado **volta ao setor Estoque**, que dá entrada do lote e cria a reserva para aquele split — a "sugestão automática" virou passo do roteiro. Ver [[Encaixe-Estoque-Revenda-no-PCP]].
-- **Reserva sem expiração (24/09/2026, implementada e testada 28/09)** — liberação só explícita, quando o pedido ou a OP é cancelado. Reserva aponta para lote + `ItemParcial` (split atendido) e nasce sempre sobre lote já liberado pela Qualidade. **Em aberto desde 28/09/2026 à tarde**: a proposta mais recente do Robert (módulos Estoque/Compras/Logística/Qualidade) move a baixa do saldo para o **despacho do Estoque** em vez da entrega — ainda não está claro se o modelo de Reserva sobrevive nesse desenho ou vira só um mecanismo para "separar sem despachar". Ver [[Encaixe-Estoque-Revenda-no-PCP]] seção 6.
-- **Toda saída de item de revenda passa pelo Estoque (24/09/2026)** — o item comprado não vai da Qualidade direto para a Expedição: entra no saldo, é reservado e sai do Estoque, igual ao item que já estava em estoque. **Revisado em 25/09/2026**: a baixa de saldo (reserva `CONSUMIDA`) só acontece quando a **Embalagem recebe** o item, não na saída do Estoque. **Revisado de novo em 28/09/2026 à tarde (proposta, não implementada)**: a baixa volta a acontecer no **despacho do Estoque**, não no recebimento da Embalagem — ver [[Encaixe-Estoque-Revenda-no-PCP]] callout de 28/09 à tarde.
+- **Reserva sem expiração (24/09/2026, implementada e testada 28/09)** — liberação só explícita, quando o pedido ou a OP é cancelado. Reserva aponta para lote + `ItemParcial` (split atendido) e nasce sempre sobre lote já liberado pela Qualidade. **Resolvido em 29/09/2026 (EC-05, Nathan)**: seguir com a proposta de 28/09 à tarde — a Reserva deixa de ser o mecanismo central de baixa (que passa a acontecer no despacho do Estoque) e fica restrita ao caso de "separar sem despachar". Ainda sem código para essa mudança. Ver [[Encaixe-Estoque-Revenda-no-PCP]] seção 5.
+- **Toda saída de item de revenda passa pelo Estoque (24/09/2026)** — o item comprado não vai da Qualidade direto para a Expedição: entra no saldo, é reservado e sai do Estoque, igual ao item que já estava em estoque. **Revisado em 25/09/2026 (em produção hoje)**: a baixa de saldo (reserva `CONSUMIDA`) só acontece quando a **Embalagem recebe** o item, não na saída do Estoque. **Revisado de novo e CONFIRMADO em 29/09/2026 (Nathan, EC-05/EC-08) — ainda sem código**: a baixa passa a ocorrer no **despacho do Estoque**, não no recebimento da Embalagem — ver [[Encaixe-Estoque-Revenda-no-PCP]] seção 5.
 - **Saneamento do catálogo Omie é pré-requisito, não opcional** — mapeado numa camada própria (`material_alias_omie`), sem corrigir o catálogo do Omie diretamente.
 - **Múltiplos depósitos confirmados** — `deposito` é tabela própria; transferência entre depósitos é operação real.
 - **Sem consignação** — confirmado que não existe estoque consignado (nem com cliente, nem com fornecedor).

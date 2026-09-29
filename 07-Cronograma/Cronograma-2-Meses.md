@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, cronograma, planejamento]
 criado: 2026-09-18
-atualizado: 2026-09-28
+atualizado: 2026-09-29
 ---
 
 # Cronograma de Desenvolvimento — 3 meses (18/09 a 21/12/2026)
@@ -18,7 +18,9 @@ atualizado: 2026-09-28
 >
 > **Atualização de 28/09/2026 (Robert)** — ver [[Encaixe-Estoque-Revenda-no-PCP]] para o detalhe completo. **C6 e D9 estão concluídas** (implementadas e testadas — confirmado direto no código do `api-pcp`/`app-pcp`, branch `develop`). Três mudanças de conteúdo (não de janela, por ora): (1) **D3 revisada** — Material deixa de ser projeção em massa do av-hub, nasce só na primeira entrada de estoque; (2) **a parte atendida pelo estoque não conclui mais no setor Estoque** — vai em trânsito pra um novo setor **Expedição** (Embalagem → Logística), e a baixa de saldo só acontece lá; vale também pro item comprado (D8) e pro produto fabricado; (3) **C7/D6 reorganizadas** para incluir o novo setor **"Requisições de compras"** (matéria-prima e revenda) e o recebimento parcial com split — ainda não implementado. **C8** ganha o respeito ao `RoteiroItem` na busca da Expedição.
 >
-> **⚠️ Mesmo dia (28/09), à tarde: item 3 acima já foi revisado de novo, antes de virar código.** Nova proposta do Robert (módulos Estoque/Compras/Logística/Qualidade — ver [[Encaixe-Estoque-Revenda-no-PCP]] callout da tarde) tira o circuito de compra do roteiro do PCP (vira desvio fixo disparado pelo Estoque), remove o setor "Estoque·Entrada" (volta a ser um único Estoque) e move a baixa do saldo do recebimento na Embalagem para o **despacho do Estoque**. Ainda é só proposta — C7/D6/C8 acima descrevem a versão da manhã; nenhuma das duas versões de 28/09 tem janela própria no cronograma ainda, avaliar impacto quando o desenho for validado.
+> **⚠️ Mesmo dia (28/09), à tarde: item 3 acima já foi revisado de novo, antes de virar código.** Nova proposta do Robert (módulos Estoque/Compras/Logística/Qualidade — ver [[Encaixe-Estoque-Revenda-no-PCP]] callout da tarde) tira o circuito de compra do roteiro do PCP (vira desvio fixo disparado pelo Estoque), remove o setor "Estoque·Entrada" (volta a ser um único Estoque) e move a baixa do saldo do recebimento na Embalagem para o **despacho do Estoque**. C7/D6/C8 acima ainda descrevem a versão da manhã.
+>
+> **Atualização de 29/09/2026 — a proposta da tarde de 28/09 vira arquitetura confirmada (Nathan, EC-05/EC-08), ainda sem código.** C7/D6 precisam ser reescopadas pra cobrir os novos setores (`REQUISICAO`, `LOGISTICA_ENTRADA`, `QUALIDADE`) e os menus por módulo (Compras, Logística, Qualidade — Movimentações vira só `PRODUTIVO`), em vez do desenho de 28/09 de manhã que ainda aparece nas linhas C7/D6/D8 abaixo. D8 ganha a inspeção de saída como setor tipo `QUALIDADE` no roteiro (obrigatória em todo roteiro de fabricação) e o fluxo de reprovação total/parcial no recebimento (quarentena da parte boa + realinhamento com Compras). Nenhuma janela nova foi criada ainda no cronograma — avaliar no planejamento da próxima sprint. Ver [[Encaixe-Estoque-Revenda-no-PCP]] seção 5 (linhas de 29/09) e seção 7.
 
 ## 1. Marcos
 

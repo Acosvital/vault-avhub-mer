@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, prd-estoque, compras, fluxo-detalhado]
 criado: 2026-09-16
-atualizado: 2026-09-28
+atualizado: 2026-09-29
 ---
 
 # Fluxo de Compras — do 0 ao 100%, conversa por conversa
@@ -19,7 +19,7 @@ atualizado: 2026-09-28
 > 2. **A requisição (C1) passa por um novo setor "Requisições de compras" (PCP), antes de Compras** — ainda não implementado. É lá que a matéria-prima fica amarrada ao item/parcial que a originou. Vale tanto para revenda quanto para matéria-prima de fabricação.
 > 3. **Recebimento parcial (C9) é permitido, com split**: o que chegou avança para a Qualidade, o restante continua aguardando em Compras. Sobra de compra (lote mínimo do fornecedor) fica livre no estoque, registrando de qual requisição veio.
 >
-> **⚠️ Atualizado de novo em 28/09/2026 à tarde (proposta, não implementada) — ver [[Encaixe-Estoque-Revenda-no-PCP]] callout da tarde de 28/09.** Robert propôs revisar este fluxo de novo, antes mesmo do item 2 acima virar código: o recebimento passa a acontecer na **Logística de Entrada** (não em Compras); a requisição/compra vira um **circuito fixo do sistema disparado pelo próprio Estoque**, fora do roteiro do PCP; e a baixa de saldo passa a ocorrer no **despacho do Estoque**, não mais no recebimento da Embalagem. As conversas C1-C19 abaixo ainda descrevem o desenho de 24-25/09 (que é o que está em produção); não reescrevi C1-C19 porque a proposta da tarde de 28/09 ainda não foi validada nem codificada.
+> **⚠️ Atualizado de novo em 28/09/2026 à tarde, CONFIRMADO em 29/09/2026 (Nathan, EC-05/EC-08) — ver [[Encaixe-Estoque-Revenda-no-PCP]] callout da tarde de 28/09 e seção 5.** Robert propôs revisar este fluxo de novo, antes mesmo do item 2 acima virar código, e o Nathan confirmou a direção: o recebimento passa a acontecer na **Logística de Entrada** (não em Compras); a requisição/compra vira um **circuito fixo do sistema disparado pelo próprio Estoque**, fora do roteiro do PCP; e a baixa de saldo passa a ocorrer no **despacho do Estoque**, não mais no recebimento da Embalagem. As conversas C1-C19 abaixo ainda descrevem o desenho de 24-25/09 (que é o que está em produção); não reescrevi C1-C19 porque a arquitetura confirmada de 28-29/09 ainda não tem nenhum código.
 
 ## Atores e sistemas
 

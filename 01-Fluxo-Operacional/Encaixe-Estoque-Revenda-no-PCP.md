@@ -1,8 +1,8 @@
 ---
 tags: [erp-acos-vital, fluxo-operacional, pcp, estoque, revenda, mes, decisao]
 criado: 2026-09-24
-atualizado: 2026-09-28
-fonte: "MES-Encaixe-Estoque-Revenda.pdf — Robert Wilson, 24/09/2026; MES-Estoque-Compras-Atualizacao.pdf — Robert Wilson, 28/09/2026 manhã; MES-Modulos-Estoque-Compras-Logistica-Qualidade.pdf — Robert Wilson, 28/09/2026 tarde"
+atualizado: 2026-09-29
+fonte: "MES-Encaixe-Estoque-Revenda.pdf — Robert Wilson, 24/09/2026; MES-Estoque-Compras-Atualizacao.pdf — Robert Wilson, 28/09/2026 manhã; MES-Modulos-Estoque-Compras-Logistica-Qualidade.pdf — Robert Wilson, 28/09/2026 tarde; respostas do Nathan em 29/09/2026 (EN-05, EC-01 a EC-08)"
 ---
 
 # Encaixe do Estoque e da Revenda no fluxo do PCP (MES)
@@ -30,6 +30,19 @@ fonte: "MES-Encaixe-Estoque-Revenda.pdf — Robert Wilson, 24/09/2026; MES-Estoq
 > - **Novos menus**: Estoque (Saldo, Reservas, Movimentação, Lotes, Atendimento/Baixa), Compras (Requisições + Compras), Logística (Logística de Entrada, Embalagens, Logística de Saída), Qualidade (Inspeção de entrada/saída). **Movimentações passa a ser só para setores `PRODUTIVO`** — as filas de Estoque/Compras/Logística/Qualidade saem de lá.
 > - **Plano em 3 fases**: (1) tipos e telas dos módulos; (2) circuito de compra reaproveitando as ações que já existem, Movimentações só com `PRODUTIVO`; (3) baixa no despacho + matéria-prima ("Solicitar compra" no Estoque, recebimento com split na Logística de Entrada, retorno ao mesmo Estoque, inspeção de saída no roteiro).
 > - **Em aberto (do PDF, seção 10)**: manter Reserva para "separar sem despachar" ou retirar de vez; inspeção de saída obrigatória em todo roteiro de fabricação ou opcional por destino; reprovação na inspeção de entrada volta pra Compras automaticamente (recompra) ou fica aguardando decisão; EN-05 (de novo) e C8 (roteiro por item) seguem pendentes.
+>
+> **Atualização de 29/09/2026 — a proposta da tarde de 28/09 vira decisão.** Nathan confirmou "seguir com a proposta de 28/09" (EC-05) e "ok" pra validar o desenho antes de codificar (EC-08) — **o desenho da seção 3 abaixo deixa de ser proposta e passa a ser a arquitetura confirmada**, ainda pendente só de implementação (nenhum código novo até aqui). Respostas de hoje:
+> - **EN-05 (resolvido de vez, sem mais conflito de registro):** `Material.natureza` fica **só como classificação**, não decide rota — mesma resposta de 25/09, agora confirmada direto pelo Nathan depois do PDF do Robert ter reaberto a pergunta.
+> - **EC-01 (Qualidade por lote × parcial):** a **inspeção de entrada é por lote** (a entidade `Lote`, não a `ItemParcial`); a **inspeção de saída é um setor tipo `QUALIDADE` dentro do roteiro** (mesma trilha da parcial, como qualquer outro setor produtivo).
+> - **EC-02 (baixa de MP consumida além do requisitado — sobras, perdas de corte):** **em aberto, sem resposta do time ainda** — o Nathan pediu uma sugestão em vez de decidir. Ver proposta abaixo, marcada como sugestão a validar, não decisão.
+> - **EC-03 (C8/`RoteiroItem` na busca da Expedição):** confirmado — sim, respeita o roteiro individual do item.
+> - **EC-04 (modelo `RequisicaoCompra`/`RequisicaoCompraItem`):** confirmado como **incorporado pela proposta da tarde de 28/09** — não é um modelo à parte, entra dentro do desenho do setor `REQUISICAO` descrito ali.
+> - **EC-05 (manter Reserva ou retirar):** **seguir com a proposta de 28/09 à tarde** — a Reserva deixa de ser o mecanismo central de baixa (que passa a acontecer no despacho do Estoque) e fica restrita ao caso de "separar sem despachar", exatamente como o PDF já cogitava.
+> - **EC-06 (inspeção de saída obrigatória ou opcional):** **obrigatória em todo roteiro** de fabricação — não é opcional por destino.
+> - **EC-07 (reprovação na inspeção de entrada — recompra automática ou decisão manual):** processo definido pelo Nathan — **reprovação total ou parcial no recebimento**: a parte aprovada fica em **quarentena aguardando**, e a parte reprovada volta pro setor Compras, que alinha a devolução da mercadoria reprovada **e** a entrega da substituição com o fornecedor. Quando a substituição chega, ela passa pelo processo de inspeção de novo; se aprovada, **une-se aos itens que já estavam em quarentena** e o conjunto segue o processo normal a partir daí.
+> - **EC-08 (validar o desenho completo antes de codificar):** **ok, validado** — libera o Robert/Pablo pra começar a implementação em fases (seção 9 do PDF da tarde).
+>
+> **Sugestão para EC-02 (baixa de MP além do requisitado) — não é decisão, é proposta a validar com o time:** tratar como um `MovimentoEstoque` tipo `AJUSTE` no despacho, com `motivo` obrigatório (ex.: "perda de corte", "sobra devolvida ao saldo") e `autorizado_por` quando o desvio passar de um limite (ver R-13). Concretamente: no despacho para a produção, o Estoque já informa os lotes/quantidades de MP que saem (seção 4 do PDF da tarde) — se o consumo real vier diferente do que a requisição previu, registrar a diferença como `AJUSTE` vinculado ao mesmo lote, sem criar um fluxo de aprovação novo por enquanto (reaproveita o que já existe pra qualquer ajuste de saldo). Sobra volta pro saldo geral do material (mesmo tratamento do "lote mínimo do fornecedor" já decidido em 28/09); perda simplesmente reduz o saldo sem virar produto. Fica junto de L-10 (sobra de chapa) como a mesma pergunta de fundo — ambas tratam de "material que sai do padrão 1:1 entre requisitado e consumido".
 >
 > **Conferido contra o código** do `app-pcp` (branch `develop`, 24/09/2026): a Carteira de Pedidos e a Nova Ordem de Produção já existem com backend real; as telas de Estoque e Qualidade do Pablo (D5, D8, D10) rodam sobre mock. Achados na seção 4.
 
@@ -66,16 +79,16 @@ O MES mantém o desenho **Fábrica → Setor → Roteiro → ItemParcial** e só
 
 > **Atualização de 28/09/2026 de manhã (Robert) — substituiu a tabela original de 24/09.** A parte atendida pelo estoque não fica `CONCLUIDO` no próprio Estoque: segue em trânsito para a **Expedição** (novo tipo de setor, `EXPEDICAO` — Embalagem → Logística, sempre os dois últimos setores do roteiro; **confirmado no código**, migration `20260925210000_setor_tipo_expedicao`). E tudo que é comprado (revenda **e** matéria-prima) passa por um novo setor **Requisições de compras** (do PCP) antes de Compras — **este último ainda não chegou a ser implementado antes de ser revisado de novo, ver abaixo**.
 >
-> **⚠️ Revisado de novo em 28/09/2026 à tarde (Robert, PDF "Módulos Estoque/Compras/Logística/Qualidade") — proposta, ainda não implementada.** As linhas abaixo (com `ESTOQUE·Entrada` e `Requisições de compras`/`Compras` dentro do roteiro) descrevem a manhã de 28/09. A proposta da tarde do mesmo dia **substitui isso antes de ir a código**: um único setor `ESTOQUE`; o circuito de compra (Requisição → Compras → Logística de Entrada → Qualidade → volta ao mesmo Estoque) sai do roteiro e vira um desvio fixo do sistema; a baixa passa a ocorrer no **despacho do Estoque**, não no recebimento da Embalagem. Roteiros propostos: **fabricação sem compra** = Estoque → setores produtivos → Expedição; **fabricação com compra de MP** = Estoque → [circuito de compra] → Estoque → setores produtivos → Expedição; **revenda** = Estoque → [circuito de compra, se faltar saldo] → Estoque → Expedição (ou direto Estoque → Expedição se já tiver saldo). Ver o callout completo na introdução desta nota.
+> **Revisado em 28/09/2026 à tarde e CONFIRMADO em 29/09/2026 (Nathan, EC-05/EC-08) — substitui a tabela da manhã abaixo.** As linhas abaixo (com `ESTOQUE·Entrada` e `Requisições de compras`/`Compras` dentro do roteiro) descreviam só a manhã de 28/09 — mantidas por histórico, mas **não são mais a arquitetura vigente**. A versão confirmada é: um único setor `ESTOQUE`; o circuito de compra (Requisição → Compras → Logística de Entrada → Qualidade → volta ao mesmo Estoque) sai do roteiro e vira um desvio fixo do sistema; a baixa passa a ocorrer no **despacho do Estoque**, não no recebimento da Embalagem. **Roteiros confirmados** (ainda sem código): **fabricação sem compra** = Estoque → setores produtivos → Expedição; **fabricação com compra de MP** = Estoque → [circuito de compra] → Estoque → setores produtivos → Expedição; **revenda** = Estoque → [circuito de compra, se faltar saldo] → Estoque → Expedição (ou direto Estoque → Expedição se já tiver saldo). Ver o callout completo na introdução desta nota.
 
-| Fábrica | Roteiro (manhã de 28/09 — ver revisão da tarde acima) |
+| Fábrica | Roteiro (manhã de 28/09 — histórico, ver versão confirmada acima) |
 |---|---|
 | **Fabricação, sem compra** (produto já sai pronto da linha) | `ESTOQUE` (fixo) → setores `PRODUTIVOS` da linha → Qualidade → `ESTOQUE·Entrada` (manual, EN-04) → **Expedição** (Embalagem → Logística) |
 | **Fabricação com compra de matéria-prima** | `ESTOQUE` (fixo) → **Requisições de compras** → Compras → Recebimento → Qualidade → `ESTOQUE·Entrada` → ação "Entregar matéria-prima para a produção" → setores `PRODUTIVOS` (ex.: Corte) → Expedição |
 | **Revenda** | `ESTOQUE` (fixo) → **Requisições de compras** → Compras → Recebimento → [beneficiamento, opcional] → Qualidade → `ESTOQUE·Entrada` → Expedição |
 | **Parte atendida direto pelo saldo** (qualquer fábrica) | `ESTOQUE` (fixo) → pula direto para **Expedição**, em trânsito, com a Reserva já `ATIVA` |
 
-O **backend insere o setor Estoque como etapa 1** de todo roteiro (substitui o papel que o setor Estoque tinha no sistema antigo). O setor "Emissão de Ordens" sai do roteiro. **Atualização (25/09/2026, EN-03/EN-04):** o Estoque do início é sempre fixo (inserido pelo backend); os demais setores tipo `ESTOQUE` (`ESTOQUE·Entrada` e, agora, `EXPEDICAO`) são adicionados manualmente na montagem do roteiro, não são automáticos. **Setor "Requisições de compras" (28/09, ainda não implementado)**: tipo de setor novo (ex. `REQUISICAO`), fila própria do PCP com a ação "Requisitar compra" — é ali que a matéria-prima fica amarrada ao item/parcial que originou a compra (cada linha da requisição aponta pra parcial/item de origem).
+O **backend insere o setor Estoque como etapa 1** de todo roteiro (substitui o papel que o setor Estoque tinha no sistema antigo). O setor "Emissão de Ordens" sai do roteiro. **Atualização (25/09/2026, EN-03/EN-04):** o Estoque do início é sempre fixo (inserido pelo backend); os demais setores tipo `ESTOQUE` (`ESTOQUE·Entrada` e, agora, `EXPEDICAO`) são adicionados manualmente na montagem do roteiro, não são automáticos. **Setor "Requisições de compras" (28/09 manhã, superseded pela versão confirmada de 29/09)**: tipo de setor novo (ex. `REQUISICAO`), fila própria do PCP com a ação "Requisitar compra" — é ali que a matéria-prima fica amarrada ao item/parcial que originou a compra (cada linha da requisição aponta pra parcial/item de origem). Na versão confirmada, esse setor sai do roteiro do PCP e vira parte do circuito de compra fixo.
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 35, 'rankSpacing': 45, 'padding': 12}}}%%
@@ -147,7 +160,7 @@ A natureza do item é o **tipo da fábrica escolhida naquela rodada**. Em emerg�
 
 Isso **substitui** o que [[Modelo-Destinacao-Item]] dizia (eixo 1 "praticamente fixo por tipo de material").
 
-> **Atenção ao cadastro de material do Pablo (D5):** `Material.natureza` (`MATERIA_PRIMA` \| `REVENDA`) existe na tela `cadastros/estoque/materiais`. Pela proposta, ele não decide rota. Pode ficar como classificação do material no estoque (o que é matéria-prima e o que é produto de revenda), sem papel no roteiro. **RESOLVIDO em 25/09/2026 — ver seção 5 (EN-05).**
+> **Atenção ao cadastro de material do Pablo (D5):** `Material.natureza` (`MATERIA_PRIMA` \| `REVENDA`) existe na tela `cadastros/estoque/materiais`. Ele não decide rota — fica só como classificação do material no estoque (o que é matéria-prima e o que é produto de revenda), sem papel no roteiro. **RESOLVIDO em 25/09/2026, reconfirmado direto pelo Nathan em 29/09/2026 — ver seção 5 (EN-05).**
 
 ### 3.6 Ligação item do pedido ↔ Material
 
@@ -163,6 +176,8 @@ Isso **substitui** o que [[Modelo-Destinacao-Item]] dizia (eixo 1 "praticamente 
 - Saldo consultado **na filial do pedido** (DEC-1: a filial vem do pedido).
 
 ### 3.7 Reserva e movimentação (D9) — implementada e testada em 28/09/2026
+
+> **Atenção (29/09/2026):** o desenho abaixo descreve o que está **em produção hoje** (baixa via `MovimentoEstoque SAIDA` quando a Embalagem recebe). A arquitetura **confirmada** para a próxima iteração (seção 5, linhas de 29/09) muda esse ponto: a baixa passa a ocorrer no **despacho do Estoque**, e a Reserva perde o papel central, ficando restrita a "separar sem despachar". Ainda não há código para essa mudança.
 
 - **Tabela `Reserva`:** lote + `ItemParcial` (o split atendido) + quantidade + snapshot de pedido/OP/item + status (`ATIVA` \| `CONSUMIDA` \| `LIBERADA`). Substitui o `pedidoNumero` em texto do mock.
 - **Sem expiração:** liberação explícita quando o pedido ou a OP é cancelado/excluído (nenhum estado sem saída). Resolve a M-06 de [[Perguntas-em-Aberto-Consolidadas]].
@@ -216,42 +231,46 @@ Isso **substitui** o que [[Modelo-Destinacao-Item]] dizia (eixo 1 "praticamente 
 | Item comprado | Aprovado na Qualidade, passa pelo Estoque (entrada + reserva) — **revisado 25/09: depois segue para a Expedição, não fica concluído no Estoque** | **Fechada (Nathan 24/09, revisada Robert 25/09)** |
 | Material não é mais projeção (D3 revisada) | Nasce/atualiza no PCP só na primeira entrada de estoque, buscando o produto direto no av-hub; campos próprios do Estoque nunca são sobrescritos; tela Materiais lista só quem já tem lote | **Fechada (25/09)** |
 | Parte atendida pelo estoque → Expedição | Novo tipo de setor `EXPEDICAO` (Embalagem → Logística); a parte atendida vai em trânsito com a Reserva `ATIVA`; a baixa (Reserva `CONSUMIDA` + `SAIDA`) só acontece quando a Embalagem recebe | **Fechada (25/09)** |
-| Tudo que é comprado volta ao Estoque (revenda **e** matéria-prima) | Novo setor "Requisições de compras" (PCP) antes de Compras; é ali que a matéria-prima fica amarrada ao item/parcial de origem; ação "Entregar matéria-prima para a produção" no Estoque·Entrada | **Fechada em princípio (28/09) — modelo de dados e implementação ainda pendentes, ver seção 6** |
-| Recebimento parcial de compra | Permitido, com split da parcial — o que chegou avança para a Qualidade, o restante continua aguardando em Compras | **Fechada (28/09)** |
+| Tudo que é comprado volta ao Estoque (revenda **e** matéria-prima) | ~~Novo setor "Requisições de compras" (PCP) antes de Compras~~ **superseded em 29/09** — vira parte do circuito de compra fixo (fora do roteiro), ver linha "Circuito de compra" abaixo; a amarração matéria-prima↔item/parcial de origem se mantém | **Fechada em princípio (28/09), redesenhada (29/09)** |
+| Recebimento parcial de compra | Permitido, com split da parcial — o que chegou avança para a Qualidade, o restante continua aguardando em Compras (**revisado 29/09: quem recebe agora é a Logística de Entrada**, não Compras) | **Fechada (28/09), local revisado (29/09)** |
 | Sobra de compra (lote mínimo do fornecedor) | Fica livre no estoque para outros pedidos; o lote registra de qual requisição veio | **Fechada (28/09)** |
+| **Circuito de compra fixo fora do roteiro** (29/09) | Requisição → Compras → Logística de Entrada → Qualidade → volta ao mesmo Estoque vira um desvio fixo do sistema, disparado pelo próprio Estoque quando falta saldo; o PCP não monta isso no roteiro | **Fechada (Nathan, 29/09, EC-05/EC-08)** |
+| **Baixa do saldo no despacho do Estoque** (29/09) | Não mais no recebimento da Embalagem — produto pronto dá baixa e vai pra Expedição; matéria-prima dá baixa e a parcial segue pro próximo setor produtivo | **Fechada (Nathan, 29/09, EC-05/EC-08)** |
+| **Setor Estoque único** (29/09) | O setor "Estoque·Entrada" deixa de existir — volta a ser um único Estoque, com a saída "solicitar compra" abrindo o circuito fixo | **Fechada (Nathan, 29/09, EC-05/EC-08)** |
+| Qualidade: inspeção por lote × parcial | **Inspeção de entrada é por lote** (entidade `Lote`); **inspeção de saída é um setor tipo `QUALIDADE` no roteiro**, na trilha da parcial | **Fechada (Nathan, 29/09, EC-01)** |
+| C8 respeita `RoteiroItem` na Expedição | **Sim** | **Fechada (Nathan, 29/09, EC-03)** |
+| `RequisicaoCompra`/`RequisicaoCompraItem` | Confirmado como incorporado pela proposta de 28/09 à tarde — modelo entra dentro do setor `REQUISICAO`, não é peça separada | **Fechada (Nathan, 29/09, EC-04)** |
+| Reserva — manter ou retirar | Seguir com a proposta de 28/09 à tarde: Reserva deixa de ser o mecanismo central de baixa, fica restrita a "separar sem despachar" | **Fechada (Nathan, 29/09, EC-05)** |
+| Inspeção de saída obrigatória ou opcional | **Obrigatória em todo roteiro** de fabricação | **Fechada (Nathan, 29/09, EC-06)** |
+| Reprovação na inspeção de entrada (total ou parcial) | Parte aprovada fica em **quarentena aguardando**; parte reprovada volta pra Compras, que alinha devolução + entrega da substituição; substituição refaz a inspeção e, se aprovada, **une-se aos itens em quarentena** | **Fechada (Nathan, 29/09, EC-07)** |
+| Validar desenho completo antes de codificar | **Ok, validado** | **Fechada (Nathan, 29/09, EC-08)** |
 | `codigoEmpresa` | `idUnidade` do pedido é UUID, mesmo id do Material | **Fechada (Gustavo, 25/09) — confirmado no banco, é o mesmo id (EN-07)** |
 | Saldo zero | **Exige clique** — há casos de compra de matéria-prima cuja descrição não bate com a do produto vendido, então não dá pra resolver automático sem risco de erro | **Fechada (25/09, EN-01)** |
 | Nome na tela | Renomeado para **"Destino"** (nem "Fábrica", nem "Linha") | **Fechada (Robert + Nathan, 25/09, EN-02)** |
 | Estoque duas vezes no roteiro da Revenda | O **1º Estoque é etapa fixa** do roteiro (inserida pelo backend); o **2º Estoque (fim) é adicionado manualmente** na montagem do roteiro — não é automático nem fixo como o primeiro | **Fechada (25/09, EN-03)** |
 | Produto fabricado termina no Estoque? | **Sim** — a regra de 3.4 (Qualidade → Estoque, não Expedição) passa a valer também para o produto fabricado, não só o comprado | **Fechada (Nathan, 25/09, EN-04)** |
-| `Material.natureza` × natureza por rodada | Fica **só como classificação** do material no estoque — serve pra filtro, relatório e distinguir matéria-prima de produto de revenda no saldo, mas **não decide a rota nem trava a escolha da fábrica**. No máximo, a tela Ordem de Produção pode usá-lo pra **sugerir** a fábrica padrão, e o PCP troca quando precisar | **Fechada (Pablo + Robert, 25/09, EN-05)** |
+| `Material.natureza` × natureza por rodada | Fica **só como classificação** do material no estoque — serve pra filtro, relatório e distinguir matéria-prima de produto de revenda no saldo, mas **não decide a rota nem trava a escolha da fábrica**. No máximo, a tela Ordem de Produção pode usá-lo pra **sugerir** a fábrica padrão, e o PCP troca quando precisar | **Fechada (Pablo + Robert, 25/09; reconfirmada direto pelo Nathan em 29/09 depois do PDF do Robert ter reaberto a pergunta — sem mais conflito de registro)** |
 | Comprado "não acabado" sem setor de beneficiamento no roteiro | Usa o **roteiro individual do item** — foge do roteiro padrão definido, ajustado item a item | **Fechada (PCP + Robert, 25/09, EN-06)** |
 
 ## 6. Em aberto
 
+> **Atualizado em 29/09/2026**: dos 10 itens que estavam aqui, 9 foram respondidos pelo Nathan (EN-05, EC-01, EC-03 a EC-08 — ver seção 5). Só sobram os dois abaixo.
+
 | # | Pergunta | Origem |
 |---|---|---|
-| 1 | **EN-05 — conflito de registro, não pergunta nova.** A resposta de 25/09 ("`Material.natureza` fica só como classificação") não chegou ao Robert; o PDF de 28/09 lista EN-05 como "sem resposta ainda". Alinhar quem tem a versão vigente. | PDF 28/09 |
-| 2 | **Qualidade: inspeção por lote (entidade) e/ou pela parcial?** Definir o que o setor Qualidade faz na fila quando há lote comprado. | PDF 28/09 |
-| 3 | **Baixa de matéria-prima consumida além do requisitado** (sobras, perdas de corte) — fora do escopo por ora. | PDF 28/09 |
-| 4 | **C8**: mover e a busca da etapa de Expedição precisam passar a respeitar o `RoteiroItem` quando o item tiver roteiro próprio (comprado não acabado, EN-06). | PDF 28/09 |
-| 5 | **DEC-4**: dupla conferência da carga inicial ainda sem fluxo implementado. | PDF 28/09 |
-| 6 | Modelo de dados de `RequisicaoCompra`/`RequisicaoCompraItem` e o novo tipo de setor "Requisições de compras" — **superseded pela proposta da tarde de 28/09** (circuito de compra fixo, fora do roteiro), ver item 7 abaixo. | PDF 28/09 manhã |
-| 7 | **Reserva: manter para "separar sem despachar" ou retirar de vez?** A proposta da tarde de 28/09 tira a baixa/conclusão do Estoque (agora é no despacho) — não está claro se a Reserva ainda tem função nesse desenho. | PDF 28/09 tarde |
-| 8 | **Inspeção de saída obrigatória em todo roteiro de fabricação, ou opcional por destino?** | PDF 28/09 tarde |
-| 9 | **Reprovação na inspeção de entrada**: a parcial volta pra Compras automaticamente (recompra) ou fica aguardando decisão humana? | PDF 28/09 tarde |
-| 10 | Validar o desenho completo da proposta da tarde (setor Estoque único, circuito de compra fixo disparado pelo Estoque, baixa no despacho, tipos `REQUISICAO`/`LOGISTICA_ENTRADA`/`QUALIDADE`, menus por módulo) antes de começar a codificar — nada disso está no código ainda. | PDF 28/09 tarde |
+| 1 | **Baixa de matéria-prima consumida além do requisitado** (sobras, perdas de corte) — o Nathan pediu sugestão em vez de decidir. Ver proposta no callout de 29/09 na introdução desta nota (tratar como `MovimentoEstoque` tipo `AJUSTE` com motivo obrigatório) — **ainda não validada pelo time**. | PDF 28/09 (EC-02) |
+| 2 | **DEC-4**: dupla conferência da carga inicial ainda sem fluxo implementado. | PDF 28/09 |
 
 ## 7. Impacto no cronograma
 
 - **C6: ✅ concluída (implementada e testada em 25/09/2026).** Tipos de Fábrica/Setor, fábrica Revenda, Estoque obrigatório como etapa 1, ação de atendimento pelo estoque (com trânsito para Expedição, não mais conclusão no Estoque).
 - **D9: ✅ concluída (implementada e testada em 28/09/2026).** Saldo, Reserva e Movimentação com o modelo de 3.7, mais a entrada/atendimento do item comprado. Destrava as telas D8/D10 do Pablo, agora sem mock.
-- **C7 e D6 — reorganizadas em 28/09/2026** (deixam de ser só "requisição pela entrada no setor Compras" + "recebimento libera o parcial"): passam a cobrir também o novo setor **Requisições de compras** (fila do PCP, `RequisicaoCompra`/`RequisicaoCompraItem`) e o recebimento com **split** (parcial permitido). Sequência de implementação sugerida pelo Robert: Requisições de compras → Compras/Recebimento.
-- **C8: em seguida** — passa a incluir também o **`RoteiroItem`** (item 4 da seção 6): mover e a busca da etapa de Expedição respeitando o roteiro individual do item, além da fila "Novo norte" já prevista.
-- **D8:** a aprovação da Qualidade move o parcial do item comprado para o setor Estoque·Entrada (regra de 3.4), que agora segue para a Expedição — não fica concluído no Estoque nem vai direto pra Expedição sem passar pelo Estoque.
-- **Novo desenvolvimento a planejar:** setor "Requisições de compras" (tipo `REQUISICAO`) e setor `EXPEDICAO` (Embalagem + Logística) — nenhum dos dois tinha linha própria no cronograma original; avaliar se entram dentro de C6/C7/D6 já orçadas ou pedem tarefa nova.
+- **C7 e D6 — reorganizadas em 28/09/2026, redesenhadas de novo em 29/09/2026.** A versão de 28/09 de manhã (requisição pela entrada no setor Compras + recebimento com split) foi **substituída pela arquitetura confirmada em 29/09**: circuito de compra fixo (Requisição → Compras → Logística de Entrada → Qualidade → volta ao Estoque), fora do roteiro do PCP, disparado pelo próprio Estoque. C7/D6 precisam ser reescopadas pra cobrir os novos setores (`REQUISICAO`, `LOGISTICA_ENTRADA`, `QUALIDADE`) e telas por módulo (Compras, Logística, Qualidade) em vez do desenho de 28/09 de manhã.
+- **C8: em seguida** — passa a incluir também o **`RoteiroItem`** (confirmado, EC-03): mover e a busca da etapa de Expedição respeitando o roteiro individual do item, além da fila "Novo norte" já prevista.
+- **D8:** a aprovação da Qualidade move o parcial pro setor Estoque (regra de 3.4) — **arquitetura confirmada em 29/09 muda o ponto da baixa** para o despacho do Estoque, não mais pro recebimento na Embalagem. D8 (frontend de Qualidade) precisa incorporar a inspeção de saída como setor tipo `QUALIDADE` no roteiro (EC-01) e o fluxo de reprovação total/parcial no recebimento (EC-07: quarentena + realinhamento com Compras + reunião com a substituição).
+- **Novo desenvolvimento a planejar:** setores `REQUISICAO`, `LOGISTICA_ENTRADA`, `QUALIDADE` (novo) e `EXPEDICAO` (já existe), e os menus Estoque/Compras/Logística/Qualidade (Movimentações vira só `PRODUTIVO`) — nenhum tinha linha própria no cronograma original; avaliar se entram dentro de C6/C7/D6/D8 já orçadas ou pedem tarefas novas. Plano em 3 fases sugerido pelo Robert (tipos e telas → circuito de compra → baixa no despacho + matéria-prima).
 
-## 8. Notas atualizadas com este encaixe (24, 25 e 28/09/2026)
+## 8. Notas atualizadas com este encaixe (24, 25, 28 e 29/09/2026)
 
 [[Modelo-Destinacao-Item]] · [[Fluxo-Detalhado-Pedido-Item]] · [[PCP-Carteira]] · [[Rota-Revenda]] · [[Rota-Fabricacao]] · [[Rota-Estoque]] · [[Fluxo-Operacional-Visao-Geral]] · [[Setores-Envolvidos-no-Fluxo]] · [[Fluxogramas-Completos]] · [[Fluxograma-Telas-por-Bloco]] · [[Fluxo-Sistema-no-Meio]] · [[Fabricacao-Chapas]] · [[Fluxo-Estoque-Completo]] · [[Estoque-Modelo-Dados]] · [[Estoque-Regras-Negocio]] · [[Fluxo-Producao-OS-OP-Completo]] · [[Fluxo-Compras-Completo]] · [[Fluxo-Recebimento-Completo]] · [[Fluxo-Qualidade-Completo]] · [[Fluxo-Expedicao-Faturamento-Completo]] · [[App-PCP-Modelo-Producao]] · [[App-PCP-Backend-Producao]] · [[Decisoes-Chave-ERP]] · [[Perguntas-em-Aberto-Consolidadas]] · [[Revisao-dos-Estados-e-Status]] · [[Campos-e-API-para-Rastreabilidade]] · [[Integracao-AvHub-MES-Especificacao-F1]] · [[Diagramas-UML]] · [[Cronograma-2-Meses]] · [[Onde-Estamos]] · [[Glossario]]
 
