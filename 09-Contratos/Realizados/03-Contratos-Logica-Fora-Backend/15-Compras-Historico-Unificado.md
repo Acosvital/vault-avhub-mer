@@ -4,7 +4,7 @@
 >
 > **✅ Backend entregue pelo DBA — conferido em 28/09/2026:** `vw_ordens_compra_historico` (migration 025) e a API no ar na `api-test`: `GET /compras/ordens?origem=todas|av-hub|omie` e `/compras/ordens/resumo` com `por_origem`. **Atrás da chave `HISTORICO_UNIFICADO`**: sem ela e sem `?origem=`, só `av-hub`. Sem dados para ver a unificação (espelho vazio no teste). A migration 025 não está no repositório da API — o SQL fica com o DBA.
 >
-> **Front feito em 28/09/2026** ([av-hub#105](https://github.com/Acosvital/av-hub/pull/105), **mergeado na `develop` em 28/09/2026**): a listagem pede `?origem=todas` por padrão (filtro Origem: av-hub/Omie), paginada no servidor, com marca "Omie" e detalhe só leitura em `/compras/pedido-omie/{id}` (GET /pedidos_compras/{id}); KPIs com `por_origem`. **Pedido ao backend:** nomes no GET /pedidos_compras/{id} → [[27-Compras-Pedido-Omie-Nomes]].
+> **Front feito em 28/09/2026** ([av-hub#105](https://github.com/Acosvital/av-hub/pull/105), **mergeado na `develop` em 28/09/2026**): a listagem pede `?origem=todas` por padrão (filtro Origem: av-hub/Omie), paginada no servidor, com marca "Omie" e detalhe só leitura em `/compras/pedido-omie/{id}` (GET /pedidos_compras/{id}); KPIs com `por_origem`. **Pedido ao backend:** nomes no GET /pedidos_compras/{id} → [[19-Compras-Pedido-Omie-Nomes]].
 
 **Criado em:** 24/09/2026 · **Para:** DBA, backend (`api-acos-vital`), pipeline e av-hub
 

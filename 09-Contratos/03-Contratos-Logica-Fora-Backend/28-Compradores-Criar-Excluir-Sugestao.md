@@ -7,7 +7,7 @@ status: proposta
 # Contrato 28 — Compradores: criar, excluir e sugestão por semelhança (igual a Vendedores)
 
 **Criado em:** 29/09/2026 · **Para:** backend (`api-acos-vital`) e, no item P, a pipeline
-(`omie-elt-pipeline`) · **Complementa:** [[16-Compradores-Funcionario]]
+(`omie-elt-pipeline`) · **Complementa:** [[18-Compradores-Funcionario]]
 
 ---
 

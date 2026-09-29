@@ -6,6 +6,8 @@ status: proposta
 
 # Contrato 27 — Compras: nomes no detalhe do pedido de compra do Omie
 
+> **Concluído — movido para `Realizados/` em 29/09/2026** (era o contrato 27). Backend na `api-test` e front mergeado na `develop` do av-hub ([av-hub#106](https://github.com/Acosvital/av-hub/pull/106)).
+
 > **Conferido em 29/09/2026: backend entregue** (API `163b58b`). Testado na `api-test` com um pedido de
 > teste no espelho (fornecedor GERDAU, Mogi, depois apagado): `nome_fornecedor`, `razao_social_fornecedor`,
 > `cpf_cnpj_fornecedor` e `etapa_descricao` ("Incluído") vieram certos; comprador e descrições dos

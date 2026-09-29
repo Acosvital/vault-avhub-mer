@@ -37,8 +37,8 @@ Conferido ao vivo na `api-test` e no código da API (`develop` até `163b58b`):
 | Contrato | Resultado |
 |---|---|
 | [[26-Vendas-Liberacao-Pedido]] | ✅ backend no ar e telas no menu; **falta a data de corte** (`parametros_vendas` vazia) e o L4 do `api-pcp` (Robert) |
-| [[27-Compras-Pedido-Omie-Nomes]] | ✅ backend testado com pedido de teste; front em [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), aguardando merge |
-| [[16-Compradores-Funcionario]] | ✅ `/funcionarios` devolve setor e unidade; última gambiarra removida em [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), aguardando merge |
+| [[19-Compras-Pedido-Omie-Nomes]] | ✅ backend testado com pedido de teste; front em [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), mergeado em 29/09 → **movido para `Realizados/`** |
+| [[18-Compradores-Funcionario]] | ✅ `/funcionarios` devolve setor e unidade; última gambiarra removida em [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), mergeado em 29/09 → **movido para `Realizados/`** |
 | [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | ❌ **não entregue**: nenhuma rota existe — voltar ao DBA |
 | [[14-Compras-Omie-Pedido-Compra]], [[19-Compras-Pedido-Pipeline-Omie]], [[23-Compras-Pipeline-Consolidado]] | não são do DBA: dependem da `omie-elt-pipeline` (branch `feat/compras-omie`, sem commits novos desde 24/09; L4, envio da OC, ainda não existe) |
 | [[16-Compras-Pedido-DBA-Banco]] e [[17-Compras-Pedido-API-Backend]] (eram 17 e 18) | históricos, concluídos pelo [[13-Compras-Backend-Consolidado]] → **movidos para `Realizados/`** |
@@ -58,7 +58,7 @@ Conferido ao vivo na `api-test` e no código da API (`develop` até `163b58b`):
 
 ## Novo: Compras — nomes no detalhe do pedido do Omie (28/09/2026)
 
-- **[[27-Compras-Pedido-Omie-Nomes]]** — `GET /pedidos_compras/{id}` passa a devolver nome/CNPJ do
+- **[[19-Compras-Pedido-Omie-Nomes]]** — `GET /pedidos_compras/{id}` passa a devolver nome/CNPJ do
   fornecedor, comprador, etapa e as descrições dos catálogos (mesmo JOIN por unidade das OCs, B5).
   Só API, aditivo. Hoje a tela do pedido feito no Omie (contrato 25) mostra só códigos.
 
@@ -80,7 +80,7 @@ na `develop` do av-hub ([av-hub#104](https://github.com/Acosvital/av-hub/pull/10
 **O que ainda depende de outros contratos (não reabre estes):** produção (B0 do 13) e a pipeline
 gravar catálogos, PTAX e espelho na `api-test` ([[23-Compras-Pipeline-Consolidado]]) — até lá as listas
 do Omie, a cotação automática e o histórico do Omie só foram testados vazios; nomes no detalhe do pedido
-do Omie ([[27-Compras-Pedido-Omie-Nomes]]). **Decisões pendentes:** quando ligar as chaves da API
+do Omie ([[19-Compras-Pedido-Omie-Nomes]]). **Decisões pendentes:** quando ligar as chaves da API
 `COMPRAS_VINCULO_EXIGIR_PV_EXISTENTE`, `COMPRAS_EXIGIR_PODE_APROVAR` e `COMPRAS_HISTORICO_UNIFICADO`
 (o av-hub já pede `?origem=todas` sozinho); avisar que os KPIs de aprovadas sobem de uma vez quando o
 histórico do Omie tiver dados.
@@ -100,14 +100,14 @@ e [[008-Requisicoes-Compra]] também já estão aplicados.
   compradores, espelho, envio da OC, catálogos, entidades HTML, testes). L1–L3 e L5–L9 já estão
   implementados na branch `feat/compras-omie` (desligados até o banco ter as tabelas). É o que falta
   para as telas de Compras terem dados na `api-test`.
-- **[[27-Compras-Pedido-Omie-Nomes]]** — nomes no detalhe do pedido feito no Omie.
+- **[[19-Compras-Pedido-Omie-Nomes]]** — nomes no detalhe do pedido feito no Omie.
 
 Contratos de detalhe:
 
 - **[[14-Compras-Omie-Pedido-Compra]]** — de-para completo com a API do Omie: puxar os pedidos de
   compra para o espelho `pedidos_compras` e enviar a OC com `UpsertPedCompra`. Conferido campo a
   campo contra a doc oficial do Omie em 23/09/2026.
-- **[[16-Compradores-Funcionario]]** — cadastro de compradores por filial, ligado ao funcionário
+- **[[18-Compradores-Funcionario]]** — cadastro de compradores por filial, ligado ao funcionário
   (resolve o `nCodCompr` do Omie).
 - ~~[[16-Compras-Pedido-DBA-Banco]], [[17-Compras-Pedido-API-Backend]] e
   [[19-Compras-Pedido-Pipeline-Omie]]~~ — **substituídos em 23/09/2026** pelos dois consolidados

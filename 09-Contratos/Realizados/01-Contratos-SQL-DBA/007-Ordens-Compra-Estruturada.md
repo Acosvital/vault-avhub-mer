@@ -15,7 +15,7 @@ atualizado: 2026-09-23
 |---|---|
 | `numero_pedido` | `numero_ordem` (varchar 30, gerado `OC-000001` por unidade) |
 | `id_requisicao` | `requisicao_id` |
-| `codigo_comprador uuid NOT NULL` | **não existe**; só `created_by`. O comprador do Omie virou um contrato novo (tabela `compradores` + `ordens_compra.id_comprador`, em [[16-Compradores-Funcionario]]) |
+| `codigo_comprador uuid NOT NULL` | **não existe**; só `created_by`. O comprador do Omie virou um contrato novo (tabela `compradores` + `ordens_compra.id_comprador`, em [[18-Compradores-Funcionario]]) |
 | `codigo_fornecedor`/`codigo_transportadora` varchar(40) | varchar(60) |
 | `status` default `rascunho` | default `aguardando_aprovacao`; o `status` do POST é **ignorado** e a trigger libera para `aprovado` abaixo do limite |
 | limite fixo de R$ 30.000 (pergunta 4) | tabela **`parametros_compras.limite_aprovacao`** por unidade (default 30.000), lida pela trigger |

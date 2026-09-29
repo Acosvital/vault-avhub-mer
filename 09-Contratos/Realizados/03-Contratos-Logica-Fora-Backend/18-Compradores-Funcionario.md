@@ -1,5 +1,7 @@
 # Contrato — Compradores (Omie) ↔ Funcionário (RH)
 
+> **Concluído — movido para `Realizados/` em 29/09/2026** (era o contrato 16). Backend na `api-test` e front mergeado na `develop` do av-hub ([av-hub#106](https://github.com/Acosvital/av-hub/pull/106)).
+
 > **Conferido em 29/09/2026: backend entregue.** Rotas de compradores no ar na `api-test`, e o
 > `/funcionarios` passou a devolver `nome_setor` e `nome_unidade` — com isso saiu a última marca
 > `GAMBIARRA(` (o BFF buscava setores e unidades à parte). **Front** em
