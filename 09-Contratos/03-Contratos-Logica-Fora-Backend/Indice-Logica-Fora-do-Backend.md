@@ -23,6 +23,13 @@ Para listar tudo no repositório `av-hub`: `grep -rn "GAMBIARRA(" app components
 (hoje são 57 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
 contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contratos-Logica-Fora-Backend/`.
 
+## Novo: notas fiscais manuais só para o admin (29/09/2026)
+
+- **[[29-Notas-Fiscais-Manuais-So-Admin]]** — a tela Dashboards › Notas fiscais manuais (av-hub) usa a tela
+  `notas-fiscais-manuais` (pode_criar/editar/deletar só no perfil admin; o DBA está criando). Pede ao backend
+  conferir a permissão pelo token no `POST /nota_fiscal_saida/manual` (hoje basta a x-api-key), tirar `manual`
+  dos campos editáveis e devolver quem cadastrou/alterou e o número do pedido.
+
 ## Novo: Compradores igual a Vendedores (29/09/2026)
 
 - **[[28-Compradores-Criar-Excluir-Sugestao]]** — criar e excluir comprador (reabre a decisão do contrato 16) e
