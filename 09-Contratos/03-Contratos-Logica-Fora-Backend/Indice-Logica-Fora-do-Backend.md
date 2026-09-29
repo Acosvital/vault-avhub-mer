@@ -23,6 +23,13 @@ Para listar tudo no repositório `av-hub`: `grep -rn "GAMBIARRA(" app components
 (hoje são 57 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
 contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contratos-Logica-Fora-Backend/`.
 
+## Novo: Compradores igual a Vendedores (29/09/2026)
+
+- **[[28-Compradores-Criar-Excluir-Sugestao]]** — criar e excluir comprador (reabre a decisão do contrato 16) e
+  sugestão de vínculo por semelhança com `min_score`, como em Vendedores. A ordenação por coluna já foi feita
+  no av-hub (av-hub#106). Tem 3 perguntas em aberto para o Nathan (código que não existe no Omie, excluir o
+  que ainda está no Omie, editar nome/ativo à mão).
+
 ## Conferência de 29/09/2026 (DBA: "terminei todos, menos 04 e 09; 13 desconsiderar")
 
 Conferido ao vivo na `api-test` e no código da API (`develop` até `163b58b`):
