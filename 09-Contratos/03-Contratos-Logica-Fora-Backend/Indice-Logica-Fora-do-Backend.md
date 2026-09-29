@@ -25,7 +25,7 @@ contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contr
 
 ## Novo: notas fiscais manuais só para o admin (29/09/2026)
 
-- **[[29-Notas-Fiscais-Manuais-So-Admin]]** — a tela Dashboards › Notas fiscais manuais (av-hub) usa a tela
+- **[[29-Notas-Fiscais-Manuais-So-Admin]]** — a tela Cadastros › Auxiliares › Notas fiscais manuais (av-hub) usa a tela
   `notas-fiscais-manuais` (pode_criar/editar/deletar só no perfil admin; o DBA está criando). Pede ao backend
   conferir a permissão pelo token no `POST /nota_fiscal_saida/manual` (hoje basta a x-api-key), tirar `manual`
   dos campos editáveis e devolver quem cadastrou/alterou e o número do pedido.
