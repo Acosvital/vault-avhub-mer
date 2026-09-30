@@ -2,7 +2,7 @@
 tags: [contrato-sql, dba, integracao-av-hub-mes, compras]
 status: aplicada
 criado: 2026-09-22
-atualizado: 2026-09-23
+atualizado: 2026-09-30
 ---
 
 # Contrato SQL 008 — `core_vendas_faturamento.requisicoes_compra` (novo)
@@ -22,7 +22,9 @@ atualizado: 2026-09-23
 | transições validadas "no backend" | validadas **por trigger no banco**: `aberta ↔ em_cotacao ↔ cancelada`; `atendida` só pela trigger da OC (emitir marca `atendida`, cancelar a OC devolve para `aberta`) |
 | `numero_requisicao` sempre do MES | na criação manual, a API gera `REQ-000001` por unidade quando não vem no corpo |
 
-**Pergunta 2 (ordem de aplicação com o 007):** resolvida, porque os dois foram aplicados juntos. A **pergunta 1** (formato do número vindo do MES) continua aberta no contrato de API 003.
+**Correção de 30/09/2026** (conferido na `develop` da API, `36940ed`): duas linhas da tabela acima ficaram velhas depois do [[13-Compras-Backend-Consolidado]] (`bf9d86a`). O **`id_origem` está no model** e o `POST /compras/requisicoes` o aceita (é a chave de idempotência do job do MES), e o **`prazo_necessidade` voltou a ser obrigatório**. Também existe `numero_requisicao_mes` (índice não único). Formato do número do MES: `RC-AAAAMMDD-NNNN`, repetido nos itens da mesma requisição (pergunta 1 respondida, ver [[003-Requisicao-Compra-Integracao-MES]]).
+
+**Pergunta 2 (ordem de aplicação com o 007):** resolvida, porque os dois foram aplicados juntos. A **pergunta 1** (formato do número vindo do MES) foi respondida em 30/09 (acima).
 
 **Status original:** proposta, aprovada por Nathan em 22/09/2026, alinhada campo a campo com `docs/ENVIAR - contrato-compras-fluxo-completo.md` (repositório `av-hub`, 21/09/2026) e com `lib/domain/compras-requisicao.ts` (domínio TypeScript já implementado no frontend, hoje rodando sobre dados de exemplo).
 

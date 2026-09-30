@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, cronograma, planejamento]
 criado: 2026-09-18
-atualizado: 2026-09-29
+atualizado: 2026-09-30
 ---
 
 # Cronograma de Desenvolvimento — 3 meses (18/09 a 21/12/2026)
@@ -335,14 +335,14 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 | A2 | Hardware do posto: aprovar compra e agendar o levantamento físico com a operação | Nathan | 0,5 | 22/09–28/09 | DEC-8 | Pedido de compra emitido; janela de 26-30/10 reservada com a operação |
 | B1 | Fechar as perguntas abertas dos contratos (SQL 001/002/004/005, API 001/002) | Gustavo | 1 | 22/09–28/09 | DEC-7 | Contratos sem pergunta aberta, prontos para aplicar |
 | B2 | Ambiente de homologação do MES/Estoque + backup/WAL do banco do MES | Gustavo | 1,5 | 22/09–28/09 | - | Banco de homologação no ar; backup do banco do MES confirmado |
-| C1 | Login duplo no MES (usuário/senha + e-mail/Azure AD) | Robert | 3 | 22/09–30/09 | - | Chão de fábrica entra por usuário/senha; escritório por e-mail corporativo |
-| C3 | Desenho do RBAC por instância de setor + revisão do schema do Estoque | Robert | 1,5 | 22/09–30/09 | - | Modelo de permissão por setor aprovado; schema D1 revisado |
+| C1 | ✅ **Concluída em 22/09/2026** (informado pelo Robert em 30/09) — Login duplo no MES (usuário/senha + e-mail/Azure AD) | Robert | 3 | 22/09–30/09 | - | Chão de fábrica entra por usuário/senha; escritório por e-mail corporativo |
+| C3 | ⚠️ **Atrasada** (Robert começa em 30/09/2026) — Desenho do RBAC por instância de setor + revisão do schema do Estoque | Robert | 1,5 | 22/09–30/09 | - | Modelo de permissão por setor aprovado; schema D1 revisado |
 | D1 | Schema Prisma estoque v1 + migrations (material, alias, depósito, localização, lote, movimento) | Pablo | 4 | 22/09–30/09 | DEC-4, DEC-7 | Migrations aplicadas em homologação |
 | F1 | Spec do contrato de integração v1: requisição, referência da OC e status por item + autenticação entre serviços | Nathan | 1,5 | 22/09–30/09 | DEC-2 | Spec aprovada por Robert e Gustavo; polling, idempotência e dono de cada coluna definidos |
 | A3 | Pauta do módulo financeiro (Passo 15) + critérios de aceite por fase | Nathan | 0,6 | 29/09–05/10 | - | Critérios de aceite de Fase 0/A/B/C no vault; pauta financeira enviada a quem decide o roadmap |
 | B3 | ✅ **Já aplicado (confirmado 21-22/09)** — ~~Aplicar~~ contratos SQL 001 (parceiros fiscais) e 005 (locais de estoque) | Gustavo | ~~1,5~~ 0 | — | B1 | Colunas/tabelas já existem em produção (`core.parceiros_dados_bancarios`/`_endereco_entrega`, `core.locais_estoque`) — nada a fazer. Ver [[Auditoria-Dump-Producao-2026-09-21]]. |
 | B4 | ✅ **Já aplicado (confirmado 21/09)** — ~~API~~ `alterado_desde` em /produtos e /parceiros (contrato API 001) | Gustavo | ~~1,5~~ 0 | — | B1 | Filtro incremental já está no ar em `api-acos-vital` (`src/routes/produtos.js:185-234`, `parceiros.js`) — nada a fazer. Ver [[Auditoria-Dump-Producao-2026-09-21]]. |
-| C4 | PCP Carteira (backend): importar itens do pedido pelo gateway | Robert | 1,5 | 29/09–05/10 | - | Itens do pedido de venda disponíveis no MES por número do pedido |
+| C4 | ✅ **Concluída** (confirmado pelo Robert em 30/09/2026; inclui o L4 do [[26-Vendas-Liberacao-Pedido]]) — PCP Carteira (backend): importar itens do pedido pelo gateway | Robert | 1,5 | 29/09–05/10 | - | Itens do pedido de venda disponíveis no MES por número do pedido |
 | D2 | Módulo base do Estoque: guards, seeds e harness de testes e2e | Pablo | 2 | 29/09–05/10 | D1 | Módulo sobe no MES com testes e2e rodando |
 | C2 | Vínculo Fábrica ↔ Unidade/Filial (codigo_empresa) | Robert | 1,5 | 01/10–05/10 | DEC-1 | Toda fábrica com filial; pedido cruzável por unidade |
 | D3 | ~~Projeção read-only de material e parceiro (full sync; incremental após B4)~~ **REVISADA em 25/09/2026**: não é mais projeção/full sync de `core.produtos` (duplicaria ~88 mil produtos sem necessidade). `Material` nasce/atualiza no PCP só na **primeira entrada de estoque**, buscando o produto direto no av-hub por código/descrição. `core.parceiros` (fornecedor) segue como projeção, sem mudança. | Pablo | 1,5 | 01/10–05/10 | B4 | Tela Saldo busca produto no av-hub e cria/atualiza o Material daquele produto; core.parceiros projetado no Estoque |
@@ -386,7 +386,7 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 | D11 | Etiquetagem código de barras/QR + leitor 2D no recebimento e na movimentação | Pablo | 3 | 03/11–10/11 | H2, DEC-8 | Etiqueta impressa e lida no posto de recebimento |
 | B7 | Backup/WAL do MES em produção + runbook de rollback do piloto | Gustavo | 1,5 | 09/11–13/11 | B2 | Runbook testado; restauração simulada |
 | C8 | ~~PCP Carteira: ações (reservar / abrir OS-OP / gerar requisição)~~ **Encolhe em 24/09/2026:** reservar virou ação do setor Estoque (C6), abrir OP é a tela Ordem de Produção (já existe), gerar requisição virou a entrada no setor Compras/Requisições (C7). Sobra a **fila "Novo norte"** (divergência, reprovação, comprado não acabado sem beneficiamento no roteiro). **Adição de 28/09/2026:** mover e a busca da etapa de Expedição passam a respeitar o `RoteiroItem` quando o item tiver roteiro próprio | Robert | 1 | 09/11–13/11 | C7, D9 | PCP decide o novo norte de todo parcial que voltou, sem estado sem saída; itens com roteiro próprio (`RoteiroItem`) são respeitados na busca da Expedição |
-| F3 | Endpoint de status por item no MES (/itens/status?alterado_desde=) | Robert | 2 | 09/11–13/11 | F1, D9 | av-hub consegue ler o estado de cada item por polling |
+| F3 | ✅ **Adiantado (29/09/2026)**: a rota já existe no `api-pcp` (`901f9bb`), com diferenças em relação ao contrato ([[005-Status-Item-Integracao-MES]]); o av-hub ainda não lê — Endpoint de status por item no MES (/itens/status?alterado_desde=) | Robert | 2 | 09/11–13/11 | F1, D9 | av-hub consegue ler o estado de cada item por polling |
 | G4 | Conferência da carga em dupla e fechamento da Fase 0 | Operação/negócio | - | 09/11–13/11 | G3 | Marco zero aprovado; consumo liberado para PCP/Comercial |
 | B10 | (stretch) Passo 4 - frete e parcelas do pedido de venda | Gustavo | 0,9 | 11/11–13/11 | B3 | Só se houver folga; primeiro corte se apertar |
 | H4 | Piloto assistido de Recebimento (1 posto, material real, em paralelo ao processo manual) | Operação/negócio | - | 11/11–18/11 | D6, D7, D8, H2 | Recebimentos reais registrados no sistema em modo sombra |

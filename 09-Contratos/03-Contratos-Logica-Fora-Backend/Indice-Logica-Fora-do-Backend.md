@@ -60,7 +60,7 @@ Conferido ao vivo na `api-test` e no código da API (`develop` até `163b58b`):
   gerente (*Liberação da equipe*, só leitura). Banco, API e telas testados no local; SQL nos
   apêndices, patch da API em `26-anexos/`. **Telas mergeadas na `develop` em 28/09/2026
   ([av-hub#103](https://github.com/Acosvital/av-hub/pull/103))**, mas sem backend na `api-test` (rotas 404).
-  Pendente: DBA/backend aplicarem (L1–L3), `api-pcp` trocar a origem da Carteira (L4). A partir deste contrato, **o contrato vive no vault** (não mais em
+  Pendente: DBA/backend aplicarem (L1–L3), `api-pcp` trocar a origem da Carteira (L4). **30/09: L4 concluído pelo Robert** (`api-pcp` `901f9bb`); faltam a data de corte (L1) e a chave própria do MES (L6). A partir deste contrato, **o contrato vive no vault** (não mais em
   `av-hub/docs/ENVIAR - *`); as marcas `GAMBIARRA(` apontam para cá.
 
 ## Novo: Compras — nomes no detalhe do pedido do Omie (28/09/2026)

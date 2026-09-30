@@ -1,11 +1,13 @@
 ---
 tags: [erp-acos-vital, fluxo-operacional, pcp, estoque, revenda, mes, decisao]
 criado: 2026-09-24
-atualizado: 2026-09-29
+atualizado: 2026-09-30
 fonte: "MES-Encaixe-Estoque-Revenda.pdf — Robert Wilson, 24/09/2026; MES-Estoque-Compras-Atualizacao.pdf — Robert Wilson, 28/09/2026 manhã; MES-Modulos-Estoque-Compras-Logistica-Qualidade.pdf — Robert Wilson, 28/09/2026 tarde; respostas do Nathan em 29/09/2026 (EN-05, EC-01 a EC-08)"
 ---
 
 # Encaixe do Estoque e da Revenda no fluxo do PCP (MES)
+
+> **30/09/2026 — o setor "Logística de Entrada" do MES passou a se chamar "Recebimento"** (`api-pcp` `0ac2596`, 29/09). Mudou só o nome: o tipo de setor continua `LOGISTICA_ENTRADA` e o código continua `logistica-entrada`. É a conferência na doca (C9 de [[Fluxo-Compras-Completo]]). A **coleta FOB** (C7b/C8) continua sendo outro papel. Onde esta nota diz "Logística de Entrada" como setor do circuito de compra, leia "Recebimento".
 
 > **Fonte única do encaixe.** Proposta do Robert ("MES — Encaixe do Estoque e da Revenda no fluxo do PCP", PDF de 24/09/2026 enviado ao Nathan), com uma regra complementar do Nathan no mesmo dia: **item comprado, depois de aprovado pela Qualidade, vai para o Estoque, não para a Expedição** (seção 3.4). As demais notas do vault apontam para cá em vez de repetir o detalhe.
 >

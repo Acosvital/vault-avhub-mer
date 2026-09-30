@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, pendencias, perguntas, consolidado]
 criado: 2026-09-21
-atualizado: 2026-09-29
+atualizado: 2026-09-30
 ---
 
 # Perguntas em aberto — lista consolidada
@@ -57,7 +57,16 @@ De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o r
 |---|---|---|
 | EC-02 | Baixa de matéria-prima consumida além do requisitado (sobras, perdas de corte) — como tratar? Sugestão registrada (tratar como `MovimentoEstoque AJUSTE` com motivo obrigatório), **ainda não validada pelo time**. | Robert + Produção |
 
-**Total: 10 pendências reais** (9 + EC-02), todas fatos de negócio/operação — nenhuma técnica. O resto do documento abaixo é o arquivo completo, com a resposta e a justificativa de cada item já fechado.
+**Integração av-hub ↔ MES — 4 novas (30/09/2026)** — levantadas pelo Robert ao comparar os contratos com o código; detalhe em [[003-Requisicao-Compra-Integracao-MES]] e [[005-Status-Item-Integracao-MES]].
+
+| ID | Pergunta | Quem |
+|---|---|---|
+| IM-01 | Requisição (003): o MES passa a mandar os campos com os nomes do av-hub (`unidade_medida`, `prazo_necessidade`, `acabado_sugerido`, `material`, `descricao`, `solicitante`) ou o job do av-hub faz o de-para? | Nathan |
+| IM-02 | Pedido sem prazo: o `prazo_necessidade` é obrigatório no av-hub. Data da requisição + N dias, ou o MES recusa a requisição até o pedido ter prazo? | Nathan |
+| IM-03 | Onde fica o job que lê o MES e grava no av-hub (API? pipeline?) e quem faz. Pelo cronograma é a F2 (Gustavo, 19/10 a 30/10); não existe nada ainda. | Nathan + Gustavo |
+| IM-04 | Status por item (005): aceitar as diferenças do que o MES entrega (foto atual em vez de log, `pedido_venda` + `ordem_producao` no lugar do uuid do pedido, etapas a mais e a menos)? Com o ok, registra-se a aprovação do Robert na F1. | Nathan |
+
+**Total: 14 pendências reais** (9 + EC-02 + as 4 da integração). As 10 primeiras são fatos de negócio/operação; as 4 da integração são decisões técnicas. O resto do documento abaixo é o arquivo completo, com a resposta e a justificativa de cada item já fechado.
 
 ---
 

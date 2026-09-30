@@ -13,6 +13,11 @@ status: proposta
 > **Falta:** (1) **a data de corte** — `parametros_vendas.data_inicio_liberacao` está vazia, então nenhum
 > pedido entra na liberação (decisão do Nathan, depois `INSERT` do DBA); (2) L4, o `api-pcp` (Robert) passar a
 > Carteira para o `/pedidos_liberados`. Telas ainda não testadas com pedidos reais.
+>
+> **Situação em 30/09/2026:** **L4 concluído** pelo Robert (`api-pcp` commit `901f9bb`, 29/09, já na
+> `develop`; conferido no código: as 4 trocas da seção 4.2 estão feitas e batem com as rotas da API).
+> **Continua faltando a data de corte (L1)**: sem ela não há teste de ponta a ponta na `api-test`. L6
+> atualizado (a chave do MES precisa ser de escrita). Observações do Robert na seção 6.
 
 **Criado em:** 28/09/2026 · **Para:** DBA, backend (`api-acos-vital`) e MES (`api-pcp`, Robert)
 
@@ -115,6 +120,12 @@ Os campos de `GET /pedidos_liberados` têm **os mesmos nomes de `/vendas_planilh
 4. Guardar `acompanhamento_qualidade` no pedido do MES: alimenta a fila de inspeção de processo da
    Qualidade (tela 9.5 de [[Fluxograma-Telas-por-Bloco]], fora da Fase B).
 
+**Feito em 29/09/2026** (Robert, `api-pcp` `901f9bb`): a Carteira lê `GET /pedidos_liberados` (`mes`, `ano`,
+`codigo_empresa`, `page`, `limit` até 200); os itens vêm de `/pedidos_liberados/:numero/itens` e o 409
+aparece como "ainda não liberado pelo vendedor", sem deixar gerar a OP; ao gerar a OP o MES chama o
+`POST .../importado` com o número da OP em `referencia`; o `acompanhamento_qualidade` fica gravado no
+pedido do MES (coluna "Qualidade" na Carteira).
+
 ## 5. O que muda no av-hub (já feito, mergeado na `develop` pelo av-hub#103)
 
 | Tela | Onde | Quem | Faz |
@@ -138,9 +149,17 @@ está desligado — ver L5.
 | **L1** | Aplicar os Apêndices A e B em teste e depois em produção; definir a data de corte | DBA + Nathan | pendente |
 | **L2** | Aplicar o patch na `develop` e publicar | backend | pendente |
 | **L3** | Mapear em `auth.rotas_telas` (para `PERMISSOES_ROTA_MODO=exigir`): `GET /pedidos_liberacao` → `liberar-pedidos` **ou** `liberacao-equipe` `.pode_visualizar`; `PUT /pedidos_liberacao/*` → `liberar-pedidos.pode_editar`. `/pedidos_liberados/*` é rota de **serviço** (MES), fora do mapa de telas | DBA | pendente |
-| **L4** | `api-pcp`: as 4 trocas da seção 4.2 | Robert | pendente |
+| **L4** | `api-pcp`: as 4 trocas da seção 4.2 | Robert | ✅ **concluído em 29/09/2026** (`901f9bb`), conferido contra a `develop` da API em 30/09. Falta o teste de ponta a ponta, que depende da data de corte (L1) |
 | **L5** | Ligar `ESCOPO_VENDEDORES_EXIGIR`: aí as 2 marcas `GAMBIARRA(` saem do BFF | infra/backend | pendente (mesmo item do contrato de permissões) |
-| **L6** | **Chave própria do MES**, restrita a `/pedidos_liberados/*` e ao que o MES já usa. Hoje o MES usa a mesma `x-api-key` genérica e **ainda consegue** ler `/vendas_planilha` e `/pedido_venda_itens` sem passar pelo portão; o bloqueio só é real depois de L4 + L6 | backend + Robert | a decidir |
+| **L6** | **Chave própria do MES**, restrita a `/pedidos_liberados/*` e ao que o MES já usa. Hoje o MES usa a mesma `x-api-key` genérica e **ainda consegue** ler `/vendas_planilha` e `/pedido_venda_itens` sem passar pelo portão; o bloqueio só é real depois de L4 + L6 | backend + Robert | **em aberto.** A API já tem chaves de serviço no banco (`auth.chaves_servico`, níveis leitura / escrita / admin). A do MES precisa ser de **escrita** (o `POST .../importado` é escrita; com leitura dá 403). **Falta:** criar a chave e restringir por rota (`/pedidos_liberados/*`, `/ordens-compra/referencia`, `/unidades`, `/produtos`, e `/compras/requisicoes` se o job do contrato 003 usar a mesma chave); a restrição por rota ainda não existe na API. No MES é só trocar a variável `API_KEY` |
+
+**Observações do Robert (30/09/2026):**
+- Pedido incluído antes da data de corte responde **404** nos itens; no MES aparece como "não encontrado".
+  É o previsto.
+- Se o `POST .../importado` falhar, hoje o MES só registra em log (a OP já foi criada). O Robert vai
+  colocar nova tentativa. Até lá, um pedido pode ficar no MES com a marcação ainda destravada no av-hub.
+- A fila de inspeção de processo (tela 9.5), que usaria o `acompanhamento_qualidade`, ainda não existe no
+  MES (fora da Fase B, como previsto).
 
 ## 7. Perguntas em aberto
 

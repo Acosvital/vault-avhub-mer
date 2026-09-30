@@ -2,12 +2,12 @@
 tags: [contrato-api, mes, estoque]
 status: rejeitada
 criado: 2026-09-17
-atualizado: 2026-09-21
+atualizado: 2026-09-30
 ---
 
 # Contrato de API 002 — `material_alias_omie` (a implementar no MES/Estoque)
 
-> **Rejeitado em 21/09/2026.** Decisão do Nathan: "não quero mais tratar isso aqui, se eles quiserem eles tratam lá no Omie" — duplicata de catálogo sai do escopo deste sistema. A tela **Produtos — Prováveis Duplicatas** (só leitura, já em produção no av-hub) **continua existindo** — só o que foi cancelado é a ação de vincular/resolver a duplicata dentro do sistema (este contrato, a tarefa D4 do [[Cronograma-2-Meses]] e a tela p1-4b do fluxo de 127 tarefas). Mantido neste arquivo só como histórico.
+> **Rejeitado em 21/09/2026.** Decisão do Nathan: "não quero mais tratar isso aqui, se eles quiserem eles tratam lá no Omie" — duplicata de catálogo sai do escopo deste sistema. A tela **Produtos — Prováveis Duplicatas** (só leitura, já em produção no av-hub) **continua existindo** — só o que foi cancelado é a ação de vincular/resolver a duplicata dentro do sistema (este contrato, a tarefa D4 do [[Cronograma-2-Meses]] e a tela p1-4b do fluxo de 127 tarefas). Mantido neste arquivo só como histórico. **30/09/2026:** o código do alias foi removido do MES (`api-pcp` `0ac2596`, 29/09), coerente com a rejeição.
 
 **Status:** ~~proposta, não implementada~~ rejeitada. **Destinatário: time do MES/Estoque**, não o av-hub — `material_alias_omie` é entidade do Estoque (schema Prisma próprio, dentro do banco do MES), conforme já corrigido nas notas de modelagem ([[Estoque-Modelo-Dados]]). O av-hub não tem acesso a esse banco nem deveria — este contrato é o que falta o MES expor para que a tela de saneamento (hoje só leitura, em `00 - HUB`) ganhe a ação de vincular duplicata.
 

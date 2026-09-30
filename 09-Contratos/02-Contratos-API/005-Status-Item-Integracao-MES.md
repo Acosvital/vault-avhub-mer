@@ -2,11 +2,29 @@
 tags: [contrato-api, mes, estoque, integracao-av-hub-mes, rastreabilidade]
 status: proposta
 criado: 2026-09-22
+atualizado: 2026-09-30
 ---
 
 # Contrato de API 005 — Status por item (MES → av-hub)
 
-**Status:** proposta, aprovada por Nathan em 22/09/2026 a partir do rascunho consolidado em [[Integracao-AvHub-MES-Especificacao-F1]] (Fluxo 3). **Aprovação formal de Robert e Gustavo, condição de pronto da tarefa F1 no [[Cronograma-2-Meses]], ainda não registrada neste arquivo.** **Destinatário: time do MES** (expõe o endpoint) e **time do av-hub** (implementa o job de polling em `api-acos-vital`). Endpoint já nomeado no [[Cronograma-2-Meses]] (tarefa F3): `/itens/status?alterado_desde=`.
+**Status:** proposta. Aprovada por Nathan em 22/09/2026 a partir do rascunho consolidado em
+[[Integracao-AvHub-MES-Especificacao-F1]] (Fluxo 3) e **aprovada pelo Robert em 30/09/2026, com diferenças**
+(abaixo). **Falta:** o Nathan aceitar as diferenças e a aprovação do Gustavo (condição de pronto da F1 no
+[[Cronograma-2-Meses]]).
+**Destinatários:** MES (`api-pcp`, Robert: expõe a rota, **já feita**, adiantando a tarefa F3) e av-hub (job
+de leitura periódica, ainda não existe).
+
+> **O que mudou na revisão de 30/09/2026** (retorno do Robert, conferido no código: `api-pcp` commit
+> `901f9bb`, já na `develop`):
+> - **a rota existe no MES**: `GET /itens/status`, com a mesma chave e a mesma paginação do
+>   [[003-Requisicao-Compra-Integracao-MES]];
+> - a resposta é a **foto atual** de cada parcial alterada desde o cursor, não um log de eventos: se a
+>   parcial passar por duas etapas entre duas leituras, o av-hub só vê a última;
+> - `pedido_venda` + `ordem_producao` no lugar de `id_pedido_venda_origem` (o MES não tem o uuid do pedido
+>   do av-hub);
+> - etapas que o contrato não previa: `estoque.atendimento`, `expedicao.embalagem`, `expedicao.concluido`;
+>   e três do contrato que o MES não manda: `recebimento.pesagem`, `estoque.reservado`, `pcp.retorno`;
+> - paginação (antiga pergunta 3) resolvida.
 
 ## Por quê
 
@@ -14,24 +32,33 @@ Corresponde à conversa **C19** de [[Fluxo-Compras-Completo]] e ao ponto de inte
 
 ## Onde isso mora
 
-Lado que expõe: **MES** (`api-pcp`) — dono do estado de produção/recebimento/qualidade de cada item. Lado que consome: **av-hub** (`api-acos-vital`) — job de polling projeta localmente para o Portal do Vendedor.
+Lado que expõe: **MES** (`api-pcp`, `src/integracao-avhub/`), dono do estado de produção, recebimento e
+qualidade de cada item. Lado que consome: **av-hub**, com um job de leitura periódica que grava uma tabela
+local para o Portal do Vendedor.
 
-## Contrato de request/response
+## A rota (como está no MES)
 
-### `GET /itens/status?alterado_desde=&codigo_empresa=&incluir_deletados=`
+### `GET /itens/status?alterado_desde=&codigo_empresa=&incluir_deletados=&limit=`
 
-**Query params:** mesmo padrão dos contratos 003/004.
+Mesmos parâmetros do contrato 003: `alterado_desde` obrigatório (`updated_at` maior ou igual, ordem
+crescente), `limit` padrão 500 e máximo 1000, sem `page`. Parcial cancelada só vem com
+`incluir_deletados=true`.
 
-**Response (200):**
+**Response (200)**, uma linha por parcial (`ItemParcial`):
 ```json
 [
   {
     "id_item_parcial": "uuid",
     "codigo_empresa": "uuid-da-unidade",
-    "id_pedido_venda_origem": "uuid-ou-null",
+    "pedido_venda": "25970",
+    "ordem_producao": "OP-000123",
     "codigo_produto_omie": "12345678",
-    "etapa": "compras.requisicao | compras.fechamento | recebimento.conferencia | recebimento.pesagem | qualidade.quarentena | qualidade.inspecao | fabrica.espera | fabrica.execucao | estoque.reservado | qualidade.reprovado | pcp.retorno",
+    "codigo_produto": "FLG-CEGO-6-150",
+    "etapa": "compras.requisicao | compras.fechamento | recebimento.conferencia | qualidade.quarentena | qualidade.inspecao | qualidade.reprovado | estoque.atendimento | fabrica.espera | fabrica.execucao | expedicao.embalagem | expedicao.concluido",
+    "setor": { "codigo": "texto", "nome": "texto", "tipo": "PRODUTIVO | ESTOQUE | ..." },
+    "status": "status da parcial no MES",
     "quantidade_na_etapa": 120.000,
+    "atendido_pelo_estoque": false,
     "ocorrido_em": "2026-11-05T16:10:00Z",
     "updated_at": "2026-11-05T16:10:00Z",
     "deleted_at": null
@@ -41,16 +68,24 @@ Lado que expõe: **MES** (`api-pcp`) — dono do estado de produção/recebiment
 
 **Regras:**
 - `codigo_empresa` obrigatório (DEC-1).
-- `etapa` usa o vocabulário comum provisório definido em [[Rastreabilidade-e-SLA-de-Eventos]] — **provisório**: aquele documento já sinaliza revisão pendente ([[Revisao-dos-Estados-e-Status]]) sobre `vendas.emitido` vs. `pcp.aceite` e sobre etapas de fábrica nascerem do roteiro, não fixas. Este contrato herda essa instabilidade — não travar o enum no código sem revisar antes de implementar.
-- Um item pode passar pela mesma etapa mais de uma vez (ex.: `pcp.retorno` após reprovação de qualidade) — a chave de upsert **não pode** ser só `id_item_parcial` (ver Idempotência).
+- O pedido é identificado por `codigo_empresa` + `pedido_venda` (o número do pedido de venda, o mesmo de
+  `/pedidos_liberados`); `ordem_producao` é o número da OP no MES.
+- `etapa` sai do **tipo do setor** em que a parcial está, mais o status dela. Vocabulário ainda
+  **provisório** ([[Rastreabilidade-e-SLA-de-Eventos]], [[Revisao-dos-Estados-e-Status]]): não travar o enum
+  no código do av-hub. `setor` e `status` vêm junto, crus, justamente para o av-hub não depender do enum.
+- `ocorrido_em` é o `updated_at` da parcial: a hora da última mudança, não a hora de entrada na etapa.
+- Um item pode passar pela mesma etapa mais de uma vez (reprovação e retorno), então a chave de gravação
+  no av-hub não pode ser só `id_item_parcial` (ver Idempotência).
 
 ## Idempotência
 
-Chave de upsert no av-hub: `(codigo_empresa, id_item_parcial, etapa, ocorrido_em)` — precisa incluir `ocorrido_em` para não sobrescrever o histórico de transições com a leitura mais recente quando o mesmo item repete etapa. O av-hub deriva a **etapa atual** exibida ao vendedor a partir do maior `ocorrido_em` por item, mas mantém todas as linhas na tabela local (log, não apenas snapshot).
+Chave de gravação no av-hub: `(codigo_empresa, id_item_parcial, etapa, ocorrido_em)`. O av-hub mostra ao
+vendedor a etapa de maior `ocorrido_em` por parcial e mantém as linhas anteriores (histórico do que ele
+leu). Como o MES manda a foto, esse histórico tem a precisão do intervalo de leitura.
 
 ## Autenticação
 
-`x-api-key`, header `MES_API_KEY` — mesma chave da direção av-hub→MES usada no contrato 003 (av-hub é quem chama o MES nos dois casos).
+`x-api-key` com a chave `MES_API_KEY`, a mesma do contrato 003 (av-hub chamando o MES nos dois casos).
 
 ## Polling
 
@@ -62,14 +97,20 @@ Intervalo proposto: **1 a 2 minutos** — é o fluxo com maior valor de frescor;
 
 ## Perguntas em aberto
 
-1. Confirmar o vocabulário final de `etapa` com Robert antes de travar o enum — depende da revisão pendente em [[Revisao-dos-Estados-e-Status]].
-2. Regra de agregação quando o item é dividido em parciais (`ItemParcial` com quantidade parcial em etapas diferentes simultaneamente) — sinalizada como pendente em [[Revisao-dos-Estados-e-Status]], impacta como o av-hub monta "a etapa do pedido" a partir de múltiplas linhas de item.
-3. Paginação não definida (mesma pendência dos contratos 003/004).
+1. **Aceite das diferenças** (foto em vez de log, `pedido_venda` + `ordem_producao`, etapas a mais e a
+   menos). O Robert pediu o ok para registrar a aprovação dele na F1. (Nathan)
+2. Vocabulário final de `etapa`: depende da revisão em [[Revisao-dos-Estados-e-Status]].
+3. Como o av-hub monta "a etapa do pedido" quando o item está dividido em parciais em etapas diferentes
+   (pendente em [[Revisao-dos-Estados-e-Status]]).
+4. Onde fica o job de leitura e quem faz: mesma pergunta 3 do contrato 003.
+
+Fechada em 30/09: paginação (`limit`, cursor pelo `updated_at` da última linha).
 
 ## Depois de aplicado
 
-- MES: criar o endpoint `GET /itens/status` em `api-pcp`.
-- av-hub: criar job de polling em `api-acos-vital` (intervalo 1-2 min), tabela local de projeção (`core_vendas_faturamento.itens_pedido_status` ou nome equivalente a definir em contrato SQL próprio) e a tela da tarefa E3 (status por item no Portal do Vendedor) consumindo essa tabela.
+- MES: ✅ rota criada.
+- av-hub: job de leitura (1 a 2 min), tabela local (`core_vendas_faturamento.itens_pedido_status` ou nome a
+  definir em contrato SQL próprio) e a tela da tarefa E3 (status por item no Portal do Vendedor).
 
 ## Ver também
 - [[Integracao-AvHub-MES-Especificacao-F1]]

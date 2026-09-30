@@ -2,14 +2,15 @@
 tags: [contrato-api, mes, estoque, integracao-av-hub-mes]
 status: proposta
 criado: 2026-09-22
-atualizado: 2026-09-29
+atualizado: 2026-09-30
 ---
 
 # Contrato de API 004 — Referência da Ordem de Compra (av-hub → MES)
 
 **Status:** proposta. Aprovada por Nathan em 22/09/2026 a partir do rascunho consolidado em
 [[Integracao-AvHub-MES-Especificacao-F1]] (Fluxo 2) e **revisada em 29/09/2026** contra o banco real de
-Compras. **Aprovação formal de Robert e Gustavo ainda pendente.**
+Compras. **Robert respondeu em 30/09/2026:** o formato do `destino` atende o Recebimento, com um ajuste
+(cada item traz também o `id_origem`, abaixo). **Aprovação do Gustavo ainda pendente.**
 **Destinatários:** backend do av-hub (`api-acos-vital`, expõe a rota) e MES (`api-pcp`, Robert, lê a rota).
 
 > **O que mudou na revisão de 29/09/2026:**
@@ -23,6 +24,18 @@ Compras. **Aprovação formal de Robert e Gustavo ainda pendente.**
 > - entram o número do pedido no Omie (a NF-e do fornecedor cita ele), o destino de cada item
 >   (pedido de venda ou estoque) e a situação da OC (só aprovada vai ao MES; cancelada sai);
 > - paginação definida (era pergunta em aberto).
+
+> **O que mudou em 30/09/2026 (retorno do Robert):**
+> - cada item ganha **`id_origem`**: o id do item da requisição no MES, o mesmo que o av-hub recebeu pelo
+>   [[003-Requisicao-Compra-Integracao-MES]]. O `id_requisicao` é o uuid da requisição **no av-hub**, que o
+>   MES não conhece; e o `numero_requisicao_mes` sozinho não identifica o item quando a requisição do MES
+>   tem mais de um material (o número se repete);
+> - a chave do MES precisa ser de **escrita** (seção Autenticação);
+> - perguntas 2 e 3 respondidas.
+>
+> **Enquanto a rota não existe** (conferido na `develop` da API em 30/09: só há `/compras/ordens`, da tela do
+> comprador), o setor Compras do MES tem um **registro manual da compra** (nº do pedido, fornecedor,
+> previsão). Quando a rota sair, entra o polling de 5 min e o registro manual sai.
 
 ## Por quê
 
@@ -81,7 +94,8 @@ Mudar a quantidade de um item ou o destino dele precisa fazer a OC reaparecer na
           "tipo_material": "acabado",
           "local_estoque": "Galpão 2",
           "id_requisicao": "uuid-ou-null",
-          "numero_requisicao_mes": "12345",
+          "id_origem": "uuid-ou-null",
+          "numero_requisicao_mes": "RC-20261001-0007",
           "destino": [
             { "tipo": "pedido_venda", "numero_pedido_venda": "25970", "codigo_empresa_pv": "uuid", "quantidade": 8.0 },
             { "tipo": "estoque", "quantidade": 2.0 }
@@ -101,9 +115,12 @@ Mudar a quantidade de um item ou o destino dele precisa fazer a OC reaparecer na
   `descricao_produto`.
 - `tipo_material`: `acabado` | `nao_acabado` — decide contra o que o Recebimento confere
   (C9 de [[Fluxo-Compras-Completo]]); **nunca vem vazio**.
-- `id_requisicao` / `numero_requisicao_mes`: a requisição do MES que o item atende (a do contrato
-  [[003-Requisicao-Compra-Integracao-MES]]); `null` quando o comprador comprou sem requisição (reposição
-  de estoque, por exemplo).
+- `id_requisicao` / `id_origem` / `numero_requisicao_mes`: a requisição que o item atende (a do contrato
+  [[003-Requisicao-Compra-Integracao-MES]]). `id_requisicao` é o uuid dela no av-hub; **`id_origem` é o id
+  do item da requisição no MES** (`requisicoes_compra.id_origem`) e é por ele que o MES liga o item da OC à
+  requisição; `numero_requisicao_mes` é o número `RC-AAAAMMDD-NNNN`, para exibir. Os três vêm `null` quando
+  o comprador comprou sem requisição (reposição de estoque, por exemplo); `id_origem` também vem `null` na
+  requisição criada à mão no av-hub.
 - `destino`: para qual pedido de venda vai o item e quanto fica em estoque (vínculos do
   [[14-Compras-Vinculo-Pedido-Venda]]). A quantidade é sempre na unidade do item da OC. Soma = `quantidade`.
 
@@ -117,10 +134,12 @@ Item que some da resposta de uma OC que voltou = item removido. O cursor `altera
 
 ## Autenticação
 
-`x-api-key`, header `AVHUB_API_KEY` — chave **própria do MES** (MES chamando av-hub), no mesmo
-`apiKeyAuth.js` que a `api-acos-vital` já usa. É a mesma chave do item L6 do
-[[26-Vendas-Liberacao-Pedido]]: restrita às rotas que o MES usa (`/pedidos_liberados/*`,
-`/ordens-compra/referencia`, `/unidades`, `/produtos`).
+`x-api-key` com uma chave **própria do MES** (MES chamando av-hub), no mesmo `apiKeyAuth.js` que a
+`api-acos-vital` já usa. É a mesma chave do item L6 do [[26-Vendas-Liberacao-Pedido]]: cadastrada em
+`auth.chaves_servico` com nível **escrita** (o `POST /pedidos_liberados/:n/importado` é escrita; com
+leitura dá 403) e restrita às rotas que o MES usa (`/pedidos_liberados/*`, `/ordens-compra/referencia`,
+`/unidades`, `/produtos`). A restrição por rota ainda não existe na API. No `api-pcp` a chave é a variável
+`API_KEY`; quando a chave nova existir, é só trocar o valor.
 
 ## Polling
 
@@ -131,11 +150,10 @@ latência de 5 min não atrasa o caminho crítico.
 
 1. **OC cancelada com recebimento parcial no MES:** o MES só marca, ou avisa o comprador? (O av-hub hoje
    não recebe nada de volta sobre recebimento — isso seria o fluxo 3, [[005-Status-Item-Integracao-MES]].)
-2. **Aprovação do Robert:** formato do `destino` e uso do `numero_requisicao_mes` batem com o que o
-   Recebimento do MES precisa?
-3. Confirmar se o `api-pcp` já tem cliente HTTP para chamar o av-hub com a chave `AVHUB_API_KEY`
-   (hoje ele já chama `/pedido_venda_itens`, `/vendas_planilha`, `/unidades` e `/produtos` com a chave
-   genérica).
+2. ~~Aprovação do Robert: formato do `destino` e uso do `numero_requisicao_mes`.~~ **Respondida em
+   30/09:** o `destino` atende; o item precisa do `id_origem` (já no contrato acima).
+3. ~~O `api-pcp` já tem cliente HTTP para chamar o av-hub?~~ **Respondida em 30/09:** tem (é o que lê
+   `/pedidos_liberados`, `/unidades` e `/produtos`); falta só a chave própria.
 
 ## Depois de aplicado
 
@@ -149,7 +167,7 @@ latência de 5 min não atrasa o caminho crítico.
   aguardando aprovação não aparecem.
 - Cancelar uma OC aprovada faz ela voltar com `situacao: cancelada`.
 - Mudar o destino de um item (vínculo com PV) faz a OC voltar na leitura seguinte.
-- Uma OC com duas requisições do MES traz o `id_requisicao` certo em cada item.
+- Uma OC com duas requisições do MES traz o `id_requisicao` e o `id_origem` certos em cada item.
 - A resposta não tem preço, fornecedor nem condição de pagamento.
 
 ## Ver também

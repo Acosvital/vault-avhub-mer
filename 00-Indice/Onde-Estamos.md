@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, status, indice]
 criado: 2026-09-21
-atualizado: 2026-09-29
+atualizado: 2026-09-30
 ---
 
 # Onde estamos
@@ -15,6 +15,8 @@ atualizado: 2026-09-29
 > **Adendo de 28/09/2026 — C6 e D9 concluídas; novo desenho de Compras em duas rodadas no mesmo dia; verificado direto no código.** Dois PDFs do Robert no mesmo dia: de manhã, **C6 e D9 (implementadas e testadas)**, Material deixa de ser projeção do av-hub (D3 revisada), a parte atendida pelo estoque passa a concluir na **Expedição** (não no Estoque), e um novo setor "Requisições de compras" (ainda não codificado); à tarde, uma segunda proposta **revisa a primeira antes dela virar código** — setor Estoque único, circuito de compra vira desvio fixo do sistema (fora do roteiro do PCP), e a baixa do saldo muda de novo, agora pro despacho do Estoque. **Clonei `api-pcp` e `app-pcp` (branch `develop`) e confirmei**: os itens da manhã batem exatamente com o schema Prisma e os componentes de frontend reais (inclusive comentários no código citando C6/D9/EN-02/EN-03 literalmente); a proposta da tarde não tem nenhum código ainda. Também confirmado em `api-acos-vital`: o bug de `alterado_desde` (filtro nunca aplicado, código depois do `return`) é real, em `produtos.js` e `parceiros.js`. **EN-05 reabriu** — resposta de 25/09 não chegou ao Robert.
 >
 > **Adendo de 29/09/2026 — a proposta da tarde de 28/09 vira decisão.** O Nathan respondeu as 9 perguntas que a atualização de 28/09 tinha deixado em aberto: EN-05 confirmado de vez (sem conflito), e a arquitetura da tarde de 28/09 (Estoque único, circuito de compra fixo fora do roteiro, baixa no despacho do Estoque, Reserva reduzida a "separar sem despachar", inspeção de entrada por lote e de saída como setor `QUALIDADE` obrigatório no roteiro, C8 respeitando `RoteiroItem`, processo de reprovação total/parcial no recebimento) passa a ser a **arquitetura confirmada**, ainda sem nenhum código. Só fica em aberto a baixa de matéria-prima consumida além do requisitado (sobras/perdas de corte) — o Nathan pediu sugestão em vez de decidir. Tudo em [[Encaixe-Estoque-Revenda-no-PCP]]; pendências reais caem de 18 para 10 em [[Perguntas-em-Aberto-Consolidadas]].
+>
+> **Adendo de 30/09/2026 — retorno do Robert sobre os contratos de integração (conferido no código).** O Robert comparou o vault com o código dos dois lados. **L4 do contrato 26 concluído**: a Carteira do MES lê `/pedidos_liberados` (falta só a data de corte para o teste de ponta a ponta). **Contratos 003 e 005 aprovados por ele com ajustes**, e as duas rotas do MES (`/requisicoes-compra` e `/itens/status`) **já existem** (F3 adiantada). **Contrato 004**: formato aprovado com um ajuste (`id_origem` em cada item); a rota do av-hub ainda não existe e o MES usa um registro manual da compra até lá. **C1 concluída em 22/09, C4 atendida, C3 atrasada** (começa agora). O setor "Logística de Entrada" do MES virou "Recebimento". **Ficam com o Nathan:** nomes dos campos do 003, regra do pedido sem prazo, onde fica o job de leitura do av-hub (F2) e o aceite das diferenças do 005; **com o backend:** a chave própria do MES, de escrita e restrita por rota (L6). Detalhe em cada contrato e em [[Perguntas-em-Aberto-Consolidadas]] seção 0.
 
 ## 1. Em uma frase
 
@@ -28,7 +30,7 @@ atualizado: 2026-09-29
 | **21/09** | **Hoje** | Vault unificado; auditoria contra dump de produção; **8 das 11 DEC decididas em conversa direta** (DEC-1, 2, 3, 5, 7, 9, 10, 11) + DEC-12 nova (genealogia de material); ~45 das ~60 perguntas da lista consolidada fechadas |
 | **22/09** | **Início da execução (S1)**. O cronograma previa S1 desde 18/09, então as janelas estão deslocadas um dia | Próximo |
 | 25/09 | **M1** — DEC-1 a DEC-9 respondidas (ou default adotado por escrito), contratos destravados, hardware aprovado | **Quase lá**: 6 das 9 (DEC-1,2,3,5,7,9) já decididas. Restam DEC-4 (a mais urgente — trava D1), DEC-6 e DEC-8 (adiada de propósito) |
-| 29/09 | Spec da integração av-hub ↔ MES aprovada (F1) | Não iniciada |
+| 29/09 | Spec da integração av-hub ↔ MES aprovada (F1) | **Em andamento**: Robert aprovou com ajustes em 30/09; faltam 4 decisões do Nathan e o Gustavo |
 | 02/10 | **M2** — Fundação no ar | Não iniciada |
 | 16/10 | **M3** — Fase 0 (sistema) pronta | Não iniciada |
 | 30/10 | **M4** — Fases A + B em homologação | Não iniciada |
@@ -66,14 +68,14 @@ Estados: **Não iniciada**, **Em andamento**, **Bloqueada**, **Concluída**, **C
 | A2 | Hardware do posto e agenda do levantamento físico | Nathan | 21/09–25/09 | Não iniciada | DEC-8 |
 | B1 | Fechar as perguntas dos contratos | Gustavo | 21/09–25/09 | **Concluída** — G-01 a G-18 todas respondidas em conversa direta com o Gustavo (21/09), ver [[Perguntas-em-Aberto-Consolidadas]] bloco C | DEC-7 |
 | B2 | Homologação do MES/Estoque e backup do banco do MES | Gustavo | 21/09–25/09 | Não iniciada | — |
-| C1 | Login duplo no MES | Robert | 21/09–29/09 | Não iniciada | — |
-| C3 | Desenho do RBAC por setor | Robert | 21/09–29/09 | Não iniciada | — |
+| C1 | Login duplo no MES | Robert | 21/09–29/09 | **Concluída** em 22/09 (informado pelo Robert em 30/09) | — |
+| C3 | Desenho do RBAC por setor | Robert | 21/09–29/09 | **Atrasada** — o Robert começa em 30/09 | — |
 | D1 | Schema Prisma do Estoque v1 | Pablo | 21/09–29/09 | Não iniciada | **DEC-4** (DEC-7 já decidida) |
-| F1 | Spec da integração av-hub ↔ MES | Nathan | 21/09–29/09 | Não iniciada | DEC-2 |
+| F1 | Spec da integração av-hub ↔ MES | Nathan | 21/09–29/09 | **Em andamento** — contratos 003, 004 e 005 escritos; Robert aprovou com ajustes em 30/09; faltam as decisões do Nathan sobre os ajustes e a aprovação do Gustavo | DEC-2 |
 | A3 | Pauta financeira e critérios de aceite | Nathan | 28/09–02/10 | Não iniciada | — |
 | B3 | Aplicar contratos SQL 001 e 005 | Gustavo | 28/09–02/10 | **Concluída** — já aplicado em produção antes do início da S1; confirmado por [[Auditoria-Dump-Producao-2026-09-21]] (21/09). Capacidade do Gustavo nessa janela fica livre | B1 |
 | B4 | API `alterado_desde` em produtos e parceiros | Gustavo | 28/09–02/10 | **Concluída** — já implementado em `produtos.js`/`parceiros.js`; confirmado por [[Auditoria-Dump-Producao-2026-09-21]] (21/09) | B1 |
-| C4 | Carteira do PCP: importar itens do pedido | Robert | 28/09–02/10 | Não iniciada | — |
+| C4 | Carteira do PCP: importar itens do pedido | Robert | 28/09–02/10 | **Concluída** — confirmado pelo Robert em 30/09, já lendo `/pedidos_liberados` (L4 do [[26-Vendas-Liberacao-Pedido]]) | — |
 | D2 | Módulo base do Estoque e testes e2e | Pablo | 28/09–02/10 | Não iniciada | D1 |
 | C2 | Vínculo Fábrica ↔ Filial | Robert | 30/09–02/10 | Não iniciada | **DEC-1** |
 | D3 | Projeção read-only de material e parceiro | Pablo | 30/09–02/10 | Não iniciada | B4 |
