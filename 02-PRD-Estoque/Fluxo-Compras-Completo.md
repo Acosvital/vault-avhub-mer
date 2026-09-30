@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, prd-estoque, compras, fluxo-detalhado]
 criado: 2026-09-16
-atualizado: 2026-09-29
+atualizado: 2026-09-30
 ---
 
 # Fluxo de Compras — do 0 ao 100%, conversa por conversa
@@ -65,8 +65,15 @@ sequenceDiagram
     end
     Compras->>Compras: C4 · emite Ordem de Compra (define CIF ou FOB)
     Compras->>Forn: C5 · envia OC
-    CCP->>Forn: C6 · follow-up ativo de prazo/trânsito (canal externo, manual)
+    CCP->>Forn: C5b · pede confirmação da OC (preço, qtd, prazo)
+    Forn-->>CCP: C5c · confirma (ou contrapropõe)
+    CCP->>Forn: C6 · follow-up ativo de prazo (canal externo, manual)
     Forn-->>CCP: C6b · confirma/atualiza previsão de chegada
+    Forn-->>CCP: C6c · avisa despacho (NF, transportadora, previsão)
+    opt atraso, entrega parcial ou mudança
+        CCP->>Compras: C6d · renegociação: comprador aprova a mudança
+        Compras->>Forn: C6e · acordo novo (prazo/qtd)
+    end
     Compras->>Receb: C7 · referência mínima da OC (itens, qtd, flag acabado/não-acabado)
     alt FOB — comprador assume custo/responsabilidade desde o despacho
         LogEnt->>Forn: C7b · coleta no fornecedor
@@ -113,8 +120,34 @@ Só dispara se o valor da compra estiver acima do limiar que ainda precisa ser d
 **C5 — Comprador → Fornecedor: envio da OC**
 Hoje manual (e-mail/PDF). Intenção futura: dado estruturado, sem depender de PDF (ver [[Fluxo-Detalhado-Pedido-Item]]).
 
-**C6/C6b — CCP ↔ Fornecedor: follow-up ativo de prazo/trânsito**
-É o **CCP** quem faz esse acompanhamento ativo (cobrar prazo, atualizar previsão), enquanto o comprador já seguiu pra outras compras. Canal externo (telefone/e-mail/WhatsApp), registrado manualmente. **Não existe estado "em trânsito" verificável** — o pedido permanece "Aprovado" até a chegada física (também documentado em [[Rota-Revenda]]).
+### Etapa CCP ↔ Fornecedor (C5b a C6e) — acompanhamento da OC até a chegada
+
+> **Adicionada em 30/09/2026 (Nathan).** Detalha o que o **CCP** faz com o fornecedor entre o envio da OC (C5) e a chegada na doca (C8/C8b). Antes era uma linha só (C6/C6b). **Decisão: o CCP passa a ter registro no av-hub** (tela 3.6 de [[Fluxograma-Telas-por-Bloco]], Ato 8 de [[Fluxo-Sistema-no-Meio]]). O fornecedor continua **sem acesso ao sistema** — quem digita é sempre o CCP; portal do fornecedor segue sendo fase futura sem data.
+
+**Quem é quem:** o **Comprador** fecha a compra e segue para as próximas. A partir da OC enviada, o **CCP** assume o acompanhamento. O CCP não muda preço, quantidade nem fornecedor da OC: se o fornecedor pede mudança, o CCP **leva ao Comprador** (C6d).
+
+**C5b/C5c — CCP → Fornecedor: confirmação da OC**
+Logo depois do envio (C5), o CCP pede ao fornecedor que **confirme** a OC: preço, quantidade e prazo. Canal externo (telefone/e-mail/WhatsApp). Resultado registrado na OC: *confirmada* ou *contraproposta* (o que o fornecedor quer mudar). Contraproposta cai em C6d. OC sem confirmação dentro de um prazo (a definir) aparece em destaque na fila do CCP.
+
+**C6/C6b — CCP ↔ Fornecedor: follow-up ativo de prazo**
+O CCP cobra o prazo e atualiza a **previsão de chegada** (`previsao_chegada`), enquanto o comprador já seguiu pra outras compras. Canal externo, **registrado manualmente**: a cada contato o CCP grava data, com quem falou, o que foi dito e a nova previsão. A fila do CCP é a lista de OCs abertas **ordenada por previsão de chegada / atraso**, mostrando o último contato registrado.
+
+**C6c — Fornecedor → CCP: despacho / trânsito**
+Quando o fornecedor despacha, o CCP registra: **data do despacho, nº da NF do fornecedor, transportadora e previsão de chegada** atualizada. Isso é o mais perto de "em trânsito" que o sistema tem, mas continua sendo **informação declarada pelo fornecedor, não verificada**: nenhuma fonte externa confirma o trânsito. O pedido permanece "Aprovado" até a chegada física (também documentado em [[Rota-Revenda]]); o despacho é um dado da OC, não um novo status do pedido. No **FOB** esse registro alimenta a Logística de entrada (C7b) com quem/onde/quando coletar.
+
+**C6d/C6e — Renegociação: atraso, entrega parcial ou mudança de condição**
+Gatilhos: fornecedor não confirma a OC; prazo estoura; fornecedor só entrega parte; fornecedor pede mudança de preço/quantidade/prazo.
+1. O CCP registra a ocorrência na OC (tipo + descrição + proposta do fornecedor).
+2. **Mudou só a data:** o CCP atualiza `previsao_chegada` e segue. Data que atrasa o item de um pedido de venda precisa de aviso ao PCP (a definir: quem avisa e como).
+3. **Mudou preço, quantidade ou condição:** decisão é do **Comprador** (C6e), que acorda com o fornecedor e, se passar do limiar de C3, volta pra aprovação. A OC é corrigida no av-hub; o CCP registra o resultado.
+4. **Entrega parcial:** o Recebimento já trata o parcial (C9, com split). A OC fica com saldo aberto e o CCP continua cobrando o restante.
+5. **Fornecedor não entrega:** OC vai a `CANCELADO` (ver tabela de saídas abaixo) e a requisição volta à fila de Compras (volta pra C1).
+
+**O que o sistema registra na OC por causa do CCP (proposta para a API/DBA):** status de confirmação do fornecedor; `previsao_chegada`; dados de despacho (data, NF, transportadora); histórico de contatos (data, usuário, resumo, nova previsão); ocorrências de renegociação (tipo, proposta, decisão do Comprador). Contrato ainda por escrever em `09-Contratos`.
+
+**Contrato:** [[32-Compras-CCP-Acompanhamento-OC]] (tabelas, endpoints e perguntas para o DBA/API).
+
+**Fica em aberto:** (1) prazo máximo sem confirmação da OC até destacar; (2) quem avisa o PCP/vendedor quando a previsão atrasa um pedido de venda; (3) se a tela do CCP é própria ou aba dentro de Ordens (T-05 em [[Fluxograma-Telas-por-Bloco]]); (4) permissão: só o perfil CCP edita esses registros, Comprador só lê ou também edita?
 
 **C7 — av-hub → MES: referência mínima da OC**
 Dispara só quando o material chega na doca — não antes. Payload: itens, quantidade esperada, flag acabado/não-acabado. **Não trafega preço, fornecedor ou condição comercial** — mesma filosofia de "colunas protegidas" do pipeline ELT (ver [[Omie-ELT-Pipeline]]).
@@ -168,14 +201,15 @@ Item aprovado sai da quarentena e vai primeiro para o setor **Estoque·Entrada**
 |---|---|
 | Reprovação de qualidade | C15→C16, volta pro PCP, novo ciclo de compra ou beneficiamento |
 | Divergência de quantidade na conferência (C9) | Mesmo padrão — volta pro PCP/Compras, não fica travado (a modelar em detalhe se divergir do fluxo de reprovação de qualidade) |
-| Fornecedor nunca entrega | Status `CANCELADO` explícito já previsto em [[Estoque-Riscos]], com destinação/reserva reavaliada |
+| Fornecedor nunca entrega | Status `CANCELADO` explícito já previsto em [[Estoque-Riscos]], com destinação/reserva reavaliada. Quem chega a essa conclusão é o CCP (C6d/C6e) |
+| Fornecedor não confirma a OC / entrega só parte | CCP registra a ocorrência; Comprador decide (C6d/C6e); saldo aberto continua na fila do CCP |
 
 ## O que este modelo deixa explícito
 
 - **C1 e C19 são os dois pontos que dependem do sentido MES→av-hub do "casamento av-hub↔MES"** (desde 24/09/2026, C19 em si é interno ao MES — Qualidade → setor Estoque — e só o status resultante cruza a fronteira, pelo Fluxo 3 da F1). C7 (av-hub→MES, referência mínima disparada só na chegada física) e C16 (reaproveita o mesmo mecanismo de C1, "volta pra C1") também cruzam a fronteira, mas não introduzem um ponto de integração novo — reduz a superfície do problema à direção MES→av-hub especificamente, em vez de "o sistema inteiro precisa de tempo real".
 - **C9 (conferência) tem uma ramificação própria**: divergência de quantidade/descrição na conferência é um caminho diferente de reprovação de qualidade (C14) — os dois merecem tratamento parecido (volta pro PCP), mas são gatilhos diferentes e precisam de telas diferentes.
 - **A flag acabado/não-acabado (nasce em C4) decide contra o que o Recebimento confere (C9)** — reforça que ela precisa estar bem visível e não pode ser opcional. Desde 24/09/2026 ela não decide mais se o item passa pelo PCP de novo: o beneficiamento já está no roteiro. A flag vira só um alerta quando contradiz o roteiro (não acabado sem setor de beneficiamento → fila "Novo norte").
-- **CCP e Logística de entrada são atores do fluxo** — detalhados em C6/C6b e C7b/C8. Lista completa de setores em [[Setores-Envolvidos-no-Fluxo]].
+- **CCP e Logística de entrada são atores do fluxo** — detalhados na etapa CCP ↔ Fornecedor (C5b–C6e) e em C7b/C8. Lista completa de setores em [[Setores-Envolvidos-no-Fluxo]].
 
 ## Ver também
 - [[Encaixe-Estoque-Revenda-no-PCP]] — setor Compras no roteiro da Revenda e a volta do item aprovado ao Estoque.
