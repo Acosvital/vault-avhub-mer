@@ -2,15 +2,22 @@
 
 **Criado em:** 15/09/2026, achado num review de correção de dados.
 
-**Status (28/09/2026):** DBA avisou que este contrato (junto com 10, 11, 12 e 13) tinha sido
-entregue. Testado ao vivo em `api-test.acosvital.com.br` — **não foi resolvido**. `total`/
-`total_pages` de `GET /vendas_planilha?pedido_venda=27320` ainda conta linha crua (total=5 pro
-pedido com 5 parciais, deveria ser 1 se contasse por pedido). Testei contiguidade em 5.000 linhas
-sem filtro: parciais do mesmo pedido continuam espalhados, não adjacentes (`pedido 25940`
-apareceu em 4 blocos não-contíguos, por exemplo). O parâmetro `agrupar_por=pedido_venda` (Opção B)
-é ignorado silenciosamente — mesmo comportamento de um parâmetro inventado ao acaso (`?parametro_
-que_nao_existe_xyz=abc` também não dá erro, a API só ignora parâmetro desconhecido). Continua
-pendente — reconfirmar com o DBA antes de assumir resolvido de novo.
+**Status (01/10/2026): backend ENTREGUE (Opção B), conferido na `api-test`. Falta o front adotar.**
+
+O DBA avisou que concluiu; conferido em 01/10/2026 em `api-test.acosvital.com.br`:
+
+| Teste | Resultado |
+|---|---|
+| `GET /vendas_planilha?pedido_venda=27320&agrupar_por=pedido_venda` | ✅ `total: 1`, `total_linhas: 5`, 1 registro com `qtd_parciais: 5` e `parciais[]` aninhados |
+| Paginação (`limit=50`, páginas 1, 2 e 3) | ✅ 150 pedidos distintos, nenhum repetido entre páginas; `total: 9845` pedidos (contra 12.422 linhas), `total_pages: 197` |
+| Filtros junto (`data_inicio`/`data_fim`; pedido inexistente) | ✅ 816 pedidos em setembro; pedido inexistente dá `total: 0` |
+| Valor inválido (`agrupar_por=xyz`) | ✅ 400 "agrupar_por deve ser um de: pedido_venda" |
+
+Forma da resposta agrupada: `{ total, page, limit, total_pages, paginar_por, agrupar_por, total_linhas, data: [{ chave_pedido, codigo_empresa, pedido_venda, codigo_pedido_omie, data_inclusao, codigo_cliente, cliente, codigo_vendedor, vendedor, numero_contrato, codigo_categoria, categoria, valor_total, qtd_parciais, parciais: [...] }] }`. `chave_pedido` = `codigo_empresa:pedido_venda`.
+
+**O modo padrão (sem `agrupar_por`) não mudou:** ainda conta e pagina por linha crua (`pedido_venda=27320` dá `total: 5`). O problema só some **quando o front manda `agrupar_por=pedido_venda`**: o av-hub ainda não manda, então `pedidos-equipe` e `pcp-pedidos` seguem com o grupo cortado na borda da página até a troca (§3).
+
+**Histórico (28/09/2026):** testado ao vivo e não resolvido (`total` por linha, parciais espalhados, `agrupar_por` ignorado).
 
 **Objetivo:** `GET /vendas_planilha` devolve **1 linha por parcial/sequencial**, não 1 linha por
 pedido — um `pedido_venda` com 4 parciais gera 4 registros com `codigo_pedido_omie` diferentes

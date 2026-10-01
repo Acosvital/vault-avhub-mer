@@ -17,7 +17,7 @@ Legenda: ✅ front pronto na `develop` · 🟡 parcial · ❌ não existe no hub
 | **005** status por item MES→hub (API) | ❌ | nenhum job do hub lê `GET /itens/status` do MES; aceite do Nathan às diferenças; falta o Gustavo. **L6 (do 26):** a chave do MES no hub precisa ser de escrita (`POST /importado` da carteira) |
 | **04** vagas | ✅ lista, resumo, `/decisao`, aviso "volta para pendente" (`fix/vagas-edicao-volta-pendente` já na develop) | ligar `VAGAS_TRAVAS_DECISAO` na API; §3.3.1 no backend (hoje 409 `VAGA_DECIDIDA`; o front trata os dois casos) |
 | **07** orçamento e coordenadores no banco | ⛔ **desconsiderado pelo Nathan (01/10)** | nada: não cobrar o DBA, não migrar as telas, os JSON ficam no repositório |
-| **09** paginação por pedido em `/vendas_planilha` | ➖ sem `agrupar_por` | backend (testado em 28/09: não resolvido). Borda de página cortando pedido continua em `pedidos-equipe` e `pcp-pedidos` |
+| **09** paginação por pedido em `/vendas_planilha` | ❌ o hub ainda não manda `agrupar_por=pedido_venda` (BFF `pedidos-equipe`, `pcp/pedidos`, `meus-pedidos`) | **backend entregue em 01/10** (conferido na `api-test`); trocar os BFFs e as telas para o modo agrupado (`total` por pedido, `parciais[]` aninhados) e tirar `utils/agruparPedidosPlanilha.ts` quando as 4 telas migrarem |
 | **13** fornecedores por produto | ❌ `GET /produtos/:id/fornecedores` não é chamado; `experimental/simulador-comissao` ainda usa o dataset estático (`lib/orcamento/data/produtos.json`) | migrar o simulador para a tabela real `produtos`. Era dependente do 07 (desconsiderado); o próprio 13 já estava marcado para desconsiderar |
 | **14** Compras ↔ Omie (puxar/criar pedido) | ➖ | pipeline (ver 23); criar OC no Omie (`IncluirPedCompra`, C6) |
 | **23** pipeline consolidado | ➖ | L1–L10: gravação no banco de teste, depois produção; PR da pipeline em draft |
@@ -37,7 +37,7 @@ Legenda: ✅ front pronto na `develop` · 🟡 parcial · ❌ não existe no hub
 ## Ordem sugerida
 
 1. Push + PR da `feat/vendedor-periodo-ativo` (33).
-2. Cobrar o DBA: 09 (o 07 foi desconsiderado) e a data de corte do 26.
+2. DBA: 09 entregue; falta só a data de corte do 26 (o 07 foi desconsiderado) e a data de corte do 26.
 3. Backend de 28 e 32, que bloqueiam telas que já estão no hub.
 4. ~~Simulador (13) e remoção dos JSON~~: dependiam do 07, desconsiderado.
 

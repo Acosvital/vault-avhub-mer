@@ -50,7 +50,7 @@ Conferido ao vivo na `api-test` e no código da API (`develop` até `163b58b`):
 | [[14-Compras-Omie-Pedido-Compra]], [[19-Compras-Pedido-Pipeline-Omie]], [[23-Compras-Pipeline-Consolidado]] | não são do DBA: dependem da `omie-elt-pipeline` (branch `feat/compras-omie`, sem commits novos desde 24/09; L4, envio da OC, ainda não existe) |
 | [[16-Compras-Pedido-DBA-Banco]] e [[17-Compras-Pedido-API-Backend]] (eram 17 e 18) | históricos, concluídos pelo [[13-Compras-Backend-Consolidado]] → **movidos para `Realizados/`** |
 | [[04-Vagas-Fila-Decisao-no-Banco]] | **entregue e conferido em 01/10/2026** → **movido para `Realizados/`** |
-| [[09-Paginacao-por-Pedido-Vendas-Planilha]] | DBA ainda corrigindo |
+| [[09-Paginacao-por-Pedido-Vendas-Planilha]] | **backend entregue e conferido em 01/10/2026** (`agrupar_por=pedido_venda`); falta o front adotar em `pedidos-equipe` e `pcp-pedidos` |
 | [[13-Fornecedores-por-Produto]] | desconsiderar (pedido do Nathan) |
 
 ## Novo: módulo de Vendas (28/09/2026)
