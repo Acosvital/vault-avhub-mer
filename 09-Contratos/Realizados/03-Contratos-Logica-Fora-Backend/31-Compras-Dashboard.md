@@ -1,10 +1,12 @@
 ---
 tags: [contrato-logica, contrato-api, compras]
 criado: 2026-09-30
-status: proposta
+status: aplicada
 ---
 
 # Contrato 31 — Compras: dashboard com valores (gasto, fornecedores, recebimento, atrasos)
+
+> **✅ ENTREGUE (01/10/2026).** **Conferência de 01/10/2026 na `api-test`** (o DBA avisou que concluiu): `GET /compras/ordens/dashboard?origem=todas` responde 200 com período, período anterior e série de 12 meses (valores zerados: não há pedidos aprovados na `api-test`).
 
 **Criado em:** 30/09/2026 · **Para:** backend (`api-acos-vital`) · **Só API, sem SQL novo**
 

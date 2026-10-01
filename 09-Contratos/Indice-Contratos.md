@@ -8,6 +8,19 @@ atualizado: 2026-10-01
 
 Seção dedicada só a **contratos** — documentos formais de mudança que precisam de aprovação/execução de outra pessoa antes do código poder avançar: contratos de **banco de dados** (para o DBA, Gustavo) e contratos de **API** (para o dev que for implementar). Cada contrato é auto-contido: alguém pode abrir só aquele arquivo, entender o "por quê", o "o quê" exato (schema ou request/response) e o que falta decidir, sem precisar ler o resto do projeto.
 
+## Conferência de 01/10/2026 (DBA: "concluí 26, 28, 29, 30, 31, 32, 33 e 34")
+
+| Contrato | Resultado na `api-test` | Onde ficou |
+|---|---|---|
+| [[26-Vendas-Liberacao-Pedido]] | ✅ data de corte preenchida (28/07/2026), liberação funcionando (741 pendentes, 16 liberados, 3 importados) | `Realizados/` |
+| [[28-Compradores-Criar-Excluir-Sugestao]] | ❌ `POST`/`DELETE /compras/compradores` dão 404 e não existem na `develop` | aberto, voltar ao DBA |
+| [[29-Notas-Fiscais-Manuais-So-Admin]] | 🟡 código pronto, mas `NOTAS_MANUAIS_EXIGIR_PERMISSAO` desligada: um Vendedor passa da checagem | aberto, ligar a trava |
+| [[30-Compras-Pedido-Omie-PDF-Completo]] | ✅ campos no código da `develop`; sem dado para testar | `Realizados/` (falta o PDF do av-hub mostrar) |
+| [[31-Compras-Dashboard]] | ✅ rota responde (valores zerados, sem pedidos) | `Realizados/` |
+| [[32-Compras-CCP-Acompanhamento-OC]] | ✅ fila, detalhe e contatos respondem e validam | `Realizados/` |
+| [[33-Dashboards-Unidade-de-Origem-do-Vendedor]] | ✅ `/vendedores` com `ativo_desde`, `inativo_desde`, `unidade_origem` | `Realizados/` (front sem push) |
+| [[34-Requisicoes-MES-Empurra-para-o-Hub]] | 🔴 PUT no ar, mas **`GET /compras/requisicoes` dá 500**: SQL do anexo 0001 provavelmente não aplicado | aberto, **urgente** |
+
 ## Como está organizado
 
 - **[[001-Produtos-Parceiros-Filtro-Incremental|1. Contratos de API]]** — mudanças de contrato de request/response em endpoints REST já existentes, ou endpoints novos. Pasta `02-Contratos-API/` (ainda em aberto) e `Realizados/02-Contratos-API/` (já aplicados).

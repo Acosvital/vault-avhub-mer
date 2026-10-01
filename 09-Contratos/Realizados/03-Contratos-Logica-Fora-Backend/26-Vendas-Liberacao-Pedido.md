@@ -1,10 +1,12 @@
 ---
 tags: [contrato-logica, contrato-sql, contrato-api, vendas, integracao-mes]
 criado: 2026-09-28
-status: proposta
+status: aplicada
 ---
 
 # Contrato 26 — Vendas: liberação do pedido pelo vendedor (acompanhamento da Qualidade) + Fluxo 4 para o MES
+
+> **✅ ENTREGUE (01/10/2026).** **Conferência de 01/10/2026 na `api-test`** (o DBA avisou que concluiu): data de corte preenchida (`data_inicio_liberacao = 2026-07-28`); `GET /pedidos_liberacao` com 741 pendentes, 16 liberados e 3 importados; `GET /pedidos_liberados` com 19. Não conferido: L6 (chave do MES de escrita).
 
 > **Situação em 29/09/2026:** **backend entregue** (API `4bf36d9`) e **front mergeado na `develop`**
 > ([av-hub#103](https://github.com/Acosvital/av-hub/pull/103)). Na `api-test`, `GET /pedidos_liberacao`,

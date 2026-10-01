@@ -1,10 +1,12 @@
 ---
 tags: [contrato-logica, contrato-api, contrato-pipeline, compras]
 criado: 2026-09-30
-status: proposta
+status: aplicada
 ---
 
 # Contrato 30 — Compras: dados que faltam no PDF do pedido de compra do Omie
+
+> **✅ ENTREGUE na API (01/10/2026).** Conferido no código da `develop` (`src/routes/pedidos_compras.js`, commit `119634a`): o detalhe devolve `inscricao_estadual_fornecedor`, endereço, `email_fornecedor`, `telefone_fornecedor` e `codigo_produto` por item. **Não testado com dado**: `pedidos_compras` está vazio na `api-test`. Falta no av-hub: o `PedidoOmiePdf.tsx` passar a mostrar esses campos. IE vazia em `core.parceiros` (pipeline) e IPI/ICMS ST seguem em aberto.
 
 **Criado em:** 30/09/2026 · **Para:** backend (`api-acos-vital`) e pipeline (`omie-elt-pipeline`)
 

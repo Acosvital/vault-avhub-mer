@@ -2,10 +2,12 @@
 tags: [contrato-logica, contrato-sql, contrato-api, dashboards, vendedores]
 criado: 2026-09-30
 atualizado: 2026-10-01
-status: proposta
+status: aplicada
 ---
 
 # Contrato 33 — Dashboards: unidade de origem e período de atividade do vendedor
+
+> **✅ ENTREGUE (01/10/2026).** **Conferência de 01/10/2026 na `api-test`** (o DBA avisou que concluiu): `GET /vendedores` devolve `ativo_desde`, `inativo_desde`, `unidade_origem`, `nome_unidade_origem` e `origem_da_unidade`. Os números dos dashboards por unidade não foram comparados. Front: commit `397cf81` na branch `feat/vendedor-periodo-ativo` do av-hub, ainda sem push.
 
 **Criado em:** 30/09/2026 · **Para:** DBA (Gustavo) + backend (`api-acos-vital`) · **SQL + API**
 

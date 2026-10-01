@@ -37,6 +37,19 @@ contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contr
   no av-hub (av-hub#106). Tem 3 perguntas em aberto para o Nathan (código que não existe no Omie, excluir o
   que ainda está no Omie, editar nome/ativo à mão).
 
+## Conferência de 01/10/2026 (DBA: "concluí 26, 28, 29, 30, 31, 32, 33 e 34")
+
+| Contrato | Resultado na `api-test` | Onde ficou |
+|---|---|---|
+| [[26-Vendas-Liberacao-Pedido]] | ✅ data de corte preenchida (28/07/2026), liberação funcionando (741 pendentes, 16 liberados, 3 importados) | `Realizados/` |
+| [[28-Compradores-Criar-Excluir-Sugestao]] | ❌ `POST`/`DELETE /compras/compradores` dão 404 e não existem na `develop` | aberto, voltar ao DBA |
+| [[29-Notas-Fiscais-Manuais-So-Admin]] | 🟡 código pronto, mas `NOTAS_MANUAIS_EXIGIR_PERMISSAO` desligada: um Vendedor passa da checagem | aberto, ligar a trava |
+| [[30-Compras-Pedido-Omie-PDF-Completo]] | ✅ campos no código da `develop`; sem dado para testar | `Realizados/` (falta o PDF do av-hub mostrar) |
+| [[31-Compras-Dashboard]] | ✅ rota responde (valores zerados, sem pedidos) | `Realizados/` |
+| [[32-Compras-CCP-Acompanhamento-OC]] | ✅ fila, detalhe e contatos respondem e validam | `Realizados/` |
+| [[33-Dashboards-Unidade-de-Origem-do-Vendedor]] | ✅ `/vendedores` com `ativo_desde`, `inativo_desde`, `unidade_origem` | `Realizados/` (front sem push) |
+| [[34-Requisicoes-MES-Empurra-para-o-Hub]] | 🔴 PUT no ar, mas **`GET /compras/requisicoes` dá 500**: SQL do anexo 0001 provavelmente não aplicado | aberto, **urgente** |
+
 ## Conferência de 29/09/2026 (DBA: "terminei todos, menos 04 e 09; 13 desconsiderar")
 
 Conferido ao vivo na `api-test` e no código da API (`develop` até `163b58b`):
