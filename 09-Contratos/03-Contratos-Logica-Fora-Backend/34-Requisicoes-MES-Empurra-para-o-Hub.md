@@ -10,7 +10,7 @@ status: proposta
 
 Decisões do Nathan (01/10/2026): (1) o MES envia a requisição ao abri-la, para dar sensação de tempo real, com nova tentativa se falhar; (2) requisição **só cancela se não tiver OC**; com OC, requisição e histórico não podem ser apagados.
 
-**Implementado e testado na API local** (branch `feat/requisicoes-mes-upsert`, commit `f4380d7`, worktree `Desktop/wt-api-requisicoes-mes`, sem push). Banco: anexo `34-anexos/0001-requisicoes-pedido-omie.sql`.
+**Na `develop` da API desde 01/10/2026** (commit `0391b29`, "implement MES integration for purchase requests", de outro desenvolvedor, a partir do nosso desenho). Antes: **implementado e testado na API local** (branch `feat/requisicoes-mes-upsert`, commit `f4380d7`, worktree `Desktop/wt-api-requisicoes-mes`, sem push). Banco: anexo `34-anexos/0001-requisicoes-pedido-omie.sql`.
 
 ## 1. A rota
 

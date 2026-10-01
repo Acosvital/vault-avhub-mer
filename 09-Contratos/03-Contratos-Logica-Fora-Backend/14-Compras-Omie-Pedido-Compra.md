@@ -1,5 +1,17 @@
 # Contrato — Compras ↔ Omie: puxar pedidos de compra e criar a OC lá
 
+> **Conferência de 01/10/2026 (o DBA avisou que concluiu): a parte do banco e da API está pronta; o contrato NÃO está concluído porque o dado ainda não chega.**
+>
+> | Item | Resultado |
+> |---|---|
+> | Códigos do Omie em `bigint` (§2.3) | ✅ `pedido_compra.js`/`pedido_compra_item.js` na `develop` da API (`codigo_pedido_compra_omie`, `codigo_fornecedor`, `numero_item_omie` = `BIGINT`) |
+> | `GET /pedidos_compras` e `/pedidos_compras/{id}` (§2.4, "o av-hub lê") | ✅ rotas existem; **`api-test`: `total: 0`** |
+> | Catálogos para os selects (§4): `/compras/compradores`, `/categorias`, `/compras/condicoes-pagamento`, `/projetos`, `/contas_correntes`, `/locais_estoque` | ✅ rotas existem e respondem 200; **todas vazias na `api-test`** |
+> | Fluxo A — pipeline puxa os pedidos do Omie (`pedidosCompras.ts`) | ❌ não confere: sem dado no espelho. É trabalho da `omie-elt-pipeline` (contrato 23, L1–L10), não do DBA |
+> | Fluxo B — enviar a OC ao Omie (`IncluirPedCompra`, `ExcluirPedCompra`) | ❌ depende do worker de escrita da pipeline (§3.9); não há como conferir sem ele |
+>
+> **Falta:** ligar os `SYNC_*` da pipeline no ambiente da `api-test` (e depois produção) para o espelho e os catálogos receberem dado; o worker de envio (B); e os testes com payload real da §5. Continua em aberto, junto do [[23-Compras-Pipeline-Consolidado]].
+
 **Criado em:** 23/09/2026.
 
 **Fontes:**
