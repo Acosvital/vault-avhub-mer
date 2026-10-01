@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, fluxo-operacional, fluxogramas, telas, escopo, execucao]
 criado: 2026-09-22
-atualizado: 2026-09-24
+atualizado: 2026-09-30
 ---
 
 # Fluxograma de Telas — quantas telas e quais funcionalidades por bloco
@@ -235,7 +235,7 @@ O pedido nasce no **Omie** e o polling entrega ao **av-hub, e só ao av-hub** �
 
 | # | Tela | Funcionalidades | Estado | Tarefa |
 |---|---|---|---|---|
-| 1.1 | **Caixa de entrada do vendedor** | Pedidos recém-chegados do Omie, ainda não liberados; marcação de **acompanhamento da Qualidade (sim/não)**; confirma e envia ao PCP. Nada chega à Carteira sem passar aqui | 🔧 feita no av-hub (local, 28/09) | **[[26-Vendas-Liberacao-Pedido]]** |
+| 1.1 | **Caixa de entrada do vendedor** | Pedidos recém-chegados do Omie, ainda não liberados; marcação de **acompanhamento da Qualidade (sim/não)**; confirma e envia ao PCP. Nada chega à Carteira sem passar aqui | 🔧 mergeada na `develop` do av-hub (#103, 28/09); o MES já lê os liberados (29/09); falta a data de corte | **[[26-Vendas-Liberacao-Pedido]]** |
 | 1.2 | **Meus Pedidos — etapa por item** | Etapa atual de cada item (as 11 etapas de `/itens/status`); linha do tempo das transições; quantidade em cada etapa (item pode estar partido); SLA até a previsão de faturamento; filtro por etapa | 🔧 evolução | **E3** |
 
 **Funcionalidade de dado, não de tela:** a etapa vem do **Fluxo 3** de [[Integracao-AvHub-MES-Especificacao-F1]] (`GET /itens/status`, polling 1–2 min), projetado em `itens_pedido_status` no av-hub para a tela não re-pollar o MES a cada carregamento.
@@ -256,7 +256,7 @@ O pedido nasce no **Omie** e o polling entrega ao **av-hub, e só ao av-hub** �
 
 | # | Tela | Funcionalidades | Estado | Tarefa |
 |---|---|---|---|---|
-| 2.1 | **Carteira de Pedidos** | Pedidos de venda do av-hub/Omie com status de envio (não enviado, parcial, total) e de produção (aguardando, em produção, concluída); filtro por filial e período; abre a Ordem de Produção do pedido. Existe em `develop` (`/carteira`, `GET /pedidos/carteira`) | 🔧 | **C4** |
+| 2.1 | **Carteira de Pedidos** | Pedidos de venda do av-hub/Omie com status de envio (não enviado, parcial, total) e de produção (aguardando, em produção, concluída); filtro por filial e período; abre a Ordem de Produção do pedido. Existe em `develop` (`/carteira`, `GET /pedidos/carteira`); **desde 29/09 lê só os pedidos liberados pelo vendedor** (`GET /pedidos_liberados`, contrato 26) | 🔧 | **C4** ✅ |
 | 2.2 | **Ordem de Produção (nova rodada)** | Itens do pedido vindos do Omie, sem digitação manual; por item, **quantidade desta rodada** e **fábrica** (linha de fabricação ou **Revenda**); roteiro por fábrica, com o **setor Estoque inserido como etapa 1** pelo backend; uma OP por fábrica; `codigo_empresa` vem do Pedido (DEC-1). Existe em `develop` (`/ordens-producao/novo`); **falta a fábrica Revenda** — hoje item sem fábrica é descartado | 🔧 | **C6** |
 | 2.3 | **Ordens de Produção — lista e detalhe** | Lista das OPs; detalhe com mini-roteiro por item, parciais por setor, histórico, anexos e embalagem. Existe em `develop` (`/ordens-producao`, `/ordens-producao/[id]`); precisa mostrar o split atendido pelo estoque e a reserva | 🔧 | **C6** |
 | 2.4 | **Setor Compras — parciais aguardando compra** | Fila dos parciais no setor Compras (roteiro da Revenda); a **entrada do parcial gera a requisição** automaticamente (material, quantidade, prazo, filial, `id_item_parcial`), exposta ao av-hub pelo Fluxo 1 (polling 5 min); mostra o estado da requisição/OC; a saída é liberada pelo Recebimento (D6) | 🆕 | **C7** |
@@ -374,7 +374,7 @@ Só o FOB (L2) tem trabalho operacional da empresa sem tela. Hoje isso se resolv
 
 | # | Tela | Funcionalidades | Estado | Tarefa |
 |---|---|---|---|---|
-| 8.12 | **Setor Estoque — atendimento do parcial** | Fila dos parciais no setor Estoque; **saldo disponível na filial do pedido** (lote liberado − reservas ativas); **atender X do estoque** (split + reserva + conclusão) e **enviar restante** (mover); na volta do item comprado aprovado pela Qualidade: **entrada do lote** (`ENTRADA`) + reserva + conclusão. Saldo zero: passa automático ou exige clique (**T-08**) | 🆕 | **C6, D9** |
+| 8.12 | **Setor Estoque — atendimento do parcial** | Fila dos parciais no setor Estoque; **saldo disponível na filial do pedido** (lote liberado − reservas ativas); **atender X do estoque** (split + reserva + conclusão) e **enviar restante** (mover); na volta do item comprado aprovado pela Qualidade: **entrada do lote** (`ENTRADA`) + reserva + conclusão. Saldo zero: exige clique (**T-08**, respondida em 25/09) | 🆕 | **C6, D9** |
 | 8.4 | **Consulta de saldo** | Saldo por material × warehouse × localização × lote; disponível vs. reservado; **consulta** — quem usa o saldo para atender é a 8.12 | 🔧 frontend pronto | **D9, D10** |
 | 8.5 | **Reservas** | **Consulta** de reservas: lote + `ItemParcial` (split atendido) + quantidade; `ATIVA`/`CONSUMIDA`/`LIBERADA`, **sem expiração**; **liberar explicitamente** quando o pedido ou a OP é cancelado; criadas pela 8.12, não à mão; liga só depois do **marco zero (13/11)** | 🔧 frontend pronto | **D9, D10** |
 | 8.6 | **Movimentação e ajuste** | Movimentos com tipo `ENTRADA`/`SAIDA`/`TRANSFERENCIA`/`AJUSTE`, destino opcional e referência à origem (reserva, recebimento, OP); ajuste de saldo com **motivo obrigatório** — nunca silencioso; histórico | 🔧 frontend pronto | **D9, D10** |
@@ -452,7 +452,7 @@ Não são raia do fluxograma, mas sem elas nada roda.
 
 | #   | Tela                                 | Funcionalidades                                                                                                                                                                                             | Estado | Tarefa         |
 | --- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------------- |
-| T.1 | **Login duplo do MES**               | Usuário/senha (chão de fábrica, sem e-mail corporativo) **e** e-mail/Azure AD (perfis de escritório: almoxarife, Qualidade, gestor de estoque). Comprador e Aprovador nunca logam no MES                    | 🆕     | **C1**         |
+| T.1 | **Login duplo do MES**               | Usuário/senha (chão de fábrica, sem e-mail corporativo) **e** e-mail/Azure AD (perfis de escritório: almoxarife, Qualidade, gestor de estoque). Comprador e Aprovador nunca logam no MES. **C1 concluída em 22/09** (informado pelo Robert em 30/09) | 🔧 feita | **C1** ✅ |
 | T.2 | **Perfis × Setor × Filial**          | RBAC por **instância** de setor — um líder de setor só enxerga o próprio setor. DEC-1 acrescentou a dimensão de filial: `PerfilSetor` precisa de `perfil × setor × codigo_empresa`, não só `perfil × setor` | 🆕     | **C3, C5**     |
 | T.3 | **Torre de Fluxo — mapa por setor**  | Volume e gargalo por setor; itens atrasados, acima da meta de etapa, ou em fila sem dono. [Protótipo já existe](https://claude.ai/artifact/SS4C4srRk9cr66UHUS2rE3) (dados fictícios)                        | ⏭️     | **I1-I7** (S5) |
 | T.4 | **Torre de Fluxo — trilha do item**  | Linha do tempo completa de um item: ator, autorizador, passagem, "com quem está"                                                                                                                            | ⏭️     | **I1-I7** (S5) |
