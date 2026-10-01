@@ -17,7 +17,7 @@ Legenda: ✅ front pronto na `develop` · 🟡 parcial · ❌ não existe no hub
 | **005** status por item MES→hub (API) | ❌ | nenhum job do hub lê `GET /itens/status` do MES; aceite do Nathan às diferenças; falta o Gustavo. **L6 (do 26):** a chave do MES no hub precisa ser de escrita (`POST /importado` da carteira) |
 | **04** vagas | ✅ lista, resumo, `/decisao`, aviso "volta para pendente" (`fix/vagas-edicao-volta-pendente` já na develop) | ligar `VAGAS_TRAVAS_DECISAO` na API; §3.3.1 no backend (hoje 409 `VAGA_DECIDIDA`; o front trata os dois casos) |
 | **07** orçamento e coordenadores no banco | ⛔ **desconsiderado pelo Nathan (01/10)** | nada: não cobrar o DBA, não migrar as telas, os JSON ficam no repositório |
-| **09** paginação por pedido em `/vendas_planilha` | ✅ as telas já listam por `/pedidos_venda` (contrato 05); rotas antigas de lista removidas (PR no hub) | backend entregue em 01/10 (conferido na `api-test`); nada a migrar no front |
+| **09** (em `Realizados/`) paginação por pedido em `/vendas_planilha` | ✅ as telas já listam por `/pedidos_venda` (contrato 05); rotas antigas de lista removidas (PR no hub) | backend entregue em 01/10 (conferido na `api-test`); nada a migrar no front |
 | **13** fornecedores por produto | ❌ `GET /produtos/:id/fornecedores` não é chamado; `experimental/simulador-comissao` ainda usa o dataset estático (`lib/orcamento/data/produtos.json`) | migrar o simulador para a tabela real `produtos`. Era dependente do 07 (desconsiderado); o próprio 13 já estava marcado para desconsiderar |
 | **14** Compras ↔ Omie (puxar/criar pedido) | ➖ | pipeline (ver 23); criar OC no Omie (`IncluirPedCompra`, C6) |
 | **23** pipeline consolidado | ➖ | L1–L10: gravação no banco de teste, depois produção; PR da pipeline em draft |
