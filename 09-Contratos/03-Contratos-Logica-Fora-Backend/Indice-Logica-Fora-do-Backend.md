@@ -47,7 +47,8 @@ Conferido ao vivo na `api-test` e no código da API (`develop` até `163b58b`):
 | [[19-Compras-Pedido-Omie-Nomes]] | ✅ backend testado com pedido de teste; front em [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), mergeado em 29/09 → **movido para `Realizados/`** |
 | [[18-Compradores-Funcionario]] | ✅ `/funcionarios` devolve setor e unidade; última gambiarra removida em [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), mergeado em 29/09 → **movido para `Realizados/`** |
 | [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | ⛔ **desconsiderado em 01/10/2026** (decisão do Nathan); antes: não entregue |
-| [[14-Compras-Omie-Pedido-Compra]], [[19-Compras-Pedido-Pipeline-Omie]], [[23-Compras-Pipeline-Consolidado]] | não são do DBA: dependem da `omie-elt-pipeline` (branch `feat/compras-omie`, sem commits novos desde 24/09; L4, envio da OC, ainda não existe) |
+| [[14-Compras-Omie-Pedido-Compra]] | **fluxos A e B testados (01/10/2026), falta ligar em produção** → **movido para `Realizados/`** |
+| [[19-Compras-Pedido-Pipeline-Omie]], [[23-Compras-Pipeline-Consolidado]] | não são do DBA: dependem da `omie-elt-pipeline` (branch `feat/compras-omie`, sem commits novos desde 24/09; L4, envio da OC, ainda não existe) |
 | [[16-Compras-Pedido-DBA-Banco]] e [[17-Compras-Pedido-API-Backend]] (eram 17 e 18) | históricos, concluídos pelo [[13-Compras-Backend-Consolidado]] → **movidos para `Realizados/`** |
 | [[04-Vagas-Fila-Decisao-no-Banco]] | **entregue e conferido em 01/10/2026** → **movido para `Realizados/`** |
 | [[09-Paginacao-por-Pedido-Vendas-Planilha]] | **entregue e conferido em 01/10/2026** (`agrupar_por=pedido_venda`; as telas já listam por `/pedidos_venda`) → **movido para `Realizados/`** |
@@ -112,7 +113,7 @@ e [[008-Requisicoes-Compra]] também já estão aplicados.
 
 Contratos de detalhe:
 
-- **[[14-Compras-Omie-Pedido-Compra]]** — de-para completo com a API do Omie: puxar os pedidos de
+- **[[14-Compras-Omie-Pedido-Compra]]** (**entregue em 01/10/2026**, agora em `Realizados/`) — de-para completo com a API do Omie: puxar os pedidos de
   compra para o espelho `pedidos_compras` e enviar a OC com `UpsertPedCompra`. Conferido campo a
   campo contra a doc oficial do Omie em 23/09/2026.
 - **[[18-Compradores-Funcionario]]** — cadastro de compradores por filial, ligado ao funcionário

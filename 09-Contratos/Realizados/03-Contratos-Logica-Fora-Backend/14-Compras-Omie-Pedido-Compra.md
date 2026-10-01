@@ -1,16 +1,10 @@
 # Contrato — Compras ↔ Omie: puxar pedidos de compra e criar a OC lá
 
-> **Conferência de 01/10/2026 (o DBA avisou que concluiu): a parte do banco e da API está pronta; o contrato NÃO está concluído porque o dado ainda não chega.**
+> **✅ Situação em 01/10/2026 — ENTREGUE; falta só ligar em produção.**
 >
-> | Item | Resultado |
-> |---|---|
-> | Códigos do Omie em `bigint` (§2.3) | ✅ `pedido_compra.js`/`pedido_compra_item.js` na `develop` da API (`codigo_pedido_compra_omie`, `codigo_fornecedor`, `numero_item_omie` = `BIGINT`) |
-> | `GET /pedidos_compras` e `/pedidos_compras/{id}` (§2.4, "o av-hub lê") | ✅ rotas existem; **`api-test`: `total: 0`** |
-> | Catálogos para os selects (§4): `/compras/compradores`, `/categorias`, `/compras/condicoes-pagamento`, `/projetos`, `/contas_correntes`, `/locais_estoque` | ✅ rotas existem e respondem 200; **todas vazias na `api-test`** |
-> | Fluxo A — pipeline puxa os pedidos do Omie (`pedidosCompras.ts`) | ❌ não confere: sem dado no espelho. É trabalho da `omie-elt-pipeline` (contrato 23, L1–L10), não do DBA |
-> | Fluxo B — enviar a OC ao Omie (`IncluirPedCompra`, `ExcluirPedCompra`) | ❌ depende do worker de escrita da pipeline (§3.9); não há como conferir sem ele |
+> O Nathan informou em 01/10/2026 que o **Fluxo A** (a pipeline puxa os pedidos de compra do Omie para `pedidos_compras`) e o **Fluxo B** (o envio da OC ao Omie) **já foram testados e funcionam**. Falta apenas ligar em **produção** (os `SYNC_*` e o worker de envio no ambiente de produção).
 >
-> **Falta:** ligar os `SYNC_*` da pipeline no ambiente da `api-test` (e depois produção) para o espelho e os catálogos receberem dado; o worker de envio (B); e os testes com payload real da §5. Continua em aberto, junto do [[23-Compras-Pipeline-Consolidado]].
+> Conferido por mim no código da `develop` da API: códigos do Omie em `bigint` (§2.3) e as rotas `/pedidos_compras`, `/pedidos_compras/{id}` e dos catálogos (compradores, categorias, condições de pagamento, `/projetos`, `/contas_correntes`, `/locais_estoque`) existem. **Na `api-test` essas rotas ainda devolvem zero registros** (conferido em 01/10/2026), então o teste do Nathan foi em outro ambiente; confirmar o dado na `api-test` quando ligarem os `SYNC_*` lá. Itens de produção continuam no [[23-Compras-Pipeline-Consolidado]].
 
 **Criado em:** 23/09/2026.
 
