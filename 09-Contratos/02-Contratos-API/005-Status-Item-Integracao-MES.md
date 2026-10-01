@@ -7,6 +7,8 @@ atualizado: 2026-09-30
 
 # Contrato de API 005 — Status por item (MES → av-hub)
 
+> **01/10/2026:** a requisição (ida, contrato 003) passou a ser empurrada pelo MES, ver [[34-Requisicoes-MES-Empurra-para-o-Hub]]. Este contrato (volta) continua como está e ainda não foi implementado.
+
 **Status:** proposta. Aprovada por Nathan em 22/09/2026 a partir do rascunho consolidado em
 [[Integracao-AvHub-MES-Especificacao-F1]] (Fluxo 3) e **aprovada pelo Robert em 30/09/2026, com diferenças**
 (abaixo). **Falta:** o Nathan aceitar as diferenças e a aprovação do Gustavo (condição de pronto da F1 no
