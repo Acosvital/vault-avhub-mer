@@ -2,7 +2,7 @@
 
 **Criado em:** 15/09/2026, achado num review de correção de dados.
 
-**Status (01/10/2026): backend ENTREGUE (Opção B), conferido na `api-test`. Falta o front adotar.**
+**Status (01/10/2026): backend ENTREGUE (Opção B), conferido na `api-test`. No av-hub não há o que migrar: as telas já listam pelo `/pedidos_venda` (contrato 05).**
 
 O DBA avisou que concluiu; conferido em 01/10/2026 em `api-test.acosvital.com.br`:
 
@@ -13,9 +13,11 @@ O DBA avisou que concluiu; conferido em 01/10/2026 em `api-test.acosvital.com.br
 | Filtros junto (`data_inicio`/`data_fim`; pedido inexistente) | ✅ 816 pedidos em setembro; pedido inexistente dá `total: 0` |
 | Valor inválido (`agrupar_por=xyz`) | ✅ 400 "agrupar_por deve ser um de: pedido_venda" |
 
-Forma da resposta agrupada: `{ total, page, limit, total_pages, paginar_por, agrupar_por, total_linhas, data: [{ chave_pedido, codigo_empresa, pedido_venda, codigo_pedido_omie, data_inclusao, codigo_cliente, cliente, codigo_vendedor, vendedor, numero_contrato, codigo_categoria, categoria, valor_total, qtd_parciais, parciais: [...] }] }`. `chave_pedido` = `codigo_empresa:pedido_venda`.
+Forma da resposta agrupada: `{ total, page, limit, total_pages, paginar_por, agrupar_por, total_linhas, data: [{ chave_pedido, codigo_empresa, pedido_venda, codigo_pedido_omie, data_inclusao, codigo_cliente, cliente, codigo_vendedor, vendedor, numero_contrato, codigo_categoria, categoria, valor_total, qtd_parciais, parciai**O modo padrão (sem `agrupar_por`) não mudou:** ainda conta e pagina por linha crua (`pedido_venda=27320` dá `total: 5`). O bug só some quando o chamador manda `agrupar_por=pedido_venda`.
 
-**O modo padrão (sem `agrupar_por`) não mudou:** ainda conta e pagina por linha crua (`pedido_venda=27320` dá `total: 5`). O problema só some **quando o front manda `agrupar_por=pedido_venda`**: o av-hub ainda não manda, então `pedidos-equipe` e `pcp-pedidos` seguem com o grupo cortado na borda da página até a troca (§3).
+**Conferido no código do av-hub em 01/10/2026:** as três telas que a §1 apontava (`pedidos-equipe`, `pcp-pedidos`, `meus-pedidos`) **já não paginam `/vendas_planilha`**. Desde o contrato 05, `usePedidos` lista por `GET /pedidos_venda` (o banco agrupa, conta e pagina por pedido), então o corte do pedido na borda da página não acontece mais nelas. As rotas antigas de lista (`/api/pedidos-equipe`, `/api/pcp/pedidos`, `/api/meus-pedidos`) e o `buscarPedidos` das fontes não eram chamados por nenhuma tela e foram removidos (branch `feat/vendas-planilha-agrupar-por-pedido`). **Nenhum consumidor do hub precisa do `agrupar_por` hoje**; ele fica disponível se alguém voltar a listar `/vendas_planilha` direto. A §3 ("o que muda no frontend") ficou sem efeito.
+
+seguem com o grupo cortado na borda da página até a troca (§3).
 
 **Histórico (28/09/2026):** testado ao vivo e não resolvido (`total` por linha, parciais espalhados, `agrupar_por` ignorado).
 
