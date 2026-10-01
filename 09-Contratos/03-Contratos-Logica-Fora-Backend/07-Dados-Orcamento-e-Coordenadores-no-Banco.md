@@ -1,5 +1,7 @@
 # Contrato — Dados de Orçamento e de coordenadores no banco (fora do repositório)
 
+> **⛔ DESCONSIDERADO em 01/10/2026 (decisão do Nathan).** Não será implementado: não cobrar o DBA nem o backend, e não migrar as telas de Orçamento nem o dashboard de comissões. Os JSON em `lib/orcamento/data/` e `lib/comissoes/coordenadores.json` ficam como estão. O texto abaixo é só histórico.
+
 > **Conferido em 29/09/2026: não entregue.** O DBA avisou que terminou os contratos desta pasta, mas
 > na `api-test` nenhuma rota deste existe (`/orcamento/fornecedores`, `/produtos`, `/cotacoes`,
 > `/vinculos`, `/categorias`, `/familias` e `/dashboard/comissoes` respondem "Rota não encontrada"),
