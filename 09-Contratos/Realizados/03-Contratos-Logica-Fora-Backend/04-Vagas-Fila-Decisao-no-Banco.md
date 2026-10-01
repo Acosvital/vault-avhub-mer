@@ -1,17 +1,20 @@
 # Contrato — Solicitações de vagas: fila, decisão e permissões no banco
 
-> **🟡 Situação em 25/09/2026 (tarde) — falta ligar a trava e a regra da §3.3.1.**
+> **✅ Situação em 01/10/2026 — ENTREGUE (conferido na `api-test`).**
 >
-> | Item | Situação |
-> |---|---|
-> | Backend (listagem, resumo, custo gerado, `/decisao`, `vagas_decisoes`) | ✅ na `api-test` |
-> | Tela (`components/Vagas/*`), sem nenhuma gambiarra de Vagas | ✅ na `develop` do av-hub (PR #90, 25/09) |
-> | `pode_aprovar` na tela `solicitacoes-de-vagas` | ✅ perfis **RH - Joanes** e **Admin (Dev)** (conferido na `api-test`); "RH - Gerencia" edita e não aprova |
-> | Aprovar/reprovar de verdade | ✅ feito pelo Nathan em 25/09 |
-> | **`VAGAS_TRAVAS_DECISAO` ligada** | ❌ **desligada na `api-test`** (testado em 25/09, vaga de teste criada e apagada): `PUT` com `situacao: "aprovado"` → **200** (esperado 400 `SITUACAO_SO_PELA_DECISAO`); `POST /decisao` com `decidido_por` de usuário sem `pode_aprovar` → **200** (esperado 403). Pelo av-hub a decisão continua barrada (o BFF exige `pode_aprovar`), mas pela API direta não. **Ação: ligar a variável no ambiente da API** (e depois em produção) e repetir os dois testes. O código da `develop` trata os dois casos certo quando ligada. |
-> | Editar vaga já decidida | ❌ **decidido em 25/09: volta para pendente** (§3.3.1). Hoje, com a trava ligada, a API recusa com 409 `VAGA_DECIDIDA`: precisa mudar. A tela já avisa e mostra o resultado (branch `fix/vagas-edicao-volta-pendente`). |
+> O DBA avisou que terminou; conferido em 01/10/2026 na `api-test` (vaga de teste criada e apagada):
 >
-> Fecha quando: trava ligada e os dois testes acima dando 400/403, e a §3.3.1 no backend.
+> | Teste | Esperado | Resultado |
+> |---|---|---|
+> | `PUT /vagas/{id}` com `situacao: "aprovado"` | 400 `SITUACAO_SO_PELA_DECISAO` | ✅ 400 `SITUACAO_SO_PELA_DECISAO` |
+> | `POST /vagas/{id}/decisao` por usuário sem `pode_aprovar` | 403 | ✅ 403 |
+> | Decisão por quem tem `pode_aprovar` (RH - Joanes) | 200 | ✅ 200 |
+> | Editar o salário de vaga **aprovada** (§3.3.1) | 200, volta para `pendente`, `decidido_*` limpos | ✅ 200, `situacao: pendente`, `decidido_por/em: null`, `custo_total` recalculado |
+> | Histórico `GET /vagas/{id}/decisoes` | linha `origem = 'edicao'` com "Dados alterados: salario" | ✅ duas linhas: `decisao` (pendente→aprovado) e `edicao` (aprovado→pendente) |
+>
+> Falta só do lado do av-hub: já trata os dois comportamentos (409 `VAGA_DECIDIDA` da API antiga e a volta para pendente), e o tratamento do 409 pode ser removido quando todos os ambientes estiverem na regra nova. A trava `VAGAS_TRAVAS_DECISAO` está ligada na `api-test`; **confirmar a mesma variável em produção** na hora de aplicar lá.
+>
+> **Histórico (25/09/2026):** faltavam ligar a trava e a regra da §3.3.1 no backend. Resolvidos pelo DBA.
 
 **Criado em:** 20/09/2026, ao oficializar a tela nova de Solicitações de vagas (`components/Vagas/`).
 
