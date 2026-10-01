@@ -165,8 +165,9 @@ Renumerados 07, 08, 09 em `Realizados/03-Contratos-Logica-Fora-Backend/`.
 
 **Da mesma leva, NÃO entregues apesar do aviso do DBA** (ver os arquivos pra detalhe do teste):
 
-- [[09-Paginacao-por-Pedido-Vendas-Planilha]] — continua aberto, backend não implementou de
-  verdade (só simulou não dar erro, mas o comportamento não mudou).
+- ~~[[09-Paginacao-por-Pedido-Vendas-Planilha]]~~ — **resolvido em 01/10/2026** (o DBA entregou
+  `agrupar_por=pedido_venda`; conferido na `api-test`) e movido para `Realizados/`. Em 28/09 o
+  backend não tinha implementado de verdade.
 - [[13-Fornecedores-por-Produto]] — endpoint existe, mas o frontend que ele alimentaria não pode
   usá-lo ainda (dataset legado com IDs incompatíveis).
 
@@ -183,8 +184,8 @@ ver "Já entregues" acima ([[04-Pedidos-Notas-Dashboards-Agregacao-no-Banco]],
 
 ## Contratos anteriores que continuam abertos e se relacionam
 
-- [[09-Paginacao-por-Pedido-Vendas-Planilha]] — paginar por pedido. Backend ainda não entregou de
-  verdade (ver status no arquivo, 28/09/2026).
+- [[09-Paginacao-por-Pedido-Vendas-Planilha]] — paginar por pedido. **Entregue em 01/10/2026**,
+  agora em `Realizados/` (ver status no arquivo).
 
 ## Onde estão as marcas, por assunto (no repositório `av-hub`)
 
