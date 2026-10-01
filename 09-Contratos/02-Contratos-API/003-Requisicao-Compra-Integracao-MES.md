@@ -7,6 +7,8 @@ atualizado: 2026-09-30
 
 # Contrato de API 003 — Requisição de compra (MES → av-hub)
 
+> **Revisado em 01/10/2026:** o Nathan decidiu que o **MES empurra** a requisição para o av-hub (e não o hub busca no MES, DEC-2). Rota, regras e segurança em [[34-Requisicoes-MES-Empurra-para-o-Hub]]. Onde este contrato fala em "job de polling" do hub, vale o 34.
+
 **Status:** proposta. Aprovada por Nathan em 22/09/2026 a partir do rascunho consolidado em
 [[Integracao-AvHub-MES-Especificacao-F1]] (Fluxo 1) e **aprovada pelo Robert em 30/09/2026, com ajustes de
 formato** (abaixo). **Falta:** o Nathan fechar as perguntas 1 a 3 e a aprovação do Gustavo (condição de

@@ -7,6 +7,8 @@ atualizado: 2026-09-30
 
 # Contrato de API 004 — Referência da Ordem de Compra (av-hub → MES)
 
+> **01/10/2026:** a requisição (ida, contrato 003) passou a ser empurrada pelo MES, ver [[34-Requisicoes-MES-Empurra-para-o-Hub]]. Este contrato (volta) continua como está e ainda não foi implementado.
+
 **Status:** proposta. Aprovada por Nathan em 22/09/2026 a partir do rascunho consolidado em
 [[Integracao-AvHub-MES-Especificacao-F1]] (Fluxo 2) e **revisada em 29/09/2026** contra o banco real de
 Compras. **Robert respondeu em 30/09/2026:** o formato do `destino` atende o Recebimento, com um ajuste
