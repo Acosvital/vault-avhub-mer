@@ -1,5 +1,11 @@
 # Contrato — Compras ↔ Omie: puxar pedidos de compra e criar a OC lá
 
+> **✅ Situação em 01/10/2026 — ENTREGUE; falta só ligar em produção.**
+>
+> O Nathan informou em 01/10/2026 que o **Fluxo A** (a pipeline puxa os pedidos de compra do Omie para `pedidos_compras`) e o **Fluxo B** (o envio da OC ao Omie) **já foram testados e funcionam**. Falta apenas ligar em **produção** (os `SYNC_*` e o worker de envio no ambiente de produção).
+>
+> Conferido por mim no código da `develop` da API: códigos do Omie em `bigint` (§2.3) e as rotas `/pedidos_compras`, `/pedidos_compras/{id}` e dos catálogos (compradores, categorias, condições de pagamento, `/projetos`, `/contas_correntes`, `/locais_estoque`) existem. **Na `api-test` essas rotas ainda devolvem zero registros** (conferido em 01/10/2026), então o teste do Nathan foi em outro ambiente; confirmar o dado na `api-test` quando ligarem os `SYNC_*` lá. Itens de produção continuam no [[23-Compras-Pipeline-Consolidado]].
+
 **Criado em:** 23/09/2026.
 
 **Fontes:**

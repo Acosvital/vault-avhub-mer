@@ -6,11 +6,13 @@ status: proposta
 
 # Contrato 34 — Requisições: o MES empurra para o av-hub (PUT por `id_origem`)
 
+> **🔴 QUEBRANDO A `api-test` (01/10/2026).** **Conferência de 01/10/2026 na `api-test`** (o DBA avisou que concluiu): a rota `PUT /compras/requisicoes/origem/{id_origem}` está no ar (valida o corpo; chave falsa dá 401), **mas `GET /compras/requisicoes` responde 500** (com e sem filtro), enquanto `/compras/requisicoes/resumo`, que é SQL cru, responde 200. O model da `develop` já tem `codigo_pedido_omie`/`numero_pedido_venda`: a causa provável é **o SQL do anexo 0001 não aplicado na `api-test`**. A caixa de entrada de Compras do av-hub fica sem lista. **Ação urgente: aplicar `34-anexos/0001-requisicoes-pedido-omie.sql` na `api-test`** (e antes de subir em produção).
+
 **Criado em:** 01/10/2026 · **Para:** backend (`api-acos-vital`), DBA (Gustavo) e MES (`api-pcp`, Robert) · **Substitui a DEC-2** ("o hub busca no MES") para as requisições; revisa os contratos 003/004/005.
 
 Decisões do Nathan (01/10/2026): (1) o MES envia a requisição ao abri-la, para dar sensação de tempo real, com nova tentativa se falhar; (2) requisição **só cancela se não tiver OC**; com OC, requisição e histórico não podem ser apagados.
 
-**Implementado e testado na API local** (branch `feat/requisicoes-mes-upsert`, commit `f4380d7`, worktree `Desktop/wt-api-requisicoes-mes`, sem push). Banco: anexo `34-anexos/0001-requisicoes-pedido-omie.sql`.
+**Na `develop` da API desde 01/10/2026** (commit `0391b29`, "implement MES integration for purchase requests", de outro desenvolvedor, a partir do nosso desenho). Antes: **implementado e testado na API local** (branch `feat/requisicoes-mes-upsert`, commit `f4380d7`, worktree `Desktop/wt-api-requisicoes-mes`, sem push). Banco: anexo `34-anexos/0001-requisicoes-pedido-omie.sql`.
 
 ## 1. A rota
 

@@ -1,10 +1,12 @@
 ---
 tags: [contrato-logica, contrato-api, compras, acessos]
 criado: 2026-09-29
-status: proposta
+status: aplicada
 ---
 
 # Contrato 28 — Compradores: criar, excluir e sugestão por semelhança (igual a Vendedores)
+
+> **❌ NÃO ENTREGUE (01/10/2026).** **Conferência de 01/10/2026 na `api-test`** (o DBA avisou que concluiu): `POST /compras/compradores` e `DELETE /compras/compradores/{id}` respondem **404 "Rota não encontrada"** e não existem na `develop` da API. `GET …/sugestoes` existe, mas não deu para testar o `min_score` (0 compradores na `api-test`). **Voltar ao DBA.**
 
 **Criado em:** 29/09/2026 · **Para:** backend (`api-acos-vital`) e, no item P, a pipeline
 (`omie-elt-pipeline`) · **Complementa:** [[18-Compradores-Funcionario]]

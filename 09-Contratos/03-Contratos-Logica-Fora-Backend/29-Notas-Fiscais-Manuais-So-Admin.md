@@ -7,6 +7,8 @@ status: proposta
 
 # Contrato 29 — Notas fiscais manuais: só o administrador cria (permissão no backend)
 
+> **🟡 CÓDIGO PRONTO, TRAVA DESLIGADA (01/10/2026).** **Conferência de 01/10/2026 na `api-test`** (o DBA avisou que concluiu): o código está na `develop` (`NOTAS_MANUAIS_EXIGIR_PERMISSAO`), mas na `api-test` a trava está **desligada**: um `POST /nota_fiscal_saida/manual` com `created_by` de um usuário do perfil **Vendedor** passou da checagem de permissão e só parou na validação do cliente (esperado: 403). Unidade inexistente no teste, nada foi gravado. **Ação:** ligar `NOTAS_MANUAIS_EXIGIR_PERMISSAO=true` no ambiente e repetir.
+
 **Criado em:** 29/09/2026 · **Revisado em:** 29/09/2026 (fim da tarde) · **Para:** DBA e backend (`api-acos-vital`)
 **Complementa:** o cadastro manual de NF que o backend entregou em 29/09/2026 (`POST /nota_fiscal_saida/manual`,
 commit `13a3691` — no código da API ele aparece como "contrato 28", que **não é** o

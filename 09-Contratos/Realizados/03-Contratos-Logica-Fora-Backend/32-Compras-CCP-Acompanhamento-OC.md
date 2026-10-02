@@ -1,10 +1,12 @@
 ---
 tags: [contrato-logica, contrato-sql, contrato-api, compras, ccp]
 criado: 2026-09-30
-status: proposta
+status: aplicada
 ---
 
 # Contrato 32 — Compras: acompanhamento da OC pelo CCP (confirmação, prazo, despacho, renegociação)
+
+> **✅ ENTREGUE (01/10/2026).** **Conferência de 01/10/2026 na `api-test`** (o DBA avisou que concluiu): `GET /compras/acompanhamento` responde com `itens` e `resumo`; `GET /compras/ordens/{id}/acompanhamento` dá 404 para OC inexistente; `POST …/contatos` valida o `tipo`. Fila vazia (nenhuma OC aprovada na `api-test`). Escrita por perfil CCP não testada.
 
 **Criado em:** 30/09/2026 · **Para:** DBA (Gustavo) + backend (`api-acos-vital`) · **SQL + API**
 
