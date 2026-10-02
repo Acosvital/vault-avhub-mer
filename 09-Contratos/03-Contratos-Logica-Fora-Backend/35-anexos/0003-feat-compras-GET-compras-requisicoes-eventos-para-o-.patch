@@ -1,0 +1,225 @@
+From 8eb5dce92fcdc6d33952eb99a3f7d0366345cdcf Mon Sep 17 00:00:00 2001
+From: oluccaa <101234415+oluccaa@users.noreply.github.com>
+Date: Fri, 2 Oct 2026 11:02:13 -0300
+Subject: [PATCH] feat(compras): GET /compras/requisicoes/eventos para o MES +
+ motivo ao cancelar (contrato 35)
+
+Marcos com data e hora de tudo o que acontece em Compras com as requisicoes
+do MES (cotacao, OC, aprovacao, Omie, fornecedor, previsao, despacho,
+ocorrencias, cancelamento e reabertura), lidos por cursor (registrado_em,
+id_evento). Os eventos sao gravados por trigger no banco
+(requisicoes_compra_eventos); sem preco, fornecedor nem condicao de pagamento.
+
+PATCH /compras/requisicoes/{id}: cancelar passa a exigir motivo (3 a 500
+caracteres) e grava cancelada_por_origem = 'compras'.
+
+Exige o SQL do contrato 35 (35-anexos/0001-requisicoes-compra-eventos.sql).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app.js                        |   3 +-
+ src/models/requisicao_compra.js   |   5 ++
+ src/routes/compras_requisicoes.js | 137 +++++++++++++++++++++++++++++-
+ 3 files changed, 143 insertions(+), 2 deletions(-)
+
+diff --git a/src/app.js b/src/app.js
+index f1618e2..b977628 100644
+--- a/src/app.js
++++ b/src/app.js
+@@ -968,7 +968,8 @@ const swaggerOptions = {
+         description:
+           "Caixa de entrada do Comprador. Criada pelo MES no caminho normal: o MES empurra por " +
+           "PUT /compras/requisicoes/origem/{id_origem} (contrato 34, chave MES_INTEGRACAO_KEYS, que só " +
+-          "vale para essa rota). O status atendida " +
++          "vale para essa rota). O MES acompanha o que acontece em Compras por " +
++          "GET /compras/requisicoes/eventos (contrato 35). Cancelar pelo PATCH exige motivo. O status atendida " +
+           "NÃO se altera por aqui: quem marca é a emissão de uma OC e quem desmarca é o cancelamento. " +
+           "Transições aberta <-> em_cotacao <-> cancelada, validadas por trigger no banco.",
+       },
+diff --git a/src/models/requisicao_compra.js b/src/models/requisicao_compra.js
+index 31fda83..3da70de 100644
+--- a/src/models/requisicao_compra.js
++++ b/src/models/requisicao_compra.js
+@@ -54,6 +54,11 @@ const RequisicaoCompra = sequelize.define(
+     // sem FK). Exigem a migration 034.
+     codigo_pedido_omie: { type: DataTypes.BIGINT, allowNull: true },
+     numero_pedido_venda: { type: DataTypes.STRING(30), allowNull: true },
++    // [Contrato 35] Quem cancelou ('compras' = PATCH do av-hub, 'mes' = PUT do
++    // contrato 34) e o motivo. Preenchidos ao cancelar e limpos ao reabrir pela
++    // trigger trg_requisicoes_compra_cancelamento.
++    motivo_cancelamento: { type: DataTypes.TEXT, allowNull: true },
++    cancelada_por_origem: { type: DataTypes.STRING(10), allowNull: true },
+ 
+     id_ordem_compra: { type: DataTypes.UUID, allowNull: true },
+     created_by: { type: DataTypes.UUID, allowNull: true },
+diff --git a/src/routes/compras_requisicoes.js b/src/routes/compras_requisicoes.js
+index 55d2554..c9402cc 100644
+--- a/src/routes/compras_requisicoes.js
++++ b/src/routes/compras_requisicoes.js
+@@ -261,9 +261,14 @@ const MSG = {
+  *             required: [status]
+  *             properties:
+  *               status: { type: string, enum: [aberta, em_cotacao, cancelada] }
++ *               motivo:
++ *                 type: string
++ *                 minLength: 3
++ *                 maxLength: 500
++ *                 description: "Obrigatório ao cancelar (contrato 35): vai para o MES no evento requisicao_cancelada"
+  *     responses:
+  *       200: { description: Atualizada }
+- *       400: { description: Transição inválida ou tentativa de mexer em "atendida" }
++ *       400: { description: Transição inválida, tentativa de mexer em "atendida" ou cancelamento sem motivo }
+  *       404: { description: Não encontrada }
+  */
+ 
+@@ -463,6 +468,122 @@ router.put("/origem/:id_origem", async (req, res) => {
+   }
+ });
+ 
++/**
++ * @swagger
++ * /compras/requisicoes/eventos:
++ *   get:
++ *     summary: "[MES] Marcos das requisições do MES (cursor incremental)"
++ *     tags: [Compras — Requisições]
++ *     security:
++ *       - ApiKeyAuth: []
++ *     description: >
++ *       Contrato 35. Fatos com data e hora de tudo o que acontece em Compras com
++ *       as requisições que vieram do MES (as manuais, sem `id_origem`, não
++ *       aparecem). Nunca traz preço, fornecedor nem condição de pagamento.
++ *
++ *
++ *       `tipo`: requisicao_recebida, em_cotacao, oc_criada, oc_removida,
++ *       oc_enviada_aprovacao, oc_aprovada, oc_no_omie, fornecedor_confirmou,
++ *       previsao_alterada, despachada, ocorrencia, oc_cancelada (inclui
++ *       reprovação), requisicao_cancelada (`dados.origem` compras|mes,
++ *       `dados.motivo`), requisicao_reaberta.
++ *
++ *
++ *       **Cursor:** em ordem crescente de (`registrado_em`, `id_evento`). Para a
++ *       próxima página, mande `proximo.alterado_desde` e `proximo.apos_id`. Uma
++ *       transação longa pode gravar evento com `registrado_em` anterior ao último
++ *       lido: releia com ~2 min de sobreposição e grave por `id_evento`
++ *       (idempotente). Chave: a de leitura do MES (a mesma do contrato 004); a
++ *       `MES_INTEGRACAO_KEYS` não abre esta rota.
++ *     parameters:
++ *       - in: query
++ *         name: alterado_desde
++ *         required: true
++ *         description: ISO 8601. Eventos com registrado_em maior que este instante.
++ *         schema: { type: string, format: date-time }
++ *       - in: query
++ *         name: apos_id
++ *         description: Desempate (id_evento do último lido) quando vários eventos têm o mesmo registrado_em.
++ *         schema: { type: string, format: uuid }
++ *       - in: query
++ *         name: codigo_empresa
++ *         schema: { type: string, format: uuid }
++ *       - in: query
++ *         name: limit
++ *         schema: { type: integer, default: 200, maximum: 500 }
++ *     responses:
++ *       200:
++ *         description: "{ quantidade, tem_mais, proximo: { alterado_desde, apos_id } | null, data: [ evento ] }"
++ *       400: { description: "alterado_desde ausente ou inválido, apos_id ou codigo_empresa que não é uuid" }
++ */
++// ISO 8601 com hora (data sozinha também vale = meia-noite UTC).
++const ISO = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2}(\.\d{1,6})?)?(Z|[+-]\d{2}(:?\d{2})?)?)?$/;
++
++router.get("/eventos", async (req, res) => {
++  try {
++    const { alterado_desde, apos_id, codigo_empresa } = req.query;
++    if (!alterado_desde) {
++      return res.status(400).json({ detail: "alterado_desde é obrigatório (ISO 8601)" });
++    }
++    if (typeof alterado_desde !== "string" || !ISO.test(alterado_desde) || Number.isNaN(Date.parse(alterado_desde))) {
++      return res.status(400).json({ detail: "alterado_desde deve ser uma data/hora ISO 8601 válida" });
++    }
++    if (apos_id && !UUID.test(apos_id)) {
++      return res.status(400).json({ detail: "apos_id deve ser um uuid" });
++    }
++    if (codigo_empresa && !UUID.test(codigo_empresa)) {
++      return res.status(400).json({ detail: "codigo_empresa deve ser um uuid" });
++    }
++    const limit = Math.min(500, Math.max(1, parseInt(req.query.limit) || 200));
++
++    // registrado_em sai como texto com microssegundos: um Date do JS cortaria
++    // em milissegundos e o cursor repetiria ou pularia eventos.
++    const linhas = await sequelize.query(
++      `SELECT e.id AS id_evento, e.id_origem, e.id_requisicao, r.numero_requisicao,
++              e.codigo_empresa, e.tipo, e.ocorrido_em,
++              to_jsonb(e.registrado_em) #>> '{}' AS registrado_em,
++              e.status_requisicao,
++              CASE WHEN oc.id IS NULL THEN NULL ELSE jsonb_build_object(
++                'id', oc.id, 'numero_pedido', oc.numero_pedido,
++                'numero_pedido_omie', oc.numero_pedido_omie, 'situacao', oc.status) END AS ordem_compra,
++              e.dados
++         FROM core_vendas_faturamento.requisicoes_compra_eventos e
++         JOIN core_vendas_faturamento.requisicoes_compra r ON r.id = e.id_requisicao
++         LEFT JOIN core_vendas_faturamento.ordens_compra oc ON oc.id = e.id_ordem_compra
++        WHERE (CASE WHEN CAST(:apos AS uuid) IS NULL
++                    THEN e.registrado_em > CAST(:desde AS timestamptz)
++                    ELSE (e.registrado_em, e.id) > (CAST(:desde AS timestamptz), CAST(:apos AS uuid)) END)
++          AND (CAST(:empresa AS uuid) IS NULL OR e.codigo_empresa = CAST(:empresa AS uuid))
++        ORDER BY e.registrado_em, e.id
++        LIMIT :lim`,
++      {
++        replacements: { desde: alterado_desde, apos: apos_id || null, empresa: codigo_empresa || null, lim: limit + 1 },
++        type: QueryTypes.SELECT,
++      }
++    );
++
++    const tem_mais = linhas.length > limit;
++    const data = tem_mais ? linhas.slice(0, limit) : linhas;
++    const ultimo = data[data.length - 1];
++    return res.json({
++      quantidade: data.length,
++      tem_mais,
++      proximo: ultimo ? { alterado_desde: ultimo.registrado_em, apos_id: ultimo.id_evento } : null,
++      data,
++    });
++  } catch (err) {
++    const codigo = err.original?.code ?? err.parent?.code;
++    if (codigo === "42P01" && /requisicoes_compra_eventos/.test(err.message)) {
++      console.error("[compras_requisicoes] requisicoes_compra_eventos ausente: aplicar o contrato 35");
++      return res.status(500).json({ detail: "GET /compras/requisicoes/eventos exige o SQL do contrato 35 no banco." });
++    }
++    if (codigo === "22008" || codigo === "22007") {
++      return res.status(400).json({ detail: "alterado_desde deve ser uma data/hora ISO 8601 válida" });
++    }
++    return handleSequelizeError(err, res, MSG);
++  }
++});
++
+ router.get("/:id", async (req, res) => {
+   try {
+     if (!UUID.test(req.params.id)) {
+@@ -531,10 +652,24 @@ router.patch("/:id", async (req, res) => {
+       });
+     }
+ 
++    // [Contrato 35] Cancelar pelo Compras exige motivo: ele vai para o MES no
++    // evento requisicao_cancelada e a parcial volta a Requisições com ele.
++    let cancelamento = {};
++    if (novo === "cancelada") {
++      const motivo = typeof req.body.motivo === "string" ? req.body.motivo.trim() : "";
++      if (motivo.length < 3 || motivo.length > 500) {
++        return res.status(400).json({ detail: "motivo é obrigatório ao cancelar (de 3 a 500 caracteres)" });
++      }
++      cancelamento = { motivo_cancelamento: motivo, cancelada_por_origem: "compras" };
++    }
++
+     await r.update({
+       status: novo,
++      ...cancelamento,
+       ...(req.body.updated_by !== undefined && { updated_by: req.body.updated_by }),
+     });
++    // A trigger limpa motivo/origem ao reabrir: relê para devolver o que ficou gravado.
++    await r.reload();
+     return res.json(r);
+   } catch (err) {
+     return handleSequelizeError(err, res, MSG);
+-- 
+2.53.0.windows.1
+
