@@ -19,7 +19,7 @@ Seção dedicada só a **contratos** — documentos formais de mudança que prec
 | [[31-Compras-Dashboard]] | ✅ rota responde (valores zerados, sem pedidos) | `Realizados/` |
 | [[32-Compras-CCP-Acompanhamento-OC]] | ✅ fila, detalhe e contatos respondem e validam | `Realizados/` |
 | [[33-Dashboards-Unidade-de-Origem-do-Vendedor]] | ✅ `/vendedores` com `ativo_desde`, `inativo_desde`, `unidade_origem` | `Realizados/` (front sem push) |
-| [[34-Requisicoes-MES-Empurra-para-o-Hub]] | 🔴 PUT no ar, mas **`GET /compras/requisicoes` dá 500**: SQL do anexo 0001 provavelmente não aplicado | aberto, **urgente** |
+| [[34-Requisicoes-MES-Empurra-para-o-Hub]] | ✅ **entregue em 02/10/2026**: SQL aplicado, lista de requisições voltou (200) com as colunas novas | `Realizados/` |
 
 ## Como está organizado
 
