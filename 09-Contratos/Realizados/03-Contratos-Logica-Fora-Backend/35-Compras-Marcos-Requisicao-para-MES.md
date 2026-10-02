@@ -1,10 +1,12 @@
 ---
 tags: [contrato-sql, contrato-api, compras, integracao-mes, torre-de-fluxo]
 criado: 2026-10-02
-status: implementado-local
+status: aplicada
 ---
 
 # Contrato 35 — Compras: marcos da requisição de compra (av-hub → MES)
+
+> **✅ ENTREGUE (02/10/2026).** O DBA aplicou o apêndice A na `api-test` e o código entrou na `develop` (`0a65491`, a partir do patch `35-anexos/0003`). Conferido na `api-test`: `GET /compras/requisicoes/eventos` sem `alterado_desde` → 400; uma requisição de teste com `id_origem` (REQ-000003, "TESTE CONTRATO 35 - APAGAR", ficou cancelada) gerou `requisicao_recebida`; cancelar sem motivo → 400; com motivo → 200 e evento `requisicao_cancelada` com `origem = compras`. Front: av-hub#117 (verificado na tela no local). Falta: o Robert ligar a leitura no MES. **Antes de produção:** SQL antes da API.
 
 > **Situação em 02/10/2026: implementado e testado no local.** SQL (apêndice A) aplicado no banco local
 > (`omie-test-db`) e testado pelo roteiro `35-anexos/0002-roteiro-teste.sql`. API: commit `8eb5dce` na branch
