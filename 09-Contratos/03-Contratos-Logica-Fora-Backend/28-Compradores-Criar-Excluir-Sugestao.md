@@ -88,14 +88,16 @@ conflito). Precisa de uma das duas saídas (decisão abaixo):
 - **(a)** a pipeline não recria código que tem linha com `deleted_at` na mesma unidade; ou
 - **(b)** excluir é só para comprador que **não** existe mais no Omie (o que existe, inativa).
 
-## 4. Perguntas em aberto (Nathan)
+## 4. Decisões (Nathan, 02/10/2026): **igual à tela de Vendedores**
 
-1. **Código que não existe no Omie:** o POST deve aceitar? Recomendação: aceitar (não há como a API do
-   Omie confirmar sem chamar o Omie), mas a tela avisa que a OC só vai ao Omie se o código existir lá.
-2. **Excluir comprador que ainda está no Omie:** (a) ou (b) do item P? Recomendação: **(a)**, para
-   "excluir" valer mesmo.
-3. **Editar `nome` e `ativo` à mão**, como em Vendedores? Hoje os dois vêm do Omie e o PUT os ignora. Se
-   sim, a pipeline sobrescreve na sincronização seguinte (ou esses campos entram nas colunas protegidas).
+Conferido no código da `develop` da API (`src/routes/vendedores.js`) e da pipeline (`vendedores.ts`, `protectedColumns.ts`) em 02/10/2026:
+
+1. **Código que não existe no Omie: aceitar.** Como `POST /vendedores`, o `POST /compras/compradores` não consulta o Omie. A tela avisa que a OC só vai ao Omie se o código existir lá.
+2. **Excluir comprador que ainda está no Omie: opção (a), a exclusão vale.** Em Vendedores o índice único `vendedores_pkey (codigo_empresa, codigo_vendedor_omie)` **não é parcial**: a sincronização bate na linha excluída, atualiza os dados e não mexe no `deleted_at`, então o vendedor excluído continua excluído. Para compradores ficar igual:
+   - **DBA:** trocar `uq_compradores_empresa_codigo` por um índice único **sem** `WHERE deleted_at IS NULL` (conferir antes se há duplicata entre linhas excluídas e vivas);
+   - **pipeline:** em `src/omie/resources/compradores.ts`, tirar `conflictWhere: 'deleted_at IS NULL'`, como em `vendedores.ts`;
+   - efeito colateral, igual a Vendedores: um `POST` com o código de um comprador excluído dá **409** (a linha excluída ocupa a chave).
+3. **Editar `nome` e `ativo` à mão: sim, e a sincronização sobrescreve.** O `PUT /compras/compradores/{id}` passa a aceitar `nome` e `ativo`, como o `PUT /vendedores`. Em Vendedores esses dois **não** estão nas colunas protegidas da pipeline, então o Omie volta a mandar neles no próximo sync; compradores fica igual (`protectedColumns` de compradores continua só com `id_funcionario` e `nome_exibicao`). O apelido fixo continua sendo o `nome_exibicao`.
 
 ## 5. Depois de aplicado (av-hub)
 
