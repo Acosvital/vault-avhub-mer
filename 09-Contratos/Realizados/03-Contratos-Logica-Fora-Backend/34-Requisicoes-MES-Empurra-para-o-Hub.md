@@ -1,12 +1,12 @@
 ---
 tags: [contrato-api, contrato-sql, compras, integracao-mes, seguranca]
 criado: 2026-10-01
-status: proposta
+status: aplicada
 ---
 
 # Contrato 34 — Requisições: o MES empurra para o av-hub (PUT por `id_origem`)
 
-> **🔴 QUEBRANDO A `api-test` (01/10/2026).** **Conferência de 01/10/2026 na `api-test`** (o DBA avisou que concluiu): a rota `PUT /compras/requisicoes/origem/{id_origem}` está no ar (valida o corpo; chave falsa dá 401), **mas `GET /compras/requisicoes` responde 500** (com e sem filtro), enquanto `/compras/requisicoes/resumo`, que é SQL cru, responde 200. O model da `develop` já tem `codigo_pedido_omie`/`numero_pedido_venda`: a causa provável é **o SQL do anexo 0001 não aplicado na `api-test`**. A caixa de entrada de Compras do av-hub fica sem lista. **Ação urgente: aplicar `34-anexos/0001-requisicoes-pedido-omie.sql` na `api-test`** (e antes de subir em produção).
+> **✅ ENTREGUE (02/10/2026).** O DBA aplicou o anexo 0001 na `api-test`. Conferido: `GET /compras/requisicoes` voltou a responder **200** (com e sem filtro) e devolve `codigo_pedido_omie` e `numero_pedido_venda`; `/resumo` 200; `PUT /compras/requisicoes/origem/{id_origem}` valida o corpo (400) e recusa chave inválida (401). Não testado: o envio real pelo MES com a `MES_INTEGRACAO_KEYS` (falta o Robert ligar do lado dele). **Antes de produção:** aplicar o anexo 0001 no banco **antes** de subir o código da API, senão a lista de requisições dá 500, como deu na `api-test` em 01/10.
 
 **Criado em:** 01/10/2026 · **Para:** backend (`api-acos-vital`), DBA (Gustavo) e MES (`api-pcp`, Robert) · **Substitui a DEC-2** ("o hub busca no MES") para as requisições; revisa os contratos 003/004/005.
 
