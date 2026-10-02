@@ -2,10 +2,12 @@
 tags: [contrato-logica, contrato-api, faturamento, permissoes]
 criado: 2026-09-29
 atualizado: 2026-09-29
-status: proposta
+status: aplicada
 ---
 
 # Contrato 29 — Notas fiscais manuais: só o administrador cria (permissão no backend)
+
+> **✅ ENTREGUE (02/10/2026).** Conferido na `api-test` com a trava ligada (`NOTAS_MANUAIS_EXIGIR_PERMISSAO`): `POST /nota_fiscal_saida/manual` sem usuário → **403 `USUARIO_NAO_INFORMADO`**; com um usuário sem a permissão da tela `notas-fiscais-manuais` → **403 `SEM_PERMISSAO`**. Nada foi gravado. Não testado: o admin criando de verdade (criaria nota). **Antes de produção:** ligar a mesma variável no ambiente e criar a tela e as permissões (P1) lá.
 
 > **🟡 CÓDIGO PRONTO, TRAVA DESLIGADA (01/10/2026).** **Conferência de 01/10/2026 na `api-test`** (o DBA avisou que concluiu): o código está na `develop` (`NOTAS_MANUAIS_EXIGIR_PERMISSAO`), mas na `api-test` a trava está **desligada**: um `POST /nota_fiscal_saida/manual` com `created_by` de um usuário do perfil **Vendedor** passou da checagem de permissão e só parou na validação do cliente (esperado: 403). Unidade inexistente no teste, nada foi gravado. **Ação:** ligar `NOTAS_MANUAIS_EXIGIR_PERMISSAO=true` no ambiente e repetir.
 

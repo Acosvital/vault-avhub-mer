@@ -6,6 +6,8 @@ status: aplicada
 
 # Contrato 28 — Vendedores e Compradores: cadastro do Omie só para leitura, período de atividade e sugestão por semelhança
 
+> **✅ ENTREGUE (02/10/2026).** Conferido na `api-test`: `POST /vendedores` e `DELETE /vendedores/{id}` respondem **403 `CADASTRO_VEM_DO_OMIE`** (R1); `PUT /vendedores/{id}` com `nome` e `ativo` diferentes responde 200 e **não altera** os dois (R2); `POST /compras/compradores` não existe (404, R3); `GET /compras/compradores/{id}/sugestoes` responde (404 para comprador inexistente, C3). R4 (`ativo_desde`/`inativo_desde` em compradores) está na `develop` (`5231219`), mas **não deu para conferir pela API**: a `api-test` não tem nenhum comprador cadastrado. Falta no av-hub: os dois campos no painel do comprador e a sugestão com sensibilidade.
+
 > **🔄 REVISADO em 02/10/2026 (decisão do Nathan). Substitui o pedido original de criar/excluir comprador.**
 >
 > **Enquanto o Omie for a origem dos cadastros:**

@@ -42,8 +42,8 @@ contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contr
 | Contrato | Resultado na `api-test` | Onde ficou |
 |---|---|---|
 | [[26-Vendas-Liberacao-Pedido]] | ✅ data de corte preenchida (28/07/2026), liberação funcionando (741 pendentes, 16 liberados, 3 importados) | `Realizados/` |
-| [[28-Compradores-Criar-Excluir-Sugestao]] | 🔄 **revisado em 02/10/2026**: criar/excluir **cancelados** (os 404 de `POST`/`DELETE` estão certos). Agora pede: vendedor sem criar/excluir/editar o que vem do Omie no backend (R1–R2) e `ativo_desde`/`inativo_desde` em compradores (R4) | aberto, backend |
-| [[29-Notas-Fiscais-Manuais-So-Admin]] | 🟡 código pronto, mas `NOTAS_MANUAIS_EXIGIR_PERMISSAO` desligada: um Vendedor passa da checagem | aberto, ligar a trava |
+| [[28-Compradores-Criar-Excluir-Sugestao]] | ✅ **entregue em 02/10/2026** | `Realizados/` |
+| [[29-Notas-Fiscais-Manuais-So-Admin]] | ✅ **entregue em 02/10/2026** | `Realizados/` |
 | [[30-Compras-Pedido-Omie-PDF-Completo]] | ✅ campos no código da `develop`; sem dado para testar | `Realizados/` (falta o PDF do av-hub mostrar) |
 | [[31-Compras-Dashboard]] | ✅ rota responde (valores zerados, sem pedidos) | `Realizados/` |
 | [[32-Compras-CCP-Acompanhamento-OC]] | ✅ fila, detalhe e contatos respondem e validam | `Realizados/` |
