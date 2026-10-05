@@ -23,6 +23,13 @@ Para listar tudo no repositório `av-hub`: `grep -rn "GAMBIARRA(" app components
 (hoje são 57 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
 contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contratos-Logica-Fora-Backend/`.
 
+## Novo: variação nas rotas mensais do dashboard (05/10/2026)
+
+- **[[37-Dashboard-Mensal-Variacao]]** — `variacao_pct` e `variacao_quantidade_pct` em
+  `/dashboard_mensal_{vendas,faturamento}` (consolidado e por unidade), para o Dashboard da Equipe parar de
+  calcular a variação no BFF (participação por empresa, av-hub#131). Registra também a diferença de 1 pedido
+  entre a classificação (855) e o total (854) em set/2026.
+
 ## Novo: produto obrigatório e comprador da OC (05/10/2026)
 
 - **[[36-Compras-Produto-Obrigatorio-e-Comprador-da-OC]]** — o Omie recusa item sem produto cadastrado
