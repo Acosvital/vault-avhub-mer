@@ -52,6 +52,56 @@ O que é banco e API está em `ENVIAR - contrato-compras-backend.md`.
 > Omie ao cancelar**; falta implementar), L10 (campos obrigatórios e FOB) e
 > marcar como inativo o que sumir do Omie nos catálogos.
 >
+> **Atualização (05/10/2026): L4 implementado** na `feat/compras-omie` (commit `66f9a2e`, **sem push**).
+> Processo novo `envio-oc-worker` (fila `omie-envio-oc`, uma rodada por vez): lê `GET
+> /compras/ordens/fila-omie`, manda `UpsertPedCompra`/`ExcluirPedCompra` e devolve em `PATCH
+> …/sincronizacao`. Ligado por `SYNC_ENVIO_OC` (padrão `false`), começa em `ENVIO_OC_DRY_RUN=true`
+> (só mostra o payload no log). Testado no local: dry run das OCs OC-000005 (R$, CIF, produto do
+> cadastro, desconto 5%, local em texto) e OC-000006 (US$ PTAX, FOB com placa), e o caminho real
+> contra um **Omie falso** (sucesso grava `nCodPed`/`cNumero`, recusa vira `erro` com a mensagem do
+> Omie, exclusão marca o espelho). **Nenhuma chamada de escrita ao Omie de verdade foi feita.**
+> Decisões de implementação:
+> - **Separador do bloco `[AV-HUB]`:** ` ; ` entre os campos de uma linha, e não ` | ` como no
+>   exemplo do contrato 14 (§3.8): o `|` é a quebra de linha do Omie e cada campo voltaria pelo
+>   espelho como uma linha solta.
+> - **Parcelas:** só vão em `parcelas_upsert` quando todas são definitivas (`calculo_provisorio =
+>   false`, condição achada no catálogo); senão vai só o `cCodParc`.
+> - **Produto:** `nCodProd` só se o código existir em `core.produtos` **da unidade da OC**; senão o
+>   item vai só com descrição e o bloco avisa. Local de estoque numérico vai em
+>   `codigo_local_estoque`; texto livre vai no bloco.
+> - **Erros:** recusa do Omie → `erro` (sai da fila até o "Reenviar"); rede/429/425 → fica
+>   pendente para a próxima rodada; 3 recusas seguidas param a rodada da unidade (o Omie bloqueia
+>   a chave com 10).
+>
+> Também em `66f9a2e`: **IE e dados fiscais dos parceiros** (contrato SQL 001 e §2.2 do contrato 30;
+> o fornecedor do 46871 ficou com IE `188.198.930.112`) e **`ativo_desde`/`inativo_desde` dos
+> compradores protegidos** (R4 do contrato 28, conferido: a data feita à mão sobreviveu ao sync).
+>
+> **Teste real no Omie (05/10/2026, conta de Mogi, autorizado pelo Nathan só para o fornecedor
+> de teste "IGNORAR ESSE CLIENTE TESTE", CNPJ 26.LTC.HSE/0001-94, código 10466053225).** Feito com
+> o banco local = cópia de produção de 05/10 e a API local na `develop` (`6646efe`):
+> - OC-000001 (emitida pela tela, item em texto livre) — **recusada**: "Item [1]: Informe a tag
+>   [cProduto], [cCodIntProd] ou [nCodProd]". Com `cProduto` livre: "Produto não cadastrado para o
+>   Código". **O Omie só aceita item com produto cadastrado** (L10.5 respondido).
+> - OC-000002 (produto 10203516758 "GRAMPO DE GRADE TESTE") — **aceita: pedido 47476**
+>   (`nCodPed` 10473263296), número gravado na OC. Antes, uma recusa: "O preenchimento da tag
+>   [nValor] é obrigatório!" (parcela precisa de valor).
+> - Reenvio com o mesmo `cCodIntPed`: "alterado com sucesso", mesmo `nCodPed`, sem duplicar item.
+> - Com `parcelas_upsert`, o Omie grava a condição como `999` (informar parcelas), mesmo mandando
+>   `000`. Alterar sem parcelas mantém as que existiam (L10.4 só parcialmente respondido: falta criar
+>   um pedido sem parcelas para ver se o Omie gera pela condição).
+> - Cancelamento → fila `excluir` → `ExcluirPedCompra` **aceito** (pedido sem recebimento, etapa
+>   10); a consulta passou a responder "Pedido de compra não cadastrado". L10.7(a) respondido.
+> - Correções na pipeline (`2ac4921`): `nValor` nas parcelas; item sem produto vira erro antes de
+>   chamar o Omie; `Client-105` também é recusa de validação (não só "não existe").
+>
+> **Decisão pendente (Nathan):** a decisão de 24/09 (B12) permite material em texto livre na OC, e o
+> formulário de OC direta (finalidade Estoque) não tem busca de produto — o código só vem de PV. Com
+> o Omie exigindo produto cadastrado, essas OCs nunca entram no Omie.
+>
+> **Ainda pendente:** L10.1, L10.3 (FOB `"1"` não testado), L10.4 (criação sem parcelas), L10.7
+> (b)–(d), e marcar como inativo o que sumir do Omie nos catálogos.
+>
 > **Dados reais vistos no teste (Mogi):** etapas do pedido de compra `10`, `15` e `20`; ~57
 > compradores, **~325 condições de pagamento** (`000`, `A05`, `A15`, `U10`…), ~108 contas
 > correntes, ~312 categorias e 60 projetos; ~1.230 pedidos de compra nos últimos 20 dias. Por

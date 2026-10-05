@@ -23,6 +23,21 @@ Para listar tudo no repositório `av-hub`: `grep -rn "GAMBIARRA(" app components
 (hoje são 57 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
 contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contratos-Logica-Fora-Backend/`.
 
+## Novo: produto obrigatório e comprador da OC (05/10/2026)
+
+- **[[36-Compras-Produto-Obrigatorio-e-Comprador-da-OC]]** — o Omie recusa item sem produto cadastrado
+  (teste real de 05/10): o item da OC passa a ter produto do cadastro da unidade (P1). O comprador da OC
+  não se troca no av-hub; se trocarem no Omie, o espelho atualiza a OC e grava o histórico (P2–P5).
+  Histórico unificado sempre ligado (P6). Front pronto na branch `feat/compras-produto-comprador-oc`.
+
+## Pipeline atualizada (05/10/2026)
+
+- **[[23-Compras-Pipeline-Consolidado]]** — L4 (envio da OC ao Omie e exclusão ao cancelar)
+  implementado na `feat/compras-omie` (`66f9a2e`, sem push), desligado e em dry run por padrão.
+  Testado no local só contra um Omie falso; falta o L10 numa conta Omie de teste. No mesmo commit:
+  IE/dados fiscais dos parceiros ([[30-Compras-Pedido-Omie-PDF-Completo]] §2.2) e as datas do
+  comprador protegidas ([[28-Compradores-Criar-Excluir-Sugestao]] R4).
+
 ## Novo: notas fiscais manuais só para o admin (29/09/2026)
 
 - **[[29-Notas-Fiscais-Manuais-So-Admin]]** — a tela Cadastros › Auxiliares › Notas fiscais manuais (av-hub) usa a tela
