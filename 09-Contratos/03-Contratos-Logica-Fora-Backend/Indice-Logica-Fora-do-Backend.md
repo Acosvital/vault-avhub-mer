@@ -23,6 +23,14 @@ Para listar tudo no repositório `av-hub`: `grep -rn "GAMBIARRA(" app components
 (hoje são 57 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
 contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contratos-Logica-Fora-Backend/`.
 
+## Novo: regras sem chave de ambiente (06/10/2026)
+
+- **[[38-Regras-Sem-Chave-de-Ambiente]]** — decisão do Nathan: regra decidida é fixa no código, sem
+  variável. 11 chaves da API passam a valer sempre e `BLACKLIST_PEDIDOS_CHAVE_LEGADA` sai (patch em
+  `38-anexos/`, depois do patch do contrato 36). Ordem de subida no §4 (perfil Gerência de Compras e
+  compradores vinculados ANTES da API). Segurança e paginação por pedido: fixar depois do pré-requisito.
+  Pendente de decisão: bloqueio de comissão dos coordenadores. Pipeline já limpa (PR #2).
+
 ## Novo: variação nas rotas mensais do dashboard (05/10/2026)
 
 - **[[37-Dashboard-Mensal-Variacao]]** — `variacao_pct` e `variacao_quantidade_pct` em
