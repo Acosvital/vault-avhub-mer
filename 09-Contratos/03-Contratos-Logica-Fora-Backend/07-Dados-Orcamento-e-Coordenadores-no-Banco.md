@@ -1,5 +1,10 @@
 # Contrato — Dados de Orçamento e de coordenadores no banco (fora do repositório)
 
+> **Nota de 06/10/2026:** apesar de desconsiderado, a parte dos coordenadores foi implementada na API
+> (`90bdb33`, `GET /dashboard/comissoes`), com o bloqueio de comissão atrás da chave
+> `COMISSOES_COORDENADORES_BLOQUEIO`. O bloqueio **não se aplica** (decisão do Nathan) e a chave sai no
+> [[38-Regras-Sem-Chave-de-Ambiente]].
+
 > **⛔ DESCONSIDERADO em 01/10/2026 (decisão do Nathan).** Não será implementado: não cobrar o DBA nem o backend, e não migrar as telas de Orçamento nem o dashboard de comissões. Os JSON em `lib/orcamento/data/` e `lib/comissoes/coordenadores.json` ficam como estão. O texto abaixo é só histórico.
 
 > **Conferido em 29/09/2026: não entregue.** O DBA avisou que terminou os contratos desta pasta, mas

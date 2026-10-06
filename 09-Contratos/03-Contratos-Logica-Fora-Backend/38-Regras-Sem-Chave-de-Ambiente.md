@@ -20,8 +20,9 @@ Levantamento de 06/10/2026 na `develop`: 15 chaves de regra na API (além das de
 
 ## 2. O que muda (patch pronto)
 
-Patch: `38-anexos/0001-regras-sem-chave-de-ambiente.patch` — aplicar **depois** de
-`36-anexos/0001-produto-sempre-obrigatorio.patch` (mexem no mesmo arquivo). Troca a leitura da variável
+Patches, nesta ordem: `36-anexos/0001-produto-sempre-obrigatorio.patch`, depois
+`38-anexos/0001-regras-sem-chave-de-ambiente.patch` e `38-anexos/0002-sem-bloqueio-comissao-coordenadores.patch`
+(o 36 e o 0001 mexem no mesmo arquivo). Troca a leitura da variável
 pelo valor da regra; a lógica não muda.
 
 | Chave | Era | Passa a | Regra |
@@ -38,6 +39,7 @@ pelo valor da regra; a lógica não muda.
 | `VENDAS_PLANILHA_VIEW_LEVE` | true | **sempre** | planilha de vendas pela view rápida |
 | `AUDITORIA_ATIVA` | true | **sempre** | grava `auth.auditoria` |
 | `BLACKLIST_PEDIDOS_CHAVE_LEGADA` | false | **removida** | modo de transição; o av-hub já manda `codigo_empresa` em todo PUT/DELETE |
+| `COMISSOES_COORDENADORES_BLOQUEIO` | false | **removida, sem bloqueio** | decisão do Nathan (06/10): o bloqueio por NF **não** se aplica à comissão dos coordenadores; a rota manda sempre `p_aplicar_bloqueio = false` (patch 0002) |
 
 Testado na API local (banco = cópia de produção de 05/10), **sem nenhuma dessas variáveis**: blacklist
 sem `codigo_empresa` → 400; OC por quem não é comprador vinculado → 400 ("Você não está vinculado como
@@ -68,11 +70,16 @@ Mesma regra (vai ficar fixa, sem chave), mas só depois de conferir o pré-requi
 2. **API** com os patches dos contratos 36 e 38.
 3. **Apagar** as variáveis da §2 do ambiente.
 
-## 5. Pendente de decisão do Nathan
+## 5. Decidido: sem bloqueio na comissão dos coordenadores (06/10/2026)
 
-- `COMISSOES_COORDENADORES_BLOQUEIO` (padrão false): aplica o bloqueio de comissão dos coordenadores.
-  **Muda o valor pago** — o código pede conferência com o comercial. Decidir se vale (fixa ligada) ou
-  não (sai a regra).
+`COMISSOES_COORDENADORES_BLOQUEIO` vinha do contrato [[07-Dados-Orcamento-e-Coordenadores-no-Banco]]
+("coordenadores … com o mesmo bloqueio de comissão que os vendedores"). O 07 foi **desconsiderado em
+01/10/2026**, mas a parte dos coordenadores foi implementada no mesmo dia (`api-acos-vital` `90bdb33`,
+`GET /dashboard/comissoes` + `fn_dashboard_comissoes`), com o bloqueio atrás da chave por mudar o valor
+pago. **Decisão: não aplica.** Patch 0002 tira a chave e fixa `false` (é o que já roda). Testado na API
+local: `GET /dashboard/comissoes?ano_mes=2026-09` → 5 coordenadores, 44 vendedores,
+`bloqueio_coordenadores_aplicado: false`. Limpeza opcional para o DBA: tirar o parâmetro
+`p_aplicar_bloqueio` (e o cálculo) de `fn_dashboard_comissoes`.
 
 ## 6. Pipeline e av-hub (já feito)
 
