@@ -208,8 +208,11 @@ aprovada leva até alguns minutos para aparecer no Omie.
   cada OC:
   - `enviar` — OC `aprovado` + `pendente`. OC `aguardando_aprovacao` **não** vai;
   - `excluir` — OC `cancelado` + `pendente` com `codigo_pedido_omie` (já estava no Omie).
-- **HRM Caldeiraria:** não tem conta Omie. **Por decisão de 24/09, compra pela unidade de Mogi**:
-  não existe OC da HRM para enviar (a tela só oferece Mogi e Uberaba). Método próprio depois.
+- **HRM Caldeiraria:** ~~não tem conta Omie; por decisão de 24/09, compra pela unidade de Mogi~~
+  **Revisto em 06/10/2026:** a HRM tem conta Omie própria e compra por ela (`id_unidade_compra` nulo
+  em produção). A OC da HRM vai pela conta da HRM: **conferir que `FILIAIS_ATIVAS` da pipeline em
+  produção inclui `hrm`** (com `FILIAL_HRM_OMIE_APP_KEY/SECRET` e `FILIAL_HRM_CODIGO_EMPRESA`); o
+  `.env` local só tem Mogi e Uberaba.
 - **Como:** `UpsertPedCompra` com `cCodIntPed = numero_pedido` (≤ 20 caracteres). Reenvio altera
   em vez de duplicar.
 - **Cabeçalho:** `dDtPrevisao ← data_previsao_chegada` (`dd/mm/aaaa`); `cCodParc ←

@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, pendencias, perguntas, consolidado]
 criado: 2026-09-21
-atualizado: 2026-09-30
+atualizado: 2026-10-06
 ---
 
 # Perguntas em aberto — lista consolidada
@@ -27,6 +27,18 @@ atualizado: 2026-09-30
 > **Atualizado de novo em 28/09/2026, à tarde (PDF do Robert, "MES — Módulos Estoque, Compras, Logística e Qualidade")**: revisa o item "Requisições de compras" antes dele virar código — setor Estoque único, circuito de compra fixo fora do roteiro, baixa no despacho do Estoque (não mais no recebimento da Embalagem). **Nenhuma das duas propostas de 28/09 tem código ainda** (confirmado: não existe model `Requisicao*`, nem enum `REQUISICAO`/`LOGISTICA_ENTRADA`/`QUALIDADE`, nem pasta de UI própria).
 >
 > **Atualizado em 29/09/2026**: o Nathan respondeu 9 dos 10 itens que a atualização de 28/09 tinha aberto. **EN-05 confirmado de vez** (`Material.natureza` só como classificação, sem conflito de registro). **A proposta da tarde de 28/09 vira arquitetura confirmada** — setor Estoque único, circuito de compra fixo, baixa no despacho, Reserva restrita a "separar sem despachar", inspeção de entrada por lote e de saída como setor `QUALIDADE` no roteiro (obrigatório em todo roteiro de fabricação), C8 respeita `RoteiroItem`, e o processo de reprovação total/parcial no recebimento ficou definido (quarentena da parte boa + realinhamento de devolução/substituição com Compras). Só fica em aberto **EC-02** (baixa de matéria-prima além do requisitado) — o Nathan pediu sugestão, não decidiu; ver [[Encaixe-Estoque-Revenda-no-PCP]] seção 6. **Total cai de 18 para 10 pendências reais.**
+
+**Compras e acessos — 5 novas (06/10/2026)**
+
+| ID | Pergunta | Quem |
+|---|---|---|
+| CA-01 | Compra para **uso interno** (ex.: consumo da cozinha): existe no Omie de cada unidade um **local de estoque** de consumo interno? Se sim, a OC de uso interno sai com ele (hoje o local é texto livre por item e só vai ao Omie se for o código numérico) — precisa de catálogo de locais na pipeline | Nathan |
+| CA-02 | Vínculo **vendedor ↔ funcionário**: manter a restrição "só setor Vendas" que a tela antiga fazia no navegador? Se sim, vira filtro no backend (a tela nova mostra todos com o setor) | Nathan |
+| CA-03 | **Ligar os compradores de produção aos funcionários** (0 de 74 em 06/10): sem isso ninguém emite OC desde o contrato 38. Quem faz e até quando | Nathan |
+| CA-04 | **HRM na api-test**: `id_unidade_compra` ainda aponta para Mogi; e a pipeline de produção tem a HRM em `FILIAIS_ATIVAS`? | DBA |
+| CA-05 | **api-test**: `POST /compras/ordens` dá 500 em qualquer caso (inclusive com produto válido) desde 06/10 de manhã | DBA |
+
+As 7 decisões da transferência entre filiais estão em [[Proposta-Transferencia-Estoque-Filiais]] (não repetidas aqui).
 
 De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o resto está decidido, aceito ou moot — arquivo completo nas seções abaixo). Nada aqui foi fabricado ou assumido por mim — são fatos de negócio, físicos ou de alocação que só quem está na operação sabe responder.
 
