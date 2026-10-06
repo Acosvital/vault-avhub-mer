@@ -63,6 +63,8 @@ O depósito é "central compartilhado, não vinculado a fábrica" ([[Estoque-Mod
 
 **✅ RESOLVIDO em 21/09/2026 (Nathan) — assimétrico em relação à DEC-1.** Fábrica **não** é amarrada a uma filial (confirma DEC-1: 1 fábrica atende as 3 filiais). **Depósito é diferente**: pode ser amarrado a uma filial, **condicionalmente** — só a partir do momento em que aquela filial tiver seu próprio setor de compras. Ou seja, `deposito.codigo_empresa` existe e é preenchido quando aplicável, mas não é regra universal desde o dia 1. ⚠️ **Tensão a resolver**: isso ajusta o que já estava registrado como "decidido" em [[Estoque-Modelo-Dados]] e [[Perguntas-Pendentes-MES-Estoque]] — "depósito central compartilhado, sem vínculo fixo com fábrica" — que não mencionava essa condição de "quando existir setor de compras na filial". Precisa atualizar as duas notas pra incluir essa condicional, não é mais um "nunca vinculado" sem exceção.
 
+**➡️ 05/10/2026 — proposta de transferência entre filiais:** [[Proposta-Transferencia-Estoque-Filiais]] propõe que **todo** depósito tenha filial (decisão 1, pendente com o Nathan), com transferência por solicitação, aprovação na origem e NF de transferência emitida no Omie.
+
 ## 2. Lacunas de domínio (ausências)
 
 ### L-10. Sobras, perdas e unidade de medida

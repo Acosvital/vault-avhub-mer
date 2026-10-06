@@ -101,6 +101,7 @@ sequenceDiagram
 
 **EB1 — Movimentação entre warehouses**
 Transferência entre depósitos compartilhados (Warehouse 01 ↔ Warehouse 02 etc.) — operação real, confirmada no PRD original (múltiplos depósitos).
+*Entre filiais (outro CNPJ, com NF de transferência), ver [[Proposta-Transferencia-Estoque-Filiais]] (05/10/2026, proposta com decisões pendentes).*
 
 **EB2/EB3 — Contagem cíclica**
 Mitigação já prevista em [[Estoque-Riscos]] pra "descolamento entre saldo do sistema e saldo físico" — rastreabilidade por lote + **motivo obrigatório** em qualquer ajuste manual.
