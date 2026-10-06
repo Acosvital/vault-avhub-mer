@@ -1,13 +1,14 @@
 ---
 tags: [erp-acos-vital, prd-estoque, estoque, mes, filiais, proposta]
 criado: 2026-10-05
-status: proposta
+status: decidida-parcial
 ---
 
 # Proposta — Transferência de estoque entre filiais
 
 > Proposta de 05/10/2026 (documento "Proposta — Transferência de estoque entre filiais", registrado no vault em 06/10).
-> **Status: proposta, com 7 decisões pendentes** (seção "Decisões pendentes"). As 4 primeiras travam o início.
+> **Status (06/10/2026): 5 das 7 decisões tomadas pelo Nathan** (1, 2, 4, 5 e 7, todas como propostas). **Faltam a 3 e a 6, com o Fiscal** — a 3 trava a etapa 2. A **etapa 1 (saldo por filial) já começou** no MES (Robert, 06/10), porque não depende de decisão que trave.
+> Origem: PDF do Robert "Decisões pendentes — Transferência entre filiais e revisão do C2" (06/10/2026), respondido pelo Nathan no mesmo dia. Junto: **a tarefa C2 sai do cronograma** (ver [[Cronograma-2-Meses]]).
 > Relacionadas: [[Lacunas-de-Logica-e-Clareza]] (L-09, depósito por filial), [[Fluxo-Estoque-Completo]] (atendimento pelo estoque, reserva, movimentação), [[Estoque-Modelo-Dados]] (`movimento_estoque`, lote), [[Fluxo-Compras-Completo]] (requisição de compra).
 
 ## Contexto
@@ -69,21 +70,21 @@ Uma tela de consulta com todas as transferências (filtro por filial, status e p
 - **Sem pedido:** o mesmo fluxo serve para reposição entre filiais, sem parcial.
 - **Cancelamento:** quem solicitou pode cancelar até a expedição; a reserva é liberada e o parcial volta a poder ser atendido ou ter compra requisitada.
 
-## Decisões pendentes
+## Decisões
 
-As quatro primeiras travam o início; as demais podem ser decididas durante a implementação.
+As quatro primeiras travam a etapa 2; as demais podem ser decididas durante a implementação. Respondidas pelo Nathan em 06/10/2026, salvo as do Fiscal.
 
 | # | Pergunta | Proposta | Quem decide | Status |
 |---|---|---|---|---|
-| 1 | Cada filial já tem depósitos próprios, ou ainda há depósito compartilhado? | Todo depósito passa a ter filial; um compartilhado vira um por filial | Nathan | ⏳ pendente |
-| 2 | Como saber que o produto de Mogi é o mesmo da outra filial? | Mesmo `codigo_produto` nas duas filiais | Nathan | ⏳ pendente |
-| 3 | A NF de transferência é sempre obrigatória entre as filiais? | Sim; a saída no MES exige o número da NF | Fiscal | ⏳ pendente |
-| 4 | Quem aprova? | O estoque da filial de origem | Nathan | ⏳ pendente |
-| 5 | O destino confere só a quantidade, ou a Qualidade inspeciona de novo? | Só quantidade; o lote herda o status | Nathan e Qualidade | ⏳ pendente |
-| 6 | Quem emite a NF no Omie e como o número chega ao MES? | O estoque da origem emite e digita no MES; integração depois | Fiscal | ⏳ pendente |
-| 7 | O atendimento deve sugerir transferir antes de requisitar compra? | Sim, quando houver saldo em outra filial | Nathan | ⏳ pendente |
+| 1 | Cada filial já tem depósitos próprios, ou ainda há depósito compartilhado? | Todo depósito passa a ter filial; um compartilhado vira um por filial | Nathan | ✅ **Decidido 06/10**: todo depósito tem filial (revê a regra condicional da L-09) |
+| 2 | Como saber que o produto de Mogi é o mesmo da outra filial? | Mesmo `codigo_produto` nas duas filiais | Nathan | ✅ **Decidido 06/10**: mesmo `codigo_produto` (ex.: `015VRDP060`) |
+| 3 | A NF de transferência é sempre obrigatória entre as filiais? | Sim; a saída no MES exige o número da NF | Fiscal | ⏳ pendente — com o Fiscal (**trava a etapa 2**) |
+| 4 | Quem aprova? | O estoque da filial de origem | Nathan | ✅ **Decidido 06/10**: o estoque da filial de origem |
+| 5 | O destino confere só a quantidade, ou a Qualidade inspeciona de novo? | Só quantidade; o lote herda o status | Nathan e Qualidade | ✅ **Decidido 06/10** (Nathan): só quantidade; o lote filho herda o status |
+| 6 | Quem emite a NF no Omie e como o número chega ao MES? | O estoque da origem emite e digita no MES; integração depois | Fiscal | ⏳ pendente — com o Fiscal |
+| 7 | O atendimento deve sugerir transferir antes de requisitar compra? | Sim, quando houver saldo em outra filial | Nathan | ✅ **Decidido 06/10**: sim, quando houver saldo disponível em outra filial |
 
-> **Ligação com a L-09.** A decisão de 21/09 deixou `deposito.codigo_empresa` **condicional** ("só quando a filial tiver seu próprio setor de compras"). A decisão 1 desta proposta torna a filial do depósito **universal**. Em 06/10 as três filiais já têm conta Omie própria com cadastro de compras (condições de pagamento, fornecedores, produtos e compradores da HRM aparecem em produção), o que favorece a proposta — mas quem fecha é o Nathan.
+> **Ligação com a L-09 (resolvida pela decisão 1 em 06/10).** A decisão de 21/09 deixou `deposito.codigo_empresa` **condicional** ("só quando a filial tiver seu próprio setor de compras"). A decisão 1 desta proposta torna a filial do depósito **universal**. Em 06/10 as três filiais já têm conta Omie própria com cadastro de compras (condições de pagamento, fornecedores, produtos e compradores da HRM aparecem em produção), o que favorece a proposta — mas quem fecha é o Nathan.
 >
 > **Ligação com a decisão 2.** O código legível do produto (`codigo_produto`, ex.: `015VRDP060`) é o mesmo que o MES já manda na requisição de compra (`material`) e que o av-hub usa para achar o produto no cadastro da unidade ao montar a OC (06/10). O `codigo_produto_omie` (`nCodProd`) é diferente em cada conta Omie e não serve para comparar entre filiais.
 

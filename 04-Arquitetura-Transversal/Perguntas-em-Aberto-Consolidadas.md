@@ -38,7 +38,12 @@ atualizado: 2026-10-06
 | CA-04 | **HRM na api-test**: `id_unidade_compra` ainda aponta para Mogi; e a pipeline de produção tem a HRM em `FILIAIS_ATIVAS`? | DBA |
 | CA-05 | **api-test**: `POST /compras/ordens` dá 500 em qualquer caso (inclusive com produto válido) desde 06/10 de manhã | DBA |
 
-As 7 decisões da transferência entre filiais estão em [[Proposta-Transferencia-Estoque-Filiais]] (não repetidas aqui).
+**Transferência entre filiais — 2 restantes, com o Fiscal** (as outras 5 decididas pelo Nathan em 06/10; detalhe em [[Proposta-Transferencia-Estoque-Filiais]])
+
+| ID | Pergunta | Quem |
+|---|---|---|
+| TF-3 | A NF de transferência é sempre obrigatória entre as filiais? (proposta: sim, a saída no MES exige o número) — **trava a etapa 2** | Fiscal |
+| TF-6 | Quem emite a NF no Omie e como o número chega ao MES? (proposta: o estoque da origem emite e digita; integração depois) | Fiscal |
 
 De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o resto está decidido, aceito ou moot — arquivo completo nas seções abaixo). Nada aqui foi fabricado ou assumido por mim — são fatos de negócio, físicos ou de alocação que só quem está na operação sabe responder.
 

@@ -24,7 +24,7 @@ atualizado: 2026-10-06
 > - **OC a partir de requisição do MES** (av-hub#151, na `main`): já traz PV, produto e destino; a OC leva só os itens das requisições; **comprador só compra da filial a que pertence**.
 > - **Telas de Compradores e Vendedores** refeitas como fila de trabalho (vínculo lado a lado, candidatos sem digitar): Compradores na `develop` (av-hub#154); Vendedores aguarda o contrato 39 (av-hub#155). **Em produção, 0 dos 74 compradores estão ligados a funcionários**: sem isso ninguém emite OC (contrato 38).
 > - **Produção (`auth.telas`)**: criadas `suprimentos` e `painel-comprador`; `compradores` movida para Cadastros › Acessos com permissão para o Admin (Dev).
-> - **Proposta de transferência de estoque entre filiais** registrada: [[Proposta-Transferencia-Estoque-Filiais]] (7 decisões pendentes).
+> - **Transferência de estoque entre filiais** ([[Proposta-Transferencia-Estoque-Filiais]]): o Nathan decidiu 5 das 7 em 06/10 (todas como propostas); **faltam a 3 e a 6, com o Fiscal** (a 3 trava a etapa 2). A **etapa 1 (saldo por filial) já começou** no MES. **A C2 saiu do cronograma** (a filial vem do pedido; o requisito de permissão por filial vai para a C3).
 > - Pendências novas em [[Perguntas-em-Aberto-Consolidadas]] seção 0 (bloco "Compras e acessos, 06/10").
 
 ## 1. Em uma frase
@@ -86,7 +86,7 @@ Estados: **Não iniciada**, **Em andamento**, **Bloqueada**, **Concluída**, **C
 | B4 | API `alterado_desde` em produtos e parceiros | Gustavo | 28/09–02/10 | **Concluída** — já implementado em `produtos.js`/`parceiros.js`; confirmado por [[Auditoria-Dump-Producao-2026-09-21]] (21/09) | B1 |
 | C4 | Carteira do PCP: importar itens do pedido | Robert | 28/09–02/10 | **Concluída** — confirmado pelo Robert em 30/09, já lendo `/pedidos_liberados` (L4 do [[26-Vendas-Liberacao-Pedido]]) | — |
 | D2 | Módulo base do Estoque e testes e2e | Pablo | 28/09–02/10 | Não iniciada | D1 |
-| C2 | Vínculo Fábrica ↔ Filial | Robert | 30/09–02/10 | Não iniciada | **DEC-1** |
+| C2 | Vínculo Fábrica ↔ Filial | Robert | 30/09–02/10 | **Cortada** em 06/10 (Robert propôs, Nathan aprovou): a filial vem do pedido; o vínculo com a filial passa para o depósito. Os 1,5 pd vão para a etapa 1 da transferência | DEC-1 |
 | D3 | Projeção read-only de material e parceiro | Pablo | 30/09–02/10 | Não iniciada | B4 |
 
 S2 a S4 e o fechamento seguem o [[Cronograma-2-Meses]]; entram neste quadro quando a sprint começar.
