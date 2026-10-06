@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, status, indice]
 criado: 2026-09-21
-atualizado: 2026-09-30
+atualizado: 2026-10-06
 ---
 
 # Onde estamos
@@ -17,6 +17,15 @@ atualizado: 2026-09-30
 > **Adendo de 29/09/2026 — a proposta da tarde de 28/09 vira decisão.** O Nathan respondeu as 9 perguntas que a atualização de 28/09 tinha deixado em aberto: EN-05 confirmado de vez (sem conflito), e a arquitetura da tarde de 28/09 (Estoque único, circuito de compra fixo fora do roteiro, baixa no despacho do Estoque, Reserva reduzida a "separar sem despachar", inspeção de entrada por lote e de saída como setor `QUALIDADE` obrigatório no roteiro, C8 respeitando `RoteiroItem`, processo de reprovação total/parcial no recebimento) passa a ser a **arquitetura confirmada**, ainda sem nenhum código. Só fica em aberto a baixa de matéria-prima consumida além do requisitado (sobras/perdas de corte) — o Nathan pediu sugestão em vez de decidir. Tudo em [[Encaixe-Estoque-Revenda-no-PCP]]; pendências reais caem de 18 para 10 em [[Perguntas-em-Aberto-Consolidadas]].
 >
 > **Adendo de 30/09/2026 — retorno do Robert sobre os contratos de integração (conferido no código).** O Robert comparou o vault com o código dos dois lados. **L4 do contrato 26 concluído**: a Carteira do MES lê `/pedidos_liberados` (falta só a data de corte para o teste de ponta a ponta). **Contratos 003 e 005 aprovados por ele com ajustes**, e as duas rotas do MES (`/requisicoes-compra` e `/itens/status`) **já existem** (F3 adiantada). **Contrato 004**: formato aprovado com um ajuste (`id_origem` em cada item); a rota do av-hub ainda não existe e o MES usa um registro manual da compra até lá. **C1 concluída em 22/09, C4 atendida, C3 atrasada** (começa agora). O setor "Logística de Entrada" do MES virou "Recebimento". **Ficam com o Nathan:** nomes dos campos do 003, regra do pedido sem prazo, onde fica o job de leitura do av-hub (F2) e o aceite das diferenças do 005; **com o backend:** a chave própria do MES, de escrita e restrita por rota (L6). Detalhe em cada contrato e em [[Perguntas-em-Aberto-Consolidadas]] seção 0.
+>
+> **Adendo de 06/10/2026 — Compras e cadastros de acesso (av-hub, API e contratos).**
+> - **Contratos 36, 37 e 38 entregues pelo DBA** e movidos para `Realizados/` (o 37 já em produção; P1 do 36 e o 38 conferidos no código da `develop`, `c8f2f5e`). **Contrato 39 novo** ([[39-Vendedores-Fila-de-Vinculo]]): filtro "sem funcionário" e nomes do vínculo na API de vendedores — patch pronto, falta o DBA.
+> - **HRM compra pela própria conta Omie**: o DBA limpou `id_unidade_compra` da HRM em produção (na `api-test` ainda aponta para Mogi). Ver [[Decisoes-Chave-ERP]].
+> - **OC a partir de requisição do MES** (av-hub#151, na `main`): já traz PV, produto e destino; a OC leva só os itens das requisições; **comprador só compra da filial a que pertence**.
+> - **Telas de Compradores e Vendedores** refeitas como fila de trabalho (vínculo lado a lado, candidatos sem digitar): Compradores na `develop` (av-hub#154); Vendedores aguarda o contrato 39 (av-hub#155). **Em produção, 0 dos 74 compradores estão ligados a funcionários**: sem isso ninguém emite OC (contrato 38).
+> - **Produção (`auth.telas`)**: criadas `suprimentos` e `painel-comprador`; `compradores` movida para Cadastros › Acessos com permissão para o Admin (Dev).
+> - **Proposta de transferência de estoque entre filiais** registrada: [[Proposta-Transferencia-Estoque-Filiais]] (7 decisões pendentes).
+> - Pendências novas em [[Perguntas-em-Aberto-Consolidadas]] seção 0 (bloco "Compras e acessos, 06/10").
 
 ## 1. Em uma frase
 

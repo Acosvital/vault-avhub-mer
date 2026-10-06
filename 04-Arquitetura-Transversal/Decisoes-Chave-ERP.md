@@ -40,6 +40,13 @@ Lista viva de decisões que precisam ser tomadas conscientemente para o "ERP de 
 
 ## Já resolvidas / bem estabelecidas
 
+- **Decisões de 06/10/2026 (Nathan) — Compras e cadastros de acesso:**
+  - **HRM compra pela própria conta Omie.** Revisa a decisão de 24/09 ("HRM compra pela unidade de Mogi"): a HRM já tem conta Omie com cadastros sincronizados (condições de pagamento, fornecedores, produtos, compradores). Em produção, `core.unidades.id_unidade_compra` da HRM ficou nulo e ela emite OC como Mogi e Uberaba.
+  - **Comprador só compra da filial a que pertence**: só emite OC numa unidade quem é comprador ATIVO vinculado (comprador do Omie ↔ funcionário) nela. A tela oferece só essas unidades e esconde "Fechar compra" das requisições de outras; o backend recusa (contrato 38, `COMPRAS_EXIGIR_VINCULO_COMPRADOR` fixo).
+  - **OC aberta de requisição do MES leva só os itens das requisições.** PV, produto e destino vêm da requisição (o MES manda o código do produto em `material` e o PV em `numero_pedido_venda`); não se acrescenta item, não se marca outro item do PV, não se troca a unidade; a finalidade segue a requisição. Mais itens só com nova requisição do MES.
+  - **O destino do item da OC é fixo**: nasce com o item (marcado no PV ou vindo da requisição); para tirar do pedido, remove-se o item. O que passar do que o pedido precisa vai para o estoque.
+  - **Vínculos de acesso não se perdem ao editar**: as telas de Compradores e Vendedores gravam só o campo alterado; os candidatos de vínculo vêm do backend (sugestão) e quem escolhe é o administrador.
+
 - Schema Postgres isolado por domínio de negócio — convenção já provada (schemas de negócio confirmados: `core`, `auth`, `core_vendas_faturamento`, `core_comissionamento`, `core_aprovacao_de_vagas`, mais `estoque` proposto). `core_compras` **continua existindo como schema, mas com o conteúdo antigo apagado** (ver item resolvido acima) — a reconstrução ainda não tem formato definido.
 - Infraestrutura self-hosted (Coolify/Traefik/Postgres/MinIO em 3 VPS) — reaproveitar, não criar infra nova.
 - Fronteira fiscal: nenhum módulo deve emitir/editar nota fiscal — isso é sempre responsabilidade do Omie.
