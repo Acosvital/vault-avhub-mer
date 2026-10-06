@@ -1,10 +1,12 @@
 ---
 tags: [contrato-sql, dba, bug, vendas, faturamento]
-status: proposta
+status: aplicada
 criado: 2026-09-24
 ---
 
 # Contrato SQL 009 — `core.categorias` sem `codigo_empresa` no JOIN de 4 views (bug real, testado)
+
+> **✅ APLICADO — conferido em PRODUÇÃO em 06/10/2026** (só leitura): `GET /vendas_planilha?pedido_venda=25970` devolve **53 registros** somando **R$ 964.763,88**, exatamente o resultado "depois do fix" deste contrato (antes eram 76 registros e R$ 1.409.191,16). Conferido só pela `vw_vendas_planilha`; as outras três views (`vw_vendas_base`, `vw_nf_classified`, `vw_faturamento_planilha`) não foram testadas uma a uma.
 
 **Achado em:** 24/09/2026, investigando um "duplicate key" no React da tela de Pedidos. Não é
 bug de tela — é bug de dado, nas views.
