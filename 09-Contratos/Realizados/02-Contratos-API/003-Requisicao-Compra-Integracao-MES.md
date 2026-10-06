@@ -1,11 +1,13 @@
 ---
 tags: [contrato-api, mes, estoque, integracao-av-hub-mes]
-status: proposta
+status: substituida
 criado: 2026-09-22
 atualizado: 2026-09-30
 ---
 
 # Contrato de API 003 — Requisição de compra (MES → av-hub)
+
+> **✅ ATENDIDO PELO CONTRATO 34 (06/10/2026).** O objetivo deste contrato (a requisição do MES chegar ao av-hub) foi entregue pelo [[34-Requisicoes-MES-Empurra-para-o-Hub]], em que o MES **empurra** a requisição (`PUT /compras/requisicoes/origem/{id_origem}`) em vez de o av-hub buscar (DEC-2 revista em 01/10/2026). O job de polling descrito abaixo **não será feito**; o texto fica como histórico. Os contratos da volta, [[004-Referencia-OC-Integracao-MES]] e [[005-Status-Item-Integracao-MES]], continuam abertos.
 
 > **Revisado em 01/10/2026:** o Nathan decidiu que o **MES empurra** a requisição para o av-hub (e não o hub busca no MES, DEC-2). Rota, regras e segurança em [[34-Requisicoes-MES-Empurra-para-o-Hub]]. Onde este contrato fala em "job de polling" do hub, vale o 34.
 
