@@ -29,7 +29,8 @@ contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contr
   variável. 11 chaves da API passam a valer sempre e `BLACKLIST_PEDIDOS_CHAVE_LEGADA` sai (patch em
   `38-anexos/`, depois do patch do contrato 36). Ordem de subida no §4 (perfil Gerência de Compras e
   compradores vinculados ANTES da API). Segurança e paginação por pedido: fixar depois do pré-requisito.
-  Pendente de decisão: bloqueio de comissão dos coordenadores. Pipeline já limpa (PR #2).
+  Bloqueio de comissão dos coordenadores: **não aplica** (06/10), a chave sai (patch 0002; vinha do 07).
+  Pipeline já limpa (PR #2).
 
 ## Novo: variação nas rotas mensais do dashboard (05/10/2026)
 
