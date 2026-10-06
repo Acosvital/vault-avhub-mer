@@ -6,6 +6,16 @@ status: proposta
 
 # Contrato 36 — Compras: produto obrigatório no item e comprador da OC vindo do Omie
 
+> **Entregue pelo DBA (06/10/2026), com uma pendência.** Conferido na `api-test`: migration 036 aplicada
+> (`historico_comprador` no detalhe) e P6 ligado (`origens: av-hub + omie`, também em produção). **Pendência
+> no P1:** a validação de produto foi entregue atrás da chave `COMPRAS_EXIGIR_PRODUTO_CADASTRO` (padrão
+> `false`) e está **desligada** (na `api-test`, OC sem produto e com produto de outra unidade foram aceitas;
+> as OCs de teste OC-000007/8/9 foram canceladas). **Decisão do Nathan: sem variável de ambiente — sempre
+> ligado.** Patch pronto em `36-anexos/0001-produto-sempre-obrigatorio.patch` (tira a chave, a validação vale
+> sempre; testado na API local: sem produto → 400, produto de Uberaba numa OC de Mogi → 400, produto da
+> unidade → 201). O av-hub com a busca de produto (#129) já está na `main`, então pode subir já.
+
+
 **Para:** DBA (Gustavo) e backend (`api-acos-vital`) · **Decisões do Nathan em 05/10/2026.**
 
 ## 1. Por quê
