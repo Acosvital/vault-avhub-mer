@@ -1,0 +1,152 @@
+From 1b6fe6e853a107d97c5e61909ca682d8bbca3bdf Mon Sep 17 00:00:00 2001
+From: oluccaa <101234415+oluccaa@users.noreply.github.com>
+Date: Tue, 6 Oct 2026 15:14:22 -0300
+Subject: [PATCH] =?UTF-8?q?feat(vendedores):=20fila=20de=20v=C3=ADnculo=20?=
+ =?UTF-8?q?=E2=80=94=20sem=5Fvinculo,=20nomes=20do=20v=C3=ADnculo=20e=20da?=
+ =?UTF-8?q?dos=20dos=20candidatos=20(contrato=2039)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- GET /vendedores?sem_vinculo=true: só quem não tem funcionário (fila e
+  número do topo da tela de Vendedores).
+- GET /vendedores devolve nome_funcionario e nome_usuario (subconsultas), para
+  o av-hub não baixar todos os funcionários e usuários só para mostrar o nome.
+- GET /vendedores/{id}/sugestoes: cada candidato traz nome_setor, nome_unidade
+  e desligado; desligados vêm depois dos ativos.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../tables/vendedores/vendedores.route.js     | 35 ++++++++++++++++---
+ .../tables/vendedores/vendedores.swagger.json | 35 +++++++++++++++++++
+ 2 files changed, 65 insertions(+), 5 deletions(-)
+
+diff --git a/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js b/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js
+index 82a2b97..b389c4b 100644
+--- a/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js
++++ b/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js
+@@ -63,6 +63,19 @@ const UNIDADE_ORIGEM_ATRIBUTOS = [
+ ];
+ 
+ 
++// [Contrato 39] Nome do funcionário e do usuário vinculados, para a lista mostrar
++// sem o av-hub baixar todos os funcionários e usuários só para traduzir o uuid.
++const VINCULO_ATRIBUTOS = [
++  [
++    literal(`(SELECT f.nome_completo FROM core.funcionarios f WHERE f.id = ${VENDEDOR_ALIAS}."id_funcionario")`),
++    "nome_funcionario",
++  ],
++  [
++    literal(`(SELECT u.username FROM auth.usuarios u WHERE u.id = ${VENDEDOR_ALIAS}."id_usuario")`),
++    "nome_usuario",
++  ],
++];
++
+ // Desempate da paginação. codigo_vendedor_omie sozinho NÃO é único -- o mesmo
+ // código existe em unidades diferentes (vendedores_pkey é codigo_empresa +
+ // codigo_vendedor_omie) --, então codigo_empresa entra logo depois e a ordem
+@@ -250,13 +263,18 @@ router.get("/", async (req, res) => {
+     }
+     if (ativo    !== undefined) where.ativo    = ativo    === "true";
+     if (comissao !== undefined) where.comissao = comissao === "true";
++    // [Contrato 39] Fila de quem falta vincular: sem funcionário. Junto de
++    // id_funcionario/id_funcionario_in não faz sentido (seria vazio): estes ganham.
++    if (req.query.sem_vinculo === "true" && where.id_funcionario === undefined) {
++      where.id_funcionario = { [Op.is]: null };
++    }
+ 
+     const { page, limit, offset } = parsePagination(req.query);
+     const { count, rows } = await Vendedor.findAndCountAll({
+       where,
+       // Unidade de origem do vendedor (contrato 33): a lotação do funcionário
+       // vinculado e, sem vínculo, o Omie do cadastro. Resolvida no banco.
+-      attributes: { include: UNIDADE_ORIGEM_ATRIBUTOS },
++      attributes: { include: [...UNIDADE_ORIGEM_ATRIBUTOS, ...VINCULO_ATRIBUTOS] },
+       // Desempate por codigo_vendedor_omie + codigo_empresa (ver DESEMPATE):
+       // sem ele, ordenar por coluna
+       // não-única (ativo, comissao, filial) deixa a paginação no servidor
+@@ -349,10 +367,17 @@ router.get("/:id/sugestoes", async (req, res) => {
+           FROM uniao
+          ORDER BY id_funcionario, (origem = 'vendedor_vinculado') DESC, score DESC
+       )
+-      SELECT id_funcionario, nome_funcionario, codigo_empresa_origem,
+-             origem, round(score::numeric, 2) AS score
+-        FROM melhor_por_funcionario
+-       ORDER BY (origem = 'vendedor_vinculado') DESC, score DESC, nome_funcionario
++      -- [Contrato 39] Setor, unidade e desligamento do funcionário, para escolher
++      -- a pessoa certa sem abrir o RH.
++      SELECT m.id_funcionario, m.nome_funcionario, m.codigo_empresa_origem,
++             m.origem, round(m.score::numeric, 2) AS score,
++             s.nome                              AS nome_setor,
++             core.fn_nome_unidade(f.codigo_empresa) AS nome_unidade,
++             (f.data_desligamento IS NOT NULL)   AS desligado
++        FROM melhor_por_funcionario m
++        JOIN core.funcionarios f ON f.id = m.id_funcionario
++        LEFT JOIN core.setores s ON s.id = f.id_setor
++       ORDER BY (m.origem = 'vendedor_vinculado') DESC, (f.data_desligamento IS NOT NULL), m.score DESC, m.nome_funcionario
+        LIMIT $3
+     `;
+ 
+diff --git a/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.swagger.json b/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.swagger.json
+index 93bd236..5681654 100644
+--- a/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.swagger.json
++++ b/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.swagger.json
+@@ -147,6 +147,20 @@
+           "score": {
+             "type": "number",
+             "description": "Similaridade de nome, 0 a 1 (1 = idêntico após unaccent/lower)"
++          },
++          "nome_setor": {
++            "type": "string",
++            "nullable": true,
++            "description": "[Contrato 39] Setor do funcionário no RH."
++          },
++          "nome_unidade": {
++            "type": "string",
++            "nullable": true,
++            "description": "[Contrato 39] Unidade (lotação) do funcionário no RH."
++          },
++          "desligado": {
++            "type": "boolean",
++            "description": "[Contrato 39] true = tem data de desligamento. Desligados vêm depois dos ativos."
+           }
+         }
+       }
+@@ -278,6 +292,17 @@
+           },
+           "description": "Filtra por vendedores com/sem comissão gerencial"
+         },
++        {
++          "in": "query",
++          "name": "sem_vinculo",
++          "schema": {
++            "type": "string",
++            "enum": [
++              "true"
++            ]
++          },
++          "description": "[Contrato 39] `true` = só vendedores sem funcionário vinculado (a fila da tela de Vendedores e o número \"sem funcionário\" do topo). Ignorado se vier `id_funcionario` ou `id_funcionario_in`."
++        },
+         {
+           "in": "query",
+           "name": "id_funcionario_in",
+@@ -385,6 +410,16 @@
+                                 "funcionario",
+                                 "cadastro_omie"
+                               ]
++                            },
++                            "nome_funcionario": {
++                              "type": "string",
++                              "nullable": true,
++                              "description": "[Contrato 39] core.funcionarios.nome_completo do funcionário vinculado."
++                            },
++                            "nome_usuario": {
++                              "type": "string",
++                              "nullable": true,
++                              "description": "[Contrato 39] auth.usuarios.username do usuário vinculado."
+                             }
+                           }
+                         }
+-- 
+2.53.0.windows.1
+
