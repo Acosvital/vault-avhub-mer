@@ -1,0 +1,225 @@
+From 871276066858fddfbb99bf6541d7eccd45d79b2a Mon Sep 17 00:00:00 2001
+From: oluccaa <101234415+oluccaa@users.noreply.github.com>
+Date: Tue, 6 Oct 2026 07:39:41 -0300
+Subject: [PATCH] chore: regras decididas sem chave de ambiente (contrato 38)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Valem sempre: COMPRAS_EXIGIR_VINCULO_COMPRADOR, COMPRAS_EXIGIR_PODE_APROVAR,
+COMPRAS_VINCULO_EXIGIR_PV_EXISTENTE, COMPRAS_ACOMPANHAMENTO_EXIGIR_PERMISSAO,
+NOTAS_MANUAIS_EXIGIR_PERMISSAO, PEDIDOS_MANUAIS_EXIGIR_PERMISSAO (antes
+desligadas) e CADASTROS_OMIE_SOMENTE_LEITURA, VAGAS_TRAVAS_DECISAO,
+VENDAS_PLANILHA_VIEW_LEVE, AUDITORIA_ATIVA (já ligadas). Sai o modo de
+transição BLACKLIST_PEDIDOS_CHAVE_LEGADA (o av-hub manda codigo_empresa).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../tables/vaga/vaga.route.js                 |  2 +-
+ .../blacklist_pedidos.route.js                | 61 +++----------------
+ .../tables/compradores/compradores.route.js   |  2 +-
+ .../ordens_compra/ordens_compra.route.js      |  6 +-
+ .../tables/vendedores/vendedores.route.js     |  2 +-
+ .../vw_vendas_planilha.route.js               |  2 +-
+ src/utils/acessoConfig.js                     | 12 ++--
+ 7 files changed, 23 insertions(+), 64 deletions(-)
+
+diff --git a/src/schemas/core_aprovacao_de_vagas/tables/vaga/vaga.route.js b/src/schemas/core_aprovacao_de_vagas/tables/vaga/vaga.route.js
+index fa91e4d..262d417 100644
+--- a/src/schemas/core_aprovacao_de_vagas/tables/vaga/vaga.route.js
++++ b/src/schemas/core_aprovacao_de_vagas/tables/vaga/vaga.route.js
+@@ -70,7 +70,7 @@ const router = Router();
+ 
+ // Padrão ligado (decisão de 29/09/2026). Só o valor "false" desliga.
+ const TRAVAS_DECISAO =
+-  String(process.env.VAGAS_TRAVAS_DECISAO ?? "true").trim().toLowerCase() !== "false";
++  true; // sempre (contrato 38: sem chave de ambiente)
+ const TELA_VAGAS = process.env.VAGAS_TELA_SLUG || "solicitacoes-de-vagas";
+ 
+ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+diff --git a/src/schemas/core_vendas_faturamento/tables/blacklist_pedidos/blacklist_pedidos.route.js b/src/schemas/core_vendas_faturamento/tables/blacklist_pedidos/blacklist_pedidos.route.js
+index 66ec828..1e5e985 100644
+--- a/src/schemas/core_vendas_faturamento/tables/blacklist_pedidos/blacklist_pedidos.route.js
++++ b/src/schemas/core_vendas_faturamento/tables/blacklist_pedidos/blacklist_pedidos.route.js
+@@ -31,24 +31,8 @@ const MSG_DUPLICADO = {
+   uniqueMsg: "Este numero_pedido já está na blacklist desta unidade (codigo_empresa)",
+ };
+ 
+-/**
+- * Contrato 10 — modo de TRANSIÇÃO para quem ainda não manda codigo_empresa.
+- *
+- * Desligado (padrão): GET/PUT/DELETE /blacklist_pedidos/:numero_pedido sem
+- * codigo_empresa -> 400. É o comportamento da develop desde que a PK composta
+- * entrou no model.
+- *
+- * BLACKLIST_PEDIDOS_CHAVE_LEGADA=true: sem codigo_empresa, a API procura o
+- * número em TODAS as unidades:
+- *   - nenhuma linha  -> 404;
+- *   - uma linha só   -> age nela (não há ambiguidade possível);
+- *   - duas ou mais   -> 409 com a lista de unidades, sem tocar em nada.
+- * Serve só para o av-hub de hoje (que não manda codigo_empresa) continuar
+- * editando/excluindo enquanto o front não é atualizado. Desligar depois.
+- * Toda chamada que cai neste modo é logada, para saber quando dá para desligar.
+- */
+-const CHAVE_LEGADA =
+-  String(process.env.BLACKLIST_PEDIDOS_CHAVE_LEGADA ?? "false").trim().toLowerCase() === "true";
++// [Contrato 38] O modo de transição sem codigo_empresa (BLACKLIST_PEDIDOS_CHAVE_LEGADA)
++// saiu: o av-hub manda codigo_empresa em todo PUT/DELETE. Sem ele -> 400.
+ 
+ /**
+  * O banco (migration 010) não aceita numero_pedido com espaço nas pontas: as
+@@ -121,41 +105,14 @@ const acharPorChave = async (req, res, { aceitarBody = false } = {}) => {
+     return record;
+   }
+ 
+-  if (!CHAVE_LEGADA) {
+-    res.status(400).json({
+-      detail:
+-        "codigo_empresa é obrigatório (query string" +
+-        (aceitarBody ? " ou corpo" : "") +
+-        ") e deve ser um uuid — numero_pedido sozinho não identifica o " +
+-        "registro, a chave é (codigo_empresa, numero_pedido)",
+-    });
+-    return null;
+-  }
+-
+-  // Modo de transição: só age se o número for inequívoco.
+-  const candidatos = await BlacklistPedido.findAll({
+-    where: { numero_pedido },
+-    order: [["codigo_empresa", "ASC"]],
++  res.status(400).json({
++    detail:
++      "codigo_empresa é obrigatório (query string" +
++      (aceitarBody ? " ou corpo" : "") +
++      ") e deve ser um uuid — numero_pedido sozinho não identifica o " +
++      "registro, a chave é (codigo_empresa, numero_pedido)",
+   });
+-  console.warn(
+-    `[blacklist_pedidos] ${req.method} sem codigo_empresa (BLACKLIST_PEDIDOS_CHAVE_LEGADA) ` +
+-      `numero_pedido=${JSON.stringify(numero_pedido)} encontrados=${candidatos.length}`
+-  );
+-
+-  if (candidatos.length === 0) {
+-    res.status(404).json({ detail: "Pedido não encontrado na blacklist" });
+-    return null;
+-  }
+-  if (candidatos.length > 1) {
+-    res.status(409).json({
+-      detail:
+-        `numero_pedido ${numero_pedido} está na blacklist de ${candidatos.length} unidades — ` +
+-        "informe codigo_empresa para dizer qual registro é",
+-      unidades: candidatos.map((c) => c.codigo_empresa),
+-    });
+-    return null;
+-  }
+-  return candidatos[0];
++  return null;
+ };
+ 
+ const pick = (fields) => (body) =>
+diff --git a/src/schemas/core_vendas_faturamento/tables/compradores/compradores.route.js b/src/schemas/core_vendas_faturamento/tables/compradores/compradores.route.js
+index 77d393b..109d332 100644
+--- a/src/schemas/core_vendas_faturamento/tables/compradores/compradores.route.js
++++ b/src/schemas/core_vendas_faturamento/tables/compradores/compradores.route.js
+@@ -16,7 +16,7 @@ const router = Router();
+ // das travas de aprovação da OC -- ligar depois de dar a permissão ao perfil
+ // de administrador na matriz de permissões.
+ const EXIGIR_PERMISSAO =
+-  String(process.env.COMPRAS_EXIGIR_PODE_APROVAR ?? "false") === "true";
++  true; // sempre (contrato 38: sem chave de ambiente)
+ 
+ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+ const { allowed: SORTABLE, nullable: NULLABLE } = sortableFromModel(Comprador);
+diff --git a/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js b/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js
+index b7b1f4f..9f3b48a 100644
+--- a/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js
++++ b/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js
+@@ -33,7 +33,7 @@ const { allowed: SORTABLE, nullable: NULLABLE } = sortableFromModel(OrdemCompra)
+ //
+ // Variável de ambiente para virar a chave sem deploy de código.
+ const BLOQUEAR_SEM_COMPRADOR =
+-  String(process.env.COMPRAS_EXIGIR_VINCULO_COMPRADOR ?? "false") === "true";
++  true; // sempre (contrato 38: sem chave de ambiente)
+ 
+ // [Contrato 22, B9] Aprovar e cancelar OC exige `pode_aprovar` na tela
+ // 'compras' (perfil "Gerência de Compras"); reenviar ao Omie exige
+@@ -42,7 +42,7 @@ const BLOQUEAR_SEM_COMPRADOR =
+ // pode_aprovar) e o av-hub mandando `updated_by` no cancelamento; só então
+ // liga aqui. Ligado antes disso, ninguém consegue aprovar.
+ const EXIGIR_PODE_APROVAR =
+-  String(process.env.COMPRAS_EXIGIR_PODE_APROVAR ?? "false") === "true";
++  true; // sempre (contrato 38: sem chave de ambiente)
+ 
+ // [Contrato 24, V2] PV digitado que não existe no espelho do Omie (numa
+ // unidade COM Omie): desligado (padrão), o vínculo é aceito como NÃO
+@@ -53,7 +53,7 @@ const EXIGIR_PODE_APROVAR =
+ // (SET LOCAL avhub.compras_exigir_pv_existente). PV da HRM (sem Omie) é sempre
+ // aceito não conferido.
+ const EXIGIR_PV_EXISTENTE =
+-  String(process.env.COMPRAS_VINCULO_EXIGIR_PV_EXISTENTE ?? "false") === "true";
++  true; // sempre (contrato 38: sem chave de ambiente)
+ 
+ // [Contrato 36, P1] Todo item da OC precisa ser um produto do cadastro da
+ // unidade da OC (o Omie recusa item sem produto: "Informe a tag [cProduto],
+diff --git a/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js b/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js
+index 3733887..5212243 100644
+--- a/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js
++++ b/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js
+@@ -102,7 +102,7 @@ const pick = (body) =>
+ // funcionar sem o Omie, sem deploy). A pipeline grava direto no banco, não
+ // passa por aqui.
+ const CADASTRO_OMIE_SOMENTE_LEITURA =
+-  String(process.env.CADASTROS_OMIE_SOMENTE_LEITURA ?? "true").trim().toLowerCase() !== "false";
++  true; // sempre (contrato 38: sem chave de ambiente)
+ 
+ // Campos que vêm do Omie: com a chave ligada, o PUT os IGNORA (não dá erro,
+ // para o BFF antigo que manda o formulário inteiro continuar funcionando).
+diff --git a/src/schemas/core_vendas_faturamento/views/vw_vendas_planilha/vw_vendas_planilha.route.js b/src/schemas/core_vendas_faturamento/views/vw_vendas_planilha/vw_vendas_planilha.route.js
+index 44f7f76..976a49c 100644
+--- a/src/schemas/core_vendas_faturamento/views/vw_vendas_planilha/vw_vendas_planilha.route.js
++++ b/src/schemas/core_vendas_faturamento/views/vw_vendas_planilha/vw_vendas_planilha.route.js
+@@ -124,7 +124,7 @@ function agruparLinhasPorPedido(rows, resumoPorChave) {
+ // Sem a migration aplicada, a API detecta que a view não existe e usa a
+ // original (avisa uma vez no log) — nada quebra, só não fica mais rápido.
+ const VIEW_LEVE_LIGADA =
+-  String(process.env.VENDAS_PLANILHA_VIEW_LEVE ?? "true").trim().toLowerCase() !== "false";
++  true; // sempre (contrato 38: sem chave de ambiente)
+ const VIEW_LEVE_RECHECAR_MS = 60_000;
+ let viewLeveExiste = null; // null = ainda não conferiu
+ let viewLeveConferidaEm = 0;
+diff --git a/src/utils/acessoConfig.js b/src/utils/acessoConfig.js
+index 4fd4901..ab28e14 100644
+--- a/src/utils/acessoConfig.js
++++ b/src/utils/acessoConfig.js
+@@ -1,6 +1,9 @@
+ /**
+  * Chaves de liga/desliga do contrato 06 (permissão, escopo e identidade).
+  * Tudo que BLOQUEIA nasce desligado; a auditoria (não bloqueia) nasce ligada.
++ * [Contrato 38] AUDITORIA_ATIVA, NOTAS_MANUAIS_EXIGIR_PERMISSAO,
++ * PEDIDOS_MANUAIS_EXIGIR_PERMISSAO e COMPRAS_ACOMPANHAMENTO_EXIGIR_PERMISSAO
++ * deixaram de ser chave: valem sempre (a descrição abaixo é a da regra).
+  *
+  *   IDENTIDADE_EXIGIR_TOKEN   false  true = chave do .env (BFF) sem
+  *                                    Authorization: Bearer -> 401 nas rotas de negócio
+@@ -56,14 +59,13 @@ export const modoPermissao = () => {
+ 
+ export const escopoVendedoresExigir = () => bool("ESCOPO_VENDEDORES_EXIGIR", false);
+ 
+-export const auditoriaAtiva = () => bool("AUDITORIA_ATIVA", true);
++export const auditoriaAtiva = () => true; // sempre (contrato 38: sem chave de ambiente)
+ 
+-export const notasManuaisExigirPermissao = () => bool("NOTAS_MANUAIS_EXIGIR_PERMISSAO", false);
++export const notasManuaisExigirPermissao = () => true; // sempre (contrato 38: sem chave de ambiente)
+ 
+-export const pedidosManuaisExigirPermissao = () => bool("PEDIDOS_MANUAIS_EXIGIR_PERMISSAO", false);
++export const pedidosManuaisExigirPermissao = () => true; // sempre (contrato 38: sem chave de ambiente)
+ 
+-export const comprasAcompanhamentoExigirPermissao = () =>
+-  bool("COMPRAS_ACOMPANHAMENTO_EXIGIR_PERMISSAO", false);
++export const comprasAcompanhamentoExigirPermissao = () => true; // sempre (contrato 38: sem chave de ambiente)
+ 
+ export const loginLimite = () => {
+   const max = parseInt(process.env.LOGIN_LIMITE_TENTATIVAS || "0", 10);
+-- 
+2.53.0.windows.1
+
