@@ -23,6 +23,13 @@ Para listar tudo no repositório `av-hub`: `grep -rn "GAMBIARRA(" app components
 (hoje são 57 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
 contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contratos-Logica-Fora-Backend/`.
 
+## Novo: fila de vínculo dos vendedores (06/10/2026)
+
+- **[[39-Vendedores-Fila-de-Vinculo]]** — `GET /vendedores?sem_vinculo=true`, `nome_funcionario`/`nome_usuario`
+  na lista e setor/unidade/desligado nos candidatos da sugestão, para a tela nova de Vendedores (lista e
+  vínculo lado a lado, como Compradores). Patch em `39-anexos/`, testado na API local. A tela nova só sobe
+  depois da API.
+
 ## Novo: regras sem chave de ambiente (06/10/2026)
 
 - **[[38-Regras-Sem-Chave-de-Ambiente]]** — decisão do Nathan: regra decidida é fixa no código, sem
