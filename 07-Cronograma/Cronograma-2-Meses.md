@@ -114,7 +114,7 @@ Em uma frase: entra do catálogo saneado até o recebimento com qualidade, saldo
 
 - Carteira do PCP: importar os itens do pedido de venda (C4) — **já em `develop` desde 23/09** — e, desde 24/09/2026, escolher a **fábrica** de cada item por rodada, com a Revenda como fábrica, tipos em Fábrica/Setor e o setor Estoque como etapa 1 de todo roteiro (C6)
 - ~~Ações a partir da classificação: reservar, abrir OS/OP, gerar requisição (C8)~~ — reservar virou ação do setor Estoque (C6), abrir OP é a própria tela Ordem de Produção e gerar requisição virou a entrada no setor Compras (C7); a C8 fica só com a fila "Novo norte"
-- Vínculo Fábrica ↔ Unidade/Filial (codigo_empresa) (C2)
+- ~~Vínculo Fábrica ↔ Unidade/Filial (codigo_empresa) (C2)~~ — **removida em 06/10/2026** (Robert propôs, Nathan aprovou): a filial vem do pedido (DEC-1); o vínculo com a filial passa para o depósito (decisão 1 de [[Proposta-Transferencia-Estoque-Filiais]]). Os 1,5 pd vão para a etapa 1 da transferência (saldo por filial)
 
 **Não entra**
 
@@ -271,7 +271,6 @@ gantt
     B10 (stretch) Passo 4 - frete e parcelas :active, b10, 2026-11-11, 2026-11-14
     section MES - acesso e PCP
     C1 Login duplo no MES :c1, 2026-09-22, 2026-10-01
-    C2 Vínculo Fábrica ↔ Filial :c2, 2026-10-01, 2026-10-06
     C3 Desenho do RBAC por setor :c3, 2026-09-22, 2026-10-01
     C4 Carteira PCP - importar itens :c4, 2026-09-29, 2026-10-06
     C5 RBAC por setor (guard global) :c5, 2026-10-05, 2026-10-15
@@ -336,7 +335,7 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 | B1 | Fechar as perguntas abertas dos contratos (SQL 001/002/004/005, API 001/002) | Gustavo | 1 | 22/09–28/09 | DEC-7 | Contratos sem pergunta aberta, prontos para aplicar |
 | B2 | Ambiente de homologação do MES/Estoque + backup/WAL do banco do MES | Gustavo | 1,5 | 22/09–28/09 | - | Banco de homologação no ar; backup do banco do MES confirmado |
 | C1 | ✅ **Concluída em 22/09/2026** (informado pelo Robert em 30/09) — Login duplo no MES (usuário/senha + e-mail/Azure AD) | Robert | 3 | 22/09–30/09 | - | Chão de fábrica entra por usuário/senha; escritório por e-mail corporativo |
-| C3 | ⚠️ **Atrasada** (Robert começa em 30/09/2026) — Desenho do RBAC por instância de setor + revisão do schema do Estoque | Robert | 1,5 | 22/09–30/09 | - | Modelo de permissão por setor aprovado; schema D1 revisado |
+| C3 | ⚠️ **Atrasada** (Robert começa em 30/09/2026) — Desenho do RBAC por instância de setor + revisão do schema do Estoque. **Com a C2 removida (06/10), fica aqui o requisito da DEC-1: permissão por setor E por filial** (`PerfilSetor` com dimensão de filial) | Robert | 1,5 | 22/09–30/09 | - | Modelo de permissão por setor e filial aprovado; schema D1 revisado |
 | D1 | Schema Prisma estoque v1 + migrations (material, alias, depósito, localização, lote, movimento) | Pablo | 4 | 22/09–30/09 | DEC-4, DEC-7 | Migrations aplicadas em homologação |
 | F1 | Spec do contrato de integração v1: requisição, referência da OC e status por item + autenticação entre serviços | Nathan | 1,5 | 22/09–30/09 | DEC-2 | Spec aprovada por Robert e Gustavo; polling, idempotência e dono de cada coluna definidos |
 | A3 | Pauta do módulo financeiro (Passo 15) + critérios de aceite por fase | Nathan | 0,6 | 29/09–05/10 | - | Critérios de aceite de Fase 0/A/B/C no vault; pauta financeira enviada a quem decide o roadmap |
@@ -344,7 +343,7 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 | B4 | ✅ **Já aplicado (confirmado 21/09)** — ~~API~~ `alterado_desde` em /produtos e /parceiros (contrato API 001) | Gustavo | ~~1,5~~ 0 | — | B1 | Filtro incremental já está no ar em `api-acos-vital` (`src/routes/produtos.js:185-234`, `parceiros.js`) — nada a fazer. Ver [[Auditoria-Dump-Producao-2026-09-21]]. |
 | C4 | ✅ **Concluída** (confirmado pelo Robert em 30/09/2026; inclui o L4 do [[26-Vendas-Liberacao-Pedido]]) — PCP Carteira (backend): importar itens do pedido pelo gateway | Robert | 1,5 | 29/09–05/10 | - | Itens do pedido de venda disponíveis no MES por número do pedido |
 | D2 | Módulo base do Estoque: guards, seeds e harness de testes e2e | Pablo | 2 | 29/09–05/10 | D1 | Módulo sobe no MES com testes e2e rodando |
-| C2 | Vínculo Fábrica ↔ Unidade/Filial (codigo_empresa) | Robert | 1,5 | 01/10–05/10 | DEC-1 | Toda fábrica com filial; pedido cruzável por unidade |
+| ~~C2~~ | ~~Vínculo Fábrica ↔ Unidade/Filial (codigo_empresa)~~ **Removida em 06/10/2026** — o critério ("pedido cruzável por unidade") já é atendido: o pedido guarda a filial (`idUnidade`, do av-hub) e tudo lê dela; o material já é separado por filial. O vínculo com a filial passa para o depósito. Os 1,5 pd cobrem a etapa 1 da transferência | Robert | ~~1,5~~ | — | DEC-1 | — |
 | D3 | ~~Projeção read-only de material e parceiro (full sync; incremental após B4)~~ **REVISADA em 25/09/2026**: não é mais projeção/full sync de `core.produtos` (duplicaria ~88 mil produtos sem necessidade). `Material` nasce/atualiza no PCP só na **primeira entrada de estoque**, buscando o produto direto no av-hub por código/descrição. `core.parceiros` (fornecedor) segue como projeção, sem mudança. | Pablo | 1,5 | 01/10–05/10 | B4 | Tela Saldo busca produto no av-hub e cria/atualiza o Material daquele produto; core.parceiros projetado no Estoque |
 
 ### S2 — Fase 0 (sistema) + núcleo do Estoque (05/10 a 16/10)
@@ -441,7 +440,7 @@ Cada uma tem um *default* escrito: se ninguém decidir até a data, o default va
 
 | # | Decisão | Quem | Até | Default se não decidir | Bloqueia |
 |---|---|---|---|---|---|
-| DEC-1 | Vínculo Fábrica ↔ Filial (codigo_empresa): 1 fábrica = 1 filial fixa, ou vínculo por pedido? | Nathan + Robert | 25/09 | 1 fábrica = 1 filial fixa | C2 |
+| DEC-1 | Vínculo Fábrica ↔ Filial (codigo_empresa): 1 fábrica = 1 filial fixa, ou vínculo por pedido? | Nathan + Robert | 25/09 | ✅ **Decidido 21/09: por pedido** — a filial vem do pedido, nunca da fábrica (o default "1 fábrica = 1 filial fixa" não vale). Reafirmado em 06/10 com a remoção da C2 | ~~C2~~ C3 |
 | DEC-2 | Integração av-hub ↔ MES v1: polling REST bidirecional (1-5 min) com autenticação entre serviços por x-api-key; 3 fluxos (requisição, referência da OC, status por item) | Nathan + Robert + Gustavo | 29/09 | Polling REST, sem webhook nem tempo real | F1, F2, F3, E1 |
 | DEC-3 | ~~Aprovação condicional de compra: acima de qual valor X e quem aprova?~~ ✅ **DECIDIDA em 21/09** — acima de R$ 30.000, o diretor aprova | Nathan + Diretoria | 25/09 | ~~Valor limite vira parâmetro, desligado no v1~~ (não se aplica) | E2 (destravada) |
 | DEC-4 | ~~Lote de carga inicial nasce liberado ou passa pela inspeção de qualidade?~~ ✅ **DECIDIDA em 22/09** — nasce liberado, com dupla conferência | Nathan + Qualidade | 25/09 | ~~Nasce liberado, com dupla conferência~~ (confirmado) | D1, G1, G3 (destravadas) |
