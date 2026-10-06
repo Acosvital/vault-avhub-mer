@@ -1,10 +1,18 @@
 ---
 tags: [contrato-api, configuracao, seguranca, compras]
 criado: 2026-10-06
-status: proposta
+status: aplicada
 ---
 
 # Contrato 38 — Regras decididas sem chave de ambiente
+
+> ✅ **Concluído no código (06/10/2026).** O DBA aplicou os patches `38-anexos/0001` e `0002` na `develop`
+> da API (commit `c8f2f5e`): nenhuma das 11 chaves é mais lida do ambiente, `BLACKLIST_PEDIDOS_CHAVE_LEGADA`
+> saiu e a comissão dos coordenadores roda sempre **sem** bloqueio por NF. Continuam com chave, de propósito,
+> as do §3 (segurança e `VENDAS_PLANILHA_PAGINAR_POR_PEDIDO`), até o pré-requisito de cada uma.
+> **Ordem de subida (§4) ainda vale:** em 06/10 nenhum dos 74 compradores de produção estava ligado a um
+> funcionário — sem isso ninguém emite OC (a tela de Compradores em Cadastros › Acessos foi liberada para o
+> Admin (Dev) em produção no mesmo dia). As regras de Compras não foram testadas em produção (só leitura).
 
 **Para:** backend (`api-acos-vital`) e quem faz o deploy · **Decisão do Nathan (06/10/2026):** "Não
 quero variáveis de ambiente, por padrão deve ser true".

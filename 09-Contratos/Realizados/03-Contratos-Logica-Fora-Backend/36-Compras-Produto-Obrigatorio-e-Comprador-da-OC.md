@@ -1,12 +1,18 @@
 ---
 tags: [contrato-sql, contrato-api, compras, omie]
 criado: 2026-10-05
-status: proposta
+status: aplicada
 ---
 
 # Contrato 36 — Compras: produto obrigatório no item e comprador da OC vindo do Omie
 
-> **Entregue pelo DBA (06/10/2026), com uma pendência.** Conferido na `api-test`: migration 036 aplicada
+> ✅ **Concluído (06/10/2026, tarde).** O DBA aplicou o patch `36-anexos/0001` na `develop` da API (commit
+> `c8f2f5e`): a chave `COMPRAS_EXIGIR_PRODUTO_CADASTRO` saiu e o produto do cadastro vale sempre. Em
+> **produção** o P6 responde `origens: av-hub + omie`; o P1 e o histórico do comprador só aparecem
+> emitindo OC (não testado em produção, que é só leitura). Na `api-test` a emissão de OC ainda dá **500**
+> em qualquer caso (inclusive com produto válido) — problema do ambiente, à parte deste contrato.
+>
+> **Antes (manhã de 06/10): entregue pelo DBA, com uma pendência.** Conferido na `api-test`: migration 036 aplicada
 > (`historico_comprador` no detalhe) e P6 ligado (`origens: av-hub + omie`, também em produção). **Pendência
 > no P1:** a validação de produto foi entregue atrás da chave `COMPRAS_EXIGIR_PRODUTO_CADASTRO` (padrão
 > `false`) e está **desligada** (na `api-test`, OC sem produto e com produto de outra unidade foram aceitas;

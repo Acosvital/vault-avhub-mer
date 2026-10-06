@@ -30,14 +30,14 @@ contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contr
   `38-anexos/`, depois do patch do contrato 36). Ordem de subida no §4 (perfil Gerência de Compras e
   compradores vinculados ANTES da API). Segurança e paginação por pedido: fixar depois do pré-requisito.
   Bloqueio de comissão dos coordenadores: **não aplica** (06/10), a chave sai (patch 0002; vinha do 07).
-  Pipeline já limpa (PR #2).
+  Pipeline já limpa (PR #2). **✅ Aplicado pelo DBA em 06/10 (`c8f2f5e`) → movido para `Realizados/`.**
 
 ## Novo: variação nas rotas mensais do dashboard (05/10/2026)
 
 - **[[37-Dashboard-Mensal-Variacao]]** — `variacao_pct` e `variacao_quantidade_pct` em
   `/dashboard_mensal_{vendas,faturamento}` (consolidado e por unidade), para o Dashboard da Equipe parar de
   calcular a variação no BFF (participação por empresa, av-hub#131). Registra também a diferença de 1 pedido
-  entre a classificação (855) e o total (854) em set/2026.
+  entre a classificação (855) e o total (854) em set/2026. **✅ Em produção em 06/10 → movido para `Realizados/`.**
 
 ## Novo: produto obrigatório e comprador da OC (05/10/2026)
 
@@ -45,6 +45,7 @@ contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contr
   (teste real de 05/10): o item da OC passa a ter produto do cadastro da unidade (P1). O comprador da OC
   não se troca no av-hub; se trocarem no Omie, o espelho atualiza a OC e grava o histórico (P2–P5).
   Histórico unificado sempre ligado (P6). Front pronto na branch `feat/compras-produto-comprador-oc`.
+  **✅ P1 sem chave aplicado pelo DBA em 06/10 (`c8f2f5e`) → movido para `Realizados/`.**
 
 ## Pipeline atualizada (05/10/2026)
 

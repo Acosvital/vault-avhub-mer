@@ -1,10 +1,15 @@
 ---
 tags: [contrato-api, dashboards, vendas]
 criado: 2026-10-05
-status: proposta
+status: aplicada
 ---
 
 # Contrato 37 — `variacao_pct` nas rotas `/dashboard_mensal_*`
+
+> ✅ **Concluído (06/10/2026).** API na `develop` (`47a5aad`), na `api-test` e em **produção**: em set/2026
+> o consolidado de vendas dá 55,3 (igual ao `vendas.variacao_pct` da `/dashboard/equipe`), por unidade
+> 41,1 / 63,2 / 280,9; faturamento 12,5. av-hub: a marca `GAMBIARRA(` saiu e o BFF lê o campo
+> (av-hub#141 e #142, na `develop`; falta levar à `main`, agora que a produção tem o campo).
 
 **Para:** backend (`api-acos-vital`) · **Pequeno e aditivo.**
 

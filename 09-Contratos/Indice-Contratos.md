@@ -1,12 +1,22 @@
 ---
 tags: [contrato-sql, contrato-api, indice]
 criado: 2026-09-17
-atualizado: 2026-10-01
+atualizado: 2026-10-06
 ---
 
 # Contratos — ERP Aços Vital
 
 Seção dedicada só a **contratos** — documentos formais de mudança que precisam de aprovação/execução de outra pessoa antes do código poder avançar: contratos de **banco de dados** (para o DBA, Gustavo) e contratos de **API** (para o dev que for implementar). Cada contrato é auto-contido: alguém pode abrir só aquele arquivo, entender o "por quê", o "o quê" exato (schema ou request/response) e o que falta decidir, sem precisar ler o resto do projeto.
+
+## Conferência de 06/10/2026 (DBA: "implementei o 36, 37 e 38")
+
+Regra do Nathan: vale o que funciona em **produção**.
+
+| Contrato | Resultado | Onde ficou |
+|---|---|---|
+| [[36-Compras-Produto-Obrigatorio-e-Comprador-da-OC]] | ✅ P1 sem chave na `develop` (`c8f2f5e`); P6 em produção (`av-hub + omie`). P1 e histórico do comprador só aparecem emitindo OC (produção é só leitura). Na `api-test` a emissão de OC dá 500 em qualquer caso — problema à parte | `Realizados/` |
+| [[37-Dashboard-Mensal-Variacao]] | ✅ em produção: `variacao_pct` no consolidado (55,3 = `/dashboard/equipe`) e por unidade | `Realizados/` (av-hub#141 pode ir à `main`) |
+| [[38-Regras-Sem-Chave-de-Ambiente]] | ✅ na `develop` (`c8f2f5e`): as 11 chaves saíram, comissão dos coordenadores sem bloqueio. Ficam as do §3 (segurança, paginação). Falta vincular os compradores (0 de 74 em produção) | `Realizados/` |
 
 ## Conferência de 01–02/10/2026 (DBA: "concluí 26, 28, 29, 30, 31, 32, 33 e 34"; em 02/10: "28, 29 e 35")
 
