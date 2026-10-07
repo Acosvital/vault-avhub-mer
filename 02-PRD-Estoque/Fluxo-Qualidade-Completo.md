@@ -1,13 +1,18 @@
 ---
 tags: [erp-acos-vital, prd-estoque, qualidade, fluxo-detalhado]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # Fluxo de Qualidade — conversa por conversa
 
+> Status: decidido | no código (develop) | em produção (mes-test; produção real não)
+
+> **Atualização de 07/10/2026 — a inspeção de entrada já tem código real em `develop`** (conferido no código; **só em `develop`, `main` do MES parada em 28/08; produção não conferida**). D8: backend `898aa54` (24/09, PR #45) e front real `815fef3` (28/09) — `src/qualidade`, `/qualidade/lotes`, permissão `inspecao-entrada`, setor "Qualidade · Entrada" (`qualidade-entrada`, tipo `QUALIDADE`). A inspeção de entrada é **por lote** (EC-01). **Aprovar exige `laudoUrl`** e leva a parcial de volta ao Estoque; **reprovar abre RNC total ou parcial**, com **cisão** e quarentena (EC-07): a parte reprovada volta a Compras, a aprovada fica em `QUARENTENA`, e na reprovação parcial as partes se unem depois (`devolverAoEstoqueParciaisProntas`). Vem da conferência do Recebimento: o lote nasce `PENDENTE` e a parcial chega com `idLoteCompra` ([[Fluxo-Recebimento-Completo]], [[App-PCP-Recebimento-Conferencia]]). **Não conferido:** a **inspeção de saída** (setor `QUALIDADE` no roteiro, EC-06) e a inspeção de processo (9.5); o setor `inspecao_qualidade` (tipo `QUALIDADE`) vem da UI/banco, não conferido.
+>
 > Detalha a inspeção de qualidade, a partir de qualquer um dos pontos de entrada possíveis (Recebimento, conclusão de OS/OP, ou item já pronto em estoque), até a aprovação/reprovação e seus desdobramentos.
 >
-> **Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje** — é escopo obrigatório do sistema a construir, não documentação de processo existente. *(Em 23/09 a fila de inspeção com aprovar/reprovar, laudo, RNC e cisão entrou no `app-pcp` `develop`, sobre mock — tarefa D8.)*
+> ~~**Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje**~~ — **superado em 07/10/2026 para a inspeção de entrada**, ver bloco acima. *(Em 23/09 a fila de inspeção com aprovar/reprovar, laudo, RNC e cisão entrou no `app-pcp` `develop` sobre mock — tarefa D8; o front real veio em 28/09.)*
 >
 > **Regra de 24/09/2026 (Nathan):** item **comprado** aprovado **vai para o setor Estoque, não para a Expedição** — ver Q6 abaixo e [[Encaixe-Estoque-Revenda-no-PCP]] seção 3.4.
 
@@ -28,37 +33,25 @@ criado: 2026-09-16
 1. **Inspeção de processo** — itens marcados pelo vendedor pra acompanhamento desde o início (documentação, validação de entrada). Entrada nasce na emissão do pedido, não depende de Recebimento/Fábrica.
 2. **Inspeção final** — itens acabados liberados por [[Fluxo-Recebimento-Completo]] (R10a) ou por conclusão de OS/OP (ver [[Fluxo-Producao-OS-OP-Completo]]). ~~Ou item que já estava pronto em estoque.~~ Desde 24/09/2026 o item atendido pelo saldo não volta à Qualidade: o saldo disponível só conta lote já liberado por ela.
 
-## Diagrama
+## Diagrama — arquitetura de 29/09/2026
+
+> Redesenhado em 07/10/2026 conforme a arquitetura de 29/09 e o código de `develop` (inspeção de entrada por lote). Fonte: [[Registro-de-Decisoes-2026-10-07]].
 
 ```mermaid
-sequenceDiagram
-    participant Vend as Vendedor (av-hub)
-    participant Receb as Recebimento/Fábrica
-    participant Qual as Qualidade
-    participant PCP
-    participant Omie
-    participant Est as Setor Estoque
-    participant Exp as Expedição
-
-    Vend->>Qual: Q1 · marca acompanhamento desde o início (na emissão do pedido)
-    Receb->>Qual: Q2 · libera item pra inspeção final
-    Qual->>Qual: Q3 · executa a inspeção (documental ou física)
-    Qual->>Qual: Q4 · exige laudo_url preenchido antes de decidir
-    alt aprovado
-        Qual->>Qual: Q5 · status_qualidade sai de PENDENTE
-        alt item comprado (fábrica Revenda)
-            Qual->>Est: Q6a · volta ao setor Estoque: entrada + reserva + conclusão
-        else item fabricado
-            Qual->>Exp: Q6b · segue pra expedição
-        end
-    else reprovado
-        Qual->>Qual: Q7 · anexa motivo + evidência (foto)
-        Qual->>Qual: Q8 · cisão de lote (lote_pai_id)
-        Qual->>PCP: Q9 · "reprovado, decide novo norte"
-        Qual->>Omie: Q10 · sinaliza RNC (nota_devolucao_pendente=true)
-        Omie-->>Qual: Q11 · nota de devolução (fecha a RNC)
-    end
+graph TD
+    REC["Setor LOGISTICA_ENTRADA, Recebimento: conferência contra a NF; lote nasce em quarentena"] --> QUA["Setor QUALIDADE, Qualidade Entrada: inspeção por lote; aprovar exige laudo"]
+    QUA -->|"aprovado"| LIB["Lote sai da quarentena, status liberado"]
+    LIB --> EST["Setor ESTOQUE: entrada do lote e reserva para a parcial"]
+    EST --> EXP["Expedição: baixa no despacho, ainda sem código"]
+    QUA -->|"reprovado"| RNC["RNC com evidência e motivo; cisão de lote, total ou parcial"]
+    RNC --> COM["Parte reprovada volta a Compras; devolução ao fornecedor sinalizada ao Omie"]
+    RNC -->|"parte aprovada"| QUAR["Fica em QUARENTENA até a união das partes"]
+    QUAR --> EST
+    COM --> REC
 ```
+
+> [!note]- Histórico 24/09: desenho original (superado)
+> O diagrama de 24/09 (Q1 a Q11) mostrava duas entradas na fila (inspeção de processo marcada pelo vendedor e inspeção final), aprovado de item comprado voltando ao Estoque e de item fabricado indo à Expedição, e reprovado voltando ao PCP ("novo norte") com sinalização de RNC ao Omie. Na prática de 29/09 a reprovação devolve a parte reprovada a Compras, e o item fabricado também passa pelo Estoque. As conversas Q1 a Q11 abaixo seguem descrevendo o desenho antigo.
 
 ## Conversa por conversa
 
@@ -105,6 +98,7 @@ Campo pra anexar foto da avaria, além do motivo em texto (ver [[Fluxo-Detalhado
 - **A exigência de `laudo_url` (Q4) é uma trava dura antes da decisão**, não uma preferência — vale confirmar se isso vale igual pra inspeção de processo (documental) ou só pra inspeção final (física).
 
 ## Ver também
+- [[App-PCP-Recebimento-Conferencia]] — a conferência que entrega o lote à Qualidade, como está no código (07/10/2026).
 - [[Encaixe-Estoque-Revenda-no-PCP]]
 - [[Fluxo-Recebimento-Completo]]
 - [[Fluxo-Producao-OS-OP-Completo]]

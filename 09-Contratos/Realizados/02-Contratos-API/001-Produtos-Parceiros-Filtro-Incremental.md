@@ -2,10 +2,12 @@
 tags: [contrato-api, dev, api-acos-vital]
 status: aplicada
 criado: 2026-09-17
-atualizado: 2026-09-22
+atualizado: 2026-10-07
 ---
 
 # Contrato de API 001 — filtro incremental `alterado_desde` em `GET /produtos` e `GET /parceiros`
+
+> **Atualização de 07/10/2026 — conferido no código (`main` = `develop` da `api-acos-vital`):** os caminhos `src/routes/*.js` citados abaixo **não existem mais**; desde o PR #276 o código mora em `src/schemas/<schema>/…`. O `apiKeyAuth.js` hoje tem 3 tipos de chave (`API_KEYS` do ambiente = admin; `auth.chaves_servico` no banco com nível leitura/escrita/admin; `MES_INTEGRACAO_KEYS`, só para o PUT do 34), então a "Pergunta 3" abaixo (chave por consumidor) já tem mecanismo no banco, sem restrição por rota. A **pipeline não usa `alterado_desde`**: produtos e parceiros usam `filtrar_por_data_de/ate` com janela fixa (este contrato é de API, consumido pelo Estoque/MES). Ver [[Chaves-de-Integracao-AvHub-MES-Pipeline]].
 
 **Status: aplicada.** Confirmado em `src/routes/produtos.js:185-234`/`parceiros.js` contra o código real (21/09/2026) — ver [[Auditoria-Dump-Producao-2026-09-21]]. `GET /produtos` e `GET /parceiros` já implementam `?alterado_desde=` exatamente com o comportamento documentado abaixo. As 3 perguntas em aberto já foram todas resolvidas — ver [[Perguntas-em-Aberto-Consolidadas]] (G-13, G-14, G-15):
 - **Pergunta 1 (exclusão não aparece no filtro):** resolvida em 21/09/2026 — Gustavo implementou `?incluir_deletados=true` em ambas as rotas; os excluídos voltam no mesmo payload incremental, com `deleted_at` preenchido.

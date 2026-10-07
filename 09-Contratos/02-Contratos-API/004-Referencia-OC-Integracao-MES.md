@@ -2,10 +2,14 @@
 tags: [contrato-api, mes, estoque, integracao-av-hub-mes]
 status: proposta
 criado: 2026-09-22
-atualizado: 2026-09-30
+atualizado: 2026-10-07
 ---
 
 # Contrato de API 004 — Referência da Ordem de Compra (av-hub → MES)
+
+> Status: decidido | no código | em produção (verificado em 07/10/2026): **🔴 com o Gustavo, não implementado** (`GET /ordens-compra/referencia` não existe em nenhum dos lados). O registro manual `PATCH /compras/requisicoes/:id/compra` **segue valendo**. Fonte: [[Registro-de-Decisoes-2026-10-07]] (#41).
+
+> **Atualização de 07/10/2026 — conferido no código (`main` = `develop` da `api-acos-vital`, `a6ab058`/`fdafb35`; `develop` do `api-pcp`):** a rota `GET /ordens-compra/referencia` **continua inexistente na API** (nem rota, nem "referencia" no código) e **no MES não há nada** que a consuma: o registro da compra segue manual (`PATCH /compras/requisicoes/:id/compra`, nº do pedido, fornecedor, previsão) e não existe job de poll de OC. Os pré-requisitos de **dados** existem: `ordens_compra_itens_vinculos`, `requisicoes_compra.id_origem` e `status`. O ajuste do Robert (`id_origem` em cada item) **segue pendente**, assim como a aprovação do Gustavo. Status: `proposta`. Atenção: a chave própria do MES que existe hoje (`MES_INTEGRACAO_KEYS`, do [[34-Requisicoes-MES-Empurra-para-o-Hub]]) **só abre o PUT** `/compras/requisicoes/origem/{id}` — não serve para esta rota (ver Autenticação). Nada disto vem de produção. Ver [[Indice-Contratos]] (Conferência de 07/10/2026) e [[Chaves-de-Integracao-AvHub-MES-Pipeline]].
 
 > **01/10/2026:** a requisição (ida, contrato 003) passou a ser empurrada pelo MES, ver [[34-Requisicoes-MES-Empurra-para-o-Hub]]. Este contrato (volta) continua como está e ainda não foi implementado.
 
@@ -142,6 +146,8 @@ Item que some da resposta de uma OC que voltou = item removido. O cursor `altera
 leitura dá 403) e restrita às rotas que o MES usa (`/pedidos_liberados/*`, `/ordens-compra/referencia`,
 `/unidades`, `/produtos`). A restrição por rota ainda não existe na API. No `api-pcp` a chave é a variável
 `API_KEY`; quando a chave nova existir, é só trocar o valor.
+
+> **(atualizado em 07/10, conferido no código)** O parágrafo acima descreve a intenção, não o que existe: o `apiKeyAuth.js` tem 3 tipos de chave — `API_KEYS` do ambiente (admin), `auth.chaves_servico` no banco (leitura/escrita/admin, cache de 30 s, **sem restrição por rota**) e `MES_INTEGRACAO_KEYS` (**só o PUT do 34**). A "chave do MES de escrita restrita às rotas que o MES usa" **não existe**: a `MES_INTEGRACAO_KEYS` dá 403 `CHAVE_MES_ROTA_NAO_PERMITIDA` em `/pedidos_liberados`, `/unidades`, `/produtos` e `/compras/requisicoes/eventos` (até em GET), então o MES lê essas rotas com chave admin ou do banco. É o L6 do [[26-Vendas-Liberacao-Pedido]], ainda aberto.
 
 ## Polling
 

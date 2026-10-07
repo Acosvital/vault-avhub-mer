@@ -1,9 +1,14 @@
 ---
 tags: [erp-acos-vital, av-hub, comissao]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # av-hub — Simulador de Comissão (protótipo)
+
+> Status: decidido | no código | em produção (verificado em 07/10/2026 pelo dump, onde indicado). Decisões da rodada em [[Registro-de-Decisoes-2026-10-07]].
+
+> **Atualização de 07/10/2026:** o front de `develop` ganhou **8 telas em `comissoes/*`** (conferido no código; função de cada uma não levantada) e o grupo Experimental ganhou também `financeiro` e um dashboard com flange 3D. **Não foi reconferido** nesta auditoria se o Simulador continua 100% local e sem gravar em banco — o texto abaixo vale como estava em 22/09. Ver [[AV-Hub-Modulos]] e [[AV-Hub-Comissao-Modulo]].
 
 **Onde vive:** menu lateral → Operações → Experimental → Simulador de Comissão.
 **Status:** protótipo local, 100% frontend, sem gravar em banco — serve para validar a lógica de negócio antes de virar contrato para o backend.
@@ -30,7 +35,7 @@ Corrige 4 bugs herdados da planilha original (comissão = valor × letra; célul
 
 ## ✅ Esclarecido (22/09/2026)
 
-O projeto Python paralelo (integração OMIE + Excel + dashboard Next.js) **é só um teste do Robert** — confirmado pelo Nathan. Não é uma segunda iniciativa concorrente que precise ser reconciliada com este protótipo nem com o `core_comissionamento` do backend; fica fora do escopo do ERP unificado. Sem impacto no roadmap do Simulador de Comissão nem no schema já existente.
+O projeto Python paralelo (integração OMIE + Excel + dashboard Next.js) **é só um teste do Robert** — confirmado pelo Nathan. Não é uma segunda iniciativa concorrente que precise ser reconciliada com este protótipo nem com o `core_comissionamento` do backend; fica fora do escopo do ERP unificado. **Local do projeto Python não documentado:** 🔴 Nathan, só se importar (não bloqueia nada). Sem impacto no roadmap do Simulador de Comissão nem no schema já existente.
 
 ## Ver também
 - [[AV-Hub-Modulos]]

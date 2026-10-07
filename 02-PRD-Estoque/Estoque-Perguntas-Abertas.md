@@ -1,22 +1,28 @@
 ---
 tags: [erp-acos-vital, prd-estoque, pendencias]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # PRD Estoque — Perguntas a Validar com o Negócio
 
-Pontos que mudam decisão de arquitetura e **não devem ser assumidos**:
+> Status: decidido | no código (develop) | em produção (mes-test; produção real não)
 
-1. Qual a tolerância aceitável entre peso teórico e peso real, por categoria de material? (5% é default provisório)
-2. Qual o prazo de retenção de auditoria exigido pela contabilidade/fiscal? Nunca foi discutido com o time de contabilidade/fiscal ainda — palpite provisório do usuário é 5 anos (padrão comum de retenção fiscal no Brasil), mas **não confirmado**, precisa validar antes de assumir como requisito.
-3. Pedidos acima de certo valor precisam de segunda aprovação (ex.: diretoria)? Em aguardo — usuário precisa conversar mais com a equipe da empresa antes de decidir.
-4. Lote de carga inicial nasce liberado, ou passa pela mesma inspeção de qualidade que um lote normal?
-5. A balança já usada tem saída digital/integração (rede, serial, arquivo exportável), ou a pesagem é lida manualmente e digitada? Em aguardo — usuário não sabe, precisa verificar com a operação.
+> **Atualização de 07/10/2026 (reescrita):** as cinco perguntas abaixo foram **todas respondidas ou fechadas**. A pergunta 1 foi decidida pelo Nathan em 07/10 e a 4 já estava decidida (DEC-4); as perguntas 2, 3 e 5 já tinham resposta em [[Decisoes-Chave-ERP]] (DEC-9, DEC-3, DEC-5) desde 21/09 e só duplicavam aqui. O texto anterior do banner ("nenhuma pergunta foi respondida") estava **errado** e foi substituído. Fonte das decisões desta rodada: [[Registro-de-Decisoes-2026-10-07]].
+
+Pontos que mudavam decisão de arquitetura e **não deviam ser assumidos** (todos resolvidos):
+
+1. ✅ **Tolerância entre peso teórico e peso real: decidido em 07/10/2026 — 5% para todas as categorias de material** (pode virar por categoria no futuro). Registro: [[Registro-de-Decisoes-2026-10-07]] (item 26). *(No código, `RecebimentoItem.toleranciaPeso` tem padrão 5% e o desvio acima dele vira divergência `PESO`; o peso real é obrigatório quando o material tem `pesoTeoricoUnitario`. Conferido em `develop`, `861c050`.)* ~~"5% é default provisório"~~ — superado.
+2. ✅ Prazo de retenção de auditoria: ver **DEC-9** em [[Decisoes-Chave-ERP]] (5 anos, sem expurgo automático) e item 53 do [[Registro-de-Decisoes-2026-10-07]].
+3. ✅ Aprovação de pedidos acima de certo valor: ver **DEC-3** em [[Decisoes-Chave-ERP]] (acima de R$ 30.000 o diretor aprova). Quem é o diretor aprovador segue 🔴 Nathan (item 50 do [[Registro-de-Decisoes-2026-10-07]]).
+4. ✅ **Fechada.** Lote de carga inicial **nasce liberado** (DEC-4), com **dupla conferência (contador + conferente)** e **terceira contagem** em caso de divergência — [[Registro-de-Decisoes-2026-10-07]] (item 25).
+5. ✅ Balança: ver **DEC-5** em [[Decisoes-Chave-ERP]] (digitação manual).
 
 ## Perguntas já respondidas
 
 Pesagem já existe hoje (não é investimento novo); há múltiplos depósitos; não há consignação; matéria-prima pode ser importada; fornecedor não tem duplicidade no Omie; cisão de lote é prática real; cotação entre fornecedores fica fora do sistema por enquanto.
 
 ## Ver também
+- [[Registro-de-Decisoes-2026-10-07]]
 - [[Estoque-Regras-Negocio]]
 - [[Estoque-Roadmap]]

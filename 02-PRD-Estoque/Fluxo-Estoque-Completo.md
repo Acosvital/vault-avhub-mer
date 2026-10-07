@@ -1,15 +1,22 @@
 ---
 tags: [erp-acos-vital, prd-estoque, estoque, fluxo-detalhado]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # Fluxo de Estoque — conversa por conversa
 
+> Status: decidido | no código (develop) | em produção (mes-test; produção real não)
+
+> **Decisões de 07/10/2026 ([[Registro-de-Decisoes-2026-10-07]]):** o **registro de remessa de produtos**, a devolução de cliente e a transferência entre filiais (etapas 2 a 4) vão ao **Ciclo 2** (começa em 04/01/2027). **Pendência 🔴 (Nathan / Pablo-Robert) — saldo zero:** o parcial sem saldo passa automático pelo Estoque ou exige clique? As notas se contradizem: aqui (EA6) e em [[Fluxo-Sistema-no-Meio]] a sugestão é "automático", mas o EN-01 de [[Encaixe-Estoque-Revenda-no-PCP]] diz "saldo zero exige clique". **Não foi decidido nesta rodada**; a contradição precisa entrar no Registro como pendência.
+
+> **Atualização de 07/10/2026 — o setor Estoque já tem código em `develop`** (conferido no código, `api-pcp` `ca3346b` / `app-pcp` `a802a3e`; **só em `develop`, a `main` do MES parou em 28/08; produção não conferida**). **Caso A** (atender pelo saldo: split + reserva): implementado e testado (C6, 25/09; D9, `0fe771f`, 28/09), com `atenderEstoque` em `itens-parcial.service`. **Caso C** (item comprado volta da Qualidade): existe como retorno ao mesmo Estoque único após a aprovação (D8, `898aa54`); a parte reprovada volta a Compras e a aprovada fica em `QUARENTENA` (EC-07). **Caso B** (operação contínua): movimentação/ajuste/saldo reais (D10); **contagem cíclica e ponto de pedido preventivo (EB2–EB5) sem código registrado** na auditoria — só os alertas `GET /estoque/alertas/estoque-minimo` e `/rnc-pendentes` (`bfe5882`, 24/09), com 2 widgets reais no `painel-estoque` e o resto ainda `MOCK_*`. **Transferência entre filiais:** etapa 1 (saldo por filial) concluída em `861c050` (07/10); etapas 2–4 não existem — ver [[Proposta-Transferencia-Estoque-Filiais]]. **Ainda não implementado (decidido em 29/09):** baixa no despacho do Estoque (hoje a baixa ocorre quando a Embalagem recebe), ação de consumo de matéria-prima e `RoteiroItem` — ver [[Encaixe-Estoque-Revenda-no-PCP]]. Estado das tarefas: [[Onde-Estamos]] e [[Cronograma-2-Meses]].
+>
 > Detalha o setor de **Estoque** em si — a operação contínua de guardar saldo, localizar, reservar e separar material — que até agora só existia como conceito ([[Rota-Estoque]], "pronta entrega") ou como célula da matriz em [[Modelo-Destinacao-Item]], mas nunca como sequência de conversas como os outros subfluxos.
 >
 > Cobre três casos: **(A)** parcial chegando no setor Estoque (etapa 1 de todo roteiro) e sendo atendido pelo saldo; **(B)** operação contínua do depósito, independente de qualquer pedido específico (movimentação, contagem cíclica, ponto de pedido); **(C)** item comprado voltando da Qualidade para o Estoque (entrada + reserva).
 >
-> **Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje** — é escopo obrigatório do sistema a construir, não documentação de processo existente. *(Em 23/09 as telas de saldo, reservas, movimentação e lote entraram no `app-pcp` `develop`, ainda sobre mock — backend real na D9.)*
+> ~~**Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje**~~ — **superado em 07/10/2026**, ver bloco acima. *(Em 23/09 as telas de saldo, reservas, movimentação e lote entraram no `app-pcp` `develop` sobre mock; o backend real veio na D9, 28/09.)*
 >
 > **Atualizado em 24/09/2026 com o encaixe do MES** ([[Encaixe-Estoque-Revenda-no-PCP]]): o Estoque virou **setor tipo `ESTOQUE`, etapa 1 obrigatória de todo roteiro**, e a reserva aponta para **lote + `ItemParcial`** (o split atendido), sem expiração. O Caso A foi reescrito e o Caso C é novo (regra do Nathan: item comprado aprovado vai para o Estoque, não para a Expedição).
 
@@ -56,10 +63,10 @@ A leitura do saldo e a criação da reserva acontecem **no mesmo passo** — evi
 `ordem_separacao`/`item_separacao`, já modelado no PRD (ver [[Estoque-Modelo-Dados]]) — o Almoxarife retira o material do warehouse. A tela de separação segue na Fase D.
 
 **EA5 — Segue pra entrega**
-O split atendido não volta à Qualidade: o saldo disponível só conta lote já liberado por ela. Na saída física a reserva vira `CONSUMIDA` (`MovimentoEstoque` `SAIDA` com referência à reserva).
+O split atendido não volta à Qualidade: o saldo disponível só conta lote já liberado por ela. Na saída física a reserva vira `CONSUMIDA` (`MovimentoEstoque` `SAIDA` com referência à reserva). *(Atualizado em 07/10, conferido no código: isso acontece quando a **Embalagem recebe** — `receber()` → `consumirReservasDaParcial` —, não na saída do Estoque; a mudança decidida em 29/09 para o despacho do Estoque não foi implementada.)*
 
 **EA6 — Enviar o restante**
-O que o saldo não cobre segue o roteiro: setores produtivos (fábrica de Fabricação) ou setor Compras (fábrica Revenda). **Saldo zero** — o parcial passa automático pelo Estoque, só registrando o tempo, ou exige clique? Em aberto, sugestão: automático. Antes do marco zero (13/11) todo parcial é tratado como saldo zero.
+O que o saldo não cobre segue o roteiro: setores produtivos (fábrica de Fabricação) ou setor Compras (fábrica Revenda). **Saldo zero** — o parcial passa automático pelo Estoque, só registrando o tempo, ou exige clique? 🔴 **Pendente (Nathan / Pablo-Robert), [[Registro-de-Decisoes-2026-10-07]]:** este texto sugere "automático", mas o EN-01 de [[Encaixe-Estoque-Revenda-no-PCP]] (seção 5) registra "saldo zero **exige clique**" e [[Fluxo-Sistema-no-Meio]] (Ato do Estoque) também sugere "automático" — **contradição a decidir**, ver abaixo. Antes do marco zero (13/11) todo parcial é tratado como saldo zero.
 
 ## Caso C — Item comprado volta da Qualidade para o Estoque (24/09/2026)
 
@@ -101,7 +108,7 @@ sequenceDiagram
 
 **EB1 — Movimentação entre warehouses**
 Transferência entre depósitos compartilhados (Warehouse 01 ↔ Warehouse 02 etc.) — operação real, confirmada no PRD original (múltiplos depósitos).
-*Entre filiais (outro CNPJ, com NF de transferência), ver [[Proposta-Transferencia-Estoque-Filiais]] (05/10/2026, proposta com decisões pendentes).*
+*Entre filiais (outro CNPJ, com NF de transferência), ver [[Proposta-Transferencia-Estoque-Filiais]] (05/10/2026, proposta com decisões pendentes). **Atualizado em 07/10: só a etapa 1 (saldo por filial) existe no código** — o atendimento mostra o saldo das outras filiais (`outrasFiliais` em `disponiveisParaParcial`); solicitar, aprovar, expedir e receber a transferência não existem.*
 
 **EB2/EB3 — Contagem cíclica**
 Mitigação já prevista em [[Estoque-Riscos]] pra "descolamento entre saldo do sistema e saldo físico" — rastreabilidade por lote + **motivo obrigatório** em qualquer ajuste manual.

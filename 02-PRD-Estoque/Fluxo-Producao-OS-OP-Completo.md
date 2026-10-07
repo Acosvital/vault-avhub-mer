@@ -1,15 +1,22 @@
 ---
 tags: [erp-acos-vital, app-pcp, producao, fluxo-detalhado]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # Fluxo de Produção (OS/OP) — conversa por conversa
 
+> Status: decidido | no código (develop) | em produção (mes-test; produção real não)
+
+> **Decisões de 07/10/2026 ([[Registro-de-Decisoes-2026-10-07]]):** o **registro de remessa de produtos** vai ao **Ciclo 2** (04/01/2027). **Pendência 🔴 (Nathan / Pablo-Robert):** o parcial com saldo zero passa automático pelo setor Estoque (OS1b) ou exige clique? Contradição entre "automático" ([[Fluxo-Estoque-Completo]], EA6) e EN-01 "saldo zero exige clique" ([[Encaixe-Estoque-Revenda-no-PCP]], seção 5) — não decidido aqui.
+
+> **Atualização de 07/10/2026 (conferido no código, `develop`, `api-pcp` `ca3346b`; produção não conferida):** (1) o disparo mudou de rota — `POST /pedidos/completo` (por fábrica) e a tela `pedidos/novo` foram **substituídos** por `POST /pedidos/completo/lote` (01/10) e pelo caminho **Carteira → Ordens de Produção**; o PR #50 apagou o `POST /pedidos/completo`; a Carteira lê só os pedidos liberados (`GET /pedidos_liberados`, `901f9bb`, 29/09). (2) Os **tipos de setor** hoje são `PRODUTIVO`, `ESTOQUE`, `COMPRAS`, `EXPEDICAO`, `REQUISICAO`, `LOGISTICA_ENTRADA` e `QUALIDADE` (não só os três citados abaixo); o circuito de compra ficou fora do roteiro. (3) O **`RoteiroItem` (C8) não é lido** por mover/concluir nem pela Expedição — a regra de 28/09 (roteiro individual do item) está decidida, **não implementada**. (4) Os setores `PRODUTIVO` de Flange e o `embalagem` vêm da UI/banco (não conferidos em `develop`). Ver [[Encaixe-Estoque-Revenda-no-PCP]].
+>
 > Detalha a execução de uma Ordem de Serviço (beneficiamento de Revenda) ou Ordem de Produção (linha própria de Fabricação), a partir do mecanismo já decidido: OS/OP = `ItemParcial`/roteiro, já implementado no `api-pcp` (ver [[App-PCP-Backend-Producao]]).
 >
 > ⚠️ Diferente dos outros fluxos deste conjunto ([[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]], [[Fluxo-Qualidade-Completo]]), **este é o único subfluxo que já tem mecanismo de estado implementado em produção** — os outros ainda são desenho, este é tradução de código real pra conversa por conversa. **Precisão (17/09/2026, confirmado com o usuário):** isso vale só pro motor de execução em si (`ItemParcial`/roteiro dentro do `api-pcp`) — o que dispara uma OS/OP a partir do PCP (aceite do pedido, classificação do item, decisão de abrir OS/OP) não existe; é o mesmo fluxo-alvo a construir descrito em [[Fluxo-Detalhado-Pedido-Item]].
 >
-> **Atualização (23-24/09/2026):** o disparo já existe em `develop` — Carteira de Pedidos → tela **Ordem de Produção** → `POST /pedidos/completo` (uma OP por fábrica em cada rodada). E o encaixe foi decidido ([[Encaixe-Estoque-Revenda-no-PCP]]): o backend insere o **setor Estoque como etapa 1** de todo roteiro (o antigo setor "Emissão de Ordens" sai), os setores ganham tipo (`PRODUTIVO`, `ESTOQUE`, `COMPRAS`), e a **OS de beneficiamento de Revenda é um setor `PRODUTIVO` opcional dentro do roteiro da fábrica Revenda** — resolve a "fábrica leve" que este documento deixava em aberto.
+> **Atualização (23-24/09/2026):** o disparo já existe em `develop` — Carteira de Pedidos → tela **Ordem de Produção** → `POST /pedidos/completo` (uma OP por fábrica em cada rodada) *(atualizado em 07/10: hoje `POST /pedidos/completo/lote`; a rota singular foi apagada no PR #50)*. E o encaixe foi decidido ([[Encaixe-Estoque-Revenda-no-PCP]]): o backend insere o **setor Estoque como etapa 1** de todo roteiro (o antigo setor "Emissão de Ordens" sai), os setores ganham tipo (`PRODUTIVO`, `ESTOQUE`, `COMPRAS`), e a **OS de beneficiamento de Revenda é um setor `PRODUTIVO` opcional dentro do roteiro da fábrica Revenda** — resolve a "fábrica leve" que este documento deixava em aberto.
 
 ## Atores e sistemas
 

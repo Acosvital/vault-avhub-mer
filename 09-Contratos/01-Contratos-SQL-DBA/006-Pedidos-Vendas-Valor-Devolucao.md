@@ -2,9 +2,16 @@
 tags: [contrato-sql, dba, omie-elt-pipeline, achado]
 status: invalidado
 criado: 2026-09-17
+atualizado: 2026-10-07
 ---
 
 # Contrato SQL 006 (antes 011 no omie-elt-pipeline) — `pedidos_vendas.valor_devolucao`
+
+> Status: decidido | em produção (verificado em 07/10/2026 pelo dump, [[Auditoria-Dump-Producao-2026-10-07]]). Fonte: [[Registro-de-Decisoes-2026-10-07]] (#31).
+> - **Contrato invalidado** (`StatusDevolucaoVenda` não está disponível no Omie). Devolução é nativa do Estoque (DEC-10), Ciclo 2.
+> - **Correção ao parágrafo seguinte:** em produção as colunas `codigo_devolucao_omie`, `valor_devolucao` e `devolucao_consultada_em` (e o índice `idx_pedidos_vendas_fila_devolucao`) **existem, vazias** (0 de 13.137 linhas preenchidas no dump). A leitura de código de 07/10 dizia que só havia `devolucao_parcial`; o dump mostra o contrário. 🟡 Limpeza dessas colunas: 🔴 Gustavo.
+
+> **Atualização de 07/10/2026 — conferido no código:** coerente com `invalidado`. Em `main` = `develop` da `api-acos-vital` e na pipeline (`master` `d2886bf`) `pedidos_vendas` só tem o boolean `devolucao_parcial`; não há `valor_devolucao` nem chamada a `StatusDevolucaoVenda`. Nada a aplicar. Segue em aberto, fora do Omie, como "valor da devolução" nativo (ver `Perguntas-Pendentes-MES-Estoque`).
 
 > **Invalidado (confirmado com o usuário, 17/09/2026): o endpoint `StatusDevolucaoVenda` não existe/não está disponível** — a hipótese abaixo, baseada só na documentação pública do Omie, não se confirmou na prática. **Não aplicar este contrato.** O valor da devolução parcial vai ter que ser tratado por fora do Omie, nativo no sistema da Aços Vital (av-hub ou Estoque/MES, a decidir — ver [[Perguntas-Pendentes-MES-Estoque]]), não sincronizado. Mantido aqui só como registro do caminho já investigado e descartado, pra ninguém reabrir a mesma hipótese sem saber que já foi testada.
 

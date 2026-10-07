@@ -2,10 +2,12 @@
 tags: [contrato-api, mes, estoque, integracao-av-hub-mes]
 status: substituida
 criado: 2026-09-22
-atualizado: 2026-09-30
+atualizado: 2026-10-07
 ---
 
 # Contrato de API 003 — Requisição de compra (MES → av-hub)
+
+> **Atualização de 07/10/2026 — conferido no código:** a rota `GET /requisicoes-compra` **existe no MES** no formato do hub (`901f9bb`, `5c1316f`, `develop` do `api-pcp`) e está **substituída pelo 34**: nenhum job da `api-acos-vital` a consome (e não será feito). O MES chama o PUT do 34 desde `e7ce2c9` (02/10). Status `substituida` confere.
 
 > **✅ ATENDIDO PELO CONTRATO 34 (06/10/2026).** O objetivo deste contrato (a requisição do MES chegar ao av-hub) foi entregue pelo [[34-Requisicoes-MES-Empurra-para-o-Hub]], em que o MES **empurra** a requisição (`PUT /compras/requisicoes/origem/{id_origem}`) em vez de o av-hub buscar (DEC-2 revista em 01/10/2026). O job de polling descrito abaixo **não será feito**; o texto fica como histórico. Os contratos da volta, [[004-Referencia-OC-Integracao-MES]] e [[005-Status-Item-Integracao-MES]], continuam abertos.
 

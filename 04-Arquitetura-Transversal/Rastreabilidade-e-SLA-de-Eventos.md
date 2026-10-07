@@ -1,9 +1,12 @@
 ---
 tags: [erp-acos-vital, arquitetura, rastreabilidade, sla, proposta]
 criado: 2026-09-21
+atualizado: 2026-10-07
 ---
 
 # Rastreabilidade, custódia e SLA por etapa — modelo de eventos
+
+> Status: decidido em parte (verificado em 07/10/2026) — vale o plano de **3 meses** (18/09 a 21/12; M7 e S5 terminam em 18/12), 🟡 em [[Registro-de-Decisoes-2026-10-07]], item 34.
 
 > **Status: proposta para a spec F1 (até 29/09/2026), não decisão.** Nasceu de uma conversa com o Nathan em 21/09/2026 e do protótipo de tela [Torre de Fluxo](https://claude.ai/artifact/SS4C4srRk9cr66UHUS2rE3), que usa dados fictícios. Tudo marcado como **premissa** abaixo precisa de validação antes de virar requisito.
 
@@ -103,7 +106,7 @@ O [[Cronograma-2-Meses]] cobre hoje "status por item" só para Fabricação e Re
 - ~~SLA por etapa: quem define as metas de cada setor?~~ ✅ Respondido (21/09): ninguém define a dedo — o sistema nunca rodou, sem como saber hoje. Meta nasce do tempo médio histórico, calculado conforme o sistema acumula uso (salva métrica/lead time por etapa). Sem meta real possível no v1 — "projeção de estouro" (seção "SLA em dois níveis" abaixo) fica sem base útil até acumular histórico suficiente.
 - ~~"Na mão de quem": pessoa nomeada em toda passagem, ou o setor basta no chão de fábrica?~~ ✅ Respondido (21/09): cada setor tem 1 líder responsável.
 - Qual é o identificador único de pessoa entre av-hub e MES?
-- Genealogia de material (lote da matéria-prima → item entregue): é exigência de cliente ou norma?
+- ~~Genealogia de material (lote da matéria-prima → item entregue): é exigência de cliente ou norma?~~ ✅ Respondido (21/09, R-12): sim, é necessária. Virou o bloco J da S5 do [[Cronograma-2-Meses]] (J2 a J5) e a alocação de lote é a DEC-12 (FIFO por padrão). Ver [[Perguntas-em-Aberto-Consolidadas]], R-12. Em 07/10, J2/J5 passam ao Robert (Registro, item 33).
 - ~~O vendedor vê só o macro ou também a trilha? Algum dia o cliente externo vê algo?~~ ✅ Respondido (21/09): só o vendedor, só o macro (quais itens em quais setores); sem trilha completa, sem acesso externo.
 - ~~Prazo de retenção do log (ver DEC-9, 5 anos por palpite).~~ ✅ Decidido (21/09): 5 anos, confirmado (não é mais palpite, validação formal com contabilidade/fiscal segue pendente).
 - ~~SLA em horas corridas ou úteis?~~ ✅ Confirmado (21/09): horas corridas, com pausa explícita interrompendo a contagem (bate com `PAUSADO`/`RETOMAR` do `ItemParcial`).

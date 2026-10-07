@@ -1,18 +1,20 @@
 ---
 tags: [contrato-logica, contrato-api, compras]
 criado: 2026-09-30
+atualizado: 2026-10-07
 status: aplicada
 ---
 
 # Contrato 31 — Compras: dashboard com valores (gasto, fornecedores, recebimento, atrasos)
 
+> **Atualização de 07/10/2026 — conferido no código (`main` = `develop` da `api-acos-vital`, `a6ab058`/`fdafb35`; produção não conferida no código; produção só pelo dump de 07/10, que cobre schema e dados, não o comportamento da API em produção; [[Auditoria-Dump-Producao-2026-10-07]]):** `GET /compras/ordens/dashboard` existe em `main` com o commit **`ca899f9`** (o `cba68fa` citado abaixo é só nota histórica de branch local, re-autorada a partir de patches; o "falta levar para a `develop`" está resolvido). O código mora agora em `src/schemas/**` (reestruturação do PR #276), não em `src/routes/compras_dashboard_sql.js`. Seguem valendo as perguntas sobre os pedidos BENAFER e as etapas 10/15/20. **(atualizado em 07/10, [[Registro-de-Decisoes-2026-10-07]] item 52)** 🔴 Nathan: conferir no Omie os dois pedidos BENAFER (44333 e 44568, R$ 82,7 mi) e olhar um pedido de cada etapa (10, 15, 20) para nomeá-las.
+
 > **✅ ENTREGUE (01/10/2026).** **Conferência de 01/10/2026 na `api-test`** (o DBA avisou que concluiu): `GET /compras/ordens/dashboard?origem=todas` responde 200 com período, período anterior e série de 12 meses (valores zerados: não há pedidos aprovados na `api-test`).
 
 **Criado em:** 30/09/2026 · **Para:** backend (`api-acos-vital`) · **Só API, sem SQL novo**
 
-**Implementado e testado na API local** (branch local `feat/compras-dashboard`, commit `cba68fa`,
-arquivos `src/routes/compras_dashboard_sql.js` e a rota em `src/routes/compras_ordens.js`), contra o
-banco local com o esqueleto de 29/09. Falta levar para a `develop` compartilhada.
+**Implementado e testado na API local** (nota histórica: `cba68fa`, branch local; equivalente na `main`: `ca899f9`; arquivos `src/routes/compras_dashboard_sql.js` e a rota em `src/routes/compras_ordens.js`), contra o
+banco local com o esqueleto de 29/09. ~~Falta levar para a `develop` compartilhada.~~ (já está na `main`: `ca899f9`)
 
 Usa a view do [[15-Compras-Historico-Unificado]] (contrato 25) e os nomes do [[19-Compras-Pedido-Omie-Nomes]].
 
@@ -35,7 +37,7 @@ Rota com caminho fixo, **antes de `/:id`** (como `/resumo`).
 |---|---|
 | `data_inicio`, `data_fim` | `AAAA-MM-DD`; padrão = mês corrente (fuso de São Paulo). `data_inicio <= data_fim`, no máximo 2 anos. Senão 400 |
 | `codigo_empresa` | uuid, opcional (todas as unidades) |
-| `origem` | igual à listagem: `av-hub`, `omie`, `todas`. **Sem o parâmetro vale a flag `COMPRAS_HISTORICO_UNIFICADO`** (desligada = só av-hub). O av-hub manda sempre `todas` |
+| `origem` | igual à listagem: `av-hub`, `omie`, `todas`. **Sem o parâmetro vale a flag `COMPRAS_HISTORICO_UNIFICADO`** (desligada = só av-hub). O av-hub manda sempre `todas`. **(atualizado em 07/10: a flag saiu no contrato 36 P6 / `c8f2f5e`; sem `?origem=`, o padrão é av-hub + Omie)** |
 
 **Regras de cálculo**
 
@@ -82,11 +84,11 @@ Rota com caminho fixo, **antes de `/:id`** (como `/resumo`).
 
 ## 3. Perguntas em aberto
 
-- **Dois pedidos da BENAFER de agosto somam R$ 82,7 mi** (44333 = R$ 52.745.954,19 e 44568 =
+- **🔴 (Nathan, 07/10: conferir no Omie)** **Dois pedidos da BENAFER de agosto somam R$ 82,7 mi** (44333 = R$ 52.745.954,19 e 44568 =
   R$ 30.023.595,74), mais da metade de tudo que foi comprado no banco. Parece valor digitado errado no
   Omie; distorce agosto e o "a receber atrasado" (o 44568 sozinho é R$ 30 mi pendente). **Conferir no
   Omie.** O dashboard não esconde: eles aparecem nos "maiores pedidos".
-- **Etapas do pedido de compra do Omie (10, 15, 20) sem nome**: `pedidos_compras_etapas` está vazia.
+- **🔴 (Nathan, 07/10: olhar um pedido de cada etapa no Omie)** **Etapas do pedido de compra do Omie (10, 15, 20) sem nome**: `pedidos_compras_etapas` está vazia.
   Pelo recebimento, a 15 é onde o material chega; a 10 e a 20 não têm nada recebido. Se a 20 for
   **cancelado**, ela não deveria contar em "comprado" nem em "atrasado" — confirmar e preencher a
   de-para (o dashboard mostra a etapa pelo código até lá).

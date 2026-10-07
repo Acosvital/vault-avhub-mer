@@ -1,12 +1,17 @@
 ---
 tags: [erp-acos-vital, prd-estoque]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # PRD — Sistema de Estoque, Recebimento de Materiais e Compras (MP e Revenda)
 
 **Versão:** 1.0 · Setembro/2026 · Aços Vital
-**Status:** 📋 Documento de planejamento — ainda não construído.
+**Status:** 📋 Documento de planejamento — **parte já tem código em `develop` do MES (atualizado em 07/10/2026)**; ver bloco abaixo.
+
+> Status: decidido | no código (develop) | em produção (mes-test; produção real não)
+
+> **Atualização de 07/10/2026 — o Estoque já tem código, mas só em `develop`.** Conferido no código (`develop` de `api-pcp` `ca3346b` e `app-pcp` `a802a3e`, 07/10): schema Prisma do Estoque (D1), módulo base (D2, **sem harness e2e**), cadastros de material e depósito (D5), recebimento com conferência e recontagem (D6/D7), qualidade por lote com RNC e cisão (D8), saldo/reserva/movimentação reais (D9/D10), etiqueta em PDF (D11, **parcial**: sem leitor 2D nem posto de recebimento), alertas de estoque mínimo/RNC pendente e a **etapa 1 da transferência entre filiais**. D3 (projeção) está pela metade e a carga inicial em lote (G1) não existe — só `POST /estoque/lotes/carga-inicial`, um lote por vez. **A `main` dos dois repositórios parou em 28/08** (api `be076b2`, app `be847ac`): nada disso foi para `main`. Produção e banco **não foram conferidos** — não ler isto como "em produção". Ver [[Onde-Estamos]] e [[Cronograma-2-Meses]].
 
 ## Resumo
 
@@ -14,7 +19,7 @@ Hoje o controle de estoque, recebimento e compras não tem sistema dedicado — 
 
 O projeto entrega um **módulo interno (Next.js)** que se conecta ao ERP já existente — cobrindo três frentes: **compras** (MP e revenda), **recebimento** (conferência quantitativa pelo almoxarifado + conferência qualitativa pela Qualidade) e **estoque** (saldo, localização, rastreabilidade por lote, com quarentena até aprovação da qualidade).
 
-O módulo mora dentro do **banco do MES** (o sistema de fábrica, Prisma, banco separado do av-hub/`api-acos-vital`), consumindo dado de fornecedor/material do av-hub via **projeção read-only**. **Correção (17/09/2026)**: essa projeção **não** pode se apoiar em "o mesmo mecanismo de evento que o av-hub já usa para ler status de produção do MES" — esse mecanismo **não existe**. [[Decisoes-Chave-ERP]] e [[AV-Hub-Modulos]] registram isso como o "casamento av-hub ↔ MES", explicitamente **não desenhado**, "maior item em aberto", e confirmam que o único padrão de sincronização entre sistemas hoje é polling em camadas (sem webhook nem mecanismo de evento). A projeção do Estoque, portanto, também precisa ser polling — candidato mais simples: consumir os endpoints REST que já existem (`GET /produtos`, `GET /parceiros` em `api-acos-vital`), sem inventar infraestrutura de evento nova. Reaproveita a infraestrutura self-hosted (VPS/Coolify) no sentido amplo, mas não o cluster Postgres específico do av-hub. Ver [[MES-Arquitetura-Decisoes]] e [[Estoque-Modelo-Dados]].
+O módulo mora dentro do **banco do MES** (o sistema de fábrica, Prisma, banco separado do av-hub/`api-acos-vital`), consumindo dado de fornecedor/material do av-hub via **projeção read-only** *(atualizado em 07/10: no código o material nasce por **snapshot do av-hub na primeira entrada**, não por projeção do catálogo; o model `Fornecedor` existe e nada o popula — ver [[Estoque-Modelo-Dados]])*. **Correção (17/09/2026)**: essa projeção **não** pode se apoiar em "o mesmo mecanismo de evento que o av-hub já usa para ler status de produção do MES" — esse mecanismo **não existe**. [[Decisoes-Chave-ERP]] e [[AV-Hub-Modulos]] registram isso como o "casamento av-hub ↔ MES", explicitamente **não desenhado**, "maior item em aberto", e confirmam que o único padrão de sincronização entre sistemas hoje é polling em camadas (sem webhook nem mecanismo de evento). A projeção do Estoque, portanto, também precisa ser polling — candidato mais simples: consumir os endpoints REST que já existem (`GET /produtos`, `GET /parceiros` em `api-acos-vital`), sem inventar infraestrutura de evento nova. Reaproveita a infraestrutura self-hosted (VPS/Coolify) no sentido amplo, mas não o cluster Postgres específico do av-hub. Ver [[MES-Arquitetura-Decisoes]] e [[Estoque-Modelo-Dados]].
 
 ## Onde isso se encaixa no fluxo operacional
 
@@ -48,9 +53,10 @@ Impressora industrial (Elgin TT042 Plus, ~R$4,1–5,2 mil) + leitor 2D de mão (
 - [[Setores-Envolvidos-no-Fluxo]] — todo setor participante, com onde vive e onde aparece em detalhe.
 - [[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]], [[Fluxo-Qualidade-Completo]], [[Fluxo-Producao-OS-OP-Completo]], [[Fluxo-Expedicao-Faturamento-Completo]], [[Fluxo-Estoque-Completo]] — o fluxo completo, do 0 ao 100%, detalhado conversa por conversa em cada subfluxo.
 - [[Encaixe-Estoque-Revenda-no-PCP]] — como o Estoque e a Revenda entram no roteiro do MES (24/09/2026).
+- [[App-PCP-Recebimento-Conferencia]] — o recebimento com conferência, recontagem e decisão do PCP, como está no código (07/10/2026).
 - [[Estoque-Modelo-Dados]]
 - [[Estoque-Regras-Negocio]]
 - [[Estoque-Riscos]]
 - [[Estoque-Perguntas-Abertas]]
 - [[Estoque-Roadmap]]
-- [[Schema-Postgres-Multi-Dominio]] — desenho original previa o schema `estoque` neste cluster; hoje o Estoque mora no banco separado do MES, com schema próprio lá dentro, ver [[MES-Arquitetura-Decisoes]].
+- [[Schema-Postgres-Multi-Dominio]] — desenho original previa o schema `estoque` neste cluster; hoje o Estoque mora no banco separado do MES, ~~com schema próprio lá dentro~~, ver [[MES-Arquitetura-Decisoes]]. *(Atualizado em 07/10: conferido no código, `estoque.prisma` está em `public`, sem `@@schema`. ✅ **Decidido em 07/10: o Estoque fica em `public`** — fecha CC-06; [[Registro-de-Decisoes-2026-10-07]], item 21.)*

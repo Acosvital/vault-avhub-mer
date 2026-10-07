@@ -1,10 +1,12 @@
 ---
 tags: [erp-acos-vital, uml, arquitetura, modelagem]
 criado: 2026-09-16
-atualizado: 2026-10-01
+atualizado: 2026-10-07
 ---
 
 # Diagramas UML — Modelo Completo
+
+> Status: decidido (verificado em 07/10/2026) — implantação (diagrama 10) e schema `public` do Estoque conforme [[Registro-de-Decisoes-2026-10-07]], itens 4 e 21.
 
 > Conjunto de diagramas UML (e aproximações fiéis via mermaid, onde a notação nativa não existe) cobrindo o máximo possível do que já foi analisado no vault. **Sequência e Atividades já existem** desde antes deste arquivo — ver 0a/0b abaixo pra preview embutido, e [[Fluxo-Compras-Completo]] + 4 irmãos / [[Fluxogramas-Completos]] pro conjunto completo (6 de cada).
 >
@@ -538,7 +540,7 @@ classDiagram
 
 **Nota:** modelo real já implementado no `api-pcp` (NestJS+Prisma) — ver [[App-PCP-Backend-Producao]]. `ItemParcial` é o motor de estado real, não `HistoricoItemParcial` (que é só trilha de auditoria).
 
-> **Notas do modelo** (com base no dump real `pcp_prd_db`, schema `public` — confirma que o schema `estoque` ainda não existe):
+> **Notas do modelo** (com base no dump real `pcp_prd_db`, schema `public` — confirma que o schema `estoque` ainda não existe; decidido em 07/10/2026: o Estoque fica em `public`, ver [[Registro-de-Decisoes-2026-10-07]]):
 > - **Roteiro existe em dois níveis**, não um só: `RoteiroPedido` (por pedido/fábrica) e `RoteiroItem` (por item específico) — cada item pode seguir um roteiro diferente dos outros do mesmo pedido.
 > - **`ItemPedido` tem auto-referência** (`idItemPai`) — hierarquia entre itens, não documentada antes.
 > - **`Divergencia` tem campo `tipo`** (QUALIDADE/QUANTIDADE/PRAZO/DANO/DOCUMENTACAO/OUTRO), além do `status` — e pode linkar em `ItemPedido` OU `ItemParcial` (granularidade dupla).
@@ -977,16 +979,15 @@ flowchart TB
     subgraph VPS1["«device» VPS1 - Coolify/Traefik"]
         AVHUBC["«artifact» av-hub<br/>(Docker, Node 20 alpine)"]
         BLOGC["«artifact» Blog, Backlog Agil (Docker)"]
+        MESAPPD["«artifact» MES: api-pcp + Estoque<br/>(NestJS + Prisma)"]
+        PIPED["«artifact» Pipeline Omie (ELT)"]
     end
     subgraph VPS2["«device» VPS2 - Cluster Postgres"]
-        PG["«database» Postgres<br/>core, auth, core_vendas_faturamento,<br/>core_comissionamento,<br/>omie_ctl/omie_raw"]
+        PG["«database» Postgres av-hub<br/>core, auth, core_vendas_faturamento,<br/>core_comissionamento,<br/>omie_ctl/omie_raw"]
+        PGMESD["«database» Postgres MES<br/>(producao + estoque, schema public)"]
     end
     subgraph VPS3["«device» VPS3 - MinIO"]
         MINIOD["«datastore» MinIO"]
-    end
-    subgraph VPSMES["«device» Infra do MES<br/>(localizacao a confirmar)"]
-        MESAPPD["«artifact» api-pcp + Estoque<br/>(NestJS + Prisma)"]
-        PGMESD["«database» Postgres MES<br/>(producao + estoque)"]
     end
     INTERNET(("Internet"))
     OMIED["«external device»<br/>Omie (SaaS)"]
@@ -998,15 +999,15 @@ flowchart TB
     AVHUBC -->|x-api-key gateway| MESAPPD
     INTERNET --> AVHUBC
     INTERNET --> OMIED
-    AVHUBC -->|pipeline ELT| OMIED
+    PIPED --> OMIED
+    PIPED --> PG
 
     style VPS1 fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
     style VPS2 fill:#e1eede,stroke:#5a7d3a,stroke-width:2px,color:#181c22
     style VPS3 fill:#f7edd0,stroke:#a8860f,stroke-width:2px,color:#181c22
-    style VPSMES fill:#f3ddd6,stroke:#a8420f,stroke-width:2px,color:#181c22
 ```
 
-**Nota:** onde a infra do MES roda de fato (mesma VPS1/2, ou separada) não está confirmado no vault — marcado explicitamente como pendência, não assumido. Ver [[Infraestrutura-Self-Hosted]].
+**Nota (07/10/2026):** MES e pipeline rodam na VPS1; o banco do MES fica na VPS2 (✅ Nathan). Ver [[Infraestrutura-Self-Hosted]] e [[Registro-de-Decisoes-2026-10-07]].
 
 ## 11. Pacotes — Dependência entre Schemas Postgres
 
@@ -1026,7 +1027,7 @@ flowchart TB
     end
     subgraph P_OMIECTL[omie_ctl / omie_raw]
     end
-    subgraph P_ESTOQUE[estoque e compras - banco do MES]
+    subgraph P_ESTOQUE[Estoque e compras - banco do MES, schema public]
     end
 
     P_AUTH -->|usuarios_unidades| P_CORE

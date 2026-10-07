@@ -1,10 +1,13 @@
 ---
 tags: [erp-acos-vital, arquitetura, lacunas, revisao, proposta]
 criado: 2026-09-21
+atualizado: 2026-10-07
 ---
 
 # Lacunas de lógica, de domínio e de clareza
 
+> Status: decidido | no código | em produção (verificado em 07/10/2026 pelo dump). Decisões de 07/10 em [[Registro-de-Decisoes-2026-10-07]].
+>
 > **Status: revisão de 21/09/2026, com propostas para discussão. Não são decisões.** Complementa [[Revisao-dos-Estados-e-Status]] (que trata só de estados e status). Os itens 1 a 9 foram conferidos no vault; os 10 e 11 são **ausências** (busquei e não encontrei tratamento nas notas), então precisam de confirmação de quem conhece a operação. Os itens 12 a 14 eram só documentação e **já foram corrigidos**.
 
 ## 1. Lógica que não fecha
@@ -27,6 +30,8 @@ O Omie tem saldo (`ListarPosEstoque`) e custo médio (`cmc`), movidos por nota f
 
 **✅ ACEITO em 21/09/2026** — Nathan optou por seguir esta proposta como está. MES = saldo físico oficial; Omie = fiscal/custo; reconciliação periódica sem correção automática de uma fonte pela outra, por tempo indefinido (não é uma "convivência temporária" com prazo de término, é o desenho permanente enquanto o Omie for o sistema fiscal).
 
+**✅ FECHADA em 07/10/2026 ([[Registro-de-Decisoes-2026-10-07]] #28):** o Omie recebe dados só manualmente e o **saldo do Omie é ignorado**. O MES é a referência do saldo físico; o Passo 2 (`ListarPosEstoque`) não será feito, então a reconciliação periódica (contrato SQL 002) deixa de existir. ~~Reconciliação periódica por tempo indefinido.~~
+
 ### L-04. OC no av-hub e OC no Omie
 A OC estruturada nasce no av-hub (E2). O envio ao Omie é "visão de futuro, não construir agora" ([[MES-Arquitetura-Decisoes]]). Enquanto isso, o Omie (que lança a NF de entrada e o financeiro) não tem a OC, e o espelho do contrato SQL 004 guarda só as OC criadas no Omie. Há duas OC sem vínculo, e o comprador pode digitar nos dois lugares.
 **Proposta:** no ciclo 1, guardar no av-hub o número da OC digitada no Omie (`codigo_pedido_compra_omie`, já previsto) e conciliar por ele; o push automático fica para depois. **Decide:** Nathan com Compras.
@@ -34,10 +39,10 @@ A OC estruturada nasce no av-hub (E2). O envio ao Omie é "visão de futuro, nã
 **✅ ACEITO em 21/09/2026** — Nathan optou por seguir esta proposta como está. Conciliação manual por `codigo_pedido_compra_omie` digitado no ciclo 1; push automático de criação de OC pro Omie continua como visão de futuro, sem data.
 
 ### L-05. Fiscal: "sempre Omie" ou "desligar o Omie"?
-O princípio é que nenhum módulo emite nota fiscal ([[Decisoes-Chave-ERP]]). Mas o cronograma fala em "antes do desligamento" e a síntese ([[Sintese-Migrar-vs-Nascer-Nativo]]) diz que os dados fiscais do parceiro são "críticos para emitir NF-e sem o Omie no futuro". A DEC-11 cobre só o financeiro.
+O princípio é que nenhum módulo emite nota fiscal ([[Decisoes-Chave-ERP]]). Mas o cronograma falava em ~~"antes do desligamento"~~ (superado em 07/10: o Omie permanece como financeiro e fiscal, sem plano de desligar) e a síntese ([[Sintese-Migrar-vs-Nascer-Nativo]]) diz que os dados fiscais do parceiro são "críticos para emitir NF-e sem o Omie no futuro". A DEC-11 cobre só o financeiro.
 **Proposta:** registrar o horizonte: "Omie permanece emissor fiscal no ciclo 1; a decisão de emitir NF-e própria é posterior e depende da DEC-11 ampliada". Assim o princípio vale como temporário e explícito. **Decide:** Nathan e diretoria.
 
-**✅ CONFIRMADO em 21/09/2026** — Nathan concorda com a proposta: "Omie como emissor de notas agora e nosso sistema no horizonte". Nota: DEC-11 (módulo financeiro nativo) já foi decidida como adiada, sem data — a emissão fiscal própria segue o mesmo horizonte indefinido, é o mesmo "futuro sem data", não uma DEC separada com prazo próprio.
+**✅ CONFIRMADO em 21/09/2026** — Nathan concorda com a proposta: "Omie como emissor de notas agora e nosso sistema no horizonte". **Revisto em 07/10/2026 (✅, [[Registro-de-Decisoes-2026-10-07]] #30): o Omie permanece como sistema financeiro e fiscal; não há plano de desligar.** O horizonte "nosso sistema" e a expressão "antes do desligamento" ficam superados. Nota: DEC-11 (módulo financeiro nativo) já foi decidida como adiada, sem data — a emissão fiscal própria segue o mesmo horizonte indefinido, é o mesmo "futuro sem data", não uma DEC separada com prazo próprio.
 
 ### L-06. Como o pedido chega à fila do PCP?
 O fluxo diz que o pedido "cai na fila do PCP" ([[Fluxo-Detalhado-Pedido-Item]]). A tarefa C4 importa os itens "por número do pedido" pelo gateway, que é uma busca manual. Não existe contrato de API de pedidos novos ou alterados; os únicos com `alterado_desde` são produtos e parceiros ([[001-Produtos-Parceiros-Filtro-Incremental]]).
@@ -69,6 +74,8 @@ O depósito é "central compartilhado, não vinculado a fábrica" ([[Estoque-Mod
 ## 2. Lacunas de domínio (ausências)
 
 ### L-10. Sobras, perdas e unidade de medida
+
+> **➡️ Ciclo 2 (04/01/2027), ✅ 07/10/2026 ([[Registro-de-Decisoes-2026-10-07]] #27).** Entra junto com EC-02, remessa de produtos, Fase D e transferência etapas 2 a 4.
 Não encontrei nas notas nada sobre **sobra ou retalho de chapa**, **perda no corte** ou **conversão de unidade** (kg × peça × metro). Corte de chapa é beneficiamento de Revenda e é o coração do negócio ([[Fabricacao-Chapas]]). O Omie tem `% perda` na estrutura de produto ([[Roteiro-de-Implementacao]], `ListarMalha`), mas o modelo do Estoque não tem.
 **Perguntas:** a sobra de um corte volta ao estoque como material (com lote, rastreio, localização)? Como se pesa o que sobra? Qual é a unidade de controle de cada material? **Decide:** Nathan com Almoxarifado e Produção.
 
@@ -104,7 +111,7 @@ A cadeia DEC-2 → F1 → E1 → F2 → D6 termina em 30/10, que é o marco M4, 
 | L-05 | Nathan e diretoria | DEC-11 (13/11), mas registrar o horizonte já |
 | L-04 | Nathan e Compras | E2 (19/10) |
 | L-02, L-03 | Nathan, Fiscal, Almoxarifado | G1 (13/10) |
-| L-10, L-11 | Nathan, Robert, Pablo | D5/D6 (08/10) |
+| L-10 (→ Ciclo 2, 04/01/2027), L-11 | Nathan, Robert, Pablo | ~~D5/D6 (08/10)~~ |
 | L-15 | Nathan | 09/10 |
 
 ## Ver também

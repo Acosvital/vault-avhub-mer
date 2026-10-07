@@ -1,10 +1,13 @@
 ---
 tags: [erp-acos-vital, fluxo-operacional, setores, referencia]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # Setores Envolvidos no Fluxo do Pedido — Referência Completa
 
+> **Atualização de 07/10/2026 — a coluna "Sistema" deixou de ser só destino planejado para parte dos setores do MES.** Conferido no código (`develop`: `api-pcp` `ca3346b`, `app-pcp` `a802a3e`; **a `main` do MES parou em 28/08; produção e banco não conferidos**): **Estoque, Compras (setor), Recebimento e Qualidade (entrada)** têm código real em `develop`; `embalagem` (Expedição) e os setores `PRODUTIVO` de Flange vêm da UI/banco e **não foram conferidos**. Detalhe na seção "Setor no fluxo × setor no MES" abaixo e nas notas de fluxo. A ressalva de 17/09 abaixo fica por histórico.
+>
 > Lista de todo setor/função que participa do ciclo de vida do pedido, do 0 ao 100%. Cada linha diz onde o setor **vai viver** (sistema-alvo), o que ele faz, e em qual dos fluxos detalhados ele aparece como ator.
 >
 > **Confirmado com o usuário (17/09/2026): a coluna "Sistema" é destino planejado, não sistema em produção.** Só "Vendas → av-hub" já é real hoje (emissão do pedido no Omie, sincronizada pro av-hub). Todas as outras linhas marcadas "MES" — PCP, Compras/CCP/Aprovador (av-hub), Recebimento, Qualidade, Fábrica, Estoque, Expedição, Logística — descrevem **o sistema que o projeto precisa construir**, não algo que já funciona. A única exceção parcial é "Fábrica/Setores de produção": o motor de execução do roteiro já existe e roda em produção pra Flanges (`app-pcp`), mas só a partir do ponto em que uma Ordem de Produção chega até ele — o despacho do PCP pra esse motor não existe.
@@ -13,16 +16,16 @@ criado: 2026-09-16
 |---|---|---|---|
 | **Vendas** (Vendedor) | av-hub | Emite o pedido, decide acompanhamento de qualidade (início/fim), observa status por item | [[Fluxo-Detalhado-Pedido-Item]], [[Fluxo-Qualidade-Completo]] (Q1) |
 | **PCP** (produção) | MES | Na Carteira de Pedidos, escolhe por rodada itens, quantidades e **fábrica** (linha de fabricação ou Revenda) e gera a Ordem de Produção; resolve divergência e reprovação. Desde 24/09/2026 a checagem de saldo e a requisição de compra saíram do PCP e viraram setores do roteiro (Estoque e Compras) | [[Encaixe-Estoque-Revenda-no-PCP]], [[Modelo-Destinacao-Item]], todos os fluxos `*-Completo` |
-| **Setor Compras** (tipo `COMPRAS`) | MES | Etapa do roteiro da fábrica Revenda: a entrada do parcial gera a requisição de compra; o parcial espera ali até o recebimento liberar | [[Encaixe-Estoque-Revenda-no-PCP]], [[Fluxo-Compras-Completo]] (C1) |
+| **Setor Compras** (tipo `COMPRAS`) | MES | Etapa do roteiro da fábrica Revenda: a entrada do parcial gera a requisição de compra; o parcial espera ali até o recebimento liberar. *(Atualizado em 07/10: no código a requisição nasce no setor `REQUISICAO` e o circuito de compra está fora do roteiro; a requisição vai ao av-hub pelo contrato 34.)* | [[Encaixe-Estoque-Revenda-no-PCP]], [[Fluxo-Compras-Completo]] (C1) |
 | **Compras** (Comprador) | av-hub | Escolhe fornecedor, negocia, emite a Ordem de Compra, define flag acabado/não-acabado | [[Fluxo-Compras-Completo]] |
 | **CCP** | av-hub (junto de Compras) | Follow-up ativo de prazos/trânsito da Ordem de Compra já emitida — cobra o fornecedor, atualiza previsão de chegada | [[Fluxo-Compras-Completo]] |
 | **Aprovador / Diretoria** | av-hub | Segunda aprovação condicional, se o valor da compra passar do limiar (ainda não definido) | [[Fluxo-Compras-Completo]] |
 | **Fornecedor** | externo | Entrega o material comprado; sem acesso ao sistema — todo contato é por canal externo | [[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]] |
 | **Logística de entrada** | MES (ou terceirizada) | Só entra em ação no frete **FOB** (coleta no fornecedor, comprador assume desde o despacho); no **CIF** o fornecedor paga e entrega direto, sem esse setor participar | [[Fluxo-Compras-Completo]], [[Fluxo-Recebimento-Completo]] |
-| **Recebimento** (Almoxarifado) | MES | Conferência quantitativa, pesagem, cria o lote, etiquetagem | [[Fluxo-Recebimento-Completo]] |
-| **Qualidade** | MES | Inspeção (de processo ou final), aprova/reprova, RNC | [[Fluxo-Qualidade-Completo]] |
+| **Recebimento** (Almoxarifado) | MES | Conferência quantitativa, pesagem, cria o lote, etiquetagem. *(Em 07/10, no código: setor `LOGISTICA_ENTRADA`, exibido "Recebimento"; conferência **contra a NF**, peso/tolerância 5%, recontagem por outra pessoa e decisão do PCP; lote em quarentena. Etiqueta por lote em PDF; sem leitor 2D.)* | [[Fluxo-Recebimento-Completo]], [[App-PCP-Recebimento-Conferencia]] |
+| **Qualidade** | MES | Inspeção (de processo ou final), aprova/reprova, RNC. *(Em 07/10, no código: inspeção de entrada por lote, setor "Qualidade · Entrada"; inspeção de saída e de processo não conferidas.)* | [[Fluxo-Qualidade-Completo]] |
 | **Fábrica / Setores de produção** (tipo `PRODUTIVO`) | MES | Executa OS (beneficiamento, setor opcional no roteiro da fábrica Revenda) ou OP (produção própria) — corte, usinagem, furação, acabamento, embalagem | [[Fluxo-Producao-OS-OP-Completo]] |
-| **Estoque** (setor tipo `ESTOQUE`; Almoxarife, saldo geral) | MES | **Etapa 1 de todo roteiro** (24/09/2026): atende do saldo com split + reserva + conclusão e envia o restante. Recebe de volta o item comprado aprovado pela Qualidade (entrada + reserva). Guarda saldo, localização, movimentação entre depósitos, contagem cíclica | [[Encaixe-Estoque-Revenda-no-PCP]], [[Fluxo-Estoque-Completo]] |
+| **Estoque** (setor tipo `ESTOQUE`; Almoxarife, saldo geral) | MES | **Etapa 1 de todo roteiro** (24/09/2026): atende do saldo com split + reserva + conclusão e envia o restante. Recebe de volta o item comprado aprovado pela Qualidade (entrada + reserva). Guarda saldo, localização, movimentação entre depósitos, contagem cíclica. *(Em 07/10, no código: atender pelo saldo, reserva, saldo/movimentação/lote, saldo por filial. Contagem cíclica não consta; a baixa ainda ocorre quando a Embalagem recebe.)* | [[Encaixe-Estoque-Revenda-no-PCP]], [[Fluxo-Estoque-Completo]] |
 | **Expedição** | MES | Embalagem, paletização, consolidação de carga (parcial × integral) | [[Fluxo-Expedicao-Faturamento-Completo]] |
 | **Logística de saída** | MES | Define transporte, roteiro de entrega, comprovante de entrega ao cliente | [[Fluxo-Expedicao-Faturamento-Completo]] |
 | **Fiscal** | Omie (externo) | Emite nota fiscal (entrada e saída) — sistema nunca emite, só sinaliza e referencia | Todos os fluxos, como fronteira — nunca como ator interno |
@@ -30,7 +33,7 @@ criado: 2026-09-16
 
 ## Setor no fluxo × setor no MES (24/09/2026)
 
-No MES, "setor" é uma entidade (`Setor`) que entra no roteiro de uma fábrica, e ganhou **tipo**: `PRODUTIVO` (padrão, as ações de hoje), `ESTOQUE` e `COMPRAS` (ações próprias de subsistema, mesmo `ItemParcial` contando o tempo). O antigo setor "Emissão de Ordens", que era o 1º de todo roteiro no sistema antigo, saiu: virou a tela Ordem de Produção. Ver [[Encaixe-Estoque-Revenda-no-PCP]].
+No MES, "setor" é uma entidade (`Setor`) que entra no roteiro de uma fábrica, e ganhou **tipo**: `PRODUTIVO` (padrão, as ações de hoje), `ESTOQUE` e `COMPRAS` (ações próprias de subsistema, mesmo `ItemParcial` contando o tempo). **(Atualizado em 07/10, conferido no código: os tipos hoje são sete — `PRODUTIVO`, `ESTOQUE`, `COMPRAS`, `EXPEDICAO`, `REQUISICAO`, `LOGISTICA_ENTRADA` e `QUALIDADE`. Foram criados por migration os setores `estoque`, `requisicoes-compra`, `compras`, `logistica-entrada` ("Recebimento") e `qualidade-entrada` ("Qualidade · Entrada"); o circuito de compra (requisição, compras) está **fora do roteiro**, `circuito-compra.ts`, e a migration `...140100` tirou `requisicoes-compra` e `compras` de `fabrica_setores`. `embalagem` (`EXPEDICAO`), `inspecao_qualidade` (`QUALIDADE`) e os produtivos de Flange vêm da UI — não conferidos.)** O antigo setor "Emissão de Ordens", que era o 1º de todo roteiro no sistema antigo, saiu: virou a tela Ordem de Produção. Ver [[Encaixe-Estoque-Revenda-no-PCP]].
 
 ## Nota sobre papéis vs. setores
 

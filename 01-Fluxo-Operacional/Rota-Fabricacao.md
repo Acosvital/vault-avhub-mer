@@ -1,6 +1,7 @@
 ---
 tags: [erp-acos-vital, fluxo-operacional]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # 3c. Rota Fabricação (PCP & Produção Interna)
@@ -20,7 +21,7 @@ Cada linha de produção tem perfil de risco e integração diferente — flange
 
 > **Confirmado com o usuário (17/09/2026) — onde termina o que é real:** o `app-pcp`/MES em si (execução do roteiro de produção de Flanges — fábrica/setor/máquina/operador) **é real e está em produção**. O que **não existe** é tudo que vem antes dele neste fluxo: o PCP recebendo o pedido, classificando o item como "Fabricação", e despachando pra dentro do app-pcp emitindo uma Ordem de Produção. Esse encaixe (despacho PCP → app-pcp, e o status voltando) é 100% a construir, junto com o resto do fluxograma.
 >
-> **Atualização (23-24/09/2026):** o despacho já existe em `develop` — Carteira de Pedidos → tela Ordem de Produção → `POST /pedidos/completo`, uma OP por fábrica. O que falta é o encaixe do Estoque (etapa 1) e da Revenda, decidido em [[Encaixe-Estoque-Revenda-no-PCP]].
+> **Atualização (23-24/09/2026):** o despacho já existe em `develop` — Carteira de Pedidos → tela Ordem de Produção → `POST /pedidos/completo` *(atualizado em 07/10: hoje `POST /pedidos/completo/lote`, desde 01/10)*, uma OP por fábrica. O que falta é o encaixe do Estoque (etapa 1) e da Revenda, decidido em [[Encaixe-Estoque-Revenda-no-PCP]].
 
 ## Ver também
 - [[Encaixe-Estoque-Revenda-no-PCP]]

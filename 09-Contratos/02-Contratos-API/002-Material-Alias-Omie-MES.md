@@ -2,10 +2,14 @@
 tags: [contrato-api, mes, estoque]
 status: rejeitada
 criado: 2026-09-17
-atualizado: 2026-09-30
+atualizado: 2026-10-07
 ---
 
 # Contrato de API 002 — `material_alias_omie` (a implementar no MES/Estoque)
+
+> Status: **rejeitado** (histórico; decisão de 21/09/2026, código removido do MES em 29/09). Verificado em 07/10/2026. Ver [[Registro-de-Decisoes-2026-10-07]] e [[Indice-Contratos]].
+
+> **Atualização de 07/10/2026 — conferido no código:** coerente com a rejeição. O alias existiu no MES (`cca3803`, 22/09) e foi removido em `0ac2596` (29/09, migration com `DROP TABLE material_alias_omie`), na `develop` do `api-pcp`. O 002 não tem consumidor nem rota na `api-acos-vital`. Nada a fazer; permanece `rejeitada` (a "Fase 0 pendente... contrato 002" do `Estoque-Roadmap` é que está desatualizada).
 
 > **Rejeitado em 21/09/2026.** Decisão do Nathan: "não quero mais tratar isso aqui, se eles quiserem eles tratam lá no Omie" — duplicata de catálogo sai do escopo deste sistema. A tela **Produtos — Prováveis Duplicatas** (só leitura, já em produção no av-hub) **continua existindo** — só o que foi cancelado é a ação de vincular/resolver a duplicata dentro do sistema (este contrato, a tarefa D4 do [[Cronograma-2-Meses]] e a tela p1-4b do fluxo de 127 tarefas). Mantido neste arquivo só como histórico. **30/09/2026:** o código do alias foi removido do MES (`api-pcp` `0ac2596`, 29/09), coerente com a rejeição.
 

@@ -1,10 +1,13 @@
 ---
 tags: [contrato-logica, contrato-api, compras, acessos]
 criado: 2026-09-29
+atualizado: 2026-10-07
 status: aplicada
 ---
 
 # Contrato 28 — Vendedores e Compradores: cadastro do Omie só para leitura, período de atividade e sugestão por semelhança
+
+> **Atualização de 07/10/2026 — conferido no código (`main` = `develop` da `api-acos-vital`; produção não conferida no código; produção só pelo dump de 07/10, que cobre schema e dados, não o comportamento da API em produção; [[Auditoria-Dump-Producao-2026-10-07]]):** `POST /vendedores` é um upsert por `(codigo_empresa, codigo_vendedor_omie)`, mas **bloqueado com 403 `CADASTRO_VEM_DO_OMIE`**; o `PUT` ignora `codigo_vendedor_omie`, `codigo_empresa`, `nome`, `email` e `ativo` e devolve o header `X-Campos-Ignorados`; `ativo_desde`/`inativo_desde` são validados; compradores têm só `GET`, `GET` sugestões, `GET :id` e `PUT` (exige edição em 'compradores'). A chave `CADASTROS_OMIE_SOMENTE_LEITURA` do R1 **saiu** no contrato 38 (`c8f2f5e`): a regra vale sempre, sem variável. R4 na pipeline: `ativo_desde`/`inativo_desde` do comprador protegidos do sync (`66f9a2e`). **(atualizado em 07/10, [[Registro-de-Decisoes-2026-10-07]] item 51)** Compradores em produção: **20 de 74** vinculados a funcionário (carga de 07/10); só importam os **32 ativos**; vincular antes da primeira OC real.
 
 > **✅ ENTREGUE (02/10/2026).** Conferido na `api-test`: `POST /vendedores` e `DELETE /vendedores/{id}` respondem **403 `CADASTRO_VEM_DO_OMIE`** (R1); `PUT /vendedores/{id}` com `nome` e `ativo` diferentes responde 200 e **não altera** os dois (R2); `POST /compras/compradores` não existe (404, R3); `GET /compras/compradores/{id}/sugestoes` responde (404 para comprador inexistente, C3). R4 (`ativo_desde`/`inativo_desde` em compradores) está na `develop` (`5231219`), mas **não deu para conferir pela API**: a `api-test` não tem nenhum comprador cadastrado. Falta no av-hub: os dois campos no painel do comprador e a sugestão com sensibilidade.
 

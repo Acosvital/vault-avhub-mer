@@ -1,10 +1,13 @@
 ---
 tags: [contrato-api, vendedores, cadastros, acessos]
 criado: 2026-10-06
+atualizado: 2026-10-07
 status: aplicada
 ---
 
 # Contrato 39 — Vendedores: fila de vínculo com o funcionário
+
+> **Atualização de 07/10/2026 — conferido no código (API em `main` = `develop`; av-hub):** V1, V2 e V3 estão no código em **`a6ab058`** (tip da `develop`, 06/10 16:05; entrou na `main` pelo PR #280, `fdafb35`, 06/10 16:12): `?sem_vinculo=true` (ignorado se vier `id_funcionario`/`id_funcionario_in`), `nome_funcionario`, `nome_usuario` e, em `/vendedores/{id}/sugestoes`, `nome_setor`, `nome_unidade` e `desligado` (desligados por último). **Front:** av-hub#155 (tela de Vendedores no padrão de Compradores) foi **mergeado na `develop` do av-hub em 07/10 às 10:01 — só na `develop`, ainda não na `main` do av-hub**. A conferência em **produção** de 07/10 abaixo é do próprio vault (só leitura) e segue como está.
 
 > **✅ ENTREGUE — conferido em PRODUÇÃO em 07/10/2026** (só leitura; o DBA avisou que concluiu):
 > - **V1:** `GET /vendedores?ativo=true&sem_vinculo=true` → `total: 30` de 88 ativos; bate com os 30 sem `id_funcionario` da lista completa (o aceite local de 06/10 dava 28: o dado mudou).

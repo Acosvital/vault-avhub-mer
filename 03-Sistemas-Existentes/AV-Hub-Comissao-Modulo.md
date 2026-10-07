@@ -1,9 +1,12 @@
 ---
 tags: [erp-acos-vital, av-hub, comissao]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # av-hub — Módulo de Comissionamento (backend real, `core_comissionamento`)
+
+> **Atualização de 07/10/2026 — auditoria código × vault** (leitura de código; produção **não** conferida). (1) O front tem hoje **8 telas em `comissoes/*`** (conferido em `develop`); o que cada uma faz não foi levantado — a nota abaixo descreve só o backend e o protótipo. (2) A API ganhou `GET /dashboard/comissoes`, que usa `fn_dashboard_comissoes` sobre `comissao_coordenadores` (contrato [[07-Dados-Orcamento-e-Coordenadores-no-Banco]], commit 90bdb33, `main` = `develop`); o código cita "migration 007 e carga 007b" — que o DBA as tenha aplicado é **[I]**. (3) Saiu da API a chave de ambiente `COMISSOES_COORDENADORES_BLOQUEIO` (contrato [[38-Regras-Sem-Chave-de-Ambiente]], `c8f2f5e`). (4) Tabelas/views listadas abaixo não foram reconferidas; os models agora ficam em `src/schemas/**`.
 
 No backend `api-acos-vital` existe um schema Postgres inteiro dedicado a comissionamento, com bem mais estrutura do que o protótipo frontend ([[AV-Hub-Simulador-Comissao]]) sugeria. Isso muda a pergunta em aberto de "[[Decisoes-Chave-ERP|Simulador de Comissão é a mesma coisa que o projeto Python de automação, ou são paralelos?]]": existe pelo menos um **terceiro** pedaço da resposta, um schema de produção já em uso.
 

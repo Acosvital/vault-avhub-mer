@@ -1,13 +1,27 @@
+---
+tags: [contrato-logica, contrato-api, orcamento, comissoes]
+status: implementada-no-codigo
+decisao: orçamento desenvolvido por fora, no módulo Comercial & Suprimentos (✅ 07/10/2026); contrato a reescrever. O "desconsiderado" de 01/10 está superado
+criado: 2026-09-20
+atualizado: 2026-10-07
+---
+
 # Contrato — Dados de Orçamento e de coordenadores no banco (fora do repositório)
+
+> Status: decidido | no código | em produção (verificado em 07/10/2026 só quanto ao que o dump mostra). Fonte: [[Registro-de-Decisoes-2026-10-07]] (#39).
+
+> **✅ Decisão de 07/10/2026 (vale sobre tudo abaixo):** o orçamento foi **desenvolvido por fora, no módulo Comercial & Suprimentos**. A API entregue (`90bdb33`, 01/10, #275) **existe**. O [[38-Regras-Sem-Chave-de-Ambiente]] implementou o orçamento, embora o vault dissesse "desconsiderado". **Este contrato (e o 38) precisam ser reescritos** para refletir isso; o texto abaixo é histórico e não deve ser lido como escopo atual.
+
+> **Histórico — atualização de 07/10/2026 (leitura de código), antes da decisão acima — divergência entre a decisão e o código.** O vault dizia "desconsiderado / não entregue / os JSON ficam". A leitura do código (`origin/main` = `origin/develop` da `api-acos-vital`, `a6ab058`/`fdafb35`) mostra o contrário no lado da API: as rotas `/orcamento/{fornecedores,produtos,cotacoes,vinculos,categorias,familias}` **existem** e leem `core_compras.orc_*` e as views `orc_vw_*`; `GET /dashboard/comissoes` **existe** e usa `fn_dashboard_comissoes` sobre `comissao_coordenadores`. Commit `90bdb33` (01/10/2026, entrou na `main` pelo PR #275); o código cita "migration 007 e carga 007b". **Não é só a parte dos coordenadores** (como a nota de 06/10 abaixo dava a entender): o orçamento inteiro está implementado na API. O que **não** foi conferido: se o DBA aplicou o SQL e a carga 007b no banco (inferência) e se o av-hub migrou as telas (os JSON de `lib/orcamento/data/` e `lib/comissoes/coordenadores.json` podem seguir em uso). **A decisão de 01/10 do Nathan ("desconsiderado") não foi revertida aqui:** o texto abaixo continua como histórico, e **cabe ao Nathan decidir se o contrato volta ao escopo** (cobrar migração das telas e remoção dos JSON do git) ou se segue desconsiderado. Status do frontmatter: `implementada-no-codigo` (API); falta conferir em produção/`api-test`. Ver [[Indice-Contratos]] (Conferência de 07/10/2026) e [[38-Regras-Sem-Chave-de-Ambiente]] §5.
 
 > **Nota de 06/10/2026:** apesar de desconsiderado, a parte dos coordenadores foi implementada na API
 > (`90bdb33`, `GET /dashboard/comissoes`), com o bloqueio de comissão atrás da chave
 > `COMISSOES_COORDENADORES_BLOQUEIO`. O bloqueio **não se aplica** (decisão do Nathan) e a chave sai no
-> [[38-Regras-Sem-Chave-de-Ambiente]].
+> [[38-Regras-Sem-Chave-de-Ambiente]]. **(atualizado em 07/10)** a chave saiu no `c8f2f5e` (#279).
 
-> **⛔ DESCONSIDERADO em 01/10/2026 (decisão do Nathan).** Não será implementado: não cobrar o DBA nem o backend, e não migrar as telas de Orçamento nem o dashboard de comissões. Os JSON em `lib/orcamento/data/` e `lib/comissoes/coordenadores.json` ficam como estão. O texto abaixo é só histórico.
+> **⛔ (superado em 07/10: ver a decisão no topo) DESCONSIDERADO em 01/10/2026 (decisão do Nathan).** Não será implementado: não cobrar o DBA nem o backend, e não migrar as telas de Orçamento nem o dashboard de comissões. Os JSON em `lib/orcamento/data/` e `lib/comissoes/coordenadores.json` ficam como estão. O texto abaixo é só histórico.
 
-> **Conferido em 29/09/2026: não entregue.** O DBA avisou que terminou os contratos desta pasta, mas
+> **Conferido em 29/09/2026: não entregue** (histórico; **superado em 07/10**: as rotas aparecem em `main` com o `90bdb33` de 01/10). O DBA avisou que terminou os contratos desta pasta, mas
 > na `api-test` nenhuma rota deste existe (`/orcamento/fornecedores`, `/produtos`, `/cotacoes`,
 > `/vinculos`, `/categorias`, `/familias` e `/dashboard/comissoes` respondem "Rota não encontrada"),
 > e não há nada de orçamento ou coordenadores na `develop` da API (até `163b58b`). **Voltar ao DBA.**

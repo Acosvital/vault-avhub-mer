@@ -1,3 +1,7 @@
+---
+atualizado: 2026-10-07
+---
+
 # Contrato — Solicitações de vagas: fila, decisão e permissões no banco
 
 > **✅ Situação em 01/10/2026 — ENTREGUE (conferido na `api-test`).**
@@ -12,7 +16,7 @@
 > | Editar o salário de vaga **aprovada** (§3.3.1) | 200, volta para `pendente`, `decidido_*` limpos | ✅ 200, `situacao: pendente`, `decidido_por/em: null`, `custo_total` recalculado |
 > | Histórico `GET /vagas/{id}/decisoes` | linha `origem = 'edicao'` com "Dados alterados: salario" | ✅ duas linhas: `decisao` (pendente→aprovado) e `edicao` (aprovado→pendente) |
 >
-> Falta só do lado do av-hub: já trata os dois comportamentos (409 `VAGA_DECIDIDA` da API antiga e a volta para pendente), e o tratamento do 409 pode ser removido quando todos os ambientes estiverem na regra nova. A trava `VAGAS_TRAVAS_DECISAO` está ligada na `api-test`; **confirmar a mesma variável em produção** na hora de aplicar lá.
+> Falta só do lado do av-hub: já trata os dois comportamentos (409 `VAGA_DECIDIDA` da API antiga e a volta para pendente), e o tratamento do 409 pode ser removido quando todos os ambientes estiverem na regra nova. A trava `VAGAS_TRAVAS_DECISAO` está ligada na `api-test`; **confirmar a mesma variável em produção** na hora de aplicar lá. **(atualizado em 07/10)** A chave `VAGAS_TRAVAS_DECISAO` **saiu do código** no contrato 38 (`c8f2f5e`, #279): a trava vale sempre, não há mais variável a conferir; falta só confirmar em produção que a API está nessa versão.
 >
 > **Histórico (25/09/2026):** faltavam ligar a trava e a regra da §3.3.1 no backend. Resolvidos pelo DBA.
 

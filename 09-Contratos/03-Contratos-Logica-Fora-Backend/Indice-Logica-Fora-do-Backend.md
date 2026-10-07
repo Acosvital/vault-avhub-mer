@@ -2,9 +2,20 @@
 tags: [contrato-logica, av-hub, indice]
 origem: "av-hub docs/ (arquivos marcados ENVIAR)"
 importado: 2026-09-23
+atualizado: 2026-10-07
 ---
 
 # Índice — lógica que ainda está fora do banco (gambiarras marcadas no av-hub)
+
+> Status: decidido | no código | em produção (verificado em 07/10/2026 só pelo dump). Decisões desta rodada: [[Registro-de-Decisoes-2026-10-07]]. Resumo: orçamento (07) desenvolvido por fora, contrato a reescrever; 13 desconsiderado; envio da OC fixo no código, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN`, risco aceito; `PERMISSOES_ROTA_MODO` fixo em `exigir`.
+
+> **Atualização de 07/10/2026 — conferido no código (`main` = `develop` da `api-acos-vital`, `a6ab058`/`fdafb35`; pipeline `master` `d2886bf`).** Produção não foi conferida; "implementada-no-codigo" = o código comprova, **falta conferir em produção/`api-test`**. Mudanças em relação aos blocos abaixo (escritos entre 23/09 e 07/10, mantidos como histórico):
+> - **07** (orçamento e coordenadores): ✅ decidido em 07/10: o orçamento foi **desenvolvido por fora, no módulo Comercial & Suprimentos**; a API `90bdb33` (01/10, #275: `/orcamento/*` e `GET /dashboard/comissoes`) existe; o 38 implementou o orçamento embora o vault dissesse "desconsiderado". O contrato 07 (e o 38) **precisam ser reescritos**. Frontmatter do 07: `implementada-no-codigo`.
+> - **13**: ✅ contrato **desconsiderado** (07/10). Histórico: `GET /produtos/:id/fornecedores` existe (`31e26a6`, 25/09, #275); o simulador do av-hub segue sem ligar.
+> - **23**: implementado no código da pipeline (L4 mergeado em 05/10, `3233acf`; flags `SYNC_*` removidas em 06/10; inativar catálogos feito; L10.4 respondido; nunca manda parcelas). **Envio da OC fixo no código, direto ao Omie, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN`; L10.1, L10.6 (FOB) e L10.7 (b)–(d) são risco aceito** (✅ 07/10). **19-Pipeline**: histórico, substituído pelo 23, P5 implementado.
+> - **38**: saíram **13** chaves (não 11): as 11 + `BLACKLIST_PEDIDOS_CHAVE_LEGADA` + `COMISSOES_COORDENADORES_BLOQUEIO`; também `COMPRAS_HISTORICO_UNIFICADO` (do 36). Sobram exatamente as 6 do §3. Logo, `COMPRAS_VINCULO_EXIGIR_PV_EXISTENTE`, `COMPRAS_EXIGIR_PODE_APROVAR`, `COMPRAS_HISTORICO_UNIFICADO` e `VAGAS_TRAVAS_DECISAO` **não existem mais como chave** (regras fixas).
+> - **26**: L6 (chave própria do MES) segue aberto: `MES_INTEGRACAO_KEYS` só abre o PUT do 34. **34 e 35**: o MES chama o PUT (`e7ce2c9`, 02/10) e lê os eventos (`41bf4a6`, 05/10), só na `develop` do `api-pcp`. **39**: API em `a6ab058` (#280), front av-hub#155 na `develop` do av-hub desde 07/10 10:01.
+> - Ver o quadro completo em [[Indice-Contratos]] (Conferência de 07/10/2026).
 
 **Criado em:** 20/09/2026, no repositório `av-hub`. **Importado para este vault em 23/09/2026** —
 só os contratos marcados `ENVIAR` (ainda pendentes) foram trazidos; os já resolvidos (`OK -`)
@@ -20,7 +31,7 @@ Enquanto o backend não entrega, o que estiver fora do lugar fica **marcado no c
 ```
 
 Para listar tudo no repositório `av-hub`: `grep -rn "GAMBIARRA(" app components lib services utils hooks`
-(hoje são 57 marcas). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
+(🔴 **contagem não conferida em 07/10**: a nota dizia 57 marcas em 23/09; o repositório `av-hub` não estava no disco para recontar e o vault não traz o número do front conferido; recontar com o `grep` acima e registrar aqui um único valor). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
 contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contratos-Logica-Fora-Backend/`.
 
 ## Fila de vínculo dos vendedores (06/10/2026) — ✅ entregue 07/10
@@ -28,12 +39,12 @@ contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contr
 - **[[39-Vendedores-Fila-de-Vinculo]]** (**entregue e conferido em produção em 07/10/2026**, agora em `Realizados/`; destrava av-hub#155) — `GET /vendedores?sem_vinculo=true`, `nome_funcionario`/`nome_usuario`
   na lista e setor/unidade/desligado nos candidatos da sugestão, para a tela nova de Vendedores (lista e
   vínculo lado a lado, como Compradores). Patch em `39-anexos/`, testado na API local. A tela nova só sobe
-  depois da API.
+  depois da API. **(atualizado em 07/10)** API no código em `a6ab058` (develop 06/10 16:05; `main` pelo #280, `fdafb35`); front av-hub#155 mergeado na `develop` do av-hub em 07/10 10:01 (só `develop`).
 
 ## Novo: regras sem chave de ambiente (06/10/2026)
 
 - **[[38-Regras-Sem-Chave-de-Ambiente]]** — decisão do Nathan: regra decidida é fixa no código, sem
-  variável. 11 chaves da API passam a valer sempre e `BLACKLIST_PEDIDOS_CHAVE_LEGADA` sai (patch em
+  variável. 11 chaves da API passam a valer sempre e `BLACKLIST_PEDIDOS_CHAVE_LEGADA` sai (**atualizado em 07/10:** no diff saíram 13 chaves, as 11 + `BLACKLIST_PEDIDOS_CHAVE_LEGADA` + `COMISSOES_COORDENADORES_BLOQUEIO`; `COMPRAS_HISTORICO_UNIFICADO` também) (patch em
   `38-anexos/`, depois do patch do contrato 36). Ordem de subida no §4 (perfil Gerência de Compras e
   compradores vinculados ANTES da API). Segurança e paginação por pedido: fixar depois do pré-requisito.
   Bloqueio de comissão dos coordenadores: **não aplica** (06/10), a chave sai (patch 0002; vinha do 07).
@@ -58,6 +69,7 @@ contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contr
 
 - **[[23-Compras-Pipeline-Consolidado]]** — L4 (envio da OC ao Omie e exclusão ao cancelar)
   implementado na `feat/compras-omie` (`66f9a2e`, sem push), desligado e em dry run por padrão.
+  **(atualizado em 07/10)** Mergeado em 05/10 (PR #1, `3233acf`); as flags `SYNC_*` saíram em 06/10 (PR #2). ✅ Decidido em 07/10: o envio fica **fixo no código, direto ao Omie, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN`** (alteração de código: Gustavo; o Nathan rodou cerca de 4 testes reais); o teste real de 05/10 está registrado no contrato; L10.1, L10.6 e L10.7 (b)–(d) são **risco aceito**.
   Testado no local só contra um Omie falso; falta o L10 numa conta Omie de teste. No mesmo commit:
   IE/dados fiscais dos parceiros ([[30-Compras-Pedido-Omie-PDF-Completo]] §2.2) e as datas do
   comprador protegidas ([[28-Compradores-Criar-Excluir-Sugestao]] R4).
@@ -86,8 +98,8 @@ contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contr
 | [[30-Compras-Pedido-Omie-PDF-Completo]] | ✅ campos no código da `develop`; sem dado para testar | `Realizados/` (falta o PDF do av-hub mostrar) |
 | [[31-Compras-Dashboard]] | ✅ rota responde (valores zerados, sem pedidos) | `Realizados/` |
 | [[32-Compras-CCP-Acompanhamento-OC]] | ✅ fila, detalhe e contatos respondem e validam | `Realizados/` |
-| [[33-Dashboards-Unidade-de-Origem-do-Vendedor]] | ✅ `/vendedores` com `ativo_desde`, `inativo_desde`, `unidade_origem` | `Realizados/` (front sem push) |
-| [[34-Requisicoes-MES-Empurra-para-o-Hub]] | ✅ **entregue em 02/10/2026**: SQL aplicado, lista de requisições voltou (200) com as colunas novas | `Realizados/` |
+| [[33-Dashboards-Unidade-de-Origem-do-Vendedor]] | ✅ `/vendedores` com `ativo_desde`, `inativo_desde`, `unidade_origem` (código em `main`, `5231219`, #275) | `Realizados/` (front sem push em 01/10; não reconferido em 07/10) |
+| [[34-Requisicoes-MES-Empurra-para-o-Hub]] | ✅ **entregue em 02/10/2026**: SQL aplicado, lista de requisições voltou (200) com as colunas novas. (07/10: o MES já chama o PUT, `e7ce2c9`) | `Realizados/` |
 
 ## Conferência de 29/09/2026 (DBA: "terminei todos, menos 04 e 09; 13 desconsiderar")
 
@@ -98,13 +110,13 @@ Conferido ao vivo na `api-test` e no código da API (`develop` até `163b58b`):
 | [[26-Vendas-Liberacao-Pedido]] | ✅ backend no ar e telas no menu; **falta a data de corte** (`parametros_vendas` vazia) e o L4 do `api-pcp` (Robert) |
 | [[19-Compras-Pedido-Omie-Nomes]] | ✅ backend testado com pedido de teste; front em [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), mergeado em 29/09 → **movido para `Realizados/`** |
 | [[18-Compradores-Funcionario]] | ✅ `/funcionarios` devolve setor e unidade; última gambiarra removida em [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), mergeado em 29/09 → **movido para `Realizados/`** |
-| [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | ⛔ **desconsiderado em 01/10/2026** (decisão do Nathan); antes: não entregue |
+| [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | ⛔ **desconsiderado em 01/10/2026** (decisão do Nathan); antes: não entregue. **(atualizado em 07/10)** o código existe em `main` (`90bdb33`); ✅ 07/10: orçamento desenvolvido por fora (Comercial & Suprimentos), contrato a reescrever; o "desconsiderado" de 01/10 está superado |
 | [[14-Compras-Omie-Pedido-Compra]] | **fluxos A e B testados (01/10/2026), falta ligar em produção** → **movido para `Realizados/`** |
-| [[19-Compras-Pedido-Pipeline-Omie]], [[23-Compras-Pipeline-Consolidado]] | não são do DBA: dependem da `omie-elt-pipeline` (branch `feat/compras-omie`, sem commits novos desde 24/09; L4, envio da OC, ainda não existe) |
+| [[19-Compras-Pedido-Pipeline-Omie]], [[23-Compras-Pipeline-Consolidado]] | não são do DBA: dependem da `omie-elt-pipeline` (branch `feat/compras-omie`, sem commits novos desde 24/09; L4, envio da OC, ainda não existe) — **(atualizado em 07/10)** L4 foi implementado em 05/10 e mergeado (PR #1); ver o aviso no topo |
 | [[16-Compras-Pedido-DBA-Banco]] e [[17-Compras-Pedido-API-Backend]] (eram 17 e 18) | históricos, concluídos pelo [[13-Compras-Backend-Consolidado]] → **movidos para `Realizados/`** |
 | [[04-Vagas-Fila-Decisao-no-Banco]] | **entregue e conferido em 01/10/2026** → **movido para `Realizados/`** |
 | [[09-Paginacao-por-Pedido-Vendas-Planilha]] | **entregue e conferido em 01/10/2026** (`agrupar_por=pedido_venda`; as telas já listam por `/pedidos_venda`) → **movido para `Realizados/`** |
-| [[13-Fornecedores-por-Produto]] | desconsiderar (pedido do Nathan) |
+| [[13-Fornecedores-por-Produto]] | desconsiderar (pedido do Nathan); ✅ **contrato 13 desconsiderado** em 07/10 |
 
 ## Novo: módulo de Vendas (28/09/2026)
 
@@ -114,8 +126,8 @@ Conferido ao vivo na `api-test` e no código da API (`develop` até `163b58b`):
   gerente (*Liberação da equipe*, só leitura). Banco, API e telas testados no local; SQL nos
   apêndices, patch da API em `26-anexos/`. **Telas mergeadas na `develop` em 28/09/2026
   ([av-hub#103](https://github.com/Acosvital/av-hub/pull/103))**, mas sem backend na `api-test` (rotas 404).
-  Pendente: DBA/backend aplicarem (L1–L3), `api-pcp` trocar a origem da Carteira (L4). **30/09: L4 concluído pelo Robert** (`api-pcp` `901f9bb`); faltam a data de corte (L1) e a chave própria do MES (L6). A partir deste contrato, **o contrato vive no vault** (não mais em
-  `av-hub/docs/ENVIAR - *`); as marcas `GAMBIARRA(` apontam para cá.
+  Pendente: DBA/backend aplicarem (L1–L3), `api-pcp` trocar a origem da Carteira (L4). **30/09: L4 concluído pelo Robert** (`api-pcp` `901f9bb`); faltam a data de corte (L1) e a chave própria do MES (L6). **(atualizado em 07/10)** a data de corte foi preenchida em 01/10; só o L6 segue aberto. A partir deste contrato, **o contrato vive no vault** (não mais em
+  `av-hub/docs/ENVIAR - *`); as marcas `GAMBIARRA(` apontam para cá (contagem total: 🔴 não conferida em 07/10, ver o topo).
 
 ## Novo: Compras — nomes no detalhe do pedido do Omie (28/09/2026)
 
@@ -144,7 +156,7 @@ do Omie, a cotação automática e o histórico do Omie só foram testados vazio
 do Omie ([[19-Compras-Pedido-Omie-Nomes]]). **Decisões pendentes:** quando ligar as chaves da API
 `COMPRAS_VINCULO_EXIGIR_PV_EXISTENTE`, `COMPRAS_EXIGIR_PODE_APROVAR` e `COMPRAS_HISTORICO_UNIFICADO`
 (o av-hub já pede `?origem=todas` sozinho); avisar que os KPIs de aprovadas sobem de uma vez quando o
-histórico do Omie tiver dados.
+histórico do Omie tiver dados. **(atualizado em 07/10)** Essas três chaves **não existem mais** no código: as regras ficaram fixas (contratos 36 e 38, `c8f2f5e`); a pendência que sobra é a ordem de subida (compradores vinculados e perfil Gerência de Compras antes da API).
 
 ## Prioridade: módulo de Compras
 
@@ -160,7 +172,7 @@ e [[008-Requisicoes-Compra]] também já estão aplicados.
 - **[[23-Compras-Pipeline-Consolidado]]** — lista de trabalho da `omie-elt-pipeline`: L1–L10 (PTAX,
   compradores, espelho, envio da OC, catálogos, entidades HTML, testes). L1–L3 e L5–L9 já estão
   implementados na branch `feat/compras-omie` (desligados até o banco ter as tabelas). É o que falta
-  para as telas de Compras terem dados na `api-test`.
+  para as telas de Compras terem dados na `api-test`. **(atualizado em 07/10)** L1–L9 e o L4 estão no `master` da pipeline (`d2886bf`) e rodam sem flag de leitura; falta conferir produção; L10.1, L10.6 e L10.7 (b)–(d) são risco aceito (✅ 07/10).
 - **[[19-Compras-Pedido-Omie-Nomes]]** — nomes no detalhe do pedido feito no Omie.
 
 Contratos de detalhe:
@@ -175,8 +187,8 @@ Contratos de detalhe:
   (o DBA concluiu a parte deles; o que sobrou foi para o [[13-Compras-Backend-Consolidado]], já
   realizado, e o [[23-Compras-Pipeline-Consolidado]]). Ficam como histórico.
 - Contratos de API da integração com o MES, ainda em proposta:
-  [[003-Requisicao-Compra-Integracao-MES]] e [[004-Referencia-OC-Integracao-MES]].
-- **[[13-Fornecedores-por-Produto]]** — fornecedor por produto (relacionado a Compras/Comissão).
+  [[003-Requisicao-Compra-Integracao-MES]] e [[004-Referencia-OC-Integracao-MES]]. **(atualizado em 07/10)** O 003 foi substituído pelo [[34-Requisicoes-MES-Empurra-para-o-Hub]]; o 004 continua inexistente (API e MES) e o [[005-Status-Item-Integracao-MES]] tem a rota só no MES, sem consumidor no hub.
+- **[[13-Fornecedores-por-Produto]]** (✅ **desconsiderado** em 07/10; texto abaixo é histórico) — fornecedor por produto (relacionado a Compras/Comissão).
   Endpoint entregue e confirmado (28/09/2026), mas ainda não dá pra ligar: o simulador
   (`experimental/simulador-comissao`) roda sobre dataset legado com IDs incompatíveis com a
   tabela real `produtos` — falta a migração do módulo antes de usar o endpoint.
@@ -185,7 +197,7 @@ Contratos de detalhe:
 e [[03-Funcionarios-Cadastro-Organograma-Transacional]] — movidos para
 `Realizados/03-Contratos-Logica-Fora-Backend/`. O front (`components/Funcionarios/*`) já foi
 adaptado e testado contra o mesmo ambiente, mas **só localmente — ainda não commitado no `av-hub`**;
-as marcas `GAMBIARRA(` de F1–F7 continuam no repositório até esse commit acontecer.
+as marcas `GAMBIARRA(` de F1–F7 continuam no repositório até esse commit acontecer (🔴 situação atual das marcas não conferida em 07/10; ver a contagem no topo).
 
 **Já entregues, front commitado e PRs mergeadas na `develop` do `av-hub` (28/09/2026):**
 
@@ -197,7 +209,7 @@ as marcas `GAMBIARRA(` de F1–F7 continuam no repositório até esse commit aco
 - [[05-Permissoes-e-Escopo-no-Banco]] — identidade propagada via Bearer token, permissão/escopo
   lidos de `/me/permissoes` (PR #95). As travas do backend (`IDENTIDADE_EXIGIR_TOKEN`,
   `PERMISSOES_ROTA_MODO`, `ESCOPO_VENDEDORES_EXIGIR`) seguem desligadas por padrão — o BFF já manda
-  o token, a segurança aperta sozinha quando a infra ligar os flags.
+  o token, a segurança aperta sozinha quando a infra ligar os flags. **(atualizado em 07/10, [[Registro-de-Decisoes-2026-10-07]] #8 e #9)** ✅ `PERMISSOES_ROTA_MODO` fica **fixo em `exigir`** no código, sem `.env` (alteração: Gustavo); as chamadas de serviço (só `x-api-key`, sem `Bearer`) passam porque o modo só confere permissão quando há token. 🟡 (Gustavo) fixar só `ESCOPO_VENDEDORES_EXIGIR`; as demais seguem como chave até separar as chaves de serviço.
 - [[06-Ordenacao-Listagens]] — `sort/order` em todas as telas de prioridade alta e baixa (PR #96).
   Permissões (agregado client-side) e Diligenciadores (paginação 100% cliente) ficaram fora de
   propósito, sem headers de tabela pra ordenar.
@@ -229,7 +241,7 @@ Renumerados 07, 08, 09 em `Realizados/03-Contratos-Logica-Fora-Backend/`.
 | Contrato | Cobre | Itens |
 |---|---|---|
 | [[04-Vagas-Fila-Decisao-no-Banco]] | Solicitações de vagas: filtros/ordem/resumo, custo gerado, decisão com `pode_aprovar` e histórico. **Entregue e conferido na `api-test` em 01/10/2026** (trava `VAGAS_TRAVAS_DECISAO` ligada, §3.3.1 no backend); movido para `Realizados/`. Falta confirmar a trava em produção | V1–V8 |
-| [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | **⛔ DESCONSIDERADO (01/10/2026).** Orçamento e coordenadores fora do repositório, com filtro/paginação/ordem no servidor | O1–O5, C1–C3 |
+| [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | **⛔ Desconsiderado em 01/10/2026 (superado em 07/10).** Orçamento e coordenadores fora do repositório, com filtro/paginação/ordem no servidor. **(atualizado em 07/10)** ✅ orçamento desenvolvido por fora, no módulo Comercial & Suprimentos; API `90bdb33` existe; contrato a reescrever | O1–O5, C1–C3 |
 
 Pedidos/Notas/Dashboards e Permissões/Escopo (P1–P8/N1–N3/D1–D3 e S1–S11) já saíram desta lista —
 ver "Já entregues" acima ([[04-Pedidos-Notas-Dashboards-Agregacao-no-Banco]],

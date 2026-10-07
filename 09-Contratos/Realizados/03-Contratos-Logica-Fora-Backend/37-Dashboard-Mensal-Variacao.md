@@ -1,10 +1,13 @@
 ---
 tags: [contrato-api, dashboards, vendas]
 criado: 2026-10-05
+atualizado: 2026-10-07
 status: aplicada
 ---
 
 # Contrato 37 — `variacao_pct` nas rotas `/dashboard_mensal_*`
+
+> **Atualização de 07/10/2026 — conferido no código (`main` = `develop` da `api-acos-vital`; produção não reconferida no código em 07/10; produção só pelo dump de 07/10, que cobre schema e dados, não o comportamento da API em produção; [[Auditoria-Dump-Producao-2026-10-07]]):** confirmado — `variacao_pct` e `variacao_quantidade_pct` saem das rotas `/dashboard_mensal_{vendas,faturamento}` via `fn_variacao_pct`. Commit mergeado `47a5aad` (PR #278, entrou em `main` antes do #280 `fdafb35`). A conferência em produção de 06/10 (abaixo) é do próprio vault e segue como está.
 
 > ✅ **Concluído (06/10/2026).** API na `develop` (`47a5aad`), na `api-test` e em **produção**: em set/2026
 > o consolidado de vendas dá 55,3 (igual ao `vendas.variacao_pct` da `/dashboard/equipe`), por unidade

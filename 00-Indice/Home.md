@@ -1,6 +1,7 @@
 ---
 tags: [erp-acos-vital, moc]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # ERP Aços Vital — Mapa de Conhecimento
@@ -10,6 +11,8 @@ Vault único do projeto de **ERP de altíssimo nível** da Aços Vital: um siste
 > **Primeira vez aqui?** Comece por [[Comece-Aqui]]: o que existe, o que falta construir, o que ler e o que fazer na primeira semana.
 >
 > **Em que ponto estamos?** [[Onde-Estamos]]: marcos, o que está pronto, quadro de tarefas e bloqueios atuais.
+>
+> **(atualizado em 07/10)** **Decisões de 07/10:** [[Registro-de-Decisoes-2026-10-07]] (o que está ✅ decidido, 🟡 proposta adotada ou 🔴 pendente). Auditoria de produção pelo dump: [[Auditoria-Dump-Producao-2026-10-07]].
 
 ## Como este vault está organizado
 
@@ -19,7 +22,7 @@ Vault único do projeto de **ERP de altíssimo nível** da Aços Vital: um siste
 - [[Schema-Postgres-Multi-Dominio|4. Arquitetura transversal]] — ver também [[Diagramas-UML|UML completo]] (classes, casos de uso, estados, componentes, implantação, pacotes) — decisões e padrões que atravessam todos os módulos.
 - [[Equipe-Projeto|5. Pessoas e equipe]]
 - [[Glossario|6. Glossário]]
-- [[Cronograma-2-Meses|7. Cronograma de 2 meses]] — plano de 18/09 a 18/11/2026 (Fase 0 a C + integração mínima), com marcos, capacidade, decisões bloqueantes e ordem de corte.
+- [[Cronograma-2-Meses|7. Cronograma de 3 meses]] — plano de 18/09 a 18/12/2026 (Fase 0 a C + integração mínima; o arquivo mantém o nome antigo "2-Meses"; antes eram 2 meses, 18/09 a 18/11), com marcos, capacidade, decisões bloqueantes e ordem de corte.
 - [[Indice-Integracao-Omie|8. Integração com o Omie]] — campo a campo do que o pipeline extrai, lacunas contra o que o Estoque/MES precisa, levantamento da API e roteiro de implementação.
 - [[Indice-Contratos|9. Contratos de banco e API]] — DDL para o DBA e contratos de endpoint, com status e perguntas em aberto.
 - [[Rastreabilidade-e-SLA-de-Eventos|Rastreabilidade, custódia e SLA por etapa]] (em `04-Arquitetura-Transversal`) — proposta de log de eventos (quem fez, com quem está, quem autorizou, quem passou, tempo contra SLA) e [[Campos-e-API-para-Rastreabilidade|os campos de banco e endpoints que ela exige]].
@@ -32,7 +35,7 @@ Vault único do projeto de **ERP de altíssimo nível** da Aços Vital: um siste
 > **A situação atual do projeto (marcos, tarefas, bloqueios) está em [[Onde-Estamos]].** A lista abaixo é o histórico do que já foi analisado e confirmado.
 
 - ✅ Fluxo operacional macro mapeado e analisado.
-- ✅ PRD do sistema de Estoque/Recebimento/Compras recebido e analisado (v1.0, ainda não construído).
+- ✅ PRD do sistema de Estoque/Recebimento/Compras recebido e analisado (v1.0; em 21/09 ainda não construído — **atualizado em 07/10:** já tem código na `develop` do MES, ver [[Onde-Estamos]]).
 - ✅ **Frontends** av-hub e app-pcp analisados em profundidade (todos os `docs/*.md`, todos os módulos, fluxos completos de pedido).
 - ✅ **Backends reais** recebidos e analisados: `api-acos-vital` (Sequelize, backend do av-hub), `api-pcp` (NestJS+Prisma, backend do app-pcp) e `omie-elt-pipeline` (extrator Omie→Postgres). Isso permitiu **confirmar, corrigir e expandir** boa parte do que antes era inferido só a partir dos frontends e de contratos escritos.
 - ✅ Descobertos 2 schemas de backend novos (`core_comissionamento`, `core_aprovacao_de_vagas`).
@@ -41,7 +44,8 @@ Vault único do projeto de **ERP de altíssimo nível** da Aços Vital: um siste
 - ✅ **Fluxo detalhado item a item registrado**: PCP verifica estoque como primeiro passo (não rota isolada), flag acabado/não-acabado do comprador define método de conferência no Recebimento, Ordem de Serviço/Ordem de Produção emitidas pelo PCP, status por item a caminho do av-hub. Ver [[Fluxo-Detalhado-Pedido-Item]].
 - ✅ **Reclassificação:** corte de chapa (plasma/laser) é beneficiamento de **Revenda**, não uma linha de Fabricação — corrigido em todo o vault. "Chapa Expandida" (produto de linha própria) é diferente de "chapa cortada sob medida" (beneficiamento).
 - ✅ **Confirmado com o usuário (17/09/2026) — marco de escopo importante:** de todo o fluxo operacional documentado em [[Fluxo-Operacional-Visao-Geral]]/[[Fluxo-Detalhado-Pedido-Item]]/[[Fluxogramas-Completos]], **só a Entrada Comercial é real hoje** (pedido criado no Omie, sincronizado pro av-hub pelo pipeline ELT). A partir da triagem do PCP em diante — classificação item a item, requisição de compra, OS/OP, Recebimento, Qualidade, Estoque, Expedição/Faturamento operacional — **nada existe em sistema nenhum**, é 100% manual hoje. Única exceção parcial: o motor de execução de roteiro do `app-pcp` (Flanges) já roda em produção, mas só a partir do ponto em que uma Ordem de Produção chega até ele — o despacho do PCP pra esse motor também não existe. **O sistema a construir deve implementar todos os passos de todos os 6 fluxogramas em [[Fluxogramas-Completos]], sem exceção** — não é um subconjunto. Ver a mesma ressalva repetida em cada nota de fluxo/rota afetada.
-- ✅ Plano de 2 meses, contratos propostos, proposta de rastreabilidade, revisão dos estados e lista de perguntas consolidadas: ver [[Onde-Estamos]].
+- ✅ **07/10/2026 — pente fino contra o código dos cinco repositórios** (detalhe no adendo de [[Onde-Estamos]]): o Estoque, a Qualidade de entrada e o Recebimento já têm código na `develop` do MES; o av-hub ganhou o módulo [[AV-Hub-Comercial-Suprimentos|Comercial & Suprimentos]] e a API foi reestruturada ([[AV-Hub-API-Estado-Atual]]); a pipeline envia OC ao Omie ([[Omie-ELT-Pipeline]]); o MES já empurra requisições e lê eventos do av-hub ([[Chaves-de-Integracao-AvHub-MES-Pipeline]]). Só código foi lido — produção não foi conferida.
+- ✅ Plano (de 2 meses em 21/09; hoje de 3 meses, até 18/12), contratos propostos, proposta de rastreabilidade, revisão dos estados e lista de perguntas consolidadas: ver [[Onde-Estamos]].
 - ✅ **24/09/2026 — encaixe do Estoque e da Revenda no fluxo do PCP** ([[Encaixe-Estoque-Revenda-no-PCP]], proposta do Robert + regra do Nathan): Revenda vira fábrica (`Fabrica.tipo = REVENDA`), Estoque e Compras viram setores tipados, o Estoque é a etapa 1 de todo roteiro, o setor Emissão de Ordens vira a tela Ordem de Produção, a reserva aponta para lote + `ItemParcial` sem expiração, e o **item comprado aprovado na Qualidade vai para o Estoque, não para a Expedição**. Revisados os fluxos, o PRD do Estoque, a UML, o mapa de telas, o cronograma e os 3 artifacts.
 - ✅ **21/09/2026 — auditoria de um dump de produção fresco contra o vault e o código real** ([[Auditoria-Dump-Producao-2026-09-21]]): achou que 5 dos 6 contratos SQL e o contrato de API 001 já estavam aplicados em produção sem o vault saber (corrigido em [[Indice-Contratos]]/[[Onde-Estamos]]). Também achou 8 endpoints do av-hub apontando pra um schema Postgres (`negocio`) que não existe no dump de produção (`core_compras`, sim) — confirmado pelo Nathan como código morto conhecido, sem urgência. Fora esses dois pontos, o modelo de dados documentado (av-hub e app-pcp) bateu com a realidade.
 
@@ -51,7 +55,7 @@ Ver [[Decisoes-Chave-ERP]] para a lista completa. Destaques:
 
 - [[Achado-Duplicacao-RBAC|Duplicação de identidade/permissão]] entre av-hub e app-pcp.
 - [[Achado-Ambiguidade-PCP|Ambiguidade do nome "PCP"]].
-- O módulo de Estoque ainda não foi construído — existe só como PRD.
+- ~~O módulo de Estoque ainda não foi construído — existe só como PRD.~~ **(atualizado em 07/10)** O Estoque tem código na `develop` do MES (materiais, depósitos, saldo, reservas, lote, qualidade, recebimento — [[App-PCP-Recebimento-Conferencia]]); a `main` do MES parou em 28/08 e nada foi conferido em produção.
 - O app-pcp tem **backend pronto para um board de produção** (dashboard/TV) que o frontend ainda não construiu — puramente lacuna de UI, não de dado.
 - [[AV-Hub-Bugs-Catalogo|Dívida técnica]] — a maior parte já resolvida; poucos itens reais restantes.
 - Padrões de engenharia maduros vistos nos dois backends e no pipeline ELT (concorrência via `updateMany`+conflito, colunas protegidas entre sistemas, adiamento deliberado de RBAC até desenhar escopo por instância, rejeição documentada de FK entre entidades sincronizadas independentemente) — candidatos a **princípios de arquitetura** para o ERP unificado, não só curiosidades.
@@ -66,9 +70,10 @@ Entrada Comercial → PCP (Carteira) → [Estoque | Revenda | Fabricação] → 
 | ------------------------------------ | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | Entrada comercial (venda)            | [[AV-Hub-Visao-Geral\|av-hub]] + [[Omie-ELT-Pipeline\|pipeline ELT]] | ✅ Em produção                                                                             |
 | Acompanhamento comercial/financeiro  | [[AV-Hub-Modulos\|Portal PCP, Portal Vendedor, Portal Gerente]]      | ✅ Em produção                                                                             |
-| Estoque / Recebimento / Compras      | [[PRD-Estoque-Visao-Geral\|PRD Estoque]]                             | 📋 Só planejado (mas Compras pode já ter views de backend — ver [[AV-Hub-Bugs-Catalogo]]) |
-| Fabricação — Flanges                 | [[App-PCP-Visao-Geral\|app-pcp]] / MES                    | 🚧 Backend maduro, frontend em construção (Robert). Única fábrica cadastrada hoje. |
+| Estoque / Recebimento / Compras      | [[PRD-Estoque-Visao-Geral\|PRD Estoque]], [[App-PCP-Recebimento-Conferencia\|Recebimento]] (MES), Compras no [[AV-Hub-Modulos\|av-hub]] | 🚧 Código na `develop` (MES) e Compras no av-hub/API/pipeline (envio da OC ao Omie); produção não conferida |
+| Fabricação — Flanges                 | [[App-PCP-Visao-Geral\|app-pcp]] / MES                    | 🚧 Backend e frontend em construção na `develop` (Robert); fábricas no código: Flange (fabricação) e Revenda. `main` parada em 28/08 (atualizado em 07/10). |
 | Fabricação — Grade de Piso, Chapa Expandida, Caldeiraria etc. | MES (mesmo modelo Fábrica/Setor/Roteiro) | 📋 Sistema definido, fábricas/roteiros ainda não cadastrados (lista aberta, não só essas três) |
 | Revenda — corte de chapa sob medida (plasma/laser) | [[PRD-Estoque-Visao-Geral\|PRD Estoque]] (beneficiamento) | 📋 É Revenda, não Fabricação — ver [[Fabricacao-Chapas]] |
 | Faturamento / Expedição              | Omie (nota fiscal) + av-hub (visão)                                  | ✅ Parcial (fiscal fica no Omie)                                                           |
+| Propostas comerciais, custo e cotação de fornecedores | [[AV-Hub-Comercial-Suprimentos\|Comercial & Suprimentos]] (`api-comercial`) | 🚧 Propostas/Painel em `main`; resto na `develop` e em branches; publicação não conferida |
 | Comissionamento                      | [[AV-Hub-Comissao-Modulo]]                                           | ✅ Schema de backend em produção, uso ainda a esclarecer                                   |

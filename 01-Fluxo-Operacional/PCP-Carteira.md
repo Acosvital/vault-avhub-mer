@@ -1,14 +1,14 @@
 ---
 tags: [erp-acos-vital, fluxo-operacional, pcp]
 criado: 2026-09-16
-atualizado: 2026-09-24
+atualizado: 2026-10-07
 ---
 
 # 2. Gestão de Carteira (PCP)
 
 > ⚠️ Não confundir com [[Achado-Ambiguidade-PCP|o "Portal PCP" do av-hub]], que é outra coisa (acompanhamento comercial por diligenciadores). Este PCP é o setor de Planejamento e Controle de Produção.
 >
-> ~~Confirmado com o usuário (17/09/2026): esta triagem/carteira não existe em nenhum sistema hoje.~~ **Superado em 23-24/09/2026:** a **Carteira de Pedidos** e a tela **Ordem de Produção** existem no `app-pcp` (branch `develop`, rotas `/carteira` e `/ordens-producao/novo`), com backend real no `api-pcp` (`GET /pedidos/carteira`, `POST /pedidos/completo`). O encaixe do Estoque e da Revenda nessa triagem foi decidido em 24/09 — ver [[Encaixe-Estoque-Revenda-no-PCP]].
+> ~~Confirmado com o usuário (17/09/2026): esta triagem/carteira não existe em nenhum sistema hoje.~~ **Superado em 23-24/09/2026:** a **Carteira de Pedidos** e a tela **Ordem de Produção** existem no `app-pcp` (branch `develop`, rotas `/carteira` e `/ordens-producao/novo`), com backend real no `api-pcp` (`GET /pedidos/carteira`, `POST /pedidos/completo`) *(atualizado em 07/10, conferido no código em `develop`: a Carteira lê só os pedidos liberados pelo vendedor — `GET /pedidos_liberados`, `901f9bb`, 29/09, C4 —, e a OP é criada por `POST /pedidos/completo/lote` (01/10); o `POST /pedidos/completo` singular foi apagado no PR #50. `main` do MES parada em 28/08; produção não conferida)*. O encaixe do Estoque e da Revenda nessa triagem foi decidido em 24/09 — ver [[Encaixe-Estoque-Revenda-no-PCP]].
 
 - O pedido de venda aparece na **Carteira de Pedidos**, lida do av-hub/Omie, com status de envio (não enviado, parcial, total) e de produção (aguardando, em produção, concluída).
 - O PCP abre o pedido na tela **Ordem de Produção** e, por **rodada**, escolhe quais itens e quantas unidades vão agora e **para qual fábrica** — uma linha de fabricação ou a fábrica **Revenda**. Cada rodada gera **uma OP por fábrica**; o sequencial de faturamento do Omie (100/1, 100/2...) é o motivo das rodadas.

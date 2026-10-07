@@ -2,9 +2,14 @@
 tags: [contrato-sql, dba, bug, vendas, faturamento]
 status: aplicada
 criado: 2026-09-24
+atualizado: 2026-10-07
 ---
 
 # Contrato SQL 009 — `core.categorias` sem `codigo_empresa` no JOIN de 4 views (bug real, testado)
+
+> Status: no código | em produção (verificado em 07/10/2026 pelo dump). Fonte das decisões: [[Registro-de-Decisoes-2026-10-07]].
+>
+> **🔴 Divergência aberta (07/10):** o [[Auditoria-Dump-Producao-2026-10-07]] diz que o pedido 25970 soma o mesmo R$ 964.763,88 em `produto_vendas`, mas com **311 linhas**, não 53, e que "o vault falava em 53 registros". Os 53 abaixo vêm de `GET /vendas_planilha` (a view), e as 311 são linhas da tabela `produto_vendas`; nenhuma fonte do vault explica a diferença, então o "53" **não foi corrigido**. O total em reais bate nas duas contagens. Dono: Gustavo (conferir por consulta a contagem na view e em `produto_vendas`).
 
 > **✅ APLICADO — conferido em PRODUÇÃO em 06/10/2026** (só leitura): `GET /vendas_planilha?pedido_venda=25970` devolve **53 registros** somando **R$ 964.763,88**, exatamente o resultado "depois do fix" deste contrato (antes eram 76 registros e R$ 1.409.191,16). Conferido só pela `vw_vendas_planilha`; as outras três views (`vw_vendas_base`, `vw_nf_classified`, `vw_faturamento_planilha`) não foram testadas uma a uma.
 

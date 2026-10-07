@@ -1,15 +1,18 @@
 ---
 tags: [erp-acos-vital, av-hub, reconciliacao]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # av-hub — Reconciliação de Vendas (Waterfall de Dedução)
+
+> **Atualização de 07/10/2026 — auditoria código × vault** (leitura de código, `api-acos-vital` `main` = `develop` a6ab058; produção **não** conferida). (1) A nota cita models Sequelize em `src/models`; hoje o código está em `src/schemas/<schema>/{tables,views,aggregates,functions}/**` (PR #276, ver [[AV-Hub-API-Estado-Atual]]). (2) **Planilha de vendas**: existe `vw_vendas_planilha_leve` (migration 2026-09-29_009, mesmas colunas), lida só no **modo por pedido** (`agrupar_por` / `paginar_por=pedido_venda`, ativado por `VENDAS_PLANILHA_PAGINAR_POR_PEDIDO`) com fallback para a view original via `to_regclass`; e `vw_vendas_planilha_resumo` **aceita intervalo de datas** (contrato 05 P8). (3) `variacao_pct` e `variacao_quantidade_pct` agora saem de `/dashboard_mensal_{vendas,faturamento}` via `fn_variacao_pct` (contrato 37). (4) Saiu a chave `BLACKLIST_PEDIDOS_CHAVE_LEGADA` (contrato [[38-Regras-Sem-Chave-de-Ambiente]]). (5) `pedidos_vendas` continua só com o boolean `devolucao_parcial` (coerente com o contrato 006 invalidado). A cascata G1–G6 descrita abaixo **não foi reconferida** contra o SQL.
 
 Implementação confirmada direto no código-fonte real de `api-acos-vital` (models Sequelize das views, com specs em prosa muito detalhadas nos próprios arquivos — embora a SQL `CREATE VIEW` em si não esteja neste repositório, só no banco/DBA).
 
 ## As duas famílias de dado — crua vs. curada
 
-- **Projeções cruas** (`vw_vendas_planilha`, `vw_faturamento_planilha` e seus `_resumo`) — "burras" de propósito: sem dedup/filtro, layout de planilha Excel. Adicionadas em 09/2026.
+- **Projeções cruas** (`vw_vendas_planilha`, `vw_faturamento_planilha` e seus `_resumo`) — "burras" de propósito: sem dedup/filtro, layout de planilha Excel. Adicionadas em 09/2026. **(atualizado em 07/10)** Há também a `vw_vendas_planilha_leve` (mesmas colunas, usada no modo por pedido) e o `_resumo` de vendas com intervalo de datas — ver o aviso no topo.
 - **Views curadas "clássicas"** (`vw_vendas_base` para pedidos, `vw_nf_classified` para notas) — pré-existentes, classificação mutuamente exclusiva.
 
 ## A cascata de classificação

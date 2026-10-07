@@ -5,6 +5,8 @@ criado: 2026-09-22
 
 # Auditoria: dump de produção (22/09) — delta contra a auditoria de 21/09
 
+> Status: histórico — retrato de 22/09/2026, não reflete o estado atual. Para o estado em 07/10, ver [[Auditoria-Dump-Producao-2026-10-07]] e [[Registro-de-Decisoes-2026-10-07]].
+
 > **Esta nota é um delta, não uma auditoria completa do zero.** Parte do que [[Auditoria-Dump-Producao-2026-09-21]] já confirmou; só documenta o que mudou entre os dois dumps (14 horas de diferença).
 >
 > **Fora de escopo (confirmado pelo Nathan, 22/09/2026): `core_organograma` e `core_mapas`.** O dump traz esses dois schemas (organograma institucional; views de geolocalização), mas o Nathan confirmou que nenhum dos dois faz parte deste projeto — não são tratados como achado/lacuna aqui nem em [[Schema-Postgres-Multi-Dominio]].

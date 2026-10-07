@@ -1,6 +1,7 @@
 ---
 tags: [contrato-logica, contrato-sql, contrato-api, compras, ccp]
 criado: 2026-09-30
+atualizado: 2026-10-07
 status: aplicada
 ---
 
@@ -148,14 +149,16 @@ Além disso: cadastro da tela `followup` em `auth.telas` (e permissão para o pe
 
 ## 5. Perguntas em aberto
 
-| # | Pergunta | Quem responde |
-|---|---|---|
-| **P1** | **Saldo a receber:** para OC do av-hub, de onde vem "chegou ou não"? O recebimento hoje é lançado no Omie (`pedidos_compras_itens.quantidade_recebida`, do espelho). Se a OC do av-hub já espelha no Omie, o backend liga as duas pelo `numero_pedido_omie`? Sem essa ligação a fila não sabe tirar da lista a OC que já chegou. | Gustavo / backend |
-| **P2** | O CCP acompanha só OC criada no av-hub, ou também o **pedido feito direto no Omie** (5.434 no espelho)? Proposta: **só av-hub** nesta versão (o histórico do Omie continua só leitura). | Nathan |
-| **P3** | Prazo para destacar OC **sem confirmação** do fornecedor (ex.: 2 dias úteis depois da emissão). Parâmetro em `parametros_compras`? | Nathan / CCP |
-| **P4** | Quando a previsão nova atrasa um pedido de venda ligado à OC (vínculo do contrato 14): quem é avisado, PCP ou vendedor, e como? Fora deste contrato, mas define se o registro precisa de um campo a mais. | Nathan / Robert |
-| **P5** | Quem é o "perfil CCP" hoje em `auth.perfis`? Existe ou é criado? | Nathan |
-| **P6** | Transportadora do despacho é texto livre ou vem de `core.parceiros` (como a da OC)? Proposta: texto livre, porque muitas vezes é a do fornecedor (CIF). | Nathan |
+> **(atualizado em 07/10)** Status por pergunta na última coluna; fonte: [[Registro-de-Decisoes-2026-10-07]] item 48. O texto das perguntas fica como estava.
+
+| # | Pergunta | Quem responde | Status (07/10) |
+|---|---|---|---|
+| **P1** | **Saldo a receber:** para OC do av-hub, de onde vem "chegou ou não"? O recebimento hoje é lançado no Omie (`pedidos_compras_itens.quantidade_recebida`, do espelho). Se a OC do av-hub já espelha no Omie, o backend liga as duas pelo `numero_pedido_omie`? Sem essa ligação a fila não sabe tirar da lista a OC que já chegou. | Gustavo / backend | 🔴 Gustavo |
+| **P2** | O CCP acompanha só OC criada no av-hub, ou também o **pedido feito direto no Omie** (5.434 no espelho)? Proposta: **só av-hub** nesta versão (o histórico do Omie continua só leitura). | Nathan | 🟡 adotada: só OC criada no av-hub |
+| **P3** | Prazo para destacar OC **sem confirmação** do fornecedor (ex.: 2 dias úteis depois da emissão). Parâmetro em `parametros_compras`? | Nathan / CCP | 🟡 adotada: 2 dias úteis como padrão, em `parametros_compras` |
+| **P4** | Quando a previsão nova atrasa um pedido de venda ligado à OC (vínculo do contrato 14): quem é avisado, PCP ou vendedor, e como? Fora deste contrato, mas define se o registro precisa de um campo a mais. | Nathan / Robert | 🔴 Nathan |
+| **P5** | Quem é o "perfil CCP" hoje em `auth.perfis`? Existe ou é criado? | Nathan | 🔴 Nathan |
+| **P6** | Transportadora do despacho é texto livre ou vem de `core.parceiros` (como a da OC)? Proposta: texto livre, porque muitas vezes é a do fornecedor (CIF). | Nathan | 🟡 adotada: texto livre |
 
 ## 6. Depois de aplicado (av-hub)
 

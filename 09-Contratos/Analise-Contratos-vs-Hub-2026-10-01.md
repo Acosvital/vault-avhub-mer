@@ -1,9 +1,18 @@
 ---
 tags: [contrato, auditoria, indice]
 criado: 2026-10-01
+atualizado: 2026-10-07
 ---
 
 # Análise: contratos em aberto × código do av-hub (01/10/2026)
+
+> ⚠️ **RETRATO HISTÓRICO DE 01/10/2026 — o arquivo inteiro está desatualizado e não deve ser lido como estado atual.** Não foi reescrito. Para o estado vigente use [[Registro-de-Decisoes-2026-10-07]] e [[Indice-Contratos]]. Status: histórico (verificado em 07/10/2026). Mudanças que mais contradizem o texto abaixo: orçamento (07) desenvolvido por fora, contrato a reescrever, e 13 desconsiderado (✅ 07/10); envio da OC fixo no código, sem `SYNC_ENVIO_OC`/`ENVIO_OC_DRY_RUN`; `fn_requisicao_mes_aplicar` existe em produção e o PUT do 34 funcionou no `mes-test`.
+
+> **Aviso de 07/10/2026 — este é um retrato de 01/10 e não foi reescrito.** Várias linhas já mudaram e **não devem mais ser lidas como estado atual**: **04** (vagas: entregue e conferido em 01/10; a trava `VAGAS_TRAVAS_DECISAO` saiu do código em 06/10, regra fixa), **28** (entregue em 02/10; `POST`/`DELETE /vendedores` = 403 `CADASTRO_VEM_DO_OMIE`), **29** (entregue em 02/10; trava sempre ligada), **31** (entregue; `ca899f9` em `main`, não o `cba68fa` local), **33** (entregue em 01/10; código `5231219`; front `397cf81` não reconferido), **`VAGAS_TRAVAS_DECISAO`** (a chave não existe mais) e a **linha 07** (o vault dizia "desconsiderado"; o código mostra `/orcamento/*` e `/dashboard/comissoes` em `main`, `90bdb33`, 01/10, e em 07/10 foi decidido que o orçamento foi desenvolvido por fora, no Comercial & Suprimentos, com o contrato 07 a reescrever). Outras mudanças: **003** substituído pelo 34 (o MES chama o PUT desde `e7ce2c9`); **004** continua inexistente (API e MES); **005** tem a rota no MES e falta o consumidor no hub; **26** L6 segue aberto.
+>
+> **Correção importante na seção "O MES empurra":** o que valeu **não foi `POST /compras/requisicoes`**, e sim **`PUT /compras/requisicoes/origem/{id_origem}`** (contrato 34, código `0391b29` no PR #275). O PUT existe na API e o MES o chama; o `POST` citado abaixo foi só o desenho de 01/10.
+>
+> **Estado atual (código, 07/10):** ver o bloco "Conferência de 07/10/2026" do [[Indice-Contratos]]. Vale a mesma ressalva: leitura de código, não de produção.
 
 Base: `origin/develop` do av-hub (branch `docs/analise-contratos-vault`) + as branches locais. Só o **front** foi conferido: backend, SQL e pipeline moram em outros repositórios e aqui valem o que o contrato diz. O contrato 02 (rejeitado) e o 06 (invalidado) ficaram de fora, e o 19-Pipeline (substituído pelo 23) também.
 
