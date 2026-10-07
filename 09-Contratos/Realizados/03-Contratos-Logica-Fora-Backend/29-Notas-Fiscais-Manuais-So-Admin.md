@@ -1,13 +1,13 @@
 ---
 tags: [contrato-logica, contrato-api, faturamento, permissoes]
 criado: 2026-09-29
-atualizado: 2026-09-29
+atualizado: 2026-10-07
 status: aplicada
 ---
 
 # Contrato 29 — Notas fiscais manuais: só o administrador cria (permissão no backend)
 
-> **✅ ENTREGUE (02/10/2026).** Conferido na `api-test` com a trava ligada (`NOTAS_MANUAIS_EXIGIR_PERMISSAO`): `POST /nota_fiscal_saida/manual` sem usuário → **403 `USUARIO_NAO_INFORMADO`**; com um usuário sem a permissão da tela `notas-fiscais-manuais` → **403 `SEM_PERMISSAO`**. Nada foi gravado. Não testado: o admin criando de verdade (criaria nota). **Antes de produção:** ligar a mesma variável no ambiente e criar a tela e as permissões (P1) lá.
+> **✅ ENTREGUE (02/10/2026).** Conferido na `api-test` com a trava ligada (`NOTAS_MANUAIS_EXIGIR_PERMISSAO`): `POST /nota_fiscal_saida/manual` sem usuário → **403 `USUARIO_NAO_INFORMADO`**; com um usuário sem a permissão da tela `notas-fiscais-manuais` → **403 `SEM_PERMISSAO`**. Nada foi gravado. Não testado: o admin criando de verdade (criaria nota). **Antes de produção:** ligar a mesma variável no ambiente e criar a tela e as permissões (P1) lá. **(atualizado em 07/10)** A chave `NOTAS_MANUAIS_EXIGIR_PERMISSAO` **saiu do código** no contrato 38 (`c8f2f5e`, #279): a trava vale sempre, sem variável; resta criar a tela e as permissões em produção.
 
 > **🟡 CÓDIGO PRONTO, TRAVA DESLIGADA (01/10/2026).** **Conferência de 01/10/2026 na `api-test`** (o DBA avisou que concluiu): o código está na `develop` (`NOTAS_MANUAIS_EXIGIR_PERMISSAO`), mas na `api-test` a trava está **desligada**: um `POST /nota_fiscal_saida/manual` com `created_by` de um usuário do perfil **Vendedor** passou da checagem de permissão e só parou na validação do cliente (esperado: 403). Unidade inexistente no teste, nada foi gravado. **Ação:** ligar `NOTAS_MANUAIS_EXIGIR_PERMISSAO=true` no ambiente e repetir.
 
@@ -26,7 +26,7 @@ Decisão do Nathan (29/09/2026): **só o administrador cria** nota manual.
 
 Hoje o `POST /nota_fiscal_saida/manual` só confere a `x-api-key`: qualquer sistema com a chave (pipeline,
 MES, outro sistema do mesmo login) consegue criar nota — **conferido na `api-test` com
-`PERMISSOES_ROTA_MODO=exigir` ligado** (ver P2). O av-hub barra no BFF, mas a regra de verdade precisa
+`PERMISSOES_ROTA_MODO=exigir` ligado** (ver P2; **atualizado em 07/10:** `exigir` passa a ser o modo **fixo** no código, [[Registro-de-Decisoes-2026-10-07]] item 8; a brecha da chamada só com `x-api-key` continua, porque o modo só confere permissão quando há token; a separação das chaves de serviço é o L6, 🔴 Gustavo). O av-hub barra no BFF, mas a regra de verdade precisa
 estar no backend.
 
 ## 2. O contrato
@@ -61,7 +61,7 @@ token, a permissão não é conferida**. Para valer, na ordem:
    estar mapeadas, porque com `exigir` rota **sem mapa** dá 403 para quem manda token.
 3. **O av-hub mandar o token**: hoje a sessão do av-hub está **sem `backendToken`** (a API precisa do
    segredo de token do contrato de permissões configurado).
-4. **`exigir`**.
+4. **`exigir`** (**atualizado em 07/10:** já é o modo fixo no código; sobra mapear as rotas e o av-hub mandar o token, ✅ o front manda token).
 5. **Exigir token** (`IDENTIDADE_EXIGIR_TOKEN=true` ou a chave do av-hub marcada como "exige usuário").
    **Ligar isto antes do passo 3 derruba o av-hub inteiro** (401 em tudo).
 

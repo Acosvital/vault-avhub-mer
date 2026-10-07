@@ -1,10 +1,13 @@
 ---
 tags: [erp-acos-vital, arquitetura, estados, revisao, proposta]
 criado: 2026-09-21
+atualizado: 2026-10-07
 ---
 
 # Revisão dos estados, status e etapas — problemas e correções propostas
 
+> Status: decidido | no código | em produção (verificado em 07/10/2026 pelo dump). Ajuste de 07/10 limitado ao que contradiz [[Registro-de-Decisoes-2026-10-07]].
+>
 > **Status: revisão crítica de 21/09/2026, com propostas. Nada aqui é decisão.** Feita **lendo os documentos**, não o código do MES nem do av-hub; onde a proposta depende de como o código realmente se comporta, está marcado **(confirmar com o Robert)**. Cobre os diagramas de estado de [[Diagramas-UML]] (seções 5 a 8 e 20), os fluxos de [[Fluxogramas-Completos]] e o vocabulário de etapas de [[Rastreabilidade-e-SLA-de-Eventos]], incluindo as falhas do que eu mesmo propus.
 
 ## 1. Veredito
@@ -127,7 +130,7 @@ Há quatro linguagens de status: `Pedido.status` do MES (`AGUARDANDO`, `EM_PRODU
 1. O cliente pode receber entrega parcial de um item? O item pode ficar parcialmente faturado?
 2. Existe concessão de lote fora de especificação? Quem autoriza?
 3. Qual é o destino de um lote reprovado por completo: devolução, descarte ou retrabalho? Quem decide?
-4. O timeout da reserva alerta ou libera?
+4. ~~O timeout da reserva alerta ou libera?~~ **Fechada em 24/09/2026 (M-06): sem expiração** (ver seção 2.4); não consta mais como pergunta em aberto em [[Perguntas-em-Aberto-Consolidadas]].
 5. Cancelar um pedido em produção: o que acontece com as OS/OP em curso e com o material já cortado?
 6. `Pedido.status` do MES é escrito por alguém hoje? Quando um pedido fica `BLOQUEADO`, e quem o desbloqueia?
 7. O protótipo Torre de Fluxo deve ser refeito com `tipo_tempo` e a composição por parcial depois destas decisões?

@@ -1,9 +1,12 @@
 ---
 tags: [erp-acos-vital, av-hub, compras, investigacao, achado]
 criado: 2026-09-22
+atualizado: 2026-10-07
 ---
 
 # Views de Compras (`core_compras`) — investigação: cobrem o futuro módulo de Compras?
+
+> **Atualização de 07/10/2026 — auditoria código × vault** (leitura de código; produção **não** conferida). **Esta nota é uma fotografia datada** (investigação de 22/09/2026, contra o dump de produção daquela data e uma cópia local da API). **Os caminhos de código citados mudaram:** `src/routes/*`, `src/models/*` e `src/services/*` **não existem mais**; hoje é `src/schemas/<schema>/{tables,views,aggregates,functions}/<entidade>/` (PR #276, ver [[AV-Hub-API-Estado-Atual]]). Os hashes de commit de setembro vêm de branches locais e não existem em `develop`/`main`. O texto abaixo **não foi reescrito**; o que mudou está nos blocos "(atualizado em 07/10)". **O que mudou desde a decisão de 22/09 (seção 5, "formato ainda não definido"):** o código da API (`main` = `develop`) já lê dois conjuntos novos no `core_compras` reconstruído — `core_compras.orc_*` e `orc_vw_*` (rotas `/orcamento/{fornecedores,produtos,cotacoes,vinculos,categorias,familias}`, contrato [[07-Dados-Orcamento-e-Coordenadores-no-Banco]], 90bdb33, 01/10) e `core_compras.vw_produto_fornecedores` (`GET /produtos/:id/fornecedores`, contrato [[13-Fornecedores-por-Produto]], migration 013, 31e26a6). Que o DBA tenha aplicado esse SQL no banco real é **[I]**; o repo da API não versiona SQL. **Ainda válido no front:** as rotas `/api/orcamento/*` e `/api/historicoProdutos` do BFF apontam para as views antigas removidas. **Não reconferido** se os 4 GET quebrados (`/catalogo_de_produtos` etc.) ainda existem na API reestruturada. Ver [[AV-Hub-Modulos]] (Orçamento) e [[AV-Hub-Bugs-Catalogo]].
 
 > **Pergunta que esta nota fecha**, levantada em [[AV-Hub-Bugs-Catalogo]] ("vale investigar essas views antes de assumir que não existe API própria de compras ainda") e em [[Auditoria-Dump-Producao-2026-09-21]] (seção 4, achado de código morto): as 4 views de `core_compras` (`vw_catalogo_de_produtos`, `vw_fornecedores_com_produtos`, `vw_historico_precos`, `vw_todos_os_fornecedores`) já cobrem, ainda que parcialmente, o que o futuro módulo de Compras (tarefas E1/E2 do [[Cronograma-2-Meses]]) precisa?
 >
@@ -80,7 +83,7 @@ Diante da conclusão da seção 4, o Nathan decidiu apagar o conteúdo do schema
 - Não é `core_vendas_faturamento.pedidos_compras` ([[004-Pedidos-Compras]]) — espelho read-only do histórico de pedidos de compra do Omie, schema/tabela diferente, sem relação com esta decisão.
 - Não é `core_vendas_faturamento.ordens_compra` ([[007-Ordens-Compra-Estruturada]]) — a OC estruturada que o av-hub decide e cria (tarefa E2), também schema/tabela diferente.
 
-**O que vai entrar no `core_compras` reconstruído ainda não foi definido nesta conversa** — esta nota só registra a decisão de apagar o conteúdo antigo; o desenho das tabelas novas é trabalho à parte, a documentar quando o Gustavo/Nathan fecharem o formato (fica como pendência, não assumir nada sobre suas colunas até então).
+**(atualizado em 07/10: parte já está no código — `orc_*`, `orc_vw_*` e `vw_produto_fornecedores`, ver o aviso no topo.)** Texto de 22/09: **o que vai entrar no `core_compras` reconstruído ainda não foi definido nesta conversa** — esta nota só registra a decisão de apagar o conteúdo antigo; o desenho das tabelas novas é trabalho à parte, a documentar quando o Gustavo/Nathan fecharem o formato (fica como pendência, não assumir nada sobre suas colunas até então).
 
 **Impacto no código morto confirmado**: agora que o conteúdo antigo do `core_compras` foi apagado, os 4 endpoints GET que quebravam com `relation "negocio.vw_..." does not exist` (`/catalogo_de_produtos`, `/fornecedores_com_produtos`, `/historico_precos`, `/todos_os_fornecedores` — `src/app.js:1665-1668`) apontam para views que **não existem mais de forma alguma** (nem no schema errado `negocio`, nem no `core_compras` certo, que já não as tem) — ainda mais motivo para **remover do código** (rotas + services + imports), não só deixar quebrado. Ver [[AV-Hub-Bugs-Catalogo]].
 

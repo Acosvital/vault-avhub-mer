@@ -1,10 +1,17 @@
 ---
 tags: [erp-acos-vital, expedicao, faturamento, fluxo-detalhado]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # Fluxo de Expedição e Faturamento — conversa por conversa
 
+> Status: decidido | no código (develop) | em produção (mes-test; produção real não)
+
+> **Decisões de 07/10/2026 ([[Registro-de-Decisoes-2026-10-07]]):** o **registro de remessa de produtos** vai ao **Ciclo 2** (04/01/2027). A **baixa no despacho do Estoque** é do Robert e segue sem código. **Pendência 🔴 (Nathan / Pablo-Robert):** saldo zero, parcial automático ou exige clique? Contradição entre "automático" ([[Fluxo-Estoque-Completo]], EA6) e EN-01 "saldo zero exige clique" ([[Encaixe-Estoque-Revenda-no-PCP]], seção 5) — não decidido aqui.
+
+> **Atualização de 07/10/2026 — só um ponto deste fluxo é conferido no código:** a **baixa do saldo ocorre quando a Embalagem recebe o item** (`receber()` → `consumirReservasDaParcial`: reserva `CONSUMIDA` + `MovimentoEstoque` `SAIDA`), exatamente como em E1a abaixo na versão de 25/09; a mudança decidida em 29/09 (baixa no despacho do Estoque) **não está implementada** — ver [[Encaixe-Estoque-Revenda-no-PCP]]. O setor `embalagem` (tipo `EXPEDICAO`) vem da UI e depende do banco, **não conferido**. Embalagem/paletização, consolidação, logística de saída e a sinalização de NF ao Omie não foram auditados nesta rodada: **sem confirmação de código** além do ponto acima. Fonte: leitura de código em `develop` (`api-pcp` `ca3346b`), não de produção.
+>
 > Ponto de convergência final: qualquer item concluído passa pelo mesmo caminho daqui em diante.
 >
 > **Atualizado em 24/09/2026** ([[Encaixe-Estoque-Revenda-no-PCP]]): a Expedição recebe de **duas portas**, não de uma. **Setor Estoque** — item atendido pelo saldo (etapa 1) e item comprado que voltou da Qualidade e foi reservado (regra do Nathan: comprado aprovado vai para o Estoque, não para a Expedição). **Qualidade** — só o item fabricado aprovado ([[Fluxo-Qualidade-Completo]] Q6b). Na saída física, a reserva do item de estoque vira `CONSUMIDA`.

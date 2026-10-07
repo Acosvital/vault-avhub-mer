@@ -1,3 +1,7 @@
+---
+atualizado: 2026-10-07
+---
+
 # Contrato — Cotação de moeda automática (PTAX do Banco Central) na Ordem de Compra
 
 > **Concluído — movido para `Realizados/` em 28/09/2026** (era o contrato 20). Backend na `api-test` e front mergeado na `develop` do av-hub. O que ainda falta (produção e dados da pipeline) é acompanhado no [[23-Compras-Pipeline-Consolidado]] e no B0 do [[13-Compras-Backend-Consolidado]].
@@ -130,6 +134,7 @@ GET /cotacoes_moeda/atual?moeda=USD
 
 1. **Compra ou venda?** Numa compra em moeda estrangeira a empresa vai **comprar** a moeda, e a
    referência comum é a **PTAX de venda**. Este contrato assume venda. Confirmar.
+   > **(atualizado em 07/10, 🟡 proposta adotada; [[Registro-de-Decisoes-2026-10-07]] item 46)** É a cotação de **venda**: a API recusa OC cuja cotação difira de `cotacao_venda` quando `cotacao_origem = 'ptax'` (`ordens_compra.route.js:970`; no front, `cotacaoPtax.ts:36-37`). Vale até alguém contestar.
 2. **Cotação do dia da emissão ou do dia do pagamento?** Este contrato trata só da cotação de
    **referência na emissão** (a que calcula `valor_total_brl` e a régua). A variação cambial
    até o pagamento é assunto do financeiro, fora daqui.

@@ -25,6 +25,10 @@ O sistema de fábrica se chama **MES** (confirmado pelo Nathan em 22/09/2026 —
 
 Decisão do Nathan: **não faz sentido desambiguar o nome "PCP"**, porque não é uma coincidência de nomenclatura a corrigir — é o mesmo setor da empresa de verdade, legitimamente presente nos dois sistemas: o setor de PCP é quem a fábrica **responde**, e o PCP **vê tudo** (produção de chão de fábrica, no app-pcp/MES); o "Portal PCP" do av-hub é a mesma função de PCP, só que a fatia voltada para **diligenciadores** acompanhando pedido/nota comercial. Não são dois departamentos distintos disputando o mesmo nome — é um departamento único com dois pontos de contato diferentes, cada um no sistema certo para aquela parte do trabalho dele. A recomendação anterior desta nota ("PCP Comercial" vs. "PCP Produção" ou nomes diferentes) fica **descartada**.
 
+## Decisão de 07/10/2026
+
+✅ Os nomes **MES** e **PCP** ficam como estão (Nathan). O "Portal PCP" do av-hub é acompanhamento comercial, não é o `app-pcp`. Ver [[Registro-de-Decisoes-2026-10-07]], item 54.
+
 ## Ver também
 - [[AV-Hub-Modulos]]
 - [[App-PCP-Visao-Geral]]

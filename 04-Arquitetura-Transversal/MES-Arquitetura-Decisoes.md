@@ -1,9 +1,19 @@
 ---
 tags: [erp-acos-vital, arquitetura, decisoes, mes]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # MES Aços Vital — Arquitetura e Decisões
+
+> Status: decidido | no código | em produção (verificado em 07/10/2026 pelo dump). Decisões de 07/10 em [[Registro-de-Decisoes-2026-10-07]].
+
+> **Atualização de 07/10/2026 — código × decisões (leitura de `develop`, api-pcp `ca3346b`; não é produção).** As decisões abaixo **não foram alteradas**; esta é a lista de onde o código diverge ou avançou:
+> - ~~**Divergência — schema do Estoque (decisão 4):** a decisão diz "schema Postgres próprio, não cai em `public`".~~ **Decisão 4 revista em 07/10/2026 (✅, [[Registro-de-Decisoes-2026-10-07]] #21): o schema do Estoque é `public`.** No código, os 9 modelos do estoque estão em `public`, sem `@@schema` (`estoque.prisma`; migration `20260922110000_estoque_v1`); o código passa a estar de acordo com a decisão, e o comentário "pendente de confirmar com o Robert" no arquivo fica obsoleto.
+> - **Decisão 1 (Fornecedor/Material como projeção):** o `Material` nasce por **snapshot do av-hub na entrada** (`produtos-avhub.client.ts`, `upsertMaterialDoAvhub`, PR #44, 28/09); o model `Fornecedor` existe e **nada o popula**; o full sync (`4a4f9bc`) só existe na branch `estoque/schema-v1`.
+> - **Decisão 3 (RBAC do Estoque no padrão do MES):** seguido (`@RequirePermission` + `PerfilSetor`). `PerfilSetor` **não tem dimensão de filial** — a implicação da DEC-1 (C3) **não foi iniciada**. Achado de segurança de 07/10 (controllers sem guard) em [[App-PCP-Visao-Geral]].
+> - **Decisão 5 / DEC-2 (integração):** o mecanismo mudou em parte — o MES **empurra** requisições por `PUT` (contrato 34) e lê marcos (35); o 003 foi substituído, o 005 não tem consumidor, o 004 não existe. Estado por contrato em [[Integracao-AvHub-MES-Especificacao-F1]].
+> - Tudo isto está só em `develop`; `main` do api-pcp parou em 28/08.
 
 Registro do desenho de arquitetura entre av-hub e o sistema de fábrica (nome: **MES** — confirmado pelo Nathan em 22/09/2026, aceito por ora, com abertura para trocar no futuro). Complementa [[Decisoes-Chave-ERP]] e [[Achado-Ambiguidade-PCP]] — este arquivo é o detalhe, aqueles continuam sendo o resumo executivo.
 
@@ -18,7 +28,7 @@ Registro do desenho de arquitetura entre av-hub e o sistema de fábrica (nome: *
 1. **Fornecedor não tem cadastro próprio no Estoque.** Reaproveita `core.parceiros` (av-hub) com `tipo_parceiro`, que já é sincronizado do Omie pelo pipeline ELT existente. O Estoque recebe uma **projeção read-only** desse dado — evita um 3º cadastro de fornecedor. **Correção (17/09/2026)**: essa projeção não pode ser "o mesmo mecanismo de evento que o av-hub usa pra ler status de produção do MES", porque esse mecanismo **não existe** ainda — ver [[Decisoes-Chave-ERP]] ("casamento av-hub ↔ MES", não desenhado, maior item em aberto) e [[AV-Hub-Modulos]]. Hoje o único padrão de sincronização entre sistemas é polling (sem webhook); a forma mais simples de fazer essa projeção é o Estoque consumir por polling os endpoints REST que `api-acos-vital` já expõe (`GET /produtos`, `GET /parceiros`), sem depender de infraestrutura de evento que ainda não foi construída. Isso corrige o PRD original do Estoque, que propunha uma tabela `fornecedor` própria dentro do schema `estoque` — ver nota em [[Estoque-Modelo-Dados]].
 2. **Toda a fabricação entra no MES desde já**, não só Flanges — lista **aberta** de linhas de produção (Grades de Piso, Chapa Expandida, Caldeiraria etc., conforme forem cadastradas), não uma lista fechada de três. Não precisa de sistema novo por linha de produção — o modelo de Fábrica/Setor/Roteiro já é genérico o suficiente; só falta cadastrar a fábrica/roteiro de cada linha nova quando chegar a hora. **Chapas não é uma linha de fabricação** — corte de chapa a plasma/laser é beneficiamento dentro da Revenda, não do MES-fabricação. Ver [[Fabricacao-Chapas]] e [[Fluxo-Detalhado-Pedido-Item]].
 3. **RBAC do Estoque segue o padrão já existente no backend do MES** (o mesmo modelo de telas/perfis/permissões + `PerfilSetor` que o `api-pcp` já tem) — não nasce como biblioteca compartilhada com o av-hub agora. Duas implementações independentes, aceitas conscientemente por velocidade de entrega.
-4. **Estoque usa Prisma**, morando dentro do mesmo banco do MES, seguindo a disciplina de migrations que o Prisma já traz em produção — reverte a recomendação original do PRD do Estoque de evitar Prisma (o motivo daquela recomendação, um problema real de build no Backlog Ágil, não se repetiu em ~1 mês de MES em produção). **Ganha schema Postgres próprio** dentro desse banco, seguindo a mesma convenção de schema-por-domínio do av-hub — não cai em `public`.
+4. **Estoque usa Prisma**, morando dentro do mesmo banco do MES, seguindo a disciplina de migrations que o Prisma já traz em produção — reverte a recomendação original do PRD do Estoque de evitar Prisma (o motivo daquela recomendação, um problema real de build no Backlog Ágil, não se repetiu em ~1 mês de MES em produção). ~~Ganha schema Postgres próprio dentro desse banco, seguindo a mesma convenção de schema-por-domínio do av-hub — não cai em `public`.~~ **Revista em 07/10/2026 (✅, [[Registro-de-Decisoes-2026-10-07]] #21): o Estoque fica em `public`.**
 5. **Ordem de Compra é decidida no av-hub, referenciada no MES/Estoque** quando o material chega na doca — mesmo padrão que já existe entre av-hub (Pedido de Venda) e MES (execução da produção). O anexo manual de PDF da OC descrito nos áudios do gerente é só a primeira fase — a intenção é trazer os **dados estruturados da própria Ordem de Compra**, sem depender de upload/parse de PDF.
 
    **Divisão exata:** PCP (MES) gera a requisição a partir de saldo/reserva (desde 24/09/2026: gerada pela entrada do parcial no setor Compras do roteiro da fábrica Revenda — ver [[Encaixe-Estoque-Revenda-no-PCP]]) → comprador (av-hub) fecha a compra (fornecedor, preço, aprovação, flag acabado/não-acabado) → só o necessário pra conferência (itens, quantidade, flag) trafega de volta pro MES, não o dado comercial completo — mesma filosofia de "colunas protegidas" do pipeline ELT. Recebimento/conferência/OS/OP seguem 100% no MES. Ver [[Fluxo-Detalhado-Pedido-Item]] e o detalhamento completo em [[Fluxo-Compras-Completo]].
@@ -48,6 +58,7 @@ Registro do desenho de arquitetura entre av-hub e o sistema de fábrica (nome: *
 - **Nome do MES — resolvido (22/09/2026)**: é **MES**, confirmado pelo Nathan — aceito por ora, com abertura para trocar no futuro.
 
 ## Ver também
+- [[App-PCP-Recebimento-Conferencia]]
 - [[Integracao-AvHub-MES-Especificacao-F1]]
 - [[Fluxo-Detalhado-Pedido-Item]]
 - [[Perguntas-Pendentes-MES-Estoque]]

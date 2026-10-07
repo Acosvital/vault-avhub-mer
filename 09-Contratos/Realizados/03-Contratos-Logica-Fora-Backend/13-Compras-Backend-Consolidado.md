@@ -1,8 +1,14 @@
+---
+atualizado: 2026-10-07
+---
+
 # Contrato — Compras: tudo o que falta no BACKEND (banco + API)
 
 > **Concluído — movido para `Realizados/` em 28/09/2026** (era o contrato 22). Backend na `api-test` e front mergeado na `develop` do av-hub. O que ainda falta (produção e dados da pipeline) é acompanhado no [[23-Compras-Pipeline-Consolidado]] e no B0 do [[13-Compras-Backend-Consolidado]].
 >
 > **✅ Backend entregue pelo DBA — conferido em 28/09/2026:** conferido no código (`origin/develop` até `04de3fe`) e ao vivo na `api-test`: B1 (`bigint`), B2, B3 (número fora de `CAMPOS`), B4 (`/fila-omie`, `PATCH /:id/sincronizacao`, `POST /:id/reenviar`), B5 (`nome_fornecedor`), B6, B7 (4 catálogos respondem), B8 (`/compras/ordens/resumo`, `/compras/requisicoes/resumo`, `/compras/parametros` → limite R$ 30.000), B9 (`pode_aprovar`), B13/B15 (23514 vira mensagem), B14 (`/unidades?compra=true` → Mogi e Uberaba). **Pendente: B0** — em produção as rotas novas não existem (`/compras/ordens/resumo` cai em `/:id`, `/compras/pedidos-venda` 404). **Catálogos vazios na `api-test`** (condições de pagamento, contas correntes, categorias, compradores): dependem da pipeline gravar lá.
+>
+> **(atualizado em 07/10/2026, dump de produção; [[Registro-de-Decisoes-2026-10-07]])** **B0 superado no schema:** o schema de Compras **já existe em produção desde 02/10** (tabelas, triggers, `contadores_documento` e a rota `/compras/ordens/resumo`), conferido no dump de 07/10. A tabela 0.1 abaixo e o texto do B0 descrevem o dump de 23/09 e ficam como histórico. **Compradores:** **20 de 74** vinculados a funcionário (carga de 07/10); só importam os **32 ativos**; nenhuma OC pode ser emitida por quem não estiver vinculado, então é preciso vincular antes da primeira OC real. **Aprovador acima de R$ 30 mil** (DEC-3): o perfil Gerência de Compras existe e **não tem usuários**; quem é o diretor aprovador é 🔴 Nathan. Nota: o item 40 do registro diz "Contrato 13 desconsiderado"; a relação com este arquivo não está clara e fica para o Nathan confirmar.
 >
 > **Front feito em 28/09/2026** ([av-hub#105](https://github.com/Acosvital/av-hub/pull/105), **mergeado na `develop` em 28/09/2026**): condição de pagamento, conta corrente e categoria como listas da unidade (condição volta a campo digitado enquanto o catálogo da unidade estiver vazio); observação por item e nº do pedido no fornecedor; limite de aprovação de `/compras/parametros`; KPIs de `/resumo`; listas paginadas no servidor; detalhe com nomes, situação no Omie, cancelado por, histórico e "Reenviar ao Omie"; aprovar/reprovar/cancelar exigem `pode_aprovar`; PDF com valores e dados do fornecedor do banco e IE da unidade; BFF parou de mandar `codigo_comprador`. Marcas `GAMBIARRA(` do contrato 15 removidas do módulo.
 
@@ -103,7 +109,9 @@ Dumps de 23/09/2026 (produção 16:46, teste 16:58) e banco local depois dos Ap�
 
 ### B0. Levar para PRODUÇÃO tudo o que já está no teste
 
-O banco de produção (dump de 23/09/2026, 16:46) **não tem nenhuma tabela nova de compras**. Antes de
+> **(atualizado em 07/10)** Superado no schema: em produção as tabelas de Compras existem desde 02/10 (dump de 07/10). Resta conferir os Apêndices A a C e o B1 contra esse dump, e vincular os compradores (20 de 74).
+
+O banco de produção (dump de 23/09/2026, 16:46) **não tinha nenhuma tabela nova de compras**. Antes de
 o av-hub de compras subir para produção, aplicar lá, na ordem: PR #273 (requisições, OCs, parcelas,
 parâmetros, triggers), `7918357` (renomes + `codigo_comprador`), `bf9d86a` (`id_origem`),
 `8715549` (compradores, cotações, `cotacao_data`/`cotacao_origem`, contador de números), o **B1

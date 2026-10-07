@@ -1,10 +1,25 @@
 ---
 tags: [erp-acos-vital, pendencias, perguntas, consolidado]
 criado: 2026-09-21
-atualizado: 2026-10-06
+atualizado: 2026-10-07
 ---
 
 # Perguntas em aberto — lista consolidada
+
+> Status: decidido em parte | no código | em produção (verificado em 07/10/2026 pelo dump). Decisões de 07/10 em [[Registro-de-Decisoes-2026-10-07]].
+
+### Fechadas em 07/10
+Detalhe e status (✅ / 🟡 / 🔴) em [[Registro-de-Decisoes-2026-10-07]].
+- **CC-02**: `fn_requisicao_mes_aplicar` existe em produção (dump de 07/10); o `PUT` de sucesso já foi validado no `mes-test`.
+- **CC-04**: merge `develop` → `main` antes do piloto (data e responsável: 🔴 Robert).
+- **CC-06**: o Estoque fica em `public`.
+- **CC-09**: branch `feat/migracao-nestjs-prisma` descartada.
+- **CC-03**: orçamento desenvolvido por fora (Comercial & Suprimentos); contratos 07 e 38 a reescrever.
+- **IM-01 e IM-03 (antigo)**: superados pelo contrato 34. **IM-02**: resolvida pelo código.
+- **Transferência (TF-3, TF-6)**: NF só após aprovação na origem; número da NF chega ao MES via av-hub.
+- **EC-02 e L-10**: passam para o Ciclo 2 (04/01/2027).
+- **DEC-9**: `auth.logs` com retenção curta e `auth.auditoria` com 5 anos (prazo do `auth.logs`: 🔴 Gustavo).
+- **Propostas 🟡 (valem até alguém contestar)**: guards do `api-pcp` (CC-05), consumidor do 005 na `api-acos-vital` (IM-03).
 
 > Reúne, num só lugar, as perguntas em aberto espalhadas pelo vault, organizadas por **quem responde**. Levantada em 21/09/2026, um dia antes do início da execução. **A fonte de verdade continua sendo cada nota de origem** (coluna "Origem"); quando uma pergunta for respondida, atualizar lá e riscar aqui.
 
@@ -34,16 +49,16 @@ atualizado: 2026-10-06
 |---|---|---|
 | CA-01 | Compra para **uso interno** (ex.: consumo da cozinha): existe no Omie de cada unidade um **local de estoque** de consumo interno? Se sim, a OC de uso interno sai com ele (hoje o local é texto livre por item e só vai ao Omie se for o código numérico) — precisa de catálogo de locais na pipeline | Nathan |
 | CA-02 | Vínculo **vendedor ↔ funcionário**: manter a restrição "só setor Vendas" que a tela antiga fazia no navegador? Se sim, vira filtro no backend (a tela nova mostra todos com o setor) | Nathan |
-| CA-03 | **Ligar os compradores de produção aos funcionários** (0 de 74 em 06/10): sem isso ninguém emite OC desde o contrato 38. Quem faz e até quando | Nathan |
+| CA-03 | **Ligar os compradores de produção aos funcionários** (~~0 de 74 em 06/10~~ **20 de 74 em 07/10**, carga do dia; só importam os **32 ativos**): sem isso ninguém emite OC desde o contrato 38. Vincular os restantes antes da primeira OC real. 🟡 (ver [[Registro-de-Decisoes-2026-10-07]] #51) | Nathan |
 | CA-04 | **HRM na api-test**: `id_unidade_compra` ainda aponta para Mogi; e a pipeline de produção tem a HRM em `FILIAIS_ATIVAS`? | DBA |
 | CA-05 | **api-test**: `POST /compras/ordens` dá 500 em qualquer caso (inclusive com produto válido) desde 06/10 de manhã | DBA |
 
-**Transferência entre filiais — 2 restantes, com o Fiscal** (as outras 5 decididas pelo Nathan em 06/10; detalhe em [[Proposta-Transferencia-Estoque-Filiais]])
+**Transferência entre filiais — as 2 que restavam (com o Fiscal) foram fechadas em 07/10** (as outras 5 decididas pelo Nathan em 06/10; detalhe em [[Proposta-Transferencia-Estoque-Filiais]])
 
 | ID | Pergunta | Quem |
 |---|---|---|
-| TF-3 | A NF de transferência é sempre obrigatória entre as filiais? (proposta: sim, a saída no MES exige o número) — **trava a etapa 2** | Fiscal |
-| TF-6 | Quem emite a NF no Omie e como o número chega ao MES? (proposta: o estoque da origem emite e digita; integração depois) | Fiscal |
+| TF-3 | ~~A NF de transferência é sempre obrigatória entre as filiais? (proposta: sim, a saída no MES exige o número) — **trava a etapa 2**~~ ✅ **Decisão 3 fechada em 07/10:** quem envia aprova na origem e só então gera a NF ([[Registro-de-Decisoes-2026-10-07]] #24) | ~~Fiscal~~ |
+| TF-6 | ~~Quem emite a NF no Omie e como o número chega ao MES? (proposta: o estoque da origem emite e digita; integração depois)~~ ✅ **Decisão 6 fechada em 07/10:** o número da NF chega ao MES **via av-hub** ([[Registro-de-Decisoes-2026-10-07]] #24) | ~~Fiscal~~ |
 
 De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o resto está decidido, aceito ou moot — arquivo completo nas seções abaixo). Nada aqui foi fabricado ou assumido por mim — são fatos de negócio, físicos ou de alocação que só quem está na operação sabe responder.
 
@@ -62,28 +77,42 @@ De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o r
 5. `Pedido.status` do MES — alguém escreve isso hoje? `BLOQUEADO` — regra de entrada e de saída?
 6. O protótipo Torre de Fluxo deve ser refeito com `tipo_tempo` e composição por parcial, depois de tudo que mudou hoje?
 
-**Domínio — 1 restante**
+**Domínio — 1 restante, agora adiada ao Ciclo 2**
 
 | ID | Pergunta | Quem |
 |---|---|---|
-| L-10 | Sobra/retalho de chapa volta ao estoque como material rastreável? Como se pesa o que sobra? Qual a unidade de controle de cada material (kg × peça × metro)? | Nathan + Almoxarifado + Produção |
+| L-10 | **➡️ Ciclo 2 (04/01/2027), ✅ 07/10 ([[Registro-de-Decisoes-2026-10-07]] #27).** Sobra/retalho de chapa volta ao estoque como material rastreável? Como se pesa o que sobra? Qual a unidade de controle de cada material (kg × peça × metro)? | Nathan + Almoxarifado + Produção |
 
-**Encaixe Estoque/Revenda — 1 restante (29/09/2026)** — detalhe em [[Encaixe-Estoque-Revenda-no-PCP]] seção 6. EN-05 e EC-01/EC-03 a EC-08 foram todas respondidas pelo Nathan em 29/09 (ver seção 5 daquela nota); só falta a de baixo, que o próprio Nathan pediu como sugestão em vez de decidir.
+**Encaixe Estoque/Revenda — 1 restante (29/09/2026), agora adiada ao Ciclo 2** — detalhe em [[Encaixe-Estoque-Revenda-no-PCP]] seção 6. EN-05 e EC-01/EC-03 a EC-08 foram todas respondidas pelo Nathan em 29/09 (ver seção 5 daquela nota); só falta a de baixo, que o próprio Nathan pediu como sugestão em vez de decidir.
 
 | ID | Pergunta | Quem |
 |---|---|---|
-| EC-02 | Baixa de matéria-prima consumida além do requisitado (sobras, perdas de corte) — como tratar? Sugestão registrada (tratar como `MovimentoEstoque AJUSTE` com motivo obrigatório), **ainda não validada pelo time**. | Robert + Produção |
+| EC-02 | **➡️ Ciclo 2 (04/01/2027), ✅ 07/10 ([[Registro-de-Decisoes-2026-10-07]] #27).** Baixa de matéria-prima consumida além do requisitado (sobras, perdas de corte) — como tratar? Sugestão registrada (tratar como `MovimentoEstoque AJUSTE` com motivo obrigatório), **ainda não validada pelo time**. | Robert + Produção |
 
 **Integração av-hub ↔ MES — 4 novas (30/09/2026)** — levantadas pelo Robert ao comparar os contratos com o código; detalhe em [[003-Requisicao-Compra-Integracao-MES]] e [[005-Status-Item-Integracao-MES]].
 
 | ID | Pergunta | Quem |
 |---|---|---|
-| IM-01 | Requisição (003): o MES passa a mandar os campos com os nomes do av-hub (`unidade_medida`, `prazo_necessidade`, `acabado_sugerido`, `material`, `descricao`, `solicitante`) ou o job do av-hub faz o de-para? | Nathan |
-| IM-02 | Pedido sem prazo: o `prazo_necessidade` é obrigatório no av-hub. Data da requisição + N dias, ou o MES recusa a requisição até o pedido ter prazo? | Nathan |
-| IM-03 | Onde fica o job que lê o MES e grava no av-hub (API? pipeline?) e quem faz. Pelo cronograma é a F2 (Gustavo, 19/10 a 30/10); não existe nada ainda. | Nathan + Gustavo |
-| IM-04 | Status por item (005): aceitar as diferenças do que o MES entrega (foto atual em vez de log, `pedido_venda` + `ordem_producao` no lugar do uuid do pedido, etapas a mais e a menos)? Com o ok, registra-se a aprovação do Robert na F1. | Nathan |
+| IM-01 | **Superada (07/10, 🟡 [[Registro-de-Decisoes-2026-10-07]] #45).** ~~Requisição (003): nomes dos campos do av-hub ou de-para?~~ **Superada em 06–07/10:** o 003 foi substituído pelo [[34-Requisicoes-MES-Empurra-para-o-Hub]] (o MES empurra a requisição, já com o formato do av-hub — conferido no código do MES em 07/10). | ~~Nathan~~ |
+| IM-02 | ✅ **Resolvida pelo código (07/10, 🟡 [[Registro-de-Decisoes-2026-10-07]] #44): o MES cai para `pedido.prazoEntrega` e recusa a requisição se ainda não houver prazo.** ~~Pedido sem prazo: o `prazo_necessidade` é obrigatório no av-hub. Data da requisição + N dias, ou o MES recusa a requisição até o pedido ter prazo?~~ **(07/10: o PUT do 34 já está implementado no MES; conferir como ele trata o pedido sem prazo antes de decidir.)** | Nathan |
+| IM-03 | **Antigo superado (🟡 [[Registro-de-Decisoes-2026-10-07]] #45); resta o consumidor do 005: 🟡 roda na `api-acos-vital` (F2, 19 a 30/10), com tabela local do status por item (Gustavo; [[Registro-de-Decisoes-2026-10-07]] #43).** ~~Onde fica o job que lê o MES e grava no av-hub (003)~~ — **não será feito** (o MES empurra, decisão do 34). **Resta o equivalente do 005:** quem consome `GET /itens/status` do MES no av-hub (a rota existe no MES; no av-hub não há rota, tabela nem job) e onde fica (API? pipeline?). Pelo cronograma é a F2 (Gustavo, 19/10 a 30/10). | Nathan + Gustavo |
+| IM-04 | 🔴 **Aguarda aceite do Nathan (recomendado: aceitar; Robert já aprovou em 30/09 — [[Registro-de-Decisoes-2026-10-07]] #42).** Status por item (005): aceitar as diferenças do que o MES entrega (foto atual em vez de log, `pedido_venda` + `ordem_producao` no lugar do uuid do pedido, etapas a mais e a menos)? Com o ok, registra-se a aprovação do Robert na F1. | Nathan |
 
-**Total: 14 pendências reais** (9 + EC-02 + as 4 da integração). As 10 primeiras são fatos de negócio/operação; as 4 da integração são decisões técnicas. O resto do documento abaixo é o arquivo completo, com a resposta e a justificativa de cada item já fechado.
+**Conferência de código de 07/10/2026 — 9 novas** (levantadas pelo pente fino do vault contra os cinco repositórios; todas vêm de leitura de código, nenhuma de produção)
+
+| ID | Pergunta | Quem |
+|---|---|---|
+| CC-01 | 🔴 **Segue aberta com o Gustavo ([[Registro-de-Decisoes-2026-10-07]] #10).** **Chave do MES (L6):** a chave do contrato 34 só abre o `PUT`; o MES lê `/pedidos_liberados`, `/produtos`, `/unidades` e `/compras/requisicoes/eventos` com chave de outro tipo (admin ou do `auth.chaves_servico` sem restrição por rota). Cria-se chave de leitura restrita por rota, ou aceita-se a admin? Ver [[Chaves-de-Integracao-AvHub-MES-Pipeline]] | Nathan + Gustavo |
+| CC-02 | ✅ **Fechada em 07/10 ([[Registro-de-Decisoes-2026-10-07]] #2 e #3): a função existe em produção (dump de 07/10) e o `PUT` foi validado no `mes-test`; falta só versionar o SQL no vault.** ~~**`fn_requisicao_mes_aplicar` (contrato 34):** o código mergeado chama essa função de banco ("migration 034"), que não está em nenhum SQL do vault; o anexo do contrato só cria 2 colunas. O DBA aplicou? Há teste de sucesso do PUT na `api-test`?~~ | ~~DBA~~ |
+| CC-03 | ✅ **Fechada em 07/10 ([[Registro-de-Decisoes-2026-10-07]] #39): o orçamento é desenvolvido por fora, no módulo Comercial & Suprimentos; a API (`90bdb33`) existe e os contratos 07 e 38 precisam ser reescritos (tarefa).** ~~**Contrato 07 (orçamento e coordenadores no banco):** em 01/10 foi "desconsiderado", mas o código na `main` (`90bdb33`) já tem `/orcamento/*` e `/dashboard/comissoes`. Volta ao escopo (e o SQL 007/007b está aplicado?) ou o código fica como está?~~ | ~~Nathan~~ |
+| CC-04 | ✅ **Decidida em 07/10 ([[Registro-de-Decisoes-2026-10-07]] #22): merge `develop` → `main` antes do piloto.** 🔴 Data e responsável: Robert. ~~**`main` do `api-pcp`/`app-pcp` parada em 28/08:** todo o Estoque/Recebimento/Qualidade está só na `develop`. Como e quando isso vai para homologação/produção?~~ | Robert |
+| CC-05 | 🟡 **Guards: proposta adotada ([[Registro-de-Decisoes-2026-10-07]] #12, Robert valida) — `JwtAuthGuard` + `PermissionsGuard` com `@RequirePermission` em `UsuariosController` e `SetoresController`. 🔴 Exposição (domínio público no Coolify?): Gustavo (#13).** **Segurança do `api-pcp`:** `UsuariosController` e `SetoresController` sem guard, e vários controllers só com JWT; hoje a barreira é o BFF do app-pcp. A api-pcp fica exposta na rede? | Robert |
+| CC-06 | ✅ **Fechada em 07/10 ([[Registro-de-Decisoes-2026-10-07]] #21): o Estoque fica em `public`.** ~~**Schema do Estoque:** o vault decidiu "schema Postgres próprio"; o código ficou em `public` (comentário no `estoque.prisma`: pendente de confirmar). Confirma `public` ou cria o schema `estoque`?~~ | ~~Robert + Nathan~~ |
+| CC-07 | **Eventos `oc_aprovada`, `oc_no_omie`, `despachada`** (contrato 35) o MES só grava: não preenchem número do pedido, previsão nem avançam a parcial (isso é o `PATCH /compras/requisicoes/:id/compra`, manual). Automatiza-se (resolveria parte do contrato 004) ou continua manual? | Nathan + Robert |
+| CC-08 | **`api-comercial`:** em que ambiente vai rodar, no mesmo cluster Postgres do Hub, com quais perfis/telas (18 slugs de `auth.telas`) e a claim `perfis` no token? Ver [[AV-Hub-Comercial-Suprimentos]] | Nathan + DBA |
+| CC-09 | ✅ **Fechada em 07/10 ([[Registro-de-Decisoes-2026-10-07]] #23): branch descartada. `FAMILIA_PADRAO_POR_FILIAL`: corrigir a doc do pipeline e registrar tarefa de código (Gustavo; #20).** ~~**Branch `feat/migracao-nestjs-prisma` (api-acos-vital):** migra as 358 rotas Express para NestJS+Prisma, 61 commits atrás da `main` e sem os contratos 34–39. Vai seguir ou será descartada? **E HRM no pipeline:** o código tem `FAMILIA_PADRAO_POR_FILIAL` fixo em mogi/uberaba (produto da HRM sem família é pulado, inferido) — cabe ajuste antes de ligar a HRM?~~ | ~~Nathan + Gustavo~~ |
+
+**Total recontado ao final de 07/10/2026: 21 itens em aberto** (era "29"): 2 de rastreabilidade (R-08, R-13) + 6 de estados e status + IM-04 + 5 de Compras e acessos (CA-01 a CA-05; CA-03 em andamento, 20 de 74 vinculados) + CC-01, CC-04 (só data/responsável), CC-05 (só exposição), CC-07 e CC-08 + **saldo zero** (baixa automática ou por clique; contradiz EN-01; 🔴 permanece) + prazo do `auth.logs` (DEC-9, Gustavo). **Fora da conta:** IM-03 (consumidor do 005, 🟡 proposta), guards do `api-pcp` (🟡), EC-02 e L-10 (Ciclo 2, 04/01/2027) e os itens fechados acima. Os de negócio/operação são fatos que só a operação sabe; os de integração e os CC são decisões técnicas. ~~Texto anterior: 29 itens (2 + 6 + L-10 + EC-02 + 3 de integração + 5 CA + 2 TF + 9 CC).~~ O resto do documento abaixo é o arquivo completo, com a resposta e a justificativa de cada item já fechado.
 
 ---
 
@@ -99,9 +128,9 @@ De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o r
 | DEC-6  | ~~Tolerância de peso por categoria de material~~ ✅ **DECIDIDO em 22/09/2026** — tolerância padrão única de 5% para todo material, sem ajuste por categoria no v1.                                                                                                                  | Nathan + Qualidade        | 25/09 | ~~5% padrão, ajustável por material~~ (confirmado só o padrão, sem ajuste por categoria) | D5 (destravada)                  |
 | DEC-7  | ~~Contratos SQL: saldo como foto atual ou série histórica (002); id estável de item de compra (004); FK de locais para depósito (005); exclusão no polling (API 001)~~ ✅ **TOTALMENTE RESOLVIDO em 21/09/2026** — os 4 sub-itens têm resposta: saldo = foto atual (I-06); id de item de compra = `(id_pedido_compra, ordem)` (ver G-10); FK de depósito = ainda não, por design, Gustavo adiciona quando `deposito` existir (ver G-11); exclusão no polling = resolvido com `?incluir_deletados=true` (ver G-13). | Gustavo                   | 25/09 | ~~Foto atual; id = pedido + sequência; sem FK; aceitar a lacuna de exclusão~~ (não se aplica, decidido) | **D1**, B3, B5, D3 (destravados) |
 | DEC-8  | ~~Compra do hardware do posto de recebimento (impressora industrial + leitor 2D, ~R$ 5-7 mil)~~ ✅ **DECIDIDO em 22/09/2026** — será comprado (impressora industrial + leitor 2D), ao contrário do default (que previa começar só com Code128 em impressora comum).                                                                                                                                                                   | Nathan + Diretoria        | 25/09 | ~~Sem hardware: etiqueta Code128 em impressora comum~~ (não se aplica, decidido: compra o hardware) | H2, D11 (destravadas)              |
-| DEC-9  | ~~Prazo de retenção de auditoria (5 anos é palpite; nunca discutido com contabilidade/fiscal)~~ ✅ **DECIDIDO em 21/09/2026** — fica em 5 anos (bate com o default; validação formal com contabilidade/fiscal ainda não foi feita, mas a equipe optou por seguir com esse valor de trabalho).                                                                                                                                                                   | Nathan                    | 09/10 | ~~5 anos, sem expurgo automático~~ (confirmado)                            | nada                 |
+| DEC-9  | **Complemento de 07/10 ([[Registro-de-Decisoes-2026-10-07]] #53): `auth.logs` com retenção curta (prazo 🔴 Gustavo) e `auth.auditoria` com 5 anos.** ~~Prazo de retenção de auditoria (5 anos é palpite; nunca discutido com contabilidade/fiscal)~~ ✅ **DECIDIDO em 21/09/2026** — fica em 5 anos (bate com o default; validação formal com contabilidade/fiscal ainda não foi feita, mas a equipe optou por seguir com esse valor de trabalho).                                                                                                                                                                   | Nathan                    | 09/10 | ~~5 anos, sem expurgo automático~~ (confirmado)                            | nada                 |
 | DEC-10 | ~~Devolução de cliente: decisão no av-hub ou ciclo completo no Estoque?~~ ✅ **DECIDIDO em 21/09/2026** — **ciclo completo nasce no Estoque**, incluindo capturar o valor da devolução parcial (que o Omie não expõe — ver I-09). Quebra o padrão "av-hub decide, MES executa" usado pra OC — aqui o Estoque decide e executa. Ver [[Decisoes-Chave-ERP]].                                                                              | Nathan                    | 13/11 | ~~sem default~~ (decidido antes do prazo)                                                               | Fase D (destravada)               |
-| DEC-11 | ~~Módulo financeiro nativo (Passo 15): quem decide e quando?~~ ✅ **DECIDIDO em 21/09/2026** — só no futuro; fica fora do roadmap atual, sem data. Revisitar quando o desligamento do Omie entrar em pauta.                                                                                                                          | Nathan → diretoria        | 13/11 | ~~sem default~~ (decidido: adiado)                                                               | Desligamento do Omie |
+| DEC-11 | ~~Módulo financeiro nativo (Passo 15): quem decide e quando?~~ ✅ **DECIDIDO em 21/09/2026** — só no futuro; fica fora do roadmap atual, sem data. ~~Revisitar quando o desligamento do Omie entrar em pauta.~~ **Revisto em 07/10 ([[Registro-de-Decisoes-2026-10-07]] #30): o Omie segue como sistema financeiro e fiscal; não há plano de desligar.**                                                                                                                          | Nathan → diretoria        | 13/11 | ~~sem default~~ (decidido: adiado)                                                               | Desligamento do Omie |
 | DEC-12 | ~~Estratégia de alocação de lote no consumo de matéria-prima pela OS/OP: qual lote baixar primeiro?~~ ✅ **DECIDIDO em 21/09/2026** — FIFO por `data_posicao` (mais antigo primeiro) como **padrão automático**, mas com **opção de escolher manualmente** o lote na hora do consumo (override do FIFO, não obrigatório usar). Trava a tarefa J3 (genealogia de material, S5). | Robert + Pablo | 20/11 | ~~FIFO por `data_posicao`~~ (confirmado, mais opção de escolha manual) | J3 (destravada) |
 
 ---

@@ -1,9 +1,14 @@
 ---
 tags: [integracao-omie, dados-extraidos]
 criado: 2026-09-17
+atualizado: 2026-10-07
 ---
 
 # Etapas de Faturamento
+
+> Status: em produção (verificado em 07/10/2026 pelo dump e pelo [[Registro-de-Decisoes-2026-10-07]] #5: `core.etapas_faturamento` populada) | no código (`enabled:true`).
+
+> **Atualização de 07/10/2026 — a ação "confirmar se está habilitado" foi respondida no código.** O recurso `etapasFaturamento` está com `enabled:true` (desde f753982) e roda nas 4 camadas (hoje/mês/últimos meses/full), destino `core.etapas_faturamento`. Fonte: leitura de código (`master` d2886bf); ~~se está de fato rodando em produção e populando a tabela não foi verificado~~ — **superado (✅ 07/10, #5): a tabela está populada em produção.** A parte restante é ligar a tabela ao dicionário de etapas do Portal do Vendedor.
 
 Fonte: Omie `ListarEtapasFaturamento` (`/produtos/etapafat/`), resource `etapasFaturamento.ts`. **Status: implementado** — a tabela de destino já existe no banco do DBA (a migration `sql/dba_migrations/005_etapas_faturamento_contrato.md` do próprio pipeline foi aplicada). Payload vem aninhado (`cadastros[].etapas[]`) e é achatado antes do mapeamento.
 
@@ -24,7 +29,7 @@ Destino: `core.etapas_faturamento`. Chave de conflito: `(codigo_empresa, codigo_
 
 O Portal do Vendedor (seção de modelagem, [[AV-Hub-Portal-Vendedor-Plano]]) tem um "dicionário de nomes de etapa" pendente. Essa tabela é a candidata natural para resolver isso, e a NF já tem um cruzamento pronto via `notas_fiscais.oppedido` → `codigo_operacao` (ver [[Notas-Fiscais-e-Itens]]).
 
-**Ação recomendada**: confirmar se o pipeline já está de fato sincronizando essa tabela em produção (a tabela existir no banco não garante que o job de extração esteja ativo) e, se sim, ligar isso ao dicionário de etapas do Portal do Vendedor.
+**Ação recomendada (atualizado em 07/10)**: o código já está habilitado (`enabled:true`); a confirmação em produção está feita (tabela populada, ✅ 07/10); falta ligar isso ao dicionário de etapas do Portal do Vendedor.
 
 ## Ver também
 - [[Notas-Fiscais-e-Itens]]

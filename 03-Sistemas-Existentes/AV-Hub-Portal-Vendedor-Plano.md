@@ -1,9 +1,12 @@
 ---
 tags: [erp-acos-vital, av-hub, portal-vendedor, planejamento]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
 # av-hub — Plano do Portal do Vendedor (Autoatendimento)
+
+> **Atualização de 07/10/2026 — auditoria código × vault** (leitura de código; produção **não** conferida; só os pontos abaixo foram reconferidos, o resto do plano vale como estava). (1) **"Cliente inativo"**: o front **já consome** `GET /clientes_inativos` — o "só falta frontend" abaixo está obsoleto. (2) **Favoritos**: o front usa `POST`/`DELETE`; se o fix do model entrou em `main` da API é **não verificado** (ver [[AV-Hub-Favoritos-Clientes-Inativos-Investigacao]]). (3) **Rotas**: `/vendas_planilha` por pedido foi substituída no front por `GET /pedidos_venda` (contrato 05); a API tem `vw_vendas_planilha_leve` e `_resumo` por intervalo ([[AV-Hub-Vendas-Reconciliacao]]). (4) **Vendedores**: a tela de Vendedores agora expõe o vínculo com funcionário e a fila "sem funcionário" (#155, só `develop`; contrato [[39-Vendedores-Fila-de-Vinculo]]) — relevante para o escopo do vendedor (`escopo_vendedores` em `GET /me/permissoes`: `todos`/`vinculados`/`proprios`; ver [[AV-Hub-RBAC]]). (5) O Portal ganhou a tela de **Liberação de pedido** (`liberar-pedidos`, #103) — ver [[AV-Hub-Modulos]].
 
 Plano de produto vivo (`docs/portal-vendedor/plano-portal-vendedor.md`), com decisões do Nathan. Três telas: **Meu Dashboard**, **Meus Pedidos**, **Minhas Notas Fiscais**.
 
@@ -34,7 +37,7 @@ Todas com `requirePermission` própria e resolução de vínculo via `getServerS
 ## Extras validados (não implementados ainda, sem bloqueio técnico)
 Estados vazios/erro, badge de SLA crítico no menu lateral, comparação com mês anterior, "próximos vencimentos" ranqueado, top clientes do vendedor (via agregação de `detalhe_vendedor_vendas` no cliente — `ranking_clientes_vendas` não filtra por vendedor), copiar nº com 1 clique, "dados atualizados às HH:MM" honesto (usar o `updated_at` mais recente entre os registros carregados, nunca a hora do navegador), exportar CSV/Excel, histórico de status do pedido (parcial — só os marcos que já existem como datas), **top produtos vendidos** (✅ viável via `GET /pedido_venda_itens`, view dedicada `vw_pedido_venda_itens` com item a item por pedido/vendedor), ritmo de meta por semana, filtro por status, SLA agregado por cliente.
 
-**Cliente inativo** e **favoritar cliente/pedido** saíram desta lista de "extras caros" — investigados a fundo em [[AV-Hub-Favoritos-Clientes-Inativos-Investigacao]] (22/09/2026), testado em runtime: `GET /clientes_inativos` já funciona de ponta a ponta, pronto, só falta frontend; `favoritar cliente/pedido` (`usuarios_favoritos`) tinha um bug real de backend no `POST` (`id` do model sem `defaultValue`, Sequelize barrava a criação antes de chegar no Postgres) — **já corrigido e testado no mesmo dia** — falta só decidir sobre push/merge e plugar o frontend nos dois.
+**Cliente inativo** e **favoritar cliente/pedido** saíram desta lista de "extras caros" — investigados a fundo em [[AV-Hub-Favoritos-Clientes-Inativos-Investigacao]] (22/09/2026), testado em runtime: `GET /clientes_inativos` já funciona de ponta a ponta, pronto, ~~só falta frontend~~ **(atualizado em 07/10: o front já consome)**; `favoritar cliente/pedido` (`usuarios_favoritos`) tinha um bug real de backend no `POST` (`id` do model sem `defaultValue`, Sequelize barrava a criação antes de chegar no Postgres) — **já corrigido e testado no mesmo dia** — falta só decidir sobre push/merge e plugar o frontend nos dois **(atualizado em 07/10: o front já usa `POST`/`DELETE` de favoritos e consome `clientes_inativos`; se o fix do model está em `main` da API, não verificado)**.
 
 ## Ver também
 - [[AV-Hub-Modulos]]

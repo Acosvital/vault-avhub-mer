@@ -1,10 +1,13 @@
 ---
 tags: [contrato-logica, contrato-sql, contrato-api, vendas, integracao-mes]
 criado: 2026-09-28
+atualizado: 2026-10-07
 status: aplicada
 ---
 
 # Contrato 26 — Vendas: liberação do pedido pelo vendedor (acompanhamento da Qualidade) + Fluxo 4 para o MES
+
+> **Atualização de 07/10/2026 — conferido no código (`main` = `develop` da `api-acos-vital`, `a6ab058`/`fdafb35`; produção não conferida no código; produção só pelo dump de 07/10, que cobre schema e dados, não o comportamento da API em produção; [[Auditoria-Dump-Producao-2026-10-07]]):** `pedidos_liberacao` e `pedidos_liberados` (GET, `/:n/itens` com 409 `PEDIDO_NAO_LIBERADO`, `POST /:n/importado`) **existem** (`4bf36d9`, 28/09, PR #275); o status `aplicada` do contrato segue valendo pela conferência de 01/10 na `api-test`. **O L6 segue ABERTO.** O `apiKeyAuth.js` tem 3 tipos de chave: (a) `API_KEYS` do ambiente = admin; (b) `auth.chaves_servico` no banco, nível leitura/escrita/admin, cache de 30 s, **sem restrição por rota**; (c) `MES_INTEGRACAO_KEYS` (nova), que **só abre o `PUT /compras/requisicoes/origem/{id}`** do [[34-Requisicoes-MES-Empurra-para-o-Hub]]. Com a (c), `/pedidos_liberados`, `/unidades`, `/produtos` e `/compras/requisicoes/eventos` dão 403 `CHAVE_MES_ROTA_NAO_PERMITIDA` até em GET: **o MES lê essas rotas com chave admin ou de banco** (`API_URL` + `API_KEY` no `api-pcp`), sem a restrição que o L6 pede. Ou seja, a chave "própria do MES, restrita às rotas que ele usa" **não existe** (a única chave própria cobre só o PUT). Ver [[Chaves-de-Integracao-AvHub-MES-Pipeline]] e [[Indice-Contratos]] (Conferência de 07/10/2026).
 
 > **✅ ENTREGUE (01/10/2026).** **Conferência de 01/10/2026 na `api-test`** (o DBA avisou que concluiu): data de corte preenchida (`data_inicio_liberacao = 2026-07-28`); `GET /pedidos_liberacao` com 741 pendentes, 16 liberados e 3 importados; `GET /pedidos_liberados` com 19. Não conferido: L6 (chave do MES de escrita).
 
@@ -148,12 +151,12 @@ está desligado — ver L5.
 
 | Item | O que | Quem | Estado |
 |---|---|---|---|
-| **L1** | Aplicar os Apêndices A e B em teste e depois em produção; definir a data de corte | DBA + Nathan | pendente |
-| **L2** | Aplicar o patch na `develop` e publicar | backend | pendente |
-| **L3** | Mapear em `auth.rotas_telas` (para `PERMISSOES_ROTA_MODO=exigir`): `GET /pedidos_liberacao` → `liberar-pedidos` **ou** `liberacao-equipe` `.pode_visualizar`; `PUT /pedidos_liberacao/*` → `liberar-pedidos.pode_editar`. `/pedidos_liberados/*` é rota de **serviço** (MES), fora do mapa de telas | DBA | pendente |
+| **L1** | Aplicar os Apêndices A e B em teste e depois em produção; definir a data de corte | DBA + Nathan | ~~pendente~~ **api-test: feito em 01/10** (data de corte 28/07/2026); produção: não conferido |
+| **L2** | Aplicar o patch na `develop` e publicar | backend | ~~pendente~~ **feito no código** (07/10): `4bf36d9` (28/09, #275) em `main` = `develop` |
+| **L3** | Mapear em `auth.rotas_telas` (para `PERMISSOES_ROTA_MODO=exigir`, **atualizado em 07/10: `exigir` é o modo fixo no código**, [[Registro-de-Decisoes-2026-10-07]] item 8; chamadas de serviço só com `x-api-key` passam sem mapeamento): `GET /pedidos_liberacao` → `liberar-pedidos` **ou** `liberacao-equipe` `.pode_visualizar`; `PUT /pedidos_liberacao/*` → `liberar-pedidos.pode_editar`. `/pedidos_liberados/*` é rota de **serviço** (MES), fora do mapa de telas | DBA | pendente |
 | **L4** | `api-pcp`: as 4 trocas da seção 4.2 | Robert | ✅ **concluído em 29/09/2026** (`901f9bb`), conferido contra a `develop` da API em 30/09. Falta o teste de ponta a ponta, que depende da data de corte (L1) |
 | **L5** | Ligar `ESCOPO_VENDEDORES_EXIGIR`: aí as 2 marcas `GAMBIARRA(` saem do BFF | infra/backend | pendente (mesmo item do contrato de permissões) |
-| **L6** | **Chave própria do MES**, restrita a `/pedidos_liberados/*` e ao que o MES já usa. Hoje o MES usa a mesma `x-api-key` genérica e **ainda consegue** ler `/vendas_planilha` e `/pedido_venda_itens` sem passar pelo portão; o bloqueio só é real depois de L4 + L6 | backend + Robert | **em aberto.** A API já tem chaves de serviço no banco (`auth.chaves_servico`, níveis leitura / escrita / admin). A do MES precisa ser de **escrita** (o `POST .../importado` é escrita; com leitura dá 403). **Falta:** criar a chave e restringir por rota (`/pedidos_liberados/*`, `/ordens-compra/referencia`, `/unidades`, `/produtos`, e `/compras/requisicoes` se o job do contrato 003 usar a mesma chave); a restrição por rota ainda não existe na API. No MES é só trocar a variável `API_KEY` |
+| **L6** | **Chave própria do MES**, restrita a `/pedidos_liberados/*` e ao que o MES já usa. Hoje o MES usa a mesma `x-api-key` genérica e **ainda consegue** ler `/vendas_planilha` e `/pedido_venda_itens` sem passar pelo portão; o bloqueio só é real depois de L4 + L6 | backend + Robert | **em aberto.** A API já tem chaves de serviço no banco (`auth.chaves_servico`, níveis leitura / escrita / admin). A do MES precisa ser de **escrita** (o `POST .../importado` é escrita; com leitura dá 403). **Falta:** criar a chave e restringir por rota (`/pedidos_liberados/*`, `/ordens-compra/referencia`, `/unidades`, `/produtos`, e `/compras/requisicoes` se o job do contrato 003 usar a mesma chave); a restrição por rota ainda não existe na API. No MES é só trocar a variável `API_KEY`. **(conferido no código em 07/10: segue em aberto; 🔴 Gustavo decide, [[Registro-de-Decisoes-2026-10-07]] item 10: chave restrita para MES e pipeline ou continuar com a chave admin. A chave do MES só abre o PUT do 34; as leituras usam outra. O MES precisa de escrita em `POST /pedidos_liberados/:n/importado`)** `MES_INTEGRACAO_KEYS` só abre o PUT do 34 e dá 403 `CHAVE_MES_ROTA_NAO_PERMITIDA` nas demais rotas (inclusive GET); as chaves de `auth.chaves_servico` não têm restrição por rota; o MES lê com chave admin ou do banco. Para fechar o L6 é preciso ou ampliar a lista de rotas permitidas da chave MES (leitura/escrita) ou criar a restrição por rota nas chaves do banco |
 
 **Observações do Robert (30/09/2026):**
 - Pedido incluído antes da data de corte responde **404** nos itens; no MES aparece como "não encontrado".

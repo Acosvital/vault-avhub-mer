@@ -6,6 +6,8 @@ atualizado: 2026-09-21
 
 # Auditoria: dump de produção (21/09) vs. vault vs. código real
 
+> Status: histórico — retrato de 21/09/2026, não reflete o estado atual. Para o estado em 07/10, ver [[Auditoria-Dump-Producao-2026-10-07]] e [[Registro-de-Decisoes-2026-10-07]].
+
 > **Pergunta que esta nota responde: "o vault está 100% atualizado?"** Não — achou 1 desatualização importante (contratos aplicados sem o vault saber) e 1 achado de código morto já confirmado e sem urgência (schema `negocio`). O resto do modelo de dados documentado no vault (av-hub e app-pcp) **bate com a realidade**. Esta nota é o depara ponto a ponto; as correções de status já foram aplicadas em [[Indice-Contratos]] e [[Onde-Estamos]].
 >
 > **Atualização (21/09, mesma tarde):** o achado da seção 4 (`negocio` vs. `core_compras`) foi confirmado pelo Nathan em conversa — o schema `negocio` **não existe mais** de fato, os 8 endpoints que apontam pra ele são código morto conhecido (não removido ainda), sem uso real hoje. Não é bug de produção ativo, é limpeza de dívida técnica pendente, sem urgência. Rebaixado de "risco crítico" para item de backlog — ver seção 4 atualizada.

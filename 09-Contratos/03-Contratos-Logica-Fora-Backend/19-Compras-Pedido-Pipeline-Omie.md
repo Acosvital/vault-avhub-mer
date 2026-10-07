@@ -1,4 +1,15 @@
+---
+tags: [contrato-logica, contrato-pipeline, compras]
+status: substituido
+criado: 2026-09-23
+atualizado: 2026-10-07
+---
+
 # Compras — pedido para a pipeline (`omie-elt-pipeline`)
+
+> Status: **histórico, substituído pelo [[23-Compras-Pipeline-Consolidado]]** (verificado em 07/10/2026). O envio da OC ao Omie é fixo no código, sem flags, ✅ ([[Registro-de-Decisoes-2026-10-07]] #7).
+
+> **Atualização de 07/10/2026 — conferido no código da pipeline (`master` `d2886bf`, 06/10):** este arquivo é **histórico** (substituído pelo [[23-Compras-Pipeline-Consolidado]]). A **P5 ("envio da OC ao Omie — decisão em aberto")** foi decidida em 24/09 (a pipeline envia, por fila) e **está implementada**: `src/jobs/envioOrdensCompra.ts` e `src/omie/ordemCompraOmie.ts`, processo `envio-oc-worker` + fila `omie-envio-oc`, `UpsertPedCompra` com `cCodIntPed = numero_pedido` e `ExcluirPedCompra` (PR #1 mergeado em 05/10, `3233acf`). A recomendação de P5 de mandar parcelas (`parcelas_incluir`) **não valeu**: o envio **nunca manda parcelas** (só `cCodParc` e `nQtdeParc`, `f4fd02d`). O separador do bloco `[AV-HUB]` é ` ; `, não ` | `. P1–P4 também estão no código (recursos `pedidosCompras`, `compradores`, `condicoesPagamentoCompras`, decodificação de entidades HTML). Produção/deploy não foram conferidos.
 
 > **⚠️ Substituído em 23/09/2026 por `../ENVIAR - contrato-compras-pipeline.md`**, que tem a lista atualizada: o que já foi entregue
 > (conferido no `develop`), o que falta e o que está errado. Este arquivo fica como histórico.

@@ -1,4 +1,10 @@
+---
+atualizado: 2026-10-07
+---
+
 # Contrato — Compras ↔ Omie: puxar pedidos de compra e criar a OC lá
+
+> **Atualização de 07/10/2026 — conferido no código da pipeline (`master` `d2886bf`, 06/10; produção/deploy não conferidos):** os dois fluxos estão no código. **Fluxo A** (espelho `pedidosCompras`, `lApenasAlterados=T`) e **Fluxo B** (`envio-oc-worker`, `UpsertPedCompra`/`ExcluirPedCompra`, `cCodIntPed = numero_pedido`; PR #1 mergeado em 05/10). O "ligar os `SYNC_*`" abaixo está superado: as flags de leitura **saíram em 06/10** (contrato 38) e os recursos de Compras rodam sempre; só `SYNC_ENVIO_OC` (padrão `false`) e `ENVIO_OC_DRY_RUN` (padrão `true`) seguiam como interruptores de escrita no Omie. **(atualizado em 07/10, ✅ Nathan, [[Registro-de-Decisoes-2026-10-07]] item 7)** Os dois interruptores **saem**: o envio fica **fixo no código** e vai **direto ao Omie**, sem flag. O Nathan rodou cerca de 4 testes reais e a OC entrou. Os riscos L10.1, L10.6 (FOB) e L10.7 (b) a (d) viram **risco aceito**; a alteração de código é do Gustavo. ~~se estão ligados em produção: desconhecido~~. **Parcelas (§3.6):** o envio **nunca manda parcelas** (só `cCodParc` e `nQtdeParc`; o Omie gera pela condição, `f4fd02d`); mandar `parcelas_upsert` faz o Omie trocar a condição para `999`. O envio usa `UpsertPedCompra` e **não** `IncluirPedCompra`; o separador do bloco `[AV-HUB]` é ` ; `. Ver [[23-Compras-Pipeline-Consolidado]].
 
 > **✅ Situação em 01/10/2026 — ENTREGUE; falta só ligar em produção.**
 >

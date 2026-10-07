@@ -2,10 +2,16 @@
 tags: [contrato-api, mes, estoque, integracao-av-hub-mes, rastreabilidade]
 status: proposta
 criado: 2026-09-22
-atualizado: 2026-09-30
+atualizado: 2026-10-07
 ---
 
 # Contrato de API 005 — Status por item (MES → av-hub)
+
+> Status: decidido | no código | em produção (verificado em 07/10/2026). Fonte: [[Registro-de-Decisoes-2026-10-07]] (#42 e #43).
+> - **Aceite das 3 diferenças** (foto atual em vez de log; `pedido_venda` + `ordem_producao`; etapas a mais e a menos): 🔴 Nathan. Recomendação: aceitar (o Robert já aprovou em 30/09).
+> - **Consumidor no hub:** 🟡 (Gustavo) roda na `api-acos-vital` (F2, 19 a 30/10), com tabela local do status por item.
+
+> **Atualização de 07/10/2026 — conferido no código:** do lado do **MES** a rota `GET /itens/status` **existe** (`901f9bb`, na `develop` do `api-pcp`; `etapa` derivada do tipo do setor, foto atual da parcial). Do lado do **hub** **não existe nada**: nem job de leitura, nem rota, nem model/tabela de status por item na `api-acos-vital` (`main` = `develop`, `a6ab058`/`fdafb35`). Falta o **consumidor no hub** (job + tabela local + tela do Portal do Vendedor, tarefa E3), o aceite do Nathan às diferenças e o Gustavo. Status: `proposta`. Observação: a `main` do `api-pcp` parou em 28/08, a rota só está na `develop` do MES; se essa `develop` roda em produção/homologação não foi verificado. Ver [[Indice-Contratos]] (Conferência de 07/10/2026).
 
 > **01/10/2026:** a requisição (ida, contrato 003) passou a ser empurrada pelo MES, ver [[34-Requisicoes-MES-Empurra-para-o-Hub]]. Este contrato (volta) continua como está e ainda não foi implementado.
 

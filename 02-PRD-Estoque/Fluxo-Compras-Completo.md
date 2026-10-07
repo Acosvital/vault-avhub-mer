@@ -1,32 +1,37 @@
 ---
 tags: [erp-acos-vital, prd-estoque, compras, fluxo-detalhado]
 criado: 2026-09-16
-atualizado: 2026-09-30
+atualizado: 2026-10-07
 ---
 
 # Fluxo de Compras — do 0 ao 100%, conversa por conversa
 
+> Status: decidido | no código (develop) | em produção (mes-test; produção real não)
+
+> **Atualização de 07/10/2026 — o lado MES do circuito de compra já tem código em `develop`** (conferido no código, `api-pcp` `ca3346b`; **só em `develop`, a `main` parou em 28/08; produção não conferida**). O que existe: (1) **requisição de compra** (C1/C7 do cronograma): `RequisicaoCompra`/`RequisicaoCompraItem`, setor `REQUISICAO`, `ComprasService.requisitar` (`b8dc158`, 29/09), com cancelamento pelo MES (`POST /compras/requisicoes/:id/cancelar`) e envio ao av-hub (`e7ce2c9`, 02/10); (2) o **circuito fora do roteiro** (`circuito-compra.ts`; a migration `...140100` tirou `requisicoes-compra` e `compras` de `fabrica_setores`); (3) o **contrato 34** (PUT `/compras/requisicoes/origem/{id_origem}`) **implementado no MES** e o **contrato 35** (GET `/compras/requisicoes/eventos`) **implementado e ligado** (`41bf4a6`, 05/10) — o MES **só reage** a `requisicao_cancelada` e `requisicao_reaberta`; `oc_aprovada`, `oc_no_omie` e `despachada` só são gravados e mostrados na timeline de andamento (`EventosRequisicaoModal`) e nas métricas (`GET /relatorios/compras`), **sem** preencher pedido de compra/previsão nem avançar a parcial; (4) o **registro manual** da compra: `PATCH /compras/requisicoes/:id/compra` (nº do pedido, fornecedor, previsão) move a parcial para o Recebimento. **Não existe:** o contrato 004 (`/ordens-compra/referencia`) — nem no MES nem no hub — e, portanto, nenhum poll de OC. Se as chaves de integração estão definidas no ambiente real: **não verificado**. O recebimento está em [[Fluxo-Recebimento-Completo]] e [[App-PCP-Recebimento-Conferencia]]; os contratos em [[Indice-Contratos]]; o estado das tarefas em [[Onde-Estamos]] e [[Cronograma-2-Meses]].
+>
 > Detalha a etapa "não tem em estoque → gera requisição de compra" da célula correspondente em [[Modelo-Destinacao-Item]], seguindo a divisão já decidida em [[MES-Arquitetura-Decisoes]] (decisão 5): **PCP (MES) decide que precisa comprar, Compras (av-hub) decide como comprar, MES executa o recebimento**.
 >
 > Cada "conversa" abaixo é uma interação entre atores/sistemas — quem fala, o que trafega, e o gatilho que a dispara. Numeradas em ordem de acontecimento no caminho feliz, com os desvios (divergência, reprovação) marcados como ramificações, nunca becos sem saída — ver [[Estoque-Riscos]].
 >
-> **Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje** — é escopo obrigatório do sistema a construir, não documentação de processo existente.
+> ~~**Confirmado com o usuário (17/09/2026): nada deste fluxo existe em sistema hoje**~~ — **superado em parte em 07/10/2026**: o lado MES (requisição, cancelamento, envio ao av-hub, eventos, recebimento) tem código em `develop`, ver bloco acima. O lado av-hub (cotação, OC, aprovação, CCP) segue conforme as notas dele, não conferido aqui.
 >
-> **Atualizado em 24/09/2026 com o encaixe do MES** ([[Encaixe-Estoque-Revenda-no-PCP]]): a requisição (C1) passa a nascer da **entrada do parcial no setor Compras** do roteiro da fábrica Revenda, vinculada ao `ItemParcial`; o beneficiamento é um setor do próprio roteiro (C10 não volta mais ao PCP); e o item **aprovado na Qualidade volta ao setor Estoque** (C19).
+> **Atualizado em 24/09/2026 com o encaixe do MES** ([[Encaixe-Estoque-Revenda-no-PCP]]): ~~a requisição (C1) passa a nascer da **entrada do parcial no setor Compras** do roteiro da fábrica Revenda, vinculada ao `ItemParcial`~~ **(superado pela decisão de 28/09: a requisição NÃO nasce ao entrar em Compras; nasce no setor `REQUISICAO`, antes de Compras)**; o beneficiamento é um setor do próprio roteiro (C10 não volta mais ao PCP); e o item **aprovado na Qualidade volta ao setor Estoque** (C19).
 >
 > **Atualizado em 28/09/2026 (Robert) — a C19 abaixo ficou incompleta, e o C1 ganhou uma etapa nova.** Duas mudanças, detalhadas em [[Encaixe-Estoque-Revenda-no-PCP]] seções 3.4/5/6:
 > 1. **C19 não termina no Estoque — o item segue para a Expedição** (novo setor tipo `EXPEDICAO`: Embalagem → Logística). O Estoque dá entrada + reserva `ATIVA`, mas a baixa real (reserva `CONSUMIDA`, saída do lote) só acontece quando a **Embalagem recebe** o item. Ver C19 revisada abaixo.
 > 2. **A requisição (C1) passa por um novo setor "Requisições de compras" (PCP), antes de Compras** — ainda não implementado. É lá que a matéria-prima fica amarrada ao item/parcial que a originou. Vale tanto para revenda quanto para matéria-prima de fabricação.
 > 3. **Recebimento parcial (C9) é permitido, com split**: o que chegou avança para a Qualidade, o restante continua aguardando em Compras. Sobra de compra (lote mínimo do fornecedor) fica livre no estoque, registrando de qual requisição veio.
 >
-> **⚠️ Atualizado de novo em 28/09/2026 à tarde, CONFIRMADO em 29/09/2026 (Nathan, EC-05/EC-08) — ver [[Encaixe-Estoque-Revenda-no-PCP]] callout da tarde de 28/09 e seção 5.** Robert propôs revisar este fluxo de novo, antes mesmo do item 2 acima virar código, e o Nathan confirmou a direção: o recebimento passa a acontecer na **Logística de Entrada** (não em Compras); a requisição/compra vira um **circuito fixo do sistema disparado pelo próprio Estoque**, fora do roteiro do PCP; e a baixa de saldo passa a ocorrer no **despacho do Estoque**, não mais no recebimento da Embalagem. As conversas C1-C19 abaixo ainda descrevem o desenho de 24-25/09 (que é o que está em produção); não reescrevi C1-C19 porque a arquitetura confirmada de 28-29/09 ainda não tem nenhum código.
+> **⚠️ Atualizado de novo em 28/09/2026 à tarde, CONFIRMADO em 29/09/2026 (Nathan, EC-05/EC-08) — ver [[Encaixe-Estoque-Revenda-no-PCP]] callout da tarde de 28/09 e seção 5.** Robert propôs revisar este fluxo de novo, antes mesmo do item 2 acima virar código, e o Nathan confirmou a direção: o recebimento passa a acontecer na **Logística de Entrada** (não em Compras); a requisição/compra vira um **circuito fixo do sistema disparado pelo próprio Estoque**, fora do roteiro do PCP; e a baixa de saldo passa a ocorrer no **despacho do Estoque**, não mais no recebimento da Embalagem. As conversas C1-C19 abaixo ainda descrevem o desenho de 24-25/09 (~~que é o que está em produção~~ *atualizado em 07/10: não conferido em produção; o que o código de `develop` tem é a mistura abaixo*); não reescrevi C1-C19 porque a arquitetura confirmada de 28-29/09 ~~ainda não tem nenhum código~~ *(atualizado em 07/10: tem código parcial — circuito fora do roteiro, setores `REQUISICAO`, `LOGISTICA_ENTRADA` e `QUALIDADE`, "Solicitar compra" a partir do Estoque, inspeção de entrada por lote, reprovação total/parcial; **ainda sem** a baixa no despacho do Estoque, a ação de consumo de matéria-prima e o `RoteiroItem`, ver [[Encaixe-Estoque-Revenda-no-PCP]])*.
 
 ## Atores e sistemas
 
 | Ator | Onde vive |
 |---|---|
 | **PCP** | MES — monta a OP da fábrica Revenda na tela Ordem de Produção; decide o novo norte |
-| **Setor Compras** (tipo `COMPRAS`) | MES — etapa do roteiro da Revenda: a entrada do parcial gera a requisição; o parcial espera ali até o recebimento |
+| **Setor Requisição** (`REQUISICAO`) | MES — fila "Requisições de compras" do PCP; **é aqui que a requisição nasce** (decisão de 28/09) |
+| **Setor Compras** (tipo `COMPRAS`) | MES — o parcial espera ali até o recebimento ~~(a entrada do parcial gera a requisição)~~ *(superado em 28/09; o circuito de compra ficou fora do roteiro)* |
 | **Setor Estoque** (tipo `ESTOQUE`) | MES — recebe de volta o item aprovado (entrada + reserva) |
 | **Comprador** | av-hub |
 | **CCP** | av-hub (junto de Compras) — follow-up ativo de prazo/trânsito, distinto do Comprador que já fechou a compra |
@@ -39,66 +44,27 @@ atualizado: 2026-09-30
 | **Vendedor** | av-hub (só observa status) |
 | **Omie** | externo, sistema fiscal |
 
-## Diagrama — caminho feliz + principais desvios
+## Diagrama — arquitetura de 29/09/2026 (caminho feliz + principais desvios)
+
+> Redesenhado em 07/10/2026 conforme a arquitetura confirmada em 28-29/09 ([[Encaixe-Estoque-Revenda-no-PCP]]) e o que o código de `develop` implementa. A **requisição NÃO nasce ao entrar em Compras**: nasce no setor `REQUISICAO` ("Requisições de compras", fila do PCP), **antes** de Compras (decisão de 28/09). O circuito de compra é fixo do sistema, fora do roteiro do PCP. Fonte das decisões de 07/10: [[Registro-de-Decisoes-2026-10-07]].
 
 ```mermaid
-sequenceDiagram
-    participant PCP
-    participant SCom as Setor Compras (MES)
-    participant Compras as Comprador (av-hub)
-    participant CCP
-    participant Aprov as Aprovador (condicional)
-    participant Forn as Fornecedor (externo)
-    participant LogEnt as Logística de entrada
-    participant Receb as Recebimento (MES)
-    participant Fab as Fábrica/Beneficiamento
-    participant Qual as Qualidade (MES)
-    participant Est as Setor Estoque (MES)
-    participant Omie
-
-    PCP->>SCom: C0 · OP da fábrica Revenda: restante sem saldo sai do Estoque e entra no setor Compras
-    SCom->>Compras: C1 · requisição gerada pela entrada do parcial (material, qtd, prazo, filial, id_item_parcial)
-    Compras->>Forn: C2 · cotação/negociação (fora do sistema)
-    opt acima do valor X
-        Compras->>Aprov: C3 · pedido de aprovação
-        Aprov-->>Compras: aprovado/reprovado
-    end
-    Compras->>Compras: C4 · emite Ordem de Compra (define CIF ou FOB)
-    Compras->>Forn: C5 · envia OC
-    CCP->>Forn: C5b · pede confirmação da OC (preço, qtd, prazo)
-    Forn-->>CCP: C5c · confirma (ou contrapropõe)
-    CCP->>Forn: C6 · follow-up ativo de prazo (canal externo, manual)
-    Forn-->>CCP: C6b · confirma/atualiza previsão de chegada
-    Forn-->>CCP: C6c · avisa despacho (NF, transportadora, previsão)
-    opt atraso, entrega parcial ou mudança
-        CCP->>Compras: C6d · renegociação: comprador aprova a mudança
-        Compras->>Forn: C6e · acordo novo (prazo/qtd)
-    end
-    Compras->>Receb: C7 · referência mínima da OC (itens, qtd, flag acabado/não-acabado)
-    alt FOB — comprador assume custo/responsabilidade desde o despacho
-        LogEnt->>Forn: C7b · coleta no fornecedor
-        LogEnt->>Receb: C8 · chegada física na doca
-    else CIF — fornecedor paga e organiza o transporte
-        Forn->>Receb: C8b · fornecedor entrega direto na doca
-    end
-    Receb->>Receb: C9 · confere (contra Pedido de Venda OU contra OC) + pesagem
-    Receb->>SCom: C9b · recebimento libera o parcial parado no setor Compras
-    alt roteiro com beneficiamento (ex.: corte de chapa)
-        Receb->>Fab: C10 · parcial segue pro setor de beneficiamento do roteiro
-        Fab->>Qual: C13 · conclui, libera pra inspeção
-    else sem beneficiamento
-        Receb->>Qual: C11 · libera pra inspeção
-    end
-    Qual->>Qual: C14 · aprova ou reprova
-    alt reprovado
-        Qual->>PCP: C15 · "reprovado, decide novo norte"
-        PCP->>SCom: C16 · parcial volta ao setor Compras, nova requisição (volta pra C1)
-        Qual->>Omie: C17 · sinaliza necessidade de devolução (RNC)
-        Omie-->>Qual: C18 · nota de devolução (fecha RNC)
-    else aprovado
-        Qual->>Est: C19 · volta ao setor Estoque: entrada do lote + reserva + CONCLUIDO
-    end
+graph TD
+    EST["Setor ESTOQUE: item do pedido sem saldo suficiente"] --> REQ["Setor REQUISICAO, fila do PCP: nasce a requisição de compra"]
+    REQ -->|"PUT contrato 34"| AVH["av-hub: Comprador cota e emite a OC; acima de R$ 30 mil o diretor aprova"]
+    AVH --> CCP["CCP acompanha a OC com o fornecedor: confirmação, prazo e despacho"]
+    REQ --> COM["Setor COMPRAS: a parcial espera a compra; registro manual de pedido, fornecedor e previsão"]
+    CCP -.->|"eventos do contrato 35"| COM
+    COM --> LOG["Setor LOGISTICA_ENTRADA, Recebimento: conferência contra a NF"]
+    LOG -->|"REABERTO pelo PCP"| COM
+    LOG -->|"CONCLUIDO ou ACEITO: lote nasce em quarentena"| QUA["Setor QUALIDADE: inspeção de entrada por lote"]
+    QUA -->|"aprovado com laudo"| EST2["Setor ESTOQUE: entrada do lote e reserva"]
+    QUA -->|"reprovado: RNC com cisão de lote"| COM
+    EST2 --> EXP["Expedição"]
 ```
+
+> [!note]- Histórico 24/09: desenho original (superado)
+> O diagrama de sequência de 24/09 mostrava a **entrada do parcial no setor Compras gerando a requisição** (C0/C1), a cotação, a aprovação condicional, a OC, o acompanhamento do CCP (C5b a C6e), a referência mínima ao Recebimento (C7, contrato 004, que não existe), FOB/CIF, a conferência contra PV ou OC (C9) e, na Qualidade, aprovado voltando ao Estoque (C19) ou reprovado voltando ao PCP e a Compras (C15/C16). As conversas C0 a C19 abaixo seguem descrevendo esse desenho, com as correções de 07/10 marcadas no texto.
 
 ## Conversa por conversa
 
@@ -106,7 +72,7 @@ sequenceDiagram
 O PCP envia o item para a fábrica **Revenda** na tela Ordem de Produção. O parcial nasce no setor Estoque (etapa 1); o que o saldo não cobre é movido para o **setor Compras**.
 
 **C1 — Setor Compras → Compras: "preciso comprar X"**
-Gatilho (**desde 24/09/2026**): a **entrada do parcial no setor Compras** gera a requisição automaticamente, vinculada ao `ItemParcial` (`origem.id_item_parcial` no Fluxo 1 de [[Integracao-AvHub-MES-Especificacao-F1]]). O parcial fica parado nesse setor até o recebimento liberar (C9b). ~~Gatilho: PCP avalia o item pelo Modelo-Destinacao-Item e conclui "sem estoque".~~ Payload: material (projeção `core.produtos`), quantidade, prazo (SLA do pedido de origem), unidade/filial (`codigo_empresa`, quando o vínculo existir — ver [[MES-Arquitetura-Decisoes]]), restrição de acabado/não-acabado se houver. **Mecanismo de transporte MES→av-hub ainda em aberto** — parte do "casamento av-hub↔MES" (ver [[Decisoes-Chave-ERP]]).
+~~Gatilho (**desde 24/09/2026**): a **entrada do parcial no setor Compras** gera a requisição automaticamente~~ **(superado em 28/09: a requisição nasce no setor `REQUISICAO`, antes de Compras, e não ao entrar em Compras; no código `ComprasService.requisitar`)**. Vinculada ao `ItemParcial` (`origem.id_item_parcial` no Fluxo 1 de [[Integracao-AvHub-MES-Especificacao-F1]]). O parcial fica parado nesse setor até o recebimento liberar (C9b). ~~Gatilho: PCP avalia o item pelo Modelo-Destinacao-Item e conclui "sem estoque".~~ Payload: material (projeção `core.produtos`), quantidade, prazo (SLA do pedido de origem), unidade/filial (`codigo_empresa`, quando o vínculo existir — ver [[MES-Arquitetura-Decisoes]]), restrição de acabado/não-acabado se houver. **Mecanismo de transporte MES→av-hub ainda em aberto** — parte do "casamento av-hub↔MES" (ver [[Decisoes-Chave-ERP]]). *(Atualizado em 07/10: o transporte existe no código — contrato 34, `EnvioAvhubService` (`e7ce2c9`, 02/10): a requisição vira uma linha em `integracao_avhub_envios` na mesma transação, um PUT por item (`id_origem` = id do `RequisicaoCompraItem`, sem `id_item_parcial`), disparo imediato + timer de 60 s, backoff 1/2/5/10/30/60 min; 200/201 → `ENVIADO`; 409 `REQUISICAO_COM_OC` → `RECUSADO` (não repete); 400 → `FALHOU`; 401/403/404/5xx reagenda; sem chave a fila espera com aviso no log. Usa `AVHUB_MES_INTEGRACAO_KEY`. Se a chave está definida no ambiente real: não verificado.)*
 
 **C2 — Comprador → Fornecedor: cotação/negociação**
 Comprador escolhe fornecedor (projeção `core.parceiros`, sem cadastro próprio no Estoque). Negociação de preço/condição acontece **fora do sistema** hoje — canal externo, sem integração.
@@ -150,7 +116,7 @@ Gatilhos: fornecedor não confirma a OC; prazo estoura; fornecedor só entrega p
 **Fica em aberto:** (1) prazo máximo sem confirmação da OC até destacar; (2) quem avisa o PCP/vendedor quando a previsão atrasa um pedido de venda; (3) se a tela do CCP é própria ou aba dentro de Ordens (T-05 em [[Fluxograma-Telas-por-Bloco]]); (4) permissão: só o perfil CCP edita esses registros, Comprador só lê ou também edita?
 
 **C7 — av-hub → MES: referência mínima da OC**
-Dispara só quando o material chega na doca — não antes. Payload: itens, quantidade esperada, flag acabado/não-acabado. **Não trafega preço, fornecedor ou condição comercial** — mesma filosofia de "colunas protegidas" do pipeline ELT (ver [[Omie-ELT-Pipeline]]).
+Dispara só quando o material chega na doca — não antes. Payload: itens, quantidade esperada, flag acabado/não-acabado. **Não trafega preço, fornecedor ou condição comercial** — mesma filosofia de "colunas protegidas" do pipeline ELT (ver [[Omie-ELT-Pipeline]]). *(Atualizado em 07/10: o contrato 004 (`GET /ordens-compra/referencia`) **não existe** no MES nem no hub. Hoje essa referência entra por registro manual — `PATCH /compras/requisicoes/:id/compra` — e o evento `oc_aprovada` do contrato 35 não preenche o pedido de compra.)*
 
 **C7b/C8 (FOB) ou C8b (CIF) — Logística de entrada**
 O par que define quem paga e quem é responsável pelo transporte é **CIF × FOB**, dois incoterms:
@@ -160,6 +126,8 @@ O par que define quem paga e quem é responsável pelo transporte é **CIF × FO
 Também referenciado em [[Rota-Revenda]].
 
 **C9 — Recebimento confere**
+> *(Atualizado em 07/10: o código confere **contra a NF**, com peso/tolerância de 5%, recontagem por outra pessoa e decisão do PCP — a divisão acabado × PV / não acabado × OC abaixo é o desenho original. Ver [[Fluxo-Recebimento-Completo]] e [[App-PCP-Recebimento-Conferencia]].)*
+
 - **Item acabado** → confere contra o **Pedido de Venda** ("cara-crachá": o que chegou é o que o vendedor vendeu).
 - **Item não acabado** → confere contra a **referência da OC** recebida em C7 (o que chegou é o que o comprador comprou, pode ser bem diferente do item final vendido).
 - Pesagem: peso teórico × quantidade, dentro da tolerância por categoria (provisório 5%, ver [[Estoque-Perguntas-Abertas]]).
@@ -200,7 +168,7 @@ Item aprovado sai da quarentena e vai primeiro para o setor **Estoque·Entrada**
 | Estado problemático | Saída garantida |
 |---|---|
 | Reprovação de qualidade | C15→C16, volta pro PCP, novo ciclo de compra ou beneficiamento |
-| Divergência de quantidade na conferência (C9) | Mesmo padrão — volta pro PCP/Compras, não fica travado (a modelar em detalhe se divergir do fluxo de reprovação de qualidade) |
+| Divergência de quantidade na conferência (C9) | Mesmo padrão — volta pro PCP/Compras, não fica travado (a modelar em detalhe se divergir do fluxo de reprovação de qualidade) *(atualizado em 07/10: no código, recontagem por outra pessoa → `AGUARDANDO_DECISAO` → PCP aceita ou reabre; `REABERTO` devolve a parcial ao setor Compras)* |
 | Fornecedor nunca entrega | Status `CANCELADO` explícito já previsto em [[Estoque-Riscos]], com destinação/reserva reavaliada. Quem chega a essa conclusão é o CCP (C6d/C6e) |
 | Fornecedor não confirma a OC / entrega só parte | CCP registra a ocorrência; Comprador decide (C6d/C6e); saldo aberto continua na fila do CCP |
 
@@ -212,6 +180,8 @@ Item aprovado sai da quarentena e vai primeiro para o setor **Estoque·Entrada**
 - **CCP e Logística de entrada são atores do fluxo** — detalhados na etapa CCP ↔ Fornecedor (C5b–C6e) e em C7b/C8. Lista completa de setores em [[Setores-Envolvidos-no-Fluxo]].
 
 ## Ver também
+- [[App-PCP-Recebimento-Conferencia]] — o recebimento como está no código (07/10/2026).
+- [[Indice-Contratos]] — contratos 34 e 35 (requisição e eventos) e o estado dos 003/004/005.
 - [[Encaixe-Estoque-Revenda-no-PCP]] — setor Compras no roteiro da Revenda e a volta do item aprovado ao Estoque.
 - [[Integracao-AvHub-MES-Especificacao-F1]] — spec técnica dos 3 fluxos por polling que cruzam a fronteira av-hub↔MES (C1, C7, C19 abaixo)
 - [[Setores-Envolvidos-no-Fluxo]]

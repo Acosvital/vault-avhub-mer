@@ -1,9 +1,12 @@
 ---
 tags: [erp-acos-vital, av-hub, portal-vendedor, investigacao, achado]
 criado: 2026-09-22
+atualizado: 2026-10-07
 ---
 
 # `usuarios_favoritos` e `clientes_inativos` — investigação dos 2 "extras" do Portal do Vendedor
+
+> **Atualização de 07/10/2026 — auditoria código × vault** (leitura de código; produção **não** conferida). **Esta nota é uma fotografia datada** (investigação de 22/09/2026, contra o dump de produção daquela data e uma cópia local da API). **Os caminhos de código citados mudaram:** `src/routes/*`, `src/models/*` e `src/services/*` **não existem mais**; hoje é `src/schemas/<schema>/{tables,views,aggregates,functions}/<entidade>/` (PR #276, ver [[AV-Hub-API-Estado-Atual]]). Os hashes de commit de setembro vêm de branches locais e não existem em `develop`/`main`. O texto abaixo **não foi reescrito**; o que mudou está nos blocos "(atualizado em 07/10)". **Novidades conferidas no front (`develop` 996e320 / `main` cfed113):** o front **já consome** `GET /clientes_inativos` (a nota dizia "só falta frontend") e usa `POST`/`DELETE` de favoritos. **Não verificado:** se o fix do model (`defaultValue: literal("uuidv7()")`, branch local `fix/usuario-favorito-id-default`) chegou à `main` da API — essa branch não aparece entre as branches abertas da auditoria e o model hoje vive em `src/schemas/**`. Ver [[AV-Hub-Bugs-Catalogo]].
 
 > **Pergunta que esta nota fecha**, levantada em [[AV-Hub-Bugs-Catalogo]] e [[Decisoes-Chave-ERP]] ("2 extras do Portal do Vendedor podem já ter suporte de backend — investigar antes de re-priorizar como caro/precisa de contrato novo"): as rotas `usuarios_favoritos` e `clientes_inativos` já existem — mas funcionam de verdade? Testado empiricamente contra o `api-acos-vital` rodando em Docker local (mesma configuração usada em [[AV-Hub-Views-Compras-Investigacao]]) e o Postgres carregado a partir do dump de produção.
 >
@@ -25,7 +28,7 @@ HTTP 200
 
 652 clientes com ≥90 dias sem comprar (parâmetro `dias_sem_comprar`, default 90), ordenados por tempo parado — exatamente a ordem de prioridade de contato que a rota documenta. A view tem 1.204 linhas no total (todos os clientes com pelo menos uma compra histórica, qualquer tempo desde a última). Filtros por vendedor, unidade, nome do cliente e paginação já funcionam.
 
-**Conclusão: não precisa de nenhum trabalho de backend.** É "só" plugar no frontend do Portal do Vendedor — o card "Clientes inativos" pode sair da lista de "extras caros" e virar tarefa de frontend puro.
+**Conclusão: não precisa de nenhum trabalho de backend.** É "só" plugar no frontend do Portal do Vendedor — o card "Clientes inativos" pode sair da lista de "extras caros" e virar tarefa de frontend puro. **(atualizado em 07/10)** Já foi plugado: o front consome `clientes_inativos` (conferido no código).
 
 ## 2. `usuarios_favoritos` — leitura funcionava, escrita estava quebrada (corrigido)
 
@@ -61,8 +64,8 @@ A intenção do comentário é correta (deixar o Postgres gerar o `id` via `DEFA
 
 | Extra | Status real | O que falta |
 |---|---|---|
-| Cliente inativo | ✅ Pronto, testado, dado real | Só frontend |
-| Favoritar cliente/pedido | ✅ Bug de backend corrigido e testado em 22/09/2026 (branch local `fix/usuario-favorito-id-default`) | Push/PR/merge em `develop` (decisão pendente) + frontend |
+| Cliente inativo | ✅ Pronto, testado, dado real | ~~Só frontend~~ **(atualizado em 07/10)** o front já consome a rota |
+| Favoritar cliente/pedido | ✅ Bug de backend corrigido e testado em 22/09/2026 (branch local `fix/usuario-favorito-id-default`) | Push/PR/merge em `develop` (decisão pendente — **em 07/10: não verificado se entrou em `main`**) + frontend (**o front já usa `POST`/`DELETE`**, conferido) |
 
 Nenhum dos dois precisava do que o vault antigo temia ("caro"/"tabela nova"). O bug de favoritos era uma linha de configuração do model, já corrigida — falta só decidir quando enviar ao remoto e plugar o frontend nos dois.
 

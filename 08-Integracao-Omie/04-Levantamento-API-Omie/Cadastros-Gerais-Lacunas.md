@@ -1,15 +1,18 @@
 ---
 tags: [integracao-omie, levantamento-api, lacunas]
 criado: 2026-09-17
+atualizado: 2026-10-07
 ---
 
 # Cadastros Gerais — o que a API do Omie oferece e não extraímos
+
+> **Atualização de 07/10/2026 — parte da lista abaixo (de 17/09) já é extraída.** Conferido contra o código do pipeline (`master` d2886bf; leitura de código, não produção): **dados fiscais do parceiro** passaram a ser gravados em `core.parceiros` (IE, IM, Suframa, Simples, `contribuinte_icms`, CNAE, `tipo_atividade`, `pessoa_fisica`, `produtor_rural`, `cidade_ibge`, `valor_limite_credito`, `bloquear_faturamento`, `inativo`, 66f9a2e); **projetos, categorias, contas correntes e condições de pagamento (de compras)** viraram recursos do pipeline (`core.projetos`, `core.categorias`, `core.contas_correntes`, `condicoes_pagamento_compras`). **Continuam sem extração:** `enderecoEntrega` e `dadosBancarios` do parceiro (as tabelas existem, sem escrita), `nif`/`documento_exterior`, características de cliente, Empresas, Documentos Anexos. O texto abaixo foi mantido como histórico do levantamento.
 
 Levantamento feito direto na documentação interativa da API (`developer.omie.com.br/service-list/`, páginas em `app.omie.com.br/api/v1/...`), não só no código do pipeline. Objetivo: achar tudo que existe no Omie e que pode ser necessário migrar antes do desligamento, versus o que pode ficar de fora.
 
 ## Clientes/Fornecedores (`geral/clientes/`) — lacuna fiscal crítica
 
-Já extraímos nome, razão social, CPF/CNPJ, contato, endereço básico. **Não extraímos** (e o Omie tem):
+Já extraímos nome, razão social, CPF/CNPJ, contato, endereço básico. **Não extraímos** (e o Omie tem) — **(atualizado em 07/10: as linhas de IE/IM/Suframa, regime, `cidade_ibge`, crédito e `inativo` já são gravadas; só `enderecoEntrega`, `dadosBancarios` e `nif`/`documento_exterior` seguem sem extração)**:
 
 | Campo                                                                                       | Por que importa                                                                                                  |
 | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -22,7 +25,7 @@ Já extraímos nome, razão social, CPF/CNPJ, contato, endereço básico. **Não
 | inativo                                                                                     | Hoje não sincronizamos esse status                                                                               |
 | nif, documento_exterior                                                                     | Só relevante para clientes/fornecedores estrangeiros                                                             |
 
-**Recomendação**: esse é o gap mais crítico de todo o levantamento — no dia em que o sistema próprio precisar emitir nota fiscal sem o Omie, faltam os dados fiscais básicos do parceiro. Vale estender a extração de `core.parceiros` antes do desligamento, não depois.
+**Recomendação (a parte fiscal básica foi atendida em 07/10; endereço de entrega e dados bancários seguem pendentes)**: esse é o gap mais crítico de todo o levantamento — no dia em que o sistema próprio precisar emitir nota fiscal sem o Omie, faltam os dados fiscais básicos do parceiro. Vale estender a extração de `core.parceiros` antes do desligamento, não depois.
 
 ## Clientes - Características (`geral/clientescaract/`)
 
@@ -34,11 +37,11 @@ Cadastro da própria Aços Vital no Omie: CNPJ, IE, regime tributário, mais dez
 
 ## Departamentos / Categorias (plano de contas)
 
-Configuração contábil-financeira (centro de custo, plano de contas/DRE). Baixa relevância para o Estoque/MES hoje. Só migrar se um módulo financeiro nativo vier a existir (ver [[Financas-Lacunas]]).
+Configuração contábil-financeira (centro de custo, plano de contas/DRE). Baixa relevância para o Estoque/MES hoje. Só migrar se um módulo financeiro nativo vier a existir (ver [[Financas-Lacunas]]). **(Atualizado em 07/10: `categorias` já é recurso do pipeline — `core.categorias`, camadas lentas; departamentos não consta na ficha de auditoria.)**
 
 ## Parcelas (condições de pagamento)
 
-Catálogo pequeno e estruturado (`nCodigo`, `cDescricao`, `nParcelas` — ex "30/60/90"). Não extraído. Relevância média: se o Estoque/MES for gerar pedidos com parcelamento, é barato nativizar como tabela de referência.
+Catálogo pequeno e estruturado (`nCodigo`, `cDescricao`, `nParcelas` — ex "30/60/90"). ~~Não extraído.~~ **Extraído desde o domínio de Compras (atualizado em 07/10):** recurso `condicoesPagamentoCompras` → `condicoes_pagamento_compras` (camadas lentas; não corta mais a descrição). Relevância média: se o Estoque/MES for gerar pedidos com parcelamento, é barato nativizar como tabela de referência.
 
 ## Documentos Anexos (`geral/anexo/`)
 
@@ -46,7 +49,7 @@ Repositório genérico de arquivo binário vinculado a qualquer cadastro do Omie
 
 ## Contas Correntes — cadastro (`geral/contacorrente/`)
 
-Cadastro bancário da própria empresa (contas, boletos, PDV). Configuração financeira/tesouraria. Só relevante se um módulo financeiro nativo vier a existir.
+Cadastro bancário da própria empresa (contas, boletos, PDV). Configuração financeira/tesouraria. Só relevante se um módulo financeiro nativo vier a existir. **(Atualizado em 07/10: o cadastro de contas correntes já é recurso do pipeline — `contasCorrentes` → `core.contas_correntes`, camadas lentas. Extrato e lançamentos seguem fora: ver [[Financas-Lacunas]].)**
 
 ## Ver também
 - [[Compras-Estoque-Producao-Lacunas]]

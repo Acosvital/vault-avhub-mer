@@ -1,4 +1,16 @@
+---
+tags: [contrato-logica, contrato-api, compras, comissoes]
+status: implementada-no-codigo
+decisao: desconsiderar (pedido do Nathan, 29/09/2026); endpoint existe, front não liga
+criado: 2026-09-10
+atualizado: 2026-10-07
+---
+
 # Contrato — Relação Produto ↔ Fornecedor (pro Simulador de Comissão)
+
+> Status: decidido. **Contrato 13 desconsiderado (✅ 07/10/2026, [[Registro-de-Decisoes-2026-10-07]] #40).** O texto abaixo é histórico.
+
+> **Atualização de 07/10/2026 — conferido no código:** `GET /produtos/:id/fornecedores` **existe** em `main` = `develop` da `api-acos-vital` (`31e26a6`, 25/09/2026, entrou pelo PR #275), sobre a view `core_compras.vw_produto_fornecedores` ("migration 013"). Isto bate com o que o vault já tinha conferido ao vivo na `api-test` em 28/09 (rota 200, tudo `[]` por falta de OC). O que **continua em aberto** é o lado do av-hub: o simulador (`experimental/simulador-comissao`) segue sobre o dataset legado com IDs incompatíveis, e o Nathan pediu para desconsiderar o contrato. Status do frontmatter: `implementada-no-codigo` (API); falta conferir em produção. Ver [[Indice-Contratos]] (Conferência de 07/10/2026).
 
 **Criado em:** 10/09/2026, horário de Brasília
 

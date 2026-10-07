@@ -1,9 +1,14 @@
 ---
 tags: [erp-acos-vital, arquitetura, postgres]
 criado: 2026-09-16
+atualizado: 2026-10-07
 ---
 
+> Status: no código (verificado em 07/10/2026) — schema do Estoque decidido em [[Registro-de-Decisoes-2026-10-07]].
+
 # Convenção: Schema Postgres por Domínio
+
+> **Atualização de 07/10/2026 — só a linha `omie_ctl`/`omie_raw` mudou:** hoje apenas `omie_ctl.run_log` está ativo; `omie_raw.*` e `RAW_AUDIT_ENABLED` foram removidos do código do pipeline em 06/10 (contrato 38). Fonte: leitura de código (`master` d2886bf), não banco/produção — as tabelas `omie_raw.*` podem continuar existindo no banco (lixo morto do `sql/002`), isso não foi conferido. O resto da nota não foi revisitado nesta passada.
 
 Padrão em produção, confirmado por leitura direta do código-fonte completo de `api-acos-vital`: um único cluster Postgres com **schemas separados por domínio de negócio**.
 
@@ -15,9 +20,9 @@ Padrão em produção, confirmado por leitura direta do código-fonte completo d
 - **`core_compras`** — **conteúdo apagado, schema mantido** (confirmado pelo Nathan, 22/09/2026). Tinha só `produtos_compras` (vínculo produto↔fornecedor, sem model/rota implementados, 0 linhas) + 4 views (`vw_catalogo_de_produtos`, `vw_fornecedores_com_produtos`, `vw_historico_precos`, `vw_todos_os_fornecedores`), 3 delas quebradas em runtime (bug de schema `negocio`) — investigado a fundo em [[AV-Hub-Views-Compras-Investigacao]], não cobria nem parcialmente o futuro módulo de Compras. **O nome do schema não muda** — o Gustavo vai reconstruir o conteúdo de dentro dele de forma estruturada, formato ainda não definido. **Nota de verificação**: o dump/container local usado nesta investigação (22/09, 11:42) é anterior a esta remoção — ainda mostra o `core_compras` antigo (com `produtos_compras` e as 4 views); não é contradição, é só uma cópia mais antiga que a produção atual.
 - **`core_comissionamento`** — schema novo: `regra_comissao_fixa`, `blacklist_comissao_vendedor`/`blacklist_comissao_destinatario` (distintas das blacklists G4/G5 — só bloqueiam, não deduzem em cascata), `bloqueio_comissao`, `simulacao`/`simulacao_item`, `simulador_parametro`, `vw_simulacao_resolvida`. Ver [[AV-Hub-Comissao-Modulo]].
 - **`core_aprovacao_de_vagas`** — schema novo: `vaga` — a tela de Solicitações de Vagas (aprovação de headcount) tem schema próprio, separado de `core`.
-- **`omie_ctl`/`omie_raw`** — schemas **próprios do pipeline ELT** (não de negócio): `omie_ctl.run_log` (auditoria de execução por filial/recurso/tier) e `omie_raw.*` (staging jsonb opcional, só se `RAW_AUDIT_ENABLED=true`). Ver [[Omie-ELT-Pipeline]].
+- **`omie_ctl`/`omie_raw`** — schemas **próprios do pipeline ELT** (não de negócio) **(atualizado em 07/10)**: `omie_ctl.run_log` (auditoria de execução por filial/recurso/tier, `sql/003`) é a **única tabela própria ativa**. ~~`omie_raw.*` (staging jsonb opcional, só se `RAW_AUDIT_ENABLED=true`)~~ — **morto**: o código (`RAW_AUDIT_ENABLED`, `upsertRawAudit`) foi removido em 06/10 (contrato 38); o `sql/002` (5 tabelas) ficou sem uso. Ver [[Omie-ELT-Pipeline]].
 - **`core_estoque`** — existe como schema reservado no cluster do av-hub, **100% vazio** (confirmado nas auditorias de 21/09 e 22/09) — não confundir com o Estoque do MES (banco separado, ver linha abaixo).
-- **`estoque`** — o Estoque não entra neste cluster: mora no banco separado do MES (Prisma), com schema Postgres próprio lá dentro, seguindo esta mesma convenção — não cai em `public`. Ver [[MES-Arquitetura-Decisoes]].
+- **Estoque** — não entra neste cluster: mora no banco separado do MES (Prisma), no schema **`public`** (✅ Nathan, 07/10/2026; fecha CC-06 — substitui a ideia anterior de um schema `estoque` próprio). Ver [[MES-Arquitetura-Decisoes]] e [[Registro-de-Decisoes-2026-10-07]], item 21.
 
 ## Como o schema é gerido — achado importante
 

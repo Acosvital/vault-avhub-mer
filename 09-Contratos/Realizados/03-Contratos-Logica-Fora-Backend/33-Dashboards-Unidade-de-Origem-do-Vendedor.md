@@ -1,17 +1,19 @@
 ---
 tags: [contrato-logica, contrato-sql, contrato-api, dashboards, vendedores]
 criado: 2026-09-30
-atualizado: 2026-10-01
+atualizado: 2026-10-07
 status: aplicada
 ---
 
 # Contrato 33 — Dashboards: unidade de origem e período de atividade do vendedor
 
+> **Atualização de 07/10/2026 — conferido no código (`main` = `develop` da `api-acos-vital`; produção não conferida no código; produção só pelo dump de 07/10, que cobre schema e dados, não o comportamento da API em produção; [[Auditoria-Dump-Producao-2026-10-07]]):** o código da API está em `main` com o commit **`5231219`** (PR #275, 02/10). O front (`397cf81`, branch `feat/vendedor-periodo-ativo` do av-hub, **local, sem push** em 01/10) **não foi reconferido** nesta leitura. As perguntas P1–P6 seguiam em aberto; **(atualizado em 07/10, [[Registro-de-Decisoes-2026-10-07]] item 49)** o status de cada uma está na tabela do §7 (P4 e P5 🟡 mantidos como implementado; P1, P2, P3, P6 e P7 🔴 Nathan, sem decisão). Não foi comparado se os números dos dashboards por unidade batem.
+
 > **✅ ENTREGUE (01/10/2026).** **Conferência de 01/10/2026 na `api-test`** (o DBA avisou que concluiu): `GET /vendedores` devolve `ativo_desde`, `inativo_desde`, `unidade_origem`, `nome_unidade_origem` e `origem_da_unidade`. Os números dos dashboards por unidade não foram comparados. Front: commit `397cf81` na branch `feat/vendedor-periodo-ativo` do av-hub, ainda sem push.
 
 **Criado em:** 30/09/2026 · **Para:** DBA (Gustavo) + backend (`api-acos-vital`) · **SQL + API**
 
-**Implementado e testado no banco e na API locais** (esqueleto de 29/09), e o front do av-hub já consome. Falta aplicar na `api-test`/produção: o SQL é o anexo [[0001-unidade-origem-e-periodo]] (`33-anexos/0001-unidade-origem-e-periodo.sql`) e o patch da API é `33-anexos/0002-api-vendedores-unidade-e-periodo.patch`.
+**Implementado e testado no banco e na API locais** (esqueleto de 29/09), e o front do av-hub já consome. Falta aplicar na `api-test`/produção: o SQL é o anexo `33-anexos/0001-unidade-origem-e-periodo.sql` (`0003-aplicar-nas-funcoes-existentes.sql` aplica nas funções de dashboard) e o patch da API é `33-anexos/0002-api-vendedores-unidade-e-periodo.patch`.
 
 Decisões do Nathan (30/09/2026): (1) vendedor sem funcionário vinculado usa o Omie em que foi cadastrado; (2) os totais dos dashboards também seguem a unidade do vendedor; (3) quem define a unidade é o RH; (4) **vendedor inativo não aparece depois que saiu**, e o período dele fica em duas datas no cadastro do vendedor.
 
@@ -103,15 +105,17 @@ Branch `feat/vendedor-periodo-ativo`, ainda **sem commit**; tipos, telas e texto
 
 ## 7. Pendências e perguntas
 
-| # | Pergunta | Quem responde |
-|---|---|---|
-| **P1** | **Quatro pessoas aparecem nos DOIS Omies, sem vínculo nos dois:** DAYANE SILVA, EDUARDO VITAL, FERNANDA LESSA e JORGE LUIZ (uma linha em Uberaba, outra em Vital). Com "usa o Omie do cadastro", cada uma conta em duas unidades. Precisam ser vinculadas a um funcionário (ou decidir a unidade de cada uma). | Nathan / RH |
-| **P2** | "AÇOS VITAL" (genérico) e os dois "- Dev" (Nathan e Robert) ficam fora dos dashboards ou entram em Vital? | Nathan |
-| **P3** | Comissões (`comissoes_provisoria`): o seletor de unidade também vale? Pela lógica, sim; **não foi alterado**. | Nathan |
-| **P4** | Quando o funcionário é de uma unidade e os vendedores estão em Omies de outras (21 casos, ex.: DIEGO ARANTES, funcionário da HRM), vale a lotação do RH. **Implementado assim**: confirmar. | Nathan |
-| **P5** | Quando o RH transferir alguém de unidade, o histórico dos dashboards **muda retroativamente** (a unidade é a de hoje). Aceitável? | Nathan |
-| **P6** | **Preencher `inativo_desde` dos 35 vendedores inativos.** Sem a data, continuam aparecendo nos meses em que faturaram. Ponto de partida: o último dia do último mês em que cada um faturou (os 7 de jan–mar/2026: Priscila Yumi Samezima Marc de Moura e Weresley de Moura em mar/2026; Mateus Araújo, Jéssica Souza, Agnaldo Barbosa, Thales Costa e Renan Guimarães em jan/2026). É palpite: quem confirma é vendas/RH. | Nathan / Vendas |
-| **P7** | As telas que usam `fn_painel_*`, `fn_pedidos_venda_linhas` e a planilha ainda filtram pelo Omie. Mudam para a unidade do vendedor também? | Nathan |
+> **(atualizado em 07/10)** Coluna de status acrescentada; o texto das perguntas não mudou. Fonte: [[Registro-de-Decisoes-2026-10-07]] item 49.
+
+| # | Pergunta | Quem responde | Status (07/10) |
+|---|---|---|---|
+| **P1** | **Quatro pessoas aparecem nos DOIS Omies, sem vínculo nos dois:** DAYANE SILVA, EDUARDO VITAL, FERNANDA LESSA e JORGE LUIZ (uma linha em Uberaba, outra em Vital). Com "usa o Omie do cadastro", cada uma conta em duas unidades. Precisam ser vinculadas a um funcionário (ou decidir a unidade de cada uma). | Nathan / RH | 🔴 Nathan (os 4 seguem sem vínculo) |
+| **P2** | "AÇOS VITAL" (genérico) e os dois "- Dev" (Nathan e Robert) ficam fora dos dashboards ou entram em Vital? | Nathan | 🔴 Nathan |
+| **P3** | Comissões (`comissoes_provisoria`): o seletor de unidade também vale? Pela lógica, sim; **não foi alterado**. | Nathan | 🔴 Nathan |
+| **P4** | Quando o funcionário é de uma unidade e os vendedores estão em Omies de outras (21 casos, ex.: DIEGO ARANTES, funcionário da HRM), vale a lotação do RH. **Implementado assim**: confirmar. | Nathan | 🟡 mantido como implementado (lotação do RH) |
+| **P5** | Quando o RH transferir alguém de unidade, o histórico dos dashboards **muda retroativamente** (a unidade é a de hoje). Aceitável? | Nathan | 🟡 mantido como implementado (histórico muda retroativamente) |
+| **P6** | **Preencher `inativo_desde` dos 35 vendedores inativos.** Sem a data, continuam aparecendo nos meses em que faturaram. Ponto de partida: o último dia do último mês em que cada um faturou (os 7 de jan–mar/2026: Priscila Yumi Samezima Marc de Moura e Weresley de Moura em mar/2026; Mateus Araújo, Jéssica Souza, Agnaldo Barbosa, Thales Costa e Renan Guimarães em jan/2026). É palpite: quem confirma é vendas/RH. | Nathan / Vendas | 🔴 Nathan (os 35 inativos seguem sem `inativo_desde`) |
+| **P7** | As telas que usam `fn_painel_*`, `fn_pedidos_venda_linhas` e a planilha ainda filtram pelo Omie. Mudam para a unidade do vendedor também? | Nathan | 🔴 Nathan |
 
 **Vendedores ativos sem funcionário vinculado (19, banco local):** Omie Aços Uberaba: DAYANE SILVA, EDUARDO VITAL, FERNANDA LESSA, JORGE LUIZ, MARIA EDUARDA. Omie Aços Vital: AÇOS VITAL, DANIEL SOUZA DA SILVA, DAYANE SILVA, DIEGO FERNANDES, EDUARDO VITAL, FERNANDA LESSA, FLÁVIO COUTINHO, JAMES MADSON OLIVEIRA DE SOUZA, JORGE LUIZ, LEONARDO MARQUES DIAS, MOISES MENEZES, Nathan Lucca - Dev, PAULO SOCORRO, Robert Wilson - Dev.
 

@@ -1,9 +1,20 @@
 ---
 tags: [erp-acos-vital, arquitetura, rastreabilidade, banco, api, proposta]
 criado: 2026-09-21
+atualizado: 2026-10-07
 ---
 
 # Campos, tabelas e API para rastreabilidade — o que criar, modificar e corrigir
+
+> Status: decidido em parte (verificado em 07/10/2026) — vale o plano de **3 meses** (18/09 a 21/12), 🟡 em [[Registro-de-Decisoes-2026-10-07]], item 34. A genealogia de material (R-12) está respondida (bloco J da S5).
+
+> **Atualização de 07/10/2026 — o que o código do MES já tem (leitura de `develop`, api-pcp `ca3346b`; não é produção; `main` parou em 28/08).** A proposta abaixo continua **não aplicada** no que importa (**nada de `fluxo.*` no Prisma**: sem `fluxo.evento`, `etapa_fluxo`, `item_acompanhado`, `sla_etapa`; sem os endpoints `/fluxo/*`). Mas alguns campos da seção 4.1 já existem ou mudaram de forma:
+> - **`HistoricoItemParcial.idUsuario` aceita nulo** (ação do sistema, sem usuário humano). Quem desenhar `ator_id` / `ator_nome` precisa prever ator nulo ou "sistema".
+> - **Recebimento (seção 4.1: `RECEBIMENTO`, `ITEM_RECEBIDO`, `PESAGEM`)** existe com **outros nomes e forma**: `Recebimento` (conferido, recontado e decidido **por** e **em**; `motivoDecisao`; `numeroNf`, `chaveAcessoNf`, `laudoUrl`), `RecebimentoItem` (quantidades NF/contada/recontada; `pesoTeorico/Real/Recontado`, `toleranciaPeso`; `idLocalizacao`, `idLote`) e `RecebimentoDivergencia` (tipo, `evidenciaUrl`, etapa). **Não há tabela `PESAGEM`** — o peso é campo do item. Quem conferiu e quem reconta são pessoas diferentes por regra de negócio. Ver [[App-PCP-Recebimento-Conferencia]].
+> - **`Fabrica.tipo` (`FABRICACAO`/`REVENDA`) e `Setor.tipo`** (hoje 7 tipos: `PRODUTIVO`, `ESTOQUE`, `COMPRAS`, `EXPEDICAO`, `REQUISICAO`, `LOGISTICA_ENTRADA`, `QUALIDADE`) estão implementados (C6, `20260925120000_c6_tipos_fabrica_setor`).
+> - **Estoque:** `Deposito`, `Localizacao`, `Material`, `Fornecedor`, `Lote`, `Rnc`, `MovimentoEstoque`, `SaldoEstoque` e `Reserva` existem em `estoque.prisma` (no schema `public`). Se cada tabela tem `criado_por`/`criado_em` e a forma exata da `Reserva`: **não verificado campo a campo**.
+> - **Requisição de compra (inconsistência 5 da seção 1):** deixou de ser "sem tabela" — `RequisicaoCompra`/`RequisicaoCompraItem` e a fila `IntegracaoAvhubEnvio` existem no MES; o lado av-hub recebe pelo contrato 34. Ver [[Integracao-AvHub-MES-Especificacao-F1]].
+> - **Não verificado:** colunas atuais de `Operador`/`Divergencia`; se `Usuario`/`Operador` ganharam `id_funcionario`.
 
 > **Status: proposta, resultado de um pente fino no vault em 21/09/2026.** Complementa [[Rastreabilidade-e-SLA-de-Eventos]] (o modelo) com a lista concreta de mudanças de banco e API. Nada aqui foi aplicado. Onde o vault não permite confirmar uma coluna real, está marcado **(confirmar)**; a confirmação é com Robert (MES) ou Gustavo (av-hub/DBA).
 

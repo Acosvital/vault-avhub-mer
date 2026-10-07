@@ -1,7 +1,8 @@
 ---
 tags: [contrato-logica, contrato-api, compras]
 criado: 2026-09-28
-status: proposta
+atualizado: 2026-10-07
+status: aplicada
 ---
 
 # Contrato 27 — Compras: nomes no detalhe do pedido de compra do Omie

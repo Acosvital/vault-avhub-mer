@@ -1,10 +1,12 @@
 ---
 tags: [erp-acos-vital, arquitetura, decisoes]
 criado: 2026-09-16
-atualizado: 2026-09-29
+atualizado: 2026-10-07
 ---
 
 # Decisões-Chave para o ERP Unificado
+
+> Status: decidido | no código | em produção (verificado em 07/10/2026 pelo dump). Decisões de 07/10 em [[Registro-de-Decisoes-2026-10-07]].
 
 Lista viva de decisões que precisam ser tomadas conscientemente para o "ERP de altíssimo nível" — atualizar conforme mais material chegar.
 
@@ -13,7 +15,7 @@ Lista viva de decisões que precisam ser tomadas conscientemente para o "ERP de 
 - [x] **Identidade/autorização será múltipla.** 2 implementações reais: av-hub e MES (Estoque+Fabricação juntos). A proposta de grupos do Azure AD do PRD do Estoque original segue descartada. Ver [[Achado-Duplicacao-RBAC]] e [[MES-Arquitetura-Decisoes]].
 - [x] **Login do MES/Estoque** vai suportar **as duas formas**, usuário/senha e e-mail (Azure AD). Resolve a lacuna de [[Estoque-Roadmap]].
 - [x] **Vínculo Fábrica ↔ Unidade/Filial (`codigo_empresa`): por pedido, não fixo.** Decidido em 21/09/2026 por Nathan + Robert (resolve DEC-1) — existe hoje uma Fábrica real atendendo matriz e as 3 filiais quando necessário, então "1 fábrica = 1 filial fixa" não reflete a operação. A filial de cada Ordem de Produção vem sempre do `codigo_empresa` do Pedido, nunca de um campo fixo na Fábrica. Gera requisito novo de RBAC (`PerfilSetor` precisa de dimensão de filial, não só `perfil × setor`) para as tarefas C2/C3. Ver [[MES-Arquitetura-Decisoes]].
-- [x] **Conceito de "Orçamento" — adiado (resolve N-01).** Decidido em 21/09/2026 por Nathan: não entra neste ciclo, é só futuro, sem data — mesmo horizonte indefinido de DEC-11 e L-05. Ver [[MES-Arquitetura-Decisoes]].
+- [x] **Conceito de "Orçamento" — adiado (resolve N-01).** Decidido em 21/09/2026 por Nathan: não entra neste ciclo, é só futuro, sem data — mesmo horizonte indefinido de DEC-11 e L-05. Ver [[MES-Arquitetura-Decisoes]]. **Revisto em 07/10/2026 ([[Registro-de-Decisoes-2026-10-07]] #39): o orçamento é desenvolvido por fora, no módulo Comercial & Suprimentos; os contratos 07 e 38 precisam ser reescritos.**
 - [x] **Criação nativa de Pedido de Venda/Ordem de Compra no av-hub com push para o Omie** — visão de futuro confirmada, não ativa hoje (Passo 4 do roteiro continua sendo av-hub decidindo localmente, sem push). **Resolvido (17/09/2026)**: o Omie tem API de criação de Ordem de Compra — `produtos/pedidocompra/` expõe `IncluirPedCompra`/`AlteraPedCompra`/`ExcluirPedCompra`/`UpsertPedCompra` (confirmado ao levantar o contrato de extração [[004-Pedidos-Compras]], contra a documentação pública do Omie). O bloqueio técnico que travava essa visão de futuro está removido; falta só decidir quando essa fase futura entra em pauta. Desenho de outbox/retry/anti-loop já esboçado. Ver [[MES-Arquitetura-Decisoes]].
 - [x] **Nome do sistema de fábrica — resolvido (22/09/2026).** Confirmado pelo Nathan: o nome é **MES** (não "MES Aços Vital", que era só um chute de nome de trabalho deste vault) — aceito por ora, com abertura para trocar no futuro se quiserem. Deixa de ser pergunta em aberto (N-02).
 - [x] **Base única de fornecedores/preços — resolvido**: Estoque reaproveita `core.parceiros` do av-hub (via projeção), não cria cadastro próprio. A pergunta sobre se as views de Compras cobrem o módulo Orçamento (N-04) ficou moot — Orçamento não entra neste ciclo (N-01).
@@ -30,7 +32,7 @@ Lista viva de decisões que precisam ser tomadas conscientemente para o "ERP de 
 - [x] **Divisão Compras av-hub × MES.** Requisição nasce no MES — desde 24/09/2026 pela entrada do parcial no setor Compras; **desde 28/09/2026, num novo setor "Requisições de compras" (PCP) antes de Compras**, ainda não implementado, onde a matéria-prima fica amarrada ao item/parcial de origem. A compra em si (fornecedor, preço, aprovação, flag acabado/não-acabado) segue decidida no av-hub; só o necessário pra conferência trafega de volta pro MES. Ver [[Fluxo-Detalhado-Pedido-Item]] e [[MES-Arquitetura-Decisoes]].
 - [x] **Aprovação condicional de compra (resolve DEC-3).** Decidido em 21/09/2026 por Nathan + Diretoria: **acima de R$ 30.000, o diretor precisa aprovar** a Ordem de Compra. Abaixo do limite, segue sem aprovação extra. Destrava E2 (fechar compra + OC estruturada).
 - [x] **Devolução de cliente: ciclo completo nasce no Estoque (resolve DEC-10).** Decidido em 21/09/2026 por Nathan: diferente da Ordem de Compra (onde av-hub decide e MES/Estoque só executa), aqui o **Estoque decide e executa o ciclo inteiro** — inclusive capturar o valor da devolução parcial, que o Omie não expõe nativamente (ver I-09 em [[Perguntas-em-Aberto-Consolidadas]]). É uma exceção deliberada ao padrão "av-hub decide, MES executa" — registrar isso explicitamente em qualquer nota que assuma o padrão geral sem ressalva. Destrava a Fase D (ciclo 2).
-- [x] **Módulo financeiro nativo — adiado (resolve DEC-11).** Decidido em 21/09/2026 por Nathan: fica só para o futuro, fora do roadmap atual, sem data — revisitar quando o desligamento do Omie entrar em pauta. Não é esquecimento, é escopo explicitamente cortado deste ciclo.
+- [x] **Módulo financeiro nativo — adiado (resolve DEC-11).** Decidido em 21/09/2026 por Nathan: fica só para o futuro, fora do roadmap atual, sem data — ~~revisitar quando o desligamento do Omie entrar em pauta~~. Não é esquecimento, é escopo explicitamente cortado deste ciclo. **Revisto em 07/10/2026 (✅, [[Registro-de-Decisoes-2026-10-07]] #30): o Omie segue como sistema financeiro e fiscal e não há plano de desligar; dados bancários e endereço de entrega de parceiro ficam fora (as tabelas existem e estão vazias).**
 - [x] **Prazo de retenção de auditoria (resolve DEC-9).** Decidido em 21/09/2026 por Nathan: **5 anos, sem expurgo automático** — bate com o default; validação formal com contabilidade/fiscal segue pendente, mas a equipe optou por seguir com esse valor de trabalho enquanto isso.
 - [x] **Balança (resolve DEC-5).** Decidido em 21/09/2026 por Nathan + Operação: **digitação manual** — bate com o default, mas agora é confirmação, não suposição (a operação não sabia se a balança tinha saída digital). Destrava D6/D7 (Recebimento).
 - [x] **Contratos SQL (resolve DEC-7).** Decidido em 21/09/2026 por Gustavo, os 4 sub-itens: saldo de estoque = foto atual (upsert); identidade estável de item de compra = `(id_pedido_compra, ordem)`; `core.locais_estoque` sem FK para `deposito` por ora (tabela ainda não existe, adiciona quando existir); exclusão no polling resolvida com `?incluir_deletados=true` em `/produtos`/`/parceiros`. Destrava B3, B5, D1 e D3.
@@ -38,8 +40,31 @@ Lista viva de decisões que precisam ser tomadas conscientemente para o "ERP de 
 - [ ] **Rastreabilidade por etapa, custódia e SLA por etapa (proposta de 21/09/2026).** Log único de eventos imutável, com ator, autorizador, passagem e "com quem está"; identidade de pessoa comum entre av-hub e MES; feed por polling com cursor sequencial. Escopo mínimo desenhado como compatível com o Fluxo 3 (status por item) do rascunho de [[Integracao-AvHub-MES-Especificacao-F1]]; versão completa fica para a S5. Ver [[Rastreabilidade-e-SLA-de-Eventos]] e [[Campos-e-API-para-Rastreabilidade]].
 - [x] **Conteúdo de `core_compras` apagado, schema reconstruído (resolve a hipótese das views de Compras).** Investigado em 22/09/2026 (ver [[AV-Hub-Views-Compras-Investigacao]]): confirmado em runtime que as 4 views não cobriam o futuro módulo de Compras — 3 quebradas por bug de schema, tabela-fonte com zero linhas, escopo insuficiente mesmo saudável. Decisão do Nathan: apagar o conteúdo antigo. **Confirmado pelo Nathan em 22/09/2026 que o Gustavo já apagou o conteúdo em produção** — o schema continua se chamando `core_compras` (não é renomeado); as tabelas/views de dentro vão ser refeitas de forma estruturada, formato ainda não definido. Não confundir com [[004-Pedidos-Compras]] nem [[007-Ordens-Compra-Estruturada]] — schemas/tabelas diferentes, sem relação com esta decisão.
 
+## Estado de implementação das decisões (conferido no código em 07/10/2026)
+
+> Nada aqui muda uma decisão; registra onde o código **divergiu ou avançou** em relação ao que o vault descrevia. Só leitura de código (`develop` do MES, `main`=`develop` da API, `develop` do av-hub, `master` do pipeline); produção não foi conferida.
+
+- **"Casamento" av-hub ↔ MES (DEC-2, polling REST).** Evoluiu: a requisição passou a ser **empurrada** pelo MES (`PUT /compras/requisicoes/origem/{id_origem}`, contrato 34, implementado nos dois lados) e o MES **lê por polling** os eventos da requisição (contrato 35, ligado). Chaves em [[Chaves-de-Integracao-AvHub-MES-Pipeline]]; a restrição por rota da chave de leitura (L6) segue aberta.
+- **Schema Postgres próprio por domínio — Estoque.** O código do MES ficou em `public` (sem `@@schema`). **Fechado em 07/10/2026 (✅, [[Registro-de-Decisoes-2026-10-07]] #21): o schema do Estoque fica em `public`** (CC-06 em [[Perguntas-em-Aberto-Consolidadas]]); ~~pendente de confirmação com o Robert~~.
+- **Divisão Compras av-hub × MES / circuito fora do roteiro.** Implementado: setores `REQUISICAO`, `COMPRAS`, `LOGISTICA_ENTRADA` (Recebimento), `QUALIDADE`; circuito de compra removido do roteiro por migration. A compra em si ainda é registrada **à mão** no MES (`PATCH /compras/requisicoes/:id/compra`) porque a referência da OC (004) não existe.
+- **Baixa do saldo no despacho do Estoque / Reserva só "separar".** Decidido em 29/09, **ainda não implementado**: a baixa da reserva ocorre quando a Embalagem recebe (`receber()`), e não há ação de consumo de matéria-prima ([[Encaixe-Estoque-Revenda-no-PCP]]).
+- **Reprovação total/parcial no recebimento, quarentena EC-07, inspeção de entrada por lote:** implementados em `src/qualidade` e no Recebimento ([[App-PCP-Recebimento-Conferencia]]).
+- **"Divergência sem reabertura" (`api-pcp`):** a divergência de **recebimento** tem caminho de volta (`REABERTO`, decisão do PCP); a divergência de produção não foi reexaminada.
+- **"App-pcp só precisa de frontend para o board":** hoje existem dashboard, Movimentações e filas de setor no MES; a lista de gaps de UI precisa ser refeita.
+- **RBAC do MES "adiado":** desde 04/09 há `@RequirePermission` por controller e `PerfilSetor` no service; falta o desenho por setor **e filial** (C3) e alguns controllers estão sem guard ([[App-PCP-Visao-Geral]]).
+- **Orçamento "adiado" (N-01) × código:** a API tem `/orcamento/*` e `/dashboard/comissoes` (contrato 07, `90bdb33`), e o av-hub ganhou o módulo Comercial & Suprimentos ([[AV-Hub-Comercial-Suprimentos]]). O conceito "Orçamento do MES" segue fora do ciclo; o que existe é o módulo comercial do av-hub — ~~convém o Nathan registrar a relação entre os dois (CC-03, CC-08).~~ **CC-03 fechada em 07/10 ([[Registro-de-Decisoes-2026-10-07]] #39): o orçamento é do módulo Comercial & Suprimentos, por fora.** CC-08 segue aberta.
+
 ## Já resolvidas / bem estabelecidas
 
+- **Decisões de 07/10/2026** (fonte: [[Registro-de-Decisoes-2026-10-07]]; ✅ = Nathan, 🟡 = proposta adotada):
+  - **Homologação (mes-test):** `https://mes-test.acosvital.com.br/` roda a `develop` e está no ar; o `PUT` de sucesso do contrato 34 já funcionou lá (✅ #1, #2).
+  - **Infraestrutura (VPS):** pipeline, MES e av-hub (e outros) na VPS 1; bancos do MES, do av-hub e demais na VPS 2; arquivos na VPS 3 (✅ #4).
+  - **Retenção de logs:** `auth.logs` com prazo curto (prazo 🔴 Gustavo) e `auth.auditoria` com 5 anos (✅ #53).
+  - **Tolerância de peso:** 5% para todas as categorias, podendo virar por categoria no futuro (✅ #26).
+  - **Carga inicial do estoque:** dupla conferência = contador + conferente; divergência = terceira contagem; o lote nasce liberado (DEC-4) (✅ #25).
+  - **Transferência entre filiais:** quem envia aprova na origem e só então gera a NF; o número da NF chega ao MES via av-hub (✅ #24).
+  - **Equipe:** Pablo atua no Comercial & Suprimentos; o MES fica com o Robert (✅ #32).
+  - **Schema do Estoque:** `public` (✅ #21). **Omie** segue como financeiro e fiscal (✅ #30).
 - **Decisões de 06/10/2026 (Nathan) — Compras e cadastros de acesso:**
   - **HRM compra pela própria conta Omie.** Revisa a decisão de 24/09 ("HRM compra pela unidade de Mogi"): a HRM já tem conta Omie com cadastros sincronizados (condições de pagamento, fornecedores, produtos, compradores). Em produção, `core.unidades.id_unidade_compra` da HRM ficou nulo e ela emite OC como Mogi e Uberaba.
   - **Comprador só compra da filial a que pertence**: só emite OC numa unidade quem é comprador ATIVO vinculado (comprador do Omie ↔ funcionário) nela. A tela oferece só essas unidades e esconde "Fechar compra" das requisições de outras; o backend recusa (contrato 38, `COMPRAS_EXIGIR_VINCULO_COMPRADOR` fixo).

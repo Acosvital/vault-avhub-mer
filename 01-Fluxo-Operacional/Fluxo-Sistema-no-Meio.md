@@ -1,10 +1,12 @@
 ---
 tags: [erp-acos-vital, fluxo-operacional, sistema, interacao, atos]
 criado: 2026-09-22
-atualizado: 2026-09-24
+atualizado: 2026-10-07
 ---
 
 # O Sistema no Meio — os 19 atos do fluxo
+
+> **Atualização de 07/10/2026 — quais atos já têm código** (conferido no código, `develop`: `api-pcp` `ca3346b`, `app-pcp` `a802a3e`; **a `main` do MES parou em 28/08, produção não conferida**). Esta nota descreve o desenho de 24/09; os atos abaixo mudaram no código assim: **ato 3** (Estoque atende e reserva) — implementado; **ato 5** (requisição) — a requisição nasce do circuito de compra **fora do roteiro**, disparada pelo "Solicitar compra" no Estoque (`b8dc158`), e é enviada ao av-hub pelo contrato 34 (PUT, `e7ce2c9`); o av-hub devolve marcos pelo contrato 35 (`41bf4a6`) — **não** é mais o `GET /requisicoes-compra` com polling de 5 min do av-hub (a rota 003 existe no MES mas ficou substituída pelo 34, sem consumidor); **ato 9** — a chegada é registrada com a ação "Conferir recebimento" no setor Recebimento, sem referência de OC vinda do av-hub (o contrato 004 não existe); **atos 10 a 12** (conferência, divergência, lote) — implementados de outro jeito: conferência **contra a NF**, peso real digitado com tolerância de 5%, divergência `PESO` entra no mesmo caminho, **recontagem por outra pessoa** e decisão do PCP em `/decisoes-pcp` (ver [[Fluxo-Recebimento-Completo]], [[App-PCP-Recebimento-Conferencia]]); **ato 14/14b/15** (Qualidade) — implementados por lote, com RNC e cisão (D8); **ato 14b na versão de 29/09** (volta ao mesmo Estoque único) — implementado; **ato 16** — a baixa ainda ocorre quando a Embalagem recebe. **Ato 17** (`/itens/status` consumido pelo av-hub): a rota 005 existe no MES, mas o consumidor no hub não. O **ato 2** (Carteira → Ordem de Produção) está em `develop`, com a Carteira lendo só os pedidos liberados (`GET /pedidos_liberados`, `901f9bb`, 29/09) e a OP por `POST /pedidos/completo/lote` (01/10). Ver [[Encaixe-Estoque-Revenda-no-PCP]].
 
 > **O que muda em relação ao fluxograma mestre.** Em [[Fluxogramas-Completos]] os setores conversam entre si: uma seta sai do PCP e chega em Compras. Isso descreve o **processo**, mas esconde a coisa mais importante do sistema a construir — **nenhum setor vai falar com outro setor; todos vão falar com o sistema.** O PCP não manda uma requisição pro comprador; o PCP grava uma requisição, e o sistema a entrega ao comprador.
 >
@@ -432,7 +434,7 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 - **3 · Faz** — **gera a requisição sozinho**, em `ABERTA`, vinculada ao `ItemParcial`, e a expõe em `GET /requisicoes-compra`. O parcial fica parado no setor Compras.
 - **4 · Mostra** — a requisição e o estado dela na fila do setor Compras.
 - **5 · Decide** — ninguém: a decisão foi tomada no ato 2, ao escolher a fábrica Revenda.
-- **6 · Roteia** — **atravessa a fronteira av-hub ↔ MES**: o job do av-hub faz polling a cada 5 min e projeta a requisição na caixa de entrada do comprador (ato 6). O parcial só sai do setor Compras quando o recebimento o libera (ato 12).
+- **6 · Roteia** — **atravessa a fronteira av-hub ↔ MES**: o job do av-hub faz polling a cada 5 min e projeta a requisição na caixa de entrada do comprador (ato 6). *(Atualizado em 07/10: no código é o MES que **empurra** — contrato 34, PUT por item (`e7ce2c9`, 02/10), fila `integracao_avhub_envios` com timer de 60 s — e nenhum job do `api-acos-vital` consome a rota 003. Se há chave de integração no ambiente real: não verificado.)* O parcial só sai do setor Compras quando o recebimento o libera (ato 12).
 
 ---
 
@@ -495,13 +497,13 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 **Força:** média (forte na conferência, **fraca na pesagem**) · **Telas:** 6.2, 6.3
 
 - **1 · Chega** — almoxarife no posto, com leitor 2D.
-- **2 · Busca** — **acabado confere contra o Pedido de Venda; não acabado, contra a Ordem de Compra.** A flag do ato 6 decide qual.
-- **3 · Faz** — compara contagem × esperado; calcula peso teórico × quantidade e testa a tolerância da categoria (5% provisório).
+- **2 · Busca** — **acabado confere contra o Pedido de Venda; não acabado, contra a Ordem de Compra.** A flag do ato 6 decide qual. *(Atualizado em 07/10: no código a conferência é **contra a NF**, sem escolha por flag; sem leitor 2D — a chave da NF é digitada.)*
+- **3 · Faz** — compara contagem × esperado; calcula peso teórico × quantidade e testa a tolerância da categoria (**5% decidido para todas as categorias**, pode virar por categoria no futuro — [[Registro-de-Decisoes-2026-10-07]], item 26; antes constava "provisório").
 - **4 · Mostra** — linha a linha, o que bate e o que não bate.
 - **5 · Decide** — almoxarife **digita o peso real à mão** (DEC-5: a balança não tem saída digital) e confirma.
-- **6 · Roteia** — bateu → o lote nasce (ato 12); não bateu → divergência (ato 11).
+- **6 · Roteia** — bateu → o lote nasce (ato 12); não bateu → divergência (ato 11). *(Atualizado em 07/10: não bateu → primeiro a **recontagem por outra pessoa**; só se continuar divergindo vai ao PCP.)*
 
-> **Meio ponto cego:** o sistema calcula a tolerância certinho, mas o número de entrada é digitado. Ele valida o cálculo, não a medição.
+> **Meio ponto cego:** o sistema calcula a tolerância certinho, mas o número de entrada é digitado. Ele valida o cálculo, não a medição. *(Confirmado no código em 07/10: peso real digitado, tolerância padrão de 5%.)*
 
 ## Ato 11 · A divergência volta pro PCP
 
@@ -511,7 +513,7 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 - **2 · Busca** — a OC, a requisição de origem e o pedido de venda afetado.
 - **3 · Faz** — abre a divergência e a coloca na fila "Novo norte". **Nunca deixa como estado terminal** — é a regra que impede beco sem saída.
 - **4 · Mostra** — pro PCP, o que chegou contra o que era esperado, lado a lado.
-- **5 · Decide** — PCP aceita o parcial, reabre a compra, ou rejeita.
+- **5 · Decide** — PCP aceita o parcial, reabre a compra, ou rejeita. *(Atualizado em 07/10: no código, tela `/decisoes-pcp`, só depois da recontagem; `ACEITO` ou `REABERTO`, motivo obrigatório nos dois.)*
 - **6 · Roteia** — aceita → ato 12 com a quantidade real; reabre → volta pro ato 5.
 
 ## Ato 12 · O lote nasce

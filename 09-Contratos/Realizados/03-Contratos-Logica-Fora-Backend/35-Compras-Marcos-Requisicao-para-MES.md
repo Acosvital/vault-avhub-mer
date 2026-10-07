@@ -1,19 +1,25 @@
 ---
 tags: [contrato-sql, contrato-api, compras, integracao-mes, torre-de-fluxo]
 criado: 2026-10-02
+atualizado: 2026-10-07
 status: aplicada
 ---
 
 # Contrato 35 — Compras: marcos da requisição de compra (av-hub → MES)
 
-> **✅ ENTREGUE (02/10/2026).** O DBA aplicou o apêndice A na `api-test` e o código entrou na `develop` (`0a65491`, a partir do patch `35-anexos/0003`). Conferido na `api-test`: `GET /compras/requisicoes/eventos` sem `alterado_desde` → 400; uma requisição de teste com `id_origem` (REQ-000003, "TESTE CONTRATO 35 - APAGAR", ficou cancelada) gerou `requisicao_recebida`; cancelar sem motivo → 400; com motivo → 200 e evento `requisicao_cancelada` com `origem = compras`. Front: av-hub#117 (verificado na tela no local). Falta: o Robert ligar a leitura no MES. **Antes de produção:** SQL antes da API.
+> **Atualização de 07/10/2026 — conferido no código (API: `main` = `develop`, `0a65491` no PR #275; MES: `develop` do `api-pcp`; produção não conferida no código; produção só pelo dump de 07/10, que cobre schema e dados, não o comportamento da API em produção; [[Auditoria-Dump-Producao-2026-10-07]]):**
+> - **O MES lê e reage:** `41bf4a6` (05/10, PR #49) `EventosAvhubService`; cursor `requisicoes-eventos`, sobreposição de 2 min, até 50 páginas × 200, idempotente por `id_evento`. **Só reage a `requisicao_cancelada` e `requisicao_reaberta`**; os demais marcos (`oc_aprovada`, `oc_no_omie`, `despachada` etc.) são gravados, só espelham `avhubStatus` e alimentam métricas — **não** preenchem pedido de compra nem previsão e não avançam a parcial. O antigo "falta o Robert ligar a leitura" **não vale mais**. (Só na `develop` do `api-pcp`; a `main` do MES parou em 28/08.)
+> - **A rota na API:** `GET /compras/requisicoes/eventos` com `alterado_desde`, `apos_id`, `codigo_empresa`, `limit`; resposta `{quantidade, tem_mais, proximo, data}`; o PATCH de cancelar exige `motivo` (3–500 caracteres) e grava `cancelada_por_origem='compras'`. O hash mergeado é **`0a65491`** (PR #275); o `8eb5dce` citado abaixo é só nota histórica (branch local re-autorada a partir de patches; o equivalente mergeado é o `0a65491`).
+> - **Chave:** a chave do 34 (`MES_INTEGRACAO_KEYS`) **não abre esta rota** (403 `CHAVE_MES_ROTA_NAO_PERMITIDA`, até em GET); o MES lê os eventos com a chave de leitura (`API_KEY`, admin ou do banco). Segue aberto o L6 do [[26-Vendas-Liberacao-Pedido]]. Ver [[Chaves-de-Integracao-AvHub-MES-Pipeline]].
+> - **(atualizado em 07/10, dump de produção; [[Registro-de-Decisoes-2026-10-07]] item 3)** A "migration 034" (`fn_requisicao_mes_aplicar`) **existe em produção, completa**. O que continua fora do vault é só o arquivo SQL (🔴 Gustavo fornece o DDL; ver [[34-Requisicoes-MES-Empurra-para-o-Hub]]). A frase "não está em arquivo local" abaixo vale só para o ambiente local de 02/10.
+
+> **✅ ENTREGUE (02/10/2026).** O DBA aplicou o apêndice A na `api-test` e o código entrou na `develop` (`0a65491`, a partir do patch `35-anexos/0003`). Conferido na `api-test`: `GET /compras/requisicoes/eventos` sem `alterado_desde` → 400; uma requisição de teste com `id_origem` (REQ-000003, "TESTE CONTRATO 35 - APAGAR", ficou cancelada) gerou `requisicao_recebida`; cancelar sem motivo → 400; com motivo → 200 e evento `requisicao_cancelada` com `origem = compras`. Front: av-hub#117 (verificado na tela no local). Falta: ~~o Robert ligar a leitura no MES~~ (**atualizado em 07/10:** ligada em `41bf4a6`, 05/10). **Antes de produção:** SQL antes da API.
 
 > **Situação em 02/10/2026: implementado e testado no local.** SQL (apêndice A) aplicado no banco local
-> (`omie-test-db`) e testado pelo roteiro `35-anexos/0002-roteiro-teste.sql`. API: commit `8eb5dce` na branch
-> `feat/contrato-35-marcos-requisicao` (worktree `Desktop/wt-api-contrato-35`, **sem push**), testada por HTTP
+> (`omie-test-db`) e testado pelo roteiro `35-anexos/0002-roteiro-teste.sql`. API: nota histórica, `8eb5dce` (branch local re-autorada; equivalente mergeado: `0a65491`), testada por HTTP
 > num container local (porta 3005). av-hub: PR Acosvital/av-hub#117 (motivo obrigatório no kanban; compatível
 > com o backend atual). Falta: DBA aplicar o apêndice A, subir a API e o Robert ligar a leitura no MES.
-> A "migration 034" (`fn_requisicao_mes_aplicar`, contrato 34) não está em nenhum arquivo local: o cancelamento pelo
+> A "migration 034" (`fn_requisicao_mes_aplicar`, contrato 34) não estava em nenhum arquivo local (**em 07/10: existe em produção**): o cancelamento pelo
 > MES foi testado por UPDATE direto (sai com `origem = 'mes'`).
 
 **Para:** DBA (Gustavo), backend (`api-acos-vital`) e MES (`api-pcp`, Robert) · **Objetivo:** dar ao MES
@@ -413,7 +419,7 @@ COMMIT;
 - [x] Apêndice A aplicado no local e testado: cada marco aparece uma vez, com `ocorrido_em` certo, mesmo
       com dois passos entre duas leituras.
 - [x] Rota e mudança no PATCH implementadas e testadas (400 sem `alterado_desde`; cancelar sem motivo = 400).
-- [ ] Cancelar no av-hub faz a parcial voltar a Requisições no MES, com o motivo.
+- [ ] Cancelar no av-hub faz a parcial voltar a Requisições no MES, com o motivo. *(07/10: o MES tem o código que reage a `requisicao_cancelada`, `41bf4a6`; falta o teste ponta a ponta.)*
 - [x] Nenhum evento traz preço, fornecedor ou condição de pagamento; requisição manual (sem `id_origem`)
       não aparece.
 

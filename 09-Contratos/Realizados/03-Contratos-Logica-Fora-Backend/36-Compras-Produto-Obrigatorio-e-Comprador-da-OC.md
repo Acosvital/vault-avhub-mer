@@ -1,10 +1,13 @@
 ---
 tags: [contrato-sql, contrato-api, compras, omie]
 criado: 2026-10-05
+atualizado: 2026-10-07
 status: aplicada
 ---
 
 # Contrato 36 — Compras: produto obrigatório no item e comprador da OC vindo do Omie
+
+> **Atualização de 07/10/2026 — conferido no código (`main` = `develop` da `api-acos-vital`, `a6ab058`/`fdafb35`; pipeline `master` `d2886bf`; produção não conferida no código; produção só pelo dump de 07/10, que cobre schema e dados, não o comportamento da API em produção; [[Auditoria-Dump-Producao-2026-10-07]]):** confirmado — a validação de produto é **incondicional** (P1), `historico_comprador` aparece no detalhe da OC (**`null` quando a tabela `ordens_compra_comprador_historico` não existe**, via `to_regclass`; P5) e o histórico unificado ficou fixo (P6; a chave `COMPRAS_HISTORICO_UNIFICADO` saiu). Commits mergeados: `5491037` (#277) e `c8f2f5e` (#279). **Na pipeline:** OC sem comprador vinculado ou item sem `nCodProd` vira erro na OC antes de chamar o Omie (`d11b6d1`, `2ac4921`; PR #1, 05/10), e a pipeline **também nunca manda parcelas** ao Omie (só `cCodParc` e `nQtdeParc`, `f4fd02d`; a regra "só parcelas definitivas" do [[23-Compras-Pipeline-Consolidado]] ficou obsoleta). A seção "Chaves que continuam" do §3 foi superada pelo [[38-Regras-Sem-Chave-de-Ambiente]]: `COMPRAS_EXIGIR_PODE_APROVAR` e `COMPRAS_VINCULO_EXIGIR_PV_EXISTENTE` também saíram (regras fixas). Ver [[Indice-Contratos]] (Conferência de 07/10/2026).
 
 > ✅ **Concluído (06/10/2026, tarde).** O DBA aplicou o patch `36-anexos/0001` na `develop` da API (commit
 > `c8f2f5e`): a chave `COMPRAS_EXIGIR_PRODUTO_CADASTRO` saiu e o produto do cadastro vale sempre. Em
@@ -32,7 +35,7 @@ cadastrado**: "Informe a tag [cProduto], [cCodIntProd] ou [nCodProd]", e com `cP
 não cadastrado para o Código". A decisão B12 (24/09) permitia material em texto livre na OC; com ela,
 toda OC de estoque emitida pela tela seria recusada. **Decisão: o item da OC passa a ter produto do
 cadastro da unidade, sempre** (estoque, uso interno e pedido de venda; o item do PV já vem com o produto,
-e dá para trocar por outro do cadastro).
+e dá para trocar por outro do cadastro). (O "contrato 22" citado abaixo é hoje o [[13-Compras-Backend-Consolidado]].)
 
 Sobre o comprador: **a OC só vai ao Omie com comprador vinculado; o comprador não se troca no av-hub; se
 trocarem o comprador do pedido no Omie, o av-hub acompanha e guarda o histórico.**
@@ -212,6 +215,6 @@ COMMIT;
 
 ## Ver também
 - [[23-Compras-Pipeline-Consolidado]] — teste real no Omie de 05/10/2026.
-- [[22-Compras-Backend-Consolidado]] / [[13-Compras-Backend-Consolidado]] — B12 (texto livre, agora
+- [[13-Compras-Backend-Consolidado]] (antes numerado 22) — B12 (texto livre, agora
   substituído por este contrato), B13 (trava da OC aprovada).
 - [[18-Compradores-Funcionario]] e [[28-Compradores-Criar-Excluir-Sugestao]] — cadastro de compradores.

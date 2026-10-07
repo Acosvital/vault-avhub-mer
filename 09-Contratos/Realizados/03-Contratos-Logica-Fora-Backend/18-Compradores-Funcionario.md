@@ -1,3 +1,7 @@
+---
+atualizado: 2026-10-07
+---
+
 # Contrato — Compradores (Omie) ↔ Funcionário (RH)
 
 > **Concluído — movido para `Realizados/` em 29/09/2026** (era o contrato 16). Backend na `api-test` e front mergeado na `develop` do av-hub ([av-hub#106](https://github.com/Acosvital/av-hub/pull/106)).
@@ -8,6 +12,8 @@
 > [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), aguardando merge; depois do merge vai para
 > `Realizados/`. A tela de Compradores não foi testada pela interface: o perfil Admin (Dev) não tem
 > `pode_editar` nela.
+
+> **(atualizado em 07/10, [[Registro-de-Decisoes-2026-10-07]] item 51)** O mecanismo existe (tela de Compras, Cadastros, Acessos). Em produção já há **20 de 74** compradores vinculados a funcionário (carga de 07/10); só importam os **32 ativos**. Vincular antes da primeira OC real: sem vínculo a emissão é bloqueada (§6).
 
 **Criado em:** 23/09/2026.
 

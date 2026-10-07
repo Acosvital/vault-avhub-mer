@@ -1,10 +1,13 @@
 ---
 tags: [contrato-logica, contrato-api, contrato-pipeline, compras]
 criado: 2026-09-30
+atualizado: 2026-10-07
 status: aplicada
 ---
 
 # Contrato 30 — Compras: dados que faltam no PDF do pedido de compra do Omie
+
+> **Atualização de 07/10/2026 — conferido no código:** **API** — o detalhe do pedido Omie com fornecedor e código do produto está no código (`119634a`; hoje em `main` = `develop` da `api-acos-vital`). **Pipeline** — a IE e os dados fiscais dos parceiros são gravados em `core.parceiros` (`66f9a2e`; `master` `d2886bf`: IE, IM, Suframa, Simples, `contribuinte_icms`, CNAE e outros), o que alimenta a IE do PDF; a pendência "IE vazia em `core.parceiros`" deixa de valer no código (falta conferir se o banco de produção já foi preenchido pela pipeline). Seguem em aberto: o `PedidoOmiePdf.tsx` do av-hub mostrar os campos e IPI/ICMS ST (não existem no espelho `pedidos_compras`). Produção não conferida. **(atualizado em 07/10, ✅ Nathan, [[Registro-de-Decisoes-2026-10-07]] item 47)** IPI e ICMS-ST **não entram** no PDF: o Omie é o sistema fiscal, e o PDF já avisa quando o total não bate com a soma das linhas. Esse item deixa de estar em aberto.
 
 > **✅ ENTREGUE na API (01/10/2026).** Conferido no código da `develop` (`src/routes/pedidos_compras.js`, commit `119634a`): o detalhe devolve `inscricao_estadual_fornecedor`, endereço, `email_fornecedor`, `telefone_fornecedor` e `codigo_produto` por item. **Não testado com dado**: `pedidos_compras` está vazio na `api-test`. Falta no av-hub: o `PedidoOmiePdf.tsx` passar a mostrar esses campos. IE vazia em `core.parceiros` (pipeline) e IPI/ICMS ST seguem em aberto.
 
@@ -95,6 +98,7 @@ Exemplo (pedido 46871, Mogi):
    no espelho e na API. **Pergunta ao Nathan: é necessário?** Enquanto não vier, o av-hub avisa no PDF
    quando o total do Omie não bate com a soma das linhas ("a diferença corresponde a impostos que o
    Omie não envia ao av-hub").
+   **(atualizado em 07/10, ✅ Nathan)** Resposta à pergunta: **não é necessário**; não incluir. O aviso do PDF cobre a diferença.
 
 ## 3. Perguntas em aberto
 
@@ -102,7 +106,7 @@ Exemplo (pedido 46871, Mogi):
   `acosvital@nfe.omie.com.br` entre os destinatários da NF-e. Esse endereço é da conta Omie; o av-hub
   não o conhece nem deve fixá-lo no código. Se for para constar no PDF, ele precisa vir de algum
   cadastro por unidade (ex.: uma coluna em `core.unidades`). Decidir se entra.
-- IPI/ICMS ST (item 2.2.2): entra ou não.
+- ~~IPI/ICMS ST (item 2.2.2): entra ou não.~~ **Decidido em 07/10 (✅ Nathan): não entra.**
 
 ## 4. Depois de aplicado (av-hub)
 

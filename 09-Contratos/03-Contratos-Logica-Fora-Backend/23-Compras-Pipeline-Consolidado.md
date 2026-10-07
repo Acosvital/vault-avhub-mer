@@ -1,4 +1,28 @@
+---
+tags: [contrato-logica, contrato-pipeline, compras, omie]
+status: implementada-no-codigo
+criado: 2026-09-23
+atualizado: 2026-10-07
+---
+
 # Contrato — Compras: tudo o que falta na PIPELINE (`omie-elt-pipeline`)
+
+> Status: decidido | no código | em produção (verificado em 07/10/2026 só pelo dump; o deploy da pipeline não foi conferido). Fonte: [[Registro-de-Decisoes-2026-10-07]] (#7, #20, #28).
+>
+> **✅ Decisão de 07/10/2026 sobre o envio da OC:** fica **fixo no código e vai direto ao Omie, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN`** (o Nathan rodou cerca de 4 testes reais e a OC entrou). **L10.1, L10.6 (FOB) e L10.7 (b) a (d) viram risco aceito.** Alteração de código: Gustavo. As menções às duas flags e aos "pendentes sem teste" abaixo são histórico.
+
+> **Atualização de 07/10/2026 — conferido no código da pipeline (`master` `d2886bf`, 06/10 07:46; produção/deploy NÃO conferidos).** Status: `implementada-no-codigo`; **falta conferir em produção/`api-test`** (o próprio contrato diz "sem deploy nada roda"). O cabeçalho abaixo (de 23/09 a 05/10) está desatualizado nestes pontos:
+> - **L4 não está mais "sem push":** o PR #1 foi **mergeado em 05/10** (14:56, `3233acf`) e o PR #2 em 06/10; `master` = `d2886bf`. O passo 0 da ordem sugerida (§4, "publicar a branch") **está feito**.
+> - **As flags `SYNC_*` de leitura saíram em 06/10** (contrato 38, `d6abf04`): `SYNC_COMPRADORES`, `SYNC_COTACAO_PTAX`, `SYNC_PEDIDOS_COMPRAS`, `SYNC_CONDICOES_PAGAMENTO_COMPRAS`, `SYNC_PROJETOS`, `SYNC_CONTAS_CORRENTES`, `SYNC_CATEGORIAS` (além de `EXCLUSION_SYNC_DRY_RUN` e `RAW_AUDIT_ENABLED`). Os recursos de Compras rodam sempre. ~~Só `SYNC_ENVIO_OC` (padrão `false`) e `ENVIO_OC_DRY_RUN` (padrão `true`) continuam, de propósito, como interruptores de escrita no Omie~~ **(decidido em 07/10: as duas flags deixam de existir; envio fixo, direto ao Omie, risco aceito; ver o topo.)**
+> - **"Marcar inativo o que sumir do Omie nos catálogos" está feito:** `jobs/inativarCatalogos.ts` (`f4fd02d`), cron `47 4 * * *`, nos 5 catálogos de Compras; não age se o Omie devolver menos da metade dos ativos.
+> - **L10.4 está respondido** (`f4fd02d`): sem parcelas o Omie gera pela condição e mantém o código; com `parcelas_upsert` ele troca a condição para `999`.
+> - **A decisão "parcelas só quando definitivas" está obsoleta:** o envio **nunca manda parcelas** (só `cCodParc` e `nQtdeParc`).
+> - **Sem teste real, hoje risco aceito (✅ 07/10):** **L10.1** (códigos de `cEtapa`; sem evidência no código), **L10.6** (FOB = `"1"`; "a confirmar" no próprio código) e **L10.7 (b)–(d)** (exclusão com recebimento parcial, recebido, aprovado no Omie). L10.2 e L10.5 respondidos; L10.3 parcial (`nValor` obrigatório, `2ac4921`).
+> - O teste real de Mogi de 05/10 (OC-000002 virando o pedido 47476, reenvio sem duplicar, exclusão aceita) está registrado aqui e no README da pipeline; o código não o prova e o Omie não foi verificado.
+> - Estado geral (código): 15 recursos registrados, 14 ligados; `estoque` está `enabled:false` (✅ 07/10: sem função, o estoque do Omie é ignorado; `core.estoque_saldo` existe vazia). Regras "item sem produto" e "comprador vinculado" valem desde o contrato 36 (`d11b6d1`, `2ac4921`).
+> - **HRM:** nenhum código da pipeline menciona a HRM e o `.env.example` só tem Mogi e Uberaba; ligar a HRM é por env, **com uma exceção** (`FAMILIA_PADRAO_POR_FILIAL` em `produtos.ts` é fixo para mogi e uberaba; produto da HRM sem família no Omie seria pulado [I]). ✅ 07/10 (#20): corrigir a doc (`ARCHITECTURE.md` do pipeline, fora do vault) e registrar tarefa de código (Gustavo).
+>
+> Ver [[Indice-Contratos]] (Conferência de 07/10/2026) e [[Chaves-de-Integracao-AvHub-MES-Pipeline]].
 
 **Criado em:** 23/09/2026 · **Para:** quem mantém a `omie-elt-pipeline`
 
@@ -15,7 +39,7 @@ O que é banco e API está em `ENVIAR - contrato-compras-backend.md`.
 
 > **Atualização (23/09/2026, fim do dia): L1, L2, L3, L5, L6, L7, L8 e L9 estão implementados** na
 > branch `feat/compras-omie` da pipeline (commits `95c2db4`, `3f16868`, `ae919fd`, `229a419` e `c7aba1b`). **Todos
-> nascem desligados** e são ligados pelo `.env` (`SYNC_COMPRADORES`, `SYNC_COTACAO_PTAX`,
+> nascem desligados** (atualizado em 07/10: as flags saíram em 06/10 e os recursos rodam sempre) e eram ligados pelo `.env` (`SYNC_COMPRADORES`, `SYNC_COTACAO_PTAX`,
 > `SYNC_PEDIDOS_COMPRAS`, `SYNC_CONDICOES_PAGAMENTO_COMPRAS`, `SYNC_PROJETOS`,
 > `SYNC_CONTAS_CORRENTES`, `SYNC_CATEGORIAS`) depois que o banco do ambiente tiver as tabelas.
 > Testados contra o Omie real (só leitura, conta de Mogi) e contra a API do Banco Central; a
@@ -48,15 +72,15 @@ O que é banco e API está em `ENVIAR - contrato-compras-backend.md`.
 >   duplicar ao rodar de novo. Os códigos do 46618 viram "16 - Revenda", "01 - Boleto/Pix/TED" e
 >   "Compras de Materia Prima", como no PDF do Omie.
 >
-> **Continua pendente:** L4 (envio da OC; **decidido em 24/09: pela pipeline, com exclusão no
+> **Continua pendente** (texto de 24/09; **atualizado em 07/10:** L4 e a inativação dos catálogos estão feitos, ver o topo): L4 (envio da OC; **decidido em 24/09: pela pipeline, com exclusão no
 > Omie ao cancelar**; falta implementar), L10 (campos obrigatórios e FOB) e
 > marcar como inativo o que sumir do Omie nos catálogos.
 >
-> **Atualização (05/10/2026): L4 implementado** na `feat/compras-omie` (commit `66f9a2e`, **sem push**).
+> **Atualização (05/10/2026): L4 implementado** na `feat/compras-omie` (commit `66f9a2e`, **sem push**; **atualizado em 07/10:** mergeado em 05/10 pelo PR #1, `3233acf`).
 > Processo novo `envio-oc-worker` (fila `omie-envio-oc`, uma rodada por vez): lê `GET
 > /compras/ordens/fila-omie`, manda `UpsertPedCompra`/`ExcluirPedCompra` e devolve em `PATCH
-> …/sincronizacao`. Ligado por `SYNC_ENVIO_OC` (padrão `false`), começa em `ENVIO_OC_DRY_RUN=true`
-> (só mostra o payload no log). Testado no local: dry run das OCs OC-000005 (R$, CIF, produto do
+> …/sincronizacao`. ~~Ligado por `SYNC_ENVIO_OC` (padrão `false`), começa em `ENVIO_OC_DRY_RUN=true`
+> (só mostra o payload no log).~~ **(07/10: sem flags, envio fixo direto ao Omie; ver o topo.)** Testado no local: dry run das OCs OC-000005 (R$, CIF, produto do
 > cadastro, desconto 5%, local em texto) e OC-000006 (US$ PTAX, FOB com placa), e o caminho real
 > contra um **Omie falso** (sucesso grava `nCodPed`/`cNumero`, recusa vira `erro` com a mensagem do
 > Omie, exclusão marca o espelho). **Nenhuma chamada de escrita ao Omie de verdade foi feita.**
@@ -64,10 +88,10 @@ O que é banco e API está em `ENVIAR - contrato-compras-backend.md`.
 > - **Separador do bloco `[AV-HUB]`:** ` ; ` entre os campos de uma linha, e não ` | ` como no
 >   exemplo do contrato 14 (§3.8): o `|` é a quebra de linha do Omie e cada campo voltaria pelo
 >   espelho como uma linha solta.
-> - **Parcelas:** só vão em `parcelas_upsert` quando todas são definitivas (`calculo_provisorio =
->   false`, condição achada no catálogo); senão vai só o `cCodParc`.
-> - **Produto:** `nCodProd` só se o código existir em `core.produtos` **da unidade da OC**; senão o
->   item vai só com descrição e o bloco avisa. Local de estoque numérico vai em
+> - **Parcelas:** ~~só vão em `parcelas_upsert` quando todas são definitivas (`calculo_provisorio =
+>   false`, condição achada no catálogo); senão vai só o `cCodParc`.~~ **Obsoleto (atualizado em 07/10, `f4fd02d`):** o envio **nunca manda parcelas**, só `cCodParc` e `nQtdeParc`; o Omie gera as parcelas pela condição.
+> - **Produto:** ~~`nCodProd` só se o código existir em `core.produtos` **da unidade da OC**; senão o
+>   item vai só com descrição e o bloco avisa.~~ **Obsoleto (atualizado em 07/10, `2ac4921`):** item sem `nCodProd` (produto precisa existir em `core.produtos` da unidade da OC) vira erro na OC antes de chamar o Omie. Local de estoque numérico vai em
 >   `codigo_local_estoque`; texto livre vai no bloco.
 > - **Erros:** recusa do Omie → `erro` (sai da fila até o "Reenviar"); rede/429/425 → fica
 >   pendente para a próxima rodada; 3 recusas seguidas param a rodada da unidade (o Omie bloqueia
@@ -89,7 +113,7 @@ O que é banco e API está em `ENVIAR - contrato-compras-backend.md`.
 > - Reenvio com o mesmo `cCodIntPed`: "alterado com sucesso", mesmo `nCodPed`, sem duplicar item.
 > - Com `parcelas_upsert`, o Omie grava a condição como `999` (informar parcelas), mesmo mandando
 >   `000`. Alterar sem parcelas mantém as que existiam (L10.4 só parcialmente respondido: falta criar
->   um pedido sem parcelas para ver se o Omie gera pela condição).
+>   um pedido sem parcelas para ver se o Omie gera pela condição). **(atualizado em 07/10: L10.4 respondido por `f4fd02d` — sem parcelas o Omie gera pela condição e mantém o código.)**
 > - Cancelamento → fila `excluir` → `ExcluirPedCompra` **aceito** (pedido sem recebimento, etapa
 >   10); a consulta passou a responder "Pedido de compra não cadastrado". L10.7(a) respondido.
 > - Correções na pipeline (`2ac4921`): `nValor` nas parcelas; item sem produto vira erro antes de
@@ -99,7 +123,7 @@ O que é banco e API está em `ENVIAR - contrato-compras-backend.md`.
 > formulário de OC direta (finalidade Estoque) não tem busca de produto — o código só vem de PV. Com
 > o Omie exigindo produto cadastrado, essas OCs nunca entram no Omie.
 >
-> **Ainda pendente:** L10.1, L10.3 (FOB `"1"` não testado), L10.4 (criação sem parcelas), L10.7
+> **Ainda pendente** (texto de 05/10; **atualizado em 07/10:** L10.4 e a inativação dos catálogos estão feitos; sobram L10.1, L10.6 — FOB `"1"` — e L10.7 (b)–(d), **risco aceito em 07/10**): L10.1, L10.3 (FOB `"1"` não testado), L10.4 (criação sem parcelas), L10.7
 > (b)–(d), e marcar como inativo o que sumir do Omie nos catálogos.
 >
 > **Dados reais vistos no teste (Mogi):** etapas do pedido de compra `10`, `15` e `20`; ~57
@@ -236,7 +260,7 @@ aprovada leva até alguns minutos para aparecer no Omie.
     por item: tipo de material, unitário na moeda, desconto % e local de estoque em texto.
     Formato exato em `ENVIAR - contrato-compras-omie-pedidocompra.md`, §3.8.
 - **Parcelas:** `parcelas_incluir[]` a partir de `ordens_compra_parcelas`, **ou** só `cCodParc` se
-  o Omie gerar sozinho (a testar, §3).
+  o Omie gerar sozinho (a testar, §3). **(atualizado em 07/10)** valeu a segunda opção: o envio nunca manda parcelas (`f4fd02d`).
 - **Retorno:** `PATCH /compras/ordens/{id}/sincronizacao` (B4): sucesso → `nCodPed`, `cNumero`;
   falha (`omie_fail`) → `status: "erro"` com a `description`.
 - **Cancelamento (decisão 24/09: cancela no Omie também).** A API do Omie **não tem "cancelar"
@@ -335,9 +359,9 @@ contrato do backend, com o `ALTER`). Em Uberaba o maior é 29.
 2. ~~Se `lApenasAlterados` filtra por data de alteração.~~ **Respondido em 24/09/2026**: sim, com
    `"T"` o período é de inclusão/alteração; com `"F"` é de previsão (ver L3). A pipeline usa `"T"`.
 3. Quais campos do `UpsertPedCompra` são obrigatórios de fato: mandar um payload mínimo e ler o erro.
-4. Se o Omie gera as parcelas sozinho com `cCodParc` e sem `parcelas_incluir`.
-5. Se `nCodProd` é obrigatório no item, ou se aceita só `cDescricao` + `cUnidade`.
-6. `cTpFrete = "1"` para FOB.
+4. Se o Omie gera as parcelas sozinho com `cCodParc` e sem `parcelas_incluir`. **(07/10: respondido, `f4fd02d` — gera pela condição e mantém o código.)**
+5. Se `nCodProd` é obrigatório no item, ou se aceita só `cDescricao` + `cUnidade`. **(05/10: respondido — o Omie exige produto cadastrado.)**
+6. `cTpFrete = "1"` para FOB. **(07/10: não testado; "a confirmar" no próprio código; risco aceito, ✅.)**
 7. **Quando o `ExcluirPedCompra` é aceito.** A doc não diz. Testar na conta de teste, com pedidos
    criados só para isso: (a) incluído, sem recebimento; (b) com recebimento parcial; (c) recebido,
    com a nota de entrada; (d) com o pedido aprovado dentro do Omie. Anotar a `description` de cada
@@ -348,7 +372,7 @@ contrato do backend, com o `ALTER`). Em Uberaba o maior é 29.
 
 ## 4. Ordem sugerida
 
-0. **Publicar a branch `feat/compras-omie`** (PR para `master`) e fazer o deploy: sem ela, nada
+0. **(atualizado em 07/10: publicar a branch está feito, PR #1 mergeado em 05/10; falta conferir o deploy)** **Publicar a branch `feat/compras-omie`** (PR para `master`) e fazer o deploy: sem ela, nada
    abaixo roda, e o `master` atual nem compila (erro corrigido no `95c2db4`).
 1. **L1** (PTAX) e **L2** (compradores): as tabelas já existem **no teste**, dá para ligar hoje lá.
    Em produção, só depois do B0 do contrato do backend.

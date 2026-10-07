@@ -1,9 +1,14 @@
 ---
 tags: [integracao-omie, dados-extraidos]
 criado: 2026-09-17
+atualizado: 2026-10-07
 ---
 
 # Produtos e Famílias
+
+> Status: decidido (`FAMILIA_PADRAO_POR_FILIAL` vira tarefa de código) | no código (`master` d2886bf) | em produção (verificado em 07/10/2026 só pelo dump).
+
+> **Atualização de 07/10/2026 — ressalva sobre multi-filial.** O "código de família padrão por filial" da linha `familias_produtos` vem de `FAMILIA_PADRAO_POR_FILIAL` (`produtos.ts`), **hardcoded só para mogi e uberaba**: um produto de filial nova (a HRM) sem família no Omie seria pulado (`validate`) `[inferido]` — o que contradiz o "nenhum código muda" do `ARCHITECTURE.md` para ligar uma filial. **Decidido em 07/10 (✅, [[Registro-de-Decisoes-2026-10-07]] #20): é tarefa de código (Gustavo) e o `ARCHITECTURE.md` do pipeline, fora do vault, deve ser corrigido.** Fonte: leitura de código (`master` d2886bf), não produção. Ver [[Omie-ELT-Pipeline]].
 
 ## `core.produtos`
 

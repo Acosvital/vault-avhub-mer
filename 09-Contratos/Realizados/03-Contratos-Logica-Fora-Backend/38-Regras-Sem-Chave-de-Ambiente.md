@@ -1,18 +1,27 @@
 ---
 tags: [contrato-api, configuracao, seguranca, compras]
 criado: 2026-10-06
+atualizado: 2026-10-07
 status: aplicada
 ---
 
 # Contrato 38 — Regras decididas sem chave de ambiente
 
+> **Atualização de 07/10/2026 — conferido no código (`main` = `develop` da `api-acos-vital`, `c8f2f5e` no PR #279; pipeline `master` `d2886bf`; produção não conferida no código; produção só pelo dump de 07/10, que cobre schema e dados, não o comportamento da API em produção; [[Auditoria-Dump-Producao-2026-10-07]]):**
+> - **Saíram 13 chaves, não 11** (o §2 já tem 13 linhas): as 11 do texto + `BLACKLIST_PEDIDOS_CHAVE_LEGADA` + `COMISSOES_COORDENADORES_BLOQUEIO`; também saiu `COMPRAS_HISTORICO_UNIFICADO` (do 36 P6). **Nenhuma chave removida é lida por `process.env`.**
+> - **(atualizado em 07/10, [[Registro-de-Decisoes-2026-10-07]] itens 7 a 10) Estado final das chaves:** `PERMISSOES_ROTA_MODO` passa a regra **fixa `exigir`** (✅, não é mais chave; Gustavo altera o código); `SYNC_ENVIO_OC` e `ENVIO_OC_DRY_RUN` **saem** (✅, envio fixo, direto ao Omie); das 5 chaves que restam, só `ESCOPO_VENDEDORES_EXIGIR` será fixada (✅ o front manda token; 🟡 Gustavo); `IDENTIDADE_EXIGIR_TOKEN`, `ESCOPO_UNIDADE_EXIGIR_SESSAO` e `AUTENTICACAO_AZURE_VALIDAR_ID_TOKEN` **quebram o MES e o pipeline** (que usam a chave do `.env` sem token) e ficam como chave até separar as chaves de serviço (L6, 🔴 Gustavo); `VENDAS_PLANILHA_PAGINAR_POR_PEDIDO` **corta dados no front** e fica como chave. A lista "6" abaixo é o retrato de 07/10 de manhã.
+> - **Sobram exatamente as 6 do §3:** `IDENTIDADE_EXIGIR_TOKEN`, `PERMISSOES_ROTA_MODO` (padrão `desligado`), `ESCOPO_VENDEDORES_EXIGIR`, `ESCOPO_UNIDADE_EXIGIR_SESSAO`, `AUTENTICACAO_AZURE_VALIDAR_ID_TOKEN`, `VENDAS_PLANILHA_PAGINAR_POR_PEDIDO`.
+> - **Segredos que também existem e não são "regra de negócio" (fora da lista do §3):** `MES_INTEGRACAO_KEYS` (nova, só abre o PUT do 34) e `DOCS_API_KEY` (pré-preenche a chave do `/docs`), além de `API_KEYS`, `USUARIO_TOKEN_SEGREDO`, `SESSION_SECRET` etc. Ver [[Chaves-de-Integracao-AvHub-MES-Pipeline]].
+> - **Pipeline (§6):** além das chaves citadas, o diff da pipeline removeu `SYNC_COMPRADORES`, `SYNC_COTACAO_PTAX`, `SYNC_PEDIDOS_COMPRAS`, `SYNC_CONDICOES_PAGAMENTO_COMPRAS`, `SYNC_PROJETOS`, `SYNC_CONTAS_CORRENTES`, `SYNC_CATEGORIAS`, `EXCLUSION_SYNC_DRY_RUN` e `RAW_AUDIT_ENABLED` (com `upsertRawAudit`, `d6abf04`); ficavam `SYNC_ENVIO_OC` (padrão `false`) e `ENVIO_OC_DRY_RUN` (padrão `true`; **atualizado em 07/10: ambas saem, o envio fica fixo e direto ao Omie, ✅**). O `exclusionSync` agora apaga de verdade (o CSV é só relatório).
+> - **§5 (orçamento × coordenadores):** o texto abaixo trata só os coordenadores, mas o `90bdb33` implementou **também o orçamento inteiro** (`/orcamento/*`) na API. **(atualizado em 07/10, ✅ Nathan, [[Registro-de-Decisoes-2026-10-07]] item 39)** O orçamento foi desenvolvido **por fora**, no módulo Comercial & Suprimentos; a API entregue (`90bdb33`) existe; a reescrita dos contratos 07 e 38 está **pendente**. ~~a decisão de 01/10 ("desconsiderado") não foi revertida e a divergência está registrada no [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] (cabe ao Nathan decidir)~~.
+
 > ✅ **Concluído no código (06/10/2026).** O DBA aplicou os patches `38-anexos/0001` e `0002` na `develop`
-> da API (commit `c8f2f5e`): nenhuma das 11 chaves é mais lida do ambiente, `BLACKLIST_PEDIDOS_CHAVE_LEGADA`
+> da API (commit `c8f2f5e`): nenhuma das 11 chaves é mais lida do ambiente (**atualizado em 07/10:** foram 13, ver acima), `BLACKLIST_PEDIDOS_CHAVE_LEGADA`
 > saiu e a comissão dos coordenadores roda sempre **sem** bloqueio por NF. Continuam com chave, de propósito,
 > as do §3 (segurança e `VENDAS_PLANILHA_PAGINAR_POR_PEDIDO`), até o pré-requisito de cada uma.
 > **Ordem de subida (§4) ainda vale:** em 06/10 nenhum dos 74 compradores de produção estava ligado a um
-> funcionário — sem isso ninguém emite OC (a tela de Compradores em Cadastros › Acessos foi liberada para o
-> Admin (Dev) em produção no mesmo dia). As regras de Compras não foram testadas em produção (só leitura).
+> funcionário (**atualizado em 07/10:** carga de 07/10 deixou **20 de 74** vinculados; só importam os 32 ativos; ver [[Registro-de-Decisoes-2026-10-07]] item 51) — sem isso ninguém emite OC (a tela de Compradores em Cadastros › Acessos foi liberada para o
+> Admin (Dev) em produção no mesmo dia). As regras de Compras não foram testadas em produção (só leitura; **o schema de Compras já existe em produção desde 02/10, conferido no dump de 07/10**).
 
 **Para:** backend (`api-acos-vital`) e quem faz o deploy · **Decisão do Nathan (06/10/2026):** "Não
 quero variáveis de ambiente, por padrão deve ser true".
@@ -58,27 +67,29 @@ Depois de aplicado, **apagar essas variáveis** do ambiente (`.env`/painel) da A
 
 ## 3. O que ainda depende de um passo (fixar depois)
 
-Mesma regra (vai ficar fixa, sem chave), mas só depois de conferir o pré-requisito:
+Mesma regra (vai ficar fixa, sem chave), mas só depois de conferir o pré-requisito (**conferido em 07/10: são exatamente estas 6 que sobram no código**; `MES_INTEGRACAO_KEYS` e `DOCS_API_KEY` são segredos e ficam fora da lista):
 
 | Chave | Pré-requisito |
 |---|---|
-| `IDENTIDADE_EXIGIR_TOKEN` | o av-hub manda `Authorization: Bearer` (token do usuário) em **toda** chamada de negócio |
-| `PERMISSOES_ROTA_MODO` (`desligado`/`observar`/`exigir`) | rodar em `observar` e ver no log que nada que deveria passar daria 403; depois fixar `exigir` |
-| `ESCOPO_VENDEDORES_EXIGIR` | mesmo do token acima |
-| `ESCOPO_UNIDADE_EXIGIR_SESSAO` | o av-hub manda `id_usuario_sessao` em toda leitura com escopo (hoje, sem ele, o usuário vê **tudo**) |
-| `AUTENTICACAO_AZURE_VALIDAR_ID_TOKEN` | o BFF repassa o `id_token` do Azure no login |
-| `VENDAS_PLANILHA_PAGINAR_POR_PEDIDO` | o av-hub pagina por `total_pages` (não por "linhas ≥ total") |
+| `IDENTIDADE_EXIGIR_TOKEN` | o av-hub manda `Authorization: Bearer` (token do usuário) em **toda** chamada de negócio. **(07/10)** O front manda (✅), mas MES e pipeline usam a chave do `.env` sem token: fixar quebra os dois. Fica como chave até separar as chaves de serviço (L6, 🔴 Gustavo) |
+| `PERMISSOES_ROTA_MODO` (`desligado`/`observar`/`exigir`) | rodar em `observar` e ver no log que nada que deveria passar daria 403; depois fixar `exigir`. **(07/10, ✅)** Decidido: **fixo em `exigir`**, deixa de ser chave. Chamadas de serviço só com `x-api-key` passam sem mapeamento (o modo só confere com token) |
+| `ESCOPO_VENDEDORES_EXIGIR` | mesmo do token acima. **(07/10)** ✅ o front manda token; 🟡 Gustavo: **será fixada** (a única das 5 restantes) |
+| `ESCOPO_UNIDADE_EXIGIR_SESSAO` | o av-hub manda `id_usuario_sessao` em toda leitura com escopo (hoje, sem ele, o usuário vê **tudo**). **(07/10)** Quebra MES e pipeline (chave do `.env` sem token); fica como chave até separar as chaves de serviço (L6, 🔴 Gustavo) |
+| `AUTENTICACAO_AZURE_VALIDAR_ID_TOKEN` | o BFF repassa o `id_token` do Azure no login. **(07/10)** Idem: quebra MES e pipeline; fica como chave até L6 (🔴 Gustavo) |
+| `VENDAS_PLANILHA_PAGINAR_POR_PEDIDO` | o av-hub pagina por `total_pages` (não por "linhas ≥ total"). **(07/10)** Fixar **corta dados no front**: fica como chave |
 
 ## 4. Ordem de subida (o que antes era feito ligando a chave)
 
 1. **Antes da API:** perfil **Gerência de Compras** com `pode_aprovar` em `compras` e as pessoas nele
    (sem isso ninguém aprova OC); **compradores vinculados aos funcionários** em Cadastros › Acessos ›
-   Compradores (sem isso ninguém emite OC — em 05/10 não havia nenhum vínculo); permissão da tela
+   Compradores (sem isso ninguém emite OC — em 05/10 não havia nenhum vínculo; **atualizado em 07/10:** 20 de 74 vinculados); permissão da tela
    `followup` para quem acompanha OC; `notas-fiscais-manuais` só no perfil do administrador.
 2. **API** com os patches dos contratos 36 e 38.
 3. **Apagar** as variáveis da §2 do ambiente.
 
 ## 5. Decidido: sem bloqueio na comissão dos coordenadores (06/10/2026)
+
+> **(atualizado em 07/10, ✅)** Orçamento desenvolvido **por fora** (Comercial & Suprimentos); API `90bdb33` existe; reescrita dos contratos 07 e 38 pendente ([[Registro-de-Decisoes-2026-10-07]] item 39). Histórico da divergência: este parágrafo e o 07 falam só da parte dos **coordenadores**, mas o `90bdb33` (01/10, #275) implementou na API **também o orçamento** (`/orcamento/{fornecedores,produtos,cotacoes,vinculos,categorias,familias}`), que o vault tratava como "não entregue/desconsiderado". ~~A decisão do Nathan de 01/10 não foi revertida; cabe a ele decidir se o 07 volta ao escopo~~ (ver [[07-Dados-Orcamento-e-Coordenadores-no-Banco]]).
 
 `COMISSOES_COORDENADORES_BLOQUEIO` vinha do contrato [[07-Dados-Orcamento-e-Coordenadores-no-Banco]]
 ("coordenadores … com o mesmo bloqueio de comissão que os vendedores"). O 07 foi **desconsiderado em
