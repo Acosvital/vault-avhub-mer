@@ -1,10 +1,17 @@
 ---
 tags: [contrato-api, vendedores, cadastros, acessos]
 criado: 2026-10-06
-status: proposta
+status: aplicada
 ---
 
 # Contrato 39 — Vendedores: fila de vínculo com o funcionário
+
+> **✅ ENTREGUE — conferido em PRODUÇÃO em 07/10/2026** (só leitura; o DBA avisou que concluiu):
+> - **V1:** `GET /vendedores?ativo=true&sem_vinculo=true` → `total: 30` de 88 ativos; bate com os 30 sem `id_funcionario` da lista completa (o aceite local de 06/10 dava 28: o dado mudou).
+> - **V2:** toda linha traz `nome_funcionario` e `nome_usuario`; ABNER → "Abner Luiz Cardoso Rodrigues"; nenhum vendedor com funcionário ficou sem o nome.
+> - **V3:** `GET /vendedores/{id}/sugestoes` traz `nome_setor`, `nome_unidade` e `desligado`; para "AÇOS VITAL", Amanda Vital (Diretoria, Aços Vital), como no aceite.
+>
+> **Destrava o av-hub:** PR av-hub#155 (tela de Vendedores no padrão de Compradores), que esperava esta API.
 
 **Para:** backend (`api-acos-vital`) · **Pequeno e aditivo** (nenhum campo existente muda).
 Patch pronto em `39-anexos/0001-vendedores-fila-de-vinculo.patch`, feito sobre a `develop` em `c8f2f5e` e
