@@ -9,6 +9,8 @@ atualizado: 2026-10-07
 
 > Status: decidido | no código | em produção (verificado em 07/10/2026): **🔴 com o Gustavo, não implementado** (`GET /ordens-compra/referencia` não existe em nenhum dos lados). O registro manual `PATCH /compras/requisicoes/:id/compra` **segue valendo**. Fonte: [[Registro-de-Decisoes-2026-10-07]] (#41).
 
+> **Linha do tempo (08/10/2026):** criado em 22/09/2026 como rascunho da F1 e aprovado pelo Nathan no mesmo dia; revisões de 29/09 e 30/09 (Robert). Plano e pendências em [[Integracao-AvHub-MES-Volta-Plano]].
+
 > **Atualização de 07/10/2026 — conferido no código (`main` = `develop` da `api-acos-vital`, `a6ab058`/`fdafb35`; `develop` do `api-pcp`):** a rota `GET /ordens-compra/referencia` **continua inexistente na API** (nem rota, nem "referencia" no código) e **no MES não há nada** que a consuma: o registro da compra segue manual (`PATCH /compras/requisicoes/:id/compra`, nº do pedido, fornecedor, previsão) e não existe job de poll de OC. Os pré-requisitos de **dados** existem: `ordens_compra_itens_vinculos`, `requisicoes_compra.id_origem` e `status`. O ajuste do Robert (`id_origem` em cada item) **segue pendente**, assim como a aprovação do Gustavo. Status: `proposta`. Atenção: a chave própria do MES que existe hoje (`MES_INTEGRACAO_KEYS`, do [[34-Requisicoes-MES-Empurra-para-o-Hub]]) **só abre o PUT** `/compras/requisicoes/origem/{id}` — não serve para esta rota (ver Autenticação). Nada disto vem de produção. Ver [[Indice-Contratos]] (Conferência de 07/10/2026) e [[Chaves-de-Integracao-AvHub-MES-Pipeline]].
 
 > **01/10/2026:** a requisição (ida, contrato 003) passou a ser empurrada pelo MES, ver [[34-Requisicoes-MES-Empurra-para-o-Hub]]. Este contrato (volta) continua como está e ainda não foi implementado.
