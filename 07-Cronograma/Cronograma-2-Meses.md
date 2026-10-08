@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, cronograma, planejamento]
 criado: 2026-09-18
-atualizado: 2026-10-07
+atualizado: 2026-10-08
 periodo: 18/09 a 21/12/2026 (3 meses)
 nome-do-arquivo: historico (era o plano de 2 meses)
 ---
@@ -57,6 +57,27 @@ nome-do-arquivo: historico (era o plano de 2 meses)
 | **Fora do que o plano previa** | D4 cortada; C2 removida (06/10); etapa 1 da transferência entre filiais concluída em 07/10 |
 
 Fonte: leitura do código das `develop` em 07/10 (ver o callout acima e [[Onde-Estamos]]). As janelas das fases futuras ficam como estavam.
+
+### Reconferência de 08/10 (código dos cinco repositórios, só leitura)
+
+- **MES (`api-pcp` `ca3346b`, `app-pcp` `2ea3183`):** nenhuma tarefa mudou de estado desde 07/10. A única mudança é o novo layout da página de lotes do Estoque (`app-pcp` #35), que não altera D7 nem D10. O Recebimento com conferência, recontagem e decisão do PCP (D6/D7) continua só na `develop`; a `main` do MES segue parada em 28/08, então o merge `develop` → `main` antes do piloto continua pendente (data e responsável 🔴 Robert).
+- **Integração (F1–F3):** o `PUT` do contrato 34 e a leitura de eventos do contrato 35 estão no `api-pcp`; `/itens/status` (005) existe no MES e o av-hub não a consome; `/ordens-compra/referencia` (004) não existe em nenhum lado. **F2 segue parcial** (falta a referência da OC).
+- **Acesso e segurança (C5):** continua parcial: `UsuariosController` e `SetoresController` sem guard na maioria das rotas.
+- **API:** `PERMISSOES_ROTA_MODO` virou `exigir` por padrão em 07/10 (`0557871`), o que obriga `USUARIO_TOKEN_SEGREDO` na subida: entra como **cuidado de deploy** da `api-acos-vital` (item do Gustavo). A decisão 8 diz "fixo, sem `.env`"; o código ainda aceita a variável.
+
+### Comercial & Suprimentos (Pablo) — fora do plano original, entregue na `develop` até 07/10
+
+Este módulo **não está** nas sprints S1–S5 (a capacidade do Pablo no plano é 0 desde 07/10, seção 3.2). Estado conferido no código:
+
+| ID | Entrega | Estado no código (08/10) |
+|---|---|---|
+| K1 | `api-comercial` (Express 5 + Prisma, schema `core_comercial`) e Propostas (CRUD, fechar/perder/reabrir, duplicar, versões, PDF, planilha de itens, lote, câmbio USD/EUR, e-mail) | ✅ na `develop` (`bd1ae48`); na `main` só a fatia de Propostas/Painel/Dashboard, sem o serviço |
+| K2 | Suprimentos: catálogo, fornecedores (categorias, certificados, apelidos), ofertas, mapa de cotação e histórico de importações, solicitações de custo, tabela-telha | ✅ na `develop` |
+| K3 | Painel do Comprador (ranking, certificados vencendo, itens sem preço), histórico de compras, pesquisa de materiais, produtos pendentes com "Ligar ao Omie", exportar fornecedores | ✅ na `develop` |
+| K4 | E2E Playwright do Comercial e CI | ✅ na `develop` (07/10) |
+| K5 | **Publicar o `api-comercial`**, cadastrar as telas em `auth.telas`, claim `perfis` no token, reescrever os contratos 07 e 38 (item 39 do Registro) | 🔴 pendente, sem data e sem dono definidos; ver [[AV-Hub-Comercial-Suprimentos]] seção 7 |
+
+Não há estimativa de pd do Pablo para K1–K5 no vault; **não recalculei a capacidade** (a decisão #32 deixa o Pablo fora do MES, mas o plano não dimensiona o Comercial & Suprimentos).
 
 ## 2. O que entra e o que não entra
 
@@ -357,6 +378,10 @@ gantt
     F1 Spec da integração v1 :f1, 2026-09-22, 2026-10-01
     F2 OC estruturada + jobs de poll :f2, 2026-10-19, 2026-10-31
     F3 Endpoint de status por item :done, f3, 2026-11-09, 2026-11-14
+    section av-hub - Comercial e Suprimentos (Pablo, fora do plano original)
+    K1 api-comercial + Propostas :done, k1, 2026-10-05, 2026-10-08
+    K2 Suprimentos - catalogo, ofertas, mapa, custo :done, k2, 2026-10-05, 2026-10-08
+    K3 Painel do comprador, historico, pesquisa :done, k3, 2026-10-06, 2026-10-08
     section Carga inicial (marco zero)
     G1 Ferramenta de carga inicial :g1, 2026-10-13, 2026-10-24
     G2 Levantamento físico (dupla) :g2, 2026-10-26, 2026-10-31
