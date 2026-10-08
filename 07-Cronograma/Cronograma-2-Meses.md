@@ -10,7 +10,7 @@ nome-do-arquivo: historico (era o plano de 2 meses)
 
 # Cronograma de Desenvolvimento — 3 meses (18/09 a 21/12/2026)
 
-> **(atualizado em 08/10) Escopo ampliado:** o Nathan aprovou o levantamento do PCP legado × MES ([[PCP-Legado-x-MES-Lacunas]]). O plano de 3 meses (M1 a M7, piloto em 18/11) segue igual; a data final do MES passa para **cerca de 08/10/2027** (marcos M8 a M11, seção 3.3, estimativas minhas a validar pelo Robert).
+> **(atualizado em 08/10) Escopo ampliado:** o Nathan aprovou o levantamento do PCP legado × MES ([[PCP-Legado-x-MES-Lacunas]]). O plano de 3 meses (M1 a M7, piloto em 18/11) segue igual; a data final do MES passa para **cerca de 08/10/2027 (data aceita pelo Nathan em 08/10)** (marcos M8 a M11, seção 3.3, estimativas minhas a validar pelo Robert).
 
 > **Regra de datas (única, 07/10/2026):** a execução vai de **22/09 a 21/12** (**63 dias úteis**). O plano **S1–FC termina em 18/11**; **S5 e M7 terminam em 18/12**; **21/12 é só o fim da conta de capacidade** (o 63º dia útil), não uma entrega. Qualquer "2 meses" ou "60 dias" nesta nota é histórico e foi superado por esta regra. O arquivo **mantém o nome `Cronograma-2-Meses` por ser histórico** (não foi renomeado, para não quebrar links).
 >

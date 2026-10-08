@@ -47,9 +47,9 @@ Detalhe e status (✅ / 🟡 / 🔴) em [[Registro-de-Decisoes-2026-10-07]].
 
 | ID | Pergunta | Quem |
 |---|---|---|
-| CA-01 | Compra para **uso interno** (ex.: consumo da cozinha): existe no Omie de cada unidade um **local de estoque** de consumo interno? Se sim, a OC de uso interno sai com ele (hoje o local é texto livre por item e só vai ao Omie se for o código numérico) — precisa de catálogo de locais na pipeline | Nathan |
-| CA-02 | Vínculo **vendedor ↔ funcionário**: manter a restrição "só setor Vendas" que a tela antiga fazia no navegador? Se sim, vira filtro no backend (a tela nova mostra todos com o setor) | Nathan |
-| CA-03 | **Ligar os compradores de produção aos funcionários** (~~0 de 74 em 06/10~~ **20 de 74 em 07/10**, carga do dia; só importam os **32 ativos**): sem isso ninguém emite OC desde o contrato 38. Vincular os restantes antes da primeira OC real. 🟡 (ver [[Registro-de-Decisoes-2026-10-07]] #51) | Nathan |
+| CA-01 | Compra para **uso interno** (ex.: consumo da cozinha): existe no Omie de cada unidade um **local de estoque** de consumo interno? Se sim, a OC de uso interno sai com ele (hoje o local é texto livre por item e só vai ao Omie se for o código numérico) — precisa de catálogo de locais na pipeline. ✅ **Respondida em 08/10 (Nathan):** o Omie não tem estoque, só uma coluna numa tabela; o estoque real fica no nosso sistema. Sem catálogo de locais na pipeline | Nathan |
+| CA-02 | Vínculo **vendedor ↔ funcionário**: manter a restrição "só setor Vendas" que a tela antiga fazia no navegador? Se sim, vira filtro no backend (a tela nova mostra todos com o setor). ✅ **Respondida em 08/10 (Nathan): manter "só setor Vendas"**, como filtro no backend | Nathan |
+| CA-03 | **Ligar os compradores de produção aos funcionários** (~~0 de 74 em 06/10~~ **20 de 74 em 07/10**, carga do dia; só importam os **32 ativos**): sem isso ninguém emite OC desde o contrato 38. Vincular os restantes antes da primeira OC real. 🟡 (ver [[Registro-de-Decisoes-2026-10-07]] #51). **08/10 (Nathan):** ele vincula só o que pode; quem não pode fica fora (regra de negócio dele) | Nathan |
 | CA-04 | **HRM na api-test**: `id_unidade_compra` ainda aponta para Mogi; e a pipeline de produção tem a HRM em `FILIAIS_ATIVAS`? | DBA |
 | CA-05 | **api-test**: `POST /compras/ordens` dá 500 em qualquer caso (inclusive com produto válido) desde 06/10 de manhã | DBA |
 

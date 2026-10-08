@@ -8,7 +8,7 @@ atualizado: 2026-10-07
 # Contrato de API 005 — Status por item (MES → av-hub)
 
 > Status: decidido | no código | em produção (verificado em 07/10/2026). Fonte: [[Registro-de-Decisoes-2026-10-07]] (#42 e #43).
-> - **Aceite das 3 diferenças** (foto atual em vez de log; `pedido_venda` + `ordem_producao`; etapas a mais e a menos): 🔴 Nathan. Recomendação: aceitar (o Robert já aprovou em 30/09).
+> - **Aceite das 3 diferenças** (foto atual em vez de log; `pedido_venda` + `ordem_producao`; etapas a mais e a menos): ✅ **aceitas pelo Nathan em 08/10/2026** (o Robert já tinha aprovado em 30/09).
 > - **Consumidor no hub:** 🟡 (Gustavo) roda na `api-acos-vital` (F2, 19 a 30/10), com tabela local do status por item.
 
 > **Linha do tempo (08/10/2026):** criado em 22/09/2026 como rascunho da F1 e aprovado pelo Nathan no mesmo dia; revisões de 29/09 e 30/09 (Robert). Plano e pendências em [[Integracao-AvHub-MES-Volta-Plano]].

@@ -73,6 +73,8 @@ atualizado: 2026-10-08
 
 Detalhes de cada marco em [[Cronograma-2-Meses]].
 
+> **Respostas do Nathan (08/10, noite):** aceitou as 3 diferenças do contrato 005; saldo zero **exige clique**; **Gerente de Compras aprova**; data do MES ~08/10/2027 aceita; CA-01 (Omie sem estoque), CA-02 (só setor Vendas), perfil **CCP** para os Follow-ups; dashboards: "- Dev" fora, comissões por unidade no futuro, `inativo_desde` = último mês de venda, telas filtram por unidade do vendedor; BENAFER adiado; **levantar todas as GAMBIARRAs, remover e criar contrato para cada**. Detalhe em [[Registro-de-Decisoes-2026-10-07]] #77. Sem resposta: 4 pontos do PCP legado, dono dos itens 28/29, Torre de Fluxo, quem reescreve contratos 07/38.
+
 ## 3. O que já está pronto
 
 | Item | Onde | Observação |

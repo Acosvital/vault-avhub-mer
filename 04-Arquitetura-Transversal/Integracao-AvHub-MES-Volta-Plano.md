@@ -31,11 +31,13 @@ A "ida" (MES → hub) já funciona: o MES empurra a requisição de compra (cont
 
 ### Aceite do Nathan para o contrato 005 (ponto 2)
 
+> ✅ **Aceito pelo Nathan em 08/10/2026: as 3 diferenças.** Resta construir o consumidor (Gustavo).
+
 O Robert aprovou em 30/09 e pediu o ok do Nathan. **Recomendação: aceitar as 3.** Efeito para o vendedor:
 
-- [ ] **Foto atual, não log:** se o item passar por duas etapas entre duas leituras (1 a 2 min), o vendedor só vê a última. Com leitura a cada 90 s isso quase não acontece. Não há linha do tempo completa até a S5 (rastreabilidade).
-- [ ] **`pedido_venda` + `ordem_producao`** no lugar do uuid do pedido do av-hub (o MES não o conhece). A ligação com o pedido do hub é por `codigo_empresa` + número do pedido.
-- [ ] **Etapas a mais e a menos:** o MES manda `estoque.atendimento`, `expedicao.embalagem` e `expedicao.concluido`, e não manda `recebimento.pesagem`, `estoque.reservado` e `pcp.retorno`. A tela mostra o que vier; o vocabulário é provisório e não deve virar enum no código.
+- [x] **Foto atual, não log:** se o item passar por duas etapas entre duas leituras (1 a 2 min), o vendedor só vê a última. Com leitura a cada 90 s isso quase não acontece. Não há linha do tempo completa até a S5 (rastreabilidade).
+- [x] **`pedido_venda` + `ordem_producao`** no lugar do uuid do pedido do av-hub (o MES não o conhece). A ligação com o pedido do hub é por `codigo_empresa` + número do pedido.
+- [x] **Etapas a mais e a menos:** o MES manda `estoque.atendimento`, `expedicao.embalagem` e `expedicao.concluido`, e não manda `recebimento.pesagem`, `estoque.reservado` e `pcp.retorno`. A tela mostra o que vier; o vocabulário é provisório e não deve virar enum no código.
 
 Perguntas do 005 ainda abertas: vocabulário final de `etapa` ([[Revisao-dos-Estados-e-Status]]) e como mostrar o item dividido em parciais em etapas diferentes (o desenho 010/006 guarda por parcial e deixa a agregação para depois).
 

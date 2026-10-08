@@ -415,7 +415,7 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 - **5 · Decide** — almoxarife confirma o atendimento (e que o material está fisicamente lá) e envia o restante.
 - **6 · Roteia** — o split atendido segue pra entrega (ato 16); o restante vai para os setores produtivos (ato 4) ou para o setor Compras (ato 5).
 
-> **Liberação decidida em 24/09/2026:** a reserva não expira; é liberada explicitamente quando o pedido ou a OP é cancelado. **Saldo zero** — passa automático ou exige clique — segue em aberto (sugestão: automático). Antes do marco zero (13/11), todo parcial passa como saldo zero.
+> **Liberação decidida em 24/09/2026:** a reserva não expira; é liberada explicitamente quando o pedido ou a OP é cancelado. **Saldo zero** — ✅ **exige clique** (decidido pelo Nathan em 08/10/2026, [[Registro-de-Decisoes-2026-10-07]] #31b). Antes do marco zero (13/11), todo parcial passa como saldo zero.
 
 ## Ato 4 · Rota fabricação: o restante segue o roteiro
 
