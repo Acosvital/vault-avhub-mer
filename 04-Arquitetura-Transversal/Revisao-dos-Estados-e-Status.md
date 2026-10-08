@@ -12,7 +12,7 @@ atualizado: 2026-10-07
 
 ## 1. Veredito
 
-O **núcleo do MES está bem construído**: o `ItemParcial` (8 estados) com escrita condicional contra concorrência e histórico imutável, a quarentena por padrão, a cisão de lote e a regra "nenhum estado é beco sem saída". O que **não está** bem construído é o que fica entre os sistemas e o que ainda não tem máquina de estados. Os itens 1 a 3 afetam a D1 e a spec F1 desta semana.
+O **núcleo do MES está bem construído**: o `ItemParcial` (9 estados na `develop`, 8 na `main`: `REPROVADO` é só da `develop`) com escrita condicional contra concorrência e histórico imutável, a quarentena por padrão, a cisão de lote e a regra "nenhum estado é beco sem saída". O que **não está** bem construído é o que fica entre os sistemas e o que ainda não tem máquina de estados. Os itens 1 a 3 afetam a D1 e a spec F1 desta semana.
 
 | # | Problema | Gravidade | Afeta |
 |---|---|---|---|
