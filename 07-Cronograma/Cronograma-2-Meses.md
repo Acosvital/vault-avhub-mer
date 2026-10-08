@@ -85,7 +85,7 @@ Este módulo **não está** nas sprints S1–S5 (a capacidade do Pablo no plano 
 | K2 | Suprimentos: catálogo, fornecedores (categorias, certificados, apelidos), ofertas, mapa de cotação e histórico de importações, solicitações de custo, tabela-telha | ✅ na `develop` |
 | K3 | Painel do Comprador (ranking, certificados vencendo, itens sem preço), histórico de compras, pesquisa de materiais, produtos pendentes com "Ligar ao Omie", exportar fornecedores | ✅ na `develop` |
 | K4 | E2E Playwright do Comercial e CI | ✅ na `develop` (07/10) |
-| K5 | **Publicar o `api-comercial`**, cadastrar as telas em `auth.telas`, claim `perfis` no token, reescrever os contratos 07 e 38 (item 39 do Registro) | 🔴 pendente, sem data e sem dono definidos; ver [[AV-Hub-Comercial-Suprimentos]] seção 7 |
+| K5 | **Publicar o `api-comercial`**, cadastrar as telas em `auth.telas`, ~~claim `perfis` no token~~ (perfis via `/me/permissoes`, PR #173), perfis comerciais dos usuários (PR #174), reescrever os contratos 07 e 38 (item 39 do Registro) | 🔴 pendente, sem data; ambiente segue com Nathan + DBA (CC-08). Estimativa do Pablo (08/10): ~3 a 3,5 pd dele + ~1 pd de DBA e infra; ver [[AV-Hub-Comercial-Suprimentos]] seções 7 e 8 |
 
 Não há estimativa de pd do Pablo para K1–K5 no vault; **não recalculei a capacidade** (a decisão #32 deixa o Pablo fora do MES, mas o plano não dimensiona o Comercial & Suprimentos).
 
