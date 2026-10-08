@@ -5,6 +5,8 @@ criado: 2026-09-16
 
 # 1. Entrada e Triagem Comercial
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 - **Vendedor**: emite e cadastra o pedido de venda diretamente no Omie.
 - **Hub/Integração**: captura os dados via API e disponibiliza visualização consolidada em tela própria ([[AV-Hub-Visao-Geral|av-hub]]).
 - **Vendas**: mantém o acompanhamento através dos status padrão do ERP Omie.

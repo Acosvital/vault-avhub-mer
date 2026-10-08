@@ -5,6 +5,8 @@ criado: 2026-09-16
 
 # Fabricação — Grades de Piso
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 Sub-rota da [[Rota-Fabricacao]], a mais longa e a mais arriscada das três:
 
 ```

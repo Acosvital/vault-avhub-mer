@@ -6,6 +6,8 @@ atualizado: 2026-10-07
 
 # Fluxogramas Completos — Todos os Setores, Todas as Possibilidades
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 > **Atualização de 07/10/2026:** os diagramas abaixo continuam sendo o **desenho de 24/09** e **não foram redesenhados**. Dois avisos: (1) a frase "só a primeira caixa é real hoje" (mais abaixo) está desatualizada — Carteira, Ordem de Produção, setor Estoque, requisição, recebimento com conferência e inspeção de entrada têm código em `develop` do MES (conferido no código, `ca3346b`/`a802a3e`; `main` parada em 28/08; produção não conferida); (2) a arquitetura de 29/09 (Estoque único, circuito de compra fora do roteiro, baixa no despacho) substitui o roteiro dos diagramas 1, 3, 4, 5 e 6 — **parcialmente implementada**: o recebimento confere **contra a NF** com recontagem e decisão do PCP (diagrama 3 não reflete isso). Ver [[Encaixe-Estoque-Revenda-no-PCP]] e [[Fluxo-Recebimento-Completo]].
 
 > Visão em fluxograma (decisão/ramificação) de tudo que já foi modelado como sequência de conversas nos arquivos `Fluxo-*-Completo`. Aqui o foco é **quem decide o quê e pra onde o item vai** — os detalhes de payload/gatilho de cada interação continuam nos arquivos de conversa. Ver também a versão publicada como página única: [[Setores-Envolvidos-no-Fluxo]].

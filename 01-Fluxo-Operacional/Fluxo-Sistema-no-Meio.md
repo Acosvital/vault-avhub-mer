@@ -6,6 +6,8 @@ atualizado: 2026-10-07
 
 # O Sistema no Meio — os 19 atos do fluxo
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 > **Atualização de 07/10/2026 — quais atos já têm código** (conferido no código, `develop`: `api-pcp` `ca3346b`, `app-pcp` `a802a3e`; **a `main` do MES parou em 28/08, produção não conferida**). Esta nota descreve o desenho de 24/09; os atos abaixo mudaram no código assim: **ato 3** (Estoque atende e reserva) — implementado; **ato 5** (requisição) — a requisição nasce do circuito de compra **fora do roteiro**, disparada pelo "Solicitar compra" no Estoque (`b8dc158`), e é enviada ao av-hub pelo contrato 34 (PUT, `e7ce2c9`); o av-hub devolve marcos pelo contrato 35 (`41bf4a6`) — **não** é mais o `GET /requisicoes-compra` com polling de 5 min do av-hub (a rota 003 existe no MES mas ficou substituída pelo 34, sem consumidor); **ato 9** — a chegada é registrada com a ação "Conferir recebimento" no setor Recebimento, sem referência de OC vinda do av-hub (o contrato 004 não existe); **atos 10 a 12** (conferência, divergência, lote) — implementados de outro jeito: conferência **contra a NF**, peso real digitado com tolerância de 5%, divergência `PESO` entra no mesmo caminho, **recontagem por outra pessoa** e decisão do PCP em `/decisoes-pcp` (ver [[Fluxo-Recebimento-Completo]], [[App-PCP-Recebimento-Conferencia]]); **ato 14/14b/15** (Qualidade) — implementados por lote, com RNC e cisão (D8); **ato 14b na versão de 29/09** (volta ao mesmo Estoque único) — implementado; **ato 16** — a baixa ainda ocorre quando a Embalagem recebe. **Ato 17** (`/itens/status` consumido pelo av-hub): a rota 005 existe no MES, mas o consumidor no hub não. O **ato 2** (Carteira → Ordem de Produção) está em `develop`, com a Carteira lendo só os pedidos liberados (`GET /pedidos_liberados`, `901f9bb`, 29/09) e a OP por `POST /pedidos/completo/lote` (01/10). Ver [[Encaixe-Estoque-Revenda-no-PCP]].
 
 > **O que muda em relação ao fluxograma mestre.** Em [[Fluxogramas-Completos]] os setores conversam entre si: uma seta sai do PCP e chega em Compras. Isso descreve o **processo**, mas esconde a coisa mais importante do sistema a construir — **nenhum setor vai falar com outro setor; todos vão falar com o sistema.** O PCP não manda uma requisição pro comprador; o PCP grava uma requisição, e o sistema a entrega ao comprador.
@@ -119,7 +121,7 @@ flowchart LR
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 45, 'rankSpacing': 62, 'padding': 14}}}%%
 flowchart TD
-    subgraph SEC_VENDAS[1. Vendas - av-hub · 2 telas]
+    subgraph SEC_VENDAS[1 - Vendas - av-hub · 2 telas]
         SA["polling do Omie para o av-hub. O pedido aparece SO para o vendedor"]
         SM["projeta a etapa de cada item - FRONTEIRA, polling 1-2 min"]
         V1[Vendedor emite o pedido no Omie]
@@ -131,7 +133,7 @@ flowchart TD
         V2 --> V3
     end
 
-    subgraph SEC_PCP[2. PCP - MES · 5 telas]
+    subgraph SEC_PCP[2 - PCP - MES · 5 telas]
         SN["o av-hub libera o pedido e o MES le por polling - FRONTEIRA"]
         SE["abre divergencia na fila Novo norte - nunca beco sem saida"]
         SK["cinde o lote e abre a RNC - nunca emite a nota"]
@@ -145,7 +147,7 @@ flowchart TD
         P6[Decide o novo norte]
     end
 
-    subgraph SEC_COMPRAS[3. Compras e CCP - av-hub · 6 telas]
+    subgraph SEC_COMPRAS[3 - Compras e CCP - av-hub · 6 telas]
         SC["projeta a requisicao no av-hub - FRONTEIRA, polling 5 min"]
         C1[Cotacao e negociacao]
         C2{Acima de R$ 30.000?}
@@ -158,12 +160,12 @@ flowchart TD
         C4 --> C5
     end
 
-    subgraph SEC_FORN[4. Fornecedor - externo · 0 telas]
+    subgraph SEC_FORN[4 - Fornecedor - externo · 0 telas]
         SGAP[["FORA DO SISTEMA - telefone, e-mail, WhatsApp"]]
         FN1[Recebe a OC]
     end
 
-    subgraph SEC_LOG[5. Logistica de entrada · 1 tela futura]
+    subgraph SEC_LOG[5 - Logistica de entrada · 1 tela futura]
         L1{CIF ou FOB?}
         L2[FOB: coleta no fornecedor]
         L3[CIF: fornecedor entrega direto]
@@ -172,7 +174,7 @@ flowchart TD
         L1 -->|CIF| L3 --> L4
     end
 
-    subgraph SEC_RECEB[6. Recebimento - MES · 5 telas]
+    subgraph SEC_RECEB[6 - Recebimento - MES · 5 telas]
         SD["casa a chegada com a referencia da OC - FRONTEIRA"]
         R1[Confere Pedido de Venda ou Ordem de Compra]
         R2[Pesagem]
@@ -184,41 +186,45 @@ flowchart TD
         R3 -->|sim| R4 --> R5
     end
 
-    subgraph SEC_PROD[7. Fabrica e Beneficiamento - MES · 4 telas fora do ciclo]
+    subgraph SEC_PROD[7 - Fabrica e Beneficiamento - MES · 4 telas fora do ciclo]
         SH["move o parcial para o proximo setor produtivo do roteiro"]
         F1["Percorre os setores produtivos do roteiro<br/>de cada fabrica: Flange, Caldeiraria HRM"]
         F2[Conclui a etapa produtiva]
         F1 --> F2
     end
 
-    subgraph SEC_ESTOQUE[8. Estoque - MES · 12 telas, 8 no ciclo]
+    subgraph SEC_ESTOQUE[8 - Estoque - MES · atendimento do pedido]
         SB["busca saldo na filial do pedido e TRAVA a reserva na mesma operacao"]
-        SR["move o restante pelo roteiro"]
-        SQ["tira da quarentena e devolve o item comprado ao Estoque"]
         E1{Saldo cobre o item?}
         E2[Almoxarife atende e separa]
-        E5[Entrada do lote na localizacao de guarda]
-        SB --> E1
-        E1 -->|sim, tudo ou parte| E2
-        E1 -->|nao, ou o restante| SR
-        SQ --> E5
-        E5 --> SB
+        SR["move o restante pelo roteiro"]
     end
+    subgraph SEC_ESTOQUE2[8 - Estoque - MES · entrada do comprado · 12 telas, 8 no ciclo]
+        SQ["tira da quarentena e devolve o item comprado ao Estoque"]
+        E5[Entrada do lote na localizacao de guarda]
+    end
+    SB --> E1
+    E1 -->|sim, tudo ou parte| E2
+    E1 -->|nao, ou o restante| SR
+    SQ --> E5
+    E5 --> SB
 
-    subgraph SEC_QUAL[9. Qualidade - MES · 5 telas, 4 no ciclo]
+    subgraph SEC_QUAL[9 - Qualidade - MES · inspecao · 5 telas, 4 no ciclo]
         SF["libera o lote em quarentena para inspecao"]
         SI["libera a conclusao para inspecao final"]
         Q1[Inspecao]
         Q2{Aprova?}
+    end
+    subgraph SEC_QUAL2[9 - Qualidade - MES · resultado da inspecao]
         Q3[Abre RNC com evidencia]
         Q4[Cisao de lote]
         Q5{Origem do item}
-        Q1 --> Q2
-        Q2 -->|nao| Q3 --> Q4
-        Q2 -->|sim| Q5
     end
+    Q1 --> Q2
+    Q2 -->|nao| Q3 --> Q4
+    Q2 -->|sim| Q5
 
-    subgraph SEC_EXP[10. Expedicao e Logistica de saida - MES · 4 telas fora do ciclo]
+    subgraph SEC_EXP[10 - Expedicao e Logistica de saida - MES · 4 telas fora do ciclo]
         SJ["recebe o concluido: do Estoque, reservado, ou da Qualidade, fabricado"]
         X1[Embalagem e paletizacao]
         X2{Parcial ou integral?}
@@ -229,7 +235,7 @@ flowchart TD
         X2 -->|parcial| X4
     end
 
-    subgraph SEC_FISCAL[11. Fiscal - Omie · 1 tela fora do ciclo]
+    subgraph SEC_FISCAL[11 - Fiscal - Omie · 1 tela fora do ciclo]
         SL["sinaliza a NF ao Omie PELO GATEWAY do av-hub - o MES nunca fala com o Omie"]
         O1[Emite nota fiscal]
         O2[Baixa o item no pedido]
@@ -415,7 +421,7 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 - **5 · Decide** — almoxarife confirma o atendimento (e que o material está fisicamente lá) e envia o restante.
 - **6 · Roteia** — o split atendido segue pra entrega (ato 16); o restante vai para os setores produtivos (ato 4) ou para o setor Compras (ato 5).
 
-> **Liberação decidida em 24/09/2026:** a reserva não expira; é liberada explicitamente quando o pedido ou a OP é cancelado. **Saldo zero** — passa automático ou exige clique — segue em aberto (sugestão: automático). Antes do marco zero (13/11), todo parcial passa como saldo zero.
+> **Liberação decidida em 24/09/2026:** a reserva não expira; é liberada explicitamente quando o pedido ou a OP é cancelado. **Saldo zero** — ✅ **exige clique** (decidido pelo Nathan em 08/10/2026, [[Registro-de-Decisoes-2026-10-07]] #31b). Antes do marco zero (13/11), todo parcial passa como saldo zero.
 
 ## Ato 4 · Rota fabricação: o restante segue o roteiro
 

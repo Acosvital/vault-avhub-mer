@@ -69,7 +69,7 @@ contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contr
 
 - **[[23-Compras-Pipeline-Consolidado]]** — L4 (envio da OC ao Omie e exclusão ao cancelar)
   implementado na `feat/compras-omie` (`66f9a2e`, sem push), desligado e em dry run por padrão.
-  **(atualizado em 07/10)** Mergeado em 05/10 (PR #1, `3233acf`); as flags `SYNC_*` saíram em 06/10 (PR #2). ✅ Decidido em 07/10: o envio fica **fixo no código, direto ao Omie, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN`** (alteração de código: Gustavo; o Nathan rodou cerca de 4 testes reais); o teste real de 05/10 está registrado no contrato; L10.1, L10.6 e L10.7 (b)–(d) são **risco aceito**.
+  **(atualizado em 07/10)** Mergeado em 05/10 (PR #1, `3233acf`); as flags `SYNC_*` saíram em 06/10 (PR #2). ✅ Decidido em 07/10: o envio fica **fixo no código, direto ao Omie, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN`** (o Nathan rodou cerca de 4 testes reais; **feito em 08/10, pipeline PR #3**); o teste real de 05/10 está registrado no contrato; L10.1, L10.6 e L10.7 (b)–(d) são **risco aceito**.
   Testado no local só contra um Omie falso; falta o L10 numa conta Omie de teste. No mesmo commit:
   IE/dados fiscais dos parceiros ([[30-Compras-Pedido-Omie-PDF-Completo]] §2.2) e as datas do
   comprador protegidas ([[28-Compradores-Criar-Excluir-Sugestao]] R4).

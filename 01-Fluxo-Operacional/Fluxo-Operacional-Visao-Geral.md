@@ -6,6 +6,8 @@ atualizado: 2026-10-07
 
 # Fluxo Operacional — Visão Geral
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 Mapa macro do processo operacional da Aços Vital, da venda até a expedição. Estrutura-se em **quatro fases principais**: [[Entrada-Comercial|entrada comercial]], [[PCP-Carteira|triagem no PCP]], rotas de atendimento ([[Rota-Estoque|estoque]], [[Rota-Revenda|revenda]] ou [[Rota-Fabricacao|fabricação]]) e [[Faturamento-Expedicao|faturamento/expedição]].
 
 > **Atualização de 07/10/2026:** a ressalva de 17/09 abaixo está **desatualizada para o MES**. Conferido no código (`develop` do `api-pcp` `ca3346b` e do `app-pcp` `a802a3e`; **a `main` do MES parou em 28/08; produção e banco não conferidos**): a Carteira, a Ordem de Produção, o setor Estoque (etapa 1, atender pelo saldo), a requisição de compra, o recebimento com conferência e a inspeção de entrada já têm código em `develop`. Continuam **sem código**: a baixa no despacho do Estoque, o consumo de matéria-prima e o roteiro individual do item (`RoteiroItem`), todos decididos em 29/09 — ver [[Encaixe-Estoque-Revenda-no-PCP]]. Estado das tarefas em [[Onde-Estamos]] e [[Cronograma-2-Meses]].

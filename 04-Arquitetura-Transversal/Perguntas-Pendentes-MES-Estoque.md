@@ -60,13 +60,13 @@ O MES vai suportar **as duas formas** (usuário/senha pro chão de fábrica, e-m
 - Ordem de Compra é decidida no av-hub, referenciada no MES quando o material chega — divisão exata de telas decidida em [[Fluxo-Detalhado-Pedido-Item]].
 - Depósito é central compartilhado (múltiplos warehouses), não vinculado a fábrica.
 - Login do MES/Estoque suporta usuário/senha e Azure AD. *(Implementado em 22/09, conferido no código `develop`.)*
-- Vínculo Fábrica ↔ Unidade/Filial (`codigo_empresa`) será criado (desenho exato ainda em aberto, ver abaixo).
+- Vínculo Fábrica ↔ Unidade/Filial (`codigo_empresa`): **decidido na DEC-1 (21/09/2026): por pedido**, uma fábrica pode atender as 3 filiais ([[MES-Arquitetura-Decisoes]]).
 - Omie tem API de criação de Ordem de Compra, mas fica pro futuro.
 - OS/OP = mecanismo `roteiro`/`ItemParcial` já existente no `api-pcp`.
 
 ## Ainda em aberto
 
-- **Desenho exato do vínculo Fábrica ↔ Unidade/Filial** — confirmado que será criado, mas ainda não definido *como* (1 fábrica = 1 filial fixa? vínculo por pedido?).
+- ~~**Desenho exato do vínculo Fábrica ↔ Unidade/Filial**~~ ✅ **Decidido na DEC-1 (21/09/2026): por pedido.** ([[Registro-de-Decisoes-2026-10-07]] #31c)
 - **Conceito de "Orçamento"** (ainda não pensado, entra depois).
 - ~~**Nome definitivo do sistema de fábrica**~~ ✅ **Resolvido em 22/09/2026**: é **MES**, confirmado pelo Nathan — aceito por ora, com abertura para trocar no futuro.
 - ~~**Devolução de cliente**: mecanismo exato (decisão no av-hub vs. nascer no Estoque) ainda em aberto.~~ Duplicada de DEC-10, decidida: nasce no Estoque ([[Registro-de-Decisoes-2026-10-07]] #31).

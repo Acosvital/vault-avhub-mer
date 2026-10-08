@@ -5,6 +5,8 @@ criado: 2026-09-16
 
 # Corte de Chapas (Beneficiamento)
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 Este item **não é uma sub-rota de Fabricação** — é um passo de **beneficiamento dentro da [[Rota-Revenda|Rota Revenda]]**. Ver [[Fluxo-Detalhado-Pedido-Item]] para o fluxo completo.
 
 ## O que isso é de fato

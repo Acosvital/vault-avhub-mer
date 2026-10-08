@@ -6,6 +6,8 @@ atualizado: 2026-10-08
 
 # Fluxograma de Telas — quantas telas e quais funcionalidades por bloco
 
+> Status: decidido | no código (`develop`, conferido em 08/10/2026) | em produção: não verificado
+
 > **Atualização de 07/10/2026 — estado das telas do MES conferido no código** (`develop`: `api-pcp` `ca3346b`, `app-pcp` `a802a3e`; **só em `develop` — a `main` do MES parou em 28/08; produção e banco não conferidos; as telas do menu são criadas por SQL fora do repo, `modulos-telas.sql`**). Corrige o que esta nota dizia ("sobre mock", "🆕 a construir"): **Estoque (8.1, 8.2, 8.4–8.7) e Qualidade (9.1–9.4) estão com API real**; a **8.12** (setor Estoque) e a **2.4** (requisição de compra) existem; o **Recebimento (bloco 6)** não ganhou rota nova — vive na fila do setor `LOGISTICA_ENTRADA` com a ação "Conferir recebimento", "Recontar" e a tela **`/decisoes-pcp`** (hoje a 2.5 só trata divergência de recebimento). **Sem código conferido:** 8.3 (carga inicial em lote, G1 — só existe `POST /estoque/lotes/carga-inicial`, um lote por vez), T.2 (C3 não iniciada; C5 parcial, sem guard global) e T.3–T.6 (nada de `fluxo.*` no Prisma). **Não auditados nesta rodada:** 8.8–8.11 (os alertas de estoque mínimo/RNC pendente de `bfe5882` são o mais próximo da 8.10) e os blocos 7, 10 e 11. A contagem de telas abaixo é a de 24/09 e **não foi refeita**. Estado das tarefas: [[Onde-Estamos]].
 
 > **Atualização de 08/10/2026 — telas marcadas como feitas, conferidas na `develop`** (`app-pcp` `2ea3183`; av-hub `main` `cfed113` e `develop` `bd1ae48`). A coluna "Estado" de cada tela foi reescrita contra o código: onde dizia 🆕 ou "frontend pronto", agora diz o que existe. **Só leitura de código; produção não conferida.**
@@ -66,7 +68,7 @@ atualizado: 2026-10-08
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 45, 'rankSpacing': 60, 'padding': 14}}}%%
 flowchart TD
-    subgraph SEC_VENDAS[1. Vendas - av-hub · 2 telas]
+    subgraph SEC_VENDAS[1 - Vendas - av-hub · 2 telas]
         V1[Vendedor emite o pedido no Omie]
         V2["Vendedor marca se a<br/>Qualidade acompanha"]
         V3[Vendedor confirma e envia ao PCP]
@@ -74,7 +76,7 @@ flowchart TD
         V2 --> V3
     end
 
-    subgraph SEC_PCP[2. PCP - MES · 5 telas]
+    subgraph SEC_PCP[2 - PCP - MES · 5 telas]
         P1["Triagem do Pedido<br/>lista os pedidos de venda<br/>liberados pelo vendedor"]
         P2["Destinacao do Pedido<br/>PCP abre o pedido e define o destino<br/>e a quantidade de cada item<br/>Estoque entra como etapa 1<br/>MES confirma a importacao ao av-hub"]
         K1[Setor Compras: parcial aguarda, requisicao enviada ao av-hub]
@@ -85,7 +87,7 @@ flowchart TD
         P6[Decide o novo norte]
     end
 
-    subgraph SEC_COMPRAS[3. Compras e CCP - av-hub · 6 telas]
+    subgraph SEC_COMPRAS[3 - Compras e CCP - av-hub · 6 telas]
         C1[Cotacao e negociacao]
         C2{Acima do valor limite?}
         C3[Aprovacao da diretoria]
@@ -97,11 +99,11 @@ flowchart TD
         C4 --> C5
     end
 
-    subgraph SEC_FORN[4. Fornecedor - externo · 0 telas]
+    subgraph SEC_FORN[4 - Fornecedor - externo · 0 telas]
         FN1[Recebe a OC]
     end
 
-    subgraph SEC_LOG[5. Logistica de entrada · 1 tela futura]
+    subgraph SEC_LOG[5 - Logistica de entrada · 1 tela futura]
         L1{CIF ou FOB?}
         L2[FOB: coleta no fornecedor]
         L3[CIF: fornecedor entrega direto]
@@ -110,7 +112,7 @@ flowchart TD
         L1 -->|CIF| L3 --> L4
     end
 
-    subgraph SEC_RECEB[6. Recebimento - MES · 5 telas]
+    subgraph SEC_RECEB[6 - Recebimento - MES · 5 telas]
         R1[Confere Pedido de Venda ou Ordem de Compra]
         R2[Pesagem]
         R3{Bate com o esperado?}
@@ -121,13 +123,13 @@ flowchart TD
         R3 -->|sim| R4 --> R5
     end
 
-    subgraph SEC_PROD[7. Fabrica e Beneficiamento - MES · 4 telas fora do ciclo]
+    subgraph SEC_PROD[7 - Fabrica e Beneficiamento - MES · 4 telas fora do ciclo]
         F1["Percorre os setores produtivos do roteiro<br/>de cada fabrica: Flange, Caldeiraria HRM"]
         F2[Conclui a etapa produtiva]
         F1 --> F2
     end
 
-    subgraph SEC_ESTOQUE[8. Estoque - MES · 12 telas, 8 no ciclo]
+    subgraph SEC_ESTOQUE[8 - Estoque - MES · 12 telas, 8 no ciclo]
         E1[Saldo disponivel na filial do pedido]
         E2{Saldo cobre o item?}
         E3[Split atendido: reserva no lote e conclui]
@@ -139,7 +141,7 @@ flowchart TD
         E5 --> E3
     end
 
-    subgraph SEC_QUAL[9. Qualidade - MES · 5 telas, 4 no ciclo]
+    subgraph SEC_QUAL[9 - Qualidade - MES · 5 telas, 4 no ciclo]
         Q1[Inspecao]
         Q2{Aprova?}
         Q3[Abre RNC com evidencia]
@@ -150,7 +152,7 @@ flowchart TD
         Q2 -->|sim| Q5
     end
 
-    subgraph SEC_EXP[10. Expedicao e Logistica de saida - MES · 4 telas fora do ciclo]
+    subgraph SEC_EXP[10 - Expedicao e Logistica de saida - MES · 4 telas fora do ciclo]
         X1[Embalagem e paletizacao]
         X2{Parcial ou integral?}
         X3[Consolida a carga]
@@ -160,7 +162,7 @@ flowchart TD
         X2 -->|parcial| X4
     end
 
-    subgraph SEC_FISCAL[11. Fiscal - Omie · 1 tela fora do ciclo]
+    subgraph SEC_FISCAL[11 - Fiscal - Omie · 1 tela fora do ciclo]
         O1[Emite nota fiscal]
         O2[Baixa o item no pedido]
         O1 --> O2
