@@ -50,7 +50,7 @@ sequenceDiagram
     SIS->>SIS: 3 · calcula o restante de cada item e limita o envio a ele
     SIS-->>PCP: 4 · mostra itens, restante e fabricas, inclusive a Revenda
     PCP->>SIS: 5 · escolhe quantidade e fabrica de cada item, monta o roteiro
-    SIS->>SIS: 6 · grava uma OP por fabrica, com o setor Estoque na etapa 1
+    SIS->>SIS: 6 · Triagem do Pedido: grava uma por fabrica, com o setor Estoque na etapa 1, e avisa o av-hub que importou (POST importado)
     SIS-->>PCP: 6 · cada parcial nasce no setor Estoque (ato 3)
 
     Note over SIS,FAB: Forca do sistema: FORTE — limita a quantidade ao restante<br/>e forca o Estoque na etapa 1. A natureza vem da fabrica.
@@ -123,13 +123,12 @@ flowchart TD
         SA["polling do Omie para o av-hub. O pedido aparece SO para o vendedor"]
         SM["projeta a etapa de cada item - FRONTEIRA, polling 1-2 min"]
         V1[Vendedor emite o pedido no Omie]
-        V2{Precisa de acompanhamento da Qualidade?}
+        V2[Vendedor marca se a Qualidade acompanha]
         V3[Vendedor confirma e envia ao PCP]
         V4[Vendedor acompanha a etapa de cada item]
         V1 --> SA
         SA --> V2
-        V2 -->|sim| V3
-        V2 -->|nao| V3
+        V2 --> V3
     end
 
     subgraph SEC_PCP[2. PCP - MES · 5 telas]
@@ -137,10 +136,11 @@ flowchart TD
         SE["abre divergencia na fila Novo norte - nunca beco sem saida"]
         SK["cinde o lote e abre a RNC - nunca emite a nota"]
         P1[Carteira: escolhe itens, quantidades e fabrica da rodada]
-        P2[Ordem de Producao: uma OP por fabrica, Estoque como etapa 1]
+        P2[Triagem do Pedido: define o destino de cada item, uma por fabrica, Estoque como etapa 1, avisa o av-hub que importou]
         K1[Setor Compras: gera a requisicao ao receber o parcial]
         P6[Decide o novo norte]
         P1 --> P2
+        P2 -->|restam itens do pedido, nova rodada| P1
     end
 
     subgraph SEC_COMPRAS[3. Compras e CCP - av-hub · 6 telas]
@@ -397,7 +397,7 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 - **3 · Faz** — calcula o restante de cada item e **não deixa enviar mais que o restante**; para cada fábrica usada, **insere o setor Estoque como etapa 1** do roteiro; `codigo_empresa` vem do pedido (DEC-1).
 - **4 · Mostra** — itens com total, já enviado e restante; as fábricas, inclusive a Revenda.
 - **5 · Decide** — PCP escolhe quantidade e **fábrica** de cada item (a natureza do item é o tipo da fábrica) e monta o roteiro.
-- **6 · Roteia** — grava **uma OP por fábrica**; cada parcial nasce no **setor Estoque** (ato 3).
+- **6 · Roteia (Triagem do Pedido)** — grava **uma por fábrica** e confirma a importação ao av-hub; cada parcial nasce no **setor Estoque** (ato 3). O pedido volta à Carteira enquanto sobrarem itens (nova rodada).
 
 > **Mudou em 24/09/2026.** Antes, este ato cruzava a matriz natureza × disponibilidade e roteava para três rotas. A disponibilidade saiu daqui: é resolvida no setor Estoque, para todo item. Ver [[Encaixe-Estoque-Revenda-no-PCP]].
 

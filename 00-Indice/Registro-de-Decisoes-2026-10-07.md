@@ -107,6 +107,7 @@ Todo fato abaixo vem de leitura de vault e código em 07/10/2026. **Produção s
 | 55 | Hashes de branches locais | 🟡 | `f4380d7`, `8eb5dce`, `cba68fa`, `c2b68a9` e `1b6fe6e` foram re-autorados a partir de patches. Ficam só como nota histórica de uma linha. |
 | 56 | Contratos com número duplicado | 🟡 | Os arquivos **não são renomeados**. Há 04, 07, 09, 13, 14 e 19 duplicados e 20, 21, 22, 24, 25 e 27 sumiram. A tabela de equivalência fica em [[Indice-Contratos]]. |
 | 57 | Convenção de status | 🟡 | Nota alterada ganha o cabeçalho `Status: decidido \| no código \| em produção (verificado em data)`. |
+| 58 | Nome da etapa do PCP depois da Carteira | ✅ (nome) / 🟡 (código) | **Triagem do Pedido**: é onde se define o destino de cada item (fábrica de fabricação ou Revenda), uma por fábrica, com o Estoque como etapa 1. Nome escolhido em 08/10/2026 para substituir "Ordem de Produção" nesta etapa; "Ordem de Produção" passa a ser só a ordem emitida para o que vai ser fabricado. **No código a tela segue como "Ordem de Produção"** (`/ordens-producao`, `ordemProducao`, `OP-`); o rótulo e a eventual entidade nova dependem do Robert. Ver [[Glossario]]. |
 
 ## 7. Achados da revisão final (07/10/2026)
 

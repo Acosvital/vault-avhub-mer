@@ -88,18 +88,19 @@ sequenceDiagram
 flowchart TD
     subgraph SEC_VENDAS[Vendas - av-hub]
         V1[Pedido chega do Omie travado]
-        V2{Qualidade acompanha desde o inicio?}
+        V2[Vendedor marca se a Qualidade acompanha]
         V3[Vendedor libera o pedido]
         V1 --> V2
-        V2 -->|sim ou nao| V3
+        V2 --> V3
     end
 
     subgraph SEC_PCP[PCP - MES]
         P1[Carteira: so pedidos liberados, escolhe itens, quantidades e destino]
-        P2[Ordem de Producao: uma OP por destino, Estoque como etapa 1]
+        P2[Triagem do Pedido: define o destino de cada item, uma por destino, Estoque como etapa 1, avisa o av-hub que importou]
         P3[Requisicoes: PCP abre a requisicao de compra]
         P6[Decide o novo norte]
         P1 --> P2
+        P2 -->|restam itens do pedido, nova rodada| P1
     end
 
     subgraph SEC_ESTOQUE[Estoque - MES, setor unico]
@@ -723,7 +724,7 @@ flowchart LR
     ALM(["Almoxarife - setor Estoque"])
     subgraph SISTEMA[Sistema]
         UC4([Escolher itens, quantidades e destino da rodada])
-        UC5([Gerar Ordem de Producao, uma por destino])
+        UC5([Fazer a Triagem do Pedido: definir o destino, uma por fabrica])
         UC10([Abrir a requisicao de compra no setor Requisicoes])
         UC8([Decidir Novo Norte])
         UC6([Atender pelo saldo: split e reserva])
@@ -911,7 +912,7 @@ stateDiagram-v2
 stateDiagram-v2
     [*] --> AGUARDANDO_LIBERACAO
     AGUARDANDO_LIBERACAO --> PENDENTE_PCP : vendedor libera, Fluxo 4
-    PENDENTE_PCP --> EM_ESTOQUE : PCP gera a OP, Estoque e a etapa 1
+    PENDENTE_PCP --> EM_ESTOQUE : PCP faz a Triagem do Pedido, Estoque e a etapa 1
     EM_ESTOQUE --> PRONTO_EXPEDICAO : atendido pelo saldo e despachado
     EM_ESTOQUE --> EM_COMPRA : solicitar compra
     EM_ESTOQUE --> EM_PRODUCAO : enviar a producao

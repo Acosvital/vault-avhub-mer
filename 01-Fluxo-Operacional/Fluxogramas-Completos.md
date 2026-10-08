@@ -41,15 +41,16 @@ atualizado: 2026-10-07
 flowchart TD
     subgraph SEC_VENDAS[Vendas - av-hub]
         V1[Vendedor emite o pedido]
-        V2{Qualidade acompanha desde o inicio?}
+        V2[Vendedor marca se a Qualidade acompanha e libera o pedido]
         V1 --> V2
     end
 
     subgraph SEC_PCP[PCP - MES]
         P1[Carteira: escolhe itens, quantidades e fabrica da rodada]
-        P2[Ordem de Producao: uma OP por fabrica, Estoque como etapa 1]
+        P2[Triagem do Pedido: define o destino de cada item, uma por fabrica, Estoque como etapa 1, avisa o av-hub que importou]
         P6[Decide o novo norte]
         P1 --> P2
+        P2 -->|restam itens do pedido, nova rodada| P1
     end
 
     subgraph SEC_ESTOQUE[Estoque - MES]
@@ -137,8 +138,7 @@ flowchart TD
         O1 --> O2
     end
 
-    V2 -->|sim, com acompanhamento da qualidade| P1
-    V2 -->|nao| P1
+    V2 --> P1
     P2 --> E1
     E4 -->|Fabricacao| F1
     E4 -->|Revenda| K1
@@ -500,7 +500,7 @@ flowchart TD
 flowchart TD
     subgraph SEC_PCP[PCP - MES]
         A[Carteira: escolhe fabrica e quantidade da rodada]
-        B[Ordem de Producao com Estoque na etapa 1]
+        B[Triagem do Pedido com Estoque na etapa 1]
         I[Requisicao preventiva de compra]
         A --> B
     end
