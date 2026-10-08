@@ -66,19 +66,22 @@ atualizado: 2026-10-08
 flowchart TD
     subgraph SEC_VENDAS[1. Vendas - av-hub · 2 telas]
         V1[Vendedor emite o pedido no Omie]
-        V2[Vendedor marca se a Qualidade acompanha]
+        V2["Vendedor marca se a<br/>Qualidade acompanha"]
         V3[Vendedor confirma e envia ao PCP]
         V1 --> V2
         V2 --> V3
     end
 
     subgraph SEC_PCP[2. PCP - MES · 5 telas]
-        P1[Carteira: escolhe itens, quantidades e fabrica da rodada]
-        P2[Triagem do Pedido: define o destino de cada item, uma por fabrica, Estoque como etapa 1, avisa o av-hub que importou]
+        P1["Carteira: so pedidos liberados<br/>PCP escolhe os itens e as<br/>quantidades da rodada"]
+        P2["Triagem do Pedido<br/>define o destino de cada item<br/>Estoque como etapa 1<br/>avisa o av-hub que importou"]
         K1[Setor Compras: parcial aguarda, requisicao enviada ao av-hub]
-        P6[Decide o novo norte]
         P1 --> P2
-        P2 -->|restam itens do pedido, nova rodada| P1
+        P2 -->|nova rodada| P1
+    end
+
+    subgraph SEC_PCP2[PCP - decisoes e requisicoes]
+        P6[Decide o novo norte]
     end
 
     subgraph SEC_COMPRAS[3. Compras e CCP - av-hub · 6 telas]
@@ -184,6 +187,7 @@ flowchart TD
 
     style SEC_VENDAS fill:#d9f0ec,stroke:#0f7a6b,stroke-width:2px,color:#181c22
     style SEC_PCP fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
+    style SEC_PCP2 fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
     style SEC_COMPRAS fill:#e3e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style SEC_FORN fill:#ece8e3,stroke:#8a7a63,stroke-width:2px,color:#181c22
     style SEC_LOG fill:#fbe8d9,stroke:#c9541a,stroke-width:2px,color:#181c22
