@@ -8,7 +8,7 @@ atualizado: 2026-10-08
 
 > Status: decidido | no código | em produção (verificado em 07/10/2026 pelo dump). Decisões da rodada em [[Registro-de-Decisoes-2026-10-07]].
 
-> **Atualização de 08/10/2026 (reconferido no código):** `main` agora é `9b9b578` (#282) e `develop` `0557871`. `PERMISSOES_ROTA_MODO` é **`exigir` por padrão** (variável ausente ou inválida vira `exigir`), mas **ainda é lida do `.env`** — não está "fixa" como na decisão 8; sem `USUARIO_TOKEN_SEGREDO` (≥ 32 caracteres) o processo encerra na subida. `contrato_tipo` do funcionário aceita CLT, PJ, Freelancer, Estágio, Temporário e Terceirizado.
+> **Atualização de 08/10/2026 (reconferido no código):** `main` agora é `9b9b578` (#282) e `develop` `0557871`. (Superado no mesmo dia: `main` `a21dcdb` e `develop` `6317d5f`, ver o item 8 do Registro.) `PERMISSOES_ROTA_MODO` era **`exigir` por padrão** (variável ausente ou inválida vira `exigir`), mas **ainda é lida do `.env`** — não está "fixa" como na decisão 8; sem `USUARIO_TOKEN_SEGREDO` (≥ 32 caracteres) o processo encerra na subida. `contrato_tipo` do funcionário aceita CLT, PJ, Freelancer, Estágio, Temporário e Terceirizado.
 
 > **Rótulos de confiança.** Leitura de `origin/main` e `origin/develop` do repositório da API, na auditoria de 07/10/2026. **`main` = `develop` em conteúdo**: tip da `develop` a6ab058 (06/10 16:05), que entrou em `main` pelo PR #280 (fdafb35, 06/10 16:12). **Produção só foi conferida pelo dump de 07/10** ([[Auditoria-Dump-Producao-2026-10-07]]). Fora o que o dump cobre (ex.: a função da migration 034), nada aqui afirma "em produção"; onde a chave de ambiente decide, está marcado "não verificado".
 
@@ -45,7 +45,7 @@ Esta nota é a foto atual do backend que o av-hub consome via `API_URL`. As nota
 | Chave | Observação |
 |---|---|
 | `IDENTIDADE_EXIGIR_TOKEN` | exige o token de usuário |
-| `PERMISSOES_ROTA_MODO` | decidido: fixo em `exigir` no código (deixa de ser chave; alteração do Gustavo). **No código de 08/10: padrão `exigir`, mas a variável ainda é aceita (`observar`/`desligado`)** |
+| `PERMISSOES_ROTA_MODO` | ✅ **fixo** desde 08/10/2026 (`6317d5f`): deixou de ser chave; `USUARIO_TOKEN_SEGREDO` sempre obrigatório |
 | `ESCOPO_VENDEDORES_EXIGIR` | escopo por vendedor |
 | `ESCOPO_UNIDADE_EXIGIR_SESSAO` | escopo por unidade |
 | `AUTENTICACAO_AZURE_VALIDAR_ID_TOKEN` | validação do id_token do Azure |

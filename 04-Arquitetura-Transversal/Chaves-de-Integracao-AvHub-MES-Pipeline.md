@@ -73,7 +73,7 @@ Do lado do MES `[C]`: o envio do 34 usa `AVHUB_MES_INTEGRACAO_KEY`; sem a chave 
 
 | Chave | Decisão | Status |
 |---|---|---|
-| `PERMISSOES_ROTA_MODO` | Deixa de ser "variável a conferir": fica **fixa em `exigir`** no código, sem `.env`. Chamadas de serviço (só `x-api-key`, sem `Bearer`) passam sem mapeamento, pois o modo só confere permissão quando há token. Alteração de código: Gustavo | ✅ |
+| `PERMISSOES_ROTA_MODO` | Deixa de ser "variável a conferir": fica **fixa em `exigir`** no código, sem `.env`. Chamadas de serviço (só `x-api-key`, sem `Bearer`) passam sem mapeamento, pois o modo só confere permissão quando há token. Alteração de código: Gustavo | ✅ feito em 08/10 (`6317d5f`) |
 | `ESCOPO_VENDEDORES_EXIGIR` | Fixar no código (front do av-hub manda token em todas as chamadas, ✅ Nathan) | 🟡 (Gustavo) |
 | `IDENTIDADE_EXIGIR_TOKEN` | Segue como chave: quebra MES e pipeline enquanto usarem a chave do `.env` sem token | 🟡 (Gustavo) |
 | `ESCOPO_UNIDADE_EXIGIR_SESSAO` | Segue como chave, pelo mesmo motivo | 🟡 (Gustavo) |
