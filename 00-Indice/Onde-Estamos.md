@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, status, indice]
 criado: 2026-09-21
-atualizado: 2026-10-07
+atualizado: 2026-10-08
 ---
 
 # Onde estamos
@@ -11,6 +11,12 @@ atualizado: 2026-10-07
 > **(atualizado em 07/10)** **Decisões de 07/10: ver [[Registro-de-Decisoes-2026-10-07]].** Ambiente de homologação no ar (M2 cumprido), envio de OC fixo no código, schema `public` do Estoque, Pablo no Comercial & Suprimentos e **Robert com o MES inteiro** (incluindo G1, baixa no despacho do Estoque, D11, I1/J2/J5; a capacidade dele precisa ser recalculada), plano de **3 meses (até 18/12)**. Onde este texto antigo conflitar com o Registro, vale o Registro.
 
 > **Atualizado em 21/09/2026 (segunda-feira), um dia antes do início da execução** (e revisado a cada adendo abaixo; o último é de 07/10/2026). Esta é a nota que responde "em que ponto o projeto está". Se ela estiver desatualizada, o projeto está desatualizado: quem muda o estado de uma tarefa atualiza a linha aqui no mesmo dia. Como manter: seção 7.
+>
+> **Adendo de 08/10/2026 — reconferência contra o código dos cinco repositórios (só leitura de código; produção e banco não conferidos).** Heads: `api-acos-vital` `main` `9b9b578` (#282) e `develop` `0557871`; av-hub `main` `cfed113` (inalterada) e `develop` `bd1ae48`; `api-pcp` `develop` `ca3346b` e `omie-elt-pipeline` `master` `d2886bf` (**ambos sem mudança**); `app-pcp` `develop` `2ea3183`. O que mudou:
+> - **`api-acos-vital`:** `PERMISSOES_ROTA_MODO` agora é **`exigir` por padrão** no código (`0557871`): sem a variável no `.env` o modo é `exigir`, valor inválido também vira `exigir`, e o servidor **só sobe com `USUARIO_TOKEN_SEGREDO` (mínimo 32 caracteres)**. **Divergência com a decisão 8 de 07/10 ("fixo, sem `.env`"):** a variável ainda é lida, então `observar`/`desligado` continuam possíveis. O tipo de contrato do funcionário passou a aceitar também Estágio, Temporário e Terceirizado (`2bb9ad7`, migration `fix02`). `main` avançou de `a6ab058` para `9b9b578` (#281/#282): `main` = `develop` até `2bb9ad7`; o `0557871` entrou pelo #282.
+> - **av-hub `develop`:** de `996e320` para `bd1ae48` (111 arquivos, +7,5 mil linhas, 07/10). Entraram em `develop` as 9 branches que o vault listava como abertas (câmbio, imprimir em lote, itens por planilha, categorias/certificados, painel do comprador, tabela-telha, histórico de compras, pesquisa de materiais, e2e Playwright) e mais: PDF interno de aprovação com margem real, envio de proposta e de cotação por e-mail (SMTP desligado até configurar; migration `evento_email_enviado`), fila de produtos pendentes com "Ligar ao Omie", exportar fornecedores, histórico de importações do mapa de cotação, tela de pedido de cotação, CI do Playwright. Detalhe em [[AV-Hub-Comercial-Suprimentos]]. **`main` do av-hub continua sem o `api-comercial`.**
+> - **`app-pcp` `develop`:** `2ea3183` (#35) refez o layout da página de lotes do Estoque (`estoque-operacao/lotes/[id]`); sem efeito nos contratos.
+> - **Confirmado sem mudança:** contrato 34 (PUT `/compras/requisicoes/origem/{id_origem}`) e 35 (eventos) no `api-pcp`; `/itens/status` existe no MES e o av-hub não a consome; `/ordens-compra/referencia` não existe; `UsuariosController` e `SetoresController` seguem sem guard na maioria das rotas (só `PATCH usuarios/:id/senha` e `GET setores/:id/painel` têm `JwtAuthGuard`); a `main` do `api-pcp` e do `app-pcp` segue parada em 28/08 (`be076b2`/`be847ac`).
 >
 > **Adendo de 07/10/2026 — pente fino contra o código dos cinco repositórios.** Os sistemas foram atualizados e o vault foi conferido contra o código (`api-acos-vital` `main`=`develop` `a6ab058`; av-hub `develop` `996e320`; `api-pcp` `develop` `ca3346b`; `app-pcp` `develop` `a802a3e`; `omie-elt-pipeline` `master` `d2886bf`). **Só leitura de código: produção, banco e deploy não foram conferidos.** O que mudou no retrato:
 > - **O MES deixou de ser "nada construído".** O Estoque tem código na `develop`: D1 (schema), D2 (módulo, sem e2e), D3 (metade), D5, D6, D7, D8, D9, D10, D11 (parcial) e a **etapa 1 da transferência entre filiais (saldo por filial)**, mais a requisição de compra (C7), a Qualidade de entrada e o **Recebimento com conferência, recontagem e decisão do PCP** (PR #50/#34, hoje 08:29). Detalhe em [[App-PCP-Recebimento-Conferencia]]. **Atenção: a `main` do `api-pcp` e do `app-pcp` parou em 28/08; tudo isso está só na `develop`.**

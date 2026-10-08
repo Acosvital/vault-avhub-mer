@@ -1,7 +1,7 @@
 ---
 tags: [contrato-sql, contrato-api, indice]
 criado: 2026-09-17
-atualizado: 2026-10-07
+atualizado: 2026-10-08
 ---
 
 # Contratos — ERP Aços Vital
@@ -15,6 +15,7 @@ Seção dedicada só a **contratos** — documentos formais de mudança que prec
 **Confiança:** tudo abaixo vem de **leitura de código** (`origin/main` e `origin/develop` da `api-acos-vital`; `develop` do `api-pcp`, do `app-pcp` e `master` da `omie-elt-pipeline`). **Produção e banco só foram conferidos pelo dump de 07/10** ([[Auditoria-Dump-Producao-2026-10-07]]); para o contrato 34 isso está resolvido (função de banco em produção, ✅ [[Registro-de-Decisoes-2026-10-07]]); para os demais, a produção não foi conferida. Regra do Nathan: vale o que funciona em **produção**; por isso, onde o código comprova mas a produção não foi vista, o estado é `implementada-no-codigo` e **falta conferir em produção/`api-test`**. Nada foi movido para `Realizados/` nem marcado `aplicada` por causa desta leitura. Notas relacionadas: [[AV-Hub-API-Estado-Atual]], [[Chaves-de-Integracao-AvHub-MES-Pipeline]], [[App-PCP-Recebimento-Conferencia]], [[Onde-Estamos]].
 
 Pontos de contexto:
+- **(atualizado em 08/10)** `main` da API avançou para `9b9b578` (#282) e a `develop` está em `0557871`; nenhum contrato novo, mas `PERMISSOES_ROTA_MODO` virou `exigir` por padrão e `contrato_tipo` do funcionário ganhou Estágio/Temporário/Terceirizado ([[Onde-Estamos]], adendo de 08/10). `api-pcp` `ca3346b` e `omie-elt-pipeline` `d2886bf` sem mudança; `app-pcp` `develop` `2ea3183`.
 - `main` = `develop` da API em conteúdo (tip `a6ab058`, 06/10 16:05; entrou na `main` pelo PR #280, `fdafb35`, 06/10 16:12; entradas anteriores: #275 `970b562` em 02/10, #276 `370173b`, #277, #278, #279). Stack real: Express 4 + Sequelize; desde o PR #276 o código mora em `src/schemas/<schema>/…` (não há mais `src/routes`/`src/models`).
 - Nota histórica (🟡, [[Registro-de-Decisoes-2026-10-07]]): os hashes de branches locais `f4380d7`, `8eb5dce`, `cba68fa`, `c2b68a9` e `1b6fe6e` foram re-autorados a partir de patches e não existem na `develop`/`main`; equivalentes mergeados confirmados nesta nota: `0391b29` (#275) para o 34, `0a65491` para o 35, `ca899f9` para o 31 (o `a6ab058` é o commit do 39). Para `c2b68a9` e `1b6fe6e` não há equivalente confirmado aqui.
 - **MES:** a `main` do `api-pcp` e do `app-pcp` parou em 28/08; tudo o que o MES tem hoje (incluindo o que liga os contratos 34 e 35) está **só na `develop`** (api `ca3346b`, app `a802a3e`, 07/10). Homologação: `https://mes-test.acosvital.com.br/` roda a `develop` (✅ [[Registro-de-Decisoes-2026-10-07]]); merge `develop` → `main` antes do piloto (✅; data e responsável 🔴 Robert).
