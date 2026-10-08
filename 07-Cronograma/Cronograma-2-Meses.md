@@ -10,6 +10,8 @@ nome-do-arquivo: historico (era o plano de 2 meses)
 
 # Cronograma de Desenvolvimento — 3 meses (18/09 a 21/12/2026)
 
+> **(atualizado em 08/10) Escopo ampliado:** o Nathan aprovou o levantamento do PCP legado × MES ([[PCP-Legado-x-MES-Lacunas]]). O plano de 3 meses (M1 a M7, piloto em 18/11) segue igual; a data final do MES passa para **cerca de 08/10/2027** (marcos M8 a M11, seção 3.3, estimativas minhas a validar pelo Robert).
+
 > **Regra de datas (única, 07/10/2026):** a execução vai de **22/09 a 21/12** (**63 dias úteis**). O plano **S1–FC termina em 18/11**; **S5 e M7 terminam em 18/12**; **21/12 é só o fim da conta de capacidade** (o 63º dia útil), não uma entrega. Qualquer "2 meses" ou "60 dias" nesta nota é histórico e foi superado por esta regra. O arquivo **mantém o nome `Cronograma-2-Meses` por ser histórico** (não foi renomeado, para não quebrar links).
 >
 > **Decisões desta rodada:** ver [[Registro-de-Decisoes-2026-10-07]] (✅ decidido / 🟡 proposta adotada / 🔴 pendente). Os registros 32 e 33 (Pablo no Comercial & Suprimentos; MES com o Robert) mudam a alocação: ver seção 3.2.
@@ -45,6 +47,10 @@ nome-do-arquivo: historico (era o plano de 2 meses)
 | **M5** — Fase 0 fechada + Fase C | 13/11 | Marco zero carregado e conferido em dupla; saldo/movimento/reserva em homologação; status por item no Portal do Vendedor; UAT concluída. |
 | **M6** — Go/no-go do piloto | 18/11 | Piloto de recebimento avaliado; decisão de seguir, ajustar ou parar; backlog do ciclo 2 priorizado. **Não muda** com a extensão — a rastreabilidade completa não bloqueia o piloto. |
 | **M7** — Rastreabilidade completa (todas as rotas) | 18/12 | Log de eventos (`fluxo.evento`) e `item_acompanhado` cobrindo Compras, Recebimento, Qualidade, Produção e Estoque; Torre de Fluxo (mapa, trilha, tempo por etapa, ranking de gargalos) em homologação. **Novo (21/09).** |
+| **M8** 🟡 — Flange (prioridade alta) no MES | 02/04/2027 | Itens 1, 2, 4, 5, 6, 7 e 11 do [[PCP-Legado-x-MES-Lacunas]]. **Novo (08/10), estimativa minha, o Robert valida.** |
+| **M9** 🟡 — Flange completa no MES | 24/05/2027 | Itens 3, 8, 9, 10, 12, 13 e 14. Só depois dele dá para desligar a linha Flange do PCP legado. |
+| **M10** 🟡 — Caldeiraria HRM no MES | 27/08/2027 | Itens 15 a 22, com a Caldeiraria como mais uma fábrica `FABRICACAO`. Depende das decisões em aberto. |
+| **M11** 🟡 — Análise e gestão no MES | 08/10/2027 | Itens 23 a 27. Os itens 28 e 29 ficam no av-hub, sem data. |
 
 > **(atualizado em 07/10) Marcos.** M1 28/09 e M2 cumpridos. **M3 16/10 mantém.** **M4 30/10 só antecipa se a homologação estiver estável até 16/10** (a homologação já está disponível no mes-test). **M5 13/11, M6 18/11 e M7 18/12 mantêm** (🟡 Nathan valida, #36 do Registro). Regra de datas no topo da nota.
 
@@ -64,6 +70,10 @@ Fonte: leitura do código das `develop` em 07/10 (ver o callout acima e [[Onde-E
 - **Integração (F1–F3):** o `PUT` do contrato 34 e a leitura de eventos do contrato 35 estão no `api-pcp`; `/itens/status` (005) existe no MES e o av-hub não a consome; `/ordens-compra/referencia` (004) não existe em nenhum lado. **F2 segue parcial** (falta a referência da OC).
 - **Acesso e segurança (C5):** continua parcial: `UsuariosController` e `SetoresController` sem guard na maioria das rotas.
 - **API:** `PERMISSOES_ROTA_MODO` virou `exigir` por padrão em 07/10 (`0557871`), o que obriga `USUARIO_TOKEN_SEGREDO` na subida: entra como **cuidado de deploy** da `api-acos-vital` (item do Gustavo). A decisão 8 diz "fixo, sem `.env`"; o código ainda aceita a variável.
+
+### Escopo novo aprovado: PCP legado × MES (08/10)
+
+O Nathan **aprovou em 08/10/2026** os **29 itens** do levantamento do Robert ([[PCP-Legado-x-MES-Lacunas]]): 14 da Flange, 8 da Caldeiraria HRM (como **mais uma fábrica** dentro dos setores produtivos do roteiro), 5 de análise no MES e 2 no av-hub (28 e 29), e pediu o **recálculo estendendo a data**. A conta está na seção 3.3; os marcos M8 a M11 e a trilha do Gantt foram acrescentados. **M1 a M7 e o piloto de 18/11 não mudam.**
 
 ### Comercial & Suprimentos (Pablo) — fora do plano original, entregue na `develop` até 07/10
 
@@ -317,11 +327,39 @@ Soma das linhas 87,9 (arredondamento herdado da tabela original, que diz 88,0). 
 
 > **(atualizado em 07/10) 🟡 Recomendação pela "ordem de corte" da seção 9 (não decidida; Nathan valida):** os cortes 2 (C8, 1,0 pd, é do Robert) e 4 (D11 em Code128, sem leitor 2D, alívio de até 3,0 pd, sem número firmado) são os que o aliviam. O corte 1 (B9/B10) é do Gustavo e não ajuda o Robert; no corte 3, a F3 já foi entregue e a E3 é do Nathan; no corte 5, a D9 já foi entregue. **Alívio máximo na S1–FC: ~4,0 pd contra um estouro de 5,85 pd.** A ordem de corte **não tem item da S5**, e a regra da S5 ("estender a janela, não cortar") já está escrita. Ver a decisão 🔴 que sobra, na seção 9.
 
+### 3.3 Recálculo com o levantamento do PCP legado (08/10, aprovado pelo Nathan)
+
+> **🟡 As estimativas em pd são minhas, por complexidade (ordem de grandeza, ±30%), não do Robert.** Ele precisa validá-las item a item antes de a data valer como compromisso. Detalhe por item em [[PCP-Legado-x-MES-Lacunas]].
+
+**Regras da conta:** equipe igual à de 07/10 (só o Robert no MES, 75% de foco, ou seja 0,75 pd por dia útil, o mesmo que 31,5 ÷ 42 e 17,25 ÷ 23 da seção 3.2); começa em **21/12/2026**, depois do plano de 18/12; feriados de 25/12, 01/01, Carnaval (08 e 09/02), sexta-feira santa (26/03), 21/04, 27/05, 07/09, 12/10, 02/11 e 15/11 de 2027; entra primeiro o déficit que já existia.
+
+| Onda | O que entra | pd (Robert) | Acumulado | Fim estimado |
+|---|---|---|---|---|
+| 0 | Déficit do plano atual (seção 3.2) | 10,1 | 10,1 | 11/01/2027 |
+| 1 | **Flange, prioridade alta:** 1 Programação da fila (4), 2 Previsão de conclusão (4), 4 Planejamento da Usinagem (8), 5 Telão/Kanban/quiosque (6), 6 Tempo real (6), 7 Impressão (6), 11 Fim do fluxo (8) | 42 | 52,1 | **02/04/2027** |
+| 2 | **Flange, média e baixa:** 3 Prazo por setor (3), 8 Visualizador e croqui (4), 9 Sinete (2), 10 Checklist e inspeção (5), 12 Travessia Mogi → HRM (5), 13 Paradas (3), 14 Restrição por campo (4) | 26 | 78,1 | **24/05/2027** |
+| 3 | **Caldeiraria HRM:** 15 Entrada da OP (5), 16 Conferência da OP (10), 17 kg/m (4), 18 Rastreabilidade (6), 19 Setores e inspeções (8), 20 Ciclo do Book (8), 21 Datas contratuais (2), 22 Planejamento (8) | 51 | 129,1 | **27/08/2027** |
+| 4 | **Análise e gestão no MES:** 23 (4), 24 (6), 25 (6), 26 (3), 27 (3) | 22 | 151,1 | **08/10/2027** |
+| av-hub | Itens 28 (6) e 29 (6) | 12 | fora da conta do Robert | **sem dono nem data** |
+
+**Totais:** 141 pd novos no MES (+10,1 do déficit) e 12 pd no av-hub. O Robert passa de 48,75 pd de capacidade e 58,85 planejados (seção 3.2) para **199,85 planejados**, ou seja, **151,1 pd a mais do que a capacidade até 18/12**.
+
+**Sensibilidade:** com 100% de foco (em vez de 75%) as ondas terminam em 09/03, 15/04, 29/06 e 29/07 de 2027. Qualquer trabalho do Robert fora desta conta empurra tudo.
+
+**O que a conta não inclui:**
+- **Ciclo 2** (começa em 04/01/2027, [[Registro-de-Decisoes-2026-10-07]] item 27): sobras e perdas de matéria-prima (EC-02, L-10), remessa de produtos, Fase D e transferência entre filiais etapas 2 a 4. Nenhum está dimensionado; todos competem com o Robert.
+- **Baixa no despacho do Estoque** (já faltava na seção 3.2).
+- **Sobreposições não descontadas:** o painel TV (item 5 = tela 7.4), o fim do fluxo (11 = telas 10.2 e 10.3), a travessia Mogi → HRM (12 = transferência etapas 2 a 4) e o estoque por unidade (26) já eram backlog. Se o Robert confirmar que algum já estava contado, a data melhora.
+- **Os itens 28 e 29 no av-hub:** o Nathan e o Pablo (Comercial & Suprimentos) estão sem folga na conta; não há quem os assuma.
+- **Dependências de decisão:** destino × filial, componente repetido e campos dos itens 18 a 20 ainda estão em aberto e podem mudar a estimativa da onda 3.
+
+**Marcos novos (🟡 estimados, dependem da validação do Robert):** M8 Flange alta no MES em 02/04/2027; M9 Flange completa em 24/05/2027; M10 Caldeiraria no MES em 27/08/2027; M11 análises no MES em 08/10/2027. Só depois de M9 faz sentido desligar a linha Flange do PCP legado.
+
 ## 4. Gantt
 
 ```mermaid
 gantt
-    title Cronograma 18/09 a 21/12/2026 (dias úteis, feriados 12/10 e 02/11)
+    title Cronograma 18/09/2026 a 08/10/2027 (dias úteis, feriados 12/10 e 02/11)
     dateFormat YYYY-MM-DD
     axisFormat %d/%m
     section Marcos
@@ -332,6 +370,10 @@ gantt
     M5 Fase 0 fechada + Fase C :milestone, m5, 2026-11-13, 0d
     M6 Go/no-go do piloto :milestone, m6, 2026-11-18, 0d
     M7 Rastreabilidade completa :milestone, m7, 2026-12-18, 0d
+    M8 Flange alta no MES :milestone, m8, 2027-04-02, 0d
+    M9 Flange completa no MES :milestone, m9, 2027-05-24, 0d
+    M10 Caldeiraria no MES :milestone, m10, 2027-08-27, 0d
+    M11 Analise e gestao no MES :milestone, m11, 2027-10-08, 0d
     section Decisões e governança
     A1 Decisões bloqueantes (DEC-1..12 decididas) :done, a1, 2026-09-22, 2026-09-30
     A2 Hardware + agenda da contagem :a2, 2026-09-22, 2026-09-29
@@ -382,6 +424,12 @@ gantt
     K1 api-comercial + Propostas :done, k1, 2026-10-05, 2026-10-08
     K2 Suprimentos - catalogo, ofertas, mapa, custo :done, k2, 2026-10-05, 2026-10-08
     K3 Painel do comprador, historico, pesquisa :done, k3, 2026-10-06, 2026-10-08
+    section MES - PCP legado x MES (estimativa, 08/10)
+    W0 Deficit do plano atual :w0, 2026-12-21, 2027-01-12
+    W1 Flange - prioridade alta :w1, 2027-01-12, 2027-04-03
+    W2 Flange - media e baixa :w2, 2027-04-05, 2027-05-25
+    W3 Caldeiraria HRM :w3, 2027-05-25, 2027-08-28
+    W4 Analise e gestao no MES :w4, 2027-08-30, 2027-10-09
     section Carga inicial (marco zero)
     G1 Ferramenta de carga inicial :g1, 2026-10-13, 2026-10-24
     G2 Levantamento físico (dupla) :g2, 2026-10-26, 2026-10-31

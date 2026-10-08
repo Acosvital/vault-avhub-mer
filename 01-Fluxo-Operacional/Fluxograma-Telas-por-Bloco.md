@@ -18,6 +18,8 @@ atualizado: 2026-10-08
 >
 > **Mudanças em relação ao que a nota dizia:** os blocos 6 (Recebimento), 7 (Fábrica) e 10 (Expedição) **não são mais "só backend / fora do ciclo"**: a fila do setor (`FilaSetor`) já tem as ações de produção, a conferência e recontagem de recebimento, a paletização e o comprovante de entrega. Os blocos 8 e 9 saíram do mock; o `mapa-deposito` é a exceção e **segue sobre `MOCK_DEPOSITOS`**. Telas que existem e não estavam na lista: `estoque-operacao/painel-estoque` (alertas reais), `estoque-operacao/mapa-deposito` (mock), `qualidade/inspecao-saida` (fila do setor Qualidade no roteiro), `pedidos-excluidos`, `relatorios` e os cadastros operacionais (`fabricas`, `maquinas`, `operadores`, `setores`).
 >
+> **Escopo novo (08/10):** o levantamento do PCP legado ([[PCP-Legado-x-MES-Lacunas]]) acrescenta recursos e telas ao MES (fila programada, planejamento da Usinagem, telão/kanban, impressão, romaneios, Caldeiraria e relatórios), todos aprovados e **ainda sem código**; este inventário de 51 telas não foi refeito para incluí-los.
+>
 > **Telas do av-hub fora desta lista que também estão feitas:** o módulo Comercial & Suprimentos inteiro (22 slugs, ver [[AV-Hub-Comercial-Suprimentos]]).
 
 > **Para que serve esta nota.** [[Fluxogramas-Completos]] e o diagrama 0b de [[Diagramas-UML]] respondem *"quem decide o quê e pra onde o item vai"*. Esta aqui responde a pergunta seguinte, que é a de **colocar o projeto pra rodar**: *"pra cada raia daquele fluxograma, quantas telas precisam existir e o que cada uma faz?"*.
@@ -66,19 +68,21 @@ atualizado: 2026-10-08
 flowchart TD
     subgraph SEC_VENDAS[1. Vendas - av-hub · 2 telas]
         V1[Vendedor emite o pedido no Omie]
-        V2{Precisa de acompanhamento da Qualidade?}
+        V2["Vendedor marca se a<br/>Qualidade acompanha"]
         V3[Vendedor confirma e envia ao PCP]
         V1 --> V2
-        V2 -->|sim| V3
-        V2 -->|nao| V3
+        V2 --> V3
     end
 
     subgraph SEC_PCP[2. PCP - MES · 5 telas]
-        P1[Carteira: escolhe itens, quantidades e fabrica da rodada]
-        P2[Ordem de Producao: uma OP por fabrica, Estoque como etapa 1]
+        P1["Triagem do Pedido<br/>lista os pedidos de venda<br/>liberados pelo vendedor"]
+        P2["Destinacao do Pedido<br/>PCP abre o pedido e define o destino<br/>e a quantidade de cada item<br/>Estoque entra como etapa 1<br/>MES confirma a importacao ao av-hub"]
         K1[Setor Compras: parcial aguarda, requisicao enviada ao av-hub]
-        P6[Decide o novo norte]
         P1 --> P2
+    end
+
+    subgraph SEC_PCP2[PCP - decisoes e requisicoes]
+        P6[Decide o novo norte]
     end
 
     subgraph SEC_COMPRAS[3. Compras e CCP - av-hub · 6 telas]
@@ -118,7 +122,7 @@ flowchart TD
     end
 
     subgraph SEC_PROD[7. Fabrica e Beneficiamento - MES · 4 telas fora do ciclo]
-        F1[Percorre os setores produtivos do roteiro]
+        F1["Percorre os setores produtivos do roteiro<br/>de cada fabrica: Flange, Caldeiraria HRM"]
         F2[Conclui a etapa produtiva]
         F1 --> F2
     end
@@ -184,6 +188,7 @@ flowchart TD
 
     style SEC_VENDAS fill:#d9f0ec,stroke:#0f7a6b,stroke-width:2px,color:#181c22
     style SEC_PCP fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
+    style SEC_PCP2 fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
     style SEC_COMPRAS fill:#e3e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style SEC_FORN fill:#ece8e3,stroke:#8a7a63,stroke-width:2px,color:#181c22
     style SEC_LOG fill:#fbe8d9,stroke:#c9541a,stroke-width:2px,color:#181c22
@@ -266,12 +271,12 @@ O pedido nasce no **Omie** e o polling entrega ao **av-hub, e só ao av-hub** �
 
 **Nós cobertos:** P1 (Carteira), P2 (Ordem de Produção), K1 (setor Compras), P6 (novo norte).
 
-**Mudou em 23-24/09/2026.** A **Carteira de Pedidos** e a **tela Ordem de Produção** já existem no `app-pcp` (branch `develop`) com backend real: o PCP escolhe itens, quantidades e **fábrica** por rodada e gera uma OP por fábrica. O encaixe de 24/09 ([[Encaixe-Estoque-Revenda-no-PCP]]) tirou do PCP a checagem de saldo e a requisição de compra — viraram os **setores Estoque** (bloco 8, tela 8.12) e **Compras** (tela 2.4) do roteiro. O motor de execução da produção continua sendo o [[App-PCP-Backend-Producao]].
+**Mudou em 23-24/09/2026.** A **Triagem do Pedido** (antiga Carteira de Pedidos) e a **Destinação do Pedido** (a tela que abre ao clicar no pedido, antiga "Ordem de Produção") (no código as telas ainda se chamam "Carteira" (`/carteira`) e "Ordem de Produção" (`/ordens-producao/novo`, campo `ordemProducao`, códigos `OP-`)) já existem no `app-pcp` (branch `develop`) com backend real: o PCP escolhe itens, quantidades e **fábrica** por rodada e define o destino de cada item, gerando uma destinação por fábrica. O encaixe de 24/09 ([[Encaixe-Estoque-Revenda-no-PCP]]) tirou do PCP a checagem de saldo e a requisição de compra — viraram os **setores Estoque** (bloco 8, tela 8.12) e **Compras** (tela 2.4) do roteiro. O motor de execução da produção continua sendo o [[App-PCP-Backend-Producao]].
 
 | # | Tela | Funcionalidades | Estado | Tarefa |
 |---|---|---|---|---|
-| 2.1 | **Carteira de Pedidos** | Pedidos de venda do av-hub/Omie com status de envio (não enviado, parcial, total) e de produção (aguardando, em produção, concluída); filtro por filial e período; abre a Ordem de Produção do pedido. Existe em `develop` (`/carteira`, `GET /pedidos/carteira`); **desde 29/09 lê só os pedidos liberados pelo vendedor** (`GET /pedidos_liberados`, contrato 26) | ✅ **Feita** — `/carteira` (`develop`) | **C4** ✅ |
-| 2.2 | **Ordem de Produção (nova rodada)** | Itens do pedido vindos do Omie, sem digitação manual; por item, **quantidade desta rodada** e **fábrica** (linha de fabricação ou **Revenda**); roteiro por fábrica, com o **setor Estoque inserido como etapa 1** pelo backend; uma OP por fábrica; `codigo_empresa` vem do Pedido (DEC-1). Existe em `develop` (`/ordens-producao/novo`); **falta a fábrica Revenda** — hoje item sem fábrica é descartado | ✅ **Feita** — `/ordens-producao/novo` (`develop`) | **C6** |
+| 2.1 | **Triagem do Pedido** (antiga Carteira de Pedidos; no código `/carteira`) | Pedidos de venda do av-hub/Omie com status de envio (não enviado, parcial, total) e de produção (aguardando, em produção, concluída); filtro por filial e período; ao clicar no pedido abre a Destinação do Pedido (2.2). Existe em `develop` (`/carteira`, `GET /pedidos/carteira`); **desde 29/09 lê só os pedidos liberados pelo vendedor** (`GET /pedidos_liberados`, contrato 26) | ✅ **Feita** — `/carteira` (`develop`; ainda com o nome antigo) | **C4** ✅ |
+| 2.2 | **Destinação do Pedido (nova rodada)** — onde se define o destino e a quantidade de cada item; no código ainda é "Ordem de Produção" (`/ordens-producao/novo`, campo `ordemProducao`, códigos `OP-`) | Itens do pedido vindos do Omie, sem digitação manual; por item, **quantidade desta rodada** e **fábrica** (linha de fabricação ou **Revenda**); roteiro por fábrica, com o **setor Estoque inserido como etapa 1** pelo backend; uma OP por fábrica; `codigo_empresa` vem do Pedido (DEC-1). Existe em `develop` (`/ordens-producao/novo`); **falta a fábrica Revenda** — hoje item sem fábrica é descartado | ✅ **Feita** — `/ordens-producao/novo` (`develop`) | **C6** |
 | 2.3 | **Ordens de Produção — lista e detalhe** | Lista das OPs; detalhe com mini-roteiro por item, parciais por setor, histórico, anexos e embalagem. Existe em `develop` (`/ordens-producao`, `/ordens-producao/[id]`); precisa mostrar o split atendido pelo estoque e a reserva | ✅ **Feita** — `/ordens-producao` e `/ordens-producao/[id]` (histórico, anexos, embalagens). 🔧 Falta mostrar o split atendido pelo estoque e a reserva | **C6** |
 | 2.4 | **Setor Compras — parciais aguardando compra** | Fila dos parciais no setor Compras (roteiro da Revenda); a **entrada do parcial gera a requisição** automaticamente (material, quantidade, prazo, filial, `id_item_parcial`), exposta ao av-hub pelo Fluxo 1 (polling 5 min); mostra o estado da requisição/OC; a saída é liberada pelo Recebimento (D6). *(Atualizado em 07/10: a requisição existe — setor `REQUISICAO`, `ComprasService.requisitar` (`b8dc158`, 29/09), cancelamento e envio ao av-hub (`e7ce2c9`); o circuito de compra ficou **fora do roteiro**, e quem "move" a parcial para o Recebimento é o `PATCH /compras/requisicoes/:id/compra`, manual)* | ✅ **Feita** — fila `requisicoes` e `pedidos-compra` (setor Compras), com `RequisitarCompraModal`, `RegistrarCompraModal` e `EventosRequisicaoModal` (`develop`) | **C7** |
 | 2.5 | **Fila "Novo norte"** | Fila única de decisões que voltaram pro PCP: divergência de recebimento (R5/R6), reprovação de qualidade (Q9) e item comprado não acabado num roteiro sem beneficiamento. Ações: aceitar parcial, reabrir compra, retrabalho, ajustar o roteiro. *(Atualizado em 07/10: **parcial** — a tela `/decisoes-pcp` (07/10, PR #34 do app) existe e hoje só trata divergência de recebimento (`ACEITO`/`REABERTO`); reprovação de qualidade e o roteiro individual do item (`RoteiroItem`) não estão ali)* | 🔧 **Parcial** — `/decisoes-pcp` só trata o recebimento (aceitar o recontado / reabrir compra); faltam reprovação de qualidade e item não acabado (C8) | **C8** |

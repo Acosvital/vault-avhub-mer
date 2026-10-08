@@ -88,33 +88,39 @@ sequenceDiagram
 flowchart TD
     subgraph SEC_VENDAS[Vendas - av-hub]
         V1[Pedido chega do Omie travado]
-        V2{Qualidade acompanha desde o inicio?}
+        V2["Vendedor marca se a<br/>Qualidade acompanha"]
         V3[Vendedor libera o pedido]
         V1 --> V2
-        V2 -->|sim ou nao| V3
+        V2 --> V3
     end
 
     subgraph SEC_PCP[PCP - MES]
-        P1[Carteira: so pedidos liberados, escolhe itens, quantidades e destino]
-        P2[Ordem de Producao: uma OP por destino, Estoque como etapa 1]
-        P3[Requisicoes: PCP abre a requisicao de compra]
-        P6[Decide o novo norte]
+        P1["Triagem do Pedido<br/>lista os pedidos de venda<br/>liberados pelo vendedor"]
+        P2["Destinacao do Pedido<br/>PCP abre o pedido e define o destino<br/>e a quantidade de cada item<br/>Estoque entra como etapa 1<br/>MES confirma a importacao ao av-hub"]
         P1 --> P2
     end
 
-    subgraph SEC_ESTOQUE[Estoque - MES, setor unico]
+    subgraph SEC_PCP2[PCP - decisoes e requisicoes]
+        P3[Requisicoes: PCP abre a requisicao de compra]
+        P6[Decide o novo norte]
+    end
+
+    subgraph SEC_ESTOQUE[Estoque - atendimento do pedido]
         E1[Saldo disponivel na filial do pedido]
         E2{Saldo cobre o item?}
         E3[Atende pelo saldo: split e reserva]
         E4{O que fazer com o restante?}
-        E5[Retorno ao Estoque: compra aprovada ou producao inspecionada]
-        E6[Despacho do Estoque: baixa do saldo]
         E1 --> E2
         E2 -->|sim, tudo ou parte| E3
         E2 -->|nao, ou o restante| E4
-        E3 --> E6
+    end
+
+    subgraph SEC_ESTOQUE2[Estoque - retorno e despacho]
+        E5[Retorno ao Estoque: compra aprovada ou producao inspecionada]
+        E6[Despacho do Estoque: baixa do saldo]
         E5 --> E6
     end
+    E3 --> E6
 
     subgraph SEC_COMPRAS[Compras - av-hub e setor Compras do MES]
         C1[Cotacao e negociacao]
@@ -143,20 +149,23 @@ flowchart TD
         R3 -->|sim| R4
     end
 
-    subgraph SEC_QUAL[Qualidade - MES]
+    subgraph SEC_QUAL[Qualidade - inspecao de entrada]
         Q1[Inspecao de entrada por lote]
         Q2{Aprova o lote?}
         Q3[RNC: parte reprovada volta a Compras]
         Q4[Parte aprovada em quarentena ate a substituicao]
-        Q7[Inspecao de saida: setor QUALIDADE no roteiro]
-        Q8{Aprova?}
         Q1 --> Q2
         Q2 -->|nao, total ou parcial| Q3 --> Q4
+    end
+
+    subgraph SEC_QUAL2[Qualidade - inspecao de saida]
+        Q7[Inspecao de saida: setor QUALIDADE no roteiro]
+        Q8{Aprova?}
         Q7 --> Q8
     end
 
     subgraph SEC_PROD[Producao e beneficiamento - MES]
-        F1[Setores produtivos do roteiro]
+        F1["Setores produtivos do roteiro<br/>de cada fabrica: Flange, Caldeiraria HRM"]
     end
 
     subgraph SEC_EXP[Expedicao - MES]
@@ -198,12 +207,15 @@ flowchart TD
 
     style SEC_VENDAS fill:#d9f0ec,stroke:#0f7a6b,stroke-width:2px,color:#181c22
     style SEC_PCP fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
+    style SEC_PCP2 fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
     style SEC_COMPRAS fill:#e3e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style SEC_FORN fill:#ece8e3,stroke:#8a7a63,stroke-width:2px,color:#181c22
     style SEC_RECEB fill:#e1eede,stroke:#5a7d3a,stroke-width:2px,color:#181c22
     style SEC_PROD fill:#f3ddd6,stroke:#a8420f,stroke-width:2px,color:#181c22
     style SEC_ESTOQUE fill:#d9eef2,stroke:#1f7a8c,stroke-width:2px,color:#181c22
+    style SEC_ESTOQUE2 fill:#d9eef2,stroke:#1f7a8c,stroke-width:2px,color:#181c22
     style SEC_QUAL fill:#f7edd0,stroke:#a8860f,stroke-width:2px,color:#181c22
+    style SEC_QUAL2 fill:#f7edd0,stroke:#a8860f,stroke-width:2px,color:#181c22
     style SEC_EXP fill:#ece0f0,stroke:#7a3f9e,stroke-width:2px,color:#181c22
     style SEC_FISCAL fill:#f6dde4,stroke:#a83f5c,stroke-width:2px,color:#181c22
 
@@ -722,8 +734,8 @@ flowchart LR
     PCP(["PCP"])
     ALM(["Almoxarife - setor Estoque"])
     subgraph SISTEMA[Sistema]
-        UC4([Escolher itens, quantidades e destino da rodada])
-        UC5([Gerar Ordem de Producao, uma por destino])
+        UC4([Abrir o pedido na Triagem do Pedido])
+        UC5([Fazer a Destinacao do Pedido: destino e quantidade, uma por fabrica])
         UC10([Abrir a requisicao de compra no setor Requisicoes])
         UC8([Decidir Novo Norte])
         UC6([Atender pelo saldo: split e reserva])
@@ -911,7 +923,7 @@ stateDiagram-v2
 stateDiagram-v2
     [*] --> AGUARDANDO_LIBERACAO
     AGUARDANDO_LIBERACAO --> PENDENTE_PCP : vendedor libera, Fluxo 4
-    PENDENTE_PCP --> EM_ESTOQUE : PCP gera a OP, Estoque e a etapa 1
+    PENDENTE_PCP --> EM_ESTOQUE : PCP faz a Destinacao do Pedido, Estoque e a etapa 1
     EM_ESTOQUE --> PRONTO_EXPEDICAO : atendido pelo saldo e despachado
     EM_ESTOQUE --> EM_COMPRA : solicitar compra
     EM_ESTOQUE --> EM_PRODUCAO : enviar a producao

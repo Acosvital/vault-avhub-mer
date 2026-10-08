@@ -41,7 +41,7 @@ sequenceDiagram
     participant Prox as Próximo setor do roteiro
     participant Exp as Expedição
 
-    PCP->>Sist: EA1 · gera a OP (1 por fábrica), com o setor Estoque como etapa 1
+    PCP->>Sist: EA1 · faz a Destinação do Pedido (1 por fábrica), com o setor Estoque como etapa 1
     Sist->>Alm: EA2 · parcial chega com o saldo disponível na filial do pedido
     Alm->>Sist: EA3 · "atender X do estoque"
     Sist->>Sist: EA3 · split do ItemParcial + Reserva (lote + split + qtd, ATIVA) + CONCLUIDO
@@ -50,7 +50,7 @@ sequenceDiagram
     Alm->>Prox: EA6 · "enviar restante" (mover): setores produtivos ou setor Compras
 ```
 
-**EA1 — PCP gera a OP**
+**EA1 — PCP faz a Destinação do Pedido**
 Na tela Ordem de Produção (a partir da Carteira), o PCP escolhe itens, quantidades e fábrica da rodada. O backend insere o setor Estoque como etapa 1 do roteiro — ver [[Encaixe-Estoque-Revenda-no-PCP]].
 
 **EA2 — O parcial chega no setor Estoque**
