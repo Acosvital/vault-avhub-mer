@@ -101,7 +101,7 @@ Todas as 9 branches que o vault listava como abertas em 07/10 **já foram mergea
 | tela de pedido de cotação (`95f24e7`) | nova tela, já no contrato de telas do DBA |
 | CI Playwright (`98096b8`, `46146ff`) | e2e do Comercial no GitHub Actions |
 
-O repositório ainda lista dezenas de branches `feat/*` remotas (ex.: `feat/comercial-configuracoes`, `feat/comercial-notificacoes`, `feat/suprimentos-perfil-fornecedor`, `feat/suprimentos-exportar-ofertas`); **não conferi uma a uma se já estão na `develop`**.
+**Conferido em 08/10 (histórico git do `develop` `bd1ae48`, 600 commits):** das 81 branches remotas do av-hub, **75 estão integralmente mergeadas na `develop`** (inclui `feat/comercial-configuracoes`, `feat/comercial-notificacoes`, `feat/suprimentos-perfil-fornecedor`, `feat/suprimentos-exportar-ofertas`, `feat/financeiro-experimental` e todas as `feat/compras-*`). Não deu para localizar no histórico (podem ser antigas e fora da janela, ou não mergeadas) só 4: `dashboard/historicos`, `feat/modulo-comercial-unificado`, `fix/pedidos-key-duplicada` e `ui/improvements`.
 
 ## 7. Pendências de publicação
 
