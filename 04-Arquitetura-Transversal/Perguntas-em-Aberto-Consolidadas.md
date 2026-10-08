@@ -14,7 +14,7 @@ Detalhe e status (✅ / 🟡 / 🔴) em [[Registro-de-Decisoes-2026-10-07]].
 - **CC-04**: merge `develop` → `main` antes do piloto (data e responsável: 🔴 Robert).
 - **CC-06**: o Estoque fica em `public`.
 - **CC-09**: branch `feat/migracao-nestjs-prisma` descartada.
-- **CC-03**: orçamento desenvolvido por fora (Comercial & Suprimentos); contratos 07 e 38 a reescrever.
+- **CC-03**: orçamento desenvolvido por fora (Comercial & Suprimentos); contratos 07 e 38 **reescritos em 08/10** (Pablo). Em aberto no 07: destino das rotas `/orcamento/*` da API (Nathan + Gustavo), tirar os JSON também do histórico do git (Nathan) e o slug `fornecedores`, que o orçamento antigo e o Comercial usam (DBA).
 - **IM-01 e IM-03 (antigo)**: superados pelo contrato 34. **IM-02**: resolvida pelo código.
 - **Transferência (TF-3, TF-6)**: NF só após aprovação na origem; número da NF chega ao MES via av-hub.
 - **EC-02 e L-10**: passam para o Ciclo 2 (04/01/2027).
