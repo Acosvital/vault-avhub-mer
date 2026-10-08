@@ -9,7 +9,7 @@ atualizado: 2026-10-07
 
 > Status: decidido | no código | em produção (verificado em 07/10/2026 só pelo dump; o deploy da pipeline não foi conferido). Fonte: [[Registro-de-Decisoes-2026-10-07]] (#7, #20, #28).
 >
-> **✅ Decisão de 07/10/2026 sobre o envio da OC:** fica **fixo no código e vai direto ao Omie, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN`** (o Nathan rodou cerca de 4 testes reais e a OC entrou). **L10.1, L10.6 (FOB) e L10.7 (b) a (d) viram risco aceito.** Alteração de código: Gustavo. As menções às duas flags e aos "pendentes sem teste" abaixo são histórico.
+> **✅ Decisão de 07/10/2026 sobre o envio da OC:** fica **fixo no código e vai direto ao Omie, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN`** (o Nathan rodou cerca de 4 testes reais e a OC entrou). **L10.1, L10.6 (FOB) e L10.7 (b) a (d) viram risco aceito.** Alteração de código: Gustavo. **(conferido no código em 08/10: ainda não foi alterado — `SYNC_ENVIO_OC` segue `false` e `ENVIO_OC_DRY_RUN` segue `true` por padrão em `src/config/index.ts`, e o README da pipeline diz que ligar espera o deploy da API com o contrato 36; hoje o envio só acontece se alguém ligar as duas chaves.)** As menções às duas flags e aos "pendentes sem teste" abaixo são histórico.
 
 > **Atualização de 07/10/2026 — conferido no código da pipeline (`master` `d2886bf`, 06/10 07:46; produção/deploy NÃO conferidos).** Status: `implementada-no-codigo`; **falta conferir em produção/`api-test`** (o próprio contrato diz "sem deploy nada roda"). O cabeçalho abaixo (de 23/09 a 05/10) está desatualizado nestes pontos:
 > - **L4 não está mais "sem push":** o PR #1 foi **mergeado em 05/10** (14:56, `3233acf`) e o PR #2 em 06/10; `master` = `d2886bf`. O passo 0 da ordem sugerida (§4, "publicar a branch") **está feito**.

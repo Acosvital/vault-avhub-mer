@@ -1,7 +1,7 @@
 ---
 tipo: registro
 criado: 2026-10-07
-atualizado: 2026-10-07
+atualizado: 2026-10-08
 ---
 
 # Registro de decisões de 07/10/2026
@@ -130,3 +130,23 @@ Todo fato abaixo vem de leitura de vault e código em 07/10/2026. **Produção s
 | 71 | `SYNC_ENVIO_OC` e `ENVIO_OC_DRY_RUN` | 🟡 | Ainda aparecem 23 vezes em 14 notas. Pela amostra são notas históricas, mas nem todas foram revisadas. |
 | 72 | Links | 🟡 | Um alvo suspeito entre todos os wikilinks ("FORA DO SISTEMA - telefone, e-mail, WhatsApp" em `Fluxo-Sistema-no-Meio`), provavelmente nó de diagrama. Não confirmado. |
 | 73 | Reserva da S5 | 🟡 | Corrigida para **21,0 pd** (a tabela dizia 22,0). Com as tarefas no Robert fica em **3,75 pd** (item 33b). |
+
+## Estado no código em 08/10/2026 das decisões que mexem em código
+
+Conferido na `develop` (`api-acos-vital` `0557871`, `api-pcp` `ca3346b`, `app-pcp` `2ea3183`, `av-hub` `bd1ae48`) e no `master` da pipeline (`d2886bf`). Só leitura de código; produção não conferida.
+
+| # | Decisão | No código hoje |
+|---|---|---|
+| 7 | Envio da OC fixo, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN` | ❌ **Não feito.** `src/config/index.ts` lê as duas: `SYNC_ENVIO_OC` padrão `false`, `ENVIO_OC_DRY_RUN` padrão `true`. |
+| 8 | `PERMISSOES_ROTA_MODO` fixo em `exigir` | 🟡 **Parcial.** Padrão virou `exigir` em 07/10 (`0557871`), mas a variável ainda é lida (`observar`/`desligado` valem). Sem `USUARIO_TOKEN_SEGREDO` (≥ 32 caracteres) o servidor não sobe. |
+| 9 | Fixar `ESCOPO_VENDEDORES_EXIGIR` | ❌ Não feito: continua lida do ambiente, padrão `false`. As outras quatro chaves seguem como chave, como decidido. |
+| 11 | Nome da variável do MES | ✅ Confere: o `api-pcp` lê `AVHUB_MES_INTEGRACAO_KEY` (singular); a API lê `MES_INTEGRACAO_KEYS`. |
+| 12 | Guards em `UsuariosController` e `SetoresController` | ❌ Não feito: só `PATCH usuarios/:id/senha` e `GET setores/:id/painel` têm `JwtAuthGuard`. |
+| 15 | `exclusionSync` apaga pedido manual | ⚠️ **Risco confirmado.** A consulta (`exclusionSync.ts`) filtra só empresa, `deleted_at` e janela; o pedido manual (código negativo, `POST /pedidos_vendas/manual`, contrato 30) não existe no Omie e entra na lista de apagados. |
+| 26 | Tolerância de peso 5% | ✅ `Material.toleranciaPeso` tem `@default(0.05)`. |
+| 25 | Carga inicial: lote nasce liberado | ✅ `origem: 'CARGA_INICIAL'`, `statusQualidade: 'LIBERADO'`. |
+| 41 | `GET /ordens-compra/referencia` (004) | ❌ Não existe em `api-acos-vital` nem no `api-pcp`. |
+| 43 | Consumidor do `/itens/status` (005) | ❌ Nenhum consumidor em `api-acos-vital` nem no av-hub; a rota existe no MES. |
+| 44 | IM-02: pedido sem prazo | ✅ `prazo_necessidade = prazoNecessidade ?? pedido.prazoEntrega`, e recusa sem prazo. |
+| 46 | PTAX é a cotação de venda | ✅ A API recusa OC cuja cotação difere de `cotacao_venda`. |
+| 22 | `main` do MES | ❌ Merge `develop` → `main` ainda não feito: `main` do `api-pcp` em `be076b2` e do `app-pcp` em `be847ac` (ambas 27–28/08). |

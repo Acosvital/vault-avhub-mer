@@ -65,12 +65,12 @@ Este módulo era o maior buraco do vault: o av-hub deixou de ser "só BFF para a
 
 ## 5. Telas e slugs de `auth.telas`
 
-O BFF aplica uma **allowlist rota × tela × ação** em `auth.telas`: sem a tela cadastrada o resultado é **403** e o item some do menu. O contrato `docs/ENVIAR - contrato-comercial-suprimentos-telas.md` (#138) lista 18 slugs:
+O BFF aplica uma **allowlist rota × tela × ação** em `auth.telas`: sem a tela cadastrada o resultado é **403** e o item some do menu. O contrato `docs/ENVIAR - contrato-comercial-suprimentos-telas.md` (#138) lista **22 slugs** (reconferido em 08/10 no `develop` `bd1ae48`; eram 18 em 07/10): 2 grupos, 17 telas com página ou bastidor e `matriz-precos` sem tela. Entraram `pedido-cotacao`, `historico-compras`, `pesquisa-materiais` e `tabela-telha`:
 
 | Tipo | Slugs |
 |---|---|
 | Grupos de menu | `comercial`, `suprimentos` (o `groupMap.ts` coloca os dois em Operações) |
-| Telas com página | `propostas`, `clientes`, `relatorio-cotacoes`, `relatorio-gerencial`, `painel-comprador`, `ofertas-fornecedor`, `fornecedores`, `catalogo-produtos`, `sincronizacao-omie`, `parametros-custo`, `dash-comercial`, `empresas-emissoras` |
+| Telas com página | `propostas`, `clientes`, `relatorio-cotacoes`, `relatorio-gerencial`, `painel-comprador`, `pedido-cotacao`, `ofertas-fornecedor`, `historico-compras`, `fornecedores`, `catalogo-produtos`, `pesquisa-materiais`, `sincronizacao-omie`, `parametros-custo`, `tabela-telha`, `dash-comercial`, `empresas-emissoras` |
 | Bastidor (sem página) | `propostas-delegacao`, `custo-item`, `solicitacoes-custo` |
 | Sem tela | `matriz-precos` |
 
@@ -116,7 +116,7 @@ As três primeiras são as pendências **declaradas** no contrato de telas (cada
 
 Pergunta original: em que ambiente vai rodar, em que cluster, com quais perfis/telas e a claim `perfis` ([[Perguntas-em-Aberto-Consolidadas]]). Estado de 07/10 pelo vault e pelo código:
 - **Ambiente:** a `api-comercial` existe **só em `develop`**, sem publicação; nenhum ambiente de produção foi decidido (o Registro de 07/10 não trata disso). Cluster Postgres: continua **[I]**.
-- **Telas:** das 18 telas/slugs do contrato, **16 estão sem cadastro em `auth.telas`**; só `suprimentos` e `painel-comprador` constam criadas (vault de 06/10; o dump de 07/10 não foi reconferido aqui para este ponto).
+- **Telas:** dos 22 slugs do contrato (08/10), **20 estão sem cadastro em `auth.telas`** (o dump de 07/10 só tem `suprimentos` e `painel-comprador`; as demais telas novas entraram na `develop` depois ou no mesmo dia do dump); só `suprimentos` e `painel-comprador` constam criadas (vault de 06/10; o dump de 07/10 não foi reconferido aqui para este ponto).
 - **Claim `perfis`** no token da `api-acos-vital`: pendente (seção 7).
 - Dono da decisão de ambiente: não definido no Registro; segue com Nathan + DBA, como na CC-08.
 

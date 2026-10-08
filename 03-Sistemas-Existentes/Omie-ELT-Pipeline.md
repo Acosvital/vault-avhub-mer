@@ -78,7 +78,7 @@ Itens e parcelas do pedido de compra são **REPLACE-ALL por pedido** (apaga o qu
 
 ## Envio de OC — a única escrita no Omie (novo em 07/10)
 
-Processo próprio (`envio-oc-worker`) + fila `omie-envio-oc` + `src/avhub/client.ts`. Cron `1-59/2 * * * *`. **Decidido (✅ Nathan, 07/10):** o envio fica **fixo no código** e vai **direto ao Omie**, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN` (alteração de código: Gustavo). O Nathan rodou cerca de **4 testes reais** e a OC entrou. L10.1, L10.6 (FOB) e L10.7 (b) a (d) viram **risco aceito**. (Texto anterior: só agendado com `SYNC_ENVIO_OC=true`, com dry run por padrão; mantidos como interruptores de propósito no contrato 38 §6, o que a decisão supera.)
+Processo próprio (`envio-oc-worker`) + fila `omie-envio-oc` + `src/avhub/client.ts`. Cron `1-59/2 * * * *`. **Decidido (✅ Nathan, 07/10):** o envio fica **fixo no código** e vai **direto ao Omie**, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN` (alteração de código: Gustavo). O Nathan rodou cerca de **4 testes reais** e a OC entrou. L10.1, L10.6 (FOB) e L10.7 (b) a (d) viram **risco aceito**. **(conferido no código em 08/10: ainda não foi alterado — `SYNC_ENVIO_OC` segue `false` e `ENVIO_OC_DRY_RUN` segue `true` por padrão em `src/config/index.ts`, e o README da pipeline diz que ligar espera o deploy da API com o contrato 36; hoje o envio só acontece se alguém ligar as duas chaves.)** (Texto anterior: só agendado com `SYNC_ENVIO_OC=true`, com dry run por padrão; mantidos como interruptores de propósito no contrato 38 §6, o que a decisão supera.)
 
 | Regra | Detalhe |
 |---|---|
