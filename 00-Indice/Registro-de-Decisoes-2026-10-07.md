@@ -137,7 +137,7 @@ Conferido na `develop` (`api-acos-vital` `0557871`, `api-pcp` `ca3346b`, `app-pc
 
 | # | Decisão | No código hoje |
 |---|---|---|
-| 7 | Envio da OC fixo, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN` | 🟡 **Feito em branch, não mergeado.** A `master` (`d2886bf`) ainda lê as duas chaves (padrão desligado e em dry run). A branch `claude/envio-oc-fixo` (`40d894a`) as remove: o worker passa a enviar de verdade assim que subir. Falta revisão, merge e o deploy da API com o contrato 36 e os compradores vinculados. |
+| 7 | Envio da OC fixo, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN` | ✅ **Feito e mergeado** na `master` da pipeline (PR #3, `0f739f0`, 08/10). O worker passa a enviar de verdade quando for publicado; falta o deploy da API com o contrato 36 e os compradores vinculados. |
 | 8 | `PERMISSOES_ROTA_MODO` fixo em `exigir` | 🟡 **Parcial.** Padrão virou `exigir` em 07/10 (`0557871`), mas a variável ainda é lida (`observar`/`desligado` valem). Sem `USUARIO_TOKEN_SEGREDO` (≥ 32 caracteres) o servidor não sobe. |
 | 9 | Fixar `ESCOPO_VENDEDORES_EXIGIR` | ❌ Não feito: continua lida do ambiente, padrão `false`. As outras quatro chaves seguem como chave, como decidido. |
 | 11 | Nome da variável do MES | ✅ Confere: o `api-pcp` lê `AVHUB_MES_INTEGRACAO_KEY` (singular); a API lê `MES_INTEGRACAO_KEYS`. |
