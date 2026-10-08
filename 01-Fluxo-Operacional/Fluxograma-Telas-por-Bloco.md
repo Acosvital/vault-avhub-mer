@@ -68,7 +68,7 @@ atualizado: 2026-10-08
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#181c22', 'primaryBorderColor': '#33475a', 'lineColor': '#5c6570', 'fontFamily': 'Source Sans 3, sans-serif', 'fontSize': '14px', 'edgeLabelBackground': '#ffffff', 'textColor': '#181c22'}, 'flowchart': {'nodeSpacing': 45, 'rankSpacing': 60, 'padding': 14}}}%%
 flowchart TD
-    subgraph SEC_VENDAS[1. Vendas - av-hub · 2 telas]
+    subgraph SEC_VENDAS[1 - Vendas - av-hub · 2 telas]
         V1[Vendedor emite o pedido no Omie]
         V2["Vendedor marca se a<br/>Qualidade acompanha"]
         V3[Vendedor confirma e envia ao PCP]
@@ -76,7 +76,7 @@ flowchart TD
         V2 --> V3
     end
 
-    subgraph SEC_PCP[2. PCP - MES · 5 telas]
+    subgraph SEC_PCP[2 - PCP - MES · 5 telas]
         P1["Triagem do Pedido<br/>lista os pedidos de venda<br/>liberados pelo vendedor"]
         P2["Destinacao do Pedido<br/>PCP abre o pedido e define o destino<br/>e a quantidade de cada item<br/>Estoque entra como etapa 1<br/>MES confirma a importacao ao av-hub"]
         K1[Setor Compras: parcial aguarda, requisicao enviada ao av-hub]
@@ -87,7 +87,7 @@ flowchart TD
         P6[Decide o novo norte]
     end
 
-    subgraph SEC_COMPRAS[3. Compras e CCP - av-hub · 6 telas]
+    subgraph SEC_COMPRAS[3 - Compras e CCP - av-hub · 6 telas]
         C1[Cotacao e negociacao]
         C2{Acima do valor limite?}
         C3[Aprovacao da diretoria]
@@ -99,11 +99,11 @@ flowchart TD
         C4 --> C5
     end
 
-    subgraph SEC_FORN[4. Fornecedor - externo · 0 telas]
+    subgraph SEC_FORN[4 - Fornecedor - externo · 0 telas]
         FN1[Recebe a OC]
     end
 
-    subgraph SEC_LOG[5. Logistica de entrada · 1 tela futura]
+    subgraph SEC_LOG[5 - Logistica de entrada · 1 tela futura]
         L1{CIF ou FOB?}
         L2[FOB: coleta no fornecedor]
         L3[CIF: fornecedor entrega direto]
@@ -112,7 +112,7 @@ flowchart TD
         L1 -->|CIF| L3 --> L4
     end
 
-    subgraph SEC_RECEB[6. Recebimento - MES · 5 telas]
+    subgraph SEC_RECEB[6 - Recebimento - MES · 5 telas]
         R1[Confere Pedido de Venda ou Ordem de Compra]
         R2[Pesagem]
         R3{Bate com o esperado?}
@@ -123,13 +123,13 @@ flowchart TD
         R3 -->|sim| R4 --> R5
     end
 
-    subgraph SEC_PROD[7. Fabrica e Beneficiamento - MES · 4 telas fora do ciclo]
+    subgraph SEC_PROD[7 - Fabrica e Beneficiamento - MES · 4 telas fora do ciclo]
         F1["Percorre os setores produtivos do roteiro<br/>de cada fabrica: Flange, Caldeiraria HRM"]
         F2[Conclui a etapa produtiva]
         F1 --> F2
     end
 
-    subgraph SEC_ESTOQUE[8. Estoque - MES · 12 telas, 8 no ciclo]
+    subgraph SEC_ESTOQUE[8 - Estoque - MES · 12 telas, 8 no ciclo]
         E1[Saldo disponivel na filial do pedido]
         E2{Saldo cobre o item?}
         E3[Split atendido: reserva no lote e conclui]
@@ -141,7 +141,7 @@ flowchart TD
         E5 --> E3
     end
 
-    subgraph SEC_QUAL[9. Qualidade - MES · 5 telas, 4 no ciclo]
+    subgraph SEC_QUAL[9 - Qualidade - MES · 5 telas, 4 no ciclo]
         Q1[Inspecao]
         Q2{Aprova?}
         Q3[Abre RNC com evidencia]
@@ -152,7 +152,7 @@ flowchart TD
         Q2 -->|sim| Q5
     end
 
-    subgraph SEC_EXP[10. Expedicao e Logistica de saida - MES · 4 telas fora do ciclo]
+    subgraph SEC_EXP[10 - Expedicao e Logistica de saida - MES · 4 telas fora do ciclo]
         X1[Embalagem e paletizacao]
         X2{Parcial ou integral?}
         X3[Consolida a carga]
@@ -162,7 +162,7 @@ flowchart TD
         X2 -->|parcial| X4
     end
 
-    subgraph SEC_FISCAL[11. Fiscal - Omie · 1 tela fora do ciclo]
+    subgraph SEC_FISCAL[11 - Fiscal - Omie · 1 tela fora do ciclo]
         O1[Emite nota fiscal]
         O2[Baixa o item no pedido]
         O1 --> O2
