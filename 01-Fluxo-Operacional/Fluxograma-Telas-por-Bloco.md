@@ -73,11 +73,10 @@ flowchart TD
     end
 
     subgraph SEC_PCP[2. PCP - MES · 5 telas]
-        P1["Carteira: so pedidos liberados<br/>PCP escolhe os itens e as<br/>quantidades da rodada"]
-        P2["Triagem do Pedido<br/>define o destino de cada item<br/>Estoque como etapa 1<br/>avisa o av-hub que importou"]
+        P1["Carteira de Pedidos<br/>pedidos liberados pelo vendedor<br/>PCP escolhe itens e quantidades<br/>da rodada, pode haver varias"]
+        P2["Triagem do Pedido<br/>PCP define o destino de cada item:<br/>fabricar ou revenda<br/>Estoque entra como etapa 1<br/>MES confirma a importacao ao av-hub"]
         K1[Setor Compras: parcial aguarda, requisicao enviada ao av-hub]
         P1 --> P2
-        P2 -->|nova rodada| P1
     end
 
     subgraph SEC_PCP2[PCP - decisoes e requisicoes]

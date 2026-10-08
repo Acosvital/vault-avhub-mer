@@ -135,11 +135,10 @@ flowchart TD
         SN["o av-hub libera o pedido e o MES le por polling - FRONTEIRA"]
         SE["abre divergencia na fila Novo norte - nunca beco sem saida"]
         SK["cinde o lote e abre a RNC - nunca emite a nota"]
-        P1["Carteira: so pedidos liberados<br/>PCP escolhe os itens e as<br/>quantidades da rodada"]
-        P2["Triagem do Pedido<br/>define o destino de cada item<br/>Estoque como etapa 1<br/>avisa o av-hub que importou"]
+        P1["Carteira de Pedidos<br/>pedidos liberados pelo vendedor<br/>PCP escolhe itens e quantidades<br/>da rodada, pode haver varias"]
+        P2["Triagem do Pedido<br/>PCP define o destino de cada item:<br/>fabricar ou revenda<br/>Estoque entra como etapa 1<br/>MES confirma a importacao ao av-hub"]
         K1[Setor Compras: gera a requisicao ao receber o parcial]
         P1 --> P2
-        P2 -->|nova rodada| P1
     end
 
     subgraph SEC_PCP2[PCP - decisoes e requisicoes]
