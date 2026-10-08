@@ -46,8 +46,8 @@ flowchart TD
     end
 
     subgraph SEC_PCP[PCP - MES]
-        P1["Carteira de Pedidos<br/>pedidos liberados pelo vendedor<br/>PCP escolhe itens e quantidades<br/>da rodada, pode haver varias"]
-        P2["Triagem do Pedido<br/>PCP define o destino de cada item:<br/>fabricar ou revenda<br/>Estoque entra como etapa 1<br/>MES confirma a importacao ao av-hub"]
+        P1["Triagem do Pedido<br/>lista os pedidos de venda<br/>liberados pelo vendedor"]
+        P2["Destinacao do Pedido<br/>PCP abre o pedido e define o destino<br/>e a quantidade de cada item<br/>Estoque entra como etapa 1<br/>MES confirma a importacao ao av-hub"]
         P1 --> P2
     end
 
@@ -503,7 +503,7 @@ flowchart TD
 flowchart TD
     subgraph SEC_PCP[PCP - MES]
         A[Carteira: escolhe fabrica e quantidade da rodada]
-        B[Triagem do Pedido com Estoque na etapa 1]
+        B[Destinacao do Pedido com Estoque na etapa 1]
         I[Requisicao preventiva de compra]
         A --> B
     end

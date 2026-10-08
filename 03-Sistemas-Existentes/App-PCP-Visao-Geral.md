@@ -64,6 +64,7 @@ Ver [[App-PCP-Modelo-Producao]] (visão frontend/roteiro), [[App-PCP-Backend-Pro
 - **Sem controller nem tela (continua só no desenho):** Pesagem, Etiqueta como entidade, OrdemSeparacao, DevolucaoCliente e ContagemCiclica. A etiqueta existe só como `GET /estoque/lotes/:id/etiqueta` (PDF Code128).
 
 ## Ver também
+- [[PCP-Legado-x-MES-Lacunas]] — o que falta para o MES substituir o PCP legado (levantamento do Robert, 08/10).
 - [[App-PCP-Recebimento-Conferencia]]
 - [[Integracao-AvHub-MES-Especificacao-F1]]
 - [[App-PCP-Modelo-Producao]]

@@ -95,8 +95,8 @@ flowchart TD
     end
 
     subgraph SEC_PCP[PCP - MES]
-        P1["Carteira de Pedidos<br/>pedidos liberados pelo vendedor<br/>PCP escolhe itens e quantidades<br/>da rodada, pode haver varias"]
-        P2["Triagem do Pedido<br/>PCP define o destino de cada item:<br/>fabricar ou revenda<br/>Estoque entra como etapa 1<br/>MES confirma a importacao ao av-hub"]
+        P1["Triagem do Pedido<br/>lista os pedidos de venda<br/>liberados pelo vendedor"]
+        P2["Destinacao do Pedido<br/>PCP abre o pedido e define o destino<br/>e a quantidade de cada item<br/>Estoque entra como etapa 1<br/>MES confirma a importacao ao av-hub"]
         P1 --> P2
     end
 
@@ -726,8 +726,8 @@ flowchart LR
     PCP(["PCP"])
     ALM(["Almoxarife - setor Estoque"])
     subgraph SISTEMA[Sistema]
-        UC4([Escolher itens, quantidades e destino da rodada])
-        UC5([Fazer a Triagem do Pedido: definir o destino, uma por fabrica])
+        UC4([Abrir o pedido na Triagem do Pedido])
+        UC5([Fazer a Destinacao do Pedido: destino e quantidade, uma por fabrica])
         UC10([Abrir a requisicao de compra no setor Requisicoes])
         UC8([Decidir Novo Norte])
         UC6([Atender pelo saldo: split e reserva])
@@ -915,7 +915,7 @@ stateDiagram-v2
 stateDiagram-v2
     [*] --> AGUARDANDO_LIBERACAO
     AGUARDANDO_LIBERACAO --> PENDENTE_PCP : vendedor libera, Fluxo 4
-    PENDENTE_PCP --> EM_ESTOQUE : PCP faz a Triagem do Pedido, Estoque e a etapa 1
+    PENDENTE_PCP --> EM_ESTOQUE : PCP faz a Destinacao do Pedido, Estoque e a etapa 1
     EM_ESTOQUE --> PRONTO_EXPEDICAO : atendido pelo saldo e despachado
     EM_ESTOQUE --> EM_COMPRA : solicitar compra
     EM_ESTOQUE --> EM_PRODUCAO : enviar a producao

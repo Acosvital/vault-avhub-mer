@@ -50,7 +50,7 @@ sequenceDiagram
     SIS->>SIS: 3 · calcula o restante de cada item e limita o envio a ele
     SIS-->>PCP: 4 · mostra itens, restante e fabricas, inclusive a Revenda
     PCP->>SIS: 5 · escolhe quantidade e fabrica de cada item, monta o roteiro
-    SIS->>SIS: 6 · Triagem do Pedido: grava uma por fabrica, com o setor Estoque na etapa 1, e avisa o av-hub que importou (POST importado)
+    SIS->>SIS: 6 · Destinacao do Pedido: grava uma por fabrica, com o setor Estoque na etapa 1, e avisa o av-hub que importou (POST importado)
     SIS-->>PCP: 6 · cada parcial nasce no setor Estoque (ato 3)
 
     Note over SIS,FAB: Forca do sistema: FORTE — limita a quantidade ao restante<br/>e forca o Estoque na etapa 1. A natureza vem da fabrica.
@@ -135,8 +135,8 @@ flowchart TD
         SN["o av-hub libera o pedido e o MES le por polling - FRONTEIRA"]
         SE["abre divergencia na fila Novo norte - nunca beco sem saida"]
         SK["cinde o lote e abre a RNC - nunca emite a nota"]
-        P1["Carteira de Pedidos<br/>pedidos liberados pelo vendedor<br/>PCP escolhe itens e quantidades<br/>da rodada, pode haver varias"]
-        P2["Triagem do Pedido<br/>PCP define o destino de cada item:<br/>fabricar ou revenda<br/>Estoque entra como etapa 1<br/>MES confirma a importacao ao av-hub"]
+        P1["Triagem do Pedido<br/>lista os pedidos de venda<br/>liberados pelo vendedor"]
+        P2["Destinacao do Pedido<br/>PCP abre o pedido e define o destino<br/>e a quantidade de cada item<br/>Estoque entra como etapa 1<br/>MES confirma a importacao ao av-hub"]
         K1[Setor Compras: gera a requisicao ao receber o parcial]
         P1 --> P2
     end
@@ -400,7 +400,7 @@ Cada ato recebe uma nota pelo quanto o sistema realmente contribui antes de a pe
 - **3 · Faz** — calcula o restante de cada item e **não deixa enviar mais que o restante**; para cada fábrica usada, **insere o setor Estoque como etapa 1** do roteiro; `codigo_empresa` vem do pedido (DEC-1).
 - **4 · Mostra** — itens com total, já enviado e restante; as fábricas, inclusive a Revenda.
 - **5 · Decide** — PCP escolhe quantidade e **fábrica** de cada item (a natureza do item é o tipo da fábrica) e monta o roteiro.
-- **6 · Roteia (Triagem do Pedido)** — grava **uma por fábrica** e confirma a importação ao av-hub; cada parcial nasce no **setor Estoque** (ato 3). O pedido volta à Carteira enquanto sobrarem itens (nova rodada).
+- **6 · Roteia (Destinação do Pedido)** — grava **uma por fábrica** e confirma a importação ao av-hub; cada parcial nasce no **setor Estoque** (ato 3). O pedido volta à Triagem do Pedido enquanto sobrarem itens (nova rodada).
 
 > **Mudou em 24/09/2026.** Antes, este ato cruzava a matriz natureza × disponibilidade e roteava para três rotas. A disponibilidade saiu daqui: é resolvida no setor Estoque, para todo item. Ver [[Encaixe-Estoque-Revenda-no-PCP]].
 

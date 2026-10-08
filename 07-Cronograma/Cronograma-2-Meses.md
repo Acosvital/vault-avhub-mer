@@ -65,6 +65,10 @@ Fonte: leitura do código das `develop` em 07/10 (ver o callout acima e [[Onde-E
 - **Acesso e segurança (C5):** continua parcial: `UsuariosController` e `SetoresController` sem guard na maioria das rotas.
 - **API:** `PERMISSOES_ROTA_MODO` virou `exigir` por padrão em 07/10 (`0557871`), o que obriga `USUARIO_TOKEN_SEGREDO` na subida: entra como **cuidado de deploy** da `api-acos-vital` (item do Gustavo). A decisão 8 diz "fixo, sem `.env`"; o código ainda aceita a variável.
 
+### Escopo novo em análise: PCP legado × MES (08/10)
+
+O Robert levantou **29 lacunas** para o MES substituir o PCP legado ([[PCP-Legado-x-MES-Lacunas]]): 14 da Flange, 8 da Caldeiraria HRM e 7 de análise e gestão. **Nada foi decidido pelo Nathan e nada tem estimativa de pessoa-dia**, então o cronograma, os marcos e a capacidade (seção 3.2) **não foram alterados**. Se qualquer parte entrar, o déficit do Robert (−10,1 pd) aumenta e o plano precisa ser recalculado de uma vez, junto com as outras mudanças de escopo do Nathan.
+
 ### Comercial & Suprimentos (Pablo) — fora do plano original, entregue na `develop` até 07/10
 
 Este módulo **não está** nas sprints S1–S5 (a capacidade do Pablo no plano é 0 desde 07/10, seção 3.2). Estado conferido no código:
