@@ -6,6 +6,8 @@ atualizado: 2026-10-08
 
 # Fluxograma de Telas — quantas telas e quais funcionalidades por bloco
 
+> Status: decidido | no código (`develop`, conferido em 08/10/2026) | em produção: não verificado
+
 > **Atualização de 07/10/2026 — estado das telas do MES conferido no código** (`develop`: `api-pcp` `ca3346b`, `app-pcp` `a802a3e`; **só em `develop` — a `main` do MES parou em 28/08; produção e banco não conferidos; as telas do menu são criadas por SQL fora do repo, `modulos-telas.sql`**). Corrige o que esta nota dizia ("sobre mock", "🆕 a construir"): **Estoque (8.1, 8.2, 8.4–8.7) e Qualidade (9.1–9.4) estão com API real**; a **8.12** (setor Estoque) e a **2.4** (requisição de compra) existem; o **Recebimento (bloco 6)** não ganhou rota nova — vive na fila do setor `LOGISTICA_ENTRADA` com a ação "Conferir recebimento", "Recontar" e a tela **`/decisoes-pcp`** (hoje a 2.5 só trata divergência de recebimento). **Sem código conferido:** 8.3 (carga inicial em lote, G1 — só existe `POST /estoque/lotes/carga-inicial`, um lote por vez), T.2 (C3 não iniciada; C5 parcial, sem guard global) e T.3–T.6 (nada de `fluxo.*` no Prisma). **Não auditados nesta rodada:** 8.8–8.11 (os alertas de estoque mínimo/RNC pendente de `bfe5882` são o mais próximo da 8.10) e os blocos 7, 10 e 11. A contagem de telas abaixo é a de 24/09 e **não foi refeita**. Estado das tarefas: [[Onde-Estamos]].
 
 > **Atualização de 08/10/2026 — telas marcadas como feitas, conferidas na `develop`** (`app-pcp` `2ea3183`; av-hub `main` `cfed113` e `develop` `bd1ae48`). A coluna "Estado" de cada tela foi reescrita contra o código: onde dizia 🆕 ou "frontend pronto", agora diz o que existe. **Só leitura de código; produção não conferida.**

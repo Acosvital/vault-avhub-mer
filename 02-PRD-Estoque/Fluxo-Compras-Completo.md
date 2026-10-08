@@ -69,7 +69,7 @@ graph TD
 ## Conversa por conversa
 
 **C0 — OP da fábrica Revenda (24/09/2026)**
-O PCP envia o item para a fábrica **Revenda** na tela Ordem de Produção. O parcial nasce no setor Estoque (etapa 1); o que o saldo não cobre é movido para o **setor Compras**.
+O PCP envia o item para a fábrica **Revenda** na tela **Destinação do Pedido** (nome de 08/10/2026; antes "Ordem de Produção"). O parcial nasce no setor Estoque (etapa 1); o que o saldo não cobre segue para o **circuito de compra**, que fica **fora do roteiro**: requisição (setor `REQUISICAO`) → Compras → Recebimento. O saldo zero exige clique (decidido em 08/10, [[Registro-de-Decisoes-2026-10-07]] #31b).
 
 **C1 — Setor Compras → Compras: "preciso comprar X"**
 ~~Gatilho (**desde 24/09/2026**): a **entrada do parcial no setor Compras** gera a requisição automaticamente~~ **(superado em 28/09: a requisição nasce no setor `REQUISICAO`, antes de Compras, e não ao entrar em Compras; no código `ComprasService.requisitar`)**. Vinculada ao `ItemParcial` (`origem.id_item_parcial` no Fluxo 1 de [[Integracao-AvHub-MES-Especificacao-F1]]). O parcial fica parado nesse setor até o recebimento liberar (C9b). ~~Gatilho: PCP avalia o item pelo Modelo-Destinacao-Item e conclui "sem estoque".~~ Payload: material (projeção `core.produtos`), quantidade, prazo (SLA do pedido de origem), unidade/filial (`codigo_empresa`, quando o vínculo existir — ver [[MES-Arquitetura-Decisoes]]), restrição de acabado/não-acabado se houver. **Mecanismo de transporte MES→av-hub ainda em aberto** — parte do "casamento av-hub↔MES" (ver [[Decisoes-Chave-ERP]]). *(Atualizado em 07/10: o transporte existe no código — contrato 34, `EnvioAvhubService` (`e7ce2c9`, 02/10): a requisição vira uma linha em `integracao_avhub_envios` na mesma transação, um PUT por item (`id_origem` = id do `RequisicaoCompraItem`, sem `id_item_parcial`), disparo imediato + timer de 60 s, backoff 1/2/5/10/30/60 min; 200/201 → `ENVIADO`; 409 `REQUISICAO_COM_OC` → `RECUSADO` (não repete); 400 → `FALHOU`; 401/403/404/5xx reagenda; sem chave a fila espera com aviso no log. Usa `AVHUB_MES_INTEGRACAO_KEY`. Se a chave está definida no ambiente real: não verificado.)*
@@ -78,7 +78,7 @@ O PCP envia o item para a fábrica **Revenda** na tela Ordem de Produção. O pa
 Comprador escolhe fornecedor (projeção `core.parceiros`, sem cadastro próprio no Estoque). Negociação de preço/condição acontece **fora do sistema** hoje — canal externo, sem integração.
 
 **C3 — Comprador → Aprovador (condicional)**
-Só dispara se o valor da compra estiver acima do limiar que ainda precisa ser definido (ver pendência de negócio em [[Estoque-Perguntas-Abertas]]). Segunda camada além da segregação comprador≠aprovador já prevista.
+Só dispara se o valor da compra estiver acima do limiar: **R$ 30.000** (DEC-3 de 21/09, aprovador diretor). **Em 08/10 o Nathan respondeu que o Gerente de Compras aprova**; falta confirmar se vale para todos os valores ou só abaixo do limiar ([[Registro-de-Decisoes-2026-10-07]] #50b). Segunda camada além da segregação comprador≠aprovador já prevista.
 
 **C4 — Emissão da Ordem de Compra**
 `pedido_compra` criado no av-hub (decidido em [[MES-Arquitetura-Decisoes]]). Campos: fornecedor, itens, preço, condição, moeda (cobre MP importada), flag **acabado/não-acabado** por item — essa flag é o dado mais importante que nasce aqui, decide o resto do fluxo.
@@ -128,6 +128,7 @@ Também referenciado em [[Rota-Revenda]].
 **C9 — Recebimento confere**
 > *(Atualizado em 07/10: o código confere **contra a NF**, com peso/tolerância de 5%, recontagem por outra pessoa e decisão do PCP — a divisão acabado × PV / não acabado × OC abaixo é o desenho original. Ver [[Fluxo-Recebimento-Completo]] e [[App-PCP-Recebimento-Conferencia]].)*
 
+- *(Desenho original de 24/09; o código de hoje confere contra a NF, como na nota acima.)*
 - **Item acabado** → confere contra o **Pedido de Venda** ("cara-crachá": o que chegou é o que o vendedor vendeu).
 - **Item não acabado** → confere contra a **referência da OC** recebida em C7 (o que chegou é o que o comprador comprou, pode ser bem diferente do item final vendido).
 - Pesagem: peso teórico × quantidade, dentro da tolerância por categoria (provisório 5%, ver [[Estoque-Perguntas-Abertas]]).

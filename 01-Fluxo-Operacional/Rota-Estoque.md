@@ -6,6 +6,8 @@ atualizado: 2026-10-07
 
 # 3a. Rota Estoque (Pronta Entrega)
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 > **Atualização de 07/10/2026 — a rota já tem código em `develop` (não é produção).** Conferido no código (`develop`, `api-pcp` `ca3346b`; a `main` do MES parou em 28/08): atender pelo estoque (split + reserva + conclusão, `atenderEstoque`), saldo/reservas/movimentação/lote reais, cadastros de material e depósito, e o saldo por filial no atendimento (transferência, etapa 1, `861c050`). **A baixa ainda ocorre quando a Embalagem recebe** o item; a mudança decidida em 29/09 (baixa no despacho do Estoque, Reserva só para "separar sem despachar") não foi implementada. Separação (`ordem_separacao`) e o fluxo de transferência (etapas 2–4) não constam no código.
 
 > **Atualizado em 24/09/2026:** a pronta entrega é o **split atendido no setor Estoque**, a etapa 1 que o backend insere em todo roteiro do MES (de Fabricação e de Revenda). Não é uma rota separada escolhida pelo PCP: todo item passa pelo Estoque primeiro, e a parte que o saldo cobre termina ali. Ver [[Encaixe-Estoque-Revenda-no-PCP]].

@@ -105,7 +105,7 @@ local: `GET /dashboard/comissoes?ano_mes=2026-09` → 5 coordenadores, 44 vended
 - `omie-elt-pipeline` PR #2 (mergeado em 06/10/2026): saíram os `SYNC_*` de leitura de Compras,
   `EXCLUSION_SYNC_DRY_RUN` (produção já rodava de verdade: run_log `ok`, nenhum `dry_run` em 30 dias) e
   `RAW_AUDIT_ENABLED`. Ficam só `SYNC_ENVIO_OC` e `ENVIO_OC_DRY_RUN` (escrita no Omie), até o passo 2 da
-  §4 e os compradores vinculados.
+  §4 e os compradores vinculados. **(08/10/2026: também saíram, na `master` da pipeline, PR #3, `0f739f0`; o envio é fixo. Este parágrafo é histórico de 06/10.)**
 - av-hub: só `NEXT_PUBLIC_DEV_SEM_LOGIN` (modo de desenvolvimento, bloqueado em produção pelo código).
 
 ## 7. Aceite

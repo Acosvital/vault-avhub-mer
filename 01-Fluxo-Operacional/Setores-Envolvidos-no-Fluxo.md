@@ -6,6 +6,8 @@ atualizado: 2026-10-07
 
 # Setores Envolvidos no Fluxo do Pedido — Referência Completa
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 > **Atualização de 07/10/2026 — a coluna "Sistema" deixou de ser só destino planejado para parte dos setores do MES.** Conferido no código (`develop`: `api-pcp` `ca3346b`, `app-pcp` `a802a3e`; **a `main` do MES parou em 28/08; produção e banco não conferidos**): **Estoque, Compras (setor), Recebimento e Qualidade (entrada)** têm código real em `develop`; `embalagem` (Expedição) e os setores `PRODUTIVO` de Flange vêm da UI/banco e **não foram conferidos**. Detalhe na seção "Setor no fluxo × setor no MES" abaixo e nas notas de fluxo. A ressalva de 17/09 abaixo fica por histórico.
 >
 > Lista de todo setor/função que participa do ciclo de vida do pedido, do 0 ao 100%. Cada linha diz onde o setor **vai viver** (sistema-alvo), o que ele faz, e em qual dos fluxos detalhados ele aparece como ator.

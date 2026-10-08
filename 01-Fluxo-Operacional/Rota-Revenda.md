@@ -6,6 +6,8 @@ atualizado: 2026-10-07
 
 # 3b. Rota Revenda (CCP & Suprimentos)
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 > **Atualização de 07/10/2026 — o roteiro abaixo é o de 24/09; o desenho vigente (29/09) é diferente, e parte dele já tem código em `develop`.** Decidido em 29/09 e conferido no código em 07/10 (`develop`; `main` do MES parada em 28/08; produção não conferida): **Estoque único** e **circuito de compra fora do roteiro** (Requisição → Compras → Recebimento → Qualidade → volta ao mesmo Estoque) estão **implementados**; "Solicitar compra" parte do Estoque; o Recebimento confere **contra a NF**, com recontagem e decisão do PCP ([[Fluxo-Recebimento-Completo]], [[App-PCP-Recebimento-Conferencia]]); a inspeção de entrada é por lote, com reprovação total/parcial. **Não implementados:** baixa no despacho do Estoque, ação de consumo de matéria-prima e `RoteiroItem`. Detalhe em [[Encaixe-Estoque-Revenda-no-PCP]].
 
 > **Atualizado em 24/09/2026:** a Revenda passa a ser uma **fábrica** no MES (`Fabrica.tipo = REVENDA`), com roteiro próprio — deixa de ser "item sem fábrica", que hoje é descartado ao salvar a OP. Ver [[Encaixe-Estoque-Revenda-no-PCP]].

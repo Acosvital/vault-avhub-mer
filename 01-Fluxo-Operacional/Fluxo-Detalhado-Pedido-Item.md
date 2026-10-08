@@ -6,6 +6,8 @@ atualizado: 2026-10-07
 
 # Fluxo Detalhado do Pedido — Nível de Item
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 > **Atualização de 07/10/2026 — parte deste fluxo já tem código em `develop` do MES** (conferido no código, `api-pcp` `ca3346b` / `app-pcp` `a802a3e`; **`main` do MES parada em 28/08; produção não conferida**). Passos 2 (Carteira + setor Estoque), 3 (requisição de compra), 4 (recebimento) e 5 (inspeção de entrada) existem. Dois pontos mudaram no código em relação ao texto abaixo: o **Recebimento confere contra a NF** (não contra PV ou OC conforme a flag — a flag acabado/não-acabado não decide a conferência) e o **item comprado volta ao mesmo Estoque único**, com o circuito de compra **fora do roteiro**. Seguem **sem código**: baixa no despacho do Estoque, consumo de matéria-prima e `RoteiroItem`. Ver [[Encaixe-Estoque-Revenda-no-PCP]], [[Fluxo-Recebimento-Completo]] e [[App-PCP-Recebimento-Conferencia]].
 
 > **Relação com [[Fluxo-Operacional-Visao-Geral]]:** são **dois modelos complementares, não um substituindo o outro**. O macro trata Estoque/Revenda/Fabricação como três categorias de destinação; este arquivo descreve o que acontece de fato, item a item, dentro dessas categorias — inclusive o fato de que "ter em estoque" na prática é uma **checagem** feita pelo PCP dentro de Revenda/Fabricação, não uma quarta rota isolada.

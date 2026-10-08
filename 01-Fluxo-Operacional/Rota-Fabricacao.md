@@ -6,6 +6,8 @@ atualizado: 2026-10-07
 
 # 3c. Rota Fabricação (PCP & Produção Interna)
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 > Fabricação **não** inclui corte de chapas — isso é beneficiamento dentro da [[Rota-Revenda|Revenda]], ver [[Fabricacao-Chapas]]. Fabricação é lista **aberta** de linhas de produção reais, cada uma com sua própria fábrica/roteiro no MES: hoje só **Flange** está de fato implementada; **Grade de Piso**, **Chapa Expandida**, **Caldeiraria** e outras entram conforme forem cadastradas — não é uma lista fechada de três itens. O modelo Fábrica/Setor/Roteiro do [[App-PCP-Visao-Geral|app-pcp]]/MES já é genérico o suficiente para qualquer linha nova; só falta cadastrar a fábrica e o roteiro quando a linha entrar em uso. Ver [[MES-Arquitetura-Decisoes]].
 
 > **Atualizado em 24/09/2026:** toda fábrica de Fabricação ganha `Fabrica.tipo = FABRICACAO`, e o backend insere o **setor Estoque como etapa 1** de todo roteiro: `ESTOQUE` → setores `PRODUTIVOS` da linha → Qualidade → entrega. A parte que o saldo de produto acabado cobre é atendida ali (split + reserva + conclusão); o restante segue para a produção. O setor "Emissão de Ordens" sai do roteiro — virou a tela Ordem de Produção. Reserva/consumo de matéria-prima fica para a J3. Ver [[Encaixe-Estoque-Revenda-no-PCP]].
