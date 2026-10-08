@@ -105,19 +105,22 @@ flowchart TD
         P6[Decide o novo norte]
     end
 
-    subgraph SEC_ESTOQUE[Estoque - MES, setor unico]
+    subgraph SEC_ESTOQUE[Estoque - atendimento do pedido]
         E1[Saldo disponivel na filial do pedido]
         E2{Saldo cobre o item?}
         E3[Atende pelo saldo: split e reserva]
         E4{O que fazer com o restante?}
-        E5[Retorno ao Estoque: compra aprovada ou producao inspecionada]
-        E6[Despacho do Estoque: baixa do saldo]
         E1 --> E2
         E2 -->|sim, tudo ou parte| E3
         E2 -->|nao, ou o restante| E4
-        E3 --> E6
+    end
+
+    subgraph SEC_ESTOQUE2[Estoque - retorno e despacho]
+        E5[Retorno ao Estoque: compra aprovada ou producao inspecionada]
+        E6[Despacho do Estoque: baixa do saldo]
         E5 --> E6
     end
+    E3 --> E6
 
     subgraph SEC_COMPRAS[Compras - av-hub e setor Compras do MES]
         C1[Cotacao e negociacao]
@@ -146,15 +149,18 @@ flowchart TD
         R3 -->|sim| R4
     end
 
-    subgraph SEC_QUAL[Qualidade - MES]
+    subgraph SEC_QUAL[Qualidade - inspecao de entrada]
         Q1[Inspecao de entrada por lote]
         Q2{Aprova o lote?}
         Q3[RNC: parte reprovada volta a Compras]
         Q4[Parte aprovada em quarentena ate a substituicao]
-        Q7[Inspecao de saida: setor QUALIDADE no roteiro]
-        Q8{Aprova?}
         Q1 --> Q2
         Q2 -->|nao, total ou parcial| Q3 --> Q4
+    end
+
+    subgraph SEC_QUAL2[Qualidade - inspecao de saida]
+        Q7[Inspecao de saida: setor QUALIDADE no roteiro]
+        Q8{Aprova?}
         Q7 --> Q8
     end
 
@@ -207,7 +213,9 @@ flowchart TD
     style SEC_RECEB fill:#e1eede,stroke:#5a7d3a,stroke-width:2px,color:#181c22
     style SEC_PROD fill:#f3ddd6,stroke:#a8420f,stroke-width:2px,color:#181c22
     style SEC_ESTOQUE fill:#d9eef2,stroke:#1f7a8c,stroke-width:2px,color:#181c22
+    style SEC_ESTOQUE2 fill:#d9eef2,stroke:#1f7a8c,stroke-width:2px,color:#181c22
     style SEC_QUAL fill:#f7edd0,stroke:#a8860f,stroke-width:2px,color:#181c22
+    style SEC_QUAL2 fill:#f7edd0,stroke:#a8860f,stroke-width:2px,color:#181c22
     style SEC_EXP fill:#ece0f0,stroke:#7a3f9e,stroke-width:2px,color:#181c22
     style SEC_FISCAL fill:#f6dde4,stroke:#a83f5c,stroke-width:2px,color:#181c22
 
