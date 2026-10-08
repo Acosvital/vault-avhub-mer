@@ -50,7 +50,7 @@ Se **nenhuma** das telas pedidas existe em `auth.telas` (banco atrasado em rela�
 
 ## 2ª camada no `api-comercial`
 
-O `api-comercial` (só em `develop`) valida o `backendToken` (claim `perfis`, `exp` obrigatório) e, **dentro dele**, aplica o `PerfilComercial`: cargo (vendedor, auxiliar, supervisor, gerente, gerente geral, diretor) e capacidades (escopo de propostas, ver valores, ver custo, excluir, relatório gerencial). Comprador é detectado por regex `/compr|suprimento/i` no nome do perfil do Hub (frágil, **[I]**). Não é um segundo cadastro de usuários — usa a identidade do Hub — mas é um **segundo modelo de permissão**. Ver [[AV-Hub-Comercial-Suprimentos]]. No BFF, as rotas comerciais exigem a tela cadastrada em `auth.telas` (senão 403 e some do menu).
+O `api-comercial` (só em `develop`) valida o `backendToken` (`exp` obrigatório; os perfis vêm de `GET /me/permissoes`, PR #173 aberto em 08/10) e, **dentro dele**, aplica o `PerfilComercial`: cargo (vendedor, auxiliar, supervisor, gerente, gerente geral, diretor) e capacidades (escopo de propostas, ver valores, ver custo, excluir, relatório gerencial). Comprador era detectado por regex `/compr|suprimento/i` no nome do perfil do Hub (frágil); o PR #175 (aberto, 08/10) troca por lista explícita em `PERFIS_COMPRADOR`. Não é um segundo cadastro de usuários — usa a identidade do Hub — mas é um **segundo modelo de permissão**. Ver [[AV-Hub-Comercial-Suprimentos]]. No BFF, as rotas comerciais exigem a tela cadastrada em `auth.telas` (senão 403 e some do menu).
 
 ## Por que isso importa para o ERP unificado
 
