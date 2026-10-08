@@ -186,7 +186,7 @@ flowchart TD
 
     subgraph SEC_PROD[7. Fabrica e Beneficiamento - MES · 4 telas fora do ciclo]
         SH["move o parcial para o proximo setor produtivo do roteiro"]
-        F1[Percorre os setores produtivos do roteiro]
+        F1["Percorre os setores produtivos do roteiro<br/>de cada fabrica: Flange, Caldeiraria HRM"]
         F2[Conclui a etapa produtiva]
         F1 --> F2
     end

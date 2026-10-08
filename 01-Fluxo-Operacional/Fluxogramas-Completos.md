@@ -108,7 +108,7 @@ flowchart TD
     end
 
     subgraph SEC_PROD[Fabrica e Beneficiamento - MES]
-        F1[Percorre os setores produtivos do roteiro]
+        F1["Percorre os setores produtivos do roteiro<br/>de cada fabrica: Flange, Caldeiraria HRM"]
         F2[Conclui a etapa produtiva]
         F1 --> F2
     end

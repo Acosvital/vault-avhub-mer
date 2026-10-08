@@ -18,6 +18,8 @@ atualizado: 2026-10-08
 >
 > **Mudanças em relação ao que a nota dizia:** os blocos 6 (Recebimento), 7 (Fábrica) e 10 (Expedição) **não são mais "só backend / fora do ciclo"**: a fila do setor (`FilaSetor`) já tem as ações de produção, a conferência e recontagem de recebimento, a paletização e o comprovante de entrega. Os blocos 8 e 9 saíram do mock; o `mapa-deposito` é a exceção e **segue sobre `MOCK_DEPOSITOS`**. Telas que existem e não estavam na lista: `estoque-operacao/painel-estoque` (alertas reais), `estoque-operacao/mapa-deposito` (mock), `qualidade/inspecao-saida` (fila do setor Qualidade no roteiro), `pedidos-excluidos`, `relatorios` e os cadastros operacionais (`fabricas`, `maquinas`, `operadores`, `setores`).
 >
+> **Escopo novo (08/10):** o levantamento do PCP legado ([[PCP-Legado-x-MES-Lacunas]]) acrescenta recursos e telas ao MES (fila programada, planejamento da Usinagem, telão/kanban, impressão, romaneios, Caldeiraria e relatórios), todos aprovados e **ainda sem código**; este inventário de 51 telas não foi refeito para incluí-los.
+>
 > **Telas do av-hub fora desta lista que também estão feitas:** o módulo Comercial & Suprimentos inteiro (22 slugs, ver [[AV-Hub-Comercial-Suprimentos]]).
 
 > **Para que serve esta nota.** [[Fluxogramas-Completos]] e o diagrama 0b de [[Diagramas-UML]] respondem *"quem decide o quê e pra onde o item vai"*. Esta aqui responde a pergunta seguinte, que é a de **colocar o projeto pra rodar**: *"pra cada raia daquele fluxograma, quantas telas precisam existir e o que cada uma faz?"*.
@@ -120,7 +122,7 @@ flowchart TD
     end
 
     subgraph SEC_PROD[7. Fabrica e Beneficiamento - MES · 4 telas fora do ciclo]
-        F1[Percorre os setores produtivos do roteiro]
+        F1["Percorre os setores produtivos do roteiro<br/>de cada fabrica: Flange, Caldeiraria HRM"]
         F2[Conclui a etapa produtiva]
         F1 --> F2
     end

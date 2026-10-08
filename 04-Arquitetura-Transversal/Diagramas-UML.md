@@ -159,7 +159,7 @@ flowchart TD
     end
 
     subgraph SEC_PROD[Producao e beneficiamento - MES]
-        F1[Setores produtivos do roteiro]
+        F1["Setores produtivos do roteiro<br/>de cada fabrica: Flange, Caldeiraria HRM"]
     end
 
     subgraph SEC_EXP[Expedicao - MES]
