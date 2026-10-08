@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, av-hub, comercial, suprimentos, api-comercial]
 criado: 2026-10-07
-atualizado: 2026-10-07
+atualizado: 2026-10-08
 ---
 
 # av-hub — AV Comercial & Suprimentos e o serviço `api-comercial`
@@ -10,7 +10,7 @@ atualizado: 2026-10-07
 
 **Decidido (✅ Nathan, 07/10):** o **orçamento é desenvolvido por fora, neste módulo** (Comercial & Suprimentos); a API entregue (`90bdb33`) existe e os contratos 07 e 38 precisam ser reescritos (item 39). **O Pablo atua aqui** (`api-comercial` e `av-hub`); o MES fica com o Robert (item 32).
 
-> **Rótulos de confiança.** Tudo aqui vem de **leitura de código** no repositório do av-hub (`origin/develop` 996e320, 07/10 10:01; `origin/main` cfed113, #153, 06/10 14:39), na auditoria de 07/10/2026. **Produção e banco não foram conferidos.** "Em `main`" = provável produção, **não verificado**. `[C]` = confirmado no código; `[I]` = inferido.
+> **Rótulos de confiança.** Tudo aqui vem de **leitura de código** no repositório do av-hub (`origin/develop` bd1ae48, 07/10 (reconferido em 08/10; era 996e320); `origin/main` cfed113, #153, 06/10 14:39), na auditoria de 07/10/2026. **Produção e banco não foram conferidos.** "Em `main`" = provável produção, **não verificado**. `[C]` = confirmado no código; `[I]` = inferido.
 
 Este módulo era o maior buraco do vault: o av-hub deixou de ser "só BFF para a `api-acos-vital`" e passou a ter um **segundo backend**, o `api-comercial`, dentro do mesmo repositório. Ver [[AV-Hub-Arquitetura-BFF]] e [[AV-Hub-Visao-Geral]].
 
@@ -21,7 +21,7 @@ Este módulo era o maior buraco do vault: o av-hub deixou de ser "só BFF para a
 | Onde está | Pasta `api-comercial/` do repo av-hub; importada no commit 6a914a0 (05/10). **Só em `develop` — 0 arquivos em `main`.** |
 | Stack | Node 22, Express 5, TypeScript ESM, Prisma 7 + PostgreSQL, zod 4, pino, decimal.js, Vitest + supertest. (O Dockerfile do Hub é Node 20; o do `api-comercial` é Node 22.) |
 | Container | Dockerfile próprio (porta 3001) e CI própria `.github/workflows/api-comercial.yml`. |
-| Banco | Schema **`core_comercial`**, 9 migrations (de `20261001…` a `20261006120642_travas_tarefa`). Mesmo cluster do Hub: **[I]** (só se vê `DATABASE_URL`). |
+| Banco | Schema **`core_comercial`**, 10 migrations (de `20261001…` a `20261007160000_evento_email_enviado`; em 06/10 eram 9, até `travas_tarefa`). Mesmo cluster do Hub: **[I]** (só se vê `DATABASE_URL`). |
 | Migração ao subir | O README diz que o Dockerfile roda `prisma migrate deploy`; o contrato de telas diz para rodar **antes**. **Divergem** — decidir na publicação. |
 | Convenções | `If-Match`/ETag em PUT/DELETE/fechar/perder/reabrir (428 sem o header, 409 com versão velha); `Idempotency-Key` em POST de proposta e de solicitação de custo; erro `{detail, codigo, campos}`; valores monetários como `Decimal` em string. |
 
@@ -65,12 +65,12 @@ Este módulo era o maior buraco do vault: o av-hub deixou de ser "só BFF para a
 
 ## 5. Telas e slugs de `auth.telas`
 
-O BFF aplica uma **allowlist rota × tela × ação** em `auth.telas`: sem a tela cadastrada o resultado é **403** e o item some do menu. O contrato `docs/ENVIAR - contrato-comercial-suprimentos-telas.md` (#138) lista 18 slugs:
+O BFF aplica uma **allowlist rota × tela × ação** em `auth.telas`: sem a tela cadastrada o resultado é **403** e o item some do menu. O contrato `docs/ENVIAR - contrato-comercial-suprimentos-telas.md` (#138) lista **22 slugs** (reconferido em 08/10 no `develop` `bd1ae48`; eram 18 em 07/10): 2 grupos, 17 telas com página ou bastidor e `matriz-precos` sem tela. Entraram `pedido-cotacao`, `historico-compras`, `pesquisa-materiais` e `tabela-telha`:
 
 | Tipo | Slugs |
 |---|---|
 | Grupos de menu | `comercial`, `suprimentos` (o `groupMap.ts` coloca os dois em Operações) |
-| Telas com página | `propostas`, `clientes`, `relatorio-cotacoes`, `relatorio-gerencial`, `painel-comprador`, `ofertas-fornecedor`, `fornecedores`, `catalogo-produtos`, `sincronizacao-omie`, `parametros-custo`, `dash-comercial`, `empresas-emissoras` |
+| Telas com página | `propostas`, `clientes`, `relatorio-cotacoes`, `relatorio-gerencial`, `painel-comprador`, `pedido-cotacao`, `ofertas-fornecedor`, `historico-compras`, `fornecedores`, `catalogo-produtos`, `pesquisa-materiais`, `sincronizacao-omie`, `parametros-custo`, `tabela-telha`, `dash-comercial`, `empresas-emissoras` |
 | Bastidor (sem página) | `propostas-delegacao`, `custo-item`, `solicitacoes-custo` |
 | Sem tela | `matriz-precos` |
 
@@ -86,19 +86,22 @@ Perfis sugeridos: Comercial (Vendedor / Auxiliar / Gestão / Diretoria), Suprime
 | **Só `develop`** (mergeado em 06/10, 15:53–15:57) | #123 base; #128 telas MVP (Clientes, Relatórios de Cotações e Gerencial com PDF/XLSX, Catálogo, Fornecedores, Ofertas, Sincronização Omie); #133 mapa de fornecedor (importa `MAPA_COTACAO.xlsx`, apelidos); #134 solicitações de custo; #135 duplicar / copiar para outra empresa / revisões; #139 e #140 paridade da proposta (fechar por itens, emitir em nome de outro, especificação técnica, cliente cadastrado, CNPJ na Receita); #143 filtros do histórico; #144 linha do tempo; #145 solicitações no formulário; #146 replicar impostos do 1º item; #147 excluir em lote; #148 exportar contatos; #149 exportar ofertas; #136 sininho de notificações (poll de 60 s); #137 Omie agendada; #150 perfil de compras do fornecedor; #152 configurações (Empresas emissoras, Parâmetros de custo com vigência); #138 documento do contrato de telas. |
 | **Branches abertas, não mergeadas** (todas partem de 27fed68, #152) | ver tabela abaixo |
 
-### Branches abertas
+### Branches da rodada de 06–07/10 (reconferido em 08/10)
 
-| Branch | O que traz |
+Todas as 9 branches que o vault listava como abertas em 07/10 **já foram mergeadas na `develop`** (`bd1ae48`): `feat/comercial-cambio`, `feat/comercial-imprimir-lote`, `feat/comercial-itens-planilha`, `feat/suprimentos-categorias-certificados`, `feat/suprimentos-painel-comprador`, `feat/suprimentos-tabela-telha`, `feat/suprimentos-historico-compras`, `feat/suprimentos-pesquisa-materiais` e `test/comercial-e2e`. Também entraram em 07/10:
+
+| Branch / PR | O que traz |
 |---|---|
-| `feat/comercial-cambio` | `GET /cambio` USD/EUR via AwesomeAPI com fallback PTAX do BCB, cache de 10 min; proposta de exportação em euro |
-| `feat/comercial-imprimir-lote` | até 50 propostas num PDF (07/10) |
-| `feat/comercial-itens-planilha` | importar/exportar itens em xlsx (07/10) |
-| `feat/suprimentos-categorias-certificados` | categorias, suspensão com motivo, certificados ISO 9001 / CRC Petrobras |
-| `feat/suprimentos-painel-comprador` | `GET /painel_comprador`: ranking de fornecedores (180 dias), certificados vencendo, itens sem preço, cobertura de custo por família, ofertas vencendo |
-| `feat/suprimentos-tabela-telha` | `PUT /telha/tabela`, tela `tabela-telha` |
-| `feat/suprimentos-historico-compras` | slug `historico-compras` (07/10) |
-| `feat/suprimentos-pesquisa-materiais` | menor custo líquido, só cotações, PDF "Cotação de Materiais"; slug `pesquisa-materiais` (07/10) |
-| `test/comercial-e2e` | testes Playwright (07/10) |
+| `feat/comercial-pdf-aprovacao` (#168) | PDF interno de aprovação com custo e margem real por item |
+| `feat/comercial-emails` (#170) | envio da proposta e do pedido de cotação por e-mail; SMTP **desligado até configurar**; evento `email_enviado` |
+| `feat/suprimentos-produtos-pendentes` (#169) | fila de produtos pendentes e "Ligar ao Omie" no catálogo |
+| `feat/suprimentos-exportar-fornecedores` (#167) | exportar fornecedores e copiar e-mails por categoria |
+| `feat/suprimentos-historico-mapas` (#166) | histórico de importações do mapa de cotação |
+| `perf/comercial-proposta-muitos-itens` (#165) | formulário da proposta rápido com milhares de itens |
+| tela de pedido de cotação (`95f24e7`) | nova tela, já no contrato de telas do DBA |
+| CI Playwright (`98096b8`, `46146ff`) | e2e do Comercial no GitHub Actions |
+
+**Conferido em 08/10 (histórico git do `develop` `bd1ae48`, 600 commits):** das 81 branches remotas do av-hub, **75 estão integralmente mergeadas na `develop`** (inclui `feat/comercial-configuracoes`, `feat/comercial-notificacoes`, `feat/suprimentos-perfil-fornecedor`, `feat/suprimentos-exportar-ofertas`, `feat/financeiro-experimental` e todas as `feat/compras-*`). Não deu para localizar no histórico (podem ser antigas e fora da janela, ou não mergeadas) só 4: `dashboard/historicos`, `feat/modulo-comercial-unificado`, `fix/pedidos-key-duplicada` e `ui/improvements`.
 
 ## 7. Pendências de publicação
 
@@ -113,7 +116,7 @@ As três primeiras são as pendências **declaradas** no contrato de telas (cada
 
 Pergunta original: em que ambiente vai rodar, em que cluster, com quais perfis/telas e a claim `perfis` ([[Perguntas-em-Aberto-Consolidadas]]). Estado de 07/10 pelo vault e pelo código:
 - **Ambiente:** a `api-comercial` existe **só em `develop`**, sem publicação; nenhum ambiente de produção foi decidido (o Registro de 07/10 não trata disso). Cluster Postgres: continua **[I]**.
-- **Telas:** das 18 telas/slugs do contrato, **16 estão sem cadastro em `auth.telas`**; só `suprimentos` e `painel-comprador` constam criadas (vault de 06/10; o dump de 07/10 não foi reconferido aqui para este ponto).
+- **Telas:** dos 22 slugs do contrato (08/10), **20 estão sem cadastro em `auth.telas`** (o dump de 07/10 só tem `suprimentos` e `painel-comprador`; as demais telas novas entraram na `develop` depois ou no mesmo dia do dump); só `suprimentos` e `painel-comprador` constam criadas (vault de 06/10; o dump de 07/10 não foi reconferido aqui para este ponto).
 - **Claim `perfis`** no token da `api-acos-vital`: pendente (seção 7).
 - Dono da decisão de ambiente: não definido no Registro; segue com Nathan + DBA, como na CC-08.
 

@@ -57,6 +57,12 @@ Ver [[App-PCP-Modelo-Producao]] (visão frontend/roteiro), [[App-PCP-Backend-Pro
 - **Não iniciados (conferido no código):** RBAC por filial (C3); harness de testes (sem `*.spec`/jest/script `test`); `RoteiroItem` lido por mover/concluir/Expedição (regra de 28/09, C8); etapas 2–4 da transferência entre filiais; fluxo de eventos `fluxo.*` (S5).
 - **Divergências têm estado terminal sem reabertura** (`RESOLVIDA`/`CANCELADA` não voltam) — potencial repetição do "bug de beco sem saída" que o [[Estoque-Riscos|PRD do Estoque]] cita como lição aprendida de uma versão anterior do PCP. Vale confirmar com Robert se isso é intencional ou um gap real.
 
+## Inventário conferido no código (08/10/2026, `develop`: `api-pcp` `ca3346b`, `app-pcp` `2ea3183`)
+
+- **Controllers do `api-pcp` (36 rotas-raiz):** `auth`, `usuarios`, `usuarios-perfis`, `perfis`, `telas`, `setores`, `fabricas`, `maquinas`, `operadores`, `pedidos`, `pedidos-excluidos`, `pedido-anexos`, `pedido-embalagens`, `pedido-embalagem-pallets`, `itens-pedido`, `itens-parciais`, `item-parcial-anexos`, `item-parcial-observacoes`, `historico-itens-parciais`, `roteiros`, `roteiro-item`, `entregas`, `divergencias`, `dashboard`, `relatorios`, `auditoria`, `compras/requisicoes`, `compras/recebimentos`, `estoque`, `estoque/materiais`, `estoque/depositos`, `estoque/lotes`, `estoque/alertas` e `qualidade/lotes`. Mais a integração com o av-hub (`integracao-avhub`: `/itens/status` e o envio/leitura dos contratos 34 e 35).
+- **Telas do `app-pcp` (41 páginas):** acessos (`perfis`, `permissoes`, `telas`, `usuarios`, `usuarios-perfis`, setor × perfil), cadastros operacionais (`fabricas`, `maquinas`, `operadores`, `setores`), cadastros de estoque (`depositos`, `materiais`), `carteira`, `ordens-producao` (lista, nova, detalhe), `movimentacoes` (por setor), `compras` (`requisicoes`, `pedidos-compra`), `decisoes-pcp`, `estoque-operacao` (`atendimento`, `lotes/[id]`, `mapa-deposito`, `movimentacao`, `painel-estoque`, `reservas`, `saldo`), `logistica` (`expedicao`, `logistica-entrada`), `qualidade` (`inspecao-entrada`, `inspecao-saida`), `pedidos-excluidos`, `relatorios`, `dashboard`.
+- **Sem controller nem tela (continua só no desenho):** Pesagem, Etiqueta como entidade, OrdemSeparacao, DevolucaoCliente e ContagemCiclica. A etiqueta existe só como `GET /estoque/lotes/:id/etiqueta` (PDF Code128).
+
 ## Ver também
 - [[App-PCP-Recebimento-Conferencia]]
 - [[Integracao-AvHub-MES-Especificacao-F1]]

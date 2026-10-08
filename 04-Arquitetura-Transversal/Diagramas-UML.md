@@ -1,12 +1,16 @@
 ---
 tags: [erp-acos-vital, uml, arquitetura, modelagem]
 criado: 2026-09-16
-atualizado: 2026-10-07
+atualizado: 2026-10-08
 ---
 
 # Diagramas UML — Modelo Completo
 
 > Status: decidido (verificado em 07/10/2026) — implantação (diagrama 10) e schema `public` do Estoque conforme [[Registro-de-Decisoes-2026-10-07]], itens 4 e 21.
+
+> **Atualizado em 08/10/2026 contra o código** (`api-pcp` `develop` `ca3346b`, `av-hub` `develop` `bd1ae48`, `api-acos-vital` `develop` `0557871`; só leitura de código). Diagramas 9, 10 e 22 corrigidos (integração MES → av-hub já existe: contratos 34 e 35; entrou o serviço `api-comercial`). **Novos:** 23 (Recebimento e integração com o av-hub no `api-pcp`), 24 (Estados do Recebimento) e 25 (Classes do `api-comercial`, schema `core_comercial`). Os diagramas 1, 2, 17 e 18 não foram refeitos linha a linha: ver as lacunas listadas em "Cobertura do código" no fim.
+
+> **Versão publicada:** o artifact [UML Completo](https://claude.ai/artifact/Avx11cnLz1DgAxbdJmDiQy) foi republicado em 08/10/2026 com 31 diagramas (os desta nota, incluindo 9, 10 e 22 corrigidos e os novos 23 a 25, que lá aparecem como abas 27, 28 e 29). Os diagramas 1, 2, 17 e 18 seguem como estavam no artifact e nesta nota.
 
 > Conjunto de diagramas UML (e aproximações fiéis via mermaid, onde a notação nativa não existe) cobrindo o máximo possível do que já foi analisado no vault. **Sequência e Atividades já existem** desde antes deste arquivo — ver 0a/0b abaixo pra preview embutido, e [[Fluxo-Compras-Completo]] + 4 irmãos / [[Fluxogramas-Completos]] pro conjunto completo (6 de cada).
 >
@@ -942,6 +946,9 @@ flowchart LR
         MESAPI["«component»<br/>API NestJS + Prisma"]
         ESTOQUEMOD["«component»<br/>Modulos Estoque, Compras<br/>e Qualidade"]
     end
+    subgraph SYS_COM[av-hub: api-comercial]
+        COMAPI["«component»<br/>Express 5 + Prisma<br/>schema core_comercial"]
+    end
     subgraph SYS_ELT[omie-elt-pipeline]
         ELT["«component»<br/>Extrator EL<br/>(BullMQ + node-cron)"]
         SCRAPER["«component»<br/>Scraping Worker<br/>(Playwright)"]
@@ -953,13 +960,20 @@ flowchart LR
 
     BFF -->|x-api-key / Bearer| API
     MESAPI -->|"x-api-key: pedidos liberados, produtos, unidades"| API
-    API -.->|"job de polling a construir: requisicoes, status por item"| MESAPI
+    MESAPI -->|"PUT /compras/requisicoes/origem (contrato 34, fila com retentativa)"| API
+    MESAPI -->|"GET /compras/requisicoes/eventos (contrato 35, polling)"| API
+    API -.->|"GET /itens/status (005): existe no MES, o av-hub ainda nao consome"| MESAPI
+    BFF -->|"x-api-key + Bearer"| COMAPI
+    COMAPI -->|"produtos e parceiros"| API
+    COMAPI --> PGAVHUB
+    COMAPI -->|"pedidos de compra, por conta"| OMIE
     API --> PGAVHUB
     MESAPI --> PGMES
     ESTOQUEMOD --> PGMES
     ELT -->|upsert| PGAVHUB
     SCRAPER -->|manifestos| PGAVHUB
     ELT -->|extrai| OMIE
+    ELT -->|"envio da OC (unica escrita no Omie)"| OMIE
     SCRAPER -->|scraping UI| OMIE
     API --> MINIO
     MESAPI --> MINIO
@@ -967,8 +981,11 @@ flowchart LR
     style SYS_AVHUB fill:#d9f0ec,stroke:#0f7a6b,stroke-width:2px,color:#181c22
     style SYS_API fill:#dce8ef,stroke:#2f6f8f,stroke-width:2px,color:#181c22
     style SYS_MES fill:#f3ddd6,stroke:#a8420f,stroke-width:2px,color:#181c22
+    style SYS_COM fill:#e6e0f5,stroke:#5b3fae,stroke-width:2px,color:#181c22
     style SYS_ELT fill:#fbe8d9,stroke:#c9541a,stroke-width:2px,color:#181c22
 ```
+
+**Nota (08/10/2026):** o `api-comercial` ainda **não tem ambiente de produção decidido** (só na `develop`, ver [[AV-Hub-Comercial-Suprimentos]]); a chave do MES só abre o `PUT` do contrato 34 (leituras: L6 aberta, [[Chaves-de-Integracao-AvHub-MES-Pipeline]]).
 
 **Nota:** `quality-api` (mencionada no código do av-hub) é sistema não relacionado, omitida aqui — ver [[Perguntas-Pendentes-MES-Estoque]].
 
@@ -981,6 +998,7 @@ flowchart TB
         BLOGC["«artifact» Blog, Backlog Agil (Docker)"]
         MESAPPD["«artifact» MES: api-pcp + Estoque<br/>(NestJS + Prisma)"]
         PIPED["«artifact» Pipeline Omie (ELT)"]
+        COMD["«artifact» api-comercial (Docker, Node 22, porta 3001)<br/>SEM PUBLICACAO DEFINIDA"]
     end
     subgraph VPS2["«device» VPS2 - Cluster Postgres"]
         PG["«database» Postgres av-hub<br/>core, auth, core_vendas_faturamento,<br/>core_comissionamento,<br/>omie_ctl/omie_raw"]
@@ -994,6 +1012,8 @@ flowchart TB
 
     AVHUBC --> PG
     AVHUBC --> MINIOD
+    AVHUBC -.->|"COMERCIAL_API_URL / KEY"| COMD
+    COMD -.->|"schema core_comercial; cluster nao confirmado"| PG
     MESAPPD --> PGMESD
     MESAPPD --> MINIOD
     AVHUBC -->|x-api-key gateway| MESAPPD
@@ -1706,7 +1726,8 @@ flowchart LR
     PGAVHUB -->|le, via API| GATEWAY
     GATEWAY -->|"pedidos liberados, itens, produto na 1a entrada"| MESAPI
     MESAPI -->|grava| PGMES
-    MESAPI -.->|"requisicoes e status por item, lidos pelo av-hub"| GATEWAY
+    MESAPI -->|"PUT requisicao de compra (c.34); GET eventos da requisicao (c.35)"| GATEWAY
+    GATEWAY -.->|"status por item (005): rota existe, av-hub nao consome"| MESAPI
 
     style OMIE fill:#ffffff,stroke:#8a7a63,stroke-width:2px,color:#181c22
     style ELT fill:#ffffff,stroke:#c9541a,stroke-width:2px,color:#181c22
@@ -1716,9 +1737,205 @@ flowchart LR
     style PGMES fill:#ffffff,stroke:#a8420f,stroke-width:2px,color:#181c22
 ```
 
-**Nota (revista em 01/10/2026):** essa é a velocidade **hoje confirmada** (polling em camadas, sem webhook). O MES não copia o catálogo: lê o produto do av-hub só na primeira entrada de estoque, e a Carteira lê só os pedidos liberados. A volta (requisições e status por item) é lida pelo av-hub, por um job que ainda não existe. Tempo real continua fora do desenho.
+**Nota (revista em 01/10/2026):** essa é a velocidade **hoje confirmada** (polling em camadas, sem webhook). O MES não copia o catálogo: lê o produto do av-hub só na primeira entrada de estoque, e a Carteira lê só os pedidos liberados. **(corrigido em 08/10)** A volta já existe em parte: o MES **empurra** a requisição com `PUT` (contrato 34, fila com retentativa) e **lê** os eventos da requisição por polling (contrato 35); a rota `/itens/status` (005) existe no MES, mas o av-hub não tem quem a consuma, e a `/ordens-compra/referencia` (004) não existe nos dois lados. Tempo real continua fora do desenho.
+
+## 23. Classes — Recebimento e integração com o av-hub (`api-pcp`, conferido em 08/10/2026)
+
+> Lido de `prisma/models/compras.prisma` e `integracao.prisma` (`develop` `ca3346b`). `Recebimento`, `RecebimentoItem` e `RecebimentoDivergencia` **não estavam** nos diagramas de classes 1 e 17.
+
+```mermaid
+classDiagram
+    class RequisicaoCompra {
+        +uuid id
+        +string codigo
+        +StatusRequisicaoCompra status
+        +string pedidoVenda
+        +string ordemProducao
+        +date prazoNecessidade
+        +string pedidoCompra
+        +string fornecedor
+        +date previsaoEntrega
+        +string motivoCancelamento
+    }
+    class RequisicaoCompraItem {
+        +TipoItemRequisicao tipo
+        +decimal quantidade
+        +decimal quantidadeRecebida
+        +uuid avhubIdRequisicao
+        +string avhubNumero
+        +string avhubStatus
+    }
+    class Recebimento {
+        +uuid id
+        +string codigo
+        +StatusRecebimento status
+        +string numeroNf
+        +string chaveAcessoNf
+        +string fornecedor
+        +string laudoUrl
+        +datetime conferidoEm
+        +datetime recontadoEm
+        +datetime decididoEm
+        +string motivoDecisao
+    }
+    class RecebimentoItem {
+        +decimal quantidadePendente
+        +decimal quantidadeNf
+        +decimal quantidadeContada
+        +decimal quantidadeRecontada
+        +decimal pesoTeorico
+        +decimal pesoReal
+        +decimal pesoRecontado
+        +decimal toleranciaPeso
+        +uuid idLocalizacao
+        +uuid idLote
+    }
+    class RecebimentoDivergencia {
+        +TipoDivergenciaRecebimento tipo
+        +string descricao
+        +string evidenciaUrl
+        +string etapa
+    }
+    class IntegracaoAvhubEnvio {
+        +TipoEnvioAvhub tipo
+        +uuid idOrigem
+        +json corpo
+        +StatusEnvioAvhub status
+        +int tentativas
+        +datetime proximaTentativaEm
+        +int httpStatus
+        +string ultimoErro
+    }
+    class RequisicaoCompraEventoAvhub {
+        +uuid id
+        +uuid idOrigem
+        +uuid idRequisicaoAvhub
+        +string tipo
+        +string statusRequisicao
+        +uuid idOrdemCompra
+        +string numeroPedidoOmie
+        +json dados
+        +string acao
+    }
+    class IntegracaoAvhubCursor {
+        +string chave
+        +string alteradoDesde
+        +uuid aposId
+    }
+    class ItemParcial
+    class Lote
+    class Material
+    RequisicaoCompra "1" --> "*" RequisicaoCompraItem
+    RequisicaoCompra "1" --> "*" Recebimento
+    RequisicaoCompra "*" --> "1" ItemParcial
+    RequisicaoCompraItem "*" --> "1" Material
+    RequisicaoCompraItem "1" --> "*" Lote
+    Recebimento "1" --> "*" RecebimentoItem
+    Recebimento "1" --> "*" RecebimentoDivergencia
+    Recebimento "*" --> "1" ItemParcial
+    RecebimentoItem "*" --> "1" RequisicaoCompraItem
+    RequisicaoCompra ..> IntegracaoAvhubEnvio : "PUT contrato 34 (idOrigem)"
+    RequisicaoCompra ..> RequisicaoCompraEventoAvhub : "eventos contrato 35 (idOrigem)"
+    RequisicaoCompraEventoAvhub ..> IntegracaoAvhubCursor : "cursor requisicoes-eventos"
+```
+
+**Enums:** `StatusRequisicaoCompra` (ABERTA, EM_COMPRA, RECEBIDA_PARCIAL, RECEBIDA, CANCELADA); `TipoItemRequisicao` (PRODUTO_FINAL, MATERIA_PRIMA); `TipoDivergenciaRecebimento` (QUANTIDADE, DESCRICAO, PESO, AVARIA); `StatusEnvioAvhub` (PENDENTE, ENVIADO, RECUSADO, FALHOU); `TipoEnvioAvhub` (REQUISICAO_COMPRA). `idLocalizacao` e `idLote` em `RecebimentoItem` são **sem FK** no schema (o lote só nasce quando o recebimento é CONCLUIDO ou ACEITO).
+
+## 24. Estados — Recebimento (`api-pcp`, conferido em 08/10/2026)
+
+```mermaid
+stateDiagram-v2
+    [*] --> CONCLUIDO : conferencia sem divergencia (lote nasce em quarentena)
+    [*] --> AGUARDANDO_RECONTAGEM : conferencia divergiu (nada entra)
+    AGUARDANDO_RECONTAGEM --> CONCLUIDO : recontagem sem divergencia (outra pessoa)
+    AGUARDANDO_RECONTAGEM --> AGUARDANDO_DECISAO : recontagem ainda diverge
+    AGUARDANDO_DECISAO --> ACEITO : PCP aceita (entra o valor recontado, motivo obrigatorio)
+    AGUARDANDO_DECISAO --> REABERTO : PCP reabre (nada entra, a parcial volta a Compras, motivo obrigatorio)
+    CONCLUIDO --> [*]
+    ACEITO --> [*]
+    REABERTO --> [*]
+```
+
+Fonte: `compras/recebimento.service.ts` (`conferir`, `recontar`, `decidir`). Detalhe de regras em [[App-PCP-Recebimento-Conferencia]].
+
+## 25. Classes — `api-comercial` (schema `core_comercial`, conferido em 08/10/2026)
+
+> Lido de `av-hub/api-comercial/prisma/models/*.prisma` (`develop` `bd1ae48`). Diagrama 3 cobre só o Hub/RBAC; o módulo Comercial & Suprimentos **não estava** em nenhum diagrama. Nem todos os campos são mostrados. Detalhe em [[AV-Hub-Comercial-Suprimentos]].
+
+```mermaid
+classDiagram
+    class EmpresaEmissora
+    class PerfilComercial {
+        +CargoComercial cargo
+        +Unidade[] unidades
+        +CodigoEmpresa[] empresas
+    }
+    class Cliente
+    class ClienteContato
+    class Proposta {
+        +StatusProposta status
+        +Moeda moeda
+        +TipoVenda tipoVenda
+    }
+    class PropostaItem
+    class PropostaEvento {
+        +TipoEventoProposta tipo
+    }
+    class PropostaVersao
+    class SolicitacaoCusto {
+        +StatusSolicitacao status
+    }
+    class CategoriaSuprimento
+    class Produto
+    class Fornecedor
+    class ApelidoFornecedor
+    class FornecedorCategoria
+    class Certificado {
+        +TipoCertificado tipo
+    }
+    class Oferta {
+        +FonteOferta fonte
+        +StatusOferta status
+    }
+    class ParametroCusto
+    class TabelaCustoTelha
+    class OrdemCompra
+    class ItemOrdemCompra
+    class ProdutoContaOmie
+    class FornecedorContaOmie
+    class SincronizacaoOmie
+    class ChaveIdempotencia
+    class TravaTarefa
+    class Notificacao
+    EmpresaEmissora "1" --> "*" Proposta
+    Cliente "1" --> "*" Proposta
+    Cliente "1" --> "*" ClienteContato
+    Proposta "1" --> "*" PropostaItem
+    Proposta "1" --> "*" PropostaEvento
+    Proposta "1" --> "*" PropostaVersao
+    CategoriaSuprimento "1" --> "*" Produto
+    Produto "1" --> "*" Oferta
+    Fornecedor "1" --> "*" Oferta
+    Fornecedor "1" --> "*" ApelidoFornecedor
+    Fornecedor "1" --> "*" Certificado
+    Fornecedor "1" --> "*" FornecedorCategoria
+    CategoriaSuprimento "1" --> "*" FornecedorCategoria
+    Fornecedor "1" --> "*" OrdemCompra
+    OrdemCompra "1" --> "*" ItemOrdemCompra
+    Produto "1" --> "*" ItemOrdemCompra
+    ItemOrdemCompra "0..1" --> "*" Oferta : origem da oferta
+    Produto "1" --> "*" ProdutoContaOmie
+    Fornecedor "1" --> "*" FornecedorContaOmie
+```
+
+**Enums principais:** `StatusProposta` (ABERTA, PARCIAL, FECHADA, PERDIDA); `CargoComercial` (VENDEDOR, AUXILIAR_VENDAS, SUPERVISOR_COMERCIAL, GERENTE_COMERCIAL, GERENTE_GERAL, DIRETOR_COMERCIAL); `StatusSolicitacao` (ABERTA, RESPONDIDA, SEM_FORNECEDOR, CANCELADA); `StatusOferta` (VIGENTE, VENCIDA, INVALIDADA, HISTORICA); `FonteOferta` (MANUAL, MAPA_COTACAO, PEDIDO_OMIE, MIGRACAO); `TipoEventoProposta` inclui PDF_GERADO e EMAIL_ENVIADO. Empresas emissoras AV, AU e HRM; unidades MOGI, UBERABA e ARUJA.
+
+## Cobertura do código (lacunas conhecidas em 08/10/2026)
+
+Itens do código que os diagramas 1, 2, 17 e 18 ainda **não** mostram: `FabricaSetor` (tabela de ligação Fábrica × Setor), `PedidoExcluido`, `AuditoriaLogin` e `AuditoriaAcesso` (no `api-pcp`). Os enums de `estoque.prisma` (`NaturezaMaterial`, `OrigemLote`, `StatusQualidadeLote`, `TipoMovimentoEstoque`, `StatusReserva`) não foram comparados valor a valor. As classes marcadas como futuras nos diagramas (Pesagem, Etiqueta, OrdemSeparacao, ItemSeparacao, DevolucaoCliente, ContagemCiclica) continuam sem modelo no schema.
 
 ## Ver também
+- [[AV-Hub-Comercial-Suprimentos]] — o módulo do diagrama 25.
 - [[Encaixe-Estoque-Revenda-no-PCP]] — o encaixe que revisou estes diagramas em 24/09 e 01/10/2026.
 - [[26-Vendas-Liberacao-Pedido]], [[003-Requisicao-Compra-Integracao-MES]], [[004-Referencia-OC-Integracao-MES]], [[005-Status-Item-Integracao-MES]] — os 4 fluxos da integração.
 - [[Fluxogramas-Completos]] — diagramas de atividade (equivalente UML), com raias por setor.
