@@ -70,7 +70,13 @@ No sistema atual a Caldeiraria virou quase um sistema à parte; o vault a citava
 - **Origem dos itens:** a HRM migrou do Totvs para o Omie, então os itens vêm do Omie, como na Flange. **Falta confirmar se o av-hub expõe a estrutura do produto** (componentes da OP).
 - **Unidade:** o banco será preparado para kg/m (hoje as quantidades são inteiros pequenos); o comportamento só muda quando a Caldeiraria entrar.
 
-**Ainda em aberto** (dependem do escopo geral): mesmo componente repetido no pedido quando há várias estruturas; destino × filial (a Caldeiraria roda na HRM); campos próprios dos itens 18 a 20.
+**Respostas do Robert (08/10, à noite):**
+- **Destino × filial:** comporta-se como a Flange. No sistema antigo a HRM está explicitamente amarrada a Arujá, e a fábrica de flanges também; em Mogi está só a grade de piso. 🟡 Decisão do Nathan para confirmar.
+- **Componente repetido no pedido:** o Robert não conhece a regra, mas imagina que os itens iguais devem **se somar**. 🟡 Proposta; a regra de negócio é do Nathan.
+- **Itens 18 (rastreabilidade) e 20 (ciclo do Book):** o Robert **não conhece a regra de negócio**. 🔴 Nathan define os campos.
+- **Item 19 (setores):** apesar dos cerca de 50 cadastrados, **poucos são realmente usados**. O levantamento dos setores em uso reduz o esforço; estimativa de 8 pd a revisar quando a lista vier.
+- **Congelar o sistema atual:** **não é possível.** Já foi pedido e a equipe do sistema atual continua incrementando. O plano deve contar com o alvo se movendo (a lista de lacunas precisa ser reconferida contra o legado antes de cada marco).
+- **Baixa no despacho:** o Robert **não sabe estimar**, porque envolve regra de negócio.
 
 ## Lacunas de análise, relatórios e gestão (23 a 29)
 
@@ -106,7 +112,7 @@ Os itens 28 e 29 hoje processam dados do faturamento oficial fora do controle da
 - [x] **Itens 28 e 29** (valores por vendedor e faturamento mensal) vão para o **av-hub**; sem dono definido.
 - [x] **Caldeiraria HRM:** entra como **mais uma fábrica** (`FABRICACAO`) dentro dos "setores produtivos do roteiro" do fluxo, não como um bloco à parte. O vault passa a tratá-la assim.
 - [x] **Plano:** recalculado **estendendo a data**, com a mesma equipe. Ver [[Cronograma-2-Meses]], seção 3.3.
-- [ ] **Ainda em aberto:** destino × filial (a Caldeiraria roda na HRM e a ida de peças Mogi → HRM entra na transferência entre filiais?); mesmo componente repetido no pedido (por estrutura ou soma); rastreabilidade por material, laudo nos *hold points* e ciclo do Book (o escopo aprovado os inclui, mas os campos próprios dos itens 18 a 20 não estão definidos); congelar novas funcionalidades no sistema atual durante a migração (ele teve 45 commits entre 28/09 e 07/10).
+- [ ] **Ainda em aberto (ver as respostas do Robert acima):** destino × filial (a Caldeiraria roda na HRM e a ida de peças Mogi → HRM entra na transferência entre filiais?); mesmo componente repetido no pedido (por estrutura ou soma); rastreabilidade por material, laudo nos *hold points* e ciclo do Book (o escopo aprovado os inclui, mas os campos próprios dos itens 18 a 20 não estão definidos); congelar novas funcionalidades no sistema atual durante a migração (ele teve 45 commits entre 28/09 e 07/10).
 
 **Mudanças de escopo do Nathan:** o PDF reserva um espaço, ainda vazio, para outras mudanças. Quando vierem, entram aqui e no cronograma.
 

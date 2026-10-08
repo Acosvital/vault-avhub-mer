@@ -54,7 +54,7 @@ sequenceDiagram
 Na tela Ordem de Produção (a partir da Carteira), o PCP escolhe itens, quantidades e fábrica da rodada. O backend insere o setor Estoque como etapa 1 do roteiro — ver [[Encaixe-Estoque-Revenda-no-PCP]].
 
 **EA2 — O parcial chega no setor Estoque**
-Corresponde ao eixo 2 de [[Modelo-Destinacao-Item]]. O sistema mostra o **saldo disponível na filial do pedido** (DEC-1) = saldo do lote liberado pela Qualidade − reservas `ATIVAS`. Nesta fase só **produto acabado** é checado; matéria-prima fica para a J3. Material ↔ item do pedido casam por `(codigoEmpresa, idOmie)`.
+Corresponde ao eixo 2 de [[Modelo-Destinacao-Item]]. O sistema mostra o **saldo disponível na filial do pedido** (DEC-1) = saldo do lote liberado pela Qualidade − reservas `ATIVAS`. Nesta fase só **produto acabado** é checado; matéria-prima fica para a J3. **Regra do Robert (08/10, 🟡 Nathan valida):** para item de fabricação a consulta tem duas etapas: **1º produto pronto, 2º matéria-prima livre** (não existe amarração produto ↔ matéria-prima, então o operador escolhe a matéria-prima). Material ↔ item do pedido casam por `(codigoEmpresa, idOmie)`.
 
 **EA3 — Atender do estoque: split + reserva + conclusão**
 A leitura do saldo e a criação da reserva acontecem **no mesmo passo** — evita a corrida entre pedidos concorrentes disputando o mesmo saldo. A reserva aponta para o **lote e o split atendido** (não mais um `pedidoNumero` em texto) e nasce `ATIVA`, **sem expiração**.
