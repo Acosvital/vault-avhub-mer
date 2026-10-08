@@ -1,7 +1,7 @@
 ---
 tags: [contrato-api, configuracao, seguranca, compras]
 criado: 2026-10-06
-atualizado: 2026-10-07
+atualizado: 2026-10-08
 status: aplicada
 ---
 
@@ -13,7 +13,7 @@ status: aplicada
 > - **Sobram exatamente as 6 do §3:** `IDENTIDADE_EXIGIR_TOKEN`, `PERMISSOES_ROTA_MODO` (padrão `desligado`), `ESCOPO_VENDEDORES_EXIGIR`, `ESCOPO_UNIDADE_EXIGIR_SESSAO`, `AUTENTICACAO_AZURE_VALIDAR_ID_TOKEN`, `VENDAS_PLANILHA_PAGINAR_POR_PEDIDO`.
 > - **Segredos que também existem e não são "regra de negócio" (fora da lista do §3):** `MES_INTEGRACAO_KEYS` (nova, só abre o PUT do 34) e `DOCS_API_KEY` (pré-preenche a chave do `/docs`), além de `API_KEYS`, `USUARIO_TOKEN_SEGREDO`, `SESSION_SECRET` etc. Ver [[Chaves-de-Integracao-AvHub-MES-Pipeline]].
 > - **Pipeline (§6):** além das chaves citadas, o diff da pipeline removeu `SYNC_COMPRADORES`, `SYNC_COTACAO_PTAX`, `SYNC_PEDIDOS_COMPRAS`, `SYNC_CONDICOES_PAGAMENTO_COMPRAS`, `SYNC_PROJETOS`, `SYNC_CONTAS_CORRENTES`, `SYNC_CATEGORIAS`, `EXCLUSION_SYNC_DRY_RUN` e `RAW_AUDIT_ENABLED` (com `upsertRawAudit`, `d6abf04`); ficavam `SYNC_ENVIO_OC` (padrão `false`) e `ENVIO_OC_DRY_RUN` (padrão `true`; **atualizado em 07/10: ambas saem, o envio fica fixo e direto ao Omie, ✅**). O `exclusionSync` agora apaga de verdade (o CSV é só relatório).
-> - **§5 (orçamento × coordenadores):** o texto abaixo trata só os coordenadores, mas o `90bdb33` implementou **também o orçamento inteiro** (`/orcamento/*`) na API. **(atualizado em 07/10, ✅ Nathan, [[Registro-de-Decisoes-2026-10-07]] item 39)** O orçamento foi desenvolvido **por fora**, no módulo Comercial & Suprimentos; a API entregue (`90bdb33`) existe; a reescrita dos contratos 07 e 38 está **pendente**. ~~a decisão de 01/10 ("desconsiderado") não foi revertida e a divergência está registrada no [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] (cabe ao Nathan decidir)~~.
+> - **§5 (orçamento × coordenadores), reescrito em 08/10/2026:** este contrato trata só das chaves; do orçamento, só a comissão dos coordenadores (sem bloqueio) é dele. O orçamento foi desenvolvido **por fora**, no módulo Comercial & Suprimentos (✅ Nathan, [[Registro-de-Decisoes-2026-10-07]] item 39), e o que falta dele está no [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] reescrito.
 
 > ✅ **Concluído no código (06/10/2026).** O DBA aplicou os patches `38-anexos/0001` e `0002` na `develop`
 > da API (commit `c8f2f5e`): nenhuma das 11 chaves é mais lida do ambiente (**atualizado em 07/10:** foram 13, ver acima), `BLACKLIST_PEDIDOS_CHAVE_LEGADA`
@@ -89,16 +89,9 @@ Mesma regra (vai ficar fixa, sem chave), mas só depois de conferir o pré-requi
 
 ## 5. Decidido: sem bloqueio na comissão dos coordenadores (06/10/2026)
 
-> **(atualizado em 07/10, ✅)** Orçamento desenvolvido **por fora** (Comercial & Suprimentos); API `90bdb33` existe; reescrita dos contratos 07 e 38 pendente ([[Registro-de-Decisoes-2026-10-07]] item 39). Histórico da divergência: este parágrafo e o 07 falam só da parte dos **coordenadores**, mas o `90bdb33` (01/10, #275) implementou na API **também o orçamento** (`/orcamento/{fornecedores,produtos,cotacoes,vinculos,categorias,familias}`), que o vault tratava como "não entregue/desconsiderado". ~~A decisão do Nathan de 01/10 não foi revertida; cabe a ele decidir se o 07 volta ao escopo~~ (ver [[07-Dados-Orcamento-e-Coordenadores-no-Banco]]).
+`COMISSOES_COORDENADORES_BLOQUEIO` vinha do [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] ("coordenadores … com o mesmo bloqueio de comissão que os vendedores"). A parte dos coordenadores foi implementada na `api-acos-vital` (`90bdb33`, 01/10: `GET /dashboard/comissoes` + `fn_dashboard_comissoes`), com o bloqueio atrás da chave por mudar o valor pago. **Decisão do Nathan: não aplica.** O patch 0002 tira a chave e fixa `false` (é o que já rodava). Testado na API local: `GET /dashboard/comissoes?ano_mes=2026-09` → 5 coordenadores, 44 vendedores, `bloqueio_coordenadores_aplicado: false`. Limpeza opcional para o DBA: tirar o parâmetro `p_aplicar_bloqueio` (e o cálculo) de `fn_dashboard_comissoes`.
 
-`COMISSOES_COORDENADORES_BLOQUEIO` vinha do contrato [[07-Dados-Orcamento-e-Coordenadores-no-Banco]]
-("coordenadores … com o mesmo bloqueio de comissão que os vendedores"). O 07 foi **desconsiderado em
-01/10/2026**, mas a parte dos coordenadores foi implementada no mesmo dia (`api-acos-vital` `90bdb33`,
-`GET /dashboard/comissoes` + `fn_dashboard_comissoes`), com o bloqueio atrás da chave por mudar o valor
-pago. **Decisão: não aplica.** Patch 0002 tira a chave e fixa `false` (é o que já roda). Testado na API
-local: `GET /dashboard/comissoes?ano_mes=2026-09` → 5 coordenadores, 44 vendedores,
-`bloqueio_coordenadores_aplicado: false`. Limpeza opcional para o DBA: tirar o parâmetro
-`p_aplicar_bloqueio` (e o cálculo) de `fn_dashboard_comissoes`.
+**Orçamento (atualizado em 08/10/2026):** não é deste contrato. O `90bdb33` também implementou na API as rotas `/orcamento/*`, mas o orçamento foi desenvolvido **por fora**, no módulo Comercial & Suprimentos (✅ Nathan, [[Registro-de-Decisoes-2026-10-07]] item 39). O que falta (tirar as telas e os JSON antigos do av-hub, decidir o destino das rotas `/orcamento/*`, conferir o slug `fornecedores`) está no [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] reescrito em 08/10.
 
 ## 6. Pipeline e av-hub (já feito)
 
