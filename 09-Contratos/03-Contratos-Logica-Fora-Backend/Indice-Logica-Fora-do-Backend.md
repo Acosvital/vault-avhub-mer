@@ -110,7 +110,7 @@ Conferido ao vivo na `api-test` e no código da API (`develop` até `163b58b`):
 | [[26-Vendas-Liberacao-Pedido]] | ✅ backend no ar e telas no menu; **falta a data de corte** (`parametros_vendas` vazia) e o L4 do `api-pcp` (Robert) |
 | [[19-Compras-Pedido-Omie-Nomes]] | ✅ backend testado com pedido de teste; front em [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), mergeado em 29/09 → **movido para `Realizados/`** |
 | [[18-Compradores-Funcionario]] | ✅ `/funcionarios` devolve setor e unidade; última gambiarra removida em [av-hub#106](https://github.com/Acosvital/av-hub/pull/106), mergeado em 29/09 → **movido para `Realizados/`** |
-| [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | ⛔ **desconsiderado em 01/10/2026** (decisão do Nathan); antes: não entregue. **(atualizado em 07/10)** o código existe em `main` (`90bdb33`); ✅ 07/10: orçamento desenvolvido por fora (Comercial & Suprimentos), contrato a reescrever; o "desconsiderado" de 01/10 está superado |
+| [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | ⛔ **desconsiderado em 01/10/2026** (decisão do Nathan); antes: não entregue. **(atualizado em 07/10)** o código existe em `main` (`90bdb33`); ✅ 07/10: orçamento desenvolvido por fora (Comercial & Suprimentos); **reescrito em 08/10** (orçamento coberto pelo módulo; falta tirar as telas e os JSON antigos depois da publicação e decidir o destino de `/orcamento/*`; coordenadores: falta o av-hub usar a API) |
 | [[14-Compras-Omie-Pedido-Compra]] | **fluxos A e B testados (01/10/2026), falta ligar em produção** → **movido para `Realizados/`** |
 | [[19-Compras-Pedido-Pipeline-Omie]], [[23-Compras-Pipeline-Consolidado]] | não são do DBA: dependem da `omie-elt-pipeline` (branch `feat/compras-omie`, sem commits novos desde 24/09; L4, envio da OC, ainda não existe) — **(atualizado em 07/10)** L4 foi implementado em 05/10 e mergeado (PR #1); ver o aviso no topo |
 | [[16-Compras-Pedido-DBA-Banco]] e [[17-Compras-Pedido-API-Backend]] (eram 17 e 18) | históricos, concluídos pelo [[13-Compras-Backend-Consolidado]] → **movidos para `Realizados/`** |
@@ -241,7 +241,7 @@ Renumerados 07, 08, 09 em `Realizados/03-Contratos-Logica-Fora-Backend/`.
 | Contrato | Cobre | Itens |
 |---|---|---|
 | [[04-Vagas-Fila-Decisao-no-Banco]] | Solicitações de vagas: filtros/ordem/resumo, custo gerado, decisão com `pode_aprovar` e histórico. **Entregue e conferido na `api-test` em 01/10/2026** (trava `VAGAS_TRAVAS_DECISAO` ligada, §3.3.1 no backend); movido para `Realizados/`. Falta confirmar a trava em produção | V1–V8 |
-| [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | **⛔ Desconsiderado em 01/10/2026 (superado em 07/10).** Orçamento e coordenadores fora do repositório, com filtro/paginação/ordem no servidor. **(atualizado em 07/10)** ✅ orçamento desenvolvido por fora, no módulo Comercial & Suprimentos; API `90bdb33` existe; contrato a reescrever | O1–O5, C1–C3 |
+| [[07-Dados-Orcamento-e-Coordenadores-no-Banco]] | **⛔ Desconsiderado em 01/10/2026 (superado em 07/10).** Orçamento e coordenadores fora do repositório, com filtro/paginação/ordem no servidor. **(atualizado em 07/10)** ✅ orçamento desenvolvido por fora, no módulo Comercial & Suprimentos; API `90bdb33` existe; **reescrito em 08/10** | O1–O5, C1–C3 |
 
 Pedidos/Notas/Dashboards e Permissões/Escopo (P1–P8/N1–N3/D1–D3 e S1–S11) já saíram desta lista —
 ver "Já entregues" acima ([[04-Pedidos-Notas-Dashboards-Agregacao-no-Banco]],
