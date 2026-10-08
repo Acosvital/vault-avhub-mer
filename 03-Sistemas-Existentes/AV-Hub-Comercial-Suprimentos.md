@@ -22,7 +22,7 @@ Este módulo era o maior buraco do vault: o av-hub deixou de ser "só BFF para a
 | Stack | Node 22, Express 5, TypeScript ESM, Prisma 7 + PostgreSQL, zod 4, pino, decimal.js, Vitest + supertest. (O Dockerfile do Hub é Node 20; o do `api-comercial` é Node 22.) |
 | Container | Dockerfile próprio (porta 3001) e CI própria `.github/workflows/api-comercial.yml`. |
 | Banco | Schema **`core_comercial`**, 10 migrations (de `20261001…` a `20261007160000_evento_email_enviado`; em 06/10 eram 9, até `travas_tarefa`). Mesmo cluster do Hub: **[I]** (só se vê `DATABASE_URL`). |
-| Migração ao subir | O README diz que o Dockerfile roda `prisma migrate deploy`; o contrato de telas diz para rodar **antes**. **Divergem** — decidir na publicação. |
+| Migração ao subir | O Dockerfile roda `prisma migrate deploy` ao subir (padrão do `api-pcp`). O contrato de telas dizia para rodar **antes**; o PR #173 (aberto, 08/10) alinha o contrato ao Dockerfile. Exige que o usuário do banco crie e altere tabelas **só** em `core_comercial`; se o DBA não aceitar DDL pelo serviço, ele roda as migrations antes e o `CMD` vira só `node`. |
 | Convenções | `If-Match`/ETag em PUT/DELETE/fechar/perder/reabrir (428 sem o header, 409 com versão velha); `Idempotency-Key` em POST de proposta e de solicitação de custo; erro `{detail, codigo, campos}`; valores monetários como `Decimal` em string. |
 
 ### Modelos de `core_comercial`
@@ -35,11 +35,12 @@ Este módulo era o maior buraco do vault: o av-hub deixou de ser "só BFF para a
 
 | Camada | Como funciona |
 |---|---|
-| 1ª — identidade do Hub | O BFF do av-hub manda `x-api-key` + o **`backendToken`** emitido pela `api-acos-vital` (JWT HS256 com `JWT_SECRET`, ou JWKS; `exp` obrigatório; claim `perfis`). Ver [[AV-Hub-API-Estado-Atual]] e [[AV-Hub-RBAC]]. |
+| 1ª — identidade do Hub | O BFF do av-hub manda `x-api-key` + o **`backendToken`** emitido pela `api-acos-vital` (JWT HS256 com `JWT_SECRET` = `USUARIO_TOKEN_SEGREDO` e `JWT_ISSUER=api-acos-vital`, ou JWKS; `exp` obrigatório). Ver [[AV-Hub-API-Estado-Atual]] e [[AV-Hub-RBAC]]. |
 | 2ª — `PerfilComercial` | Dentro do `api-comercial`: o perfil define o **cargo** (vendedor, auxiliar, supervisor, gerente, gerente geral, diretor) e as **capacidades** (escopo das propostas, ver valores, ver custo, excluir, relatório gerencial). |
 
-- Comprador é detectado por regex `/compr|suprimento/i` no **nome do perfil do Hub** — frágil **[I]**: renomear o perfil muda o acesso.
-- Pendência declarada no contrato de telas: o token precisa carregar o claim `perfis`.
+- Comprador era detectado por regex `/compr|suprimento/i` no **nome do perfil do Hub** — frágil: renomear o perfil mudava o acesso. **PR #175 (aberto, 08/10):** lista explícita pelo nome exato em `PERFIS_COMPRADOR` (padrão: `Suprimentos - Comprador`, `Suprimentos - Gestão`).
+- **Perfis do Hub (atualizado em 08/10):** a `api-acos-vital` **não põe os perfis no token, de propósito** (`src/utils/tokenUsuario.js`: a matriz é lida do banco a cada requisição). O contrato pedia a claim `perfis`; o **PR #173 (aberto)** faz o `api-comercial` buscar os perfis em `GET /me/permissoes` (contrato 06), com o mesmo token e a `HUB_API_KEY`, com cache de 15 s. Hub fora do ar → 503; usuário recusado → 401. **Nada muda na `api-acos-vital`.**
+- **`PerfilComercial` dos usuários reais (atualizado em 08/10):** não havia rota nem tela (só o seed criava o do usuário de desenvolvimento); sem ele, o usuário entra mas não vê propostas. **PR #174 (aberto):** tela `Cadastros › Acessos › Perfis comerciais` (slug `usuarios-comerciais`, como no PRD §6), mantida pela gerência comercial; o primeiro gestor entra pelo SQL do contrato de telas.
 
 ## 3. Ligação com o resto
 
@@ -107,18 +108,22 @@ Todas as 9 branches que o vault listava como abertas em 07/10 **já foram mergea
 
 1. **Publicar o `api-comercial`** (nada dele está em `main`; o front de `develop` chama rotas que só existem nele).
 2. **Cadastrar as telas** em `auth.telas` (hoje, no vault, só `suprimentos` e `painel-comprador`).
-3. **Token com claim `perfis`** na `api-acos-vital`.
-4. Resolver a divergência `prisma migrate deploy` no Dockerfile × "rodar antes".
+3. ~~**Token com claim `perfis`** na `api-acos-vital`.~~ Não precisa: perfis via `GET /me/permissoes` (PR #173).
+4. ~~Resolver a divergência `prisma migrate deploy` no Dockerfile × "rodar antes".~~ Fica no Dockerfile; contrato corrigido (PR #173).
+5. **Cadastrar o `PerfilComercial` (cargo) de cada pessoa:** tela no PR #174; o primeiro gestor entra pelo SQL do contrato, e a gestão comercial informa o cargo de cada um.
+6. **Reescrever os contratos 07 e 38** (item 39 do Registro).
 
-As três primeiras são as pendências **declaradas** no contrato de telas (cadastro das telas, token com `perfis`, publicação do serviço); a quarta foi achada na auditoria.
+PRs de 08/10 ([#173](https://github.com/Acosvital/av-hub/pull/173), [#174](https://github.com/Acosvital/av-hub/pull/174) e [#175](https://github.com/Acosvital/av-hub/pull/175), abertos em 08/10).
 
 ## 8. CC-08 revisada (ambiente e telas da `api-comercial`)
 
 Pergunta original: em que ambiente vai rodar, em que cluster, com quais perfis/telas e a claim `perfis` ([[Perguntas-em-Aberto-Consolidadas]]). Estado de 07/10 pelo vault e pelo código:
 - **Ambiente:** a `api-comercial` existe **só em `develop`**, sem publicação; nenhum ambiente de produção foi decidido (o Registro de 07/10 não trata disso). Cluster Postgres: continua **[I]**.
 - **Telas:** dos 22 slugs do contrato (08/10), **20 estão sem cadastro em `auth.telas`** (o dump de 07/10 só tem `suprimentos` e `painel-comprador`; as demais telas novas entraram na `develop` depois ou no mesmo dia do dump); só `suprimentos` e `painel-comprador` constam criadas (vault de 06/10; o dump de 07/10 não foi reconferido aqui para este ponto).
-- **Claim `perfis`** no token da `api-acos-vital`: pendente (seção 7).
+- **Claim `perfis`** no token da `api-acos-vital`: **não é mais necessária** (seção 2, PR #173).
 - Dono da decisão de ambiente: não definido no Registro; segue com Nathan + DBA, como na CC-08.
+
+**Sugestão do Pablo (08/10), para a decisão da CC-08:** app no Coolify da **VPS 1**, ao lado do Hub (Dockerfile pronto: Node 22, porta 3001, healthcheck em `/health`); banco no cluster da **VPS 2**, schema `core_comercial`, com um usuário só para o serviço e acesso apenas a esse schema (no mesmo banco do Hub ou num banco separado: as duas opções funcionam sem mudar código). **Estimativa do que falta do lado do Pablo:** ~3 a 3,5 pd (perfis via `/me/permissoes`, contrato, perfis comerciais, contratos 07 e 38, primeira subida); DBA ~0,5 pd (telas e permissões); infra ~0,5 pd. Com o ambiente decidido, cerca de 1 semana. Chave do Omie e SMTP não impedem a publicação (só desligam o histórico de compras e os e-mails).
 
 ## Ver também
 - [[AV-Hub-Modulos]]
