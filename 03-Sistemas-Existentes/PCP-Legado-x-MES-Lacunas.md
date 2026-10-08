@@ -16,7 +16,7 @@ O MES (`api-pcp`/`app-pcp`) ainda não substitui o PCP legado no chão de fábri
 
 | Função | Sistema atual | MES | Situação |
 |---|---|---|---|
-| Abertura da OP | Lê o PDF do PV | Carteira e OP a partir do Omie, via av-hub (hoje **Triagem e Destinação do Pedido**, [[Registro-de-Decisoes-2026-10-07]] item 58) | MES melhor |
+| Abertura da OP | Lê o PDF do PV | Carteira e OP a partir do Omie, via av-hub (hoje **Triagem e Destinação do Pedido**, [[Registro-de-Decisoes-2026-10-07]] item 74) | MES melhor |
 | Roteiro por item | Livre, etapa pode repetir | `RoteiroItem` por item, setor pode repetir, tipos de setor | Paridade |
 | Ações na fila do setor | Receber, iniciar, pausar/retomar com motivo, mover, devolver parcial, concluir, retrabalho, reprovar, desfazer recebimento | As mesmas ações no `FilaSetor` | Paridade |
 | Máquina e operador | Obrigatórios ao iniciar | Por setor (`exigeMaquinaOperador`) | Paridade |
