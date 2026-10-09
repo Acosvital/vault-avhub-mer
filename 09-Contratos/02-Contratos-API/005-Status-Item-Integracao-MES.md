@@ -1,15 +1,22 @@
 ---
 tags: [contrato-api, mes, estoque, integracao-av-hub-mes, rastreabilidade]
-status: proposta
+status: implementada-no-codigo
 criado: 2026-09-22
-atualizado: 2026-10-07
+atualizado: 2026-10-09
 ---
 
 # Contrato de API 005 — Status por item (MES → av-hub)
 
 > Status: decidido | no código | em produção (verificado em 07/10/2026). Fonte: [[Registro-de-Decisoes-2026-10-07]] (#42 e #43).
 > - **Aceite das 3 diferenças** (foto atual em vez de log; `pedido_venda` + `ordem_producao`; etapas a mais e a menos): ✅ **aceitas pelo Nathan em 08/10/2026** (o Robert já tinha aprovado em 30/09).
-> - **Consumidor no hub:** 🟡 (Gustavo) roda na `api-acos-vital` (F2, 19 a 30/10), com tabela local do status por item.
+> - **Consumidor no hub:** ✅ implementado no código (o Nathan informou em 09/10 que o DBA entregou; conferido: `dee35b0`, 08/10, `develop` da `api-acos-vital`). Ver a atualização de 09/10 abaixo.
+
+> **Atualização de 09/10/2026 — conferido no código (`origin/develop` da `api-acos-vital`, `dee35b0`; autor `HauntedCrusader`):**
+> - **Job:** `itens_pedido_status.job.js` roda no processo da API (iniciado em `app.js` depois do `listen`), a cada `MES_STATUS_INTERVALO_SEG` (padrão 90 s), uma unidade por vez (`core.unidades` sem `deleted_at`). Lê `GET {MES_API_URL}/itens/status?alterado_desde=&codigo_empresa=&incluir_deletados=true&limit=1000` com `x-api-key: MES_API_KEY` e grava por `fn_itens_pedido_status_gravar` (migration **`api005`**). Página cheia (1000) = lê de novo; falha do MES desfaz a transação e o cursor não anda; `pg_try_advisory_xact_lock` por unidade evita duas instâncias lendo a mesma unidade; 401/403 seguidos geram alerta no log.
+> - **Rota:** `GET /itens_pedido_status?codigo_empresa=&pedido_venda=&historico=` (uuid e número do pedido obrigatórios; `historico=true` traz todas as fotos). Devolve por parcial: `id_item_parcial`, `codigo_produto_omie`, `codigo_produto`, `ordem_producao`, `etapa`, `setor {codigo,nome,tipo}`, `status`, `quantidade_na_etapa`, `atendido_pelo_estoque`, `ocorrido_em` (com `historico`: `atual` e `cancelado_no_mes_em`). Lê só a tabela local: o hub **não chama o MES na hora da consulta**.
+> - **Escopo:** `escopoVendedor.js` ganhou a regra `itens_pedido_status` como "dono" por `pedido_venda` na query; pedido sem dono conhecido em `pedidos_vendas` dá **403** (fail-closed). O mapa rota → tela está na migration `api005`.
+> - **Aceite das 3 diferenças:** aceitas formalmente pelo Nathan em 08/10/2026 (#42); o consumidor foi construído sobre o formato do MES (foto atual, `pedido_venda` + `ordem_producao`, `etapa` do setor).
+> - **Pendente:** (1) a migration `api005` (função, tabela, mapa de rotas) **não foi verificada no banco**; (2) o contrato **006** e o **SQL 010** existem no vault: [[006-Status-por-Item-Leitura-no-Hub]] e [[010-Itens-Pedido-Status]]; (3) o **front não consome a rota** (nenhuma referência a `itens_pedido_status` ou `itens/status` fora de `node_modules`), então a tela 1.2 (Meus pedidos, Pedidos da equipe, Pedidos do PCP) e a tarefa E3 seguem abertas; (4) o MES precisa ter `MES_API_KEY` configurada igual à do hub.
 
 > **Linha do tempo (08/10/2026):** criado em 22/09/2026 como rascunho da F1 e aprovado pelo Nathan no mesmo dia; revisões de 29/09 e 30/09 (Robert). Plano e pendências em [[Integracao-AvHub-MES-Volta-Plano]].
 > **Desenho do lado do hub (08/10):** tabela em [[010-Itens-Pedido-Status]] e job + rota em [[006-Status-por-Item-Leitura-no-Hub]]; tela 1.2 em branch do `av-hub` (ver o plano).
