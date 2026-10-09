@@ -6,6 +6,8 @@ atualizado: 2026-10-09
 
 # Mapa de rotas do BFF para a API: quem chama com Bearer e quem não
 
+> **(atualizado em 09/10/2026)** O PR #178 do `av-hub` (mergeado em 09/10) ligou o Bearer nos helpers de Compras e de pedidos/notas por fonte, **sem variável de ambiente**. As seções B e C abaixo são o retrato de antes: os 64 handlers da seção B passam a mandar o Bearer quando a sessão tem token. Na `api-test`, com token confirmado por log, as 27 rotas de lista e as de detalhe testadas responderam como antes, sem 403 de rota não mapeada (um usuário só, só leituras). A seção A segue valendo como lista de rotas que o Gustavo deve manter mapeadas.
+
 > Status: no código (av-hub `develop` `a402d78`, extração de 09/10/2026) | em produção (não verificado). Pedido do Nathan para o Gustavo mapear em `auth.rotas_telas`. Contexto: [[Auditoria-Pente-Fino-2026-10-08]] (item 10) e [[Registro-de-Decisoes-2026-10-07]].
 
 ## Para que serve

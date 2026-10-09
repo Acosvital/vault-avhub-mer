@@ -200,3 +200,15 @@ própria (001 em diante) independente da numeração do outro repositório.
 Divergência de pasta: a página da nota manual está em `dashboards/`, e o [[29-Notas-Fiscais-Manuais-So-Admin]] diz `cadastros/auxiliares`.
 
 > **Movidos para `Realizados/` em 09/10/2026:** 004, 005, 006 (API), 010 e 011 (SQL), 23 e 45 (lógica fora do backend). **Critério:** a implementação está confirmada no código da `api-acos-vital` (`fe55923`, `dee35b0`) ou do pipeline; produção **não** foi conferida e o DDL das migrations `api004` e `api005` segue a fornecer pelo DBA. Pendências que continuam abertas dentro deles: o job de leitura no MES do 004, o `exclusionSync` e a tela do 45. **Ficam fora de `Realizados/`:** as propostas 40 a 44, o 07 (a reescrever), o API 002 (rejeitado), o SQL 006 (invalidado), o 19-Pipeline (substituído) e o 13-Fornecedores (desconsiderado).
+
+
+## Atualizados e criados em 09/10/2026 (escopo, login, bucket e Torre de Fluxo)
+
+| Contrato | O que mudou | Status |
+|---|---|---|
+| [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] | Atualizado: escopo fixo no código (sem `ESCOPO_VENDEDORES_EXIGIR` no ambiente); `/pedido_venda_itens/{numero}` precisa da regra "dono"; token expirado vira furo de acesso quando o BFF parar de filtrar, então a renovação vem antes | `proposta` (Gustavo) |
+| [[41-Login-Rate-Limit-no-Backend]] | Atualizado: limite fixo no código (5 em 900 s); chave IP + e-mail; `loginOk` não zera a chave de IP; Azure fora do limite (🟡). Front já feito no PR #178 | `proposta` (Gustavo) |
+| [[44-Upload-de-Fotos-Politica-de-Bucket]] | Atualizado: a validação do BFF é defesa em profundidade e a marca foi reclassificada; requisitos do storage R1 a R7; `deletarFoto` não tem chamador. 🔴 MinIO ou SeaweedFS | `proposta` (Gustavo/infra) |
+| [[46-Torre-de-Fluxo-Feed-Jobs-e-Telas]] | **Novo**: feed do MES, tabelas `core_fluxo.*`, job de projeção (recomendado na `api-acos-vital`), BFF e as telas T.3, T.4, T.5 e T.5b; o que o front adianta antes de 23/11 | `proposta` (Robert, Gustavo, Nathan) |
+
+Fora de escopo por decisão do Nathan (09/10): tudo de **comissões** (o contrato [[42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio]] não é executado agora; coordenadores, `dash-comissoes` e "minhas comissões" estão em desenvolvimento).
