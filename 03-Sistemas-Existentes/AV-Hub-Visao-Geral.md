@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, av-hub]
 criado: 2026-09-16
-atualizado: 2026-10-07
+atualizado: 2026-10-08
 ---
 
 # av-hub — Visão Geral
@@ -20,6 +20,7 @@ Cobre a [[Entrada-Comercial|entrada comercial]] (captura pedidos do Omie) e boa 
 
 ## Principais características técnicas
 
+- **Testes e CI (conferido em 08/10, `develop` `bd1ae48`):** três workflows em `.github/workflows/`. `ci.yml` (PR e `main`): `npm run check`, `npm audit` (nível crítico) e `npm run build`. `api-comercial.yml` (PR, `main` e `develop`): lint, typecheck, testes unitários e de integração e `npm audit`. `e2e-comercial.yml` (PR e `develop`): sobe a stack e roda o Playwright (`npm run test:e2e`, specs `navegacao` e `proposta`, só do Comercial). Não há teste automatizado das telas de Vendas, Compras ou Comissões.
 - [[AV-Hub-Arquitetura-BFF|Arquitetura BFF]] — não acessa banco diretamente, só faz proxy para backends externos: `API_URL` (`api-acos-vital`) e, **desde 05/10 só em `develop`**, `COMERCIAL_API_URL` (`api-comercial`, dentro do repo) (atualizado em 07/10). Era "BFF puro, só `API_URL`".
 - [[AV-Hub-RBAC|RBAC completo e em produção]] — perfis/telas/permissões relacionais no Postgres; a API também aplica RBAC por rota (`auth.fn_autorizar`), **ligado em produção: não verificado** (atualizado em 07/10).
 - Autenticação: Azure AD (SSO corporativo) + fallback de credencial, via NextAuth.

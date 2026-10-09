@@ -64,7 +64,7 @@ Todo evento, de qualquer sistema, tem os mesmos campos.
 
 ## Vocabulário comum de etapas
 
-Os estados do `ItemParcial` (8 estados) cobrem só a produção. O log precisa de um vocabulário macro que junte os sistemas. Etapas usadas no protótipo, derivadas de [[Fluxogramas-Completos]] e [[Setores-Envolvidos-no-Fluxo]]:
+Os estados do `ItemParcial` (9 estados na `develop`, 8 na `main`: `REPROVADO` é só da `develop`) cobrem só a produção. O log precisa de um vocabulário macro que junte os sistemas. Etapas usadas no protótipo, derivadas de [[Fluxogramas-Completos]] e [[Setores-Envolvidos-no-Fluxo]]:
 
 `vendas.emitido` → `pcp.classificacao` → (`compras.requisicao` → `compras.fechamento` → `compras.followup` → `recebimento.conferencia` → `recebimento.pesagem` → `qualidade.quarentena`) ou (`fabrica.espera` → `fabrica.execucao`) ou (`estoque.reservado`) → `qualidade.inspecao` → `expedicao.embalagem` → `expedicao.carga` → `fiscal.nf` → `expedicao.transporte`.
 

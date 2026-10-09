@@ -6,6 +6,8 @@ atualizado: 2026-09-24
 
 # Modelo de Destinação do Item — Reconciliando Estoque × Revenda × Fabricação
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 > Formaliza a relação entre o diagrama macro ([[Fluxo-Operacional-Visao-Geral]]) e o fluxo detalhado item a item ([[Fluxo-Detalhado-Pedido-Item]]), que coexistiam por decisão consciente, mas nunca tinham sido modelados juntos de fato.
 >
 > **Atualizado em 24/09/2026 com o encaixe do Estoque e da Revenda no MES** ([[Encaixe-Estoque-Revenda-no-PCP]]). Duas mudanças: o **eixo 1 deixa de ser fixo por material** — é escolhido por item, a cada rodada, pela fábrica para onde o PCP manda o item; e o **eixo 2 é resolvido no setor Estoque** (etapa 1 de todo roteiro), com split do `ItemParcial` e reserva, não numa tela de classificação do PCP. A matriz continua válida como mapa dos casos; o que mudou foi **onde** cada eixo é decidido.

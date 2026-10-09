@@ -7,6 +7,8 @@ fonte: "MES-Encaixe-Estoque-Revenda.pdf — Robert Wilson, 24/09/2026; MES-Estoq
 
 # Encaixe do Estoque e da Revenda no fluxo do PCP (MES)
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 > **Atualização de 07/10/2026 — decidido ≠ implementado: a arquitetura de 29/09 está "decidida, parcialmente implementada".** A decisão do Nathan (EC-05/EC-08) **não foi alterada**; o que mudou é o que já existe no código. Conferido no código (`develop`: `api-pcp` `ca3346b`, `app-pcp` `a802a3e`, 07/10 — **a `main` dos dois repositórios parou em 28/08; nada disto está em `main`, e produção não foi conferida**):
 >
 > | Peça da arquitetura de 29/09 | Estado no código (`develop`) |

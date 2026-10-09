@@ -69,7 +69,7 @@ Resultado por contrato (`sim` = objetos existem em produção; "sem uso" = 0 lin
 | Contrato | Produção |
 |---|---|
 | SQL 001 parceiros fiscais | **Aplicado e populado:** IE preenchida em 14.273 de 22.981 parceiros; `inativo`=true em 3.975. `dados_bancarios`, `endereco_entrega`, `cnaes`, `parceiros_produtos`: 0 linhas |
-| SQL 002 `estoque_saldo`, 005 `locais_estoque` | Aplicados, **vazios** (sem recurso na pipeline) |
+| SQL 002 `estoque_saldo`, 005 `locais_estoque` | Aplicados, **vazios** (sem recurso na pipeline em 07/10; **em 08/10:** o Nathan definiu que o estoque real fica no nosso sistema, o Omie tem só uma coluna numa tabela — CA-01 — e os locais seguem como trabalho B6) |
 | SQL 003 frete/parcelas | Aplicado, **vazio**; a chave única é `(codigo_empresa, codigo_pedido_omie[, numero_parcela])` |
 | SQL 004 `pedidos_compras` | **Aplicado e populado:** 22.808 pedidos (Vital 21.917, Uberaba 456, HRM 435), 43.973 itens, 31.758 parcelas; índice único `(id_pedido_compra, ordem)`; etapas 10/15/20 = 1.186/20.380/1.242; `incluido_em_omie` até 07/10 14:16 UTC |
 | SQL 006 `valor_devolucao` ("invalidado") | **Parcialmente aplicado:** colunas `codigo_devolucao_omie`, `valor_devolucao`, `devolucao_consultada_em` e índice `idx_pedidos_vendas_fila_devolucao`; 0 de 13.137 preenchidas; `devolucao_parcial`=true em 599 |
@@ -136,7 +136,7 @@ Schema `historico` e `pg_cron` (e as funções `fn_snapshot_mensal`, `fn_resolve
 
 ## 10. O que o dump não permite verificar
 
-Variáveis de ambiente em produção (`PERMISSOES_ROTA_MODO`, `ESCOPO_*`, `IDENTIDADE_EXIGIR_TOKEN`, `SYNC_ENVIO_OC`, `ENVIO_OC_DRY_RUN`, `FILIAIS_ATIVAS`); se o front já consome `/orcamento/*` e `/dashboard/comissoes`; se a API de produção roda a `main` `fdafb35`; `variacao_pct` (calculada na API); a taxa de sucesso por recurso (o `run_log` só tem `enqueued`); a correspondência filial↔unidade da pipeline (inferida); se o MES real roda em outro banco.
+Variáveis de ambiente em produção (`PERMISSOES_ROTA_MODO`, `ESCOPO_*`, `IDENTIDADE_EXIGIR_TOKEN`, `FILIAIS_ATIVAS`; ~~`SYNC_ENVIO_OC`, `ENVIO_OC_DRY_RUN`~~ saíram do código em 08/10); se o front já consome `/orcamento/*` e `/dashboard/comissoes`; se a API de produção roda a `main` `fdafb35`; `variacao_pct` (calculada na API); a taxa de sucesso por recurso (o `run_log` só tem `enqueued`); a correspondência filial↔unidade da pipeline (inferida); se o MES real roda em outro banco.
 
 ## Ver também
 - [[Onde-Estamos]] · [[Indice-Contratos]] · [[Perguntas-em-Aberto-Consolidadas]] (CC-10 a CC-16)

@@ -40,7 +40,7 @@ atualizado: 2026-10-07
 
 ## Backend real é bem mais rico que este modelo (visto pelo frontend)
 
-O backend real (`api-pcp`, NestJS+Prisma) modela produção com muito mais detalhe do que o roteiro simples descrito acima: estado por item (`ItemParcial`, 8 estados, com split/consolidação/devolução entre setores), entregas parciais ao cliente como entidade própria, embalagem/paletização, anexos por etapa e histórico imutável de movimentação. Ver [[App-PCP-Backend-Producao]] para o modelo completo — este arquivo documenta só o que o frontend enviado usa hoje.
+O backend real (`api-pcp`, NestJS+Prisma) modela produção com muito mais detalhe do que o roteiro simples descrito acima: estado por item (`ItemParcial`, 9 estados na `develop` (8 na `main`), com split/consolidação/devolução entre setores), entregas parciais ao cliente como entidade própria, embalagem/paletização, anexos por etapa e histórico imutável de movimentação. Ver [[App-PCP-Backend-Producao]] para o modelo completo — este arquivo documenta só o que o frontend enviado usa hoje.
 
 ## Ponto de atenção: `SistemaOrigem`
 

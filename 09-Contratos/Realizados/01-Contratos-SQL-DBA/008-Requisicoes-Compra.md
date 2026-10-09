@@ -2,7 +2,7 @@
 tags: [contrato-sql, dba, integracao-av-hub-mes, compras]
 status: aplicada
 criado: 2026-09-22
-atualizado: 2026-09-30
+atualizado: 2026-10-08
 ---
 
 # Contrato SQL 008 — `core_vendas_faturamento.requisicoes_compra` (novo)
@@ -23,6 +23,8 @@ atualizado: 2026-09-30
 | `numero_requisicao` sempre do MES | na criação manual, a API gera `REQ-000001` por unidade quando não vem no corpo |
 
 **Correção de 30/09/2026** (conferido na `develop` da API, `36940ed`): duas linhas da tabela acima ficaram velhas depois do [[13-Compras-Backend-Consolidado]] (`bf9d86a`). O **`id_origem` está no model** e o `POST /compras/requisicoes` o aceita (é a chave de idempotência do job do MES), e o **`prazo_necessidade` voltou a ser obrigatório**. Também existe `numero_requisicao_mes` (índice não único). Formato do número do MES: `RC-AAAAMMDD-NNNN`, repetido nos itens da mesma requisição (pergunta 1 respondida, ver [[003-Requisicao-Compra-Integracao-MES]]).
+
+**Reconferência de 08/10/2026 (model da API na `develop` `0557871`, `requisicoes_compra.model.js`):** o model declara `id_ordem_compra` (não `ordem_compra_id`), `quantidade` `DECIMAL(14,3)` (não `numeric(15,4)`), `solicitante` `STRING(100)` (não `text`) e `prazo_necessidade` `NOT NULL`; `id_origem`, `numero_requisicao_mes`, `motivo_cancelamento` e `cancelada_por_origem` existem. A tabela acima (23/09) diverge do model em três pontos (nome da coluna da OC, precisão da quantidade, tipo do solicitante). Como as migrations não estão no repositório da API, **a divergência só se resolve conferindo o banco**: ou a tabela de 23/09 está velha, ou o model não reflete o DDL.
 
 **Pergunta 2 (ordem de aplicação com o 007):** resolvida, porque os dois foram aplicados juntos. A **pergunta 1** (formato do número vindo do MES) foi respondida em 30/09 (acima).
 

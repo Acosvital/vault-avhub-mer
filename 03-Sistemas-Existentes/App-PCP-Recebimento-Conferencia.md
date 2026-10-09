@@ -1,12 +1,14 @@
 ---
 tags: [erp-acos-vital, app-pcp, recebimento]
 criado: 2026-10-07
-atualizado: 2026-10-07
+atualizado: 2026-10-08
 ---
 
 # app-pcp — Recebimento e conferência (como está no código em 07/10/2026)
 
 > Status: decidido | no código | em produção (verificado em 07/10/2026 pelo dump, onde indicado). Decisões da rodada em [[Registro-de-Decisoes-2026-10-07]]. MES = Robert.
+
+> **(atualizado em 08/10)** `app-pcp` `develop` avançou para `2ea3183` (#35, 07/10): só o layout da página de lotes do Estoque (`estoque-operacao/lotes/[id]`) mudou; `api-pcp` segue em `ca3346b`.
 
 > **Rótulo de confiança.** Tudo abaixo vem de **leitura de código na branch `develop`** (api-pcp `ca3346b`, PR #50, 07/10 08:31; app-pcp `a802a3e`, PR #34, 07/10 08:32). **Não** foi conferido em produção nem em homologação. `main` dos dois repositórios parou em 28/08 (api `be076b2`, app `be847ac`): **nada disto está em `main`**. **Decidido (✅ Nathan, 07/10):** merge `develop` → `main` **antes do piloto** (fecha CC-04); **data e responsável: 🔴 Robert**. A `develop` roda no ambiente de homologação `https://mes-test.acosvital.com.br/` (`mes-test`, ✅ no ar; marco M2 cumprido); o `main` não foi dado como em produção. Ver [[App-PCP-Visao-Geral]].
 

@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, av-hub, rbac]
 criado: 2026-09-16
-atualizado: 2026-10-07
+atualizado: 2026-10-08
 ---
 
 # av-hub — RBAC (Perfis, Telas, Permissões)
@@ -29,7 +29,7 @@ A `api-acos-vital` deixou de confiar só no guard do front ([[AV-Hub-API-Estado-
 | Peça | Estado no código |
 |---|---|
 | Token de usuário | `Authorization: Bearer` (HMAC, `USUARIO_TOKEN_SEGREDO`); a identidade do token sobrescreve `id_usuario_sessao` e os campos `created_by`/`updated_by`/`deleted_by`/`aprovado_por`/`decidido_por`/`cancelado_por` |
-| `auth.fn_autorizar` + `auth.rotas_telas` | autorização por rota, `PERMISSOES_ROTA_MODO` fica **fixo em `exigir` no código**, sem `.env` (✅ Nathan, 07/10; alteração de código: Gustavo; antes o padrão era `desligado`) |
+| `auth.fn_autorizar` + `auth.rotas_telas` | autorização por rota, `PERMISSOES_ROTA_MODO` **fixo em `exigir`, sem `.env`** (✅ Nathan, 07/10; alteração de código: Gustavo). **FIXO desde 08/10/2026 (`6317d5f`, #283, DBA)**: a variável `PERMISSOES_ROTA_MODO` **não é mais lida**; rota sem a ação na tela dá 403 `SEM_PERMISSAO` e rota sem mapa dá 403 `ROTA_SEM_PERMISSAO_MAPEADA` (com token de usuário; sem token nada muda). **Efeito:** `USUARIO_TOKEN_SEGREDO` (≥ 32 caracteres) passou a ser **obrigatório em qualquer ambiente**: sem ele a API não sobe. Antes o padrão era `desligado` |
 | Escopo | `ESCOPO_VENDEDORES_EXIGIR`, `ESCOPO_UNIDADE_EXIGIR_SESSAO`, `IDENTIDADE_EXIGIR_TOKEN` (das 6 chaves que sobraram do contrato [[38-Regras-Sem-Chave-de-Ambiente]]; 🟡 Gustavo: fixar só `ESCOPO_VENDEDORES_EXIGIR`, as demais seguem como chave até separar as chaves de serviço) |
 | Auditoria | sempre ligada (`auth.auditoria`) |
 | Erros | `TOKEN_REVOGADO`, `CHAVE_SOMENTE_LEITURA`, `CHAVE_SEM_ACESSO_ADMINISTRATIVO`, `TOKEN_USUARIO_AUSENTE` |
@@ -37,6 +37,16 @@ A `api-acos-vital` deixou de confiar só no guard do front ([[AV-Hub-API-Estado-
 Com o modo decidido como `exigir` fixo, a regra passa a valer em qualquer ambiente assim que a alteração do Gustavo entrar; **se já está no ar em produção, não verificado**.
 
 **🟡 Chamadas de serviço (proposta adotada, validar com o Gustavo):** o modo só confere permissão quando há token de usuário. As chamadas de serviço do pipeline e do MES (só `x-api-key`, sem `Bearer`) **passam sem mapeamento** em `auth.rotas_telas`. Ver [[Registro-de-Decisoes-2026-10-07]] (itens 8 e 9).
+
+## Modo de desenvolvimento sem login (conferido no código em 08/10)
+
+- **No Hub:** `NEXT_PUBLIC_DEV_SEM_LOGIN=true` libera todas as telas com um usuário e um menu fixos de desenvolvimento (`lib/auth/devSemLogin.ts`); o `requirePermission` devolve "liberado" sem consultar nada. **Só vale com `NODE_ENV` diferente de `production`.**
+- **No `api-comercial`:** `AUTH_DEV_BYPASS=true` aceita o header `x-dev-usuario` no lugar do `Bearer`; o serviço **encerra na subida** se o bypass for ligado sem `NODE_ENV=development` ou `test` declarado.
+- Os dois são travas de ambiente: em qualquer deploy, conferir que as variáveis não existem. Não verificado nos ambientes reais.
+
+## `requirePermission` e telas ainda não cadastradas
+
+Se **nenhuma** das telas pedidas existe em `auth.telas` (banco atrasado em relação ao front), o guard **cai no menu do JWT** em vez de negar; se pelo menos uma existe, a resposta ao vivo de `/me/permissoes` manda. Consequência para o Comercial & Suprimentos: enquanto os slugs não são cadastrados, a decisão depende do menu da sessão, que também não os traz, e o resultado é 403 ([[AV-Hub-Comercial-Suprimentos]]).
 
 ## 2ª camada no `api-comercial`
 

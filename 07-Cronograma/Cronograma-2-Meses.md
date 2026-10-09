@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, cronograma, planejamento]
 criado: 2026-09-18
-atualizado: 2026-10-07
+atualizado: 2026-10-08
 periodo: 18/09 a 21/12/2026 (3 meses)
 nome-do-arquivo: historico (era o plano de 2 meses)
 ---
@@ -9,6 +9,8 @@ nome-do-arquivo: historico (era o plano de 2 meses)
 > Status: decidido (Nathan, 07/10) | no código (develop; conferido 07/10) | em produção (MES só em teste; mes-test)
 
 # Cronograma de Desenvolvimento — 3 meses (18/09 a 21/12/2026)
+
+> **(atualizado em 08/10) Escopo ampliado:** o Nathan aprovou o levantamento do PCP legado × MES ([[PCP-Legado-x-MES-Lacunas]]). O plano de 3 meses (M1 a M7, piloto em 18/11) segue igual; a data final do MES passa para **cerca de 08/10/2027 (data aceita pelo Nathan em 08/10)** (marcos M8 a M11, seção 3.3, estimativas minhas a validar pelo Robert).
 
 > **Regra de datas (única, 07/10/2026):** a execução vai de **22/09 a 21/12** (**63 dias úteis**). O plano **S1–FC termina em 18/11**; **S5 e M7 terminam em 18/12**; **21/12 é só o fim da conta de capacidade** (o 63º dia útil), não uma entrega. Qualquer "2 meses" ou "60 dias" nesta nota é histórico e foi superado por esta regra. O arquivo **mantém o nome `Cronograma-2-Meses` por ser histórico** (não foi renomeado, para não quebrar links).
 >
@@ -45,6 +47,10 @@ nome-do-arquivo: historico (era o plano de 2 meses)
 | **M5** — Fase 0 fechada + Fase C | 13/11 | Marco zero carregado e conferido em dupla; saldo/movimento/reserva em homologação; status por item no Portal do Vendedor; UAT concluída. |
 | **M6** — Go/no-go do piloto | 18/11 | Piloto de recebimento avaliado; decisão de seguir, ajustar ou parar; backlog do ciclo 2 priorizado. **Não muda** com a extensão — a rastreabilidade completa não bloqueia o piloto. |
 | **M7** — Rastreabilidade completa (todas as rotas) | 18/12 | Log de eventos (`fluxo.evento`) e `item_acompanhado` cobrindo Compras, Recebimento, Qualidade, Produção e Estoque; Torre de Fluxo (mapa, trilha, tempo por etapa, ranking de gargalos) em homologação. **Novo (21/09).** |
+| **M8** 🟡 — Flange (prioridade alta) no MES | 02/04/2027 | Itens 1, 2, 4, 5, 6, 7 e 11 do [[PCP-Legado-x-MES-Lacunas]]. **Novo (08/10), estimativa minha, o Robert valida.** |
+| **M9** 🟡 — Flange completa no MES | 24/05/2027 | Itens 3, 8, 9, 10, 12, 13 e 14. Só depois dele dá para desligar a linha Flange do PCP legado. |
+| **M10** 🟡 — Caldeiraria HRM no MES | 27/08/2027 | Itens 15 a 22, com a Caldeiraria como mais uma fábrica `FABRICACAO`. Depende das decisões em aberto. |
+| **M11** 🟡 — Análise e gestão no MES | 08/10/2027 | Itens 23 a 27. Os itens 28 e 29 ficam no av-hub, sem data. |
 
 > **(atualizado em 07/10) Marcos.** M1 28/09 e M2 cumpridos. **M3 16/10 mantém.** **M4 30/10 só antecipa se a homologação estiver estável até 16/10** (a homologação já está disponível no mes-test). **M5 13/11, M6 18/11 e M7 18/12 mantêm** (🟡 Nathan valida, #36 do Registro). Regra de datas no topo da nota.
 
@@ -57,6 +63,31 @@ nome-do-arquivo: historico (era o plano de 2 meses)
 | **Fora do que o plano previa** | D4 cortada; C2 removida (06/10); etapa 1 da transferência entre filiais concluída em 07/10 |
 
 Fonte: leitura do código das `develop` em 07/10 (ver o callout acima e [[Onde-Estamos]]). As janelas das fases futuras ficam como estavam.
+
+### Reconferência de 08/10 (código dos cinco repositórios, só leitura)
+
+- **MES (`api-pcp` `ca3346b`, `app-pcp` `2ea3183`):** nenhuma tarefa mudou de estado desde 07/10. A única mudança é o novo layout da página de lotes do Estoque (`app-pcp` #35), que não altera D7 nem D10. O Recebimento com conferência, recontagem e decisão do PCP (D6/D7) continua só na `develop`; a `main` do MES segue parada em 28/08, então o merge `develop` → `main` antes do piloto continua pendente (data e responsável 🔴 Robert).
+- **Integração (F1–F3):** o `PUT` do contrato 34 e a leitura de eventos do contrato 35 estão no `api-pcp`; `/itens/status` (005) existe no MES e o av-hub não a consome; `/ordens-compra/referencia` (004) não existe em nenhum lado. **F2 segue parcial** (falta a referência da OC).
+- **Acesso e segurança (C5):** continua parcial: `UsuariosController` e `SetoresController` sem guard na maioria das rotas.
+- **API:** `PERMISSOES_ROTA_MODO` virou `exigir` por padrão em 07/10 (`0557871`), o que obriga `USUARIO_TOKEN_SEGREDO` na subida: entra como **cuidado de deploy** da `api-acos-vital` (item do Gustavo). A decisão 8 diz "fixo, sem `.env`"; o código ainda aceita a variável.
+
+### Escopo novo aprovado: PCP legado × MES (08/10)
+
+O Nathan **aprovou em 08/10/2026** os **29 itens** do levantamento do Robert ([[PCP-Legado-x-MES-Lacunas]]): 14 da Flange, 8 da Caldeiraria HRM (como **mais uma fábrica** dentro dos setores produtivos do roteiro), 5 de análise no MES e 2 no av-hub (28 e 29), e pediu o **recálculo estendendo a data**. A conta está na seção 3.3; os marcos M8 a M11 e a trilha do Gantt foram acrescentados. **M1 a M7 e o piloto de 18/11 não mudam.**
+
+### Comercial & Suprimentos (Pablo) — fora do plano original, entregue na `develop` até 07/10
+
+Este módulo **não está** nas sprints S1–S5 (a capacidade do Pablo no plano é 0 desde 07/10, seção 3.2). Estado conferido no código:
+
+| ID | Entrega | Estado no código (08/10) |
+|---|---|---|
+| K1 | `api-comercial` (Express 5 + Prisma, schema `core_comercial`) e Propostas (CRUD, fechar/perder/reabrir, duplicar, versões, PDF, planilha de itens, lote, câmbio USD/EUR, e-mail) | ✅ na `develop` (`bd1ae48`); na `main` só a fatia de Propostas/Painel/Dashboard, sem o serviço |
+| K2 | Suprimentos: catálogo, fornecedores (categorias, certificados, apelidos), ofertas, mapa de cotação e histórico de importações, solicitações de custo, tabela-telha | ✅ na `develop` |
+| K3 | Painel do Comprador (ranking, certificados vencendo, itens sem preço), histórico de compras, pesquisa de materiais, produtos pendentes com "Ligar ao Omie", exportar fornecedores | ✅ na `develop` |
+| K4 | E2E Playwright do Comercial e CI | ✅ na `develop` (07/10) |
+| K5 | **Publicar o `api-comercial`**, cadastrar as telas em `auth.telas`, claim `perfis` no token, reescrever os contratos 07 e 38 (item 39 do Registro) | 🔴 pendente, sem data e sem dono definidos; ver [[AV-Hub-Comercial-Suprimentos]] seção 7 |
+
+Não há estimativa de pd do Pablo para K1–K5 no vault; **não recalculei a capacidade** (a decisão #32 deixa o Pablo fora do MES, mas o plano não dimensiona o Comercial & Suprimentos).
 
 ## 2. O que entra e o que não entra
 
@@ -296,11 +327,39 @@ Soma das linhas 87,9 (arredondamento herdado da tabela original, que diz 88,0). 
 
 > **(atualizado em 07/10) 🟡 Recomendação pela "ordem de corte" da seção 9 (não decidida; Nathan valida):** os cortes 2 (C8, 1,0 pd, é do Robert) e 4 (D11 em Code128, sem leitor 2D, alívio de até 3,0 pd, sem número firmado) são os que o aliviam. O corte 1 (B9/B10) é do Gustavo e não ajuda o Robert; no corte 3, a F3 já foi entregue e a E3 é do Nathan; no corte 5, a D9 já foi entregue. **Alívio máximo na S1–FC: ~4,0 pd contra um estouro de 5,85 pd.** A ordem de corte **não tem item da S5**, e a regra da S5 ("estender a janela, não cortar") já está escrita. Ver a decisão 🔴 que sobra, na seção 9.
 
+### 3.3 Recálculo com o levantamento do PCP legado (08/10, aprovado pelo Nathan)
+
+> **🟡 As estimativas em pd são minhas, por complexidade (ordem de grandeza, ±30%), não do Robert.** Ele precisa validá-las item a item antes de a data valer como compromisso. Detalhe por item em [[PCP-Legado-x-MES-Lacunas]].
+
+**Regras da conta:** equipe igual à de 07/10 (só o Robert no MES, 75% de foco, ou seja 0,75 pd por dia útil, o mesmo que 31,5 ÷ 42 e 17,25 ÷ 23 da seção 3.2); começa em **21/12/2026**, depois do plano de 18/12; feriados de 25/12, 01/01, Carnaval (08 e 09/02), sexta-feira santa (26/03), 21/04, 27/05, 07/09, 12/10, 02/11 e 15/11 de 2027; entra primeiro o déficit que já existia.
+
+| Onda | O que entra | pd (Robert) | Acumulado | Fim estimado |
+|---|---|---|---|---|
+| 0 | Déficit do plano atual (seção 3.2) | 10,1 | 10,1 | 11/01/2027 |
+| 1 | **Flange, prioridade alta:** 1 Programação da fila (4), 2 Previsão de conclusão (4), 4 Planejamento da Usinagem (8), 5 Telão/Kanban/quiosque (6), 6 Tempo real (6), 7 Impressão (6), 11 Fim do fluxo (8) | 42 | 52,1 | **02/04/2027** |
+| 2 | **Flange, média e baixa:** 3 Prazo por setor (3), 8 Visualizador e croqui (4), 9 Sinete (2), 10 Checklist e inspeção (5), 12 Travessia Mogi → HRM (5), 13 Paradas (3), 14 Restrição por campo (4) | 26 | 78,1 | **24/05/2027** |
+| 3 | **Caldeiraria HRM:** 15 Entrada da OP (5), 16 Conferência da OP (10), 17 kg/m (4), 18 Rastreabilidade (6), 19 Setores e inspeções (8), 20 Ciclo do Book (8), 21 Datas contratuais (2), 22 Planejamento (8) | 51 | 129,1 | **27/08/2027** |
+| 4 | **Análise e gestão no MES:** 23 (4), 24 (6), 25 (6), 26 (3), 27 (3) | 22 | 151,1 | **08/10/2027** |
+| av-hub | Itens 28 (6) e 29 (6) | 12 | fora da conta do Robert | **sem dono nem data** |
+
+**Totais:** 141 pd novos no MES (+10,1 do déficit) e 12 pd no av-hub. O Robert passa de 48,75 pd de capacidade e 58,85 planejados (seção 3.2) para **199,85 planejados**, ou seja, **151,1 pd a mais do que a capacidade até 18/12**.
+
+**Sensibilidade:** com 100% de foco (em vez de 75%) as ondas terminam em 09/03, 15/04, 29/06 e 29/07 de 2027. Qualquer trabalho do Robert fora desta conta empurra tudo.
+
+**O que a conta não inclui:**
+- **Ciclo 2** (começa em 04/01/2027, [[Registro-de-Decisoes-2026-10-07]] item 27): sobras e perdas de matéria-prima (EC-02, L-10), remessa de produtos, Fase D e transferência entre filiais etapas 2 a 4. Nenhum está dimensionado; todos competem com o Robert.
+- **Baixa no despacho do Estoque** (já faltava na seção 3.2).
+- **Sobreposições não descontadas:** o painel TV (item 5 = tela 7.4), o fim do fluxo (11 = telas 10.2 e 10.3), a travessia Mogi → HRM (12 = transferência etapas 2 a 4) e o estoque por unidade (26) já eram backlog. Se o Robert confirmar que algum já estava contado, a data melhora.
+- **Os itens 28 e 29 no av-hub:** o Nathan e o Pablo (Comercial & Suprimentos) estão sem folga na conta; não há quem os assuma.
+- **Dependências de decisão:** destino × filial, componente repetido e campos dos itens 18 a 20 ainda estão em aberto e podem mudar a estimativa da onda 3.
+
+**Marcos novos (🟡 estimados, dependem da validação do Robert):** M8 Flange alta no MES em 02/04/2027; M9 Flange completa em 24/05/2027; M10 Caldeiraria no MES em 27/08/2027; M11 análises no MES em 08/10/2027. Só depois de M9 faz sentido desligar a linha Flange do PCP legado.
+
 ## 4. Gantt
 
 ```mermaid
 gantt
-    title Cronograma 18/09 a 21/12/2026 (dias úteis, feriados 12/10 e 02/11)
+    title Cronograma 18/09/2026 a 08/10/2027 (dias úteis, feriados 12/10 e 02/11)
     dateFormat YYYY-MM-DD
     axisFormat %d/%m
     section Marcos
@@ -311,6 +370,10 @@ gantt
     M5 Fase 0 fechada + Fase C :milestone, m5, 2026-11-13, 0d
     M6 Go/no-go do piloto :milestone, m6, 2026-11-18, 0d
     M7 Rastreabilidade completa :milestone, m7, 2026-12-18, 0d
+    M8 Flange alta no MES :milestone, m8, 2027-04-02, 0d
+    M9 Flange completa no MES :milestone, m9, 2027-05-24, 0d
+    M10 Caldeiraria no MES :milestone, m10, 2027-08-27, 0d
+    M11 Analise e gestao no MES :milestone, m11, 2027-10-08, 0d
     section Decisões e governança
     A1 Decisões bloqueantes (DEC-1..12 decididas) :done, a1, 2026-09-22, 2026-09-30
     A2 Hardware + agenda da contagem :a2, 2026-09-22, 2026-09-29
@@ -350,13 +413,23 @@ gantt
     D11 Etiquetagem + leitor 2D :d11, 2026-11-03, 2026-11-11
     D12 Correções UAT/piloto + treino :d12, 2026-11-16, 2026-11-19
     section av-hub - Compras e Portal
-    E1 Compras - requisições no av-hub :e1, 2026-10-05, 2026-10-17
-    E2 Compras - fechar compra + OC :e2, 2026-10-19, 2026-10-31
+    E1 Compras - requisições no av-hub :done, e1, 2026-10-05, 2026-10-17
+    E2 Compras - fechar compra + OC :done, e2, 2026-10-19, 2026-10-31
     E3 Portal - status por item :e3, 2026-11-02, 2026-11-14
     section Integração av-hub ↔ MES
     F1 Spec da integração v1 :f1, 2026-09-22, 2026-10-01
     F2 OC estruturada + jobs de poll :f2, 2026-10-19, 2026-10-31
     F3 Endpoint de status por item :done, f3, 2026-11-09, 2026-11-14
+    section av-hub - Comercial e Suprimentos (Pablo, fora do plano original)
+    K1 api-comercial + Propostas :done, k1, 2026-10-05, 2026-10-08
+    K2 Suprimentos - catalogo, ofertas, mapa, custo :done, k2, 2026-10-05, 2026-10-08
+    K3 Painel do comprador, historico, pesquisa :done, k3, 2026-10-06, 2026-10-08
+    section MES - PCP legado x MES (estimativa, 08/10)
+    W0 Deficit do plano atual :w0, 2026-12-21, 2027-01-12
+    W1 Flange - prioridade alta :w1, 2027-01-12, 2027-04-03
+    W2 Flange - media e baixa :w2, 2027-04-05, 2027-05-25
+    W3 Caldeiraria HRM :w3, 2027-05-25, 2027-08-28
+    W4 Analise e gestao no MES :w4, 2027-08-30, 2027-10-09
     section Carga inicial (marco zero)
     G1 Ferramenta de carga inicial :g1, 2026-10-13, 2026-10-24
     G2 Levantamento físico (dupla) :g2, 2026-10-26, 2026-10-31
@@ -413,7 +486,7 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 |---|---|---|---|---|---|---|
 | B5 | ✅ **Já aplicado (confirmado 21-22/09)** — ~~Aplicar~~ contratos SQL 002 (estoque_saldo) e 004 (pedidos_compras) | Gustavo | ~~2~~ 0 | — | B1, DEC-7 | `core.estoque_saldo` e `core_vendas_faturamento.pedidos_compras`/`_itens` já existem em produção; risco do `numero_item_omie` também resolvido (`ordem` é a identidade, índice único `uq_pedidos_compras_itens_ordem` aplicado) — nada a fazer. Ver [[Auditoria-Dump-Producao-2026-09-21]] e [[004-Pedidos-Compras]]. |
 | C5 | ⚠️ **Parcial (conferido 07/10)**: `@RequirePermission` por controller (~20), sem guard global; usuários e setores sem guard. RBAC por instância de setor (guard global + PerfilSetor) | Robert | 3 | 05/10–14/10 | C3 | Almoxarife, Qualidade e Gestor de Estoque com escopo por warehouse/setor |
-| E1 | ✅ **Adiantado (22/09/2026)** — Compras v1: modelagem + caixa de entrada de requisições vindas do MES | Nathan | 3 | 05/10–16/10 | F1, DEC-2 | Comprador vê as requisições do PCP no av-hub. Backend implementado e testado (contrato SQL [[008-Requisicoes-Compra]], branch local `feat/compras-requisicoes-e1` em `api-acos-vital`) — ainda não deployado em produção. Ver [[AV-Hub-Views-Compras-Investigacao]] e [[Decisoes-Chave-ERP]]. |
+| E1 | ✅ **Adiantado (22/09/2026)** — Compras v1: modelagem + caixa de entrada de requisições vindas do MES | Nathan | 3 | 05/10–16/10 | F1, DEC-2 | Comprador vê as requisições do PCP no av-hub. Backend implementado e testado (contrato SQL [[008-Requisicoes-Compra]], branch local `feat/compras-requisicoes-e1` em `api-acos-vital`) — **(conferido em 08/10) feita:** a tela `compras/requisicoes` (lista + kanban) está na `main` do av-hub e as rotas `/compras/*` na `main` da API; o dump de 07/10 mostra o schema em produção, **sem nenhuma linha**. Ver [[AV-Hub-Views-Compras-Investigacao]] e [[Decisoes-Chave-ERP]]. |
 | B6 | Pipeline ELT: ~~Passos 1, 3, 6 e 9 (parceiros fiscais, lead_time, locais, etapas)~~ **continua só com os locais (Passo 6)** e os Passos 1 e 9; **`lead_time` (Passo 3) sai do pipeline** (✅ 07/10, #29). `core.etapas_faturamento` já está populada em produção (#5) | Gustavo | 1,5 | 08/10–15/10 | B3, B5 | Parceiros com dados fiscais e locais de estoque sincronizando; etapas confirmadas em produção |
 | C6 | ✅ **Concluída — implementada e testada em 25/09/2026.** ~~PCP Carteira: classificação natureza × disponibilidade (backend + tela)~~ **Encaixe Estoque/Revenda:** enums `Fabrica.tipo`/`Setor.tipo` + seed (fábrica Revenda "Destino", setores Estoque/Compras/Expedição); backend força o setor Estoque como etapa 1 e remove Emissão de Ordens; Nova Ordem envia item de revenda à fábrica Revenda; tela do setor Estoque com "atender X do estoque" (split + reserva `ATIVA`, **revisado: não conclui mais ali, segue em trânsito pra Expedição**) e "enviar restante" | Robert | 3 | 08/10–16/10 | C4 | Item de revenda vira OP da fábrica Revenda; todo parcial nasce no setor Estoque; o split atendido segue reservado até a Expedição confirmar. Ver [[Encaixe-Estoque-Revenda-no-PCP]] |
 | D5 | ✅ **Entregue no código (23/09, `e14ecb2`, `develop`)** — Cadastros: material (campos extras), depósito/warehouse e localização - API + telas | Pablo | 4 | 08/10–16/10 | D3, C5, DEC-6 | Material com peso teórico, tolerância, mín/máx e ponto de pedido; localizações cadastradas |
@@ -427,7 +500,7 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 | C7 | ⚠️ *Descrição de 28/09 abaixo: superada por entrega em 07/10 e arquitetura de 29/09.* ✅ **Entregue no código (29/09 `b8dc158`; cancelamento e envio ao av-hub 02/10 `e7ce2c9`, `develop`)** — PCP: requisição de compra (endpoint + tela; payload C1 do fluxo). **Desde 24/09/2026: disparada pela entrada do parcial no setor Compras** do roteiro da Revenda, vinculada ao `ItemParcial`. **Reorganizada em 28/09/2026**: passa a incluir o novo setor **"Requisições de compras"** (fila própria do PCP, antes de Compras) para revenda **e** matéria-prima de fabricação — é ali que a requisição amarra a matéria-prima ao item/parcial de origem; `RequisicaoCompra`/`RequisicaoCompraItem` no Prisma | Robert | 2,5 | 19/10–23/10 | C6, F1 | Requisição sai do MES com material, quantidade, prazo, filial e `id_item_parcial`, sem ação manual; visível para Compras |
 | D6 | ⚠️ *Descrição de 28/09 abaixo: superada por entrega em 07/10 e arquitetura de 29/09.* ✅ **Entregue no código (07/10, `861c050`, `develop`)** — conferência contra a NF, recontagem por outra pessoa e decisão do PCP, ver [[App-PCP-Recebimento-Conferencia]]. Recebimento (backend): conferência dupla, divergência com saída, pesagem, quarentena, RNC e cisão de lote. **Desde 24/09/2026:** a conferência libera o parcial parado no setor Compras e o move para o próximo setor do roteiro. **Reorganizada em 28/09/2026**: recebimento parcial permitido (split — o que chegou avança, o restante aguarda em Compras); sobra do lote mínimo do fornecedor fica livre no estoque, registrando de qual requisição veio; setor Compras ganha a ação "Registrar pedido de compra / recebimento" | Robert | 4,5 | 19/10–30/10 | D5, F2, DEC-5 | Nenhum estado sem saída; lote nasce em quarentena; recebimento parcial não trava o restante |
 | D7 | ✅ **Entregue no código (07/10, `f2c01f1`, `develop`)** — dentro da fila do setor Recebimento. Recebimento (frontend): fila, conferência quantitativa, pesagem, divergência | Pablo | 4 | 19/10–28/10 | D5 | Almoxarife executa o recebimento ponta a ponta em homologação |
-| E2 | ✅ **Adiantado (22/09/2026)** — Compras: fechar compra (fornecedor, preço, aprovação condicional, acabado/não acabado, CIF/FOB, previsão de chegada) + OC estruturada | Nathan | 3 | 19/10–30/10 | E1, DEC-3 | OC com dados estruturados, sem PDF; CCP registra previsão de chegada. Backend implementado e testado (contrato SQL [[007-Ordens-Compra-Estruturada]], mesma branch local) — régua de R$30.000 confirmada em BRL e moeda estrangeira; sincronização com o Omie (`IncluirPedCompra`) e parcelas reais (catálogo de condição de pagamento) ficam pendentes. Ainda não deployado. |
+| E2 | ✅ **Adiantado (22/09/2026)** — Compras: fechar compra (fornecedor, preço, aprovação condicional, acabado/não acabado, CIF/FOB, previsão de chegada) + OC estruturada | Nathan | 3 | 19/10–30/10 | E1, DEC-3 | OC com dados estruturados, sem PDF; CCP registra previsão de chegada. Backend implementado e testado (contrato SQL [[007-Ordens-Compra-Estruturada]], mesma branch local) — régua de R$30.000 confirmada em BRL e moeda estrangeira; sincronização com o Omie (`IncluirPedCompra`) e parcelas reais (catálogo de condição de pagamento) ficam pendentes. **(conferido em 08/10) feita:** `compras/nova`, `compras/ordens` (lista + kanban), `compras/aprovacoes`, `compras/dashboard-compras` e `compras/followup` estão na `main` do av-hub; o envio da OC ao Omie está no código da pipeline, mas desligado por padrão (ver [[Registro-de-Decisoes-2026-10-07]], item 7). |
 | F2 | ⚠️ **Redesenhada (conferido 07/10)**: o 003 virou o [[34-Requisicoes-MES-Empurra-para-o-Hub]] (o MES empurra; sem job de poll) e o 35 está ligado no MES; resta a rota 004 e o consumidor do 005. API de OC estruturada + jobs de poll (requisições → av-hub; referência da OC → MES) | Gustavo | 3 | 19/10–30/10 | F1, E1 | Requisição e OC trafegam entre os dois sistemas em homologação |
 | B9 | (stretch) Passo 5 - histórico de pedidos de compra do Omie | Gustavo | 2 | 26/10–30/10 | B5 | Só se houver folga; primeiro corte se apertar |
 | D8 | ⚠️ *Descrição de 28/09 abaixo: superada por entrega em 07/10 e arquitetura de 29/09.* ✅ **Backend e front reais em `develop` (24–28/09)**. Qualidade (frontend): fila de inspeção, laudo, aprova/reprova, RNC e cisão. **Tela já em `develop` sobre mock (23/09).** **Regra de 24/09/2026, revisada 25/09/2026:** item comprado aprovado vai para o setor Estoque·Entrada (entrada + reserva `ATIVA`) e **segue depois para a Expedição** — não fica concluído no Estoque. Em aberto (28/09): se a inspeção é por lote (entidade) e/ou pela parcial quando há lote comprado | Pablo | 3 | 26/10–30/10 | D6 | Qualidade inspeciona, aprova ou reprova; lote reprovado é cindido; aprovado comprado chega ao setor Estoque em trânsito pra Expedição |

@@ -45,7 +45,7 @@ Com a chave A, **qualquer outra rota responde 403 `CHAVE_MES_ROTA_NAO_PERMITIDA`
 
 Logo, o MES lê com **chave admin ou do banco** (a chave B). Isso mantém **aberta a pendência L6** do contrato 26 ("chave do MES de escrita restrita por rota"), **ainda aberta no código** (0391b29, #275) e **🔴 pendente com o Gustavo**: chave restrita para MES e pipeline ou continuar com a chave admin? O MES precisa de escrita (`POST /pedidos_liberados/:n/importado`) e o pipeline também (`PATCH /compras/ordens/:id/sincronizacao`) — [[Registro-de-Decisoes-2026-10-07]], item 10. A restrição que existe só vale para a chave do PUT, não existe chave **de leitura+confirmação restrita às rotas do MES**. As notas dos contratos 004, 005 e 26 diziam "chave do MES restrita às rotas que o MES usa" como se isso viesse da chave do 34 — **não vem**. Ver [[26-Vendas-Liberacao-Pedido]] e [[35-Compras-Marcos-Requisicao-para-MES]].
 
-Do lado do MES `[C]`: o envio do 34 usa `AVHUB_MES_INTEGRACAO_KEY`; sem a chave a fila de envio **espera com aviso no log**. A leitura de eventos do 35 usa `API_KEY`. **Se as variáveis têm valor no ambiente real: não verificado.**
+Do lado do MES `[C]`: o envio do 34 usa `AVHUB_MES_INTEGRACAO_KEY`; sem a chave a fila de envio **espera com aviso no log**. A leitura de eventos do 35 usa `API_KEY`. **(conferido em 08/10)** Intervalos do MES: o envio roda a cada `AVHUB_ENVIO_INTERVALO_SEG` (padrão 60 s) e a leitura de eventos a cada `AVHUB_EVENTOS_INTERVALO_MIN` (padrão 5 min); ambos usam `API_URL` (padrão `https://api.acosvital.com.br`). **Se as variáveis têm valor no ambiente real: não verificado.**
 
 ## 4. `auth.chaves_servico` — como restringir B e C
 
@@ -73,7 +73,7 @@ Do lado do MES `[C]`: o envio do 34 usa `AVHUB_MES_INTEGRACAO_KEY`; sem a chave 
 
 | Chave | Decisão | Status |
 |---|---|---|
-| `PERMISSOES_ROTA_MODO` | Deixa de ser "variável a conferir": fica **fixa em `exigir`** no código, sem `.env`. Chamadas de serviço (só `x-api-key`, sem `Bearer`) passam sem mapeamento, pois o modo só confere permissão quando há token. Alteração de código: Gustavo | ✅ |
+| `PERMISSOES_ROTA_MODO` | Deixa de ser "variável a conferir": fica **fixa em `exigir`** no código, sem `.env`. Chamadas de serviço (só `x-api-key`, sem `Bearer`) passam sem mapeamento, pois o modo só confere permissão quando há token. Alteração de código: Gustavo | ✅ feito em 08/10 (`6317d5f`) |
 | `ESCOPO_VENDEDORES_EXIGIR` | Fixar no código (front do av-hub manda token em todas as chamadas, ✅ Nathan) | 🟡 (Gustavo) |
 | `IDENTIDADE_EXIGIR_TOKEN` | Segue como chave: quebra MES e pipeline enquanto usarem a chave do `.env` sem token | 🟡 (Gustavo) |
 | `ESCOPO_UNIDADE_EXIGIR_SESSAO` | Segue como chave, pelo mesmo motivo | 🟡 (Gustavo) |

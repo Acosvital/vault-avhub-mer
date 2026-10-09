@@ -87,7 +87,7 @@ Fila e retorno do envio passam pela API do av-hub (`GET /compras/ordens/fila-omi
 | monitor de pool | `*/2 * * * *` | diagnóstico |
 | PTAX | `30 13,17 * * 1-5` (America/Sao_Paulo) + ao subir | carga inicial desde 2026-01-01 se a tabela estiver vazia |
 | inativar catálogos | `47 4 * * *` | `ativo=false` nos 5 catálogos de Compras que sumiram do Omie; não age se o Omie devolver menos da metade dos ativos |
-| envio de OC | `1-59/2 * * * *` | fixo no código (decisão de 07/10, #7); ~~só agendado se `SYNC_ENVIO_OC=true`~~ superado |
+| envio de OC | `1-59/2 * * * *` | decisão de 07/10 (#7): fixo no código — **desde 08/10 (PR #3, `0f739f0`) o agendamento é fixo e o envio vai de verdade; não há mais `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN`** |
 | scraping de manifesto | `setTimeout` auto-reagendado, seg–sex 07–18h, ~1h ±25 min | só Mogi; 2FA por TOTP local |
 
 ## Ver também

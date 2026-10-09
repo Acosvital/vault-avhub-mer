@@ -5,6 +5,8 @@ criado: 2026-09-16
 
 # Fabricação — Flanges
 
+> Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
+
 Sub-rota da [[Rota-Fabricacao]] roteada para um sistema próprio dedicado de cálculo e parâmetros técnicos de flange: o [[App-PCP-Visao-Geral|app-pcp]] (ainda em construção, Robert).
 
 ## Modelo real (visto no código do app-pcp)
