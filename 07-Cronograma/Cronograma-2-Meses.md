@@ -10,7 +10,7 @@ nome-do-arquivo: historico (era o plano de 2 meses)
 
 # Cronograma de Desenvolvimento — 3 meses (18/09 a 21/12/2026)
 
-> **(atualizado em 08/10) Escopo ampliado:** o Nathan aprovou o levantamento do PCP legado × MES ([[PCP-Legado-x-MES-Lacunas]]). O plano de 3 meses (M1 a M7, piloto em 18/11) segue igual; a data final do MES passa para ~~cerca de 08/10/2027 (data aceita pelo Nathan em 08/10)~~ **cerca de 21/10/2027 (recalculada em 09/10 com o custo do lote, seção 3.4; o Nathan precisa reaceitar)** (marcos M8 a M11, estimativas minhas a validar pelo Robert). **Ciclo 1 fecha em 21/01/2027 e o Ciclo 2 começa em 22/01/2027** (eram 18/12/2026 para o plano e 04/01/2027).
+> **(atualizado em 08/10) Escopo ampliado:** o Nathan aprovou o levantamento do PCP legado × MES ([[PCP-Legado-x-MES-Lacunas]]). O plano de 3 meses (M1 a M7, piloto em 18/11) segue igual; a data final do MES passa para ~~cerca de 08/10/2027 (data aceita pelo Nathan em 08/10)~~ **cerca de 21/10/2027 (recalculada em 09/10 com o custo do lote, seção 3.4; aceita pelo Nathan em 09/10)** (marcos M8 a M11, estimativas minhas a validar pelo Robert). **Ciclo 1 fecha em 21/01/2027 e o Ciclo 2 começa em 22/01/2027** (eram 18/12/2026 para o plano e 04/01/2027).
 
 > **Regra de datas (única, 07/10/2026):** a execução vai de **22/09 a 21/12** (**63 dias úteis**). O plano **S1–FC termina em 18/11**; **S5 e M7 terminam em 18/12**; **21/12 é só o fim da conta de capacidade** (o 63º dia útil), não uma entrega. Qualquer "2 meses" ou "60 dias" nesta nota é histórico e foi superado por esta regra. O arquivo **mantém o nome `Cronograma-2-Meses` por ser histórico** (não foi renomeado, para não quebrar links).
 >
@@ -384,7 +384,7 @@ Soma das linhas 87,9 (arredondamento herdado da tabela original, que diz 88,0). 
 | M10 Caldeiraria HRM | 27/08/2027 | 09/09/2027 |
 | M11 Análise e gestão | 08/10/2027 | 21/10/2027 |
 
-O **plano S1–FC e a S5 mantêm as datas** (M3 16/10, M4 30/10, M5 13/11, piloto 18/11, M7 18/12) para Nathan e Gustavo; o que se desloca é o que depende do Robert. O Ciclo 2 só começa em 22/01/2027 porque o Robert fecha o Ciclo 1 (o déficit da Onda 0) em 21/01; as tarefas do Ciclo 2 que são do Gustavo ou do Nathan podem começar antes, se houver folga. K8 e K9 a K11 entram no Ciclo 2 e **não** estão na conta das ondas (somariam 1,0 pd do Robert e ~11 pd do av-hub). **O Nathan aceitou M11 ≈ 08/10/2027 em 08/10; a nova data (21/10/2027) precisa de novo aceite.**
+O **plano S1–FC e a S5 mantêm as datas** (M3 16/10, M4 30/10, M5 13/11, piloto 18/11, M7 18/12) para Nathan e Gustavo; o que se desloca é o que depende do Robert. O Ciclo 2 só começa em 22/01/2027 porque o Robert fecha o Ciclo 1 (o déficit da Onda 0) em 21/01; as tarefas do Ciclo 2 que são do Gustavo ou do Nathan podem começar antes, se houver folga. K8 e K9 a K11 entram no Ciclo 2 e **não** estão na conta das ondas (somariam 1,0 pd do Robert e ~11 pd do av-hub). **✅ O Nathan aceitou as novas datas em 09/10/2026** (M11 ≈ 21/10/2027, que substitui o ≈ 08/10/2027 de 08/10). As estimativas em pd continuam 🟡 até o Robert validá-las.
 
 ## 4. Gantt
 
