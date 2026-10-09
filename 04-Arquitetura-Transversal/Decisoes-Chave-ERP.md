@@ -51,7 +51,7 @@ Lista viva de decisões que precisam ser tomadas conscientemente para o "ERP de 
 - **Reprovação total/parcial no recebimento, quarentena EC-07, inspeção de entrada por lote:** implementados em `src/qualidade` e no Recebimento ([[App-PCP-Recebimento-Conferencia]]).
 - **"Divergência sem reabertura" (`api-pcp`):** a divergência de **recebimento** tem caminho de volta (`REABERTO`, decisão do PCP); a divergência de produção não foi reexaminada.
 - **"App-pcp só precisa de frontend para o board":** hoje existem dashboard, Movimentações e filas de setor no MES; a lista de gaps de UI precisa ser refeita.
-- **RBAC do MES "adiado":** desde 04/09 há `@RequirePermission` por controller e `PerfilSetor` no service; falta o desenho por setor **e filial** (C3) e alguns controllers estão sem guard ([[App-PCP-Visao-Geral]]).
+- **RBAC do MES "adiado":** desde 04/09 há `@RequirePermission` por controller e `PerfilSetor` no service; falta o desenho por setor **e filial** (C3) e alguns controllers estão sem guard **(atualizado em 09/10/2026: resolvido no PR #51 do `api-pcp`, `e8f951e`, 08/10: guard global com deny-by-default; usuários e setores com `@RequirePermission` nas escritas)** ([[App-PCP-Visao-Geral]]).
 - **Orçamento "adiado" (N-01) × código:** a API tem `/orcamento/*` e `/dashboard/comissoes` (contrato 07, `90bdb33`), e o av-hub ganhou o módulo Comercial & Suprimentos ([[AV-Hub-Comercial-Suprimentos]]). O conceito "Orçamento do MES" segue fora do ciclo; o que existe é o módulo comercial do av-hub — ~~convém o Nathan registrar a relação entre os dois (CC-03, CC-08).~~ **CC-03 fechada em 07/10 ([[Registro-de-Decisoes-2026-10-07]] #39): o orçamento é do módulo Comercial & Suprimentos, por fora.** CC-08 segue aberta.
 
 ## Já resolvidas / bem estabelecidas
