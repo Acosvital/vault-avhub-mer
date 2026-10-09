@@ -80,7 +80,7 @@ sequenceDiagram
     Qual->>Sist: EC1 · aprova o lote do item comprado (sai da quarentena)
     Sist->>Alm: EC2 · parcial volta ao setor Estoque (última etapa do roteiro da Revenda)
     Alm->>Sist: EC3 · entrada do lote na localização de guarda (MovimentoEstoque ENTRADA, ref. recebimento)
-    Sist->>Sist: EC4 · Reserva ATIVA do lote para o split + CONCLUIDO
+    Sist->>Sist: EC4 · Reserva ATIVA do lote para o split + CONCLUIDO (o custo do item no pedido é o custo médio dos lotes das reservas)
     Alm->>Exp: EC5 · segue pra entrega, igual ao Caso A
 ```
 

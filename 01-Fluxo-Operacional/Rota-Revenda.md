@@ -33,6 +33,10 @@ Introduz dependência de terceiros logo na entrada (fornecedor) e tem os estados
 
 Nota real do [[PRD-Estoque-Visao-Geral|PRD do Estoque]] (seção 18): **não existe um estado "em trânsito" verificável** — o fornecedor não tem acesso ao sistema, a data de entrega é sempre informada por canal externo (telefone/e-mail/WhatsApp) e registrada manualmente pelo comprador. O pedido permanece "Aprovado" até a chegada física.
 
+## Custo na Revenda (09/10/2026)
+
+A Revenda é onde o custo × venda por item vale primeiro: o lote nasce com o custo da OC (ou da carga inicial), a reserva liga o lote ao item do pedido e o custo do item é o custo médio dos lotes usados. Ver [[Estoque-Custo-do-Lote]]. A fabricação segue sem custo até o consumo de matéria-prima e a genealogia (J2 a J4).
+
 ## Onde isso é implementado (ou planejado)
 
 ~~Nada disto existe hoje (17/09/2026).~~ Em 24/09/2026: o motor de roteiro (`ItemParcial`) e a tela Ordem de Produção existem; a fábrica Revenda, os setores tipados Estoque/Compras e a entrada do item comprado no Estoque são a construir (C6, C7, D6, D8, D9 — ver [[Cronograma-2-Meses]]). **Em 07/10/2026 (conferido no código, `develop`):** C6 e D9 feitas; C7 (requisição, `b8dc158`/`e7ce2c9`), D6/D7 (recebimento, `861c050`/`f2c01f1`) e D8 (qualidade, `898aa54`/`815fef3`) em `develop`; contratos 34 e 35 implementados no MES. Ver [[Onde-Estamos]]. O lado av-hub de Compras (requisição, OC) tem frontend e backend em andamento. Modelo de dados em [[Estoque-Modelo-Dados]] (recebimento, inspeção, RNC, reserva).

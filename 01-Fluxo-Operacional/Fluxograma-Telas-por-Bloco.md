@@ -10,6 +10,8 @@ atualizado: 2026-10-08
 
 > **Atualização de 07/10/2026 — estado das telas do MES conferido no código** (`develop`: `api-pcp` `ca3346b`, `app-pcp` `a802a3e`; **só em `develop` — a `main` do MES parou em 28/08; produção e banco não conferidos; as telas do menu são criadas por SQL fora do repo, `modulos-telas.sql`**). Corrige o que esta nota dizia ("sobre mock", "🆕 a construir"): **Estoque (8.1, 8.2, 8.4–8.7) e Qualidade (9.1–9.4) estão com API real**; a **8.12** (setor Estoque) e a **2.4** (requisição de compra) existem; o **Recebimento (bloco 6)** não ganhou rota nova — vive na fila do setor `LOGISTICA_ENTRADA` com a ação "Conferir recebimento", "Recontar" e a tela **`/decisoes-pcp`** (hoje a 2.5 só trata divergência de recebimento). **Sem código conferido:** 8.3 (carga inicial em lote, G1 — só existe `POST /estoque/lotes/carga-inicial`, um lote por vez), T.2 (C3 não iniciada; C5 parcial, sem guard global (atualizado em 09/10: C5 feita no PR #51 do `api-pcp`, 08/10)) e T.3–T.6 (nada de `fluxo.*` no Prisma). **Não auditados nesta rodada:** 8.8–8.11 (os alertas de estoque mínimo/RNC pendente de `bfe5882` são o mais próximo da 8.10) e os blocos 7, 10 e 11. A contagem de telas abaixo é a de 24/09 e **não foi refeita**. Estado das tarefas: [[Onde-Estamos]].
 
+> **Atualização de 09/10/2026 — custo do lote ([[Estoque-Custo-do-Lote]]).** Os diagramas ganham o custo, sem mudar o caminho do item: a OC grava valor, moeda e cotação por item (emissão da OC); o lote nasce no Recebimento com o custo da OC, opcional e nunca bloqueante; o custo do item no pedido é o custo médio dos lotes que o atendem. Cadastros, Orçamento, dashboards, comissões e pedidos manuais não fazem parte do desenho. A Torre de Fluxo visualiza o fluxograma mestre.
+
 > **Atualização de 09/10/2026 — rótulos renomeados no `app-pcp` (`9bb47e4`, #39; só rótulos, rotas, slugs e permissões iguais).** Carteira → **Triagem dos Pedidos** (`/carteira`); Nova Ordem de Produção → **Destinação do Pedido** (`/ordens-producao/novo`); Ordens de Produção → **Acompanhamento dos Pedidos** (`/ordens-producao`); Movimentações → **Filas de Produção** (`/movimentacoes`); Dashboard do Estoque → **Painel do Estoque**; Atendimento / Baixa → **Atendimento**; Consulta de Saldo → **Saldo**; Compras → **Pedidos de Compra**; Decisões do PCP → **Divergências de Recebimento**. Nova tela **Cadastros › Acessos › Depósitos por Perfil** (#36). Os nomes de tela deste arquivo anteriores a esta data usam os rótulos antigos.
 >
 > **Atualização de 08/10/2026 — telas marcadas como feitas, conferidas na `develop`** (`app-pcp` `2ea3183`; av-hub `main` `cfed113` e `develop` `bd1ae48`). A coluna "Estado" de cada tela foi reescrita contra o código: onde dizia 🆕 ou "frontend pronto", agora diz o que existe. **Só leitura de código; produção não conferida.**
@@ -93,7 +95,7 @@ flowchart TD
         C1[Cotacao e negociacao]
         C2{Acima do valor limite?}
         C3[Aprovacao da diretoria]
-        C4[Emite Ordem de Compra, define CIF ou FOB]
+        C4[Emite Ordem de Compra, define CIF ou FOB, grava valor moeda e cotacao por item]
         C5[CCP: follow-up de prazo]
         C1 --> C2
         C2 -->|sim| C3 --> C4
@@ -118,7 +120,7 @@ flowchart TD
         R1[Confere Pedido de Venda ou Ordem de Compra]
         R2[Pesagem]
         R3{Bate com o esperado?}
-        R4[Cria lote em quarentena]
+        R4[Cria lote em quarentena, com o custo da OC opcional]
         R5{Roteiro tem beneficiamento?}
         R1 --> R2 --> R3
         R3 -->|nao| R6[Divergencia]
@@ -134,7 +136,7 @@ flowchart TD
     subgraph SEC_ESTOQUE[8 - Estoque - MES · 12 telas, 8 no ciclo]
         E1[Saldo disponivel na filial do pedido]
         E2{Saldo cobre o item?}
-        E3[Split atendido: reserva no lote e conclui]
+        E3[Split atendido: reserva no lote e conclui, custo do item e o custo medio dos lotes]
         E4{Tipo da fabrica}
         E5[Entrada do item comprado no saldo]
         E1 --> E2
@@ -300,7 +302,7 @@ O pedido nasce no **Omie** e o polling entrega ao **av-hub, e só ao av-hub** �
 | # | Tela | Funcionalidades | Estado | Tarefa |
 |---|---|---|---|---|
 | 3.1 | **Caixa de entrada de Requisições** | Lista + Kanban das requisições vindas do MES (Fluxo 1, polling 5 min); agrupamento por material/fornecedor para comprar em lote; triagem | ✅ **Feita** — `compras/requisicoes` (lista + kanban), na `main` do av-hub | **E1** |
-| 3.2 | **Emissão da OC** (`/compras/nova`) | Fornecedor (projeção `core.parceiros`, sem cadastro próprio); preço, moeda e `cotacao_moeda` (cobre MP importada); **flag acabado/não-acabado por item**; CIF × FOB; condição de pagamento e parcelas | ✅ **Feita** — `compras/nova` e `compras/nova/[requisicaoId]`, na `main` | **E2** |
+| 3.2 | **Emissão da OC** (`/compras/nova`) | Fornecedor (projeção `core.parceiros`, sem cadastro próprio); preço, desconto, moeda e `cotacao_moeda` (cobre MP importada; esses valores seguem ao MES, contrato [[007-Referencia-OC-Valores-no-MES]]); **flag acabado/não-acabado por item**; CIF × FOB; condição de pagamento e parcelas | ✅ **Feita** — `compras/nova` e `compras/nova/[requisicaoId]`, na `main` | **E2** |
 | 3.3 | **Ordens de Compra** | Lista + Kanban de fechamento; estados da OC; vínculo com a requisição de origem (`id_requisicao_origem`) | ✅ **Feita** — `compras/ordens` (lista + kanban), `compras/ordem/[id]` e `compras/pedido-omie/[id]`, na `main` | **E2** |
 | 3.4 | **Fila de Aprovações** | Dispara **acima de R$ 30.000** (DEC-3), em BRL ou em moeda estrangeira convertida; segregação comprador ≠ aprovador; aprovar/reprovar com motivo (reprovado volta pra 3.2) | ✅ **Feita** — `compras/aprovacoes`, na `main` | **E2** |
 | 3.5 | **Dashboard de Compras** | Volume, valor, requisições em aberto, OCs por estado | ✅ **Feita** — `compras/dashboard-compras`, na `main` | **E2** |
@@ -352,7 +354,7 @@ Só o FOB (L2) tem trabalho operacional da empresa sem tela. Hoje isso se resolv
 | 6.2 | **Conferência quantitativa** | Localiza a referência conforme a flag — **item acabado confere contra o Pedido de Venda; não acabado contra a OC**; contagem item a item; leitor 2D de código de barras/QR; touch-friendly (posto de chão de fábrica) | ✅ **Feita** — `ConferirRecebimentoModal` (contagem × NF, chave de 44 dígitos). 🔧 Sem leitor 2D (D11) | **D6, D11** |
 | 6.3 | **Pesagem** | Peso teórico × quantidade × peso real; tolerância **5% decidida para todas as categorias** (pode virar por categoria — [[Registro-de-Decisoes-2026-10-07]], item 26); **digitação manual** (DEC-5, a balança não tem saída digital); fora da tolerância cai na 6.4 | ✅ **Feita** — peso teórico × real digitado, na conferência e na recontagem (`RecontarRecebimentoModal`) | **D6, D7** |
 | 6.4 | **Registro de divergência** | Tipo (quantidade / descrição / peso / avaria), descrição, foto de evidência; envia pra fila 2.5 do PCP; **nunca é estado terminal** | ✅ **Feita** — divergência por tipo (quantidade, descrição, peso, avaria) com evidência; cai em `/decisoes-pcp` | **D6** |
-| 6.5 | **Lote e etiquetagem** | Cria o lote com a **quantidade real** (`origem = RECEBIMENTO`, `status_qualidade = PENDENTE` — quarentena por padrão); imprime etiqueta código de barras/QR; associa a chave de acesso da NF de entrada (só `chave_acesso`, nunca CFOP/ICMS-ST); roteia pra Qualidade (acabado) ou PCP (não acabado) | ✅ **Feita** — o lote nasce na conferência/decisão e a etiqueta Code128 sai em `lotes/[id]` ("Imprimir etiqueta"). 🔧 Sem leitor 2D nem posto de recebimento (D11) | **D6, D8, D11** |
+| 6.5 | **Lote e etiquetagem** | Cria o lote com a **quantidade real** (`origem = RECEBIMENTO`, `status_qualidade = PENDENTE` — quarentena por padrão) e o **custo da OC**, opcional ([[008-Custo-do-Lote-no-MES]]); imprime etiqueta código de barras/QR; associa a chave de acesso da NF de entrada (só `chave_acesso`, nunca CFOP/ICMS-ST); roteia pra Qualidade (acabado) ou PCP (não acabado) | ✅ **Feita** — o lote nasce na conferência/decisão e a etiqueta Code128 sai em `lotes/[id]` ("Imprimir etiqueta"). 🔧 Sem leitor 2D nem posto de recebimento (D11) | **D6, D8, D11** |
 
 **6.2 e 6.3 podem virar um wizard só** se o posto físico for o mesmo (mesa de conferência com balança ao lado). Mantive separadas porque são atividades com device diferente — o leitor 2D na conferência, a digitação do peso na pesagem. Decisão em aberto **T-02**, a resolver no levantamento físico (26–30/10), não agora.
 
@@ -395,7 +397,7 @@ Só o FOB (L2) tem trabalho operacional da empresa sem tela. Hoje isso se resolv
 |---|---|---|---|---|
 | 8.1 | **Cadastro de material** | Material é **projeção read-only de `core.produtos`** *(atualizado em 07/10: não é projeção — nasce por snapshot do av-hub na primeira entrada de estoque, `upsertMaterialDoAvhub`, PR #44; ver [[Estoque-Modelo-Dados]])* — só os campos extras do Estoque são editáveis: peso teórico, tolerância, mínimo/máximo, ponto de pedido. Liga ao item do pedido por `(codigo_empresa, id_omie)`; a `natureza` do material **não decide rota** (quem decide é a fábrica da rodada) | ✅ **Feita** — `cadastros/estoque/materiais`, com API real | **D5** |
 | 8.2 | **Depósitos e localizações** | Warehouse (depósito compartilhado, não vinculado a fábrica); `codigo_empresa` no depósito (L-09); localização (corredor, prateleira); hierarquia | ✅ **Feita** — `cadastros/estoque/depositos` (depósito e localização), com API real | **D5** |
-| 8.3 | **Carga inicial** | Importação com **dry-run** antes de gravar; folhas de contagem por localização; dupla conferência (**contador + conferente; divergência = terceira contagem**, decidido em 07/10 — item 25 de [[Registro-de-Decisoes-2026-10-07]]); ~~reconciliação com o saldo do Omie~~ *(superado em 07/10: o saldo do Omie é ignorado, o Omie só recebe dados manualmente e o MES é a referência do saldo físico — item 28 do Registro)*; lote nasce com `origem = CARGA_INICIAL` e **já liberado**, sem inspeção (default da DEC-4) | 🔧 **Parcial** — só a entrada manual de lote na tela Saldo (`EntradaLoteModal`, `POST /estoque/lotes/carga-inicial`); faltam importação com dry-run, folhas de contagem e dupla conferência | **G1, G3** |
+| 8.3 | **Carga inicial** | Importação com **dry-run** antes de gravar, com coluna **opcional de custo unitário** ([[008-Custo-do-Lote-no-MES]]); folhas de contagem por localização; dupla conferência (**contador + conferente; divergência = terceira contagem**, decidido em 07/10 — item 25 de [[Registro-de-Decisoes-2026-10-07]]); ~~reconciliação com o saldo do Omie~~ *(superado em 07/10: o saldo do Omie é ignorado, o Omie só recebe dados manualmente e o MES é a referência do saldo físico — item 28 do Registro)*; lote nasce com `origem = CARGA_INICIAL` e **já liberado**, sem inspeção (default da DEC-4) | 🔧 **Parcial** — só a entrada manual de lote na tela Saldo (`EntradaLoteModal`, `POST /estoque/lotes/carga-inicial`); faltam importação com dry-run, folhas de contagem e dupla conferência | **G1, G3** |
 
 ### Fase C — operação
 

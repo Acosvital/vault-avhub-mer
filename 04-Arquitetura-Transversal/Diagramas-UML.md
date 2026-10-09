@@ -50,7 +50,7 @@ sequenceDiagram
         Compras->>Aprov: C3 · pedido de aprovação
         Aprov-->>Compras: aprovado/reprovado
     end
-    Compras->>Compras: C4 · emite Ordem de Compra (define CIF ou FOB)
+    Compras->>Compras: C4 · emite Ordem de Compra (define CIF ou FOB; grava valor, desconto, moeda e cotação por item)
     Compras->>Forn: C5 · envia OC
     Compras-->>SCom: C7 · referência da OC por item (contrato 004, a construir: hoje registro manual no MES)
     alt FOB
@@ -60,7 +60,7 @@ sequenceDiagram
         Forn->>Receb: C8b · fornecedor entrega direto na doca
     end
     SCom->>Receb: parcial segue para o Recebimento
-    Receb->>Receb: C9 · confere a NF e cria o lote PENDENTE em quarentena (recebimento parcial faz split)
+    Receb->>Receb: C9 · confere a NF e cria o lote PENDENTE em quarentena, com o custo da OC se a referência já chegou (recebimento parcial faz split)
     Receb->>QE: C11 · parcial espera a inspeção do lote
     QE->>QE: C14 · inspeção de entrada por lote (laudo obrigatório)
     alt aprovado
@@ -306,6 +306,16 @@ classDiagram
         +datetime quarentenaDesde
         +string numeroNf
     }
+    class LoteCusto:::estoqueStyle {
+        +decimal custoLiquidoUnitario
+        +string origem
+        +decimal valorUnitario
+        +string moeda
+        +decimal cotacao
+        +decimal descontoPct
+        +decimal freteUnit
+        +boolean cotacaoAConferir
+    }
     class Rnc:::estoqueStyle {
         +string motivo
         +string evidenciaUrl
@@ -377,6 +387,7 @@ classDiagram
     Reserva "0..*" --> "1" Lote
     Reserva "0..*" --> "0..1" ItemParcial : split atendido
     MovimentoEstoque "0..*" --> "0..1" Reserva : consumo
+    Lote "1" --> "0..1" LoteCusto : custo opcional
     Lote "1" --> "0..1" Pesagem
     Lote "1" --> "0..*" Etiqueta
     OrdemSeparacao "1" --> "1..*" ItemSeparacao
@@ -388,7 +399,7 @@ classDiagram
     classDef estoqueStyle fill:#d9eef2,stroke:#1f7a8c,color:#181c22
     classDef mesStyle fill:#f3ddd6,stroke:#a8420f,color:#181c22
     classDef futuroStyle fill:#eef0f2,stroke:#8d95a1,color:#5c6570
-    cssClass "Material,Fornecedor,RequisicaoCompra,RequisicaoCompraItem,Lote,Rnc,Deposito,LocalizacaoEstoque,SaldoEstoque,MovimentoEstoque,Reserva" estoqueStyle
+    cssClass "Material,Fornecedor,RequisicaoCompra,RequisicaoCompraItem,Lote,LoteCusto,Rnc,Deposito,LocalizacaoEstoque,SaldoEstoque,MovimentoEstoque,Reserva" estoqueStyle
     cssClass "ItemParcial" mesStyle
     cssClass "Pesagem,Etiqueta,OrdemSeparacao,ItemSeparacao,DevolucaoCliente,ContagemCiclica" futuroStyle
 ```
@@ -1368,6 +1379,21 @@ classDiagram
         +datetime quarentena_desde
         +string numero_nf
     }
+    class LOTE_CUSTO:::estoqueStyle {
+        +UUID id_lote «PK»«FK»
+        +string origem
+        +decimal custo_liquido_unitario
+        +decimal valor_unitario
+        +string moeda
+        +decimal cotacao
+        +decimal desconto_pct
+        +decimal icms_recuperar_unit
+        +decimal ipi_unit
+        +decimal st_unit
+        +decimal frete_unit
+        +UUID id_item_oc
+        +boolean cotacao_a_conferir
+    }
     class RNC:::estoqueStyle {
         +UUID id «PK»
         +UUID id_lote «FK»
@@ -1458,6 +1484,7 @@ classDiagram
     RESERVA_ESTOQUE "0..*" --> "1" LOTE
     RESERVA_ESTOQUE "0..*" --> "0..1" ITEM_PARCIAL
     MOVIMENTO_ESTOQUE "0..*" --> "0..1" RESERVA_ESTOQUE
+    LOTE "1" --> "0..1" LOTE_CUSTO
     LOTE "1" --> "0..1" PESAGEM
     LOTE "1" --> "0..*" ETIQUETA
     ORDEM_SEPARACAO "1" --> "1..*" ITEM_SEPARACAO
@@ -1469,7 +1496,7 @@ classDiagram
     classDef estoqueStyle fill:#d9eef2,stroke:#1f7a8c,color:#181c22
     classDef mesStyle fill:#f3ddd6,stroke:#a8420f,color:#181c22
     classDef futuroStyle fill:#eef0f2,stroke:#8d95a1,color:#5c6570
-    cssClass "MATERIAL,FORNECEDOR,REQUISICAO_COMPRA,REQUISICAO_COMPRA_ITEM,LOTE,RNC,DEPOSITO,LOCALIZACAO_ESTOQUE,SALDO_ESTOQUE,MOVIMENTO_ESTOQUE,RESERVA_ESTOQUE" estoqueStyle
+    cssClass "MATERIAL,FORNECEDOR,REQUISICAO_COMPRA,REQUISICAO_COMPRA_ITEM,LOTE,LOTE_CUSTO,RNC,DEPOSITO,LOCALIZACAO_ESTOQUE,SALDO_ESTOQUE,MOVIMENTO_ESTOQUE,RESERVA_ESTOQUE" estoqueStyle
     cssClass "ITEM_PARCIAL" mesStyle
     cssClass "PESAGEM,ETIQUETA,ORDEM_SEPARACAO,ITEM_SEPARACAO,DEVOLUCAO_CLIENTE,CONTAGEM_CICLICA" futuroStyle
 ```
