@@ -31,7 +31,7 @@ sequenceDiagram
 
     Alm->>Sist: 1 · Conferir recebimento: contagem × NF (+ peso real, se o material tem peso teórico)
     alt tudo bate
-        Sist->>Sist: 2a · lote(s) PENDENTE (quarentena) + ENTRADA no saldo na localização informada
+        Sist->>Sist: 2a · lote(s) PENDENTE (quarentena) + ENTRADA no saldo na localização informada + custo do lote copiado da OC, opcional
         Sist->>Qual: 2b · parcial segue com idLoteCompra · recebimento CONCLUIDO
     else diverge (quantidade, descrição, peso, avaria)
         Sist->>Sist: 3a · nada entra no estoque · AGUARDANDO_RECONTAGEM
@@ -121,7 +121,7 @@ Peso teórico × quantidade, dentro da tolerância por categoria (5% provisório
 Esta é uma ramificação **diferente** da reprovação de qualidade (que só acontece depois, na inspeção) — aqui o problema é "chegou errado", não "chegou ruim". Volta pro PCP decidir: aceita o que chegou como recebimento parcial (ajusta o lote pra quantidade real) ou rejeita e reabre o ciclo de compra (volta pra C1 de [[Fluxo-Compras-Completo]]). *(Atualizado em 07/10: no código o PCP **não** recebe a divergência direto — antes há uma **recontagem por outra pessoa**; só se a recontagem continua divergindo o recebimento vai a `AGUARDANDO_DECISAO` e aparece em `/decisoes-pcp`. "Aceita" = `ACEITO` (entra a quantidade recontada); "rejeita" = `REABERTO` (nada entra e a parcial volta ao setor Compras). Motivo obrigatório nos dois.)*
 
 **R7 — Criação do lote**
-`lote` nasce com `origem = RECEBIMENTO` e `status_qualidade = PENDENTE` — quarentena por padrão, mesmo se o item for "acabado" e passar batido pela conferência (ver [[Estoque-Modelo-Dados]]).
+`lote` nasce com `origem = RECEBIMENTO` e `status_qualidade = PENDENTE` — quarentena por padrão, mesmo se o item for "acabado" e passar batido pela conferência (ver [[Estoque-Modelo-Dados]]). **(09/10)** O lote ganha o custo da OC em `lote_custo` (opcional, nunca bloqueia; OC com cotação manual vem marcada para conferência): [[008-Custo-do-Lote-no-MES]].
 
 **R8 — Etiquetagem**
 *(Atualizado em 07/10: parcial no código — `GET /estoque/lotes/:id/etiqueta` gera PDF Code128 (`2e2c18e`, 23/09); sem leitor 2D e sem posto de recebimento.)* Código de barras/QR por padrão; RFID só no piloto de Flange (maior valor unitário — ver [[Fabricacao-Flanges]] e [[Estoque-Riscos]] pra a ressalva técnica de tag on-metal).

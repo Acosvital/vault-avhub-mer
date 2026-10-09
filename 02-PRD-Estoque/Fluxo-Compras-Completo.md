@@ -81,7 +81,7 @@ Comprador escolhe fornecedor (projeção `core.parceiros`, sem cadastro próprio
 Só dispara se o valor da compra estiver acima do limiar: **R$ 30.000** (DEC-3 de 21/09, aprovador diretor). **Em 08/10 o Nathan respondeu que o Gerente de Compras aprova**; falta confirmar se vale para todos os valores ou só abaixo do limiar ([[Registro-de-Decisoes-2026-10-07]] #50b). Segunda camada além da segregação comprador≠aprovador já prevista.
 
 **C4 — Emissão da Ordem de Compra**
-`pedido_compra` criado no av-hub (decidido em [[MES-Arquitetura-Decisoes]]). Campos: fornecedor, itens, preço, condição, moeda (cobre MP importada), flag **acabado/não-acabado** por item — essa flag é o dado mais importante que nasce aqui, decide o resto do fluxo.
+`pedido_compra` criado no av-hub (decidido em [[MES-Arquitetura-Decisoes]]). Campos: fornecedor, itens, preço, condição, moeda e cotação (cobre MP importada), desconto, flag **acabado/não-acabado** por item — essa flag é o dado mais importante que nasce aqui, decide o resto do fluxo. *(Atualizado em 09/10: o valor unitário, o desconto, a moeda e a cotação passam ao MES pelo [[007-Referencia-OC-Valores-no-MES]] e viram o custo do lote no Recebimento; ver [[Estoque-Custo-do-Lote]].)*
 
 **C5 — Comprador → Fornecedor: envio da OC**
 Hoje manual (e-mail/PDF). Intenção futura: dado estruturado, sem depender de PDF (ver [[Fluxo-Detalhado-Pedido-Item]]).
@@ -132,7 +132,7 @@ Também referenciado em [[Rota-Revenda]].
 - **Item acabado** → confere contra o **Pedido de Venda** ("cara-crachá": o que chegou é o que o vendedor vendeu).
 - **Item não acabado** → confere contra a **referência da OC** recebida em C7 (o que chegou é o que o comprador comprou, pode ser bem diferente do item final vendido).
 - Pesagem: peso teórico × quantidade, dentro da tolerância por categoria (provisório 5%, ver [[Estoque-Perguntas-Abertas]]).
-- Cria o **lote**, nascendo em quarentena (`status_qualidade = PENDENTE`, padrão já documentado em [[Estoque-Modelo-Dados]]).
+- Cria o **lote**, nascendo em quarentena (`status_qualidade = PENDENTE`, padrão já documentado em [[Estoque-Modelo-Dados]]), com o **custo da OC** quando a referência já chegou ao MES; sem ela, o lote nasce sem custo e nada trava ([[008-Custo-do-Lote-no-MES]]).
 
 **C9b — Recebimento libera o parcial parado no setor Compras (24/09/2026)**
 A conferência bem-sucedida move o parcial para o próximo setor do roteiro da Revenda (tarefa D6).

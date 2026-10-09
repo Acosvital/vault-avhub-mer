@@ -8,6 +8,8 @@ atualizado: 2026-10-07
 
 > Status: decidido (fluxo de negócio). O que já existe no código está em [[Fluxograma-Telas-por-Bloco]] e [[Onde-Estamos]]; produção não verificada (dump de 07/10).
 
+> **Atualização de 09/10/2026 — custo do lote ([[Estoque-Custo-do-Lote]]).** Os diagramas ganham o custo, sem mudar o caminho do item: a OC grava valor, moeda e cotação por item (emissão da OC); o lote nasce no Recebimento com o custo da OC, opcional e nunca bloqueante; o custo do item no pedido é o custo médio dos lotes que o atendem. Cadastros, Orçamento, dashboards, comissões e pedidos manuais não fazem parte do desenho. A Torre de Fluxo visualiza o fluxograma mestre.
+
 > **Atualização de 07/10/2026:** os diagramas abaixo continuam sendo o **desenho de 24/09** e **não foram redesenhados**. Dois avisos: (1) a frase "só a primeira caixa é real hoje" (mais abaixo) está desatualizada — Carteira, Ordem de Produção, setor Estoque, requisição, recebimento com conferência e inspeção de entrada têm código em `develop` do MES (conferido no código, `ca3346b`/`a802a3e`; `main` parada em 28/08; produção não conferida); (2) a arquitetura de 29/09 (Estoque único, circuito de compra fora do roteiro, baixa no despacho) substitui o roteiro dos diagramas 1, 3, 4, 5 e 6 — **parcialmente implementada**: o recebimento confere **contra a NF** com recontagem e decisão do PCP (diagrama 3 não reflete isso). Ver [[Encaixe-Estoque-Revenda-no-PCP]] e [[Fluxo-Recebimento-Completo]].
 
 > Visão em fluxograma (decisão/ramificação) de tudo que já foi modelado como sequência de conversas nos arquivos `Fluxo-*-Completo`. Aqui o foco é **quem decide o quê e pra onde o item vai** — os detalhes de payload/gatilho de cada interação continuam nos arquivos de conversa. Ver também a versão publicada como página única: [[Setores-Envolvidos-no-Fluxo]].
@@ -60,7 +62,7 @@ flowchart TD
     subgraph SEC_ESTOQUE[Estoque - MES]
         E1[Saldo disponivel na filial do pedido]
         E2{Saldo cobre o item?}
-        E3[Split atendido: reserva no lote e conclui]
+        E3[Split atendido: reserva no lote e conclui, custo do item e o custo medio dos lotes]
         E4{Tipo da fabrica}
         E5[Entrada do item comprado no saldo]
         E1 --> E2
@@ -77,7 +79,7 @@ flowchart TD
         C1[Cotacao e negociacao]
         C2{Acima do valor limite?}
         C3[Aprovacao da diretoria]
-        C4[Emite Ordem de Compra, define CIF ou FOB]
+        C4[Emite Ordem de Compra, define CIF ou FOB, grava valor moeda e cotacao por item]
         C5[CCP: follow-up de prazo]
         C1 --> C2
         C2 -->|sim| C3 --> C4
@@ -102,7 +104,7 @@ flowchart TD
         R1[Confere Pedido de Venda ou Ordem de Compra]
         R2[Pesagem]
         R3{Bate com o esperado?}
-        R4[Cria lote em quarentena]
+        R4[Cria lote em quarentena, com o custo da OC opcional]
         R5{Roteiro tem beneficiamento?}
         R1 --> R2 --> R3
         R3 -->|nao| R6[Divergencia]
@@ -235,7 +237,7 @@ flowchart TD
         B[Comprador escolhe fornecedor e negocia]
         C{Valor acima de R$ 30.000?}
         D[Aprovacao da diretoria]
-        E[Emite Ordem de Compra, define CIF ou FOB]
+        E[Emite Ordem de Compra, define CIF ou FOB, grava valor moeda e cotacao por item]
         H[CCP acompanha prazo]
         I{Fornecedor confirma a chegada?}
         B --> C
@@ -298,7 +300,7 @@ flowchart TD
         D[Pesagem: peso teorico x tolerancia]
         E{Confere com o esperado?}
         F[Abre divergencia]
-        H[Cria lote com quantidade real]
+        H[Cria lote com quantidade real e o custo da OC opcional]
         J[Lote nasce em quarentena]
         K[Etiquetagem]
         L[Associa nota fiscal de entrada]
@@ -517,7 +519,7 @@ flowchart TD
     subgraph SEC_ESTOQUE[Estoque / Almoxarife - MES]
         D[Parcial chega na etapa 1]
         C{Saldo disponivel na filial do pedido?}
-        E[Split atendido: reserva ATIVA no lote]
+        E[Split atendido: reserva ATIVA no lote, custo do item e o custo medio dos lotes]
         F[Conclui o split e separa]
         G[Restante segue o roteiro: setores produtivos ou setor Compras]
         P[Entrada do item comprado no saldo]

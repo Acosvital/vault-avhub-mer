@@ -116,6 +116,8 @@ flowchart LR
 >
 > **Como ler:** caixa branca = passo de um setor · paralelogramo escuro = o sistema · caixa vermelha = fora do sistema. Cada ação do sistema mora **dentro da raia onde o resultado dela aterrissa** — por isso o PCP tem três: é pra lá que as exceções voltam.
 >
+> **Custo (09/10/2026):** o lote que entra no Estoque (compra ou carga inicial) traz o custo opcional; a reserva do ato 3 liga lote e item, e o custo do item é o custo médio dos lotes — [[Estoque-Custo-do-Lote]].
+
 > **Repare no Estoque:** desde 24/09/2026 é por ele que **todo** item entra no roteiro (etapa 1) — e é por ele que o item comprado sai, depois da Qualidade. A busca de saldo e a reserva viraram um nó escuro: é trabalho que sai da pessoa e passa a ser do sistema, que busca o saldo e trava a reserva **na mesma operação**, pra dois pedidos não disputarem o mesmo lote. O mesmo movimento acontece no Recebimento e na Qualidade.
 
 ```mermaid
@@ -152,7 +154,7 @@ flowchart TD
         C1[Cotacao e negociacao]
         C2{Acima de R$ 30.000?}
         C3[Aprovacao da diretoria]
-        C4[Emite Ordem de Compra, define CIF ou FOB]
+        C4[Emite Ordem de Compra, define CIF ou FOB, grava valor moeda e cotacao por item]
         C5[CCP: follow-up de prazo]
         C1 --> C2
         C2 -->|sim| C3 --> C4
@@ -179,7 +181,7 @@ flowchart TD
         R1[Confere Pedido de Venda ou Ordem de Compra]
         R2[Pesagem]
         R3{Bate com o esperado?}
-        R4[Cria lote em quarentena]
+        R4[Cria lote em quarentena, com o custo da OC opcional]
         R5{Roteiro tem beneficiamento?}
         R1 --> R2 --> R3
         R3 -->|nao| R6[Divergencia]
