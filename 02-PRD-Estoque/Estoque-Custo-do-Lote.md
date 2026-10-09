@@ -89,7 +89,9 @@ A NF do Omie não diz de qual lote saiu cada peça. Vale o **custo médio do ite
 
 Quem quiser mudar uma delas muda o contrato 008 e o item 94 do Registro; nada aqui trava o código antes da etapa 2.
 
-## Evolução da comissão (av-hub)
+## Evolução da comissão (av-hub) — fora do desenho
+
+> Comissões não estão no Diagrama de Atividades (decisão do Nathan, 09/10): esta seção e o contrato 47 ficam depois da entrega do desenho. O custo do lote em si (tabelas acima) é Estoque/Compras e **está** no desenho.
 
 1. **Etapa 1, sem mudança:** o vendedor continua preenchendo o simulador com custo orçado e valor de venda.
 2. **Etapa 2, semiautomática (Ciclo 2):** o simulador já vem com o custo real dos lotes usados em cada item (`GET /itens/custo`); Compras só confere e confirma.
