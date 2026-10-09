@@ -1,13 +1,13 @@
 ---
 tags: [contrato-sql, dba, integracao-av-hub-mes, compras, api004]
-status: implementada-no-codigo
+status: implementada
 criado: 2026-10-09
 atualizado: 2026-10-09
 ---
 
 # Contrato SQL 011 — `vw_ordens_compra_referencia_mes` + `ordens_compra_referencia_mes` (marca por trigger) + índice (migration `api004`)
 
-> **Status: `implementada-no-codigo`. Aplicação no banco NÃO verificada.** A rota `GET /ordens-compra/referencia` existe na `api-acos-vital` (`fe55923`, 08/10/2026; lida em `origin/develop`, `dee35b0`) e lê estes objetos. O repositório da API **não versiona SQL** e o DDL real **não foi achado em lugar nenhum** (nem em `api-acos-vital`, nem em `omie-elt-pipeline\sql`, nem no vault, nem no [[Auditoria-Dump-Producao-2026-10-07]]). Fonte das decisões: [[Registro-de-Decisoes-2026-10-07]] (#41).
+> **Status: `implementada`. ✅ Migration `api004` entregue e aplicada pelo DBA (Gustavo afirmou em 09/10/2026).** O vault não a enxerga porque o repositório não versiona SQL; a confirmação é a palavra do DBA, e o que continua pendente é só **o script versionado** (checklist abaixo). A rota `GET /ordens-compra/referencia` existe na `api-acos-vital` (`fe55923`, 08/10/2026; lida em `origin/develop`, `dee35b0`) e lê estes objetos. O repositório da API **não versiona SQL** e o DDL real **não foi achado em lugar nenhum** (nem em `api-acos-vital`, nem em `omie-elt-pipeline\sql`, nem no vault, nem no [[Auditoria-Dump-Producao-2026-10-07]]). Fonte das decisões: [[Registro-de-Decisoes-2026-10-07]] (#41).
 
 > **Este contrato é a INTERFACE EXIGIDA PELO CÓDIGO, não um DDL.** Tudo que é dedução está marcado com 🟡.
 
@@ -136,7 +136,7 @@ Atenção: o teste do erro é **só `42P01`** (relação inexistente) com `refer
 - [ ] Definição do índice `(alterado_em, id_ordem_compra)` (`\di+` / `pg_indexes`) e se é `UNIQUE`.
 - [ ] Qual expressão gera `alterado_em_utc` (formato e fuso).
 - [ ] De onde vêm os vínculos OC↔pedido de venda (`destino`) e como o resto "estoque" é calculado.
-- [ ] Se a migration `api004` foi aplicada em produção: `SELECT to_regclass('core_vendas_faturamento.vw_ordens_compra_referencia_mes'), to_regclass('core_vendas_faturamento.ordens_compra_referencia_mes');` e `SELECT count(*), max(alterado_em) FROM core_vendas_faturamento.ordens_compra_referencia_mes;`.
+- [x] ~~Se a migration `api004` foi aplicada em produção~~ (✅ DBA, 09/10; conferência opcional por): `SELECT to_regclass('core_vendas_faturamento.vw_ordens_compra_referencia_mes'), to_regclass('core_vendas_faturamento.ordens_compra_referencia_mes');` e `SELECT count(*), max(alterado_em) FROM core_vendas_faturamento.ordens_compra_referencia_mes;`.
 - [ ] O script da migration `api004` (origem, quem aplicou, quando), para versioná-lo.
 - [ ] Como a marca reage a **exclusão** de OC aprovada (o contrato diz que sai como `cancelada`; uma linha apagada some da view).
 
@@ -147,7 +147,7 @@ Depois da resposta: substituir as seções 1 a 3 pelo DDL real, no formato de [[
 - Tudo o que é DDL: tipos, tabelas de apoio da view, PK, nome e unicidade do índice, funções e eventos da trigger.
 - Se a marca cobre mudança de item e de destino, e o risco de commit tardio.
 - Se `alterado_em_utc` é coluna da view ou expressão.
-- Se a migration `api004` está aplicada em produção (nenhuma fonte confirma; sem ela a rota dá 500).
+- ~~Se a migration `api004` está aplicada em produção~~ ✅ **O DBA afirmou em 09/10/2026 que a entregou e aplicou** (sem ela a rota daria 500). Resta versionar o script e conferir o DDL por `\d`/`pg_get_viewdef`.
 - Lado do MES (job de leitura a cada 5 min): fora deste contrato, pendente com o Robert.
 
 ## Ver também

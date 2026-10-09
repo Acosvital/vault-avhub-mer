@@ -75,7 +75,7 @@ O depósito é "central compartilhado, não vinculado a fábrica" ([[Estoque-Mod
 
 ### L-10. Sobras, perdas e unidade de medida
 
-> **➡️ Ciclo 2 (04/01/2027), ✅ 07/10/2026 ([[Registro-de-Decisoes-2026-10-07]] #27).** Entra junto com EC-02, remessa de produtos, Fase D e transferência etapas 2 a 4.
+> **➡️ Ciclo 2 (22/01/2027), ✅ 07/10/2026 ([[Registro-de-Decisoes-2026-10-07]] #27).** Entra junto com EC-02, remessa de produtos, Fase D e transferência etapas 2 a 4.
 Não encontrei nas notas nada sobre **sobra ou retalho de chapa**, **perda no corte** ou **conversão de unidade** (kg × peça × metro). Corte de chapa é beneficiamento de Revenda e é o coração do negócio ([[Fabricacao-Chapas]]). O Omie tem `% perda` na estrutura de produto ([[Roteiro-de-Implementacao]], `ListarMalha`), mas o modelo do Estoque não tem.
 **Perguntas:** a sobra de um corte volta ao estoque como material (com lote, rastreio, localização)? Como se pesa o que sobra? Qual é a unidade de controle de cada material? **Decide:** Nathan com Almoxarifado e Produção.
 
@@ -111,7 +111,7 @@ A cadeia DEC-2 → F1 → E1 → F2 → D6 termina em 30/10, que é o marco M4, 
 | L-05 | Nathan e diretoria | DEC-11 (13/11), mas registrar o horizonte já |
 | L-04 | Nathan e Compras | E2 (19/10) |
 | L-02, L-03 | Nathan, Fiscal, Almoxarifado | G1 (13/10) |
-| L-10 (→ Ciclo 2, 04/01/2027), L-11 | Nathan, Robert, Pablo | ~~D5/D6 (08/10)~~ |
+| L-10 (→ Ciclo 2, 22/01/2027), L-11 | Nathan, Robert, Pablo | ~~D5/D6 (08/10)~~ |
 | L-15 | Nathan | 09/10 |
 
 ## Ver também

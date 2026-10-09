@@ -290,6 +290,10 @@ novo, aplicar a mesma regra e marcar o que sobrar.
 - [[Indice-Contratos]] — índice geral dos contratos SQL/API deste vault.
 
 
+## Novo em 09/10/2026
+
+- [[47-Custo-Real-por-Item-no-Hub]]: simulador etapa 2, comissão por faturamento, Compras e Orçamento (`para-implementar`, Ciclo 2). Ver [[Estoque-Custo-do-Lote]].
+
 ## Movidos para Realizados em 09/10/2026
 
 - [[23-Compras-Pipeline-Consolidado]] e [[45-Pedido-de-Venda-Manual]]: implementados no código (produção não verificada). Ver [[Indice-Contratos]].

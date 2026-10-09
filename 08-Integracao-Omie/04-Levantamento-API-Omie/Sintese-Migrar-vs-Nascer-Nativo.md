@@ -26,7 +26,7 @@ atualizado: 2026-10-07
 > | Estoque mínimo | **aberto** (sem mapeamento) |
 > | Frete/parcelas/desconto do pedido de venda | **aberto** (contrato 003 aplicado, pipeline não grava) |
 > | Valor da devolução parcial | **nativo do Estoque** (DEC-10, Ciclo 2); contrato 011/006 invalidado |
-> | Remessa de produtos | **Ciclo 2** (04/01/2027) |
+> | Remessa de produtos | **Ciclo 2** (22/01/2027) |
 > | Financeiro | **fica no Omie** (✅ 07/10, DEC-11) |
 > | Comissão do vendedor | **aberto** — `comissao` protegida; vendedores relistados por inteiro |
 
@@ -82,7 +82,7 @@ Consolidação do levantamento completo da API do Omie (`developer.omie.com.br/s
 | Valor da devolução parcial (`vTotal`) | ~~🟢 Extrair (com esforço extra)~~ → **🔵 nativo do Estoque (DEC-10, Ciclo 2)** | Só acessível por chamada individual, não em massa; o `StatusDevolucaoVenda` não está disponível no Omie (🟡 #31). Superado o job dedicado sugerido antes |
 | Histórico de mudança de etapa do pedido | 🔵 Nascer nativo | Melhor registrar como evento no momento em que acontece do que puxar retroativamente |
 | CT-e | 🟢 Extrair (se volume relevante) | Documento fiscal de frete — avaliar volume antes de priorizar |
-| Remessa de Produtos | 🟢 Extrair — **Ciclo 2 (04/01/2027, ✅ 07/10)** | Documento fiscal real de movimentação sem venda, relevante para beneficiamento/corte para terceiros |
+| Remessa de Produtos | 🟢 Extrair — **Ciclo 2 (22/01/2027, ✅ 07/10)** | Documento fiscal real de movimentação sem venda, relevante para beneficiamento/corte para terceiros |
 | Tabela de Preços | 🔵 Nascer nativo | Impacta margem diretamente, faz mais sentido como configuração comercial do sistema novo |
 | Comissão do vendedor (segue aberto em 07/10) | 🟢 Extrair (se confirmado que é a fonte) | Hoje é coluna protegida no pipeline por suspeita de vir de outro sistema — verificar se é este campo do Omie |
 | Meios de Pagamento / Motivos de Devolução | 🔵 Nascer nativo | Tabelas de lookup triviais, baratas de recriar como enum |

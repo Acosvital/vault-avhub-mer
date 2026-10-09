@@ -118,7 +118,7 @@ Os itens 28 e 29 hoje processam dados do faturamento oficial fora do controle da
 
 ## O que isto muda no vault
 
-- **Escopo e cronograma foram alterados em 08/10/2026**, a pedido do Nathan: o MES passa a ter 141 pd novos (itens 1 a 27), mais 12 pd no av-hub (28 e 29). Com o Robert sozinho no MES a 75% de foco, a **data final do MES passa de 18/12/2026 para cerca de 08/10/2027**. A conta e as ondas de entrega estão no [[Cronograma-2-Meses]], seção 3.3. **As estimativas são minhas** e o Robert precisa validá-las.
+- **Escopo e cronograma foram alterados em 08/10/2026**, a pedido do Nathan: o MES passa a ter 141 pd novos (itens 1 a 27), mais 12 pd no av-hub (28 e 29). Com o Robert sozinho no MES a 75% de foco, a **data final do MES passa de 18/12/2026 para cerca de ~~08/10/2027~~ **21/10/2027****. A conta e as ondas de entrega estão no [[Cronograma-2-Meses]], seção 3.3. **As estimativas são minhas** e o Robert precisa validá-las.
 - **Conflito com decisões anteriores:** a Caldeiraria como fábrica do MES é nova. O vault tratava a HRM só como unidade/empresa (contas Omie só de Mogi e Uberaba, manifesto sem HRM, [[Registro-de-Decisoes-2026-10-07]] item 19).
 - **Coerente com o vault:** divergências sem tela (2.5), painel TV sem página (7.4), consolidação e transporte na Fase D (10.2, 10.3) e transferência entre filiais só na etapa 1. Estes itens se sobrepõem a lacunas do levantamento (5, 11, 12, 26); **não subtraí a sobreposição**, então a estimativa é conservadora nesse ponto.
 

@@ -26,3 +26,7 @@ Pesagem já existe hoje (não é investimento novo); há múltiplos depósitos; 
 - [[Registro-de-Decisoes-2026-10-07]]
 - [[Estoque-Regras-Negocio]]
 - [[Estoque-Roadmap]]
+
+## Custo do lote (decidido em 09/10/2026)
+
+As sete perguntas sobre custo × venda foram **fechadas** em 09/10 (regra A de custo médio; custo da carga inicial pela coluna opcional da G1; composição como no simulador, frete fora; PTAX da OC; sobra segue o lote; Compras só confere; só revenda). Detalhe em [[Estoque-Custo-do-Lote]] e nos itens 93 a 96 de [[Registro-de-Decisoes-2026-10-07]]. **Segue em aberto:** a fonte do imposto por item (ICMS a recuperar, IPI, ST), que a OC não guarda.

@@ -10,7 +10,7 @@ nome-do-arquivo: historico (era o plano de 2 meses)
 
 # Cronograma de Desenvolvimento — 3 meses (18/09 a 21/12/2026)
 
-> **(atualizado em 08/10) Escopo ampliado:** o Nathan aprovou o levantamento do PCP legado × MES ([[PCP-Legado-x-MES-Lacunas]]). O plano de 3 meses (M1 a M7, piloto em 18/11) segue igual; a data final do MES passa para **cerca de 08/10/2027 (data aceita pelo Nathan em 08/10)** (marcos M8 a M11, seção 3.3, estimativas minhas a validar pelo Robert).
+> **(atualizado em 08/10) Escopo ampliado:** o Nathan aprovou o levantamento do PCP legado × MES ([[PCP-Legado-x-MES-Lacunas]]). O plano de 3 meses (M1 a M7, piloto em 18/11) segue igual; a data final do MES passa para ~~cerca de 08/10/2027 (data aceita pelo Nathan em 08/10)~~ **cerca de 21/10/2027 (recalculada em 09/10 com o custo do lote, seção 3.4; aceita pelo Nathan em 09/10)** (marcos M8 a M11, estimativas minhas a validar pelo Robert). **Ciclo 1 fecha em 21/01/2027 e o Ciclo 2 começa em 22/01/2027** (eram 18/12/2026 para o plano e 04/01/2027).
 
 > **Regra de datas (única, 07/10/2026):** a execução vai de **22/09 a 21/12** (**63 dias úteis**). O plano **S1–FC termina em 18/11**; **S5 e M7 terminam em 18/12**; **21/12 é só o fim da conta de capacidade** (o 63º dia útil), não uma entrega. Qualquer "2 meses" ou "60 dias" nesta nota é histórico e foi superado por esta regra. O arquivo **mantém o nome `Cronograma-2-Meses` por ser histórico** (não foi renomeado, para não quebrar links).
 >
@@ -47,10 +47,10 @@ nome-do-arquivo: historico (era o plano de 2 meses)
 | **M5** — Fase 0 fechada + Fase C | 13/11 | Marco zero carregado e conferido em dupla; saldo/movimento/reserva em homologação; status por item no Portal do Vendedor; UAT concluída. |
 | **M6** — Go/no-go do piloto | 18/11 | Piloto de recebimento avaliado; decisão de seguir, ajustar ou parar; backlog do ciclo 2 priorizado. **Não muda** com a extensão — a rastreabilidade completa não bloqueia o piloto. |
 | **M7** — Rastreabilidade completa (todas as rotas) | 18/12 | Log de eventos (`fluxo.evento`) e `item_acompanhado` cobrindo Compras, Recebimento, Qualidade, Produção e Estoque; Torre de Fluxo (mapa, trilha, tempo por etapa, ranking de gargalos) em homologação. **Novo (21/09).** |
-| **M8** 🟡 — Flange (prioridade alta) no MES | 02/04/2027 | Itens 1, 2, 4, 5, 6, 7 e 11 do [[PCP-Legado-x-MES-Lacunas]]. **Novo (08/10), estimativa minha, o Robert valida.** |
-| **M9** 🟡 — Flange completa no MES | 24/05/2027 | Itens 3, 8, 9, 10, 12, 13 e 14. Só depois dele dá para desligar a linha Flange do PCP legado. |
-| **M10** 🟡 — Caldeiraria HRM no MES | 27/08/2027 | Itens 15 a 22, com a Caldeiraria como mais uma fábrica `FABRICACAO`. Depende das decisões em aberto. |
-| **M11** 🟡 — Análise e gestão no MES | 08/10/2027 | Itens 23 a 27. Os itens 28 e 29 ficam no av-hub, sem data. |
+| **M8** 🟡 — Flange (prioridade alta) no MES | ~~02/04/2027~~ **14/04/2027** | Itens 1, 2, 4, 5, 6, 7 e 11 do [[PCP-Legado-x-MES-Lacunas]]. **Novo (08/10), estimativa minha, o Robert valida.** |
+| **M9** 🟡 — Flange completa no MES | ~~24/05/2027~~ **04/06/2027** | Itens 3, 8, 9, 10, 12, 13 e 14. Só depois dele dá para desligar a linha Flange do PCP legado. |
+| **M10** 🟡 — Caldeiraria HRM no MES | ~~27/08/2027~~ **09/09/2027** | Itens 15 a 22, com a Caldeiraria como mais uma fábrica `FABRICACAO`. Depende das decisões em aberto. |
+| **M11** 🟡 — Análise e gestão no MES | ~~08/10/2027~~ **21/10/2027** | Itens 23 a 27. Os itens 28 e 29 ficam no av-hub, sem data. |
 
 > **(atualizado em 07/10) Marcos.** M1 28/09 e M2 cumpridos. **M3 16/10 mantém.** **M4 30/10 só antecipa se a homologação estiver estável até 16/10** (a homologação já está disponível no mes-test). **M5 13/11, M6 18/11 e M7 18/12 mantêm** (🟡 Nathan valida, #36 do Registro). Regra de datas no topo da nota.
 
@@ -59,7 +59,7 @@ nome-do-arquivo: historico (era o plano de 2 meses)
 | Situação | Itens |
 |---|---|
 | **Entregues antes da janela do plano** | C6 (25/09), D5 (23/09), C7 (29/09), D8 (24–28/09), D9 (28/09), D6 e D7 (07/10), F3 (29/09) |
-| **Atrasados ou parciais** | C3 não iniciada; C5 sem guard global; (feita em 08/10, PR #51 do `api-pcp`) D2 sem e2e; D3 pela metade; G1 só um lote por vez; D11 sem leitor 2D; C8 parcial; F2 redesenhada (contrato 34) |
+| **Atrasados ou parciais** | C3 não iniciada; ~~C5 sem guard global~~ (feita em 08/10, PR #51 do `api-pcp`: guard global e `PerfilDeposito`) D2 sem e2e; D3 pela metade; G1 só um lote por vez; D11 sem leitor 2D; C8 parcial; F2 redesenhada (contrato 34) |
 | **Fora do que o plano previa** | D4 cortada; C2 removida (06/10); etapa 1 da transferência entre filiais concluída em 07/10 |
 
 Fonte: leitura do código das `develop` em 07/10 (ver o callout acima e [[Onde-Estamos]]). As janelas das fases futuras ficam como estavam.
@@ -215,7 +215,7 @@ Em uma frase: entra do catálogo saneado até o recebimento com qualidade, saldo
 - ~~Saldo do Omie habilitado (Passo 2) para reconciliar a carga inicial (G3)~~ **Não será feito (✅ 07/10, #28):** o Omie recebe dados só manualmente e o estoque do Omie é ignorado
 - Histórico de pedidos de compra (Passo 5) — só se sobrar folga (B9) *(stretch)*
 - Frete e parcelas do pedido de venda (Passo 4) — só se sobrar folga (B10) *(stretch)*
-- Remessa de produtos (Passo 7) — **confirmado em 22/09/2026 (N-05): a Aços Vital usa** (galvanização externa da Grade de Piso) — sem task/pd alocado ainda neste plano, precisa ser dimensionado e encaixado (provável S2 do ciclo 2 ou folga desta S1-S4) — **✅ 07/10 (#27): fica no Ciclo 2, que começa em 04/01/2027**
+- Remessa de produtos (Passo 7) — **confirmado em 22/09/2026 (N-05): a Aços Vital usa** (galvanização externa da Grade de Piso) — sem task/pd alocado ainda neste plano, precisa ser dimensionado e encaixado (provável S2 do ciclo 2 ou folga desta S1-S4) — **✅ 07/10 (#27): fica no Ciclo 2, que começa em 22/01/2027**
 
 **Não entra**
 
@@ -335,25 +335,56 @@ Soma das linhas 87,9 (arredondamento herdado da tabela original, que diz 88,0). 
 
 | Onda | O que entra | pd (Robert) | Acumulado | Fim estimado |
 |---|---|---|---|---|
-| 0 | Déficit do plano atual (seção 3.2) | 10,1 | 10,1 | 11/01/2027 |
-| 1 | **Flange, prioridade alta:** 1 Programação da fila (4), 2 Previsão de conclusão (4), 4 Planejamento da Usinagem (8), 5 Telão/Kanban/quiosque (6), 6 Tempo real (6), 7 Impressão (6), 11 Fim do fluxo (8) | 42 | 52,1 | **02/04/2027** |
-| 2 | **Flange, média e baixa:** 3 Prazo por setor (3), 8 Visualizador e croqui (4), 9 Sinete (2), 10 Checklist e inspeção (5), 12 Travessia Mogi → HRM (5), 13 Paradas (3), 14 Restrição por campo (4) | 26 | 78,1 | **24/05/2027** |
-| 3 | **Caldeiraria HRM:** 15 Entrada da OP (5), 16 Conferência da OP (10), 17 kg/m (4), 18 Rastreabilidade (6), 19 Setores e inspeções (8), 20 Ciclo do Book (8), 21 Datas contratuais (2), 22 Planejamento (8) | 51 | 129,1 | **27/08/2027** |
-| 4 | **Análise e gestão no MES:** 23 (4), 24 (6), 25 (6), 26 (3), 27 (3) | 22 | 151,1 | **08/10/2027** |
+| 0 | Déficit do plano atual (seção 3.2) | ~~10,1~~ **16,1** | ~~10,1~~ **16,1** | ~~11/01/2027~~ **21/01/2027** |
+| 1 | **Flange, prioridade alta:** 1 Programação da fila (4), 2 Previsão de conclusão (4), 4 Planejamento da Usinagem (8), 5 Telão/Kanban/quiosque (6), 6 Tempo real (6), 7 Impressão (6), 11 Fim do fluxo (8) | 42 | ~~52,1~~ **58,1** | ~~02/04/2027~~ **14/04/2027** |
+| 2 | **Flange, média e baixa:** 3 Prazo por setor (3), 8 Visualizador e croqui (4), 9 Sinete (2), 10 Checklist e inspeção (5), 12 Travessia Mogi → HRM (5), 13 Paradas (3), 14 Restrição por campo (4) | 26 | ~~78,1~~ **84,1** | ~~24/05/2027~~ **04/06/2027** |
+| 3 | **Caldeiraria HRM:** 15 Entrada da OP (5), 16 Conferência da OP (10), 17 kg/m (4), 18 Rastreabilidade (6), 19 Setores e inspeções (8), 20 Ciclo do Book (8), 21 Datas contratuais (2), 22 Planejamento (8) | 51 | ~~129,1~~ **135,1** | ~~27/08/2027~~ **09/09/2027** |
+| 4 | **Análise e gestão no MES:** 23 (4), 24 (6), 25 (6), 26 (3), 27 (3) | 22 | ~~151,1~~ **157,1** | ~~08/10/2027~~ **21/10/2027** |
 | av-hub | Itens 28 (6) e 29 (6) | 12 | fora da conta do Robert | **sem dono nem data** |
 
 **Totais:** 141 pd novos no MES (+10,1 do déficit) e 12 pd no av-hub. O Robert passa de 48,75 pd de capacidade e 58,85 planejados (seção 3.2) para **199,85 planejados**, ou seja, **151,1 pd a mais do que a capacidade até 18/12**.
 
-**Sensibilidade:** com 100% de foco (em vez de 75%) as ondas terminam em 09/03, 15/04, 29/06 e 29/07 de 2027. Qualquer trabalho do Robert fora desta conta empurra tudo.
+**Sensibilidade:** com 100% de foco (em vez de 75%) as ondas terminam em ~~09/03, 15/04, 29/06 e 29/07~~ **17/03, 26/04, 07/07 e 06/08** de 2027 (recalculado em 09/10; Onda 0 em 14/01). Qualquer trabalho do Robert fora desta conta empurra tudo.
 
 **O que a conta não inclui:**
-- **Ciclo 2** (começa em 04/01/2027, [[Registro-de-Decisoes-2026-10-07]] item 27): sobras e perdas de matéria-prima (EC-02, L-10), remessa de produtos, Fase D e transferência entre filiais etapas 2 a 4. Nenhum está dimensionado; todos competem com o Robert.
+- **Ciclo 2** (começa em ~~04/01/2027~~ **22/01/2027**, [[Registro-de-Decisoes-2026-10-07]] item 27): sobras e perdas de matéria-prima (EC-02, L-10), remessa de produtos, Fase D e transferência entre filiais etapas 2 a 4. Nenhum está dimensionado; todos competem com o Robert.
 - **Baixa no despacho do Estoque** (já faltava na seção 3.2).
 - **Sobreposições não descontadas:** o painel TV (item 5 = tela 7.4), o fim do fluxo (11 = telas 10.2 e 10.3), a travessia Mogi → HRM (12 = transferência etapas 2 a 4) e o estoque por unidade (26) já eram backlog. Se o Robert confirmar que algum já estava contado, a data melhora.
 - **Os itens 28 e 29 no av-hub:** o Nathan e o Pablo (Comercial & Suprimentos) estão sem folga na conta; não há quem os assuma.
 - **Dependências de decisão:** destino × filial, componente repetido e campos dos itens 18 a 20 ainda estão em aberto e podem mudar a estimativa da onda 3.
 
-**Marcos novos (🟡 estimados, dependem da validação do Robert):** M8 Flange alta no MES em 02/04/2027; M9 Flange completa em 24/05/2027; M10 Caldeiraria no MES em 27/08/2027; M11 análises no MES em 08/10/2027. Só depois de M9 faz sentido desligar a linha Flange do PCP legado.
+**Marcos novos (🟡 estimados, dependem da validação do Robert):** M8 Flange alta no MES em ~~02/04/2027~~ **14/04/2027**; M9 Flange completa em ~~24/05/2027~~ **04/06/2027**; M10 Caldeiraria no MES em ~~27/08/2027~~ **09/09/2027**; M11 análises no MES em ~~08/10/2027~~ **21/10/2027** (recalculados em 09/10, seção 3.4). Só depois de M9 faz sentido desligar a linha Flange do PCP legado.
+
+### 3.4 Recálculo com o custo do lote (09/10, [[Estoque-Custo-do-Lote]])
+
+> **🟡 Estimativas minhas, por complexidade (±30%); o Robert as valida item a item.** O custo do lote passou a fazer parte do desenho do Estoque e tem contratos ([[012-Ordens-Compra-Referencia-Valores]], [[007-Referencia-OC-Valores-no-MES]], [[008-Custo-do-Lote-no-MES]], [[47-Custo-Real-por-Item-no-Hub]]). O trabalho novo soma ao plano de 18/12 e à conta da seção 3.3.
+
+| ID | Tarefa | Dono | pd | Onde cai |
+|---|---|---|---|---|
+| K1 | SQL 012: valores na view e na marca `alterado_em` | Gustavo | 0,5 | S3 (19/10 a 30/10), antes do job |
+| K2 | Rota 004 devolve os valores + swagger (contrato 007, lado do hub) | Gustavo | 0,5 | S3 |
+| K3 | `lote_custo` + coluna de custo opcional na G1 (contrato 008, §1 e §2) | Robert | 1,0 | dentro da G1 (13/10 a 23/10), que passa de 2,9 para 3,9 pd |
+| K4 | Job de leitura da referência da OC no MES + projeção com valores (007, lado do MES). **É o job pendente do 004; não estava contado em nenhum pd do Robert** (a F2 de 3 pd é do Gustavo) | Robert | 3,0 | Onda 0 (depois de 18/12) |
+| K5 | Custo na entrada do lote no recebimento (008, §3) | Robert | 1,5 | Onda 0 |
+| K6 | Custo no movimento `CONSUMO` (J2, 008 §4) | Robert | 0,5 | junto da J2 (19/11 a 25/11), absorvido no déficit |
+| K7 | J4 expõe o custo por item entregue | Gustavo | 0,5 | S5 (04/12 a 10/12); a J4 passa de 2 para 2,5 pd |
+| K8 | `GET /itens/custo` (008 §5) | Robert | 1,0 | **Ciclo 2** |
+| K9 a K11 | av-hub: simulador etapa 2, comissão por faturamento, Compras/Orçamento (47) | Comercial & Suprimentos | ~11 (4 + 5 + 2) 🟡 | **Ciclo 2**, sem dono confirmado |
+
+**Efeito no Robert (Ciclo 1):** +6,0 pd (K3 + K4 + K5 + K6). Planejado S1–FC + S5 de 58,85 para **64,85 pd** contra 48,75 de capacidade: **déficit de 16,1 pd** (era 10,1), sempre sem contar a baixa no despacho do Estoque. Gustavo: +1,5 pd, cabe na reserva de 9,8 pd da S5 e de 11,9 pd da S1–FC. Nathan: sem mudança.
+
+**Datas (75% de foco, 0,75 pd por dia útil, mesmos feriados da seção 3.3; a conta reproduz exatamente as datas antigas com 10,1 pd):**
+
+| | Antes | Agora |
+|---|---|---|
+| Déficit do Robert (Onda 0) / **fim do Ciclo 1** | 11/01/2027 | **21/01/2027** |
+| **Início do Ciclo 2** | 04/01/2027 | **22/01/2027** |
+| M8 Flange alta | 02/04/2027 | 14/04/2027 |
+| M9 Flange completa | 24/05/2027 | 04/06/2027 |
+| M10 Caldeiraria HRM | 27/08/2027 | 09/09/2027 |
+| M11 Análise e gestão | 08/10/2027 | 21/10/2027 |
+
+O **plano S1–FC e a S5 mantêm as datas** (M3 16/10, M4 30/10, M5 13/11, piloto 18/11, M7 18/12) para Nathan e Gustavo; o que se desloca é o que depende do Robert. O Ciclo 2 só começa em 22/01/2027 porque o Robert fecha o Ciclo 1 (o déficit da Onda 0) em 21/01; as tarefas do Ciclo 2 que são do Gustavo ou do Nathan podem começar antes, se houver folga. K8 e K9 a K11 entram no Ciclo 2 e **não** estão na conta das ondas (somariam 1,0 pd do Robert e ~11 pd do av-hub). **✅ O Nathan aceitou as novas datas em 09/10/2026** (M11 ≈ 21/10/2027, que substitui o ≈ 08/10/2027 de 08/10). As estimativas em pd continuam 🟡 até o Robert validá-las.
 
 ## 4. Gantt
 
@@ -370,10 +401,10 @@ gantt
     M5 Fase 0 fechada + Fase C :milestone, m5, 2026-11-13, 0d
     M6 Go/no-go do piloto :milestone, m6, 2026-11-18, 0d
     M7 Rastreabilidade completa :milestone, m7, 2026-12-18, 0d
-    M8 Flange alta no MES :milestone, m8, 2027-04-02, 0d
-    M9 Flange completa no MES :milestone, m9, 2027-05-24, 0d
-    M10 Caldeiraria no MES :milestone, m10, 2027-08-27, 0d
-    M11 Analise e gestao no MES :milestone, m11, 2027-10-08, 0d
+    M8 Flange alta no MES :milestone, m8, 2027-04-14, 0d
+    M9 Flange completa no MES :milestone, m9, 2027-06-04, 0d
+    M10 Caldeiraria no MES :milestone, m10, 2027-09-09, 0d
+    M11 Analise e gestao no MES :milestone, m11, 2027-10-21, 0d
     section Decisões e governança
     A1 Decisões bloqueantes (DEC-1..12 decididas) :done, a1, 2026-09-22, 2026-09-30
     A2 Hardware + agenda da contagem :a2, 2026-09-22, 2026-09-29
@@ -485,13 +516,13 @@ Legenda de responsável: **Nathan** (N), **Gustavo** (G), **Robert** (R), **Pabl
 | ID | Entrega | Resp. | pd | Janela | Depende de | Pronto quando |
 |---|---|---|---|---|---|---|
 | B5 | ✅ **Já aplicado (confirmado 21-22/09)** — ~~Aplicar~~ contratos SQL 002 (estoque_saldo) e 004 (pedidos_compras) | Gustavo | ~~2~~ 0 | — | B1, DEC-7 | `core.estoque_saldo` e `core_vendas_faturamento.pedidos_compras`/`_itens` já existem em produção; risco do `numero_item_omie` também resolvido (`ordem` é a identidade, índice único `uq_pedidos_compras_itens_ordem` aplicado) — nada a fazer. Ver [[Auditoria-Dump-Producao-2026-09-21]] e [[004-Pedidos-Compras]]. |
-| C5 | ⚠️ **Parcial (conferido 07/10)**: `@RequirePermission` por controller (~20), sem guard global; usuários e setores sem guard. **(atualizado em 09/10/2026: resolvido no PR #51 do `api-pcp`, `e8f951e`, 08/10: guard global com deny-by-default; usuários e setores com `@RequirePermission` nas escritas)** RBAC por instância de setor (guard global + PerfilSetor) | Robert | 3 | 05/10–14/10 | C3 | Almoxarife, Qualidade e Gestor de Estoque com escopo por warehouse/setor |
+| C5 | ⚠️ **Parcial (conferido 07/10)**: `@RequirePermission` por controller (~20), sem guard global; usuários e setores sem guard. **(atualizado em 09/10/2026: resolvido no PR #51 do `api-pcp`, `e8f951e`, 08/10: guard global com deny-by-default; usuários e setores com `@RequirePermission` nas escritas)** RBAC por instância de setor (guard global + PerfilSetor) **(09/10: o escopo por depósito entrou como `PerfilDeposito`, default-deny, no mesmo PR #51; a dimensão de filial no `PerfilSetor` continua na C3)** | Robert | 3 | 05/10–14/10 | C3 | Almoxarife, Qualidade e Gestor de Estoque com escopo por warehouse/setor |
 | E1 | ✅ **Adiantado (22/09/2026)** — Compras v1: modelagem + caixa de entrada de requisições vindas do MES | Nathan | 3 | 05/10–16/10 | F1, DEC-2 | Comprador vê as requisições do PCP no av-hub. Backend implementado e testado (contrato SQL [[008-Requisicoes-Compra]], branch local `feat/compras-requisicoes-e1` em `api-acos-vital`) — **(conferido em 08/10) feita:** a tela `compras/requisicoes` (lista + kanban) está na `main` do av-hub e as rotas `/compras/*` na `main` da API; o dump de 07/10 mostra o schema em produção, **sem nenhuma linha**. Ver [[AV-Hub-Views-Compras-Investigacao]] e [[Decisoes-Chave-ERP]]. |
 | B6 | Pipeline ELT: ~~Passos 1, 3, 6 e 9 (parceiros fiscais, lead_time, locais, etapas)~~ **continua só com os locais (Passo 6)** e os Passos 1 e 9; **`lead_time` (Passo 3) sai do pipeline** (✅ 07/10, #29). `core.etapas_faturamento` já está populada em produção (#5) | Gustavo | 1,5 | 08/10–15/10 | B3, B5 | Parceiros com dados fiscais e locais de estoque sincronizando; etapas confirmadas em produção |
 | C6 | ✅ **Concluída — implementada e testada em 25/09/2026.** ~~PCP Carteira: classificação natureza × disponibilidade (backend + tela)~~ **Encaixe Estoque/Revenda:** enums `Fabrica.tipo`/`Setor.tipo` + seed (fábrica Revenda "Destino", setores Estoque/Compras/Expedição); backend força o setor Estoque como etapa 1 e remove Emissão de Ordens; Nova Ordem envia item de revenda à fábrica Revenda; tela do setor Estoque com "atender X do estoque" (split + reserva `ATIVA`, **revisado: não conclui mais ali, segue em trânsito pra Expedição**) e "enviar restante" | Robert | 3 | 08/10–16/10 | C4 | Item de revenda vira OP da fábrica Revenda; todo parcial nasce no setor Estoque; o split atendido segue reservado até a Expedição confirmar. Ver [[Encaixe-Estoque-Revenda-no-PCP]] |
 | D5 | ✅ **Entregue no código (23/09, `e14ecb2`, `develop`)** — Cadastros: material (campos extras), depósito/warehouse e localização - API + telas | Pablo | 4 | 08/10–16/10 | D3, C5, DEC-6 | Material com peso teórico, tolerância, mín/máx e ponto de pedido; localizações cadastradas |
 | A4 | Coordenar UAT e treinamento dos setores | Nathan | 1,5 | 13/10–13/11 | - | Roteiro de UAT por setor; treinamento do posto de recebimento |
-| G1 | ⚠️ **Parcial (conferido 07/10)**: só `POST /estoque/lotes/carga-inicial`, um lote por vez. Ferramenta de carga inicial: import → lotes CARGA_INICIAL, dry-run e folhas de contagem | ~~Gustavo~~ **Robert** (✅ 07/10, #33) | 2,9 | 13/10–23/10 | D5, DEC-4 | Dry-run com dados de teste; folhas de contagem por localização |
+| G1 | ⚠️ **Parcial (conferido 07/10)**: só `POST /estoque/lotes/carga-inicial`, um lote por vez. Ferramenta de carga inicial: import → lotes CARGA_INICIAL, dry-run e folhas de contagem | ~~Gustavo~~ **Robert** (✅ 07/10, #33) | ~~2,9~~ **3,9** (+1,0 do custo, K3) | 13/10–23/10 | D5, DEC-4 | Dry-run com dados de teste; folhas de contagem por localização |
 
 ### S3 — Fases A + B + levantamento físico (19/10 a 30/10)
 
@@ -557,7 +588,7 @@ Nathan confirmou que a genealogia lote de matéria-prima → item entregue é ne
 |---|---|---|---|---|---|---|
 | J2 | Schema: estender `MOVIMENTO_ESTOQUE` com tipo `CONSUMO`, vínculo a `lote` + `ItemParcial` | ~~Pablo~~ **Robert** | 1 | 19/11–25/11 | D9 | Migration aplicada em homologação |
 | J3 | Backend: consumo de matéria-prima no início/conclusão da OS/OP — aplica FIFO por `data_posicao` como padrão, com endpoint pra escolher o lote manualmente (override), trata consumo parcial entre lotes | Robert | 3,5 | 26/11–04/12 | J2, I3, DEC-12 | Toda OS/OP concluída baixa saldo do(s) lote(s) certo(s); operador consegue escolher lote manualmente quando quiser |
-| J4 | Endpoint de genealogia: lote → itens entregues, e item entregue → lote(s) de origem | Gustavo | 2 | 04/12–10/12 | J3 | `GET` retorna a cadeia completa em homologação |
+| J4 | Endpoint de genealogia: lote → itens entregues, e item entregue → lote(s) de origem | Gustavo | ~~2~~ **2,5** (+0,5 do custo, K7) | 04/12–10/12 | J3 | `GET` retorna a cadeia completa em homologação |
 | J5 | Tela: consulta de genealogia por lote ou por item/pedido | ~~Pablo~~ **Robert** | 3 | 10/12–18/12 | J4 | Qualidade/Compras conseguem consultar a origem de um item entregue |
 
 **Nunca cortar aqui:** nada (regra de 21/09; ver a ressalva da seção 9 sobre o estouro do Robert) — se a S5 estourar, a resposta é estender a janela (já é capacidade extra, não tira de outro lugar), não cortar rastreabilidade nem genealogia pela metade, porque os dois pedidos foram explícitos (100% do pedido; "eu preciso disso").
@@ -627,7 +658,7 @@ Se algo estourar, o escopo cede — a data não. Cortar nesta ordem:
 
 ## 10. Piloto e depois de 18/11
 
-O piloto de recebimento (H4) roda de 11/11 a 18/11 em **1 posto**, com material real, **em paralelo ao processo manual** — recebimento não consome estoque, então não depende do marco zero. Em 18/11 (A5) sai o go/no-go: seguir para mais postos, ajustar ou parar. ~~O ciclo 2 começa em 19/11 com Fase D, Expedição/Faturamento e o restante da seção 2; esse ciclo ainda não foi estimado.~~ **Superado (✅ 07/10, #27 do Registro): o Ciclo 2 começa em 04/01/2027.** Entram a **Fase D**, a **Expedição/Faturamento**, a **remessa de produtos**, o **EC-02** (sobras e perdas de matéria-prima), o **L-10** (sobras de chapa, perda no corte, unidade) e a **transferência entre filiais, etapas 2 a 4**. A devolução com `valor_devolucao` nativo também é do Ciclo 2 (DEC-10; 🟡 #31). Se o Nathan validar a proposta da seção 3.1, a tela de ranking de gargalos (T.6) entra junto. O Ciclo 2 **ainda não foi estimado**; o backlog sai do go/no-go de 18/11 (A5).
+O piloto de recebimento (H4) roda de 11/11 a 18/11 em **1 posto**, com material real, **em paralelo ao processo manual** — recebimento não consome estoque, então não depende do marco zero. Em 18/11 (A5) sai o go/no-go: seguir para mais postos, ajustar ou parar. ~~O ciclo 2 começa em 19/11 com Fase D, Expedição/Faturamento e o restante da seção 2; esse ciclo ainda não foi estimado.~~ **Superado (✅ 07/10, #27 do Registro): o Ciclo 2 começa em 22/01/2027.** Entram a **Fase D**, a **Expedição/Faturamento**, a **remessa de produtos**, o **EC-02** (sobras e perdas de matéria-prima), o **L-10** (sobras de chapa, perda no corte, unidade) e a **transferência entre filiais, etapas 2 a 4**. A devolução com `valor_devolucao` nativo também é do Ciclo 2 (DEC-10; 🟡 #31). Se o Nathan validar a proposta da seção 3.1, a tela de ranking de gargalos (T.6) entra junto. O Ciclo 2 **ainda não foi estimado**; o backlog sai do go/no-go de 18/11 (A5).
 
 ## Ver também
 - [[Estoque-Roadmap]] — as fases 0/A/B/C/D/E que este plano datou.
