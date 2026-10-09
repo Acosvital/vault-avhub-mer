@@ -26,3 +26,7 @@ Pesagem já existe hoje (não é investimento novo); há múltiplos depósitos; 
 - [[Registro-de-Decisoes-2026-10-07]]
 - [[Estoque-Regras-Negocio]]
 - [[Estoque-Roadmap]]
+
+## Custo do lote (proposta de 09/10/2026)
+
+Sete perguntas 🔴 ao Nathan, sem urgência, sobre custo × venda e comissão: regra do faturamento parcial, custo da carga inicial, composição do custo, PTAX, sobra de compra mínima, papel de Compras e escopo (só revenda). Detalhe em [[Proposta-Custo-x-Venda-Comissao]] e itens 93 e 94 de [[Registro-de-Decisoes-2026-10-07]].

@@ -9,6 +9,7 @@ atualizado: 2026-10-07
 > Status: decidido | no código (develop) | em produção (mes-test; produção real não)
 
 > **Decisões de 07/10/2026 que mudam este roadmap** ([[Registro-de-Decisoes-2026-10-07]]):
+> - **(09/10) G1 aceita uma coluna de custo unitário opcional por lote** (não bloqueia a carga; ver [[Proposta-Custo-x-Venda-Comissao]], item 93 do Registro).
 > - **G1 (carga em lote) agora é do Robert** (MES); o Pablo foi para o Comercial & Suprimentos (itens 32 e 33). A capacidade do Robert estoura e precisa ser recalculada ([[Cronograma-2-Meses]]).
 > - **Carga inicial:** dupla conferência = **contador + conferente**; divergência = **terceira contagem**; o lote nasce liberado (DEC-4) (item 25).
 > - **Saldo do Omie:** o Omie recebe dados só manualmente e o estoque do Omie é **ignorado**. O Passo 2 (`ListarPosEstoque`) **não será feito**; a dependência de reconciliar a carga com o saldo do Omie (G3) **cai**. O MES é a referência do saldo físico (item 28).
