@@ -1,13 +1,82 @@
 ---
 tags: [contrato-logica, contrato-api, seguranca, login, gambiarra-s9]
 criado: 2026-10-07
-atualizado: 2026-10-07
+atualizado: 2026-10-09
 status: proposta
 ---
 
 # Contrato 41 — Login: rate limit no backend (fecha a GAMBIARRA S9)
 
-> **Status: proposta (07/10/2026).** Fecha a marcação `GAMBIARRA(` de `lib/auth/loginRateLimiter.ts:24` do av-hub ("rate limit em memória do processo (S9): precisa de store compartilhado"). **Achado principal: a API já tem o limite em banco, só que desligado por padrão e sem o BFF mandar o IP.** O trabalho é ligar, fixar valores, mandar o IP e apagar o código do front. Fontes: leitura do av-hub (`lib/auth/loginRateLimiter.ts`, `app/api/auth/[...nextauth]/route.ts`) e da `api-acos-vital` (`utils/acessoConfig.js`, `schemas/auth/aggregates/autenticacao/autenticacao.route.js`), em 07/10/2026. Legenda: ✅ verificado no código · 🟡 inferência · 🔴 pendente com dono. Decisões gerais em [[Registro-de-Decisoes-2026-10-07]]; o método "regra decidida é fixa no código" vem do [[38-Regras-Sem-Chave-de-Ambiente]].
+> **(atualizado em 09/10/2026)** Pedido do Nathan: contrato do rate limit do login, **sem variável de ambiente**: limite e janela ficam **fixos no código da API** (princípio do [[38-Regras-Sem-Chave-de-Ambiente]]). Conferido em 09/10 na `api-acos-vital` (`develop`, `dee35b0`) e no `av-hub` (branch `feat/bff-bearer-helpers`, commit `564abc8`, PR #178, **ainda não mergeado**). Comissões ficam fora de escopo. Legenda: ✅ verificado no código · 🟡 inferência · 🔴 pendente com dono. As seções 1 a 9 abaixo são o texto de 07/10; onde mudou, vale esta seção 0 (**superado** nos pontos que ela cita: liga/desliga por variável, chave só por IP, BFF sem `x-cliente-ip`, mensagem do 429 opcional).
+
+## 0. Estado de 09/10/2026 e o que falta
+
+**Estado verificado (✅):**
+
+- **API:** `utils/acessoConfig.js` ainda tem `loginLimite()` lendo `LOGIN_LIMITE_TENTATIVAS` (padrão 0 = desligado) e `LOGIN_LIMITE_JANELA_SEGUNDOS` (padrão 900, mínimo 10) do ambiente; o comentário do topo do arquivo ainda documenta as duas variáveis. A rota `POST /autenticacao/login` usa `auth.fn_login_bloqueado`, `auth.fn_login_falha` e `auth.fn_login_sucesso`, devolve **429** com `Retry-After` e `{ codigo: "LOGIN_LIMITE" }`, e monta as chaves `email:<e-mail>` e `ip:<x-cliente-ip>` (o IP **sozinho**, não `ip:email`). `loginOk` zera **só a chave do e-mail**. Como o padrão é 0, **sem a variável setada o limite não existe**.
+- **Front (PR #178, não mergeado):** o `authorize` em `app/api/auth/[...nextauth]/route.ts` já manda `x-cliente-ip` (último valor de `x-forwarded-for`, o do proxy mais próximo) e, ao receber 429, lança o erro `LOGIN_LIMITE`; `app/(public)/login/page.tsx` mostra "Muitas tentativas de login. Aguarde alguns minutos e tente de novo." Isso entrega o item 3 e a Q5 da proposta. **O limitador local continua**: `lib/auth/loginRateLimiter.ts` (5 tentativas em 15 min, `Map` no processo, chaves `ip:email` e `email`) segue em uso, com a marca `GAMBIARRA(` na linha 24.
+- **Azure AD:** `POST /autenticacao/azure` **não** passa por esse limite (só `/login` chama `limiteExcedido`). 🟡 Faz sentido não passar: a senha é validada pelo Azure, que tem proteção própria, e aqui não há falha de senha para contar. Fica fora.
+
+### (a) O que a API precisa mudar (Gustavo)
+
+1. Em `acessoConfig.js`, `loginLimite()` devolve **valores fixos** `{ max: 5, janela: 900 }` (os mesmos do front). Remover a leitura de `process.env` e as duas linhas `LOGIN_LIMITE_*` do comentário do topo. Nada de `.env`.
+2. Com o limite sempre ligado, os `if (!max) return` em `limiteExcedido`, `loginFalhou` e `loginOk` perdem a função (podem ficar ou sair).
+3. Atualizar o comentário de `chavesLimite` ("LOGIN_LIMITE_TENTATIVAS=0 desliga") e o `autenticacao.swagger.json`, que cita a variável.
+4. **Chave por IP:** ver a recomendação abaixo. 🟡 Trocar `ip:<ip>` por `ip:<ip>:<e-mail>` mexe só em `chavesLimite`, mas `loginOk` usa `chavesLimite(...)[0]` (a do e-mail) e deveria zerar também a chave composta.
+5. **Confirmar que as funções existem no banco.** 🔴 O DDL real de `auth.fn_login_bloqueado`, `fn_login_falha`, `fn_login_sucesso` e da tabela `auth.login_tentativas` **não está no repositório da API** (ela não versiona SQL). O dump de 07/10 lista os nomes ([[Auditoria-Dump-Producao-2026-10-07]]), mas o corpo não foi lido. **Pedir ao Gustavo** `\df+ auth.fn_login_*` e `\d auth.login_tentativas`, e conferir: (i) se bloqueia a partir de `>= max` (esperado: a 6ª tentativa recebe 429) ou `> max`; (ii) se a chave é `text` livre (aceita `ip:ip:email`); (iii) se o retorno é em segundos.
+
+**Recomendação de chave (mantida, agora com o dado do código):** bloquear por **e-mail** e por **IP+e-mail**, **não** por IP sozinho. Com `ip:<ip>` sozinho e `max = 5`, cinco erros de pessoas diferentes atrás do mesmo NAT bloqueiam a empresa toda; e, como `loginOk` não zera a chave de IP, os erros acumulam mesmo entre usuários que depois acertam. 🟡 Se o Nathan mantiver o IP sozinho, o limite do IP teria de ser bem maior que o do e-mail, mas a função recebe um único `max` para todas as chaves.
+
+### (b) O que o front já fez (PR #178) e o que falta
+
+- **Já feito:** envia `x-cliente-ip`; trata 429 como `LOGIN_LIMITE`; mensagem própria na tela de login.
+- **Falta, só depois de a API estar no ar com o limite fixo:** apagar `lib/auth/loginRateLimiter.ts`; tirar do `authorize` os imports e usos de `chaveRateLimit`, `chaveRateLimitEmail`, `reservarTentativaLogin` e `limparTentativas`; remover a marca `GAMBIARRA(`. Manter o tratamento do 429 e a mensagem. Atualizar a contagem de marcas (item 58 do [[Registro-de-Decisoes-2026-10-07]]).
+
+### (c) Passo a passo e ordem
+
+| # | Quem | Passo |
+|---|---|---|
+| 1 | Gustavo | Enviar o DDL real das 3 funções e da `auth.login_tentativas`; dizer se `LOGIN_LIMITE_TENTATIVAS` está setada em produção hoje |
+| 2 | Gustavo | Na `develop` da API: fixar `max: 5` e `janela: 900`, remover a leitura de ambiente, ajustar `chavesLimite`/`loginOk` conforme a Q2, atualizar swagger e comentários |
+| 3 | Gustavo | Subir a API (`develop` para `main`). **A API vai primeiro.** Sem o IP (PR #178 fora), o limite já vale por e-mail |
+| 4 | Front | Mergear o PR #178 (manda o IP e trata o 429). O limiter local **fica** |
+| 5 | Nathan | Rodar os testes de aceite (d) na homologação, com API e front já no ar |
+| 6 | Front | Novo PR: apagar `loginRateLimiter.ts` e as chamadas, **só depois de o passo 5 passar em produção** |
+
+### (d) Testes de aceite
+
+- **N falhas dão 429:** 5 senhas erradas para o mesmo e-mail e a 6ª tentativa devolve **429** com `Retry-After` e `codigo: "LOGIN_LIMITE"`, direto na API e pela tela (mensagem "Muitas tentativas...").
+- **Reinício não zera:** redeploy da API no Coolify logo após estourar; continua 429 (contador no banco).
+- **Outros não são afetados:** outro e-mail no mesmo IP continua entrando (vale com `ip:email`; com IP sozinho este teste **falha**, e é a prova do risco de NAT); outro IP com o mesmo e-mail continua bloqueado (chave do e-mail).
+- **Sucesso zera:** login correto antes da 5ª falha zera o contador (conferir também a chave de IP).
+- **Janela:** passados 900 s o login volta.
+- **IP gravado:** em `auth.login_tentativas` a chave `ip:` mostra o IP do cliente, não o do Traefik nem o do BFF.
+- **Azure:** SSO entra normalmente, sem contar nem sofrer o limite.
+- **Sem variável:** com `LOGIN_LIMITE_*` ausente do ambiente, o 429 acontece (prova de que o valor é fixo).
+
+### (e) Riscos e rollback
+
+- **IP atrás do Traefik/Coolify (🟡):** o front usa o **último** valor de `x-forwarded-for`. Havendo mais de um proxy (CDN, balanceador), esse valor é o do proxy e todos caem na mesma chave de IP. Não conferi a configuração do Traefik.
+- **NAT:** ver a recomendação acima.
+- **Spoof de `x-cliente-ip`:** só o BFF chama a rota (exige `x-api-key`); o cabeçalho é confiável enquanto a chave não vazar.
+- **Falha do banco:** `limiteExcedido` não tem `catch`; se a consulta falhar o login devolve 500. 🟡 Decidir falhar aberto ou fechado. `loginFalhou` e `loginOk` já ignoram o erro (só registram).
+- **Valor fixo:** mudar o limite exige deploy. Aceito, como no contrato 38.
+- **Rollback:** reverter o commit da API (volta ao desligado) e, se o front já removeu o limiter, reverter o PR dele; por isso o limiter local só sai depois da validação (passo 6). Em bloqueio indevido em massa, o DBA limpa `auth.login_tentativas` sem deploy.
+
+### (f) Perguntas
+
+| # | Pergunta | Dono |
+|---|---|---|
+| Q1 | 🔴 Confirmar 5 tentativas / 900 s fixos no código (os do front). | Nathan |
+| Q2 | 🔴 Chave: e-mail + **IP+e-mail** (recomendado) ou e-mail + IP sozinho (como o código está)? | Nathan / Gustavo |
+| Q3 | 🔴 Quantos proxies entre o cliente e o BFF? O último valor de `x-forwarded-for` é o IP do cliente? | Gustavo |
+| Q4 | 🔴 `LOGIN_LIMITE_TENTATIVAS` está setada em produção? Corpo de `fn_login_*` (`>=` ou `>`, tipo da chave)? Falha aberta ou fechada se o banco falhar? | Gustavo |
+| Q5 | Mensagem própria do 429: **feita** no PR #178; falta mergear. | Front |
+| Q6 | 🟡 Azure continua fora do limite (proposta acima). | Nathan |
+
+---
+
+> **Status (superado em 09/10/2026 pela seção 0; texto de 07/10 preservado): proposta (07/10/2026).** Fecha a marcação `GAMBIARRA(` de `lib/auth/loginRateLimiter.ts:24` do av-hub ("rate limit em memória do processo (S9): precisa de store compartilhado"). **Achado principal: a API já tem o limite em banco, só que desligado por padrão e sem o BFF mandar o IP.** O trabalho é ligar, fixar valores, mandar o IP e apagar o código do front. Fontes: leitura do av-hub (`lib/auth/loginRateLimiter.ts`, `app/api/auth/[...nextauth]/route.ts`) e da `api-acos-vital` (`utils/acessoConfig.js`, `schemas/auth/aggregates/autenticacao/autenticacao.route.js`), em 07/10/2026. Legenda: ✅ verificado no código · 🟡 inferência · 🔴 pendente com dono. Decisões gerais em [[Registro-de-Decisoes-2026-10-07]]; o método "regra decidida é fixa no código" vem do [[38-Regras-Sem-Chave-de-Ambiente]].
 
 **Para:** backend (`api-acos-vital`, Gustavo) e av-hub (BFF) · **Pequeno.** Sem tabela nova a criar (ver §2).
 
