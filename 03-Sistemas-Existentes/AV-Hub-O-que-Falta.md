@@ -38,6 +38,7 @@ O diagrama tem duas raias do AV-Hub, **Vendas** e **Compras** (esta compartilhad
 2. **Escopo do vendedor** nas rotas de liberação e de pedidos (contrato 40), com o token renovável antes de o BFF parar de filtrar.
 3. **Aprovador, CCP e compradores vinculados**, e o deploy do contrato 36.
 4. **Recompra por RNC.**
+5. **Torre de Fluxo**, por último, porque depende do feed do MES.
 
 ## Fora do desenho: não contam para "concluir"
 
@@ -50,7 +51,19 @@ Estes itens existem no AV-Hub mas **não aparecem no Diagrama de Atividades** e 
 - Rate limit do login ([[41-Login-Rate-Limit-no-Backend]]), política do bucket ([[44-Upload-de-Fotos-Politica-de-Bucket]]) e as marcas `GAMBIARRA(` que só tocam esses módulos.
 - Portal do Vendedor: itens do plano ([[AV-Hub-Portal-Vendedor-Plano]]).
 
-A Torre de Fluxo (rastreabilidade completa, M7) tem marco próprio no [[Cronograma-2-Meses]] e também não está no 0b.
+
+## A Torre de Fluxo faz parte do desenho
+
+A Torre de Fluxo é a **visualização do 0b**: mostra o processo da empresa e onde está cada item. O protótipo (artifact "Torre de Fluxo") tem 9 nós que são as raias do diagrama (Vendas, PCP, Estoque, Fábrica, Qualidade, Expedição, Compras·CCP, Recebimento, Fiscal), com os mesmos caminhos: solicitar compra, enviar à produção, inspeção de entrada e de saída, retorno ao Estoque, despacho, divergência e lote reprovado. Por isso a Torre **conta** para concluir (corrige a versão desta nota de 09/10, que a deixava de fora).
+
+| Item | Estado | Quem |
+|---|---|---|
+| Protótipo visual com dados de exemplo | ✅ | |
+| Feed do MES, tabelas `core_fluxo.*`, job de projeção e BFF ([[46-Torre-de-Fluxo-Feed-Jobs-e-Telas]]) | 🔴 nada em código | Robert (feed), Gustavo (tabelas), Nathan (telas) |
+| Telas T.3, T.4, T.5, T.5b (mapa por setor, trilha do item, tempo por etapa) | 🔴 | Nathan (I5 e I6, 11 pd) |
+| Ranking de gargalos (T.6) | Ciclo 2 (decidido em 07/10) | Nathan |
+
+A régua é o 0b: a Torre só mostra o que o diagrama tem; qualquer etapa nova no 0b entra nela. Janela: S5 (26/11 a 18/12), depois do que depende do MES.
 
 ## Antes de chamar de pronto
 

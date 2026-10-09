@@ -77,6 +77,8 @@ sequenceDiagram
 
 ## 0b. Atividades (já existe) — preview: Fluxograma mestre
 
+> **Revisto em 09/10/2026 (custo do lote):** a OC grava valor unitário, desconto, moeda e cotação por item (C4); o lote nasce no Recebimento com o custo da OC, opcional e nunca bloqueante (R4); o custo do item no pedido é o custo médio dos lotes que o atendem (E3). Ver [[Estoque-Custo-do-Lote]]. **A Torre de Fluxo é a visualização deste diagrama:** suas 9 raias (Vendas, PCP, Estoque, Fábrica, Qualidade, Expedição, Compras·CCP, Recebimento, Fiscal) são as do 0b. Cadastros, Orçamento, dashboards, comissões e pedidos manuais não fazem parte do desenho. O artifact de UML foi atualizado na mesma data.
+>
 > **Revisto em 01/10/2026:** o pedido chega travado e o vendedor libera; o Estoque decide atender, solicitar compra ou enviar à produção; a compra volta ao Estoque pela inspeção de entrada; a produção passa pela inspeção de saída e também volta ao Estoque; o despacho do Estoque leva à Expedição ou à produção. Ainda não reflete o [[Fluxogramas-Completos]], que está no desenho de 24/09.
 >
 > O diagrama de atividades oficial da UML — decisões, `fork`/`join` (ramificações paralelas), raias por setor. Este é o mestre (fim a fim); os outros 5 focados (Compras, Recebimento, Qualidade, Produção, Estoque) estão em [[Fluxogramas-Completos]].
@@ -108,7 +110,7 @@ flowchart TD
     subgraph SEC_ESTOQUE[Estoque - atendimento do pedido]
         E1[Saldo disponivel na filial do pedido]
         E2{Saldo cobre o item?}
-        E3[Atende pelo saldo: split e reserva]
+        E3["Atende pelo saldo: split e reserva<br/>custo do item = custo medio dos lotes"]
         E4{O que fazer com o restante?}
         E1 --> E2
         E2 -->|sim, tudo ou parte| E3
@@ -126,7 +128,7 @@ flowchart TD
         C1[Cotacao e negociacao]
         C2{Acima de 30 mil reais?}
         C3[Aprovacao da diretoria]
-        C4[Emite Ordem de Compra, define CIF ou FOB]
+        C4["Emite Ordem de Compra, define CIF ou FOB<br/>grava valor, moeda e cotacao por item"]
         C5[CCP: follow-up de prazo]
         C1 --> C2
         C2 -->|sim| C3 --> C4
@@ -142,7 +144,7 @@ flowchart TD
         R1[Confere a NF contra a OC ou o pedido de venda]
         R2[Pesagem]
         R3{Bate com o esperado?}
-        R4[Cria lote em quarentena, split se chegou parte]
+        R4["Cria lote em quarentena, split se chegou parte<br/>lote nasce com o custo da OC, opcional"]
         R6[Divergencia]
         R1 --> R2 --> R3
         R3 -->|nao| R6
