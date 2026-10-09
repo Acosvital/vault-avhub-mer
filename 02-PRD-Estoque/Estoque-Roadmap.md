@@ -9,11 +9,11 @@ atualizado: 2026-10-07
 > Status: decidido | no código (develop) | em produção (mes-test; produção real não)
 
 > **Decisões de 07/10/2026 que mudam este roadmap** ([[Registro-de-Decisoes-2026-10-07]]):
-> - **(09/10) G1 aceita uma coluna de custo unitário opcional por lote** (não bloqueia a carga; ver [[Proposta-Custo-x-Venda-Comissao]], item 93 do Registro).
+> - **(09/10) G1 aceita uma coluna de custo unitário opcional por lote** (não bloqueia a carga; ver [[Estoque-Custo-do-Lote]], [[008-Custo-do-Lote-no-MES]] e o item 93 do Registro; a G1 passa a 3,9 pd).
 > - **G1 (carga em lote) agora é do Robert** (MES); o Pablo foi para o Comercial & Suprimentos (itens 32 e 33). A capacidade do Robert estoura e precisa ser recalculada ([[Cronograma-2-Meses]]).
 > - **Carga inicial:** dupla conferência = **contador + conferente**; divergência = **terceira contagem**; o lote nasce liberado (DEC-4) (item 25).
 > - **Saldo do Omie:** o Omie recebe dados só manualmente e o estoque do Omie é **ignorado**. O Passo 2 (`ListarPosEstoque`) **não será feito**; a dependência de reconciliar a carga com o saldo do Omie (G3) **cai**. O MES é a referência do saldo físico (item 28).
-> - **Ciclo 2 (começa em 04/01/2027):** entram a **Fase D**, a **remessa de produtos**, **EC-02** (sobras e perdas de matéria-prima), **L-10** (sobras de chapa, perda no corte, unidade) e a transferência entre filiais (etapas 2 a 4) (item 27).
+> - **Ciclo 2 (começa em 22/01/2027):** entram a **Fase D**, a **remessa de produtos**, **EC-02** (sobras e perdas de matéria-prima), **L-10** (sobras de chapa, perda no corte, unidade) e a transferência entre filiais (etapas 2 a 4) (item 27).
 > - **Schema do Estoque:** ✅ fica em `public` (item 21).
 
 > **Atualização de 07/10/2026 — estado das fases pelas tarefas D\*** (conferido no código, `develop` do MES, `api-pcp` `ca3346b` e `app-pcp` `a802a3e`; **a `main` dos dois repos parou em 28/08, então tudo abaixo está só em `develop`**; produção e homologação não foram conferidas, e marco de cronograma só muda com homologação). Ver [[Onde-Estamos]] e [[Cronograma-2-Meses]].
@@ -24,7 +24,7 @@ atualizado: 2026-10-07
 > | **Fase A** | C7 (requisição), contratos 34/35 | Requisição de compra implementada (`b8dc158`, 29/09; cancelamento e envio em `e7ce2c9`, 02/10); contrato 34 (PUT) e 35 (eventos) **ligados no MES** (`e7ce2c9`, `41bf4a6`); se há chave no ambiente real: não verificado |
 > | **Fase B** | D6, D7, D8, D11 | D6/D7 em `develop` (`861c050`, `f2c01f1`, 07/10); D8 feita (`898aa54`, `815fef3`); D11 **parcial** (`2e2c18e`: etiqueta PDF Code128; sem leitor 2D nem posto de recebimento) |
 > | **Fase C** | D9, D10 | D9 feita (`0fe771f`, 28/09); D10 real (só `painel-estoque` em parte, `mapa-deposito` e `qualidade/route` ainda citam mock) |
-> | **Fase D** | — | Não iniciada, salvo a **transferência entre filiais, etapa 1** (saldo por filial, `861c050`, 07/10) e os alertas de estoque mínimo/RNC pendente (`bfe5882`). **Decidido em 07/10: a Fase D vai ao Ciclo 2 (04/01/2027)** |
+> | **Fase D** | — | Não iniciada, salvo a **transferência entre filiais, etapa 1** (saldo por filial, `861c050`, 07/10) e os alertas de estoque mínimo/RNC pendente (`bfe5882`). **Decidido em 07/10: a Fase D vai ao Ciclo 2 (22/01/2027)** |
 > | **Fase E** | — | Não iniciada |
 
 | Fase | Entrega |
@@ -33,7 +33,7 @@ atualizado: 2026-10-07
 | Fase A | Pedido de compra (MP e revenda) — sem cadastro de fornecedor próprio, ver nota abaixo |
 | Fase B | Recebimento em duas etapas (quantitativa + qualitativa), pesagem, RNC, etiquetagem código de barras |
 | Fase C | Estoque (saldo, localização, movimento, reserva) — consulta interna dentro do mesmo banco do MES, sem view de integração externa |
-| Fase D | Separação/expedição, devolução de cliente, contagem cíclica e ponto de pedido — **Ciclo 2 (a partir de 04/01/2027)**, junto de remessa de produtos, EC-02 e L-10 *(decidido em 07/10)* |
+| Fase D | Separação/expedição, devolução de cliente, contagem cíclica e ponto de pedido — **Ciclo 2 (a partir de 22/01/2027)**, junto de remessa de produtos, EC-02 e L-10 *(decidido em 07/10)* |
 | Fase E (futura) | Piloto de RFID em item de maior valor |
 
 ## Status da Fase 0 (17/09/2026)

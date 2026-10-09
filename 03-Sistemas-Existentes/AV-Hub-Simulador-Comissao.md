@@ -40,4 +40,4 @@ O projeto Python paralelo (integração OMIE + Excel + dashboard Next.js) **é s
 ## Ver também
 - [[AV-Hub-Modulos]]
 - [[AV-Hub-Comissao-Modulo]]
-- [[Proposta-Custo-x-Venda-Comissao]] (futuro: simulador pré-preenchido com custo real e comissão por faturamento)
+- [[Estoque-Custo-do-Lote]] (decidido em 09/10; Ciclo 2: simulador pré-preenchido com custo real e comissão por faturamento, contrato [[47-Custo-Real-por-Item-no-Hub]])

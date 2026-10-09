@@ -27,6 +27,6 @@ Pesagem já existe hoje (não é investimento novo); há múltiplos depósitos; 
 - [[Estoque-Regras-Negocio]]
 - [[Estoque-Roadmap]]
 
-## Custo do lote (proposta de 09/10/2026)
+## Custo do lote (decidido em 09/10/2026)
 
-Sete perguntas 🔴 ao Nathan, sem urgência, sobre custo × venda e comissão: regra do faturamento parcial, custo da carga inicial, composição do custo, PTAX, sobra de compra mínima, papel de Compras e escopo (só revenda). Detalhe em [[Proposta-Custo-x-Venda-Comissao]] e itens 93 e 94 de [[Registro-de-Decisoes-2026-10-07]].
+As sete perguntas sobre custo × venda foram **fechadas** em 09/10 (regra A de custo médio; custo da carga inicial pela coluna opcional da G1; composição como no simulador, frete fora; PTAX da OC; sobra segue o lote; Compras só confere; só revenda). Detalhe em [[Estoque-Custo-do-Lote]] e nos itens 93 a 96 de [[Registro-de-Decisoes-2026-10-07]]. **Segue em aberto:** a fonte do imposto por item (ICMS a recuperar, IPI, ST), que a OC não guarda.

@@ -438,7 +438,7 @@ As telas 9.1–9.4 foram construídas pelo Pablo em `develop` **sobre mock** (`l
 
 **9.1 e 9.5 são telas distintas, não uma fila com filtro.** [[Fluxo-Qualidade-Completo]] é explícito: *"não são a mesma fila com prioridades diferentes, são entradas de dados distintas que precisam de telas distintas"*.
 
-**Decisão em aberto T-04:** a trava do `laudo_url` vale igual para a inspeção de processo (documental)? A regra foi escrita pensando na inspeção física. Não trava nada agora — a 9.5 é ciclo 2 (que começa em 04/01/2027, [[Registro-de-Decisoes-2026-10-07]], item 27).
+**Decisão em aberto T-04:** a trava do `laudo_url` vale igual para a inspeção de processo (documental)? A regra foi escrita pensando na inspeção física. Não trava nada agora — a 9.5 é ciclo 2 (que começa em 22/01/2027, [[Registro-de-Decisoes-2026-10-07]], item 27).
 
 ---
 

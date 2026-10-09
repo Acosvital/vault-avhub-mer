@@ -17,7 +17,7 @@ Detalhe e status (✅ / 🟡 / 🔴) em [[Registro-de-Decisoes-2026-10-07]].
 - **CC-03**: orçamento desenvolvido por fora (Comercial & Suprimentos); contratos 07 e 38 a reescrever.
 - **IM-01 e IM-03 (antigo)**: superados pelo contrato 34. **IM-02**: resolvida pelo código.
 - **Transferência (TF-3, TF-6)**: NF só após aprovação na origem; número da NF chega ao MES via av-hub.
-- **EC-02 e L-10**: passam para o Ciclo 2 (04/01/2027).
+- **EC-02 e L-10**: passam para o Ciclo 2 (22/01/2027).
 - **DEC-9**: `auth.logs` com retenção curta e `auth.auditoria` com 5 anos (prazo do `auth.logs`: 🔴 Gustavo).
 - **Propostas 🟡 (valem até alguém contestar)**: guards do `api-pcp` (CC-05), consumidor do 005 na `api-acos-vital` (IM-03).
 
@@ -81,13 +81,13 @@ De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o r
 
 | ID | Pergunta | Quem |
 |---|---|---|
-| L-10 | **➡️ Ciclo 2 (04/01/2027), ✅ 07/10 ([[Registro-de-Decisoes-2026-10-07]] #27).** Sobra/retalho de chapa volta ao estoque como material rastreável? Como se pesa o que sobra? Qual a unidade de controle de cada material (kg × peça × metro)? | Nathan + Almoxarifado + Produção |
+| L-10 | **➡️ Ciclo 2 (22/01/2027), ✅ 07/10 ([[Registro-de-Decisoes-2026-10-07]] #27).** Sobra/retalho de chapa volta ao estoque como material rastreável? Como se pesa o que sobra? Qual a unidade de controle de cada material (kg × peça × metro)? | Nathan + Almoxarifado + Produção |
 
 **Encaixe Estoque/Revenda — 1 restante (29/09/2026), agora adiada ao Ciclo 2** — detalhe em [[Encaixe-Estoque-Revenda-no-PCP]] seção 6. EN-05 e EC-01/EC-03 a EC-08 foram todas respondidas pelo Nathan em 29/09 (ver seção 5 daquela nota); só falta a de baixo, que o próprio Nathan pediu como sugestão em vez de decidir.
 
 | ID | Pergunta | Quem |
 |---|---|---|
-| EC-02 | **➡️ Ciclo 2 (04/01/2027), ✅ 07/10 ([[Registro-de-Decisoes-2026-10-07]] #27).** Baixa de matéria-prima consumida além do requisitado (sobras, perdas de corte) — como tratar? Sugestão registrada (tratar como `MovimentoEstoque AJUSTE` com motivo obrigatório), **ainda não validada pelo time**. | Robert + Produção |
+| EC-02 | **➡️ Ciclo 2 (22/01/2027), ✅ 07/10 ([[Registro-de-Decisoes-2026-10-07]] #27).** Baixa de matéria-prima consumida além do requisitado (sobras, perdas de corte) — como tratar? Sugestão registrada (tratar como `MovimentoEstoque AJUSTE` com motivo obrigatório), **ainda não validada pelo time**. | Robert + Produção |
 
 **Integração av-hub ↔ MES — 4 novas (30/09/2026)** — levantadas pelo Robert ao comparar os contratos com o código; detalhe em [[003-Requisicao-Compra-Integracao-MES]] e [[005-Status-Item-Integracao-MES]].
 
@@ -112,7 +112,7 @@ De ~60 perguntas levantadas, **só estas seguem genuinamente sem resposta** (o r
 | CC-08 | **`api-comercial`:** em que ambiente vai rodar, no mesmo cluster Postgres do Hub, com quais perfis/telas (22 slugs de `auth.telas` no contrato de 08/10; eram 18) e a claim `perfis` no token? Ver [[AV-Hub-Comercial-Suprimentos]] | Nathan + DBA |
 | CC-09 | ✅ **Fechada em 07/10 ([[Registro-de-Decisoes-2026-10-07]] #23): branch descartada. `FAMILIA_PADRAO_POR_FILIAL`: corrigir a doc do pipeline e registrar tarefa de código (Gustavo; #20).** ~~**Branch `feat/migracao-nestjs-prisma` (api-acos-vital):** migra as 358 rotas Express para NestJS+Prisma, 61 commits atrás da `main` e sem os contratos 34–39. Vai seguir ou será descartada? **E HRM no pipeline:** o código tem `FAMILIA_PADRAO_POR_FILIAL` fixo em mogi/uberaba (produto da HRM sem família é pulado, inferido) — cabe ajuste antes de ligar a HRM?~~ | ~~Nathan + Gustavo~~ |
 
-**Total recontado em 08/10/2026: 17 itens em aberto** (eram 21 em 07/10): 2 de rastreabilidade (R-08, R-13) + 6 de estados e status + 4 de Compras e acessos (CA-01 e CA-02 respondidas em 08/10; abertas CA-03 em andamento, 20 de 74 vinculados, CA-04 e CA-05) + CC-01, CC-04 (só data/responsável), CC-05 (só exposição), CC-07 e CC-08 + prazo do `auth.logs` (DEC-9, Gustavo). **Saíram da conta em 08/10:** IM-04 (aceite do 005, ✅ Nathan) e **saldo zero** (✅ exige clique; fecha o EN-01). **Fora da conta:** IM-03 (consumidor do 005, 🟡 proposta), guards do `api-pcp` (🟡), EC-02 e L-10 (Ciclo 2, 04/01/2027) e os itens fechados acima. ~~Texto de 07/10: 21 itens, com IM-04 e saldo zero.~~ O resto do documento abaixo é o arquivo completo, com a resposta e a justificativa de cada item já fechado.
+**Total recontado em 08/10/2026: 17 itens em aberto** (eram 21 em 07/10): 2 de rastreabilidade (R-08, R-13) + 6 de estados e status + 4 de Compras e acessos (CA-01 e CA-02 respondidas em 08/10; abertas CA-03 em andamento, 20 de 74 vinculados, CA-04 e CA-05) + CC-01, CC-04 (só data/responsável), CC-05 (só exposição), CC-07 e CC-08 + prazo do `auth.logs` (DEC-9, Gustavo). **Saíram da conta em 08/10:** IM-04 (aceite do 005, ✅ Nathan) e **saldo zero** (✅ exige clique; fecha o EN-01). **Fora da conta:** IM-03 (consumidor do 005, 🟡 proposta), guards do `api-pcp` (🟡), EC-02 e L-10 (Ciclo 2, 22/01/2027) e os itens fechados acima. ~~Texto de 07/10: 21 itens, com IM-04 e saldo zero.~~ O resto do documento abaixo é o arquivo completo, com a resposta e a justificativa de cada item já fechado.
 
 ---
 

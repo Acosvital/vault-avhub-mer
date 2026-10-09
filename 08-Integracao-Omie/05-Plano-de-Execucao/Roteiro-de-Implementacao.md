@@ -8,7 +8,7 @@ atualizado: 2026-10-07
 
 > Status: decidido (Passos 1, 2, 3, 6, 7, 8, 9, 15) | no código (`master` d2886bf, 06/10) | em produção (verificado em 07/10/2026 só pelo dump). Decisões em [[Registro-de-Decisoes-2026-10-07]].
 >
-> **Decisões de 07/10 sobre os passos (✅):** Passo 1 parcial (endereço de entrega e dados bancários ficam fora); Passo 2 **cancelado**; Passo 3 `lead_time` **sai do pipeline** (cadastro no MES); Passo 6 **continua** (B6, Gustavo); Passos 7 e 8 vão para o **Ciclo 2 (04/01/2027)**; Passo 9 **feito e populando em produção**; Passo 15 o **Omie segue como financeiro**, sem plano de desligar.
+> **Decisões de 07/10 sobre os passos (✅):** Passo 1 parcial (endereço de entrega e dados bancários ficam fora); Passo 2 **cancelado**; Passo 3 `lead_time` **sai do pipeline** (cadastro no MES); Passo 6 **continua** (B6, Gustavo); Passos 7 e 8 vão para o **Ciclo 2 (22/01/2027)**; Passo 9 **feito e populando em produção**; Passo 15 o **Omie segue como financeiro**, sem plano de desligar.
 >
 > **Atualização de 07/10/2026 — estado de cada passo conferido contra o código do pipeline (`master` d2886bf, 06/10; leitura de código, não produção).**
 >
@@ -174,7 +174,7 @@ Cadastro pequeno (poucos registros) — migrar como carga inicial única, não p
 
 ### Passo 7 🟢 — Extrair Remessa de Produtos
 
-> **Decisão de 07/10 (✅, #27):** remessa de produtos fica no **Ciclo 2 (começa em 04/01/2027)**.
+> **Decisão de 07/10 (✅, #27):** remessa de produtos fica no **Ciclo 2 (começa em 22/01/2027)**.
 >
 > **Estado (atualizado em 07/10): aberto** — a auditoria lista remessa de produtos entre as lacunas ainda abertas; nenhum recurso no pipeline.
 
@@ -189,7 +189,7 @@ Campos principais: `cabec` (`nCodRem`, `nCodCli`, `dPrevisao`, `nCodVend`, `cNum
 
 ### Passo 8 🟢 — Job dedicado: valor de devolução parcial
 
-> **Decisão de 07/10 (✅ #27; 🟡 #31):** a devolução vai para o **Ciclo 2 (04/01/2027)**. O `StatusDevolucaoVenda` não está disponível no Omie; devolução é nativa do Estoque (DEC-10). As colunas `valor_devolucao` em produção estão vazias (limpeza: Gustavo). O desenho abaixo (job com `StatusDevolucaoVenda`) está **superado**.
+> **Decisão de 07/10 (✅ #27; 🟡 #31):** a devolução vai para o **Ciclo 2 (22/01/2027)**. O `StatusDevolucaoVenda` não está disponível no Omie; devolução é nativa do Estoque (DEC-10). As colunas `valor_devolucao` em produção estão vazias (limpeza: Gustavo). O desenho abaixo (job com `StatusDevolucaoVenda`) está **superado**.
 >
 > **Estado (atualizado em 07/10): NÃO IMPLEMENTADO.** O contrato de `valor_devolucao` (006/011) foi invalidado; `valor_devolucao` segue aberto.
 

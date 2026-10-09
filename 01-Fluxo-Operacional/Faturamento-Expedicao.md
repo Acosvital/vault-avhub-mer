@@ -6,7 +6,7 @@ atualizado: 2026-10-07
 
 # 4. Faturamento e Expedição
 
-> **Atualização de 07/10/2026** ([[Registro-de-Decisoes-2026-10-07]]). **Status: em produção (conferido pelo dump de 07/10).** A tabela `core.etapas_faturamento` está **populada em produção** (item 5 do Registro, ✅). A **remessa de produtos** fica para o **Ciclo 2**, que começa em **04/01/2027** (item 27, ✅). A emissão fiscal continua 100% no Omie, que segue como sistema financeiro e fiscal (item 30, ✅).
+> **Atualização de 07/10/2026** ([[Registro-de-Decisoes-2026-10-07]]). **Status: em produção (conferido pelo dump de 07/10).** A tabela `core.etapas_faturamento` está **populada em produção** (item 5 do Registro, ✅). A **remessa de produtos** fica para o **Ciclo 2**, que começa em **22/01/2027** (item 27, ✅). A emissão fiscal continua 100% no Omie, que segue como sistema financeiro e fiscal (item 30, ✅).
 
 - **Regra de faturamento**: definição entre faturamento **parcial** (liberando lotes prontos para mitigar gargalos) ou **integral** (após consolidação de todos os itens do pedido).
 - **Expedição/Logística**: emissão da documentação fiscal e acionamento do carregamento/transporte final ao cliente.

@@ -29,4 +29,4 @@ O [[AV-Hub-Simulador-Comissao|Simulador de Comissão]] no frontend é hoje **100
 - [[AV-Hub-Vendas-Reconciliacao]]
 - [[Decisoes-Chave-ERP]]
 - [[Schema-Postgres-Multi-Dominio]]
-- [[Proposta-Custo-x-Venda-Comissao]] (futuro, sem prazo: etapa 3 calcularia a comissão por faturamento)
+- [[Estoque-Custo-do-Lote]] (decidido em 09/10; Ciclo 2: a etapa 3 calcula a comissão por faturamento, contrato [[47-Custo-Real-por-Item-no-Hub]])
