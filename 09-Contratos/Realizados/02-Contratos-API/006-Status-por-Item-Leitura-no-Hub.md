@@ -81,7 +81,7 @@ A tela 1.2 mostra, por item do pedido, a etapa atual da(s) parcial(is), a quanti
 
 ## Implementação conferida no código (09/10/2026)
 
-> Status: decidido | no código | em produção (verificado em 09/10/2026): **✅ lado do hub implementado no código** (commit `dee35b0`, 08/10/2026, `origin/develop` da `api-acos-vital`; autor `HauntedCrusader`). **Produção não verificada.** **🔴 o front não consome a rota.** Fonte: [[Registro-de-Decisoes-2026-10-07]] (#42 e #43) e [[005-Status-Item-Integracao-MES]].
+> Status: decidido | no código | em produção (verificado em 09/10/2026): **✅ lado do hub implementado no código** (commit `dee35b0`, 08/10/2026, `origin/develop` da `api-acos-vital`; autor `HauntedCrusader`). **Produção não verificada.** **✅ o front consome a rota** desde 08/10/2026 (PR #172 do `av-hub`, `4869810`: cartão "Etapa dos itens"); conferência na seção "Consumo no front" ao final. Fonte: [[Registro-de-Decisoes-2026-10-07]] (#42 e #43) e [[005-Status-Item-Integracao-MES]].
 
 > **(atualizado em 09/10)** Este contrato descreve o que o hub faz com o que o MES expõe no [[005-Status-Item-Integracao-MES]]. O código do hub já cita "contrato 006" e "SQL 010" (`itens_pedido_status.route.js:6-8`, `.job.js:4-6`), então esta nota existe para fechar essa referência. Tudo abaixo vem da leitura do código em 09/10/2026; o que é dedução vem marcado com 🟡.
 
@@ -239,7 +239,7 @@ Em aberto ([[005-Status-Item-Integracao-MES]]): como a tela monta "a etapa do pe
 ## 6. Pendências
 
 1. 🔴 **Migration `api005` não verificada no banco** (função `fn_itens_pedido_status_do_pedido`, `fn_itens_pedido_status_gravar`, tabela, tabela de cursor e linhas em `auth.rotas_telas`). Sem ela, a rota responde 500 e o job só registra no log. Dono: Gustavo.
-2. 🔴 **O front não consome a rota** (nenhuma referência a `itens_pedido_status` ou `itens/status` fora de `node_modules`, conferido em 09/10). A tela 1.2 e a tarefa E3 seguem abertas.
+2. ✅ **O front consome a rota** (PR #172 do `av-hub`, `4869810`, 08/10; conferido em 09/10). Ver a seção "Consumo no front" ao final. Falta o teste ponta a ponta na `api-test` com a migration `api005` aplicada.
 3. 🔴 **Aceite formal do 005 pelo Nathan** (foto atual em vez de log; `pedido_venda` + `ordem_producao`; etapas a mais e a menos). O consumidor já foi construído sobre esse formato, então foi aceito de fato.
 4. 🔴 **Contrato SQL 010 (a tabela `itens_pedido_status`)** ainda não está documentado no vault, apesar de o código citá-lo (`route.js:8`).
 5. 🔴 **`MES_API_KEY` igual nos dois lados.** O hub envia `MES_API_KEY`; o MES lê a chave do hub em `AVHUB_MES_INTEGRACAO_KEY` ([[Registro-de-Decisoes-2026-10-07]], #11). 🟡 Conferir que a chave configurada é a que o MES aceita nesta rota; o código só mostra o envio.
@@ -265,3 +265,16 @@ Em aberto ([[005-Status-Item-Integracao-MES]]): como a tela monta "a etapa do pe
 - [[003-Requisicao-Compra-Integracao-MES]]
 - [[34-Requisicoes-MES-Empurra-para-o-Hub]]
 - [[Indice-Contratos]]
+
+## Consumo no front (conferido em 09/10/2026)
+
+> Status: decidido | no código | em produção (não verificado). Fonte: PR #172 do `av-hub` (`4869810`, 08/10/2026, mergeado na `develop`), lido por `git show`.
+
+- **Onde:** cartão "Etapa dos itens" (tela 1.2, tarefa E3) dentro de `components/Pedidos/PedidoDetalhe.tsx`, que serve a Meus Pedidos, Pedidos da equipe e Pedidos do PCP. Arquivos: `components/Pedidos/EtapaDosItens.tsx` (e `.module.css`), `lib/domain/etapas-item.ts`, `services/pedidosVenda.ts` e a rota do BFF `app/api/pedidos-venda/[fonte]/[codigoEmpresa]/[pedidoVenda]/etapas/route.ts`. O front também ganhou `docs/ENVIAR - contrato-status-por-item.md`.
+- **Chamada:** o BFF lê `GET {API_URL}/itens_pedido_status?codigo_empresa=&pedido_venda=` e devolve `{ disponivel, lido_em, itens }`. Antes de repassar, busca o pedido e confere que ele está no escopo da fonte (`pedidoNoEscopo`).
+- **Compatibilidade com a API: confere.** O tipo `EtapaItemProps` tem os mesmos 10 campos que a rota devolve (`id_item_parcial`, `codigo_produto_omie`, `codigo_produto`, `ordem_producao`, `etapa`, `setor {codigo, nome, tipo}`, `status`, `quantidade_na_etapa`, `atendido_pelo_estoque`, `ocorrido_em`), e o envelope tem `lido_em` e `itens`. Ressalva 🟡: o tipo declara `quantidade_na_etapa: number`, e a API pode devolver `null`.
+- **Autenticação: só `x-api-key`.** O BFF usa `headersApi()`, sem Bearer. Por isso a regra "dono" da API (`escopoVendedor.js`) e o mapa de rota não se aplicam a essa chamada; o escopo fica por conta do BFF. É o mesmo ponto do item 10 da [[Auditoria-Pente-Fino-2026-10-08]]. Corrigir junto com os demais helpers.
+- **404 e vazio:** 404 do hub é tratado como `disponivel: false` (a tela explica, sem erro). A API de fato responde 200 com `itens` vazio quando o MES não tem dado; o cartão precisa tratar a lista vazia como "sem status ainda".
+- **Frescor:** o cartão avisa quando `lido_em` passa de 10 minutos (`ETAPA_ATRASO_MINUTOS`), o mesmo limite que a rota documenta.
+- **Vocabulário no front (provisório):** `compras.requisicao`, `compras.fechamento`, `recebimento.conferencia`, `qualidade.quarentena`, `qualidade.inspecao`, `qualidade.reprovado`, `estoque.atendimento`, `fabrica.espera`, `fabrica.execucao`, `expedicao.embalagem` e `expedicao.concluido`. Etapa desconhecida aparece com o código cru, em tom neutro.
+- **Pendente:** teste ponta a ponta na `api-test` com a migration `api005` aplicada; confirmar `MES_API_KEY` igual nos dois lados.

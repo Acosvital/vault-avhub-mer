@@ -144,7 +144,7 @@ Todo fato abaixo vem de leitura de vault e código em 07/10/2026. **Produção s
 |---|---|---|---|
 | 81 | Contrato 006, SQL 010, SQL 011 e 45 | 🟡 | Criados em 09/10 a partir do código da `api-acos-vital` (`dee35b0`). O código já os citava sem existirem no vault (006 e "SQL 010") ou os chamava com número errado ("Contrato 30" para o pedido manual). Ver [[Indice-Contratos]]. |
 | 82 | DDL de `api004` e `api005` | 🔴 (Gustavo) | O repositório da API não versiona SQL. Os contratos 010 e 011 descrevem só a interface que o código exige e trazem o checklist do DDL real (`\d`, `\df+`, definição da view e do trigger). Confirmar que as duas migrations estão aplicadas. |
-| 83 | Front sem a tela de status por item | 🔴 (front) | `PedidoDetalhe.tsx` serve às três telas; falta o BFF e a coluna de etapa por produto da parcela. A rota exige Bearer e responde 200 com `itens` vazio quando o MES não tem dado. |
+| 83 | Tela de status por item no front | ✅ (front) | **(09/10)** Feita: PR #172 do `av-hub` (`4869810`, 08/10), cartão "Etapa dos itens" em `PedidoDetalhe`. Compatível com a rota. Pendências: usa `headersApi()` (só `x-api-key`, sem Bearer); `quantidade_na_etapa` tipado `number` e a API pode mandar `null`; teste ponta a ponta com a migration `api005` aplicada. Detalhes no fim do [[006-Status-por-Item-Leitura-no-Hub]]. |
 | 84 | MES não lê a referência da OC | 🔴 (Robert) | O `api-pcp` não consome `GET /ordens-compra/referencia`. Usar chave de leitura, não a do contrato 34. |
 | 85 | Numeração de "Contrato 30" nos comentários do código | 🟡 (Gustavo) | Trocar para 45 nos comentários de `pedidoVendaManual.js`, `pedidos_vendas.route.js` e `notas_fiscais.route.js`. |
 
@@ -167,3 +167,4 @@ Conferido na `develop` (`api-acos-vital` `0557871`, `api-pcp` `ca3346b`, `app-pc
 | 44 | IM-02: pedido sem prazo | ✅ `prazo_necessidade = prazoNecessidade ?? pedido.prazoEntrega`, e recusa sem prazo. |
 | 46 | PTAX é a cotação de venda | ✅ cotação de venda; a API **reclassifica a origem para `manual`**, não recusa (`ordens_compra.route.js:964-977`, conferido em 08/10). |
 | 22 | `main` do MES | ❌ Merge `develop` → `main` ainda não feito: `main` do `api-pcp` em `be076b2` e do `app-pcp` em `be847ac` (ambas 27–28/08). |
+| 86 | Notificações com 403 no dev (api-test) | 🟡 | Em 09/10, ao abrir /pcp-pedidos num servidor local apontando para a pi-test, GET de notificações devolveu 403 "Acesso negado" (lib/api/fetchHelper.ts). Causa não investigada; pode ser permissão do usuário de teste. |
