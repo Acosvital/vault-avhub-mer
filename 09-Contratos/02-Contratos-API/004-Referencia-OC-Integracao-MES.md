@@ -1,13 +1,15 @@
 ---
 tags: [contrato-api, mes, estoque, integracao-av-hub-mes]
-status: proposta
+status: implementada-no-codigo
 criado: 2026-09-22
-atualizado: 2026-10-07
+atualizado: 2026-10-09
 ---
 
 # Contrato de API 004 — Referência da Ordem de Compra (av-hub → MES)
 
-> Status: decidido | no código | em produção (verificado em 07/10/2026): **🔴 com o Gustavo, não implementado** (`GET /ordens-compra/referencia` não existe em nenhum dos lados). O registro manual `PATCH /compras/requisicoes/:id/compra` **segue valendo**. Fonte: [[Registro-de-Decisoes-2026-10-07]] (#41).
+> Status: decidido | no código | em produção (verificado em 09/10/2026): **✅ lado do hub implementado** (o Nathan informou em 09/10 que o DBA entregou; conferido no código: commit `fe55923` de 08/10, na `develop` e na `main` da `api-acos-vital` pelo PR #284). **🔴 lado do MES não existe**: o `api-pcp` não tem nenhuma referência à rota. Produção: não verificada. O registro manual `PATCH /compras/requisicoes/:id/compra` **segue valendo** até o MES passar a ler a rota. Fonte: [[Registro-de-Decisoes-2026-10-07]] (#41).
+
+> **Atualização de 09/10/2026 — conferido no código (`origin/develop` da `api-acos-vital`, `dee35b0`):** `GET /ordens-compra/referencia?alterado_desde=&codigo_empresa=&page=&limit=` existe (`views/vw_ordens_compra_referencia_mes`). `alterado_desde` é obrigatório (ISO 8601); `limit` padrão 100 e máximo 500; aceita `apos_id` como desempate do cursor (extensão do contrato). **A regra fica no banco**: a rota lê a view `vw_ordens_compra_referencia_mes` e o `alterado_em` vem de trigger (migration **`api004`**). Sem a migration a rota responde 500 "exige a migration api004 no banco": **não se sabe se ela já foi aplicada**. **Chave:** rota de serviço, sem token de usuário e sem linha em `auth.rotas_telas`. A chave do MES do contrato 34 (`MES_INTEGRACAO_KEYS`) dá **403 `CHAVE_MES_ROTA_NAO_PERMITIDA`** aqui (decisão do Gustavo em 08/10); o MES deve ler com uma chave de **leitura** de `auth.chaves_servico` ou de `API_KEYS`. **Pendente no MES (Robert):** o job de leitura a cada 5 min com UPSERT por `(codigo_empresa, id_ordem_compra)` e itens por `(id_ordem_compra, id_item_oc)`, e o ajuste `id_origem` por item pedido em 30/09. O código do hub é de `HauntedCrusader`.
 
 > **Atualização de 07/10/2026 — conferido no código (`main` = `develop` da `api-acos-vital`, `a6ab058`/`fdafb35`; `develop` do `api-pcp`):** a rota `GET /ordens-compra/referencia` **continua inexistente na API** (nem rota, nem "referencia" no código) e **no MES não há nada** que a consuma: o registro da compra segue manual (`PATCH /compras/requisicoes/:id/compra`, nº do pedido, fornecedor, previsão) e não existe job de poll de OC. Os pré-requisitos de **dados** existem: `ordens_compra_itens_vinculos`, `requisicoes_compra.id_origem` e `status`. O ajuste do Robert (`id_origem` em cada item) **segue pendente**, assim como a aprovação do Gustavo. Status: `proposta`. Atenção: a chave própria do MES que existe hoje (`MES_INTEGRACAO_KEYS`, do [[34-Requisicoes-MES-Empurra-para-o-Hub]]) **só abre o PUT** `/compras/requisicoes/origem/{id}` — não serve para esta rota (ver Autenticação). Nada disto vem de produção. Ver [[Indice-Contratos]] (Conferência de 07/10/2026) e [[Chaves-de-Integracao-AvHub-MES-Pipeline]].
 

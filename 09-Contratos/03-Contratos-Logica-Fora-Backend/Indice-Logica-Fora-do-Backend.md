@@ -31,8 +31,19 @@ Enquanto o backend não entrega, o que estiver fora do lugar fica **marcado no c
 ```
 
 Para listar tudo no repositório `av-hub`: `grep -rn "GAMBIARRA(" app components lib services utils hooks`
-(🔴 **contagem não conferida em 07/10**: a nota dizia 57 marcas em 23/09; o repositório `av-hub` não estava no disco para recontar e o vault não traz o número do front conferido; recontar com o `grep` acima e registrar aqui um único valor). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
+(🟡 **recontado em 07/10: 12 marcas em código**, **11** depois de apagar o código morto do contrato 43, no front (`Desktop\TI\NATHAN\00 - HUB`, branch `fix/gambiarras-bff`); os 57 de 23/09, os 24 do índice antigo e os 14 do catálogo de bugs são histórico; ver o item 58 do [[Registro-de-Decisoes-2026-10-07]]). Quando um contrato for entregue: aplicar a seção "O que muda na tela" do
 contrato, apagar a marca no `av-hub` e mover o arquivo para `Realizados/03-Contratos-Logica-Fora-Backend/`.
+
+## Novo: contratos 40 a 44 (07/10/2026) — propostas para as marcas restantes
+
+Nenhum está entregue. Detalhe de cada um em [[Indice-Contratos]] e nos itens 74 e 75 do [[Registro-de-Decisoes-2026-10-07]].
+
+- **[[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]]** — marcas de `lib/api/{portalPcp,pedidosVenda,liberacaoPedidos}.ts`, `app/api/liberar-pedidos/.../route.ts` e `app/api/auth/[...nextauth]/route.ts` (S1 a S3, L5). A API já aplica o escopo pelo token, desligado; o front só tira o escopo do BFF **depois** da API ligada em produção.
+- **[[41-Login-Rate-Limit-no-Backend]]** — marca de `lib/auth/loginRateLimiter.ts:24` (S9). O front só remove o limiter depois de a API ligada em produção.
+- **[[42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio]]** — marcas de `lib/orcamento/dados.ts` (O1, O2), `lib/comissoes/coordenadores.ts` (C1) e `dash-comissoes/page.tsx` (C2/C3).
+- **[[43-Ordem-das-Etapas-de-Faturamento-no-Cadastro]]** — marca de `utils/etapasFluxo.ts:10` (P6). O único consumidor (`services/portalGerente/etapasEmpresa.ts`) não tem chamador: os dois arquivos foram apagados em 07/10 e a marca saiu com eles (sem commit).
+- **[[44-Upload-de-Fotos-Politica-de-Bucket]]** — marca de `lib/s3/fotos.ts:19` (S10). A validação do BFF é defesa legítima e fica; reclassificar: 🔴 Nathan.
+
 
 ## Fila de vínculo dos vendedores (06/10/2026) — ✅ entregue 07/10
 
