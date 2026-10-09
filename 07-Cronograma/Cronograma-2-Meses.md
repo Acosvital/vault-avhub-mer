@@ -369,7 +369,7 @@ Soma das linhas 87,9 (arredondamento herdado da tabela original, que diz 88,0). 
 | K6 | Custo no movimento `CONSUMO` (J2, 008 §4) | Robert | 0,5 | junto da J2 (19/11 a 25/11), absorvido no déficit |
 | K7 | J4 expõe o custo por item entregue | Gustavo | 0,5 | S5 (04/12 a 10/12); a J4 passa de 2 para 2,5 pd |
 | K8 | `GET /itens/custo` (008 §5) | Robert | 1,0 | **Ciclo 2** |
-| K9 a K11 | av-hub: simulador etapa 2, comissão por faturamento, Compras/Orçamento (47) | Comercial & Suprimentos | ~11 (4 + 5 + 2) 🟡 | **Ciclo 2**, sem dono confirmado |
+| K9 a K11 | av-hub: simulador etapa 2, comissão por faturamento, Compras/Orçamento (47). **Fora do desenho (09/10): não conta para concluir** | Comercial & Suprimentos | ~11 (4 + 5 + 2) 🟡 | depois da entrega do desenho, sem dono confirmado |
 
 **Efeito no Robert (Ciclo 1):** +6,0 pd (K3 + K4 + K5 + K6). Planejado S1–FC + S5 de 58,85 para **64,85 pd** contra 48,75 de capacidade: **déficit de 16,1 pd** (era 10,1), sempre sem contar a baixa no despacho do Estoque. Gustavo: +1,5 pd, cabe na reserva de 9,8 pd da S5 e de 11,9 pd da S1–FC. Nathan: sem mudança.
 

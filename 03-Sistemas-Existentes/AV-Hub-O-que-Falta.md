@@ -4,37 +4,57 @@ criado: 2026-10-09
 atualizado: 2026-10-09
 ---
 
-# AV-Hub: o que falta para concluir
+# AV-Hub: o que falta para entregar o desenho
 
-> Status: decidido (Nathan, até 09/10/2026) | no código (av-hub `develop` `a402d78`, `api-acos-vital` `dee35b0`) | em produção: **não verificado**. Reúne o que o vault e o código dizem estar pendente no **AV-Hub** (front e BFF). Não é um compromisso de prazo. Legenda: ✅ feito, 🟡 proposta ou parcial, 🔴 pendente.
+> Status: decidido (Nathan, 09/10/2026) | no código (av-hub `develop` `111f605`, `api-acos-vital` `dee35b0`) | em produção: **não verificado**. **Régua desta nota: o Diagrama de Atividades (aba 0b de [[Diagramas-UML]], mestre fim a fim).** O objetivo do vault é entregar o sistema como o desenho está hoje; o que não aparece nele não conta para "concluir". Não é compromisso de prazo. Legenda: ✅ feito, 🟡 parcial, 🔴 pendente.
 
-## Onde estamos
-O AV-Hub tem os módulos de **pedidos e notas** (portais do vendedor, da equipe e do PCP), **Compras**, **Comercial e Suprimentos**, **Cadastros e RH**, **Comissões**, **Dashboards**, **Fechamento**, **Orçamento** (legado) e o **Simulador** (experimental). A base de vendas e de Compras está entregue. Falta fechar pontas, **publicar o Comercial e Suprimentos**, endurecer a segurança e fazer a Torre de Fluxo.
+## O que o desenho pede do AV-Hub
 
-Já feito nesta rodada: limpeza de código morto e ponteiros das marcas (av-hub #176), correções do BFF de nota manual, follow-up CCP, link de "Atrasados" e rotas do Comercial (#177), cartão "Etapa dos itens" (#172) e a lista de rotas para o Bearer ([[Mapa-Rotas-BFF-API-para-Bearer]]).
+O diagrama tem duas raias do AV-Hub, **Vendas** e **Compras** (esta compartilhada com o setor Compras do MES), mais quatro pontos de contato com o MES e com o Omie.
 
-## O que falta, por módulo
-| Módulo | Falta | Status | Depende de |
+| Etapa do diagrama | Estado | O que falta | Quem |
 |---|---|---|---|
-| **Pedidos e notas** | Testar o cartão "Etapa dos itens" ponta a ponta (migration `api005`); `quantidade_na_etapa` tipado `number`, a API pode mandar `null`. Tela de **pedidos de venda manuais** (a API existe, a tela não; [[45-Pedido-de-Venda-Manual]]). Itens do plano do Portal do Vendedor ainda não feitos: estados vazios e de erro, badge de SLA crítico no menu, comparação com o mês anterior, "próximos vencimentos", top clientes, copiar número com um clique, "dados atualizados às HH:MM" ([[AV-Hub-Portal-Vendedor-Plano]]) | 🔴 | Nathan (tela manual); Gustavo (migration) |
-| **Compras** | A base está entregue ([[AV-Hub-Modulos]]). Falta: ter o aprovador de fato (o perfil Gerência de Compras tinha 0 usuários no dump de 07/10); vincular os compradores ativos que ainda estão sem vínculo; envio da OC ao Omie em produção (código pronto, falta deploy da API com o contrato 36); campos `itens_recebidos` e `itens_parciais` do dashboard, que a API não manda; rateio por departamento (contrato 01) | 🟡 | Nathan (nomes); Gustavo (deploy) |
-| **Comercial e Suprimentos** | O `api-comercial` está **só em `develop` e não foi publicado**; ambiente ainda sem decisão; 20 dos 22 slugs de tela sem cadastro em `auth.telas`; falta a claim `perfis` no token; nada carrega os `PerfilComercial` fora dos seeds; o auxiliar não consegue salvar proposta (o schema exige preço); o token não confere `typ` e `ver`; rate limit compartilhado por IP. Sem isso o módulo dá 403 para todos ([[AV-Hub-Comercial-Suprimentos]]) | 🔴 | Nathan e Gustavo |
-| **Cadastros, RH e acesso** | CRUD de produtos (o BFF só tem `GET`; decidir se o hub cria e exclui produto). "Novo parceiro" e "novo produto" nunca funcionam (falta `codigo_empresa`). Troca da própria senha. Login Azure: usuário desativado não é derrubado e o `signIn` falho não bloqueia. Token de 15 minutos sem renovação. 28 BFFs que engolem erros como 500. Tela de permissões que corta em 200 linhas (tinha 194). Select de unidade editável em cargos e setores. Telas de negócio que levam 403 em unidades, setores e cargos por causa do gate da tela | 🔴 | Front, em boa parte sozinho |
-| **Comissões e dashboards** | Coordenadores ainda em JSON do repositório; a API já tem `GET /dashboard/comissoes` ([[42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio]]). O simulador é protótipo local sem gravar em banco, e o backend já tem schema para persistir ([[AV-Hub-Comissao-Modulo]]). "Minhas comissões" sem escopo de sessão. Filtro de empresa do ritmo de meta sem efeito. `metas-mensais` pode dar 403 por `pode_editar` contra `pode_criar`. Fechamento manual sem `created_by` | 🔴 | Gustavo (contratos); Nathan (escopo) |
-| **Orçamento legado** | Remover telas, rotas, `lib/orcamento` e os JSONs quando o módulo novo o substituir. A data de corte é decisão sua. O simulador e o cadastro de produtos ainda dependem dele | 🔴 | Nathan |
-| **Segurança transversal** | Bearer nos helpers do BFF (✅ feito e mergeado no PR #178 de 09/10, ativo no código; eram 64 handlers só com `x-api-key`); fixar `ESCOPO_VENDEDORES_EXIGIR`; rate limit do login ([[41-Login-Rate-Limit-no-Backend]]); política do bucket ([[44-Upload-de-Fotos-Politica-de-Bucket]]); escopo e permissão pelo token ([[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]]) | 🔴 | Gustavo mapear as rotas primeiro |
-| **Torre de Fluxo (S5)** | 4 telas e o BFF (I5 e I6, 11 pd), de 26/11 a 18/12. Hoje só existe o protótipo. Depende do módulo `fluxo` do MES (Robert) ([[Cronograma-2-Meses]]) | 🔴 | Robert |
-| **Limpeza** | 10 marcas `GAMBIARRA(` restantes no código do front: 2 de comissões (**fora de escopo**, em desenvolvimento), 2 do orçamento, 5 do escopo de vendedores e 1 do login; mais uma sem marcação (`minhas-comissões`, também fora de escopo). A do upload foi reclassificada como defesa em profundidade ([[44-Upload-de-Fotos-Politica-de-Bucket]]). Somem à medida que saem os contratos 40 e 41 e a decisão do orçamento | 🟡 | Contratos acima |
+| **V1** Pedido chega do Omie travado | ✅ [[26-Vendas-Liberacao-Pedido]] | Nada | |
+| **V2/V3** Vendedor marca "Qualidade acompanha" e libera numa ação | ✅ tela 1.1 (`liberar-pedidos`, `liberacao-equipe`) | Escopo do vendedor na rota de liberação e em Meus Pedidos: hoje são marcas `GAMBIARRA(`; o escopo vem do token ([[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]]) | Gustavo |
+| **P2 → hub** Destinação confirma a importação | Hub ✅ (`POST /pedidos_liberados/:n/importado`) | Chave restrita L6 do MES e do pipeline, ou seguir com a chave admin; lado do MES a confirmar | Gustavo; Robert |
+| **P3** Requisições: PCP abre, o hub recebe | ✅ ([[34-Requisicoes-MES-Empurra-para-o-Hub]], [[35-Compras-Marcos-Requisicao-para-MES]]), tela 3.1 | Nada | |
+| **C1 a C4** Cotação, aprovação acima de R$ 30 mil, emissão da OC (CIF/FOB) | ✅ telas 3.2, 3.3, 3.4 | Ter aprovador de fato: o perfil Gerência de Compras tinha 0 usuários no dump de 07/10. Vincular os compradores ativos (20 de 74 em 07/10) | Nathan (nomes) |
+| **C5** CCP faz o follow-up | ✅ tela 3.6 | Criar o perfil CCP (decidido em 08/10) | Nathan |
+| Envio da OC ao fornecedor/Omie | Código pronto na pipeline | Deploy da API com o [[36-Compras-Produto-Obrigatorio-e-Comprador-da-OC]] | Gustavo |
+| **Referência da OC → MES** (004) | Hub ✅, `api004` aplicada (DBA) | Job de leitura no MES (Robert, 3 pd). Estendido com os valores da OC: [[012-Ordens-Compra-Referencia-Valores]] e [[007-Referencia-OC-Valores-no-MES]] | Robert; Gustavo |
+| **Status por item → Meus Pedidos** (005) | Consumidor no código (`dee35b0`, job de 90 s) | Teste ponta a ponta do cartão "Etapa dos itens"; fechar a tela 1.2 (`quantidade_na_etapa` pode vir `null`) | Nathan; Gustavo |
+| **Recompra por RNC** (`Q3 → C1` e `P6 → P3`: a parte reprovada volta a Compras) | 🔴 **não achei tela nem contrato no hub** | Confirmar se o contrato 35 (eventos da requisição) já cobre; se não, desenhar a entrada de recompra em Compras | Nathan, Robert |
+| Fiscal/Omie: NF e baixa do item | Fora do hub (Omie) | Só leitura do status | |
+
+## Pedidos do desenho que dependem de decisão
+
+1. **Aprovador e perfil CCP** (Nathan): sem eles a aprovação acima de R$ 30 mil e o follow-up ficam sem quem aja.
+2. **L6** (Gustavo): a chave com que o MES confirma a importação.
+3. **Recompra por RNC**: o desenho a exige; o vault não a descreve no hub.
 
 ## Ordem sugerida
-1. **Publicar o Comercial e Suprimentos** (ambiente, telas, perfis, claim). É o que mais bloqueia funcionalidade inteira.
-2. **Correções do front que não dependem de ninguém**: cadastros, autenticação, tratamento de erros, paginação das permissões.
-3. **Bearer e escopo**, depois que o Gustavo mapear as rotas e confirmar o escopo dos perfis (20 dos 21 perfis são `vinculados`).
-4. **Telas que sobram**: pedidos manuais e os itens do plano do portal.
-5. **Torre de Fluxo**, por último, porque depende do MES.
+
+1. **Fechar as pontas com o MES**: L6, job do 004 no MES, teste do 005 e tela 1.2.
+2. **Escopo do vendedor** nas rotas de liberação e de pedidos (contrato 40), com o token renovável antes de o BFF parar de filtrar.
+3. **Aprovador, CCP e compradores vinculados**, e o deploy do contrato 36.
+4. **Recompra por RNC.**
+
+## Fora do desenho: não contam para "concluir"
+
+Estes itens existem no AV-Hub mas **não aparecem no Diagrama de Atividades** e ficam fora desta conta (decisão do Nathan, 09/10/2026):
+
+- Cadastros e RH (CRUD de produtos, troca de senha, login Azure, permissões, unidades/setores/cargos).
+- Orçamento legado e o módulo Comercial e Suprimentos.
+- Dashboards e Comissões (simulador, coordenadores, "minhas comissões", fechamento). Inclui a comissão por faturamento do [[47-Custo-Real-por-Item-no-Hub]].
+- Pedidos de venda manuais ([[45-Pedido-de-Venda-Manual]]): o desenho só tem pedido que chega do Omie.
+- Rate limit do login ([[41-Login-Rate-Limit-no-Backend]]), política do bucket ([[44-Upload-de-Fotos-Politica-de-Bucket]]) e as marcas `GAMBIARRA(` que só tocam esses módulos.
+- Portal do Vendedor: itens do plano ([[AV-Hub-Portal-Vendedor-Plano]]).
+
+A Torre de Fluxo (rastreabilidade completa, M7) tem marco próprio no [[Cronograma-2-Meses]] e também não está no 0b.
 
 ## Antes de chamar de pronto
-Nada disto foi exercitado em produção. Faltam: testar na `api-test` com um usuário de cada perfil (admin, gerente, vendedor, PCP, comprador), aplicar as migrations e subir em ordem (banco, API, BFF) e conferir o `e2e`.
+
+Nada disto foi exercitado em produção. Faltam: testar na `api-test` o caminho do desenho (liberar → destinar → requisição → OC → recebimento → status por item) com um usuário de cada perfil envolvido (vendedor, PCP, comprador, aprovador, CCP), aplicar migrations e subir em ordem (banco, API, BFF) e conferir o `e2e`. O 0b ainda não mostra os valores da OC nem o custo do lote ([[Estoque-Custo-do-Lote]]); atualizá-lo é pendência do vault.
 
 ## Fontes
-[[Auditoria-Pente-Fino-2026-10-08]] · [[Registro-de-Decisoes-2026-10-07]] · [[AV-Hub-Modulos]] · [[AV-Hub-Portal-Vendedor-Plano]] · [[AV-Hub-Comercial-Suprimentos]] · [[Mapa-Rotas-BFF-API-para-Bearer]] · [[Cronograma-2-Meses]]
+[[Diagramas-UML]] · [[Fluxograma-Telas-por-Bloco]] · [[Integracao-AvHub-MES-Volta-Plano]] · [[Registro-de-Decisoes-2026-10-07]] · [[Indice-Contratos]] · [[Cronograma-2-Meses]]

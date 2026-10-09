@@ -7,6 +7,8 @@ atualizado: 2026-10-09
 
 # Contrato 47 — Custo real por item no av-hub: simulador (etapa 2), comissão por faturamento (etapa 3), Compras e Orçamento
 
+> **Escopo (09/10/2026, Nathan): fora do desenho.** Comissões, Orçamento e Compras-analítico não aparecem no Diagrama de Atividades e não contam para concluir o AV-Hub ([[AV-Hub-O-que-Falta]]). O contrato fica guardado, **depois** da entrega do desenho; o que entra no desenho é o custo no lote do MES ([[008-Custo-do-Lote-no-MES]]) e os valores da OC ([[007-Referencia-OC-Valores-no-MES]]).
+>
 > **Status: `para-implementar`, Ciclo 2** (dono: Comercial & Suprimentos; quem executa é decisão do Nathan). Depende de [[008-Custo-do-Lote-no-MES]] (`GET /itens/custo`) e de [[007-Referencia-OC-Valores-no-MES]]. Desenho: [[Estoque-Custo-do-Lote]]. **Nada de comissões é alterado antes do Ciclo 2** (item 90 do [[Registro-de-Decisoes-2026-10-07]]); este contrato só fixa o que o hub fará.
 
 ## 1. Job de leitura (mesmo molde do [[006-Status-por-Item-Leitura-no-Hub]])
