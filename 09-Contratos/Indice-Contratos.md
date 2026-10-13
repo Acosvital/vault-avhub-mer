@@ -224,3 +224,9 @@ Desenho em [[Estoque-Custo-do-Lote]]. O DBA já entregou o `api004`; estes contr
 | [[007-Referencia-OC-Valores-no-MES]] (API) | Rota 004 devolve os valores; job do MES os grava (é o job pendente do 004) | Gustavo (rota), Robert (job) | `para-implementar` |
 | [[008-Custo-do-Lote-no-MES]] (API/MES) | `lote_custo`, custo opcional na G1, custo na entrada do recebimento, no consumo e `GET /itens/custo` | Robert | `para-implementar` (G1 já) |
 | [[47-Custo-Real-por-Item-no-Hub]] (lógica) | Consumo no hub: simulador etapa 2, comissão por faturamento, Compras e Orçamento | Comercial & Suprimentos | `para-implementar` (Ciclo 2) |
+
+## Criado em 13/10/2026 (Acompanhamento de Clientes)
+
+| Contrato | O que é | Status |
+|---|---|---|
+| [[48-Acompanhamento-de-Clientes-Grupos-de-Empresa]] | Tela de acompanhamento de clientes (pedidos e NFs do mês, vendedores, ativo/inativo) e **grupos de empresa**: CNPJ parado não é inativo se o grupo comprou no prazo. Tabelas `grupos_clientes` e `grupos_clientes_membros`, funções `fn_acompanhamento_clientes` e `fn_movimento_cliente_mes`, tela e rotas em `auth.*` | `proposta` (Gustavo). Código da API e do front escrito e **sem commit**; nada testado contra banco; funções e tabelas não existem no banco |
