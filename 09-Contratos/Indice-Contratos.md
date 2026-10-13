@@ -244,4 +244,4 @@ Desenho em [[Estoque-Custo-do-Lote]]. O DBA já entregou o `api004`; estes contr
 | Contrato | O que é | Status |
 |---|---|---|
 | [[49-Vinculos-do-Usuario-no-Me-Permissoes-Completos]] | `fn_me_permissoes.vendedores[]` com `nome_exibicao` e `ativo`; conferir que é o mesmo conjunto de `fn_vendedores_do_usuario` e a `origem` por perfil. Resolve a Q3 do 40 | `proposta` (Gustavo) |
-| [[50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]] | Como remover as 3 marcas que restam no front, com token obrigatório (401 sem token), testes por perfil e rollback | `proposta` (Nathan; depende do 49) |
+| [[50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]] | Como remover as marcas que restam no front (2 depois de reclassificar a do `nextauth`), com token obrigatório (401 sem token), testes por perfil e rollback | `proposta` (Nathan; depende do 49) |

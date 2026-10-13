@@ -5,8 +5,10 @@ atualizado: 2026-10-13
 status: proposta
 ---
 
-# Contrato 50 — Tirar as 3 marcas que restam do [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] no front
+# Contrato 50 — Tirar as 2 marcas que restam do [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] no front
 
+> **(atualizado em 13/10/2026)** A **marca C (`nextauth`) foi reclassificada** pelo Nathan na branch `feat/escopo-vendedor-liberacao-no-backend` (comentário normal, sem `GAMBIARRA(`; o menu do JWT é cache de apresentação). **Restam 2 marcas: A e B**, que dependem do contrato 49.
+>
 > Status: proposta | **só leitura de código** (13/10/2026): `00 - HUB` (`develop` `03d62ea` + branch `feat/escopo-vendedor-liberacao-no-backend` `0561bbc`), `api-acos-vital` (`origin/develop` `80581d0`). Nada foi testado com usuário vendedor. Depende do [[49-Vinculos-do-Usuario-no-Me-Permissoes-Completos]].
 
 **Dono:** Nathan (front/BFF). **Pré-requisito:** o contrato 49 entregue e conferido na `api-test`.
@@ -19,7 +21,7 @@ O contrato 40 tinha 5 marcas no front. Em 13/10 a branch `feat/escopo-vendedor-l
 |---|---|---|---|
 | **A** | `lib/api/pedidosVenda.ts` | `resolverEscopo` resolve os vendedores (2 a 4 chamadas), manda `?vendedor=`, calcula `proprio`, `permitidos` e o "sem vínculo" | contrato 49 (D1 a D3) + este passo 3 |
 | **B** | `lib/api/portalPcp.ts` | `resolverVendedoresDiligenciador` (3 chamadas) e `resolverEscopoPcp` alimentam a lista de vendedores e o "focar num vendedor" do PCP, e validam o foco | contrato 49 + este passo 4 |
-| **C** | `app/api/auth/[...nextauth]/route.ts` (l. 192) | revalida o menu/permissões do JWT a cada 5 min (`REVALIDAR_PERMISSOES_MS`) | **decisão Q4** (passo 5): reclassificar, não remover |
+| **C** | `app/api/auth/[...nextauth]/route.ts` (l. 192) | revalida o menu/permissões do JWT a cada 5 min (`REVALIDAR_PERMISSOES_MS`) | ✅ **reclassificada em 13/10** (passo 5; Q4 decidida: reclassificar, não remover) |
 
 **O que a API já garante** (`escopoVendedor.js`, `fd8c29b`, regra fixa): com token e perfil que não é `todos`, preenche o `vendedor`/`codigo_vendedor` que falta, devolve `403 VENDEDOR_FORA_DO_ESCOPO` para vendedor de fora, confere o dono de `/pedidos_venda/{empresa}/{numero}`, `/pedido_venda_itens/{numero}`, `/pedidos_vendas/{cod}`, observações do PCP e `PUT /pedidos_liberacao/...` (`403 PEDIDO_FORA_DO_ESCOPO`), e `403 SEM_VENDEDOR_VINCULADO` sem vínculo. **Sem token ela não filtra**: é a chamada do MES e do pipeline.
 
@@ -45,7 +47,7 @@ Quem deixa de filtrar no BFF passa a depender 100% do token. O `backendToken` du
 3. **Apagar** `resolverPedidoDoEscopoPcp` e os `validarCodigoVendedor` de escopo: a API já confere o dono em `/pedidos_vendas/{cod}` e em `pedido_observacao_pcp`. Rotas: `app/api/pcp/{dashboard, notas, notas/resumo, pedidos/resumo, pedidos/[codigo_pedido_omie]/status-historico, observacoes, observacoes/[id], vendedores}`.
 4. Sem token: 401, como na seção 2.
 
-## 5. Marca C — `nextauth` (Q4 do contrato 40)
+## 5. Marca C — `nextauth` (Q4 do contrato 40) ✅ feito em 13/10/2026
 
 **Recomendação: reclassificar, não remover.** O polling de 5 min existe para a **barra lateral e o `usePermission`** (UI), que leem o menu do JWT. A decisão de acesso **no servidor** já vem ao vivo: `requirePermission` lê `/me/permissoes` a cada requisição (cache de 5 s) e a API confere `auth.rotas_telas`. Então o JWT é só **cache de apresentação**.
 - Trocar o texto da marca por um comentário normal (sem `GAMBIARRA(`), dizendo que o menu do JWT é cache de UI, que a decisão de acesso é da API e do `requirePermission`, e que `REVALIDAR_PERMISSOES_MS` só limita o atraso do menu.
@@ -72,7 +74,7 @@ Quem deixa de filtrar no BFF passa a depender 100% do token. O `backendToken` du
 | 2 | Nathan | Testar a branch `0561bbc` (liberação) na `api-test` e mesclar |
 | 3 | Nathan | PR da marca A, testes 1 a 3, 6 e 7 |
 | 4 | Nathan | PR da marca B, testes 4, 5 e 7 |
-| 5 | Nathan | Reclassificar a marca C (Q4) |
+| 5 | Nathan | ✅ Reclassificar a marca C (feito em 13/10, `feat/escopo-vendedor-liberacao-no-backend`) |
 | 6 | Nathan | Testes 8 a 10 e atualizar o item 58 do [[Registro-de-Decisoes-2026-10-07]] |
 
 **Rollback:** reverter o PR do front. A API continua com o escopo fixo e o BFF volta a filtrar por conta própria (sem perda de segurança).
@@ -89,7 +91,7 @@ Quem deixa de filtrar no BFF passa a depender 100% do token. O `backendToken` du
 | # | Pergunta | Dono |
 |---|---|---|
 | Q1 | 🔴 O contrato 49 (D1 a D4) vai ser entregue como está? | Gustavo |
-| Q2 | 🔴 Marca C: reclassificar (recomendado) ou remover o polling? | Nathan |
+| Q2 | ✅ Marca C: **reclassificada** (decisão do Nathan, 13/10); o polling fica | Nathan |
 | Q3 | 🟡 Os 403 que substituem o "não encontrado" no detalhe têm mensagem adequada na tela? | Nathan |
 | Q4 | 🟡 Trazer os dashboards para este escopo ou deixar fora? | Nathan |
 
