@@ -267,3 +267,11 @@ Desenho em [[Estoque-Custo-do-Lote]]. O DBA já entregou o `api004`; estes contr
 | Contrato | O que mudou | Status |
 |---|---|---|
 | [[44-Upload-de-Fotos-Politica-de-Bucket]] | O DBA diz que fez (relato do Nathan). É infraestrutura do bucket: não verificável pelo código. Faltam as respostas Q1, Q2, Q3 e Q6, o texto da política e os testes da seção F | `entregue-pelo-dba`, **movido para `Realizados/` em 13/10** na palavra do DBA (infra não verificada; respostas Q1, Q2, Q3, Q6 e o texto da política ainda a guardar) |
+
+
+## Atualizado em 13/10/2026 (contratos 47 e 48, segunda rodada)
+
+| Contrato | O que mudou | Status |
+|---|---|---|
+| [[47-Custo-Real-por-Item-no-Hub]] | O DBA entregou o §1 (`80581d0`, `develop`): job que lê `GET /itens/custo` do MES e rota `GET /itens_pedido_custo` com permissão `custo-itens`. Faltam o DDL da migration 047 conferido, o `GET /itens/custo` no MES (008, Robert), e §2, §3 e §4 (front, Ciclo 2) | `parcial-1-entregue` (fica em `03-...`) |
+| [[48-Acompanhamento-de-Clientes-Grupos-de-Empresa]] | O DBA diz que fez (API em `63871f3`; banco não visto). Falta o BFF do av-hub passar `kpis=true` | `entregue-pelo-dba-front-pendente` (vai para `Realizados/` depois do ajuste do front) |

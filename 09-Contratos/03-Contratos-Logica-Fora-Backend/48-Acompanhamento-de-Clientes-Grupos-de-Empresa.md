@@ -2,7 +2,7 @@
 tags: [contrato-sql, contrato-api, dba, av-hub, clientes, grupos-de-empresa, portal-do-gerente]
 criado: 2026-10-13
 atualizado: 2026-10-13
-status: proposta
+status: entregue-pelo-dba-front-pendente
 ---
 
 # Contrato 48 — Acompanhamento de Clientes e grupos de empresa
@@ -111,6 +111,8 @@ Pedidos e NFs do mês de **um cliente** (`p_codigo_cliente`) **ou de todo o grup
 
 ## 6. Estado do código (13/10)
 
+> **(atualizado em 13/10/2026) O DBA diz que fez o contrato todo (relato do Nathan).** O código da API está na `develop` (`63871f3`); **o DDL e as funções no banco não foram vistos** (não ficam no repositório). Falta do lado do av-hub: o BFF passar `kpis=true` (abaixo) e conferir os formatos de resposta; só depois o contrato vai para `Realizados/`.
+>
 > **(atualizado em 13/10/2026) A API foi escrita pelo dono dela.** Commit `63871f3` na `develop` da `api-acos-vital` (ainda fora da `main`): `GET /acompanhamento_clientes` e `/movimento` sobre as funções da seção 3 e 4, rotas de `grupos_clientes` (CRUD, `sugestoes`, `membros`), models, swagger, erros e a entrada no `escopoVendedor.js` (`acompanhamento_clientes` em formato `lista`; `grupos_clientes` em formato `rota`). Conferido só no código. 🔴 **O DDL da seção 2 e as funções das seções 3 e 4 continuam sem aplicação no banco confirmada.** 🟡 **O BFF do av-hub precisa de ajuste:** a rota da API só devolve o objeto `kpis` com `?kpis=true` (padrão `false`) e aceita `status` em lista separada por vírgula; o BFF `app/api/acompanhamento-clientes` não repassa `kpis`, então os cartões de resumo ficam sem número.
 
 **`api-acos-vital`: nada publicado.** Escrevi as rotas e os models em uma branch local, mas o repositório da API não é do Nathan, e a branch foi apagada a pedido dele (era o commit `f182c9c`, recuperável do reflog por pouco tempo). O que precisa existir na API, para o dono dela:
