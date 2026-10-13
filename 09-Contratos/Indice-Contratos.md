@@ -212,3 +212,9 @@ Divergência de pasta: a página da nota manual está em `dashboards/`, e o [[29
 | [[46-Torre-de-Fluxo-Feed-Jobs-e-Telas]] | **Novo**: feed do MES, tabelas `core_fluxo.*`, job de projeção (recomendado na `api-acos-vital`), BFF e as telas T.3, T.4, T.5 e T.5b; o que o front adianta antes de 23/11 | `proposta` (Robert, Gustavo, Nathan) |
 
 Fora de escopo por decisão do Nathan (09/10): tudo de **comissões** (o contrato [[42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio]] não é executado agora; coordenadores, `dash-comissoes` e "minhas comissões" estão em desenvolvimento).
+
+## Criado em 13/10/2026 (Acompanhamento de Clientes)
+
+| Contrato | O que é | Status |
+|---|---|---|
+| [[47-Acompanhamento-de-Clientes-Grupos-de-Empresa]] | Tela de acompanhamento de clientes (pedidos e NFs do mês, vendedores, ativo/inativo) e **grupos de empresa**: CNPJ parado não é inativo se o grupo comprou no prazo. Tabelas `grupos_clientes` e `grupos_clientes_membros`, funções `fn_acompanhamento_clientes` e `fn_movimento_cliente_mes`, tela e rotas em `auth.*` | `proposta` (Gustavo). Código da API e do front escrito e **sem commit**; nada testado contra banco; funções e tabelas não existem no banco |
