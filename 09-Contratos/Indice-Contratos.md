@@ -266,4 +266,4 @@ Desenho em [[Estoque-Custo-do-Lote]]. O DBA já entregou o `api004`; estes contr
 
 | Contrato | O que mudou | Status |
 |---|---|---|
-| [[44-Upload-de-Fotos-Politica-de-Bucket]] | O DBA diz que fez (relato do Nathan). É infraestrutura do bucket: não verificável pelo código. Faltam as respostas Q1, Q2, Q3 e Q6, o texto da política e os testes da seção F | `entregue-pelo-dba-a-conferir` (fica em `03-...`; vai para `Realizados/` depois dos testes) |
+| [[44-Upload-de-Fotos-Politica-de-Bucket]] | O DBA diz que fez (relato do Nathan). É infraestrutura do bucket: não verificável pelo código. Faltam as respostas Q1, Q2, Q3 e Q6, o texto da política e os testes da seção F | `entregue-pelo-dba`, **movido para `Realizados/` em 13/10** na palavra do DBA (infra não verificada; respostas Q1, Q2, Q3, Q6 e o texto da política ainda a guardar) |
