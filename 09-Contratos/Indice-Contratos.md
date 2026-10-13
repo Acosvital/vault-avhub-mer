@@ -236,4 +236,4 @@ Desenho em [[Estoque-Custo-do-Lote]]. O DBA já entregou o `api004`; estes contr
 
 | Contrato | O que mudou | Status |
 |---|---|---|
-| [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] | O DBA entregou: escopo de vendedores fixo no código da API (`fd8c29b`, 09/10, em `develop` e `main`) e regra de dono em `/pedido_venda_itens/{numero}`. Falta conferir em produção e remover as marcas S1 a S3 do front | `implementada-no-codigo` (relato do Nathan; produção não conferida) |
+| [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] | O DBA entregou: escopo de vendedores fixo no código da API (`fd8c29b`, 09/10, em `develop` e `main`) e regra de dono em `/pedido_venda_itens/{numero}`. Falta conferir em produção e remover as marcas S1 a S3 do front | `implementada-no-codigo`, **movido para `Realizados/` em 13/10** a pedido do Nathan (produção não conferida; testes da §5 e as 5 marcas do front seguem abertos) |
