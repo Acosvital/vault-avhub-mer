@@ -2,13 +2,15 @@
 tags: [erp-acos-vital, av-hub, comercial, suprimentos, api-comercial, proposta]
 criado: 2026-10-09
 status: aguardando-decisao
-atualizado: 2026-10-09
+atualizado: 2026-10-13
 ---
 
 # Proposta — Fechar o fluxo do orçamento no Comercial & Suprimentos
 
 > Status: proposto pelo Pablo em 09/10/2026 | **aguardando decisão do Nathan** | nada no código ainda.
-> Relacionadas: [[AV-Hub-Comercial-Suprimentos]], PRD v4 (`PRD-AV-Comercial-Suprimentos-v4.md`, seções 5, 11, 12 e 13), [[Fluxo-Compras-Completo]] (requisição de compra).
+> Relacionadas: [[AV-Hub-Comercial-Suprimentos]], PRD v4 (`PRD-AV-Comercial-Suprimentos-v4.md`, seções 5, 11, 12 e 13), [[Entrada-Comercial]], [[Fluxo-Compras-Completo]] (requisição de compra).
+>
+> **Revisado em 13/10/2026:** a tarefa 1 mudou. A proposta ganha vira **pedido de venda**, não requisição de compra. A compra continua nascendo no MES (setor Estoque sem saldo → requisição), como no [[Fluxo-Compras-Completo]]: "PCP (MES) decide que precisa comprar, Compras (av-hub) decide como comprar".
 
 ## 1. Onde o fluxo para hoje
 
@@ -19,35 +21,44 @@ Conferido no código em 09/10/2026 (`av-hub` `develop`, `api-acos-vital` `develo
    orçamento  ──►   a proposta    ──►   pede a Compras ──►   os fornecedores ──►   à proposta   ──►   perder
                     ✅                  ✅                   🟡 parcial            ✅                 ✅
                                                                                                         │
-8. Preço pago volta ao histórico  ◄──  7. Requisição e OC no Compras do Hub  ◄──────────────────────────┘
-   ✅ (liga com a chave do Omie)          ❌ nada liga a proposta fechada à compra
+                                                                                                        ▼
+                                  7. Pedido de venda no Omie  ──►  Ato 1b em diante: liberação com Qualidade
+                                     ❌ vendedor redigita tudo        sim/não → PCP → Estoque do MES → requisição
+                                                                      → Compras do Hub (OC)
 ```
 
 - **Pronto:** proposta com custo sugerido (menor custo líquido ou média de 90 dias, respeitando CRC e certificados), pedido de custo do vendedor a Compras, PDF, e-mail, fechamento total ou por itens, linha do tempo.
 - **Parcial (passo 4):** o pedido de cotação manda um e-mail por fornecedor, mas a resposta não volta ao sistema. O comprador lança a oferta à mão ou importa o mapa.
-- **Falta (passo 7):** fechar a proposta não gera nada em Compras. O comprador abre a requisição à mão.
+- **Falta (passo 7):** fechar a proposta não prepara o pedido de venda. O vendedor redigita cliente, itens e condições no Omie.
 
 As três tarefas abaixo estão no PRD v4. A 1 e a 2 são da fase 4.1 (o MVP fechou a paridade com os sistemas antigos); nenhuma trava a publicação do `api-comercial` (K5).
 
 ## 2. As três tarefas
 
-### Tarefa 1 — Necessidade de compra (proposta fechada → requisição) · PRD §13.1, jornada J5
+### Tarefa 1 — Proposta ganha → pedido de venda preparado para o Omie · fluxo [[Entrada-Comercial]]
 
-**Problema:** o fluxo para no fechamento. O comprador fica sabendo da venda por fora e digita a requisição de novo.
+**Problema:** o fluxo do Comercial para no fechamento. O pedido de venda é a Fase 1 do fluxo operacional (nasce no Omie e chega ao av-hub pelo ELT), mas o vendedor redigita tudo o que já está na proposta.
+
+**Decisão (13/10/2026):** nesta fase o av-hub **não** cria o pedido no Omie pela API. Ele **prepara** o pedido para o vendedor digitar.
 
 **Entrega:**
-- Ao fechar (total ou por itens), cada item fechado vira uma **necessidade de compra**: produto, quantidade, fornecedor e oferta de referência, custo de referência, prazo e **unidade compradora** (AV → Mogi; AU → Uberaba; HRM → Mogi, decisão de Compras de 24/09 no PRD).
-- Tela `Suprimentos › Necessidades de compra`: fila por unidade, com **"Gerar requisição"** (uma ou várias) e cancelar.
-- Status: `PENDENTE` → `REQUISICAO_GERADA` → `OC_EMITIDA` → `ATENDIDA` / `CANCELADA`. Reabrir ou perder a proposta cancela as pendentes.
-- Na proposta e na necessidade: número da requisição e da OC, com link para o Compras do Hub.
+- Na proposta ganha, "Preparar pedido no Omie" com:
+  - conta Omie (Mogi/Uberaba);
+  - cliente, condição de pagamento, frete e previsão;
+  - itens com o código do produto no Omie (com aviso quando o produto não tem cadastro), quantidades e preços.
 
-**Como liga com o Compras do Hub:** a `api-acos-vital` **já tem** `POST /compras/requisicoes` (criação manual) com `id_origem` único entre as requisições vivas. O `api-comercial` manda a necessidade com `id_origem` = id da necessidade, então uma nova tentativa não duplica. O status da OC volta lendo a requisição.
+  O vendedor copia campo a campo ou baixa em .xlsx.
+- Campo **acompanhamento da Qualidade (sim/não)** na proposta, para o vendedor já levar a decisão. A marcação oficial continua na liberação do pedido no av-hub (tela 1.1, contrato [[26-Vendas-Liberacao-Pedido]]).
+- Campo opcional **nº do pedido no Omie**, que liga a proposta ao pedido que volta pelo ELT.
+- O saldo do estoque do MES aparece só como **consulta**, se houver endpoint de leitura. Quem confere e reserva é o setor Estoque do MES (etapa 1 de todo roteiro), depois da liberação.
 
-**Depende de (contrato C-01, Gustavo):** o `id_origem` hoje é "id da requisição no MES". Para não misturar as origens, pedir um campo **`origem`** (`MES` | `COMERCIAL`) na requisição, ou confirmar que dá para reaproveitar o `id_origem` como está. Estimativa do lado do Gustavo: ~0,5 pd.
+**Fora do escopo:**
+- gerar a compra a partir da proposta, porque a compra nasce no MES;
+- criar o pedido no Omie pela API (`IncluirPedido`), que fica para uma fase seguinte.
 
-**Fora do escopo:** atender pelo estoque (v4.2) e agrupamento automático de necessidades iguais.
+**Depende de:** nada externo.
 
-**Estimativa (Pablo):** 3 a 4 pd, com testes unitários, de integração e de tela.
+**Estimativa (Pablo):** ~2 pd, com testes.
 
 ### Tarefa 2 — Cotação com resposta do fornecedor e mapa comparativo · PRD §11.2 e §11.3, jornada J2
 
@@ -87,11 +98,11 @@ As três tarefas abaixo estão no PRD v4. A 1 e a 2 são da fase 4.1 (o MVP fech
 
 | # | Tarefa | Valor | Pablo | Outros | Decisão pendente |
 |---|---|---|---|---|---|
-| 1 | Necessidade de compra → requisição | Fecha o fluxo de ponta a ponta | 3 a 4 pd | ~0,5 pd Gustavo (C-01) | Campo `origem` na requisição |
+| 1 | Proposta ganha → pedido de venda preparado | Liga o Comercial à Fase 1 do fluxo | ~2 pd | — | Criar no Omie pela API numa fase seguinte? |
 | 3 | Painel de margem | Gestão vê prejuízo antes de mandar | ~2 pd | — | Parâmetros e limites das letras |
 | 2 | Cotação com resposta e mapa | Tira a digitação do comprador; auditoria ISO | 4 a 5 pd | — | — |
 
-**Total:** 9 a 11 pd do Pablo + ~0,5 pd do Gustavo.
+**Total:** 8 a 9 pd do Pablo.
 
 **Ordem sugerida:** 1 (é o elo que falta), depois 3 (pequena e com valor para a gestão), depois 2.
 
@@ -99,5 +110,5 @@ As três tarefas abaixo estão no PRD v4. A 1 e a 2 são da fase 4.1 (o MVP fech
 
 1. **Entram?** Quais das três, e se entram **antes** ou **depois** da publicação do `api-comercial` (K5). Nenhuma trava a publicação.
 2. **Ordem:** a sugerida acima ou outra.
-3. **Tarefa 1:** ok para abrir o contrato C-01 com o Gustavo (campo `origem` na requisição de compra)?
+3. **Tarefa 1:** numa fase seguinte, o av-hub deve criar o pedido direto no Omie pela API (`IncluirPedido`), ou o vendedor continua digitando a partir do resumo?
 4. **Tarefa 3:** os parâmetros do simulador de comissões valem para a margem da proposta? Quem define os limites das letras A–D e do status `NEGOCIAR` (Diretoria comercial)?
