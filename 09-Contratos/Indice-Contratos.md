@@ -260,3 +260,10 @@ Desenho em [[Estoque-Custo-do-Lote]]. O DBA já entregou o `api004`; estes contr
 |---|---|---|
 | [[46-Torre-de-Fluxo-Feed-Jobs-e-Telas]] | O DBA entregou o lado da API (`77223e9`, `develop`): rotas `/fluxo/*` de leitura e job de projeção que lê o feed do MES. Faltam o DDL da migration 046 conferido, o feed do MES (Robert), o BFF e as 4 telas (Nathan) e subir para a `main` | `parcial-api-entregue` (fica em `03-...`, não vai para `Realizados/`) |
 | [[48-Acompanhamento-de-Clientes-Grupos-de-Empresa]] | O dono da API escreveu as rotas e os models (`63871f3`, `develop`). Falta aplicar o DDL e as funções no banco, e o BFF do av-hub passar `kpis=true` | `proposta` → `implementada-no-codigo` (API; banco e produção não conferidos) |
+
+
+## Atualizado em 13/10/2026 (contrato 44)
+
+| Contrato | O que mudou | Status |
+|---|---|---|
+| [[44-Upload-de-Fotos-Politica-de-Bucket]] | O DBA diz que fez (relato do Nathan). É infraestrutura do bucket: não verificável pelo código. Faltam as respostas Q1, Q2, Q3 e Q6, o texto da política e os testes da seção F | `entregue-pelo-dba-a-conferir` (fica em `03-...`; vai para `Realizados/` depois dos testes) |

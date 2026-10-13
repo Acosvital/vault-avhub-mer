@@ -1,12 +1,14 @@
 ---
 tags: [contrato-logica, seguranca, armazenamento, upload, gambiarra-s10]
 criado: 2026-10-07
-atualizado: 2026-10-09
-status: proposta
+atualizado: 2026-10-13
+status: entregue-pelo-dba-a-conferir
 prioridade: baixa
 ---
 
 # Contrato 44 — Upload de fotos: política no bucket (reforço da GAMBIARRA S10)
+
+> **(atualizado em 13/10/2026) DBA DISSE QUE FEZ (relato do Nathan).** É contrato de **infraestrutura** (credencial e política do bucket na VPS 3): **não há nada no código das duas APIs nem do front que prove** que foi aplicado, e eu **não vi o storage**. Por isso o contrato **não foi movido para `Realizados/`**: falta registrar o que o DBA fez e rodar os testes da seção F. 🔴 **Faltam estas respostas dele, para guardar aqui:** Q1 (MinIO ou SeaweedFS), Q2 (nomes reais dos buckets e quem mais escreve neles), Q3 (o Organograma segue com a credencial antiga?), Q6 (há órfãos em `uploads/`?), o **texto da política aplicada** (passo 6 da seção E) e se `S3_ACCESS_KEY`/`S3_SECRET_KEY` do av-hub já foram trocadas no Coolify (passo 5). **O que já está feito no front (verificável):** a marca da seção A foi reclassificada em `lib/s3/fotos.ts` (PR #179, `develop` do av-hub); o código não mudou nem precisa mudar para a credencial nova.
 
 ## (atualizado em 09/10/2026) Decisão sobre a marca, política do bucket e ordem de execução
 
