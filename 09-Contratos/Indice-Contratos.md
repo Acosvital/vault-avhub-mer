@@ -245,3 +245,10 @@ Desenho em [[Estoque-Custo-do-Lote]]. O DBA já entregou o `api004`; estes contr
 |---|---|---|
 | [[49-Vinculos-do-Usuario-no-Me-Permissoes-Completos]] | `fn_me_permissoes.vendedores[]` com `nome_exibicao` e `ativo`; conferir que é o mesmo conjunto de `fn_vendedores_do_usuario` e a `origem` por perfil. Resolve a Q3 do 40 | `proposta` (Gustavo) |
 | [[50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]] | Como remover as marcas que restam no front (2 depois de reclassificar a do `nextauth`), com token obrigatório (401 sem token), testes por perfil e rollback | `proposta` (Nathan; depende do 49) |
+
+
+## Atualizado em 13/10/2026 (contrato 41)
+
+| Contrato | O que mudou | Status |
+|---|---|---|
+| [[41-Login-Rate-Limit-no-Backend]] | O DBA entregou: limite de falhas de login fixo no código da API (5 em 900 s, chaves `email` e `ip:email`, 429 com `Retry-After`; `c2173b9`, em `develop` e `main`). Falta o front apagar `lib/auth/loginRateLimiter.ts` e a marca S9 | `implementada-no-codigo`, **movido para `Realizados/` em 13/10** (produção não conferida) |
