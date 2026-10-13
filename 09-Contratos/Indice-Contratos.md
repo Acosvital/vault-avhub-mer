@@ -230,3 +230,10 @@ Desenho em [[Estoque-Custo-do-Lote]]. O DBA já entregou o `api004`; estes contr
 | Contrato | O que é | Status |
 |---|---|---|
 | [[48-Acompanhamento-de-Clientes-Grupos-de-Empresa]] | Tela de acompanhamento de clientes (pedidos e NFs do mês, vendedores, ativo/inativo) e **grupos de empresa**: CNPJ parado não é inativo se o grupo comprou no prazo. Tabelas `grupos_clientes` e `grupos_clientes_membros`, funções `fn_acompanhamento_clientes` e `fn_movimento_cliente_mes`, tela e rotas em `auth.*` | `proposta` (Gustavo). Código da API e do front escrito e **sem commit**; nada testado contra banco; funções e tabelas não existem no banco |
+
+
+## Atualizado em 13/10/2026 (contrato 40)
+
+| Contrato | O que mudou | Status |
+|---|---|---|
+| [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] | O DBA entregou: escopo de vendedores fixo no código da API (`fd8c29b`, 09/10, em `develop` e `main`) e regra de dono em `/pedido_venda_itens/{numero}`. Falta conferir em produção e remover as marcas S1 a S3 do front | `implementada-no-codigo` (relato do Nathan; produção não conferida) |

@@ -107,14 +107,14 @@ Pedidos e NFs do mês de **um cliente** (`p_codigo_cliente`) **ou de todo o grup
   - `GET|POST /grupos_clientes`, `GET|PUT|DELETE /grupos_clientes/{id}`
   - `GET /grupos_clientes/sugestoes`
   - `POST /grupos_clientes/{id}/membros`, `DELETE /grupos_clientes/{id}/membros/{empresa}/{codigo}`
-- **Escopo de vendedor:** a rota `acompanhamento_clientes` foi acrescentada em `src/middlewares/escopoVendedor.js` (`ROTAS`, formato `lista`, parâmetro `codigo_vendedor`). Com isso a API preenche os vendedores do usuário quando o parâmetro vem vazio; para o perfil com escopo "todos" nada é filtrado. 🔴 Conferir com o Gustavo, junto do [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]], se `grupos_clientes` precisa de regra própria (vendedor lê grupos? só a gerência edita?).
+- **Escopo de vendedor (a fazer na API):** acrescentar `acompanhamento_clientes: { params: ["codigo_vendedor"], formato: "lista", empresa: true }` em `ROTAS` de `src/middlewares/escopoVendedor.js`. Desde o [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] o escopo é fixo no código: com a rota no mapa, a API preenche os vendedores do usuário quando o parâmetro vem vazio, e o perfil com escopo "todos" (gerência) não é filtrado. 🔴 Conferir com o Gustavo se `grupos_clientes` precisa de regra própria (vendedor lê grupos? só a gerência edita?).
 
-## 6. O que já está escrito (13/10, ainda **sem commit** e sem teste contra banco)
+## 6. Estado do código (13/10)
 
-**`api-acos-vital`** (`src/schemas/core_vendas_faturamento/`):
-- `functions/fn_acompanhamento_clientes/…route.js`: `GET /acompanhamento_clientes` (filtros `mes`, `ano`, `codigo_empresa`, `codigo_vendedor`, `dias_inativo`, `status`, `busca`, `id_grupo`, `visao=cnpj|grupo`, paginação, `kpis`) e `GET /acompanhamento_clientes/movimento`.
-- `tables/grupos_clientes/` (model e rotas) e `tables/grupos_clientes_membros/` (model); rotas de grupos, membros (409 informando em qual grupo o CNPJ já está) e sugestões por raiz.
-- Registro no `index.js` do schema e entrada no `escopoVendedor.js`. Sem arquivos `.swagger.json` ainda.
+**`api-acos-vital`: nada publicado.** Escrevi as rotas e os models em uma branch local, mas o repositório da API não é do Nathan, e a branch foi apagada a pedido dele (era o commit `f182c9c`, recuperável do reflog por pouco tempo). O que precisa existir na API, para o dono dela:
+- `GET /acompanhamento_clientes` (filtros `mes`, `ano`, `codigo_empresa`, `codigo_vendedor`, `dias_inativo`, `status`, `busca`, `id_grupo`, `visao=cnpj|grupo`, paginação, `kpis`) e `GET /acompanhamento_clientes/movimento`, sobre as funções da seção 3 e 4.
+- Models e rotas de `grupos_clientes` e `grupos_clientes_membros` (seção 2): CRUD, membros (409 informando em qual grupo o CNPJ já está) e sugestões pela raiz do CNPJ.
+- Registro no `index.js` do schema, entrada no `escopoVendedor.js` (seção 5) e os `.swagger.json`.
 
 **`00 - HUB`:** tela `/acompanhamento-clientes` (`components/AcompanhamentoClientes/`), BFF (`app/api/acompanhamento-clientes`, `app/api/grupos-clientes`, `lib/api/acompanhamentoClientesApi.ts`), serviço, tipos e entradas em `groupMap.ts` e `iconMap.tsx`. `tsc` e `eslint` limpos nos arquivos novos; visual conferido no preview com dados simulados no navegador.
 
