@@ -252,3 +252,11 @@ Desenho em [[Estoque-Custo-do-Lote]]. O DBA já entregou o `api004`; estes contr
 | Contrato | O que mudou | Status |
 |---|---|---|
 | [[41-Login-Rate-Limit-no-Backend]] | O DBA entregou: limite de falhas de login fixo no código da API (5 em 900 s, chaves `email` e `ip:email`, 429 com `Retry-After`; `c2173b9`, em `develop` e `main`). Falta o front apagar `lib/auth/loginRateLimiter.ts` e a marca S9 | `implementada-no-codigo`, **movido para `Realizados/` em 13/10** (produção não conferida) |
+
+
+## Atualizado em 13/10/2026 (contratos 46 e 48)
+
+| Contrato | O que mudou | Status |
+|---|---|---|
+| [[46-Torre-de-Fluxo-Feed-Jobs-e-Telas]] | O DBA entregou o lado da API (`77223e9`, `develop`): rotas `/fluxo/*` de leitura e job de projeção que lê o feed do MES. Faltam o DDL da migration 046 conferido, o feed do MES (Robert), o BFF e as 4 telas (Nathan) e subir para a `main` | `parcial-api-entregue` (fica em `03-...`, não vai para `Realizados/`) |
+| [[48-Acompanhamento-de-Clientes-Grupos-de-Empresa]] | O dono da API escreveu as rotas e os models (`63871f3`, `develop`). Falta aplicar o DDL e as funções no banco, e o BFF do av-hub passar `kpis=true` | `proposta` → `implementada-no-codigo` (API; banco e produção não conferidos) |

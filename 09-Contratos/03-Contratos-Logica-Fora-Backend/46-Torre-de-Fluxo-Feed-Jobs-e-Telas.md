@@ -1,11 +1,13 @@
 ---
 tags: [contrato-api, torre-de-fluxo, rastreabilidade, integracao-av-hub-mes, bff, front]
 criado: 2026-10-09
-atualizado: 2026-10-09
-status: proposta
+atualizado: 2026-10-13
+status: parcial-api-entregue
 ---
 
 # Contrato 46 — Torre de Fluxo: feed do MES, jobs de projeção e telas (I5 e I6)
+
+> **(atualizado em 13/10/2026) LADO DA API ENTREGUE PELO DBA (relato do Nathan); o resto segue aberto.** Commit `77223e9` (13/10) na `develop` da `api-acos-vital` (**ainda não está na `main`**): `GET /fluxo/torre`, `GET /fluxo/itens/:id`, `GET /fluxo/itens/:id/tempo` e `GET /fluxo/sla-etapas`, só leitura, com escopo de unidade (`resolverEscopoUnidade`) e MES fora do ar devolvendo 200 com `mes_indisponivel = true`; job `item_estado_projetado.job.js` (iniciado no `app.js`, mesmas `MES_API_URL` e `MES_API_KEY` do 005; regras fixas no código, sem chave de ligar/desligar) que lê `GET {MES}/fluxo/eventos` com janela de sobreposição e trava por `pg_try_advisory_xact_lock`; cliente do MES em `utils/mesFluxo.js`. Ou seja, **a recomendação da seção 5 (job na `api-acos-vital`) foi a adotada.** O código chama `core_fluxo.fn_feed_aplicar`, a tabela `core_fluxo.item_estado_projetado`, `feed_cursor` e a "migration 046" (`auth.rotas_telas`: telas `torre-fluxo` e `torre-fluxo-trilha`). **Conferido só no código.** 🔴 **Segue aberto:** (1) o DDL da migration 046 não está no repositório da API: confirmar com o Gustavo que foi aplicada (sem ela as rotas dão 500); (2) o **feed `GET /fluxo/eventos` do MES** (I1 a I3, Robert): enquanto o MES responder 404, o job só avisa e não anda; (3) o **BFF e as 4 telas** (I5 e I6, Nathan, seções 6 a 8) e a permissão das telas novas; (4) subir `develop` → `main`. O contrato **fica em `03-Contratos-Logica-Fora-Backend/`**, não vai para `Realizados/`: só a parte da API está pronta. As seções abaixo mantêm o texto da proposta.
 
 > **(atualizado em 09/10/2026)** Primeira versão, escrita sobre a leitura do vault e do código de 09/10 (`api-acos-vital` `develop`, front `00 - HUB`). **Nada da Torre existe em código** em nenhum dos três lados (ver seção 1). Tudo marcado 🟡 é inferência minha; tudo marcado 🔴 precisa de decisão de alguém com nome na seção 12. Produção não verificada.
 
