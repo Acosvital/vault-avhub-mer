@@ -237,3 +237,11 @@ Desenho em [[Estoque-Custo-do-Lote]]. O DBA já entregou o `api004`; estes contr
 | Contrato | O que mudou | Status |
 |---|---|---|
 | [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] | O DBA entregou: escopo de vendedores fixo no código da API (`fd8c29b`, 09/10, em `develop` e `main`) e regra de dono em `/pedido_venda_itens/{numero}`. Falta conferir em produção e remover as marcas S1 a S3 do front | `implementada-no-codigo`, **movido para `Realizados/` em 13/10** a pedido do Nathan (produção não conferida; testes da §5 e as 5 marcas do front seguem abertos) |
+
+
+## Criados em 13/10/2026 (marcas restantes do contrato 40)
+
+| Contrato | O que é | Status |
+|---|---|---|
+| [[49-Vinculos-do-Usuario-no-Me-Permissoes-Completos]] | `fn_me_permissoes.vendedores[]` com `nome_exibicao` e `ativo`; conferir que é o mesmo conjunto de `fn_vendedores_do_usuario` e a `origem` por perfil. Resolve a Q3 do 40 | `proposta` (Gustavo) |
+| [[50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]] | Como remover as 3 marcas que restam no front, com token obrigatório (401 sem token), testes por perfil e rollback | `proposta` (Nathan; depende do 49) |
