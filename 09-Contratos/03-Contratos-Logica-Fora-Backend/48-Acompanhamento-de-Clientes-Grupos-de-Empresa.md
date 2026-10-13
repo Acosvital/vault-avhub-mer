@@ -2,7 +2,7 @@
 tags: [contrato-sql, contrato-api, dba, av-hub, clientes, grupos-de-empresa, portal-do-gerente]
 criado: 2026-10-13
 atualizado: 2026-10-13
-status: entregue-pelo-dba-front-pendente
+status: api-test-ok-front-pendente
 ---
 
 # Contrato 48 — Acompanhamento de Clientes e grupos de empresa
@@ -112,6 +112,8 @@ Pedidos e NFs do mês de **um cliente** (`p_codigo_cliente`) **ou de todo o grup
 ## 6. Estado do código (13/10)
 
 > **(atualizado em 13/10/2026) O DBA diz que fez o contrato todo (relato do Nathan).** O código da API está na `develop` (`63871f3`); **o DDL e as funções no banco não foram vistos** (não ficam no repositório). Falta do lado do av-hub: o BFF passar `kpis=true` (abaixo) e conferir os formatos de resposta; só depois o contrato vai para `Realizados/`.
+>
+> **(atualizado em 13/10/2026) CONFERIDO NA `api-test` (só GET, chave de serviço, sem token).** `GET /acompanhamento_clientes` responde 200 nas duas visões, com `kpis` e `vendedores[]` (as funções e o DDL **existem e funcionam nesse ambiente**: 1265 clientes no mês de outubro, 0 grupos cadastrados, 141 sugestões de raiz de CNPJ em `GET /grupos_clientes/sugestoes`); `GET /grupos_clientes` responde 200 com lista vazia; `GET /acompanhamento_clientes/movimento` valida os parâmetros (400). As chaves da linha batem com os tipos do front (`nome_fantasia`, `razao_social`, `cpf_cnpj`, `qtd_cnpjs_grupo`, `status`, `vendedores[].nome_exibicao`) e com o PR #194. **Não conferi:** produção (só a `api-test`), escrita (`POST` de grupo e de membros, que o diálogo precisa), escopo de vendedor (precisa de token) e o cadastro da tela em `auth.telas`.
 >
 > **(atualizado em 13/10/2026) AJUSTE DO FRONT, 1ª PARTE:** PR [av-hub#194](https://github.com/Acosvital/av-hub/pull/194) (BFF passa `kpis=true`; chaves dos cartões alinhadas à API). **2ª PARTE, aberta:** o diálogo de grupos do av-hub (`GrupoClientesDialog`, `services/acompanhamentoClientes.ts`, rotas `app/api/grupos-clientes`) foi escrito para o formato do contrato original e **não bate com a API de grupos que o dono escreveu**: `POST /grupos_clientes/{id}/membros` recebe `{ membros, mover, created_by }` (o BFF manda um array) e responde `incluidos/movidos/ja_no_grupo/vinculos/grupo`; o 409 é `CLIENTE_EM_OUTRO_GRUPO` com `conflitos` e a opção `mover`; as sugestões vêm paginadas e agrupadas por raiz (`raiz_cnpj`, `nome_sugerido`, `clientes[]`); a lista usa `qtd_cnpjs` e `unidades`; o membro tem `nome_fantasia`. O contrato 48 só vai para `Realizados/` depois dessa 2ª parte.
 >
