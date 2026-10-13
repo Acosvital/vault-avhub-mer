@@ -10,6 +10,23 @@ atualizado: 2026-10-08
 
 Seção dedicada só a **contratos** — documentos formais de mudança que precisam de aprovação/execução de outra pessoa antes do código poder avançar: contratos de **banco de dados** (para o DBA, Gustavo) e contratos de **API** (para o dev que for implementar). Cada contrato é auto-contido: alguém pode abrir só aquele arquivo, entender o "por quê", o "o quê" exato (schema ou request/response) e o que falta decidir, sem precisar ler o resto do projeto.
 
+## Pendências em aberto — 13/10/2026 (o que falta de cada contrato)
+
+> Resumo do dia 13/10. **Tudo veio de leitura de código e do relato do Nathan sobre o DBA**: nenhum banco, produção ou `api-test` foi conferido por quem escreveu. Marcadores: 🔴 sem dono ativo ou bloqueando · 🟡 conferir. PRs do `av-hub`: [#185](https://github.com/Acosvital/av-hub/pull/185) ✅ mesclado · [#186](https://github.com/Acosvital/av-hub/pull/186) aberto · [#194](https://github.com/Acosvital/av-hub/pull/194) aberto.
+
+| Contrato | Situação | O que falta | Quem |
+|---|---|---|---|
+| [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] | `Realizados/`. API entregue (`fd8c29b`); front da caixa de liberação mesclado (#185) | 🟡 testar na `api-test` (vendedor A liberando pedido de B deve dar 403; "sem vínculo"; auxiliar; sem token = 401); 2 marcas ainda no front (`pedidosVenda.ts`, `portalPcp.ts`) | Nathan; marcas dependem do 49 e 50 |
+| [[41-Login-Rate-Limit-no-Backend]] | `Realizados/`. API entregue (`c2173b9`); limitador local sai no PR #186 (aberto) | 🟡 teste de 5 falhas (o bloqueio apareceu, mas não se sabe em qual tentativa) e teste de login com sucesso; depois mesclar o #186 | Nathan |
+| [[44-Upload-de-Fotos-Politica-de-Bucket]] | `Realizados/` na palavra do DBA | 🟡 respostas Q1 (MinIO ou SeaweedFS), Q2 (buckets), Q3 (Organograma), Q6 (órfãos) e o texto da política aplicada | Gustavo |
+| [[46-Torre-de-Fluxo-Feed-Jobs-e-Telas]] | `parcial-api-entregue` (`77223e9`, só na `develop`) | 🟡 confirmar o DDL da migration 046; 🔴 feed `GET /fluxo/eventos` no MES (Robert), sem ele o job não anda; BFF e 4 telas (Nathan); subir `develop` → `main` | Gustavo, Robert, Nathan |
+| [[47-Custo-Real-por-Item-no-Hub]] | `parcial-1-entregue` (§1, `80581d0`, só na `develop`) | 🟡 DDL da migration 047; 🔴 `GET /itens/custo` no MES ([[008-Custo-do-Lote-no-MES]], Robert); §2 simulador, §3 comissão e §4 Compras/Orçamento (Ciclo 2, fora do desenho) | Gustavo, Robert, Nathan |
+| [[48-Acompanhamento-de-Clientes-Grupos-de-Empresa]] | `entregue-pelo-dba-front-pendente` (API `63871f3`, só na `develop`) | 🟡 DDL e funções no banco; mesclar o #194 (cartões); 🔴 adaptar o diálogo e o BFF de grupos ao formato real da API (`membros` + `mover`, sugestões por raiz, `qtd_cnpjs`); cadastrar a tela `acompanhamento-clientes` em `auth.telas`, `auth.permissoes` e `auth.rotas_telas`; subir `develop` → `main` | Gustavo, Nathan |
+| [[49-Vinculos-do-Usuario-no-Me-Permissoes-Completos]] | `proposta` | 🔴 DBA completar `nome_exibicao` e `ativo` em `fn_me_permissoes.vendedores[]` e confirmar `origem` por perfil; destrava as marcas do 40 | Gustavo |
+| [[50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]] | `proposta`; a marca do `nextauth` já foi reclassificada | depende do 49; depois PRs das marcas A e B, com 401 sem token e testes por perfil | Nathan |
+
+**Transversal:** os commits `77223e9` (46), `80581d0` (47) e `63871f3` (48) da `api-acos-vital` estão só na `develop`; a `main` ainda está em `49596ca`. **Sem o `develop` → `main` e sem as migrations 046, 047 e as de 48, as rotas novas não funcionam em produção.** A `api-acos-vital` não é do Nathan: quem sobe é o dono dela.
+
 ## Conferência de 07/10/2026 (código em `main` = `develop` da api-acos-vital, `a6ab058`/`fdafb35`)
 
 **Confiança:** tudo abaixo vem de **leitura de código** (`origin/main` e `origin/develop` da `api-acos-vital`; `develop` do `api-pcp`, do `app-pcp` e `master` da `omie-elt-pipeline`). **Produção e banco só foram conferidos pelo dump de 07/10** ([[Auditoria-Dump-Producao-2026-10-07]]); para o contrato 34 isso está resolvido (função de banco em produção, ✅ [[Registro-de-Decisoes-2026-10-07]]); para os demais, a produção não foi conferida. Regra do Nathan: vale o que funciona em **produção**; por isso, onde o código comprova mas a produção não foi vista, o estado é `implementada-no-codigo` e **falta conferir em produção/`api-test`**. Nada foi movido para `Realizados/` nem marcado `aplicada` por causa desta leitura. Notas relacionadas: [[AV-Hub-API-Estado-Atual]], [[Chaves-de-Integracao-AvHub-MES-Pipeline]], [[App-PCP-Recebimento-Conferencia]], [[Onde-Estamos]].
