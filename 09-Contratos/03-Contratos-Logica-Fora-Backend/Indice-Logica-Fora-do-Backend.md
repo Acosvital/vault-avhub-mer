@@ -293,6 +293,7 @@ novo, aplicar a mesma regra e marcar o que sobrar.
 ## Novo em 09/10/2026
 
 - [[47-Custo-Real-por-Item-no-Hub]]: simulador etapa 2, comissão por faturamento, Compras e Orçamento (`para-implementar`, Ciclo 2). Ver [[Estoque-Custo-do-Lote]].
+- [[48-Acompanhamento-de-Clientes-Grupos-de-Empresa]]: tela de acompanhamento de clientes e grupos de empresa (CNPJ parado só é inativo se o grupo todo estiver parado); tabelas, funções, rotas e telas em `auth.*` (`proposta`, Gustavo).
 
 ## Movidos para Realizados em 09/10/2026
 
