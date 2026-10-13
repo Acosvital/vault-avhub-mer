@@ -2,7 +2,7 @@
 tags: [contrato-sql, contrato-api, dba, av-hub, clientes, grupos-de-empresa, portal-do-gerente]
 criado: 2026-10-13
 atualizado: 2026-10-13
-status: api-test-ok-front-pendente
+status: banco-api-ok-escopo-gerencia-a-decidir
 ---
 
 # Contrato 48 — Acompanhamento de Clientes e grupos de empresa
@@ -112,6 +112,8 @@ Pedidos e NFs do mês de **um cliente** (`p_codigo_cliente`) **ou de todo o grup
 ## 6. Estado do código (13/10)
 
 > **(atualizado em 13/10/2026) O DBA diz que fez o contrato todo (relato do Nathan).** O código da API está na `develop` (`63871f3`); **o DDL e as funções no banco não foram vistos** (não ficam no repositório). Falta do lado do av-hub: o BFF passar `kpis=true` (abaixo) e conferir os formatos de resposta; só depois o contrato vai para `Realizados/`.
+>
+> **(atualizado em 13/10/2026) CONFERIDO NO DUMP DO BANCO DE TESTE** (`Dump avhub teste (Completo).sql`; só li DDL, `auth.rotas_telas`, `auth.telas`, `auth.perfis` e `auth.permissoes`; **não li dados de clientes ou usuários**). **Banco e API completos para o 48:** tabelas `grupos_clientes` e `grupos_clientes_membros` ✅; tela `acompanhamento-clientes` em `auth.telas` ✅; **todas as rotas mapeadas em `auth.rotas_telas`** (`GET /acompanhamento_clientes` e, por prefixo, `/movimento`; `GET`, `POST`, `PUT`, `DELETE /grupos_clientes` e `/membros`; `GET /grupos_clientes/sugestoes` só para quem edita) ✅; permissões: **Gerência** e **Admin (Dev)** com tudo, **Vendedor** só visualizar ✅. 🔴 **ACHADO: "Gerência vê tudo" NÃO vale hoje.** As rotas de clientes têm `escopo_vendedor = true` e o escopo do usuário é o **mais amplo entre os perfis** (`fn_escopo_vendedores_usuario`). O perfil **Gerência** está como **`vinculados`**; só **"Gerencia PCP"** é `todos`. Resultado: um usuário só com o perfil Gerência vê **apenas os clientes dos vendedores vinculados a ele**, e leva **403 `SEM_VENDEDOR_VINCULADO`** se não tiver nenhum. Para a regra do Nathan (gerência vê tudo, vendedor só os dele) é preciso **mudar `auth.perfis.escopo_vendedores` do perfil Gerência para `todos`** (ou usar outro perfil de gerência com `todos`). **Decisão do Nathan e do DBA:** isso também amplia o que a Gerência vê nas outras telas com escopo de vendedor.
 >
 > **(atualizado em 13/10/2026) CONFERIDO NA `api-test` (só GET, chave de serviço, sem token).** `GET /acompanhamento_clientes` responde 200 nas duas visões, com `kpis` e `vendedores[]` (as funções e o DDL **existem e funcionam nesse ambiente**: 1265 clientes no mês de outubro, 0 grupos cadastrados, 141 sugestões de raiz de CNPJ em `GET /grupos_clientes/sugestoes`); `GET /grupos_clientes` responde 200 com lista vazia; `GET /acompanhamento_clientes/movimento` valida os parâmetros (400). As chaves da linha batem com os tipos do front (`nome_fantasia`, `razao_social`, `cpf_cnpj`, `qtd_cnpjs_grupo`, `status`, `vendedores[].nome_exibicao`) e com o PR #194. **Não conferi:** produção (só a `api-test`), escrita (`POST` de grupo e de membros, que o diálogo precisa), escopo de vendedor (precisa de token) e o cadastro da tela em `auth.telas`.
 >

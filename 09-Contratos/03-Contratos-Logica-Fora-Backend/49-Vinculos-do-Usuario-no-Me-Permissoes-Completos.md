@@ -2,7 +2,7 @@
 tags: [contrato-api, contrato-sql, dba, escopo, permissoes, gambiarra-s3, me-permissoes]
 criado: 2026-10-13
 atualizado: 2026-10-13
-status: proposta
+status: parcial-d2-d3-ja-existem-d1-falta
 ---
 
 # Contrato 49 — `GET /me/permissoes` com os vínculos de vendedor completos (destrava as marcas S3 do [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]])
@@ -10,6 +10,8 @@ status: proposta
 > Status: proposta | **só leitura de código** (13/10/2026): `api-acos-vital` (`origin/develop` `80581d0`), `00 - HUB` (`lib/api/mePermissoes.ts`) e este vault. Produção e o corpo de `auth.fn_me_permissoes` **não foram vistos** (a função é de banco e não está no repositório). Tudo marcado 🟡 é inferência; 🔴 precisa do DBA.
 
 **Destinatários:** Gustavo (DBA, `auth.fn_me_permissoes`) e Nathan (front, contrato [[50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]]).
+
+> **(atualizado em 13/10/2026) CONFERIDO NO DUMP DO BANCO DE TESTE** (`Dump avhub teste (Completo).sql`; só li DDL, `auth.rotas_telas`, `auth.telas`, `auth.perfis` e `auth.permissoes`; **não li dados de clientes ou usuários**). `auth.fn_me_permissoes` monta `vendedores` com `to_jsonb(v)` sobre `auth.fn_vendedores_do_usuario(u.id)`: **D2 ✅ já é verdade** (é a mesma fonte que o `escopoVendedor.js` usa). **D3 ✅ confirmado:** `origem` = `proprio` (`vendedores.id_funcionario` = funcionário do usuário), `titular` (via `auxiliar_vendedor`) e `diligenciado` (via `diligenciador_vendedor`, **só** se o escopo for `vinculados` ou `todos`). **D4 ✅ respondido pelo comportamento:** para `todos` a função **não devolve o catálogo**, só os vínculos do próprio usuário ("escopo todos não filtra"); a lista completa de vendedores do PCP continua vindo de `GET /vendedores`. **D1 ❌ NÃO FEITO:** a função devolve só `codigo_empresa`, `codigo_vendedor_omie`, `id_funcionario`, `nome`, `origem`. **Faltam `nome_exibicao` e `ativo`** (e a função também não filtra vendedor inativo: `v.deleted_at IS NULL`, sem `ativo`, o que é o certo para não sumir com histórico). É a única mudança que o DBA ainda precisa fazer neste contrato.
 
 ## 1. Por quê
 
