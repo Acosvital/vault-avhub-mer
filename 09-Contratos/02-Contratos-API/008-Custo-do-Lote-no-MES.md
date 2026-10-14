@@ -65,7 +65,7 @@ O movimento `SAIDA` que consome a `Reserva` (tem `id_reserva`) grava o `custo_li
 
 ## 5. `GET /itens/custo?alterado_desde=&codigo_empresa=&apos_id=&limit=`
 
-Irmã de `GET /itens/status` (005): mesma chave de serviço. A resposta é um **array puro** (como o `/itens/status`), com **uma linha por filial + pedido + produto** (`codigo_produto_omie`). No MES o grão é o produto: linhas repetidas do mesmo produto no pedido Omie são somadas num item só, e não existe número de linha do pedido. O cursor é `alterado_desde` + `apos_id` (uuid do item no MES).
+Irmã de `GET /itens/status` (005): mesma chave de serviço. A resposta é um **array puro** (como o `/itens/status`), com **uma linha por filial + pedido + produto** (`codigo_produto_omie`). **O item do pedido é o produto.** No Omie um pedido pode ter o mesmo produto em duas linhas (linha 3 com 12 flanges e linha 7 com 8 flanges da mesma flange). O MES não guarda o número da linha do Omie, só o produto; por isso soma as linhas repetidas num item só (20 flanges, uma linha na resposta). A chave de casamento com o hub é filial + pedido + `codigo_produto_omie`, nunca o número da linha. O cursor é `alterado_desde` + `apos_id` (uuid do item no MES).
 
 ```json
 [ { "id": "uuid do item no MES",
@@ -87,6 +87,21 @@ Irmã de `GET /itens/status` (005): mesma chave de serviço. A resposta é um **
 ## 6. Telas (`app-pcp`)
 
 Coluna "Custo unit." opcional em Lotes e Saldo (visível só com a permissão de custo); campo no assistente da carga inicial; indicador "sem custo" e "cotação a conferir" no recebimento. Nada disso aparece para quem não tem a permissão.
+
+## Cenário de ponta a ponta (exemplo)
+
+Pedido Omie **25970**, filial F1, flange **FLG-2-150**: linha 3 com 12 un e linha 7 com 8 un. O MES guarda **um item de 20 un**.
+
+1. **Marco zero (G1).** A planilha da carga inicial traz o lote **L1** com 10 un e `custo_unitario = 10,00`. Nasce `lote_custo` com `origem = CARGA_INICIAL`. Outro lote da mesma planilha vem sem custo: nasce sem `lote_custo`, sem erro; o dry-run conta quantos ficaram assim.
+2. **Compra.** O pedido precisa de mais 10 flanges além do L1. Compras emite a **OC-A** (um só fornecedor) agrupando 2 requisições da mesma flange (3 + 2 = 5 un), a R$ 12,00, e compra 8 para ter sobra de 3. A OC é editada até o fornecedor aceitar; depois da versão final não muda mais.
+3. **Chegada (K4 + K5).** O Recebimento confere a NF e a unidade da OC é igual à do lote. Nasce **um lote L2 de 8 un** (as 2 requisições chegaram juntas, mesmo produto), com `origem = OC`, `id_item_oc`, `custo = 12,00`. A sobra de 3 un fica no L2 com o mesmo custo e a mesma identificação da OC.
+4. **Outra OC no mesmo dia.** A **OC-B**, de outro fornecedor, traz a mesma flange a R$ 15,00, 5 un. Mesmo produto em outra OC: **lote separado L3**, custo 15,00.
+5. **Reserva.** O pedido reserva 10 do L1, 5 do L2 e 5 do L3. O item ganha `custo_alterado_em`.
+6. **Saída (K6).** O Estoque despacha. Cada `SAIDA` com `id_reserva` grava o custo do lote naquele momento (snapshot).
+7. **`GET /itens/custo`** (hub, a cada ciclo do job): uma linha para F1 + 25970 + FLG-2-150, `quantidade = 20`, `custo_total = 10×10 + 5×12 + 5×15 = 235,00`, `custo_medio = 11,75`, `completo = true`, três lotes com `origem` e `consumido`. O hub grava por filial + pedido + produto.
+8. **Faturamento (contrato 47).** NF parcial de 10 flanges: custo = 10 × 11,75 = 117,50.
+9. **Erro descoberto depois (D4).** Alguém vê que o custo do L2 era 13,00, e já saíram 4 un. A correção `MANUAL` (permissão `estoque-custo` editar, motivo obrigatório, auditada) vale para o saldo e as reservas abertas; as 4 baixadas mantêm 12,00. O item muda `custo_total` só na parte ainda reservada.
+10. **Variações.** Se uma das OCs estivesse em kg e o lote em peças (D2): lote sem custo, sinalizado, custo pela rota `MANUAL`. Se faltasse a chave de leitura da OC (H1): todos os lotes de compra nascem sem custo e `completo = false`, sem bloquear nada.
 
 ## Aceite
 
