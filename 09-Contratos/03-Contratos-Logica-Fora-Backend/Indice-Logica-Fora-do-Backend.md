@@ -293,7 +293,7 @@ novo, aplicar a mesma regra e marcar o que sobrar.
 ## Novo em 09/10/2026
 
 - [[47-Custo-Real-por-Item-no-Hub]]: simulador etapa 2, comissão por faturamento, Compras e Orçamento (`para-implementar`, Ciclo 2). Ver [[Estoque-Custo-do-Lote]].
-- [[48-Acompanhamento-de-Clientes-Grupos-de-Empresa]]: tela de acompanhamento de clientes e grupos de empresa (CNPJ parado só é inativo se o grupo todo estiver parado); tabelas, funções, rotas e telas em `auth.*` (`proposta`, Gustavo).
+- [[48-Acompanhamento-de-Clientes-Grupos-de-Empresa]]: tela de acompanhamento de clientes e grupos de empresa (CNPJ parado só é inativo se o grupo todo estiver parado); tabelas, funções, rotas e telas em `auth.*` (`entregue-pelo-dba-front-pendente`, Gustavo). **14/10:** marcas `GAMBIARRA` em `components/AcompanhamentoClientes/AcompanhamentoDetalhe.tsx` (busca no lugar do filtro `codigo_cliente`; aviso de NF cancelada somada), §9; venda e faturamento por cliente com deduções separadas, §10.
 - [[49-Vinculos-do-Usuario-no-Me-Permissoes-Completos]]: `GET /me/permissoes` com `nome_exibicao` e `ativo` nos vínculos e conferência da `origem` (próprio, titular, diligenciado); destrava as marcas S3 do [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] (`proposta`, Gustavo).
 - [[50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]]: as 3 marcas que restam do contrato 40 (`pedidosVenda.ts`, `portalPcp.ts`, `nextauth`), passo a passo, testes e rollback (`proposta`, Nathan; depende do 49).
 

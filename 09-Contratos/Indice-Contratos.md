@@ -292,3 +292,9 @@ Desenho em [[Estoque-Custo-do-Lote]]. O DBA já entregou o `api004`; estes contr
 |---|---|---|
 | [[47-Custo-Real-por-Item-no-Hub]] | O DBA entregou o §1 (`80581d0`, `develop`): job que lê `GET /itens/custo` do MES e rota `GET /itens_pedido_custo` com permissão `custo-itens`. Faltam o DDL da migration 047 conferido, o `GET /itens/custo` no MES (008, Robert), e §2, §3 e §4 (front, Ciclo 2) | `parcial-1-entregue` (fica em `03-...`) |
 | [[48-Acompanhamento-de-Clientes-Grupos-de-Empresa]] | O DBA diz que fez (API em `63871f3`; banco não visto). Falta o BFF do av-hub passar `kpis=true` | `entregue-pelo-dba-front-pendente` (vai para `Realizados/` depois do ajuste do front) |
+
+## Atualizado em 14/10/2026 (contrato 48, v2 da tela)
+
+| Contrato | O que mudou | Status |
+|---|---|---|
+| [[48-Acompanhamento-de-Clientes-Grupos-de-Empresa]] | v2 do front: páginas por cliente e por grupo no lugar do modal. Conferido no `api-test`: 🔴 NF cancelada soma no total do mês (`qtd_nfs_mes`/`valor_nfs_mes` e `totais` do movimento); 🟡 `codigo_cliente` ignorado no `GET /acompanhamento_clientes`. 🔴 venda e faturamento por cliente com deduções separadas (mesma lógica de Pedidos/Notas da Equipe): a função usa regra própria e os resumos ignoram o filtro de cliente. Pedidos ao Gustavo nas §9 e §10 | segue `entregue-pelo-dba-front-pendente`, com 3 pendências novas de banco |
