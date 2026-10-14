@@ -1,0 +1,184 @@
+<title>Fluxo 0b Atividades</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: raias horizontais, nós em colunas por ordem do fluxo; detalhe do nó abaixo do diagrama. */
+:root{
+  --bg:#f3f4f1; --surface:#ffffff; --fg:#1b2420; --muted:#5b6862; --line:#c9d0ca; --edge:#6b7a72;
+  --ok-bg:#e2f1e6; --ok-bd:#2f7d4a; --ok-fg:#0d3320;
+  --pa-bg:#fbefc8; --pa-bd:#a67c00; --pa-fg:#3d2c00;
+  --fa-bg:#fbe0dc; --fa-bd:#b3342a; --fa-fg:#4a0f0a;
+  --lane-a:#eef0ec; --lane-b:#e7eae5; --accent:#1f5f7a; --sel:#1f5f7a;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12171a; --surface:#1a2125; --fg:#e4e9e6; --muted:#9aa8a1; --line:#33403a; --edge:#8a9a92;
+  --ok-bg:#16301f; --ok-bd:#52b36f; --ok-fg:#cdebd6;
+  --pa-bg:#3a2f0a; --pa-bd:#d6a928; --pa-fg:#f6e4ac;
+  --fa-bg:#3d1714; --fa-bd:#e5675c; --fa-fg:#f6cfca;
+  --lane-a:#171d20; --lane-b:#1c2326; --accent:#6bb7d3; --sel:#6bb7d3; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12171a; --surface:#1a2125; --fg:#e4e9e6; --muted:#9aa8a1; --line:#33403a; --edge:#8a9a92;
+  --ok-bg:#16301f; --ok-bd:#52b36f; --ok-fg:#cdebd6;
+  --pa-bg:#3a2f0a; --pa-bd:#d6a928; --pa-fg:#f6e4ac;
+  --fa-bg:#3d1714; --fa-bd:#e5675c; --fa-fg:#f6cfca;
+  --lane-a:#171d20; --lane-b:#1c2326; --accent:#6bb7d3; --sel:#6bb7d3; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:24px 48px}
+.wrap{max-width:1180px;margin-inline:auto}
+h1{font-family:var(--f-display);font-size:clamp(1.6rem,4vw,2.3rem);line-height:1.1;margin:0 0 6px;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 18px;max-width:68ch}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0 0 14px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:16px;height:12px;border-radius:3px;border:1.5px solid}
+.sw.ok{background:var(--ok-bg);border-color:var(--ok-bd)}
+.sw.pa{background:var(--pa-bg);border-color:var(--pa-bd);border-style:dashed}
+.sw.fa{background:var(--fa-bg);border-color:var(--fa-bd);border-style:dotted}
+.hint{font-size:13px;color:var(--muted);margin:0 0 8px}
+.board{overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);max-height:78vh}
+.canvas{position:relative}
+.lane{position:absolute;left:0;right:0}
+.lane:nth-child(odd){background:var(--lane-a)}.lane:nth-child(even){background:var(--lane-b)}
+.lname{position:sticky;left:0;z-index:3;width:104px;height:100%;padding:8px;font-family:var(--f-display);font-size:13px;font-weight:600;line-height:1.2;background:inherit;border-right:1px solid var(--line);display:flex;align-items:center}
+svg.edges{position:absolute;left:0;top:0;pointer-events:none;z-index:1;overflow:visible}
+.node{position:absolute;z-index:2;width:132px;height:58px;padding:5px 8px;border-radius:7px;border:1.5px solid;text-align:left;font:inherit;font-size:12px;line-height:1.25;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:1px}
+.node b{font-family:var(--f-mono);font-size:11px;font-weight:500;display:flex;justify-content:space-between}
+.node span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.node.ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok-fg)}
+.node.pa{background:var(--pa-bg);border-color:var(--pa-bd);color:var(--pa-fg);border-style:dashed}
+.node.fa{background:var(--fa-bg);border-color:var(--fa-bd);color:var(--fa-fg);border-style:dotted}
+.node.dec{border-radius:20px}
+.node:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+.node.sel{box-shadow:0 0 0 3px var(--sel)}
+.node.dim{opacity:.35}
+.e{fill:none;stroke:var(--edge);stroke-width:1.4}
+.e.back{stroke-dasharray:5 4}
+.e.hi{stroke:var(--sel);stroke-width:2.6}
+.e.dimmed{opacity:.18}
+.el{font-size:10.5px;fill:var(--muted);font-family:var(--f-body);paint-order:stroke;stroke:var(--surface);stroke-width:3px}
+.detail{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 18px}
+.detail h2{font-family:var(--f-display);font-size:1.25rem;margin:0 0 4px}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;border:1.5px solid;margin-left:8px;vertical-align:middle}
+.badge.ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok-fg)}
+.badge.pa{background:var(--pa-bg);border-color:var(--pa-bd);color:var(--pa-fg)}
+.badge.fa{background:var(--fa-bg);border-color:var(--fa-bd);color:var(--fa-fg)}
+dl{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:8px 14px;margin:12px 0 0}
+dt{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+dd{margin:0;min-width:0;overflow-wrap:anywhere}
+code{font-family:var(--f-mono);font-size:12.5px;background:var(--lane-a);padding:1px 5px;border-radius:4px}
+.flow{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.flow button{font:inherit;font-size:12px;font-family:var(--f-mono);border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;padding:2px 8px;cursor:pointer}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 16px}
+.sum div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--muted)}
+.sum strong{display:block;font-family:var(--f-display);font-size:1.5rem;color:var(--fg);font-variant-numeric:tabular-nums}
+.foot{margin-top:18px;font-size:12.5px;color:var(--muted)}
+@media (max-width:560px){dl{grid-template-columns:1fr;gap:2px}dt{padding-top:8px}}
+@media (prefers-reduced-motion:no-preference){.e,.node{transition:opacity .15s}}
+</style>
+<div class="wrap">
+  <h1>Fluxo 0b: Atividades</h1>
+  <p class="sub">Um pedido de venda de 0 a 100%, do Omie à nota fiscal. Estado de cada nó no código em 14/10/2026. Clique num nó para ver regra, tela, endpoint, contrato e pendência.</p>
+  <div class="sum" id="sum"></div>
+  <div class="legend">
+    <span><i class="sw ok"></i>✅ no código</span>
+    <span><i class="sw pa"></i>🟡 parcial</span>
+    <span><i class="sw fa"></i>🔴 sem código</span>
+    <span>losango arredondado = decisão · linha tracejada = volta no fluxo</span>
+  </div>
+  <p class="hint">Role o diagrama para os lados. As raias ficam fixas à esquerda.</p>
+  <div class="board" id="board"><div class="canvas" id="canvas"></div></div>
+  <section class="detail" id="detail" aria-live="polite"></section>
+  <p class="foot">Código de referência: api-pcp 579a625 · app-pcp 1fca8d3 · api-acos-vital f322dcd · HUB b55ac55 · pipeline 0f739f0. Fonte: 00-Fluxo-Mestre-0b do vault v2.</p>
+</div>
+<script>
+var LANES=[["vendas","Vendas · av-hub"],["pcp","PCP · MES"],["estoque","Estoque · MES"],["compras","Compras · CCP"],["forn","Fornecedor"],["rec","Recebimento · MES"],["qe","Qualidade de entrada"],["prod","Produção · MES"],["qs","Qualidade de saída"],["exp","Expedição · MES"],["fis","Fiscal · Omie"]];
+var N={
+V1:{l:"vendas",t:"Pedido chega do Omie travado",s:"ok",r:"Pedido criado no Omie chega ao av-hub, travado.",tela:"—",ep:"pipeline ListarPedidos → pedidos_vendas",c:"—",cod:"No código.",p:"—"},
+V2:{l:"vendas",t:"Vendedor marca se a Qualidade acompanha",s:"ok",r:"Vendedor marca “Qualidade acompanha desde o início?”.",tela:"Liberar Pedidos · /liberar-pedidos (HUB)",ep:"PUT /pedidos_liberacao/:empresa/:numero",c:"LOG-26",cod:"No código.",p:"—"},
+V3:{l:"vendas",t:"Vendedor libera o pedido",s:"ok",r:"Marcação e liberação numa ação só.",tela:"Liberar Pedidos · /liberar-pedidos (HUB)",ep:"idem; histórico em pedidos_vendas_liberacao_historico",c:"LOG-26",cod:"No código.",p:"—"},
+P1:{l:"pcp",t:"Triagem do Pedido",s:"ok",r:"Lista os pedidos liberados.",tela:"Triagem dos Pedidos · antiga “Carteira” · /carteira (app-pcp)",ep:"GET /pedidos/carteira → GET /pedidos_liberados",c:"LOG-26",cod:"No código; nomes técnicos ainda são os antigos.",p:"Renomear rotas e slugs antigos."},
+P2:{l:"pcp",t:"Destinação do Pedido",s:"ok",r:"Define destino (FABRICACAO ou REVENDA) e quantidade ≤ restante por item e rodada; insere Estoque como etapa 1; confirma a importação ao av-hub.",tela:"Destinação do Pedido · antiga “Nova Ordem de Produção” · /ordens-producao/novo",ep:"POST /pedidos/completo/lote; POST /pedidos_liberados/:n/importado",c:"LOG-26",cod:"No código.",p:"—"},
+P3:{l:"pcp",t:"Requisição de compra (origem PCP)",s:"ok",r:"Requisição do material do pedido, criada no MES.",tela:"Requisições de compras · /compras/requisicoes",ep:"POST /compras/requisicoes; envio PUT /compras/requisicoes/origem/:id_origem",c:"LOG-34",cod:"No código: fila integracao_avhub_envios, retry com backoff de 1 a 60 min.",p:"—"},
+P6:{l:"pcp",t:"Novo norte: retrabalho ou reabre compra",s:"pa",r:"Decide entre retrabalho e reabertura da compra.",tela:"Sem tela (decidido).",ep:"—",c:"EC-03",cod:"RoteiroItem tem CRUD, mas nenhuma movimentação o lê.",p:"Implementar o novo norte (Robert)."},
+E1:{l:"estoque",t:"Saldo disponível na filial",s:"ok",r:"Saldo = lotes LIBERADO − reservas ATIVA na filial do pedido.",tela:"Atendimento · /estoque-operacao/atendimento",ep:"GET /estoque/saldo/disponivel-parcial/:idItemParcial",c:"—",cod:"No código.",p:"—"},
+E2:{l:"estoque",t:"Saldo cobre o item?",s:"ok",d:1,r:"Decide se o saldo cobre. Saldo zero exige clique (#31b).",tela:"Atendimento",ep:"—",c:"#31b",cod:"No código.",p:"—"},
+E3:{l:"estoque",t:"Atende pelo saldo",s:"ok",r:"Split e reserva. Custo do item = média dos lotes.",tela:"Atendimento",ep:"PATCH /itens-parciais/:id/atender-estoque",c:"API-008",cod:"Split e reserva no código; custo do item não (sem GET /itens/custo).",p:"Criar GET /itens/custo."},
+E4:{l:"estoque",t:"O que fazer com o restante?",s:"ok",d:1,r:"Solicitar compra ou enviar à produção.",tela:"Atendimento",ep:"PATCH /itens-parciais/:id/atender-estoque (destinoRestante)",c:"—",cod:"Compra no código. “Enviar à produção” só move a parcial; não reserva nem baixa matéria-prima.",p:"Consumo de matéria-prima."},
+E5:{l:"estoque",t:"Entrada no Estoque",s:"pa",r:"Compra aprovada ou fabricado aprovado vira lote e saldo.",tela:"Atendimento · Saldo",ep:"devolverAoEstoqueParciaisProntas",c:"—",cod:"Comprado: no código. Fabricado não vira lote (OrigemLote só tem RECEBIMENTO e CARGA_INICIAL).",p:"Entrada de produção do fabricado (Robert)."},
+E6:{l:"estoque",t:"Despacho: documento de retirada",s:"fa",r:"Quem precisa da mercadoria (Expedição ou Produção) gera um documento de retirada. A baixa do saldo acontece na retirada, no Estoque.",tela:"Não existe.",ep:"Hoje: consumirReservasDaParcial em receber() e em EntregasService.create",c:"—",cod:"Sem código. Hoje a baixa roda em receber() (itens-parciais.service.ts:278-285) e de novo na entrega.",p:"Criar documento de retirada e mover a baixa para a retirada (Robert)."},
+C0:{l:"compras",t:"Requisição (origem Compras)",s:"pa",r:"Necessidade própria do Compras, sem pedido de venda.",tela:"Nova requisição · /compras/requisicoes (HUB)",ep:"POST /compras/requisicoes (av-hub), permissão compras.pode_criar",c:"LOG-34",cod:"No av-hub sim. Não chega ao MES: id_origem é obrigatório no evento.",p:"Decidir como levar o material comprado ao MES."},
+C1:{l:"compras",t:"Cotação e negociação",s:"ok",r:"Cotação e negociação, fora do sistema.",tela:"Requisições · Ordens · /compras/* (HUB)",ep:"marcos requisicao_recebida, em_cotacao",c:"LOG-35",cod:"No código.",p:"—"},
+C2:{l:"compras",t:"Acima de R$ 30 mil?",s:"ok",d:1,r:"Define o nível de aprovação.",tela:"Aprovações · /compras/aprovacoes (HUB)",ep:"parametros_compras.limite_aprovacao",c:"—",cod:"No código.",p:"—"},
+C3:{l:"compras",t:"Gerente aprova; Diretoria acima de R$ 30 mil",s:"pa",r:"Decidido: o Gerente de Compras aprova sempre; acima de R$ 30 mil a Diretoria também.",tela:"Aprovações · /compras/aprovacoes (HUB)",ep:"oc_enviada_aprovacao, oc_aprovada",c:"DEC-3, #50b",cod:"Trigger fn_ordens_compra_recalcular auto-aprova até R$ 30 mil; acima basta pode_aprovar (Gerência). Não há degrau da Diretoria nem “Gerente sempre”.",p:"Implementar os dois níveis (Gustavo)."},
+C4:{l:"compras",t:"Emite a Ordem de Compra",s:"ok",r:"CIF ou FOB; valor, desconto, moeda e cotação PTAX; flag acabado/não-acabado.",tela:"Ordens · /compras/ordens (HUB)",ep:"POST /compras/ordens; fila GET /compras/ordens/fila-omie (pipeline)",c:"LOG-23, LOG-36",cod:"No código.",p:"—"},
+C5:{l:"compras",t:"Follow-up do CCP",s:"ok",r:"Confirmação, previsão, despacho, ocorrência. No MES, Compras · CCP é só leitura e espelha os marcos.",tela:"Follow-up · /compras/followup (HUB); Compras · CCP · /compras/pedidos-compra (MES)",ep:"GET /compras/requisicoes/eventos",c:"LOG-35, LOG-32",cod:"No código; perfil CCP não.",p:"Perfil CCP."},
+FN1:{l:"forn",t:"Recebe a OC e entrega",s:"ok",r:"CIF direto ou coleta FOB. Fora do sistema.",tela:"—",ep:"—",c:"—",cod:"Fora do sistema.",p:"—"},
+R0:{l:"rec",t:"Esperados: OC aprovada, chegada com NF",s:"ok",r:"A OC aprovada entra nos esperados. A doca registra a chegada com a NF.",tela:"Recebimento · /logistica/logistica-entrada",ep:"GET /compras/requisicoes/esperados; POST /compras/requisicoes/:id/chegada; POST …/liberar-recebimento",c:"LOG-35",cod:"No código.",p:"—"},
+R1:{l:"rec",t:"Confere contra a NF",s:"ok",r:"Confere a NF (chave de 44 dígitos).",tela:"Recebimento",ep:"POST /compras/recebimentos",c:"—",cod:"No código.",p:"Cruzar com a OC quando existir o job do contrato 004."},
+R2:{l:"rec",t:"Pesagem",s:"ok",r:"Peso real obrigatório se há peso teórico; tolerância de 5%.",tela:"Recebimento",ep:"POST /compras/recebimentos",c:"—",cod:"No código.",p:"—"},
+R3:{l:"rec",t:"Bate com o esperado?",s:"ok",d:1,r:"Compara o conferido com o esperado.",tela:"Recebimento",ep:"POST /compras/recebimentos/:id/recontar e /decidir",c:"—",cod:"No código.",p:"—"},
+R4:{l:"rec",t:"Cria o lote em quarentena",s:"ok",r:"Lote PENDENTE com ENTRADA no saldo; split se chegou parte.",tela:"Recebimento",ep:"POST /compras/recebimentos",c:"API-007, API-008",cod:"Lote no código. O custo da OC não é gravado em lote_custo.",p:"Gravar custo da OC (Robert)."},
+R6:{l:"rec",t:"Divergência",s:"ok",r:"QUANTIDADE, DESCRICAO, PESO ou AVARIA.",tela:"Divergências de Recebimento · /decisoes-pcp",ep:"POST /compras/recebimentos/:id/decidir",c:"—",cod:"No código; reabertura de divergência de produção não.",p:"Tela de divergência de produção."},
+Q1:{l:"qe",t:"Inspeção de entrada por lote",s:"ok",r:"Laudo obrigatório.",tela:"Inspeção de entrada · /qualidade/inspecao-entrada",ep:"POST /qualidade/lotes/:id/aprovar e /reprovar",c:"—",cod:"No código.",p:"—"},
+Q2:{l:"qe",t:"Aprova o lote?",s:"ok",d:1,r:"Aprova ou reprova, total ou parcial.",tela:"Inspeção de entrada",ep:"idem",c:"—",cod:"No código.",p:"—"},
+Q3:{l:"qe",t:"RNC: a parte reprovada volta a Compras",s:"ok",r:"Devolução e substituição.",tela:"Inspeção de entrada",ep:"RNC; nota_devolucao_pendente",c:"—",cod:"No código; recompra por RNC sem contrato.",p:"Contrato da recompra por RNC."},
+Q4:{l:"qe",t:"Parte aprovada em quarentena",s:"ok",r:"Fica em QUARENTENA até a substituição (EC-07).",tela:"Inspeção de entrada",ep:"cisão do lote (idLotePai)",c:"EC-07",cod:"No código.",p:"—"},
+F1:{l:"prod",t:"Setores produtivos do roteiro",s:"ok",r:"Setores produtivos do roteiro de cada fábrica.",tela:"Filas de Produção · /movimentacoes",ep:"/itens-parciais/:id/*",c:"—",cod:"Filas no código. Consumo de matéria-prima não. EM_PRODUCAO e BLOQUEADO nunca são gravados.",p:"Consumo de matéria-prima (Robert)."},
+Q7:{l:"qs",t:"Inspeção de saída",s:"ok",r:"Setor QUALIDADE obrigatório no roteiro de fabricação.",tela:"Inspeção de saída · /qualidade/inspecao-saida",ep:"PATCH /itens-parciais/:id/reprovar",c:"—",cod:"No código; ninguém conferiu em produção ❓.",p:"—"},
+Q8:{l:"qs",t:"Aprova?",s:"pa",d:1,r:"Sim → Estoque (E5). Não → PCP (P6).",tela:"Inspeção de saída",ep:"idem",c:"—",cod:"Não existe ação “aprovar”: o inspetor usa mover e a parcial cai na etapa seguinte do roteiro, a Expedição, não o Estoque.",p:"Aprovado deve voltar ao Estoque (Robert)."},
+X1:{l:"exp",t:"Embalagem e paletização",s:"ok",r:"Embalagem e paletes (10.1).",tela:"Expedição · /logistica/expedicao",ep:"/entregas",c:"—",cod:"No código.",p:"—"},
+X2:{l:"exp",t:"Parcial ou integral?",s:"pa",d:1,r:"Parcial ou integral.",tela:"Expedição",ep:"—",c:"—",cod:"Integral fica travado por item que não chega (T-06).",p:"Destravar o integral."},
+X3:{l:"exp",t:"Consolida a carga",s:"fa",r:"Consolidação de carga (10.2).",tela:"Não existe.",ep:"—",c:"—",cod:"Sem código. Não há entidade de carga ou romaneio.",p:"Desenvolver 10.2."},
+X4:{l:"exp",t:"Logística de saída",s:"pa",r:"Transporte (10.3) e comprovante (10.4).",tela:"Expedição",ep:"POST /entregas",c:"—",cod:"Comprovante no código; transporte não.",p:"Desenvolver 10.3."},
+O1:{l:"fis",t:"Emite a nota fiscal",s:"pa",r:"O Omie emite a nota; o sistema nunca emite.",tela:"—",ep:"pipeline ListarNF",c:"—",cod:"Lado Omie no código. Sinalização do MES ao Omie (11.1) sem código.",p:"Contrato Expedição → NF do Omie."},
+O2:{l:"fis",t:"Baixa o item no pedido",s:"ok",r:"O Omie baixa o item no pedido.",tela:"—",ep:"pipeline",c:"—",cod:"Lado Omie no código.",p:"—"}
+};
+var ED=[["V1","V2"],["V2","V3"],["V3","P1"],["P1","P2"],["P2","E1"],["E1","E2"],["E2","E3","sim, tudo ou parte"],["E2","E4","não, ou o restante"],["E3","E6"],["E4","P3","solicitar compra"],["E4","E6","enviar à produção"],["P3","C1"],["C0","C1"],["C1","C2"],["C2","C3","sim"],["C2","C4","não"],["C3","C4"],["C4","C5"],["C5","FN1"],["FN1","R0"],["R0","R1"],["R1","R2"],["R2","R3"],["R3","R6","não"],["R3","R4","sim"],["R6","P6"],["R4","Q1"],["Q1","Q2"],["Q2","Q3","não"],["Q3","Q4"],["Q2","E5","sim"],["Q4","E5","substituição aprovada"],["E6","X1","produto pronto"],["E6","F1","matéria-prima ou beneficiamento"],["F1","Q7"],["Q7","Q8"],["Q8","E5","sim"],["Q8","P6","não"],["X1","X2"],["X2","X3","integral"],["X3","X4"],["X2","X4","parcial"],["X4","O1"],["O1","O2"],
+["E5","E3","entra no saldo",1],["Q3","C1","recompra",1],["P6","F1","retrabalho",1],["P6","P3","reabre compra",1]];
+var W=132,H=58,CW=158,LH=92,LW=104,PAD=22;
+var ids=Object.keys(N);
+// camadas por caminho mais longo, ignorando arestas de volta
+var col={};ids.forEach(function(i){col[i]=0});
+for(var k=0;k<60;k++)ED.forEach(function(e){if(e[3])return;if(col[e[1]]<col[e[0]]+1)col[e[1]]=col[e[0]]+1});
+// colisões na mesma raia
+var laneIdx={};LANES.forEach(function(l,i){laneIdx[l[0]]=i});
+var used={};ids.slice().sort(function(a,b){return col[a]-col[b]}).forEach(function(i){var key=function(c){return N[i].l+":"+c};while(used[key(col[i])])col[i]++;used[key(col[i])]=1});
+var maxc=Math.max.apply(null,ids.map(function(i){return col[i]}));
+var cv=document.getElementById("canvas"),TW=LW+PAD+(maxc+1)*CW+PAD,TH=LANES.length*LH;
+cv.style.width=TW+"px";cv.style.height=TH+"px";
+LANES.forEach(function(l,i){var d=document.createElement("div");d.className="lane";d.style.top=i*LH+"px";d.style.height=LH+"px";d.innerHTML='<div class="lname">'+l[1]+'</div>';cv.appendChild(d)});
+var NS="http://www.w3.org/2000/svg",svg=document.createElementNS(NS,"svg");svg.setAttribute("class","edges");svg.setAttribute("width",TW);svg.setAttribute("height",TH+90);
+svg.innerHTML='<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--edge)"/></marker><marker id="arh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--sel)"/></marker></defs>';
+cv.appendChild(svg);
+var pos={};
+ids.forEach(function(i){var x=LW+PAD+col[i]*CW,y=laneIdx[N[i].l]*LH+(LH-H)/2;pos[i]={x:x,y:y};
+ var b=document.createElement("button");b.className="node "+N[i].s+(N[i].d?" dec":"");b.id="n-"+i;b.style.left=x+"px";b.style.top=y+"px";
+ var g={ok:"✅",pa:"🟡",fa:"🔴"}[N[i].s];b.innerHTML="<b><span>"+i+"</span><span>"+g+"</span></b><span>"+N[i].t+"</span>";
+ b.title=N[i].t;b.addEventListener("click",function(){pick(i)});cv.appendChild(b)});
+var paths=[];
+ED.forEach(function(e,k){var a=pos[e[0]],b=pos[e[1]],back=!!e[3]||col[e[1]]<=col[e[0]],d,lx,ly;
+ var p=document.createElementNS(NS,"path");
+ if(!back){var sx=a.x+W,sy=a.y+H/2,tx=b.x,ty=b.y+H/2,dx=Math.max(24,(tx-sx)/2);d="M"+sx+" "+sy+" C"+(sx+dx)+" "+sy+" "+(tx-dx)+" "+ty+" "+tx+" "+ty;lx=(sx+tx)/2;ly=(sy+ty)/2-4}
+ else{var sx2=a.x+W/2,sy2=a.y+H,tx2=b.x+W/2,ty2=b.y+H,dy=Math.max(sy2,ty2)+34;d="M"+sx2+" "+sy2+" C"+sx2+" "+dy+" "+tx2+" "+dy+" "+tx2+" "+ty2;lx=(sx2+tx2)/2;ly=dy-6}
+ p.setAttribute("d",d);p.setAttribute("class","e"+(back?" back":""));p.setAttribute("marker-end","url(#ar)");svg.appendChild(p);
+ var t=null;if(e[2]){t=document.createElementNS(NS,"text");t.setAttribute("class","el");t.setAttribute("x",lx);t.setAttribute("y",ly);t.setAttribute("text-anchor","middle");t.textContent=e[2];svg.appendChild(t)}
+ paths.push({p:p,t:t,e:e})});
+var sum={ok:0,pa:0,fa:0};ids.forEach(function(i){sum[N[i].s]++});
+document.getElementById("sum").innerHTML='<div><strong>'+ids.length+'</strong>nós no fluxo</div><div><strong>'+sum.ok+'</strong>✅ no código</div><div><strong>'+sum.pa+'</strong>🟡 parciais</div><div><strong>'+sum.fa+'</strong>🔴 sem código</div>';
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+function pick(i){
+ var n=N[i],lab={ok:"✅ no código",pa:"🟡 parcial",fa:"🔴 sem código"}[n.s],ln=LANES[laneIdx[n.l]][1];
+ ids.forEach(function(j){var el=document.getElementById("n-"+j);el.classList.toggle("sel",j===i);var rel=paths.some(function(q){return (q.e[0]===i&&q.e[1]===j)||(q.e[1]===i&&q.e[0]===j)});el.classList.toggle("dim",j!==i&&!rel)});
+ paths.forEach(function(q){var on=q.e[0]===i||q.e[1]===i;q.p.classList.toggle("hi",on);q.p.classList.toggle("dimmed",!on);q.p.setAttribute("marker-end",on?"url(#arh)":"url(#ar)");if(q.t)q.t.style.opacity=on?1:.2});
+ var ins=paths.filter(function(q){return q.e[1]===i}).map(function(q){return q.e[0]}),outs=paths.filter(function(q){return q.e[0]===i}).map(function(q){return q.e[1]});
+ var chips=function(a){return a.length?'<div class="flow">'+a.map(function(x){return '<button data-n="'+x+'">'+x+'</button>'}).join("")+'</div>':"—"};
+ var D=document.getElementById("detail");
+ D.innerHTML='<h2>'+i+' · '+esc(n.t)+'<span class="badge '+n.s+'">'+lab+'</span></h2><div style="color:var(--muted);font-size:13px">'+ln+'</div><dl><dt>Regra</dt><dd>'+esc(n.r)+'</dd><dt>Tela</dt><dd>'+esc(n.tela)+'</dd><dt>Endpoint</dt><dd><code>'+esc(n.ep)+'</code></dd><dt>Contrato / decisão</dt><dd>'+esc(n.c)+'</dd><dt>Estado no código</dt><dd>'+esc(n.cod)+'</dd><dt>Pendência</dt><dd>'+esc(n.p)+'</dd><dt>Vem de</dt><dd>'+chips(ins)+'</dd><dt>Segue para</dt><dd>'+chips(outs)+'</dd></dl>';
+ D.querySelectorAll("button[data-n]").forEach(function(b){b.addEventListener("click",function(){pick(b.dataset.n);var el=document.getElementById("n-"+b.dataset.n);el.scrollIntoView({block:"nearest",inline:"center"})})});
+ try{history.replaceState(null,"","#"+i)}catch(e){}
+}
+document.getElementById("detail").innerHTML='<h2>Escolha um nó</h2><p style="color:var(--muted);margin:4px 0 0">Comece por <button class="flow" style="font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;padding:2px 8px;cursor:pointer" id="go">E6 · Despacho</button>, o nó que mais falta no código.</p>';
+document.getElementById("go").addEventListener("click",function(){pick("E6");document.getElementById("n-E6").scrollIntoView({block:"nearest",inline:"center"})});
+var h=(location.hash||"").slice(1);if(h&&N[h])pick(h);
+</script>
