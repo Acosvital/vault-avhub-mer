@@ -36,15 +36,15 @@ h1{font-family:var(--f-display);font-size:clamp(1.6rem,4vw,2.3rem);line-height:1
 .sw.pa{background:var(--pa-bg);border-color:var(--pa-bd);border-style:dashed}
 .sw.fa{background:var(--fa-bg);border-color:var(--fa-bd);border-style:dotted}
 .hint{font-size:13px;color:var(--muted);margin:0 0 8px}
-.board{overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);max-height:78vh}
+.board{overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);max-height:84vh}
 .canvas{position:relative}
 .lane{position:absolute;left:0;right:0}
 .lane:nth-child(odd){background:var(--lane-a)}.lane:nth-child(even){background:var(--lane-b)}
-.lname{position:sticky;left:0;z-index:3;width:104px;height:100%;padding:8px;font-family:var(--f-display);font-size:13px;font-weight:600;line-height:1.2;background:inherit;border-right:1px solid var(--line);display:flex;align-items:center}
+.lname{position:sticky;left:0;z-index:3;width:118px;height:100%;padding:10px 12px;font-family:var(--f-display);font-size:14px;font-weight:600;line-height:1.2;background:inherit;border-right:1px solid var(--line);display:flex;align-items:center}
 svg.edges{position:absolute;left:0;top:0;pointer-events:none;z-index:1;overflow:visible}
-.node{position:absolute;z-index:2;width:132px;height:58px;padding:5px 8px;border-radius:7px;border:1.5px solid;text-align:left;font:inherit;font-size:12px;line-height:1.25;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:1px}
+.node{position:absolute;z-index:2;width:176px;height:88px;padding:8px 11px;border-radius:8px;border:1.5px solid;text-align:left;font:inherit;font-size:13px;line-height:1.3;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:3px}
 .node b{font-family:var(--f-mono);font-size:11px;font-weight:500;display:flex;justify-content:space-between}
-.node span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.node span{display:block}
 .node.ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok-fg)}
 .node.pa{background:var(--pa-bg);border-color:var(--pa-bd);color:var(--pa-fg);border-style:dashed}
 .node.fa{background:var(--fa-bg);border-color:var(--fa-bd);color:var(--fa-fg);border-style:dotted}
@@ -56,7 +56,7 @@ svg.edges{position:absolute;left:0;top:0;pointer-events:none;z-index:1;overflow:
 .e.back{stroke-dasharray:5 4}
 .e.hi{stroke:var(--sel);stroke-width:2.6}
 .e.dimmed{opacity:.18}
-.el{font-size:10.5px;fill:var(--muted);font-family:var(--f-body);paint-order:stroke;stroke:var(--surface);stroke-width:3px}
+.el{font-size:12px;fill:var(--muted);font-family:var(--f-body);paint-order:stroke;stroke:var(--surface);stroke-width:3px}
 .detail{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 18px}
 .detail h2{font-family:var(--f-display);font-size:1.25rem;margin:0 0 4px}
 .badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;border:1.5px solid;margin-left:8px;vertical-align:middle}
@@ -136,7 +136,7 @@ O2:{l:"fis",t:"Baixa o item no pedido",s:"ok",r:"O Omie baixa o item no pedido."
 };
 var ED=[["V1","V2"],["V2","V3"],["V3","P1"],["P1","P2"],["P2","E1"],["E1","E2"],["E2","E3","sim, tudo ou parte"],["E2","E4","não, ou o restante"],["E3","E6"],["E4","P3","solicitar compra"],["E4","E6","enviar à produção"],["P3","C1"],["C0","C1"],["C1","C2"],["C2","C3","sim"],["C2","C4","não"],["C3","C4"],["C4","C5"],["C5","FN1"],["FN1","R0"],["R0","R1"],["R1","R2"],["R2","R3"],["R3","R6","não"],["R3","R4","sim"],["R6","P6"],["R4","Q1"],["Q1","Q2"],["Q2","Q3","não"],["Q3","Q4"],["Q2","E5","sim"],["Q4","E5","substituição aprovada"],["E6","X1","produto pronto"],["E6","F1","matéria-prima ou beneficiamento"],["F1","Q7"],["Q7","Q8"],["Q8","E5","sim"],["Q8","P6","não"],["X1","X2"],["X2","X3","integral"],["X3","X4"],["X2","X4","parcial"],["X4","O1"],["O1","O2"],
 ["E5","E3","entra no saldo",1],["Q3","C1","recompra",1],["P6","F1","retrabalho",1],["P6","P3","reabre compra",1]];
-var W=132,H=58,CW=158,LH=92,LW=104,PAD=22;
+var W=176,H=88,CW=236,LH=132,LW=118,PAD=28;
 var ids=Object.keys(N);
 // camadas por caminho mais longo, ignorando arestas de volta
 var col={};ids.forEach(function(i){col[i]=0});
