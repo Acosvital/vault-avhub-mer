@@ -2,12 +2,12 @@
 tags: [contrato-sql, contrato-api, dba, av-hub, clientes, grupos-de-empresa, portal-do-gerente]
 criado: 2026-10-13
 atualizado: 2026-10-14
-status: banco-api-ok-pendencias-9-10
+status: banco-api-ok-pendencias-9-10-12
 ---
 
 # Contrato 48 — Acompanhamento de Clientes e grupos de empresa
 
-> Status (14/10/2026): **tabelas, funções, rotas e permissões existem e respondem no `api-test`** (§6). Tela v2 no front (páginas por cliente e por grupo). **Pendências de banco:** NF cancelada nos totais e filtro `codigo_cliente` (§9); venda e faturamento por cliente com deduções separadas, na lógica da Equipe (§10); perfil Gerência `vinculados` × `todos` (§6). Produção não conferida. Revisão de coerência na §11.
+> Status (14/10/2026): **tabelas, funções, rotas e permissões existem e respondem no `api-test`** (§6). Tela v2 no front (páginas por cliente e por grupo). **Pendências de banco:** NF cancelada nos totais e filtro `codigo_cliente` (§9); venda e faturamento por cliente com deduções separadas, na lógica da Equipe (§10); perfil Gerência `vinculados` × `todos` (§6). Produção não conferida. Revisão de coerência na §11. **§12 (14/10):** a lista não parte do cadastro (1.265 de 3.842 clientes), NF não conta como compra e status `sem_compra`; pente fino da tela.
 > Cópia de trabalho no repositório do hub: `docs/ENVIAR - contrato-acompanhamento-clientes.md`.
 
 **Destinatários:** Gustavo (DBA, tabelas, funções, `auth.*`) e Nathan (front, BFF, API).
@@ -146,8 +146,9 @@ Pedidos e NFs do mês de **um cliente** (`p_codigo_cliente`) **ou de todo o grup
 4. 🟡 **Nathan:** filtro por vendedor na tela (hoje só se vê os vendedores em cada linha).
 5. 🔴 **Gustavo:** NF cancelada fora dos totais e filtro `codigo_cliente` na lista (§9).
 6. 🔴 **Gustavo:** venda e faturamento do mês por cliente e por grupo, com deduções separadas e `composicao_mes`, na mesma lógica de Pedidos/Notas da Equipe, no escopo do usuário (§10.2). Filtro de cliente nos resumos é opcional (§10.3).
-7. 🟡 **Nathan e Gustavo:** para a inatividade, um pedido depois cancelado (G1) ou refaturado (G6) conta como "compra"? Proposta: só pedido que ficou no líquido conta.
+7. 🟡 **Nathan e Gustavo:** para a inatividade, um pedido depois cancelado (G1) ou refaturado (G6) conta como "compra"? Proposta: só pedido que ficou no líquido conta. **Atualizado em 14/10:** NF também tem que contar como compra (217 clientes só com NF aparecem inativos); ver §12.2.
 8. 🟡 **Gustavo:** quais clientes o resumo exclui (YPFB, blacklist de pedidos e de vendedores) e com qual texto em `motivo_fora_dos_numeros`.
+9. 🔴 **Gustavo:** base de clientes pelo cadastro (tipo Cliente), compra = pedido ou NF e status `sem_compra` (§12.2); pente fino da tela (§12.3).
 
 ## 9. Pendências vistas na v2 da tela (14/10/2026, conferido no `api-test`)
 
@@ -238,5 +239,97 @@ Lido o contrato inteiro contra o objetivo da §1 (por cliente: o que comprou e f
 6. **Data:** a versão anterior da §10 afirmava a data de cada resumo sem conferir. Agora diz "a mesma data que o resumo usa".
 7. **§10.3 simplificada:** a composição vem na própria linha (`composicao_mes`), então o filtro novo nos resumos ficou opcional.
 8. **Pergunta nova:** o que conta como "compra" para a inatividade (§8, item 7).
+
+## 12. 🔴 Quem é cliente, o que conta como compra e o status "Sem compra" (14/10/2026)
+
+Pedido do Nathan: a tela tem que mostrar **todos os clientes**, não só quem já comprou. Conferido no dump do banco de teste de 13/10 (`Dump avhub teste (Completo).sql`, `fn_acompanhamento_clientes` na linha 2986) e na `api-test`.
+
+### 12.1 Hoje
+
+A lista **não parte do cadastro**. A função junta quem tem pedido válido (`ped_cli`), quem tem NF (`nf_cli`) e os membros de grupo, sem recorte de mês. `core.parceiros` só entra por LEFT JOIN para trazer nome e CNPJ. Por isso o total é fixo (1.265 em qualquer mês).
+
+| | Total |
+|---|---|
+| `GET /parceiros` (cliente, fornecedor e transportadora juntos) | 23.007 |
+| Parceiros com o tipo **Cliente** (`parceiros_tipos`, view `core_mapas.vw_todos_os_clientes`) | **3.842** (Aços Vital 1.991, Hrm 1.820, Uberaba 31) |
+| Na tela (`fn_acompanhamento_clientes`) | 1.265 (1.048 com pedido válido, 1.138 com NF) |
+| Clientes com o tipo Cliente **fora** da tela | **2.699** (Hrm 1.792, Aços Vital 899, Uberaba 8) |
+| Na tela **sem** o tipo Cliente no Omie (compram, mas estão como Fornecedor, sem tipo ou "Setor - *") | 122 |
+
+**Erro de regra:** `ultima_compra` e `dias_sem_comprar` olham **só pedido**. Os **217** clientes da tela que só têm NF (193 sem nenhuma linha em `pedidos_vendas`, 24 só com pedidos descartados) vêm com `ultima_compra` nula e status `inativo`. **122 deles tiveram NF nos últimos 90 dias** (63 nos últimos 30). Ex.: GALVANIZACAO JOSITA LTDA, 10/2026: 28 notas, R$ 901.762,79, marcada "Inativo" e "nunca comprou".
+
+### 12.2 O que pedimos na função
+
+1. **Base = cadastro + quem comprou.** Clientes com o tipo Cliente **mais** quem tem pedido válido ou NF **mais** membros de grupo (hoje daria 3.964). Só o cadastro perderia os 122 que compram sem a etiqueta.
+2. **Compra = pedido válido ou NF** (responde a §8, item 7). `ultima_compra = GREATEST(ultimo_pedido, ultima_nf)` (`GREATEST` ignora NULL no Postgres). Devolver também `ultimo_pedido`, `ultima_nf` e `qtd_nfs_total`.
+3. **Status novo `sem_compra`**: cliente que nunca teve pedido nem NF e não está coberto pelo grupo. `inativo` passa a ser só quem já comprou e parou.
+4. **`kpis.sem_compra`** (contagem) e a API aceitar `status=sem_compra` no filtro (hoje só `ativo`, `inativo` e `coberto_grupo`).
+5. `inativo_omie` (de `parceiros.inativo`, 5 clientes hoje), para a tela marcar.
+6. `qtd_cnpjs_com_venda_grupo` contar pedido **ou** NF no mês.
+
+Trecho sugerido (o resto da função fica igual):
+
+```sql
+cadastro AS (
+  SELECT p.codigo_empresa, p.codigo_parceiro_omie::varchar AS codigo_cliente
+    FROM core.parceiros p
+   WHERE p.deleted_at IS NULL
+     AND EXISTS (SELECT 1 FROM core.parceiros_tipos pt
+                   JOIN core.tipos_parceiro tp ON tp.id = pt.id_tipo_parceiro AND tp.deleted_at IS NULL
+                  WHERE pt.id_parceiro = p.id AND pt.deleted_at IS NULL AND upper(tp.tipo) = 'CLIENTE')
+),
+clientes AS (
+  SELECT codigo_empresa, codigo_cliente FROM cadastro
+  UNION SELECT codigo_empresa, codigo_cliente FROM ped_cli
+  UNION SELECT codigo_empresa, codigo_cliente FROM nf_cli
+  UNION SELECT codigo_empresa, codigo_cliente FROM membros
+),
+-- em base: pc.ultima AS ultimo_pedido, nc.ultima AS ultima_nf,
+--          COALESCE(nc.qtd_total, 0) AS qtd_nfs_total,
+--          GREATEST(pc.ultima, nc.ultima) AS ultima_compra
+-- status:
+CASE
+  WHEN v.ultima_compra IS NOT NULL AND CURRENT_DATE - v.ultima_compra < p_dias_inativo THEN 'ativo'
+  WHEN v.id_grupo IS NOT NULL AND g.ultima_compra_grupo IS NOT NULL
+       AND CURRENT_DATE - g.ultima_compra_grupo < p_dias_inativo THEN 'coberto_grupo'
+  WHEN v.ultima_compra IS NULL THEN 'sem_compra'
+  ELSE 'inativo'
+END
+```
+
+**Cuidados:** mudar o `RETURNS TABLE` exige `DROP FUNCTION` + `CREATE` (o `CREATE OR REPLACE` recusa). Ordem: banco → API (`sem_compra` no filtro e nos `kpis`) → tela (já pronta, liga sozinha).
+
+**Escopo de vendedor:** quem nunca comprou não tem vendedor. Hoje **não existe carteira cliente → vendedor** no cadastro, então esses clientes só aparecem para quem vê todos (gerência). 🟡 Decidir se é isso mesmo ou se a carteira vem de outro lugar.
+
+### 12.3 Pente fino da tela: o que é do backend
+
+Revisão do av-hub em 14/10 contra a API (`origin/develop`, 63871f3). O front foi corrigido no que dependia só dele; isto aqui precisa da API ou do banco:
+
+1. **Ordenação:** `venda_liquida_mes` e `faturamento_liquido_mes` fora das colunas aceitas (cai em silêncio na ordem padrão). `dias_sem_comprar` usa `NULLS LAST` nas duas direções. A tela agora abre por `dias_sem_comprar asc` (última compra mais recente primeiro, sem compra no fim), que está certo; em `desc`, pedir `NULLS FIRST`.
+2. **Visão por grupo:** o filtro de status vale na linha do grupo (só `ativo`/`inativo`), mas os `kpis` contam CNPJs. Clicar em "Cobertos pelo grupo" na visão por grupo dá lista vazia. Definir o status do grupo para o filtro, ou aplicar o filtro nos membros.
+3. **Escopo dos números do cliente:** `qtd/valor_pedidos_mes` e `vendedores` contam todos os vendedores, enquanto o `/movimento` mostra só os do usuário. Mesma página, dois números (e valor de outro vendedor à vista). Alinhar à §10.2.
+4. **`/movimento`:** `totais.qtd_pedidos` conta linhas (cabeçalho + parcelas), não pedidos.
+5. **Linha do grupo sem `vendedores`:** o front soma os dos membros (marca `GAMBIARRA` em `lib/domain/acompanhamentoClientes.ts`). Pedido: `vendedores` agregado na linha do grupo.
+6. **`kpis.sem_pedido_mes`:** o cartão "Sem pedido no mês" faz `total_clientes − com_pedido_mes` no navegador (marca `GAMBIARRA`). Some quando a §10 trocar o cartão.
+7. **Grupos:** o 409 `CLIENTE_EM_OUTRO_GRUPO` tem dois formatos (o caminho AV482 devolve `id_grupo`/`nome_grupo`, sem `conflitos[]`); pedir sempre `conflitos[]`. Sugestões com parâmetro `raiz` exato em vez de `busca` (com `limit 20`, a raiz certa pode sair da página). Edição atômica (nome + inclusões + remoções numa transação).
+8. 🔴 **Sem token de usuário a API não aplica o escopo:** na sessão local de 14/10 **não havia `backendToken`**, e a tela devolvia os clientes de todos os vendedores. Conferir se em produção a sessão tem o token. Se tiver, o BFF pode recusar sem token (como `liberar-pedidos`); se não, a tela mostra tudo para um vendedor.
+9. **Página do pedido para vendedor:** o movimento leva a `/pedidos-equipe/...`; confirmar se o perfil vendedor tem essa tela.
+
+### 12.4 Para o pipeline
+
+2.034 das 11.073 NFs vivas apontam para um `codigo_pedido_omie` que não existe em `pedidos_vendas`. Parece buraco na sincronização de pedidos (e explica parte dos 193 clientes "só com NF").
+
+### 12.5 Na tela (av-hub, 14/10)
+
+- Cartão "Clientes" com o texto certo: "com pedido ou nota em qualquer mês" (antes dizia "com histórico de compra").
+- Status `sem_compra` ("Sem compra", azul, informativo), opção no filtro e cartão clicável: **ligam sozinhos quando a API mandar `kpis.sem_compra`**. Com o cartão, "Inativos" passa a dizer "compraram, mas não nos últimos N dias".
+- Enquanto a §12.2 não vem: "sem pedido registrado" no lugar de "nunca comprou"; "Última compra: Sem pedido".
+
+### 12.6 Como conferir
+
+1. `GET /acompanhamento_clientes?mes=10&ano=2026&kpis=true`: `kpis.total_clientes` ≈ clientes com o tipo Cliente + os que compram sem a etiqueta (3.964 no dump de 13/10).
+2. GALVANIZACAO JOSITA LTDA (10/2026): `ultima_compra` = data da última NF, status `ativo`.
+3. Um cliente cadastrado sem pedido nem NF: `status = 'sem_compra'`, `ultima_compra` nula, conta em `kpis.sem_compra` e não em `kpis.inativos`.
+4. `status=sem_compra` no filtro devolve só esses; `ativos + inativos + coberto_grupo + sem_compra = total_clientes`.
 
 Ver também: [[Indice-Contratos]], [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]], [[AV-Hub-API-Estado-Atual]].
