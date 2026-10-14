@@ -1,0 +1,97 @@
+---
+tags: [sistemas, pipeline, omie, elt, bullmq, redis]
+criado: 2026-10-14
+atualizado: 2026-10-14
+status: vigente
+dono: Gustavo (DBA)
+fontes: [omie-elt-pipeline 0f739f0 (master), README.md, ARCHITECTURE.md, src/config/index.ts, src/jobs/*, src/omie/resources/*, src/workers/*, ecosystem.config.cjs, v1 Omie-ELT-Pipeline]
+---
+
+# Pipeline Omie (`omie-elt-pipeline`)
+
+Serviço que traz os dados do Omie para o banco do av-hub e, só para a OC, escreve de volta no Omie. Node + TypeScript, BullMQ sobre Redis, `pg` direto no PostgreSQL do av-hub, PM2 em produção ✅ `package.json`, `ecosystem.config.cjs`. Branch de produção: `master` (0f739f0). Dono: Gustavo (DBA). Não há webhook do Omie: tudo é polling por janela de calendário ✅ `src/config/index.ts:81-86`, `ARCHITECTURE.md:60`. Estado da integração Omie como um todo: [[Omie-Integracao-Estado]]. Colunas que o sync nunca escreve: [[Colunas-Protegidas]]. Selos: [[Regras-do-Vault]].
+
+## Processos (PM2, `ecosystem.config.cjs`)
+
+| Processo | Script | Papel | Concorrência |
+|---|---|---|---|
+| `omie-scheduler` | `dist/jobs/scheduler.js` | só enfileira (crons) | — |
+| `omie-extract-worker` | `dist/workers/extractWorker.js` | chama a API do Omie, respeitando o limite por IP+AppKey+método (padrão 3 simultâneas e 200/min por método) | 4 e 2 (duas filas) ✅ `extractWorker.ts:54,114` |
+| `omie-load-worker` | `dist/workers/loadWorker.js` | upsert no PostgreSQL | `LOAD_WORKER_CONCURRENCY` (20) e `LOAD_WORKER_REALTIME_CONCURRENCY` (5) ✅ `loadWorker.ts:254,269` |
+| `omie-scraping-worker` | `dist/workers/scrapingWorker.js` | Playwright: relatório de manifestação (destinatário) do portal Omie, 1x/dia | próprio |
+| `omie-envio-oc-worker` | `dist/workers/envioOcWorker.js` | **única escrita no Omie**: envia e exclui OC | 1 (fila `omie-envio-oc`) ✅ `envioOcWorker.ts:20`, `queue/index.ts:111` |
+| `omie-dashboard` | `dist/dashboard/index.js` | Bull Board (HTTP + Redis) | — |
+
+Todos reiniciam sozinhos, com backoff exponencial e `max_restarts` de 1 000 000 ✅ `ecosystem.config.cjs:17-24`. O comentário do `omie-envio-oc-worker` no mesmo arquivo ("ocioso enquanto SYNC_ENVIO_OC=false") está velho: o envio é fixo desde 07/10 ✅ `config/index.ts:154-163`.
+
+## Camadas de sync (todas as filiais, todos os recursos ligados)
+
+| Camada | Cron padrão | Variável | Janela |
+|---|---|---|---|
+| Hoje | `*/3 * * * *` | `SYNC_HOJE_CRON` | dia atual |
+| Mês corrente | `2,22,42 * * * *` | `SYNC_MES_CRON` | dia 01 até hoje |
+| Últimos meses | `7 */3 * * *` | `SYNC_ULTIMOS_MESES_CRON`, `SYNC_ULTIMOS_MESES_WINDOW_DAYS` (90) | 90 dias |
+| Full sync | `17 3 * * *` | `FULL_SYNC_CRON` | catálogo sem limite; pedidos e NF em 365 dias (`FULL_SYNC_PEDIDOS_WINDOW_DAYS`, `FULL_SYNC_NF_WINDOW_DAYS`) |
+| Exclusão curta | `12,32,52 * * * *` | `EXCLUSION_SYNC_CURTA_CRON`, `…_WINDOW_DAYS` (60) | pedidos apagados no Omie |
+| Exclusão ampla | `27 4 * * *` | `EXCLUSION_SYNC_CRON`, `…_WINDOW_DAYS` (180) | idem |
+| Geocodificação | `37 5 * * *` | `GEOCODE_PARCEIROS_CRON` | parceiros "Cliente" sem coordenada (Nominatim) |
+| Monitor de pool | `*/2 * * * *` | `POOL_MONITOR_CRON` | conexões "idle in transaction" |
+| PTAX | `30 13,17 * * 1-5` (Brasília) | `COTACAO_PTAX_CRON`, `PTAX_MOEDAS` (USD, EUR), `PTAX_JANELA_DIAS` (7), `PTAX_CARGA_INICIAL_DESDE` (2026-01-01) | boletim de fechamento do Banco Central; carga inicial ao subir se a tabela está vazia |
+| Inativar catálogos | `47 4 * * *` | `INATIVAR_CATALOGOS_CRON` | o que sumiu do Omie vira `ativo = false` |
+| Envio da OC | `1-59/2 * * * *` | `ENVIO_OC_CRON`, `ENVIO_OC_LOTE` (20 por unidade) | fila de OCs |
+
+Fonte: ✅ `src/config/index.ts:89-159`, `src/jobs/scheduler.ts:25-130`. Por que janela fixa e não watermark: o Omie só filtra pedido e NF por data de inclusão/emissão, nunca por alteração ✅ `config/index.ts:81-88`.
+
+## Recursos extraídos (`src/omie/resources/index.ts`)
+
+| Recurso | Método Omie | Tabela destino | Ligado |
+|---|---|---|---|
+| `produtos` | `ListarProdutos` | `core.produtos` | ✅ |
+| `parceiros` | `ListarClientes` | `core.parceiros` | ✅ |
+| `vendedores` | `ListarVendedores` | `core_vendas_faturamento.vendedores` | ✅ |
+| `pedidosVendas` | `ListarPedidos` (endpoint `/produtos/pedido/`) | `core_vendas_faturamento.pedidos_vendas` | ✅ **nó V1** |
+| `notasFiscais` | `ListarNF` (`/produtos/nfconsultar/`) | `core_vendas_faturamento.notas_fiscais` | ✅ **nó O1/O2 (lado Omie)** |
+| `produtoVendas` | sem `listMethod`: sai de dentro de `pedidosVendas`/`notasFiscais` | `core_vendas_faturamento.produto_vendas` | ✅ |
+| `familiaProdutos` | `PesquisarFamilias` | `core.familia_produtos` | ✅ |
+| `etapasFaturamento` | `ListarEtapasFaturamento` | `core.etapas_faturamento` | ✅ |
+| `compradores` | `ListarCompradores` | `core_vendas_faturamento.compradores` | ✅ |
+| `pedidosCompras` | `PesquisarPedCompra` (paginação `nPagina`) | `core_vendas_faturamento.pedidos_compras` (+ itens e parcelas em tabelas próprias) | ✅ |
+| `condicoesPagamentoCompras` | `ListarFormasPagCompras` | `core_vendas_faturamento.condicoes_pagamento_compras` | ✅ |
+| `projetos`, `contasCorrentes`, `categorias` | `ListarProjetos`, `ListarContasCorrentes`, `ListarCategorias` | `core.projetos`, `core.contas_correntes`, `core.categorias` | ✅ |
+| `estoque` | `ListarPosEstoque` | nenhuma (`table: null`; a tabela `core.estoque_saldo` existe no banco, sem sync) | **desligado** (`enabled: false`) ✅ `resources/estoque.ts:16,32` |
+
+Os catálogos de Compras (condições, projetos, contas, categorias, compradores) rodam só na camada "últimos meses" e no full sync (`somenteCamadaLenta`) ✅ README `:118-120`. `core.estoque_saldo` fica vazia: **o saldo do Estoque da fábrica vive no MES**, não no Omie ([[Modelo-Estoque-e-Custo-do-Lote]]).
+
+O pedido de venda entra no av-hub **travado** (sem marcação de liberação); a liberação é do vendedor ([[01-Vendas-Liberacao]]). O pipeline nunca escreve em `pedidos_vendas.manual` nem nas outras colunas protegidas ✅ `src/db/protectedColumns.ts:50-58`.
+
+## Envio da OC ao Omie (única escrita)
+
+1. A cada 2 minutos o scheduler enfileira a rodada; o `envio-oc-worker` faz, por unidade, `GET {AVHUB_API_URL}/compras/ordens/fila-omie?codigo_empresa=` ✅ `src/avhub/client.ts:1-13`, `jobs/envioOrdensCompra.ts:17-26`.
+2. `acao: "enviar"` (OC `aprovado` com `status_sincronizacao_omie = pendente`) vira `UpsertPedCompra` com `cCodIntPed` = número da OC (reenvio altera, não duplica). `acao: "excluir"` (OC cancelada que já estava no Omie) vira `ExcluirPedCompra` ✅ `envioOrdensCompra.ts:19-26`; a fila vem de `api-acos-vital` `ordens_compra.route.js:857-891`.
+3. Resultado em `PATCH {AVHUB_API_URL}/compras/ordens/{id}/sincronizacao` (`nCodPed`, `cNumero` ou erro) ✅ `envioOrdensCompra.ts:27-33`.
+4. Recusa do Omie marca `erro` e a OC sai da fila até alguém clicar em "Reenviar" no HUB; rede, 429/425 e "aguarde N segundos" deixam pendente. Depois de 3 recusas seguidas (`MAX_RECUSAS_SEGUIDAS`) a rodada da unidade para ✅ `:41-47`.
+5. Só vai a condição de pagamento (`cCodParc`), nunca as parcelas; todo item precisa de produto do cadastro da unidade (`nCodProd`) ✅ README `:153-158`. O bloco `[AV-HUB]` do `cObsInt` leva o "Destino:" por PV (campos separados por ` ; `, porque o `|` é quebra de linha no Omie).
+6. Modo de teste: `npm run envio-oc -- --dry-run` (monta o payload e não envia) ✅ README `:143-145`.
+
+Cotação PTAX gravada em `core.cotacoes_moeda` é a base da cotação da OC em moeda estrangeira ([[Rastreabilidade-e-Torre-de-Fluxo]] não depende dela).
+
+## Variáveis de ambiente
+
+| Variável | Uso | Código |
+|---|---|---|
+| `FILIAIS_ATIVAS` (padrão `mogi,uberaba`), `FILIAL_<CHAVE>_OMIE_APP_KEY`, `_OMIE_APP_SECRET`, `_CODIGO_EMPRESA` (uuid de `core.unidades`) | contas Omie, uma por filial | ✅ `config/index.ts:31-47` |
+| `OMIE_BASE_URL`, `OMIE_MAX_CONCURRENT_PER_METHOD` (3), `OMIE_MAX_PER_MINUTE_PER_METHOD` (200) | cliente Omie | ✅ `:61-69` |
+| `PGHOST`, `PGPORT`, `PGDATABASE` (`erp`), `PGUSER`, `PGPASSWORD`, `PG_SSL`, `PG_IDLE_IN_TRANSACTION_TIMEOUT_MS` | banco | ✅ `:71-77`, `db/pool.ts:50` |
+| `REDIS_URL` | BullMQ | ✅ `:79` |
+| `AVHUB_API_URL`, `AVHUB_API_KEY` | envio da OC (obrigatórias para o worker) | ✅ `:164-165`, `avhub/client.ts:13-14` |
+| `FILIAL_<CHAVE>_SCRAPING_{EMAIL,SENHA,ERP_URL,REPORT_SLUG,NOME_APLICATIVO,TOTP_SECRET}`, `SCRAPING_STATE_DIR`, `SCRAPING_CRON`, `SCRAPING_TIMEOUT_MIN` | scraping de manifestação | ✅ `:227-268` |
+| `LOG_LEVEL`, `NODE_ENV` | log | ✅ |
+
+As chaves `SYNC_*` de ligar/desligar recursos saíram em 06/10 (contrato 38): hoje só há crons e janelas ✅ README `:102-111`. O repositório ainda traz o `dump 2.0.sql` na raiz (esquema antigo do banco); não é fonte de verdade ✅ `ls`.
+
+## Pendências e riscos
+
+- 🔴 A pipeline escreve no Omie de verdade ao subir o worker (decisão de 07/10). Antes de publicar: contrato 36 na API e compradores vinculados ✅ README `:107-110`.
+- 🟡 `ecosystem.config.cjs:62` ainda cita `SYNC_ENVIO_OC=false` e o `README.md:169-171` ainda diz "Ainda não feito: o envio da ordem de compra"; o envio é fixo e está feito.
+- 🟡 Pedido de venda apagado e recriado com o mesmo sequencial colide em `uq_pedidos_vendas_numero_sequencial`; o `pedidoAutoHeal` confirma no Omie e apaga a linha antiga ✅ `jobs/pedidoAutoHeal.ts:1-25`.
+- ❓ Latência real do `ListarPedidos` entre o pedido criado no Omie e a caixa de liberação (camada "hoje" a cada 3 min) não medida.

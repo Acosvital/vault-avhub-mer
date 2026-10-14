@@ -1,0 +1,201 @@
+diff --git a/src/models/vendedor.js b/src/models/vendedor.js
+index 146b1ca..11d36f1 100644
+--- a/src/models/vendedor.js
++++ b/src/models/vendedor.js
+@@ -92,6 +92,22 @@ const Vendedor = sequelize.define(
+       allowNull: false,
+       defaultValue: true,
+     },
++    // Período em que o vendedor vale nos dashboards/rankings (contrato 33). Datas
++    // DO DIA, sem hora. NULL em ativo_desde = desde sempre; NULL em inativo_desde
++    // = sem data de saída. Editadas à mão, NÃO vêm do Omie: o POST desta rota faz
++    // upsert com pick(), então o sync que não manda estes campos não os apaga.
++    // `ativo` (boolean) continua sendo o estado de HOJE; estas datas decidem em
++    // quais MESES o vendedor aparece.
++    ativo_desde: {
++      type: DataTypes.DATEONLY,
++      allowNull: true,
++      validate: { isDate: { msg: "ativo_desde deve ser uma data válida (AAAA-MM-DD)" } },
++    },
++    inativo_desde: {
++      type: DataTypes.DATEONLY,
++      allowNull: true,
++      validate: { isDate: { msg: "inativo_desde deve ser uma data válida (AAAA-MM-DD)" } },
++    },
+     id_origem: {
+       type: DataTypes.UUID,
+       allowNull: true,
+diff --git a/src/routes/fn_ranking_vendedores_faturamento.js b/src/routes/fn_ranking_vendedores_faturamento.js
+index 46d06ac..aaa4488 100644
+--- a/src/routes/fn_ranking_vendedores_faturamento.js
++++ b/src/routes/fn_ranking_vendedores_faturamento.js
+@@ -172,10 +172,10 @@ router.get("/", async (req, res) => {
+       bind.push(req.query.id_pessoa);
+       conditions.push(`id_pessoa = $${bind.length}`);
+     }
+-    if (req.query.codigo_empresa) {
+-      bind.push(req.query.codigo_empresa);
+-      conditions.push(`$${bind.length} = ANY(empresas)`);
+-    }
++    // codigo_empresa NÃO vira condição aqui (contrato 33): ele já foi para a função
++    // ($4), que filtra pela UNIDADE DE ORIGEM do vendedor. O antigo `= ANY(empresas)`
++    // olhava onde a pessoa faturou e cortaria quem é da unidade mas vendeu só em
++    // outro Omie.
+     if (req.query.cod_vendedor) {
+       bind.push(req.query.cod_vendedor);
+       conditions.push(`$${bind.length} = ANY(codigos_vendedor)`);
+@@ -187,7 +187,10 @@ router.get("/", async (req, res) => {
+     const whereExtra = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+ 
+     const rows = await sequelize.query(
+-      `SELECT * FROM core_vendas_faturamento.fn_ranking_vendedores_faturamento($1, $2, $3, $4) t ${whereExtra} ORDER BY posicao ASC`,
++      `SELECT t.*,
++              core_vendas_faturamento.fn_unidade_do_vendedor(t.codigo_empresa, t.cod_vendedor) AS unidade_origem,
++              core.fn_nome_unidade(core_vendas_faturamento.fn_unidade_do_vendedor(t.codigo_empresa, t.cod_vendedor)) AS nome_unidade_origem
++         FROM core_vendas_faturamento.fn_ranking_vendedores_faturamento($1, $2, $3, $4) t ${whereExtra} ORDER BY posicao ASC`,
+       { bind, type: QueryTypes.SELECT }
+     );
+ 
+diff --git a/src/routes/fn_ranking_vendedores_vendas.js b/src/routes/fn_ranking_vendedores_vendas.js
+index bfc9b28..fa4e51d 100644
+--- a/src/routes/fn_ranking_vendedores_vendas.js
++++ b/src/routes/fn_ranking_vendedores_vendas.js
+@@ -147,7 +147,10 @@ router.get("/", async (req, res) => {
+     const whereExtra = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+ 
+     const rows = await sequelize.query(
+-      `SELECT * FROM core_vendas_faturamento.fn_ranking_vendedores_vendas($1, $2, $3, $4) t ${whereExtra} ORDER BY posicao ASC`,
++      `SELECT t.*,
++              core_vendas_faturamento.fn_unidade_do_vendedor(t.codigo_empresa, t.cod_vendedor) AS unidade_origem,
++              core.fn_nome_unidade(core_vendas_faturamento.fn_unidade_do_vendedor(t.codigo_empresa, t.cod_vendedor)) AS nome_unidade_origem
++         FROM core_vendas_faturamento.fn_ranking_vendedores_vendas($1, $2, $3, $4) t ${whereExtra} ORDER BY posicao ASC`,
+       { bind, type: QueryTypes.SELECT }
+     );
+ 
+diff --git a/src/routes/vendedores.js b/src/routes/vendedores.js
+index 99a2ec8..20fce90 100644
+--- a/src/routes/vendedores.js
++++ b/src/routes/vendedores.js
+@@ -24,14 +24,14 @@ const router = Router();
+ const VENDEDOR_SORTABLE = [
+   "nome", "nome_exibicao", "email", "filial", "comissao", "ativo",
+   "codigo_vendedor_omie", "is_manager", "ajuda_custo", "created_at", "updated_at",
+-  "codigo_empresa", "id_usuario", "id_funcionario",
++  "codigo_empresa", "id_usuario", "id_funcionario", "ativo_desde", "inativo_desde",
+ ];
+ 
+ // Colunas que aceitam NULL. No Postgres, ORDER BY col DESC põe NULL PRIMEIRO:
+ // ordenar por "Email" decrescente encheria o topo da tela de linhas vazias.
+ const VENDEDOR_NULLABLE = [
+   "nome_exibicao", "email", "filial", "ajuda_custo",
+-  "id_usuario", "id_funcionario",
++  "id_usuario", "id_funcionario", "ativo_desde", "inativo_desde",
+ ];
+ 
+ // Contrato 12 -- sort=nome_unidade ordena pelo NOME da unidade
+@@ -44,6 +44,24 @@ const NOME_UNIDADE = literal(
+   `core.fn_nome_unidade("${Vendedor.name}"."${Vendedor.getAttributes().codigo_empresa.field ?? "codigo_empresa"}")`
+ );
+ const VENDEDOR_SORT_EXPRESSOES = { nome_unidade: NOME_UNIDADE };
++// Contrato 33. Só leitura: a unidade vem do RH (core.funcionarios.codigo_empresa);
++// sem funcionário vinculado vale o Omie em que o vendedor foi cadastrado
++// (origem_da_unidade = 'cadastro_omie'). Não é editável aqui.
++const VENDEDOR_ALIAS = `"${Vendedor.name}"`;
++const UNIDADE_ORIGEM = `core_vendas_faturamento.fn_unidade_do_vendedor(${VENDEDOR_ALIAS}."codigo_empresa", ${VENDEDOR_ALIAS}."codigo_vendedor_omie"::text)`;
++const UNIDADE_ORIGEM_ATRIBUTOS = [
++  [literal(UNIDADE_ORIGEM), "unidade_origem"],
++  [literal(`core.fn_nome_unidade(${UNIDADE_ORIGEM})`), "nome_unidade_origem"],
++  [
++    literal(
++      `(SELECT vu.origem_da_unidade FROM core_vendas_faturamento.vw_vendedor_unidade vu ` +
++        `WHERE vu.codigo_empresa = ${VENDEDOR_ALIAS}."codigo_empresa" ` +
++        `AND vu.codigo_vendedor_omie = ${VENDEDOR_ALIAS}."codigo_vendedor_omie")`
++    ),
++    "origem_da_unidade",
++  ],
++];
++
+ 
+ // Desempate da paginação. codigo_vendedor_omie sozinho NÃO é único -- o mesmo
+ // código existe em unidades diferentes (vendedores_pkey é codigo_empresa +
+@@ -71,7 +89,7 @@ const KEY_FIELDS_UPSERT = ["codigo_empresa", "codigo_vendedor_omie"];
+ 
+ const FIELDS = [
+   "codigo_vendedor_omie", "codigo_empresa", "nome", "nome_exibicao", "email",
+-  "ajuda_custo", "filial", "ativo", "id_origem",
++  "ajuda_custo", "filial", "ativo", "ativo_desde", "inativo_desde", "id_origem",
+   "comissao", "id_usuario", "id_funcionario",
+   "created_by", "updated_by", "deleted_by","is_manager", "comissao_gerencial"
+ ];
+@@ -144,6 +162,16 @@ const pick = (body) =>
+  *         ativo:
+  *           type: boolean
+  *           default: true
++ *         ativo_desde:
++ *           type: string
++ *           format: date
++ *           nullable: true
++ *           description: "Primeiro dia em que o vendedor vale nos dashboards (contrato 33). NULL = desde sempre. Editado à mão; o sync do Omie não altera."
++ *         inativo_desde:
++ *           type: string
++ *           format: date
++ *           nullable: true
++ *           description: "Primeiro dia em que o vendedor deixou de valer nos dashboards. NULL = sem data de saída. Não pode ser anterior a ativo_desde nem coexistir com ativo=true."
+  *         id_origem:
+  *           type: string
+  *           format: uuid
+@@ -208,7 +236,34 @@ const pick = (body) =>
+  *       400:
+  *         description: codigo_vendedor_omie ou codigo_empresa ausente
+  */
+-router.post("/", async (req, res) => {
++// Período de atividade (contrato 33). Só o que dá para conferir olhando o corpo:
++// formato AAAA-MM-DD, saída não anterior à entrada e "ativo" sem data de saída.
++// String vazia vira null (limpar o campo). O que depende do registro já gravado
++// (PUT parcial) fica para a CHECK ck_vendedores_periodo, que o handler devolve
++// como 400.
++const DATA_ISO = /^\d{4}-\d{2}-\d{2}$/;
++function validarPeriodoAtivo(req, res, next) {
++  const body = req.body ?? {};
++  for (const campo of ["ativo_desde", "inativo_desde"]) {
++    if (body[campo] === "") body[campo] = null;
++    const v = body[campo];
++    if (v != null && (typeof v !== "string" || !DATA_ISO.test(v) || Number.isNaN(Date.parse(v)))) {
++      return res.status(400).json({ detail: `${campo} deve ser uma data válida (AAAA-MM-DD)` });
++    }
++  }
++  const { ativo_desde, inativo_desde, ativo } = body;
++  if (ativo_desde && inativo_desde && inativo_desde < ativo_desde) {
++    return res.status(400).json({ detail: "inativo_desde não pode ser anterior a ativo_desde" });
++  }
++  if (ativo === true && inativo_desde) {
++    return res.status(400).json({
++      detail: "Vendedor ativo não pode ter inativo_desde: limpe a data de saída (ou marque o vendedor como inativo)",
++    });
++  }
++  return next();
++}
++
++router.post("/", validarPeriodoAtivo, async (req, res) => {
+   try {
+     const payload = pick(req.body);
+     if (!payload.codigo_vendedor_omie) {
+@@ -405,6 +460,9 @@ router.get("/", async (req, res) => {
+     const { page, limit, offset } = parsePagination(req.query);
+     const { count, rows } = await Vendedor.findAndCountAll({
+       where,
++      // Unidade de origem do vendedor (contrato 33): a lotação do funcionário
++      // vinculado e, sem vínculo, o Omie do cadastro. Resolvida no banco.
++      attributes: { include: UNIDADE_ORIGEM_ATRIBUTOS },
+       // Desempate por codigo_vendedor_omie + codigo_empresa (ver DESEMPATE):
+       // sem ele, ordenar por coluna
+       // não-única (ativo, comissao, filial) deixa a paginação no servidor
+@@ -666,7 +724,7 @@ router.get("/:id/sugestoes", async (req, res) => {
+  *       404:
+  *         description: Vendedor não encontrado
+  */
+-router.put("/:id", update(pick));
++router.put("/:id", validarPeriodoAtivo, update(pick));
+ 
+ /**
+  * @swagger

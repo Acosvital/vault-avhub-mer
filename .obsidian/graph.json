@@ -1,0 +1,121 @@
+{
+  "collapse-filter": false,
+  "search": "",
+  "showTags": true,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": true,
+  "colorGroups": [
+    {
+      "query": "tag:#fluxo-operacional",
+      "color": {
+        "a": 1,
+        "rgb": 4321431
+      }
+    },
+    {
+      "query": "tag:#prd-estoque",
+      "color": {
+        "a": 1,
+        "rgb": 14701138
+      }
+    },
+    {
+      "query": "tag:#av-hub",
+      "color": {
+        "a": 1,
+        "rgb": 1146986
+      }
+    },
+    {
+      "query": "tag:#app-pcp",
+      "color": {
+        "a": 1,
+        "rgb": 15761536
+      }
+    },
+    {
+      "query": "tag:#achado",
+      "color": {
+        "a": 1,
+        "rgb": 16724530
+      }
+    },
+    {
+      "query": "tag:#arquitetura",
+      "color": {
+        "a": 1,
+        "rgb": 3426654
+      }
+    },
+    {
+      "query": "tag:#infraestrutura",
+      "color": {
+        "a": 1,
+        "rgb": 8359053
+      }
+    },
+    {
+      "query": "tag:#decisoes",
+      "color": {
+        "a": 1,
+        "rgb": 2003199
+      }
+    },
+    {
+      "query": "tag:#equipe",
+      "color": {
+        "a": 1,
+        "rgb": 9807270
+      }
+    },
+    {
+      "query": "tag:#glossario",
+      "color": {
+        "a": 1,
+        "rgb": 9936031
+      }
+    },
+    {
+      "query": "tag:#rbac",
+      "color": {
+        "a": 1,
+        "rgb": 10181046
+      }
+    },
+    {
+      "query": "tag:#portal-vendedor",
+      "color": {
+        "a": 1,
+        "rgb": 3066993
+      }
+    },
+    {
+      "query": "tag:#comissao",
+      "color": {
+        "a": 1,
+        "rgb": 15105570
+      }
+    },
+    {
+      "query": "tag:#bugs",
+      "color": {
+        "a": 1,
+        "rgb": 13382400
+      }
+    }
+  ],
+  "collapse-display": false,
+  "showArrow": true,
+  "textFadeMultiplier": 0.1,
+  "nodeSizeMultiplier": 0.655492682926829,
+  "lineSizeMultiplier": 0.992039024390244,
+  "collapse-forces": false,
+  "centerStrength": 0.569170731707317,
+  "repelStrength": 20,
+  "linkStrength": 1,
+  "linkDistance": 500,
+  "scale": 0.06699744995282372,
+  "close": false
+}

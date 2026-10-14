@@ -1,0 +1,82 @@
+From ac63834deae0052880ad773ed4e2e3db74e85eb1 Mon Sep 17 00:00:00 2001
+From: oluccaa <101234415+oluccaa@users.noreply.github.com>
+Date: Tue, 6 Oct 2026 07:51:12 -0300
+Subject: [PATCH] =?UTF-8?q?chore(comissoes):=20sem=20bloqueio=20por=20NF?=
+ =?UTF-8?q?=20na=20comiss=C3=A3o=20dos=20coordenadores=20(contrato=2038)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Decisão do Nathan (06/10/2026): o bloqueio não se aplica. Sai a chave
+COMISSOES_COORDENADORES_BLOQUEIO; a rota manda sempre p_aplicar_bloqueio =
+false (é o que já roda hoje, com a chave desligada).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../fn_dashboard_comissoes.route.js               | 15 +++++----------
+ .../fn_dashboard_comissoes.swagger.json           |  4 ++--
+ 2 files changed, 7 insertions(+), 12 deletions(-)
+
+diff --git a/src/schemas/core_comissionamento/functions/fn_dashboard_comissoes/fn_dashboard_comissoes.route.js b/src/schemas/core_comissionamento/functions/fn_dashboard_comissoes/fn_dashboard_comissoes.route.js
+index 5b1841e..07e2e8c 100644
+--- a/src/schemas/core_comissionamento/functions/fn_dashboard_comissoes/fn_dashboard_comissoes.route.js
++++ b/src/schemas/core_comissionamento/functions/fn_dashboard_comissoes/fn_dashboard_comissoes.route.js
+@@ -16,20 +16,15 @@ import { hojeSaoPaulo } from "../../../../utils/periodoVendas.js";
+ // Permissão: GET /dashboard/comissoes → dash-comissoes em auth.rotas_telas
+ // (migration 007), aplicada pelo middleware do contrato 06.
+ //
+-// COMISSOES_COORDENADORES_BLOQUEIO (padrão DESLIGADA): ligada ("true"), o
+-// coordenador perde percentual/100 × faturamento das NFs do mês com
+-// bloqueio_comissoes.is_blocked — o mesmo bloqueio por NF que já pesa na
+-// comissão dos vendedores. Desligada, bloqueado = 0, que é o que a página
+-// mostra hoje (o JSON não tinha bloqueio). Muda valor pago: só ligar depois
+-// de conferir com o comercial.
++// Bloqueio por NF (bloqueio_comissoes) NÃO se aplica à comissão dos
++// coordenadores — decisão do Nathan (06/10/2026, contrato 38): a função
++// recebe sempre p_aplicar_bloqueio = false. Era a chave
++// COMISSOES_COORDENADORES_BLOQUEIO (padrão desligada), que saiu.
+ 
+ const router = Router();
+ 
+ const ANO_MES = /^\d{4}-(0[1-9]|1[0-2])$/;
+ 
+-const bloqueioCoordenadoresLigado = () =>
+-  String(process.env.COMISSOES_COORDENADORES_BLOQUEIO ?? "false").trim().toLowerCase() === "true";
+-
+ router.get("/", async (req, res) => {
+   try {
+     let anoMes = req.query.ano_mes;
+@@ -52,7 +47,7 @@ router.get("/", async (req, res) => {
+ 
+     const [{ dashboard }] = await sequelize.query(
+       "SELECT core_comissionamento.fn_dashboard_comissoes($1, $2, $3, $4) AS dashboard",
+-      { bind: [anoMes, tr.isTrackRecord, bloqueioCoordenadoresLigado(), incluirPedidos], type: QueryTypes.SELECT }
++      { bind: [anoMes, tr.isTrackRecord, false, incluirPedidos], type: QueryTypes.SELECT }
+     );
+     return res.json(dashboard);
+   } catch (err) {
+diff --git a/src/schemas/core_comissionamento/functions/fn_dashboard_comissoes/fn_dashboard_comissoes.swagger.json b/src/schemas/core_comissionamento/functions/fn_dashboard_comissoes/fn_dashboard_comissoes.swagger.json
+index 2bbc262..5fbfbb7 100644
+--- a/src/schemas/core_comissionamento/functions/fn_dashboard_comissoes/fn_dashboard_comissoes.swagger.json
++++ b/src/schemas/core_comissionamento/functions/fn_dashboard_comissoes/fn_dashboard_comissoes.swagger.json
+@@ -85,7 +85,7 @@
+           },
+           "bloqueio_coordenadores_aplicado": {
+             "type": "boolean",
+-            "description": "COMISSOES_COORDENADORES_BLOQUEIO"
++            "description": "Sempre false: o bloqueio por NF não se aplica a coordenadores (contrato 38)"
+           },
+           "faturamento_bloqueado": {
+             "type": "number",
+@@ -165,7 +165,7 @@
+   "/dashboard/comissoes": {
+     "get": {
+       "summary": "Dashboard de comissões do mês — vendedores e coordenadores com comissão, total e posição calculados no banco",
+-      "description": "Contrato 07. Vendedores vêm do relatório provisório do mês (comissoes_provisoria, como o gerador mandou: comissão e bloqueio); exceções (comissao_coordenadores tipo excecao) entram no mesmo ranking. Coordenadores (tipo gerencia): comissao = percentual/100 × faturamento total do mês. Parâmetros de coordenador pela vigência do mês. Bloqueio da comissão de coordenador por NF bloqueada só com COMISSOES_COORDENADORES_BLOQUEIO=true (padrão desligada = bloqueado 0, como hoje).\n",
++      "description": "Contrato 07. Vendedores vêm do relatório provisório do mês (comissoes_provisoria, como o gerador mandou: comissão e bloqueio); exceções (comissao_coordenadores tipo excecao) entram no mesmo ranking. Coordenadores (tipo gerencia): comissao = percentual/100 × faturamento total do mês. Parâmetros de coordenador pela vigência do mês. Não há bloqueio por NF na comissão de coordenador (bloqueado sempre 0; decisão de 06/10/2026, contrato 38).\n",
+       "tags": [
+         "Dashboard de Comissões"
+       ],
+-- 
+2.53.0.windows.1
+

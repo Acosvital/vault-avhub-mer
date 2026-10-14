@@ -1,0 +1,144 @@
+---
+id: LOG-19a
+aliases: ["19-Compras-Pedido-Pipeline-Omie"]
+tags: [contrato, contrato-logica, contrato-pipeline, compras, substituido]
+criado: 2026-10-14
+atualizado: 2026-10-14
+status: arquivado
+dono: "Gustavo (DBA)"
+etapa_0b: [C4]
+fontes: ["omie-elt-pipeline/src/jobs/envioOrdensCompra.ts", "[[LOG-23-Compras-Pipeline-Consolidado]]"]
+criado_original: 2026-09-23
+---
+
+# Compras — pedido para a pipeline (`omie-elt-pipeline`)
+
+> [!info] Situação em 14/10/2026
+> **Status:** `arquivado` · **Pasta:** `Arquivados` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
+>
+> - 🟡 **Arquivado: substituído pelo [[LOG-23-Compras-Pipeline-Consolidado]].**
+> - ✅ O envio da OC ao Omie está na pipeline (`omie-elt-pipeline/src/jobs/envioOrdensCompra.ts`, fila `GET /compras/ordens/fila-omie` em `omie-elt-pipeline/src/avhub/client.ts:111`), fixo no código e sem chave de liga/desliga.
+>
+> Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
+> O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
+
+
+> Status: **histórico, substituído pelo [[LOG-23-Compras-Pipeline-Consolidado|23-Compras-Pipeline-Consolidado]]**[^c1] (verificado em 07/10/2026). O envio da OC ao Omie é fixo no código, sem flags, ✅ ([[Registro-de-Decisoes|Registro-de-Decisoes-2026-10-07]] #7).
+
+> **Atualização de 07/10/2026 — conferido no código da pipeline (`master` `d2886bf`, 06/10):** este arquivo é **histórico** (substituído pelo [[LOG-23-Compras-Pipeline-Consolidado|23-Compras-Pipeline-Consolidado]]). A **P5 ("envio da OC ao Omie — decisão em aberto")** foi decidida em 24/09 (a pipeline envia, por fila) e **está implementada**: `src/jobs/envioOrdensCompra.ts` e `src/omie/ordemCompraOmie.ts`, processo `envio-oc-worker` + fila `omie-envio-oc`, `UpsertPedCompra` com `cCodIntPed = numero_pedido` e `ExcluirPedCompra` (PR #1 mergeado em 05/10, `3233acf`). A recomendação de P5 de mandar parcelas (`parcelas_incluir`) **não valeu**: o envio **nunca manda parcelas** (só `cCodParc` e `nQtdeParc`, `f4fd02d`). O separador do bloco `[AV-HUB]` é ` ; `, não ` | `. P1–P4 também estão no código (recursos `pedidosCompras`, `compradores`, `condicoesPagamentoCompras`, decodificação de entidades HTML). Produção/deploy não foram conferidos.
+
+> **⚠️ Substituído em 23/09/2026 por `../ENVIAR - contrato-compras-pipeline.md`**, que tem a lista atualizada: o que já foi entregue
+> (conferido no `develop`), o que falta e o que está errado. Este arquivo fica como histórico.
+
+**Data:** 23/09/2026 · **Para:** quem mantém a `omie-elt-pipeline`
+**Depende de:** `01 - DBA - banco.md` (D1, D5 e D6 precisam existir antes).
+**Contrato completo, só para referência:** `../ENVIAR - contrato-compras-omie-pedidocompra.md`,
+com o de-para campo a campo.
+
+**Nada disto foi testado contra uma conta Omie real**, só contra a documentação. Os pontos a
+confirmar estão em P6.
+
+---
+
+## P1. Recurso `pedidosCompras` (Omie → `pedidos_compras`)
+
+`src/omie/resources/pedidosCompras.ts`, no molde de `pedidosVendas.ts`, registrado em
+`index.ts`:
+
+- `endpointPath: '/produtos/pedidocompra/'`, `listMethod: 'PesquisarPedCompra'`,
+  `listResponseKey: 'pedidos_pesquisa'`, `idField: 'cabecalho_consulta.nCodPed'`,
+  `getMethod: 'ConsultarPedCompra'`, `getIdParam: 'nCodPed'`.
+- Parâmetros: `nPagina`, **`nRegsPorPagina`** (o vault escreveu `nRegPorPagina`, errado) e
+  `dDataInicial`/`dDataFinal` em `dd/mm/aaaa`.
+- **Todas as 7 flags `lExibirPedidos*` = `"T"`.** Não existe filtro `cEtapa` na pesquisa, como
+  o vault dizia.
+- Cada pedido já vem com itens, frete, parcelas e departamentos. **Não precisa de um
+  `ConsultarPedCompra` por pedido.**
+- **Chaves:**
+  - pedido: upsert em `(codigo_empresa, codigo_pedido_compra_omie)`;
+  - itens: REPLACE-ALL por pedido, com `ordem` = posição no array;
+  - parcelas: REPLACE-ALL por pedido, em `pedidos_compras_parcelas`.
+- **Conversões:**
+  - `nDesconto` do item é **valor em R$** e vai em `valor_desconto`, não em
+    `percentual_desconto`;
+  - `valor_total_pedido` = soma de `nValTot` dos itens;
+  - `cCodIntItem` do item vai em `codigo_item_integracao` (D5). É o que liga o item do espelho
+    ao item da OC do av-hub.
+- **Onde cada campo vai:** tabelas de-para da §2.2 do contrato completo.
+
+**Teste que vale fazer:** o parâmetro `lApenasAlterados = "T"` ("apenas pedidos alterados no
+período"). Se ele filtrar mesmo por data de alteração, compras pode ter sincronização
+incremental, sem revarrer as janelas inteiras como em vendas.
+
+## P2. Recurso `compradores` (Omie → `compradores`)
+
+`src/omie/resources/compradores.ts`:
+- `'/estoque/comprador/'` · `ListarCompradores`, `cadastros`, 50 por página. É catálogo:
+  entra no `full_sync` diário e na carga inicial.
+- Upsert em `(codigo_empresa, codigo_comprador_omie)`: `nome ← cDescricao`,
+  `ativo ← cInativo = 'N'`.
+- **Colunas protegidas** em `protectedColumns.ts`: `compradores.id_funcionario` e
+  `compradores.nome_exibicao`. O vínculo é feito à mão no av-hub e o sync não pode apagar.
+- Comprador que sumiu do Omie: marcar `ativo = false`, **não apagar**.
+
+## P3. Recurso `condicoesPagamentoCompras` (Omie → `condicoes_pagamento_compras`)
+
+`'/produtos/formaspagcompras/'` · `ListarFormasPagCompras`, `cadastros`, 50 por página,
+catálogo diário. Upsert em `(codigo_empresa, codigo_omie)`:
+
+| Coluna | Omie |
+|---|---|
+| `codigo_omie` | `cCodigo` |
+| `descricao` | `cDescricao` |
+| `quantidade_parcelas` | `nQtdeParc` |
+| `lista_dias` | `cListaParc` |
+| `dias_deslocamento` | `nDiasParc` |
+
+## P4. Nomes de parceiro com entidade HTML
+
+`core.parceiros.nome_fantasia` está chegando como `&apos;DALS&apos;-DESTILARIA...`. Decodificar
+as entidades HTML no mapper de parceiros (`&apos;`, `&amp;`, `&quot;` etc.) e reprocessar os
+registros afetados.
+
+## P5. Envio da OC ao Omie (av-hub → Omie) — **decisão em aberto**
+
+A recomendação é que este envio fique **nesta pipeline**, como um worker de escrita separado:
+ela já tem as credenciais das duas contas e o limitador de taxa do Omie. Se a API também
+chamasse o Omie, os dois processos disputariam o mesmo limite (o 429 de 21/08). **Só começar
+depois de confirmado.** Resumo do que o worker faz (detalhe na §3 do contrato completo):
+
+- **O que envia:** só OC `aprovado` com `status_sincronizacao_omie = 'pendente'`.
+- **Como envia:** **`UpsertPedCompra`** com `cCodIntPed = numero_ordem`. Um reenvio altera o
+  pedido em vez de duplicar.
+- **Conversões:**
+  - moeda ≠ BRL: converter os valores para R$ (`× cotacao_moeda`). O Omie não tem moeda;
+  - desconto: % → valor (`qtd × unitário × desc / 100`);
+  - frete: `CIF → "0"`, `FOB → "1"` (padrão da NF-e, a doc do Omie não lista; confirmar em P6);
+    placa sem hífen (`cPlaca` tem 7 caracteres).
+- **Comprador:** `nCodCompr` = `compradores.codigo_comprador_omie` do `ordens_compra.id_comprador`.
+- **Não mandar `cEmailAprovador`**: ele aprova o pedido dentro do Omie.
+- **Observações (§3.8 do contrato completo):**
+  - `cObs` do cabeçalho ← `observacao` (observação do pedido, **para o fornecedor**; sai impressa
+    no pedido do Omie);
+  - `cObs` de cada item ← `ordens_compra_itens.observacao` (para o fornecedor, C9);
+  - `cObsInt` ← bloco `[AV-HUB]…[/AV-HUB]` com tudo que o Omie não tem campo (OC e requisição;
+    quem emitiu e quem aprovou, com data, e o e-mail do aprovador; moeda, cotação e total na
+    moeda; por item: tipo de material, unitário na moeda, desconto % e local de estoque),
+    **seguido** da `observacao_interna` do comprador;
+  - em todos: quebra de linha vira `|` e nada de "•"/aspas tipográficas (viram "¿¿¿" no Omie).
+- **Retorno:**
+  - sucesso: `codigo_pedido_omie ← nCodPed`, `numero_pedido_omie ← cNumero`,
+    `status_sincronizacao_omie = 'sincronizado'` e `sincronizado_em`;
+  - falha: `'erro'` e `erro_sincronizacao_omie ← description`.
+
+## P6. Confirmar com uma chamada real (conta de teste)
+
+1. Os códigos de `cEtapa`.
+2. Se `lApenasAlterados` filtra por data de alteração.
+3. Quais campos do `UpsertPedCompra` são obrigatórios de fato: mandar um payload mínimo e ler o
+   erro.
+4. Se o Omie gera as parcelas sozinho com `cCodParc` e sem `parcelas_incluir`.
+5. Se `nCodProd` é obrigatório no item, ou se aceita só `cDescricao` + `cUnidade`.
+6. Os códigos de `cTpFrete`: `0` = CIF **confirmado** no pedido 46618; falta confirmar `1` = FOB.
+
+[^c1]: Nota de 14/10/2026: Confirmado: mantido como histórico, estado vigente no LOG-23.

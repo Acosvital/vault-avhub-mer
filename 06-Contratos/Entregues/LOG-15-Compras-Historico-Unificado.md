@@ -1,0 +1,169 @@
+---
+id: LOG-15
+aliases: ["15-Compras-Historico-Unificado", "Contrato 25 (numeração antiga)"]
+tags: [contrato, contrato-logica, compras, historico]
+criado: 2026-10-14
+atualizado: 2026-10-14
+status: implementado-no-codigo
+dono: "Gustavo (DBA)"
+etapa_0b: [C4]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:62-66", "api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_ordens_compra_historico"]
+---
+# Contrato — Compras: histórico único (OC do av-hub + pedido de compra antigo do Omie)
+
+> [!info] Situação em 14/10/2026
+> **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
+>
+> - ✅ `vw_ordens_compra_historico` existe e `GET /compras/ordens?origem=av-hub|omie|todas` está no ar (`ordens_compra.route.js:62-66`); a chave `COMPRAS_HISTORICO_UNIFICADO` saiu (regra fixa, [[LOG-38-Regras-Sem-Chave-de-Ambiente]]).
+>
+> Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
+> O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
+
+
+> **Concluído — movido para `Realizados/`[^c1] em 28/09/2026** (era o contrato 25). Backend na `api-test` e front mergeado na `develop` do av-hub. O que ainda falta (produção e dados da pipeline) é acompanhado no [[LOG-23-Compras-Pipeline-Consolidado|23-Compras-Pipeline-Consolidado]] e no B0 do [[LOG-13a-Compras-Backend-Consolidado|13-Compras-Backend-Consolidado]].
+>
+> **✅ Backend entregue pelo DBA — conferido em 28/09/2026:** `vw_ordens_compra_historico` (migration 025) e a API no ar na `api-test`: `GET /compras/ordens?origem=todas|av-hub|omie` e `/compras/ordens/resumo` com `por_origem`. **Atrás da chave `HISTORICO_UNIFICADO`**: sem ela e sem `?origem=`, só `av-hub`. Sem dados para ver a unificação (espelho vazio no teste). A migration 025 não está no repositório da API — o SQL fica com o DBA.
+>
+> **Front feito em 28/09/2026** ([av-hub#105](https://github.com/Acosvital/av-hub/pull/105), **mergeado na `develop` em 28/09/2026**): a listagem pede `?origem=todas` por padrão (filtro Origem: av-hub/Omie), paginada no servidor, com marca "Omie" e detalhe só leitura em `/compras/pedido-omie/{id}` (GET /pedidos_compras/{id}); KPIs com `por_origem`. **Pedido ao backend:** nomes no GET /pedidos_compras/{id} → [[LOG-19b-Compras-Pedido-Omie-Nomes|19-Compras-Pedido-Omie-Nomes]].
+
+**Criado em:** 24/09/2026 · **Para:** DBA, backend (`api-acos-vital`), pipeline e av-hub
+
+Estende a decisão do [[LOG-14b-Compras-Vinculo-Pedido-Venda|14-Compras-Vinculo-Pedido-Venda]] (que já resolve isso só dentro do card
+"Compras deste pedido") para as telas **Ordens de compra**, **Dashboard de compras** e
+**Requisições**. Depende do **B4**/**L4** ([[LOG-13a-Compras-Backend-Consolidado|13-Compras-Backend-Consolidado]] /
+[[LOG-23-Compras-Pipeline-Consolidado|23-Compras-Pipeline-Consolidado]] — envio da OC ao Omie) e do **C4**
+([[LOG-10-Compras-Pendencias-Pos-Backend|10-Compras-Pendencias-Pos-Backend]] — `GET /compras/ordens/resumo`).
+
+---
+
+## 1. Por quê
+
+Hoje existem **duas fontes de compra** que não se falam fora do card de PV:
+
+- `ordens_compra` (+ itens/parcelas) — a OC que o **av-hub cria**. É a única coisa que
+  `GET /compras/ordens` e o painel (`PainelCompras`) enxergam.
+- `pedidos_compras` (+ itens/parcelas) — o **espelho só-leitura** do Omie, com **674+ pedidos**
+  (crescendo: 5.434 no teste local de 24/09/2026), a maioria criada **antes** do av-hub existir e
+  fora dele.
+
+O Nathan: *"é melhor o pedido de venda estar mesclado com a ordem de compra criada no AV-Hub, por
+mais que seja sistemas diferentes a base é praticamente a mesma. Senão eu perco meu histórico."* —
+e confirmou que isso vale também para o **Dashboard de compras** e as **Requisições**, não só
+para o pedido de venda.
+
+**O mecanismo de unificação já existe e já está decidido** (contrato 24, §5): quando uma OC do
+av-hub é enviada ao Omie (`cCodIntPed = numero_pedido`, ex. `"OC-000123"`), a pipeline lê esse
+mesmo pedido de volta e grava `pedidos_compras.codigo_pedido_integracao = "OC-000123"`. A
+`vw_pedido_venda_compras` já ignora a linha do espelho quando isso acontece, mostrando só a linha
+`ordens_compra` no lugar dela — uma identidade só, sem duplicar. **Este contrato só pede para
+reaproveitar esse mesmo mecanismo fora do escopo de um PV.**
+
+## 2. O que falta (as 3 telas)
+
+### H1. `GET /compras/ordens` — histórico completo, não só o que nasceu no av-hub
+
+Hoje só lê `ordens_compra`. Precisa virar uma **view unificada** (nome sugerido
+`vw_ordens_compra_historico`), no mesmo espírito de `vw_pedido_venda_compras`:
+
+```sql
+-- Rascunho — a base de cada lado, colunas normalizadas para o mínimo que a
+-- listagem usa hoje (numero, fornecedor, unidade, valor, previsão, status,
+-- sincronização, origem). Ajustar contra o schema real na hora de aplicar.
+CREATE VIEW core_vendas_faturamento.vw_ordens_compra_historico AS
+SELECT
+  'av-hub'::text                       AS origem,
+  oc.id                                 AS id,
+  oc.numero_pedido                      AS numero,
+  oc.codigo_empresa,
+  oc.codigo_fornecedor,
+  oc.valor_total_brl,
+  oc.data_previsao_chegada,
+  oc.status,                           -- status do av-hub (régua de aprovação)
+  oc.status_sincronizacao_omie,
+  oc.created_at
+FROM core_vendas_faturamento.ordens_compra oc
+WHERE oc.deleted_at IS NULL
+
+UNION ALL
+
+SELECT
+  'omie'::text                         AS origem,
+  pc.id,
+  pc.numero_pedido,
+  pc.codigo_empresa,
+  pc.codigo_fornecedor,
+  NULL::numeric                        AS valor_total_brl,  -- ver H4: converter moeda/soma dos itens
+  pc.data_previsao,
+  pc.etapa,                            -- cEtapa do Omie ("10"/"15"/"20"...) — NÃO é o status do av-hub
+  NULL::text                           AS status_sincronizacao_omie,  -- não se aplica: já está no Omie
+  pc.incluido_em_omie                  AS created_at
+FROM core_vendas_faturamento.pedidos_compras pc
+WHERE pc.deleted_at IS NULL
+  AND pc.codigo_pedido_integracao IS NULL;  -- é o que já bate a OC do av-hub: não duplica
+```
+
+`GET /compras/ordens` (e o `q`/`sort`/`order`/paginação de C3) passam a ler daqui. **Sem `page`**
+continua juntando tudo (BFF), mas ver H3 abaixo — com 5000+ linhas do espelho isso deixa de ser
+seguro.
+
+### H2. Dashboard de compras — KPIs sobre o histórico unificado
+
+`PainelCompras`/`GET /compras/ordens/resumo` (C4) somam hoje só `ordens_compra`. Os cards
+"Ordens aprovadas" e "Requisições e ordens" devem contar sobre `vw_ordens_compra_historico`
+inteira (av-hub + Omie-só), não só o que o av-hub criou. **"Aguardando aprovação" continua só
+av-hub** — um pedido puramente do Omie não passa pela régua de aprovação daqui, não faz sentido
+aparecer nesse card.
+
+### H3. Requisições — não é a listagem em si, é o link que ela gera
+
+`requisicoes_compra` **não tem equivalente no Omie** (é conceito só do av-hub, nasceu com ele) —
+não há o que unificar na listagem de Requisições em si. O que muda: quando uma requisição gera
+uma OC (`POST /compras/requisicoes/{id}/gerar-oc` ou o fluxo equivalente) e essa OC depois é
+sincronizada e unificada (H1), o link "Ver ordem de compra" da requisição **continua batendo direto
+no `id` de `ordens_compra`** (a origem "av-hub" da view usa o mesmo `id`) — nada quebra, só
+confirmar no código que ninguém assume que todo item de `vw_ordens_compra_historico` tem
+`status_sincronizacao_omie`/régua de aprovação preenchidos (H1 já cobre isso com `NULL`).
+
+### H4. Valor em R$ dos pedidos do Omie-só
+
+`pedidos_compras` não tem uma coluna equivalente a `ordens_compra.valor_total_brl` — só os itens
+(`pedidos_compras_itens.valor_total`, já em R$ pelo de-para do [[LOG-14a-Compras-Omie-Pedido-Compra|14-Compras-Omie-Pedido-Compra]]).
+A view (H1) precisa somar os itens por pedido (`SUM(pci.valor_total) GROUP BY id_pedido_compra`),
+não inventar uma coluna nova em `pedidos_compras`.
+
+## 3. Perguntas em aberto
+
+- **Status amigável para o Omie-só — é trabalho do DBA, não do av-hub.** `pedidos_compras.etapa` já
+  está no banco (cru, "10"/"15"/"20" — 399/4.758/277 linhas no teste local de 24/09/2026), mas
+  **decidido em 24/09/2026: quem traduz é o DBA (Gustavo)**, não o av-hub tentando adivinhar pelo
+  padrão dos dados. A doc oficial do Omie não lista os códigos (só diz "etapa atual do pedido" —
+  [[LOG-14a-Compras-Omie-Pedido-Compra|14-Compras-Omie-Pedido-Compra]]); o Gustavo tem acesso de suporte pra confirmar direto com o
+  Omie ou achar a lista completa. Só depois de traduzido: de-para de `etapa` pra alguma coisa
+  exibível na tela de Ordens de compra (ex.: "10" → "Incluído"), sem inventar que passou pela
+  aprovação do av-hub. Mesma pendência do [[LOG-23-Compras-Pipeline-Consolidado|23-Compras-Pipeline-Consolidado]], L10.
+- **Paginação de verdade antes de ligar.** Com 5000+ linhas de espelho, a gambiarra atual do
+  `useCompras.ts` (baixa tudo, pagina no navegador) não aguenta — H1 só devia ir para a tela depois
+  do C3 (paginação/filtro no servidor) estar pronto, senão o navegador trava.
+- **Filtro "só o que eu emiti pelo av-hub"** ainda faz sentido pra alguém (ex.: auditoria)? Se sim,
+  a origem (`av-hub`/`omie`) vira um filtro na tela, não só uma coluna.
+
+## 4. Depois de aplicado
+
+- `/compras/ordens`: nova coluna/badge de origem (`av-hub` vs `Omie`, antes do av-hub existir);
+  pedidos Omie-só abrem num detalhe **somente leitura** (sem os botões de aprovar/reprovar/PDF
+  interno, que são do fluxo av-hub).
+- `PainelCompras`: KPIs "Ordens aprovadas" e "Requisições e ordens" sobem de valor imediatamente ao
+  ligar (histórico de meses vira visível de uma vez) — avisar antes de ligar em produção, pra não
+  parecer um pico de compras do dia.
+- Nada muda em `Requisições` além de confirmar o link (H3).
+
+## Ver também
+
+- [[LOG-14b-Compras-Vinculo-Pedido-Venda|14-Compras-Vinculo-Pedido-Venda]] — o mecanismo original (`codigo_pedido_integracao`),
+  escopado por pedido de venda.
+- [[LOG-13a-Compras-Backend-Consolidado|13-Compras-Backend-Consolidado]] (B4) e [[LOG-23-Compras-Pipeline-Consolidado|23-Compras-Pipeline-Consolidado]] (L4) — pré-requisito:
+  sem o envio da OC ao Omie, `codigo_pedido_integracao` nunca é preenchido pelo lado do av-hub.
+- [[LOG-10-Compras-Pendencias-Pos-Backend|10-Compras-Pendencias-Pos-Backend]] (C3, C4) — paginação/filtro no servidor e os endpoints de
+  resumo que H2 estende.
+
+[^c1]: Nota de 14/10/2026: Em 14/10/2026 esta nota está em `06-Contratos/Entregues/`; a pasta `Realizados/` era do vault v1.

@@ -1,0 +1,122 @@
+From c2b68a9bba80e0f9106db50ab0f696e3987437f7 Mon Sep 17 00:00:00 2001
+From: oluccaa <101234415+oluccaa@users.noreply.github.com>
+Date: Tue, 6 Oct 2026 07:17:50 -0300
+Subject: [PATCH] =?UTF-8?q?fix(compras):=20produto=20do=20cadastro=20sempr?=
+ =?UTF-8?q?e=20obrigat=C3=B3rio=20no=20item=20da=20OC=20(contrato=2036,=20?=
+ =?UTF-8?q?P1)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Tira a chave COMPRAS_EXIGIR_PRODUTO_CADASTRO: a validação vale sempre
+(decisão do Nathan, 06/10/2026). O av-hub com a busca de produto no item
+já está na main.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../ordens_compra/ordens_compra.route.js      | 57 ++++++++-----------
+ .../ordens_compra/ordens_compra.swagger.json  |  4 +-
+ 2 files changed, 27 insertions(+), 34 deletions(-)
+
+diff --git a/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js b/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js
+index 9a193fb..b7b1f4f 100644
+--- a/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js
++++ b/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js
+@@ -58,14 +58,9 @@ const EXIGIR_PV_EXISTENTE =
+ // [Contrato 36, P1] Todo item da OC precisa ser um produto do cadastro da
+ // unidade da OC (o Omie recusa item sem produto: "Informe a tag [cProduto],
+ // [cCodIntProd] ou [nCodProd]"). `itens[].codigo_produto` = codigo_produto_omie
+-// de core.produtos da unidade, ativo e não excluído; senão 400. Atrás de chave
+-// porque a ORDEM importa: primeiro o av-hub com a busca de produto no item
+-// (branch feat/compras-produto-comprador-oc); ligada antes disso, ninguém
+-// consegue emitir OC pela tela antiga, que não manda produto. Desligada
+-// (padrão), o POST aceita o item como antes -- e a pipeline já não manda ao
+-// Omie OC com item sem produto (vira erro na OC, sem chamar o Omie).
+-const EXIGIR_PRODUTO_CADASTRO =
+-  String(process.env.COMPRAS_EXIGIR_PRODUTO_CADASTRO ?? "false") === "true";
++// de core.produtos da unidade, ativo e não excluído; senão 400. Sempre ligado,
++// sem chave de ambiente (decisão do Nathan, 06/10/2026): o av-hub com a busca
++// de produto no item já está na main.
+ 
+ // [Contrato 25, H1/H2] Histórico único: GET /compras/ordens, /resumo e
+ // /dashboard juntam as OCs do av-hub com os pedidos de compra só do Omie
+@@ -1065,32 +1060,30 @@ router.post("/", async (req, res) => {
+     // ── [Contrato 36, P1] produto do cadastro DA UNIDADE DA OC em todo item ──
+     // codigo_produto = codigo_produto_omie (vai no nCodProd). Uma consulta só
+     // para todos os itens; a mensagem diz qual item (pela `ordem`).
+-    if (EXIGIR_PRODUTO_CADASTRO) {
+-      const msgProduto = (it, i) =>
+-        `Item ${it.ordem ?? i + 1}: escolha um produto do cadastro da unidade (o Omie não aceita item sem produto)`;
+-      const codigos = itens.map((it) =>
+-        ["string", "number"].includes(typeof it.codigo_produto) ? String(it.codigo_produto).trim() : "");
+-      const semProduto = codigos.findIndex((c) => !c);
+-      if (semProduto >= 0) {
+-        return res.status(400).json({ detail: msgProduto(itens[semProduto], semProduto) });
+-      }
+-      const produtos = await sequelize.query(
+-        `SELECT codigo_produto_omie FROM core.produtos
+-          WHERE codigo_empresa = :empresa AND codigo_produto_omie IN (:codigos)
+-            AND deleted_at IS NULL AND ativo`,
+-        {
+-          replacements: { empresa: cab.codigo_empresa, codigos: [...new Set(codigos)] },
+-          type: QueryTypes.SELECT,
+-        }
+-      );
+-      const doCadastro = new Set(produtos.map((p) => p.codigo_produto_omie));
+-      const fora = codigos.findIndex((c) => !doCadastro.has(c));
+-      if (fora >= 0) {
+-        return res.status(400).json({ detail: msgProduto(itens[fora], fora) });
++    const msgProduto = (it, i) =>
++      `Item ${it.ordem ?? i + 1}: escolha um produto do cadastro da unidade (o Omie não aceita item sem produto)`;
++    const codigos = itens.map((it) =>
++      ["string", "number"].includes(typeof it.codigo_produto) ? String(it.codigo_produto).trim() : "");
++    const semProduto = codigos.findIndex((c) => !c);
++    if (semProduto >= 0) {
++      return res.status(400).json({ detail: msgProduto(itens[semProduto], semProduto) });
++    }
++    const produtos = await sequelize.query(
++      `SELECT codigo_produto_omie FROM core.produtos
++        WHERE codigo_empresa = :empresa AND codigo_produto_omie IN (:codigos)
++          AND deleted_at IS NULL AND ativo`,
++      {
++        replacements: { empresa: cab.codigo_empresa, codigos: [...new Set(codigos)] },
++        type: QueryTypes.SELECT,
+       }
+-      // Grava o código como achado no cadastro (sem espaços nas pontas).
+-      itens.forEach((it, i) => { it.codigo_produto = codigos[i]; });
++    );
++    const doCadastro = new Set(produtos.map((p) => p.codigo_produto_omie));
++    const fora = codigos.findIndex((c) => !doCadastro.has(c));
++    if (fora >= 0) {
++      return res.status(400).json({ detail: msgProduto(itens[fora], fora) });
+     }
++    // Grava o código como achado no cadastro (sem espaços nas pontas).
++    itens.forEach((it, i) => { it.codigo_produto = codigos[i]; });
+ 
+     // ── [3.2 / B2] COMPRADOR resolvido pela sessão, nunca do corpo ─────────
+     // Caminho: created_by (usuário) -> usuarios.id_funcionario -> comprador
+diff --git a/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.swagger.json b/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.swagger.json
+index 22c4a90..db5d833 100644
+--- a/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.swagger.json
++++ b/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.swagger.json
+@@ -420,7 +420,7 @@
+           "ApiKeyAuth": []
+         }
+       ],
+-      "description": "Cabeçalho e itens numa transação. `itens` é obrigatório com ao menos um. Obrigatórios: `codigo_empresa` e `codigo_fornecedor`.\nO `status` e o `numero_pedido` do corpo são IGNORADOS. `codigo_comprador` e `id_comprador` não são aceitos (ignorados se vierem): o comprador (`id_comprador`) é resolvido pelo backend a partir de quem emite — o usuário do token ou, sem token, `created_by` — pela regra do banco `fn_comprador_da_sessao`: usuário → funcionário → comprador ATIVO dessa pessoa na unidade da OC (contrato 16, §2.1). Fica gravado: se o vínculo mudar depois, a OC continua com o comprador da época, e é o `codigo_comprador_omie` dele que vai no nCodCompr.\nSem comprador vinculado na unidade: com `COMPRAS_EXIGIR_VINCULO_COMPRADOR=true`, responde 400 (\"Você não está vinculado como comprador em <unidade>. Peça ao administrador para fazer o vínculo.\"), e emissão sem `created_by` nem token também é recusada; desligada (padrão), a OC é emitida com `id_comprador` null.\nItens aceitam `observacao` (para o fornecedor).\n[Contrato 36, P1] Com COMPRAS_EXIGIR_PRODUTO_CADASTRO=true, TODO item exige `codigo_produto` = `codigo_produto_omie` de um produto do cadastro DA UNIDADE DA OC (core.produtos ativo e não excluído; busca em GET /produtos?codigo_empresa=&q=&ativo=true) — o Omie não aceita item sem produto. Sem ele, ou com o código de um produto de outra unidade, inativo ou excluído: 400 \"Item {ordem}: escolha um produto do cadastro da unidade (o Omie não aceita item sem produto)\". `descricao_produto` continua obrigatória (vem do produto). Desligada (padrão), o item sem produto é aceito como antes (a pipeline não o envia ao Omie).\nUnidade que compra por outra (HRM → Aços Vital) é recusada com 400.\n[Contrato 24] Vínculo com o pedido de venda (PV), tudo na mesma transação:\n  - `finalidade` (padrão `estoque`): `pedidos_venda` (um ou vários PVs; o que não está\n    vinculado é estoque), `recompra` (reposição de um PV já atendido), `estoque`,\n    `uso_interno`. Com PV (pedidos_venda/recompra) sem nenhum vínculo → 400; estoque ou\n    uso interno com vínculo → 400.\n  - `itens[].vinculos[]`: `{ numero_pedido_venda, codigo_empresa_pv?, codigo_produto_pv?,\n    quantidade }`. `codigo_empresa_pv` padrão = unidade da OC (PV de outra unidade pode,\n    inclusive HRM). `codigo_produto_pv` = `codigo_produto_omie` do item do PV (de\n    GET /compras/pedidos-venda/{numero}); é o que liga o saldo a comprar. `quantidade`\n    SEMPRE na unidade do item da OC (o material comprado pode ser outro: fabricação). A\n    soma dos vínculos de um item não passa da quantidade dele.\n  - `itens[].codigo_produto` = `codigo_produto_omie` (vai no nCodProd do Omie): quando é o\n    mesmo produto do PV, a quantidade abate o saldo a comprar.\n  - `itens[].id_requisicao`: várias requisições do MES numa OC (uma por item). Precisa\n    estar aberta/em cotação e ser da unidade da OC (ou da HRM numa OC de Mogi); vira\n    `atendida`. Cancelar a OC devolve todas para a fila.\n  - PV que não existe na unidade: HRM (sem Omie) é aceito com `pv_conferido: false`; nas\n    outras unidades também é aceito não conferido, a não ser com\n    COMPRAS_VINCULO_EXIGIR_PV_EXISTENTE=true (aí 400 \"Pedido de venda 999999 não existe em\n    Aços Vital\"). Produto que não está no PV → 400.\n",
++      "description": "Cabeçalho e itens numa transação. `itens` é obrigatório com ao menos um. Obrigatórios: `codigo_empresa` e `codigo_fornecedor`.\nO `status` e o `numero_pedido` do corpo são IGNORADOS. `codigo_comprador` e `id_comprador` não são aceitos (ignorados se vierem): o comprador (`id_comprador`) é resolvido pelo backend a partir de quem emite — o usuário do token ou, sem token, `created_by` — pela regra do banco `fn_comprador_da_sessao`: usuário → funcionário → comprador ATIVO dessa pessoa na unidade da OC (contrato 16, §2.1). Fica gravado: se o vínculo mudar depois, a OC continua com o comprador da época, e é o `codigo_comprador_omie` dele que vai no nCodCompr.\nSem comprador vinculado na unidade: com `COMPRAS_EXIGIR_VINCULO_COMPRADOR=true`, responde 400 (\"Você não está vinculado como comprador em <unidade>. Peça ao administrador para fazer o vínculo.\"), e emissão sem `created_by` nem token também é recusada; desligada (padrão), a OC é emitida com `id_comprador` null.\nItens aceitam `observacao` (para o fornecedor).\n[Contrato 36, P1] TODO item exige `codigo_produto` = `codigo_produto_omie` de um produto do cadastro DA UNIDADE DA OC (core.produtos ativo e não excluído; busca em GET /produtos?codigo_empresa=&q=&ativo=true) — o Omie não aceita item sem produto. Sem ele, ou com o código de um produto de outra unidade, inativo ou excluído: 400 \"Item {ordem}: escolha um produto do cadastro da unidade (o Omie não aceita item sem produto)\". `descricao_produto` continua obrigatória (vem do produto).\nUnidade que compra por outra (HRM → Aços Vital) é recusada com 400.\n[Contrato 24] Vínculo com o pedido de venda (PV), tudo na mesma transação:\n  - `finalidade` (padrão `estoque`): `pedidos_venda` (um ou vários PVs; o que não está\n    vinculado é estoque), `recompra` (reposição de um PV já atendido), `estoque`,\n    `uso_interno`. Com PV (pedidos_venda/recompra) sem nenhum vínculo → 400; estoque ou\n    uso interno com vínculo → 400.\n  - `itens[].vinculos[]`: `{ numero_pedido_venda, codigo_empresa_pv?, codigo_produto_pv?,\n    quantidade }`. `codigo_empresa_pv` padrão = unidade da OC (PV de outra unidade pode,\n    inclusive HRM). `codigo_produto_pv` = `codigo_produto_omie` do item do PV (de\n    GET /compras/pedidos-venda/{numero}); é o que liga o saldo a comprar. `quantidade`\n    SEMPRE na unidade do item da OC (o material comprado pode ser outro: fabricação). A\n    soma dos vínculos de um item não passa da quantidade dele.\n  - `itens[].codigo_produto` = `codigo_produto_omie` (vai no nCodProd do Omie): quando é o\n    mesmo produto do PV, a quantidade abate o saldo a comprar.\n  - `itens[].id_requisicao`: várias requisições do MES numa OC (uma por item). Precisa\n    estar aberta/em cotação e ser da unidade da OC (ou da HRM numa OC de Mogi); vira\n    `atendida`. Cancelar a OC devolve todas para a fila.\n  - PV que não existe na unidade: HRM (sem Omie) é aceito com `pv_conferido: false`; nas\n    outras unidades também é aceito não conferido, a não ser com\n    COMPRAS_VINCULO_EXIGIR_PV_EXISTENTE=true (aí 400 \"Pedido de venda 999999 não existe em\n    Aços Vital\"). Produto que não está no PV → 400.\n",
+       "requestBody": {
+         "required": true,
+         "content": {
+@@ -479,7 +479,7 @@
+           "description": "Criada, com itens (e itens[].vinculos, quantidade_sem_vinculo, numero_requisicao) e parcelas aninhados"
+         },
+         "400": {
+-          "description": "itens ausente, campo inválido, moeda != BRL sem cotacao_moeda, unidade que compra por outra, (com COMPRAS_EXIGIR_VINCULO_COMPRADOR=true) usuário sem vínculo de comprador na unidade, ou [contrato 24] finalidade inválida, vínculo inválido/duplicado, vínculos somando mais que o item, finalidade com PV sem vínculo ou estoque com vínculo, produto fora do PV, requisição fora da fila / de outra unidade / em dois itens, (com COMPRAS_VINCULO_EXIGIR_PV_EXISTENTE=true) PV inexistente, (com COMPRAS_EXIGIR_PRODUTO_CADASTRO=true) [contrato 36] item sem produto do cadastro da unidade"
++          "description": "itens ausente, campo inválido, moeda != BRL sem cotacao_moeda, unidade que compra por outra, (com COMPRAS_EXIGIR_VINCULO_COMPRADOR=true) usuário sem vínculo de comprador na unidade, ou [contrato 24] finalidade inválida, vínculo inválido/duplicado, vínculos somando mais que o item, finalidade com PV sem vínculo ou estoque com vínculo, produto fora do PV, requisição fora da fila / de outra unidade / em dois itens, (com COMPRAS_VINCULO_EXIGIR_PV_EXISTENTE=true) PV inexistente, [contrato 36] item sem produto do cadastro da unidade"
+         }
+       }
+     }
+-- 
+2.53.0.windows.1
+
