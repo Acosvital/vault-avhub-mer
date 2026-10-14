@@ -1,7 +1,7 @@
 ---
 tags: [erp-acos-vital, prd-estoque, estoque, mes, comissao, custo, compras, orcamento]
 criado: 2026-10-09
-atualizado: 2026-10-09
+atualizado: 2026-10-14
 status: decidido
 ---
 
@@ -88,6 +88,19 @@ A NF do Omie não diz de qual lote saiu cada peça. Vale o **custo médio do ite
 | 7 | Escopo inicial | **Só revenda**; fabricação segue em 2% fixos até existirem consumo de MP e genealogia (J2 a J4) |
 
 Quem quiser mudar uma delas muda o contrato 008 e o item 94 do Registro; nada aqui trava o código antes da etapa 2.
+
+### Decisões de 14/10/2026 (pendências do Robert, Nathan decidiu; detalhes no [[008-Custo-do-Lote-no-MES]])
+
+| # | Tema | Decisão |
+|---|---|---|
+| D1 | OC com várias requisições | Lote **por produto dentro da OC**; cada lote leva o preço do item da OC (`id_item_oc`). Sobra de compra fica no mesmo lote, com o mesmo custo. Mesmo produto em duas OCs: lotes separados. Uma OC é de um só fornecedor: um preço por produto |
+| D2 | Unidade da OC ≠ do lote | Ciclo 1: lote sem custo e sinalizado, custo pela rota MANUAL. Ciclo 2: fator de conversão no cadastro, peso real nas chapas. Perguntas a Compras em aberto |
+| D3 | Preço da OC depois da entrada | Não acontece: OC não muda depois que o lote chega |
+| D4 | Correção depois da baixa | Vale para saldo e reservas abertas; o baixado mantém o snapshot; sem movimento de ajuste |
+| D5 | Impostos por item | Ciclo 1 sem impostos; origem fica para o Ciclo 2 |
+| D6 | Pedido manual | Nunca entra no custo; precisa de marca de origem manual, só para dashboard de vendas e faturamento |
+| D7 | Pedido dividido | O mesmo produto pode cair em mais de uma ordem; soma numa linha por filial + pedido + produto |
+| D8 | Custo MANUAL | `estoque-custo` editar, motivo obrigatório, auditoria |
 
 ## Evolução da comissão (av-hub) — fora do desenho
 

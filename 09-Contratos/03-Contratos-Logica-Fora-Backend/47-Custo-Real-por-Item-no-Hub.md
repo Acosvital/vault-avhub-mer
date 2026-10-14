@@ -2,7 +2,7 @@
 tags: [contrato-logica, av-hub, comissao, compras, orcamento, custo]
 status: parcial-1-entregue
 criado: 2026-10-09
-atualizado: 2026-10-13
+atualizado: 2026-10-14
 ---
 
 # Contrato 47 — Custo real por item no av-hub: simulador (etapa 2), comissão por faturamento (etapa 3), Compras e Orçamento
@@ -19,7 +19,9 @@ atualizado: 2026-10-13
 
 ## 1. Job de leitura (mesmo molde do [[006-Status-por-Item-Leitura-no-Hub]])
 
-Job do hub lê `GET /itens/custo` do MES (cursor `alterado_desde` + `apos_id`, chave de serviço) e grava em `core_vendas_faturamento.itens_pedido_custo` 🟡 (chave filial + pedido + item; colunas do JSON do contrato 008, `lotes` em `jsonb`) por função de banco, como em `fn_itens_pedido_status_gravar`. Rota `GET /itens_pedido_custo?numero_pedido=` com o escopo "dono" do pedido (mesmo do contrato 40) e permissão de tela própria: **custo é dado sensível; o vendedor não vê o custo, só o resultado (letra e %)**. 🔴 Nathan confirma.
+Job do hub lê `GET /itens/custo` do MES (cursor `alterado_desde` + `apos_id`, chave de serviço) e grava em `core_vendas_faturamento.itens_pedido_custo` 🟡 (chave **filial + pedido + produto** (`codigo_produto_omie`), não "item": no MES o grão é o produto e linhas repetidas do pedido são somadas; colunas do JSON do contrato 008, resposta em array puro, `lotes` em `jsonb`) por função de banco, como em `fn_itens_pedido_status_gravar`. 🔴 O SQL da `fn_itens_pedido_custo_gravar` (migration 047) hoje faz upsert por "unidade, pedido, item" e precisa passar a gravar por produto. **Pedido manual (sem Omie) nunca entra** nesta tabela (decisão de 14/10 no 008).
+>
+> **Custo sem impostos no Ciclo 1 (14/10, decisão D5 do 008):** a OC não traz ICMS, IPI nem ST por item, então `custo_medio` e `custo_total` vêm sem impostos e podem ficar acima do custo real quando há ICMS recuperável. O simulador e a tela devem deixar isso claro; a origem dos impostos fica para o Ciclo 2. Rota `GET /itens_pedido_custo?numero_pedido=` com o escopo "dono" do pedido (mesmo do contrato 40) e permissão de tela própria: **custo é dado sensível; o vendedor não vê o custo, só o resultado (letra e %)**. 🔴 Nathan confirma.
 
 ## 2. Etapa 2 — simulador pré-preenchido
 
@@ -43,7 +45,7 @@ A cada NF faturada de um pedido cujos itens da NF tenham custo completo: `custo 
 4. O histórico de preços lista o preço pago em USD já convertido, com a data da PTAX.
 
 ## Perguntas em aberto 🔴
-Quem executa (Pablo/Comercial & Suprimentos ou outro); permissão de custo; fonte do imposto por item; se a etapa 3 paga a diferença quando o custo do lote for corrigido depois da NF (proposta: não).
+Quem executa (Pablo/Comercial & Suprimentos ou outro); permissão de custo; fonte do imposto por item; se a etapa 3 paga a diferença quando o custo do lote for corrigido depois da NF (**não**: decidido em 14/10, D4 do 008, a parte baixada mantém o custo gravado na saída).
 
 ## Ver também
 [[Estoque-Custo-do-Lote]] · [[AV-Hub-Comissao-Modulo]] · [[AV-Hub-Simulador-Comissao]] · [[008-Custo-do-Lote-no-MES]] · [[40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]]
