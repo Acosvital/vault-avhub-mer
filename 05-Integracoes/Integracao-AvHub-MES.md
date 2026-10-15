@@ -244,7 +244,7 @@ Resumo; o desenho completo (envelope, projeção, telas) está em [[Rastreabilid
 - **Job no hub** ✅ `item_estado_projetado.job.js`: lê o feed a cada 90 s, página de 1000, janela de 200 `seq` relidos, trava por fonte; **404 do MES avisa e repete a cada 10 min** (`:44-49`, `:150-154`); aplica por `core_fluxo.fn_feed_aplicar`.
 - **Rotas do hub** ✅ `item_estado_projetado.route.js`: `GET /fluxo/torre` (`:185`), `/fluxo/sla-etapas` (`:262`), `/fluxo/itens/:id/tempo` (`:281`), `/fluxo/itens/:id` (`:302`). Trilha, tempo e SLA são proxy do MES (a chave fica na API); MES fora do ar devolve 200 com `mes_indisponivel: true`.
 - **Chave:** `MES_API_KEY`, `MES_API_URL` (mesma do INT-05).
-- **Permissão:** telas `torre-fluxo` e `torre-fluxo-trilha`, concedidas só ao perfil Admin pela 046b ❓ aplicada; demais perfis 🔴 Gustavo/Nathan (BL-021).
+- **Permissão:** telas `torre-fluxo` e `torre-fluxo-trilha`, concedidas só ao perfil de testes do time de TI pela 046b ❓ aplicada; nenhum perfil de negócio as tem 🔴 Gustavo/Nathan (BL-021).
 - **Front:** o HUB não tem a tela da Torre 🔴 Nathan (BL-022).
 
 ```mermaid

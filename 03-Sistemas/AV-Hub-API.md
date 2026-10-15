@@ -102,7 +102,7 @@ Isto difere do 0b e da decisão de 14/10 ("Gerente aprova sempre; acima de R$ 30
 - **Projeção:** `core_fluxo.item_estado_projetado`, uma linha por `(codigo_empresa, numero_pedido, codigo_item_omie)`, escrita **só** por `core_fluxo.fn_feed_aplicar` ✅ dump `:2169`. Também existem `core_fluxo.evento` (eventos do hub, append-only, nasce vazia) e `core_fluxo.feed_cursor` (`fonte = 'mes'`).
 - **Job:** `item_estado_projetado.job.js` a cada 90 s (`INTERVALO_MS`), primeira rodada aos 5 s, `GET {MES_API_URL}/fluxo/eventos?apos_seq=<cursor - 200>&limite=1000`, até 50 páginas por rodada, trava `avhub.fluxo_feed`; 404 do MES = "feed ainda não publicado": avisa uma vez e espera 10 min ✅ `:46-60`.
 - **Escopo:** por unidade (`auth.usuarios_unidades`); fora do escopo, 403 na lista e 404 no item; MES fora do ar devolve 200 com `mes_indisponivel = true` ✅ `:16-33`.
-- **Estado hoje:** o MES **não publica** `/fluxo/*` 🔴 (Robert); o job está dando 404. O HUB não tem a tela 🔴 (Nathan). A 046b concede as duas telas só ao perfil Admin (Dev) ✅ comentário `:22-25`; a concessão real ❓ Gustavo.
+- **Estado hoje:** o MES **não publica** `/fluxo/*` 🔴 (Robert); o job está dando 404. O HUB não tem a tela 🔴 (Nathan). A 046b concede as duas telas só ao perfil de testes do time de TI ✅ comentário `:22-25`, então nenhum perfil de negócio abre a Torre; a concessão real ❓ Gustavo.
 
 ### Custo real por item (LOG-47 §1, API-008) — E3, R4
 

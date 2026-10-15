@@ -113,7 +113,7 @@ Dados em `auth.rotas_telas` e `auth.telas`: **o dump é só esqueleto** (sem `CO
 | `compradores` | `pode_visualizar`, `pode_editar` | BFF e API | vínculo comprador × funcionário; só quem é comprador vinculado na unidade emite OC (regra fixa, `BLOQUEAR_SEM_COMPRADOR = true`) | ✅ `compradores.route.js:210`, `ordens_compra.route.js:35` |
 | **`custo-itens`** | `pode_visualizar` | **API, sempre** (também sem token) | `GET /itens_pedido_custo`; **nasce sem permissão para nenhum perfil** (decisão de 13/10) | ✅ `itens_pedido_custo.route.js:41-48,76-85` |
 | **`torre-fluxo`** | visualizar | mapa (migration 046/046b) | `GET /fluxo/torre`, `/fluxo/sla-etapas`, `/fluxo/itens/:id/tempo` | ✅ `item_estado_projetado.route.js:16-25` |
-| **`torre-fluxo-trilha`** | visualizar | mapa | `GET /fluxo/itens/:id` (mostra nomes de pessoas); 046b concede só ao perfil Admin (Dev) | ✅ idem |
+| **`torre-fluxo-trilha`** | visualizar | mapa | `GET /fluxo/itens/:id` (mostra nomes de pessoas); 046b concede só ao perfil de testes do time de TI (nenhum perfil de negócio) | ✅ idem |
 | `pcp-pedidos`, `pcp-notas`, `pcp-dashboard` | visualizar (+criar e deletar nas observações) | BFF | portal PCP do av-hub (leitura) | ✅ `HUB app/api/pcp/**` |
 | `meus-pedidos`, `pedidos-equipe` | visualizar | BFF | card "Etapa dos itens" | ✅ `HUB lib/api/pedidosVenda.ts` |
 

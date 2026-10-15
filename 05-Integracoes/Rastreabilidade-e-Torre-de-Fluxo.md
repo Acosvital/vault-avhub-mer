@@ -65,7 +65,7 @@ Idempotência: o hub só aplica o evento se for mais novo que o último aplicado
 | `core_fluxo.item_estado_projetado`, `evento`, `feed_cursor`, `vw_item_estado_atual`, `fn_feed_aplicar`, `fn_torre_*` | Gustavo | entregues (77223e9, 7c3f57a, migration 046b); a Torre está vazia: o MES responde 404 ❓ conferido na `api-test` em 13/10 | ✅ |
 | Job de projeção `item_estado_projetado.job.js`, iniciado em `app.js:208` | Gustavo | roda a cada 90 s; 404 do MES avisa e repete a cada 10 min; trava `pg_try_advisory_xact_lock` por fonte | ✅ |
 | Rotas do hub: `GET /fluxo/torre` (`item_estado_projetado.route.js:185`), `/fluxo/sla-etapas` (`:262`), `/fluxo/itens/:id/tempo` (`:281`), `/fluxo/itens/:id` (`:302`) | Gustavo | no ar; MES fora do ar devolve 200 com `mes_indisponivel: true` | ✅ |
-| Perfis com `torre-fluxo` e `torre-fluxo-trilha` | Gustavo e Nathan | só o Admin recebeu (046b); sem perfil, ninguém abre a Torre com login | 🔴 BL-021 |
+| Perfis com `torre-fluxo` e `torre-fluxo-trilha` | Gustavo e Nathan | só o perfil de testes do time de TI recebeu (046b); sem perfil de negócio, ninguém abre a Torre com login | 🔴 BL-021 |
 | Eventos do **lado do hub** (liberação, aprovação, fechamento de compra) em `core_fluxo.evento` | Gustavo | nada instrumenta; a Torre começaria no PCP | 🔴 BL-029 |
 | BFF `/api/fluxo/*` e as telas T.3, T.4, T.5, T.5b no HUB | Nathan | **não existem**: nenhuma ocorrência de `fluxo/torre` ou `torre-fluxo` em `app`, `lib`, `components`, `services` do HUB b55ac55 | 🔴 BL-022 |
 | `GET /itens/status` (005) e cartão "Etapa dos itens" | Robert, Gustavo, Nathan | no ar; HUB `components/Pedidos/EtapaDosItens.tsx`, `PedidoDetalhe.tsx` | ✅ |

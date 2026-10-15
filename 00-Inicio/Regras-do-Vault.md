@@ -50,6 +50,10 @@ fontes: [notas do v1, arquivo:linha, commits]
 - Diagramas em mermaid. Cada diagrama de fluxo usa os mesmos IDs de nó do [[00-Fluxo-Mestre-0b]].
 - **Nomes de telas:** Triagem do Pedido (antiga Carteira, rota `/carteira`), Destinação do Pedido (antiga "Nova Ordem de Produção", rota `/ordens-producao/novo`), Acompanhamento dos Pedidos (antiga lista de Ordens de Produção). O código ainda usa os nomes antigos em alguns pontos; registre as duas formas.
 
+## Perfil `Admin (Dev)` não é ator
+
+`Admin (Dev)` é um perfil de **teste** do time de TI (Nathan, Robert, Pablo e Gustavo), com permissão a tudo. Quem o tem não atua no sistema. **Não liste esse perfil como ator** em "Quem atua", em diagramas ou em tabelas de papéis. Ele só pode aparecer onde o fato é técnico, por exemplo "a migration concede a tela só ao perfil de testes", e o que importa é que nenhum perfil de negócio recebeu a permissão.
+
 ## Divisão de trabalho (para as pendências)
 
 - **Gustavo (DBA):** banco e API do av-hub (`api-acos-vital`).

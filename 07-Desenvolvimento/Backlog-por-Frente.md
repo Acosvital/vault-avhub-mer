@@ -48,7 +48,7 @@ O que **falta desenvolver** no fluxo de Atividades ([[00-Fluxo-Mestre-0b]]), con
 | BL-028 | C0 | Gerar evento do contrato 35 para requisição sem `id_origem` (contraparte de BL-006) | [[LOG-35-Compras-Marcos-Requisicao-para-MES]] | 🔴 | `Dump Avhub (Esqueleto).sql:8587` |
 | BL-019 | E3 | **Aplicar a migration 047b**: `fn_itens_pedido_custo_gravar` grava por `item integer` no dump e deve gravar por produto; a API já exige a 047b | [[LOG-47-Custo-Real-por-Item-no-Hub]] | 🔴 | `itens_pedido_custo.job.js:27,157-180` |
 | BL-020 | E3 | Perfil com a tela `custo-itens` (a tela nasce sem perfil: 403 a todos) | [[LOG-47-Custo-Real-por-Item-no-Hub]] | 🔴 | `GET /itens_pedido_custo` exige `custo-itens:pode_visualizar` |
-| BL-021 | todos | Conceder `torre-fluxo` e `torre-fluxo-trilha` (só o Admin recebeu na 046b) aos perfis certos | [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas]] | 🔴 | migration 046b, `auth.permissoes` |
+| BL-021 | todos | Conceder `torre-fluxo` e `torre-fluxo-trilha` (a 046b só deu ao perfil de testes do time de TI) aos perfis certos | [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas]] | 🔴 | migration 046b, `auth.permissoes` |
 | BL-029 | todos | Instrumentar eventos do lado do hub (liberação, fechamento de compra, aprovação) em `core_fluxo.evento` | [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas]] | 🔴 | #92 |
 | BL-026 | transversal | Marca de origem **manual** do pedido chegar ao MES: pedido manual nunca entra no custo (D6) | [[API-008-Custo-do-Lote-no-MES]] | 🔴 | coluna `manual` protegida ([[Colunas-Protegidas]]) |
 | BL-027 | O1 | `exclusionSync` não pode apagar pedido manual (`manual` fora do filtro) | [[LOG-45-Pedido-de-Venda-Manual]] | 🔴 | `omie-elt-pipeline/src/jobs/exclusionSync.ts:103,136` |
