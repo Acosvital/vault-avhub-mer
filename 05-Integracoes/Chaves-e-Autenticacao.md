@@ -64,7 +64,7 @@ As quatro últimas só podem ser fixadas depois de separar as chaves de serviço
 
 ## Front do HUB
 
-- Os helpers do BFF (`headersDaApi()` em `HUB lib/api/escopoUnidade.ts:45`; `headersApi = () => headersDaApi()` em `lib/api/pedidosVenda.ts:96`) mandam `x-api-key` e, havendo sessão, `Authorization: Bearer`, sem variável de ambiente ✅ (#88, HUB b55ac55). Sem Bearer a API trata a chamada como serviço, sem escopo nem permissão por tela. Rotas de BFF que ainda mandam só a chave: ❓ não reauditado desde 08/10 (a auditoria de 08/10 achou 38 arquivos; o PR #178 cobriu os helpers) → [[Pontas-Soltas]] PS-018.
+- Os helpers do BFF (`headersDaApi()` em `HUB lib/api/escopoUnidade.ts:45`; `headersApi = () => headersDaApi()` em `lib/api/pedidosVenda.ts:96`) mandam `x-api-key` e, havendo sessão, `Authorization: Bearer`, sem variável de ambiente ✅ (#88, HUB b55ac55). Sem Bearer a API trata a chamada como serviço, sem escopo nem permissão por tela. Rotas de BFF que ainda mandam só a chave: ❓ não reauditado desde 08/10 (a auditoria de 08/10 achou 38 arquivos; o PR #178 cobriu os helpers) → [[Pontas-Soltas]] PS-018. Desde a PR #206 (HUB `d0ef359`) o token é lido do cookie no servidor e não vai na sessão do navegador, e `requirePermission` responde 401 sem ele.
 - Páginas e permissões: [[RBAC-e-Permissoes]]; rotas do BFF: [[Mapa-Rotas-BFF-Bearer]].
 
 ## Guards do MES
@@ -94,6 +94,6 @@ Ver também: [[Registro-de-Decisoes]], [[Infraestrutura]].
 
 A auditoria da `api-acos-vital` (`276dab8`) achou que a chave de `API_KEYS` sem token **dispensa permissão, escopo e identidade** (`apiKeyAuth.js:160-161`, `exigirToken` com padrão `false` em `acessoConfig.js:71`) e que `POST /autenticacao/azure` emite JWT só com o e-mail enquanto `AUTENTICACAO_AZURE_VALIDAR_ID_TOKEN` está desligado (padrão, `azureIdToken.js:27-28`). Desenho da correção, ordem e testes: [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] (S1 e S2), com o lado do HUB no BL-058.
 
-- **Ordem importa:** ligar `IDENTIDADE_EXIGIR_TOKEN` derruba o login do BFF enquanto as 3 chamadas pré-login (`fetchMenu`, `fetchSlugDaTela`, `fetchInfoPerfisDoUsuario`) seguirem só com a chave, porque só `/autenticacao` e `/me` são isentas (`acessoConfig.js:95`).
-- O HUB **não** manda o `id_token` do Azure hoje; sem isso a validação do `id_token` não pode ser fixada.
+- **Ordem importa:** ligar `IDENTIDADE_EXIGIR_TOKEN` ainda derruba o login do BFF por **uma** chamada: `fetchMenu` (`GET /permissoes_usuario/menu/:id_usuario`), que só leva a chave. Perfis e tela inicial já passaram para `GET /me/permissoes` com o Bearer (PR #206). Só `/autenticacao` e `/me` são isentas (`acessoConfig.js:95`): a API precisa incluir a rota do menu, conferindo que o id é o do token.
+- O HUB passou a mandar o `id_token` do Azure no `/autenticacao/azure` (PR #206). A API já pode fixar a validação; ❓ falta testar o login Azure na homologação com a validação ligada.
 - Os valores reais dessas variáveis em produção seguem ❓ (Gustavo, perguntas Q1 a Q4 do LOG-51).

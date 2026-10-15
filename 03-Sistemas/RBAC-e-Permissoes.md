@@ -1,7 +1,7 @@
 ---
 tags: [sistemas, rbac, permissoes, mes, av-hub, seguranca]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-15
 status: vigente
 dono: Gustavo (DBA)
 fontes: [api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, HUB b55ac55, Dump MES e Dump Avhub de 14/10, v1 AV-Hub-RBAC, Achado-Duplicacao-RBAC]
@@ -94,7 +94,7 @@ Seeds: `estoque-custo` nasce "default-deny, só o Administrador" ✅ `common/con
 3. **Identidade passa a ser a do token.** `id_usuario_sessao` na query e os campos `created_by`, `updated_by`, `deleted_by`, `aprovado_por`, `decidido_por`, `cancelado_por` do corpo são **sobrescritos** pelo id do token ✅ `identidadeUsuario.js:29-37`.
 4. **Sem token:** chave de `.env` e chave do MES seguem sem identidade (o MES e a pipeline não são usuários). Chave com `exige_usuario` recebe 401 `TOKEN_USUARIO_AUSENTE` ✅ `:63-69`.
 5. **Escopo de vendedor** (contrato 40): perfil que não é `todos` só vê pedidos e notas dos vendedores do usuário (`escopoVendedor.js`); **escopo de unidade** (`auth.usuarios_unidades`) e de setor (`escopoUnidade.js`, `escopoSetor.js`) ✅.
-6. **BFF.** `requirePermission(slug, ação)` do HUB lê `GET /me/permissoes` (ao vivo, cache 5 s) e cai no menu do JWT se faltar o `backendToken` ✅ `HUB/lib/api/requirePermission.ts:14-50`. Por isso o BFF nega **antes** de chegar à API, e a API nega de novo pelo mapa.
+6. **BFF.** `requirePermission(slug, ação)` do HUB lê `GET /me/permissoes` (ao vivo, cache 5 s) e responde 401 sem o token do usuário, 503 se `/me/permissoes` falhar e 403 se a tela não estiver em `auth.telas`: o menu do JWT é só apresentação e não autoriza nada ✅ `HUB/lib/api/requirePermission.ts` (`d0ef359`). Por isso o BFF nega **antes** de chegar à API, e a API nega de novo pelo mapa.
 7. Rotas fora do mapa de permissão: `ROTAS_SEM_PERMISSAO_DE_TELA` em `utils/acessoConfig.js` ✅.
 
 Dados em `auth.rotas_telas` e `auth.telas`: **o dump é só esqueleto** (sem `COPY`/`INSERT`), então quais linhas existem em produção ❓ Gustavo (`auth.vw_rotas_telas_conferencia` ajuda a conferir).

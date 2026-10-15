@@ -1,7 +1,7 @@
 ---
 tags: [anexo, bff, bearer, permissoes, rotas, av-hub, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-15
 status: vigente
 dono: Nathan
 fontes: [HUB b55ac55 app/api/**/route.ts (extração por script em 14/10), api-acos-vital f322dcd middlewares/identidadeUsuario.js e utils/acessoConfig.js, Dump Avhub 14/10 (auth.rotas_telas), v1 Mapa-Rotas-BFF-API-para-Bearer e anexo mapa-rotas.js]
@@ -9,7 +9,7 @@ fontes: [HUB b55ac55 app/api/**/route.ts (extração por script em 14/10), api-a
 
 # Mapa de rotas do BFF para a API: quem chama com Bearer
 
-> **Correção (reauditoria de 14/10/2026):** a contagem "Sem Bearer (`headersCompras`, `headersApi` ou `x-api-key` inline)" abaixo classifica errado: `headersCompras` (`lib/compras/api.ts:31`) e `headersApi` (`lib/api/pedidosVenda.ts:96`) são apelidos de `headersComIdentidade` e **mandam o Bearer**. Na leitura arquivo a arquivo, só `app/api/auth/[...nextauth]/route.ts` (3 funções do login) chama a API sem o token do usuário ✅. Veja BL-042 em [[Backlog-por-Frente]] e PS-018 em [[Pontas-Soltas]].
+> **Correção (reauditoria de 14/10/2026):** a contagem "Sem Bearer (`headersCompras`, `headersApi` ou `x-api-key` inline)" abaixo classifica errado: `headersCompras` (`lib/compras/api.ts:31`) e `headersApi` (`lib/api/pedidosVenda.ts:96`) são apelidos de `headersComIdentidade` e **mandam o Bearer**. Na leitura arquivo a arquivo, só `app/api/auth/[...nextauth]/route.ts` (3 funções do login) chama a API sem o token do usuário ✅. **Em 15/10 (PR #206):** restou só `fetchMenu`; perfis e tela inicial passaram a usar `GET /me/permissoes` com o Bearer. Veja BL-042 em [[Backlog-por-Frente]] e PS-018 em [[Pontas-Soltas]].
 
 Fora do fluxo 0b, mas decide se o usuário comum leva 403. Regras de chave e token: [[Chaves-e-Autenticacao]]; permissões: [[RBAC-e-Permissoes]].
 
@@ -19,7 +19,7 @@ Fora do fluxo 0b, mas decide se o usuário comum leva 403. Regras de chave e tok
 - **Sem** Bearer nada muda: segue só a `x-api-key` (BFF, MES e pipeline) e os campos de autoria do corpo são os informados.
 - Escopo de vendedores: fixo desde 09/10 (contrato 40); só vale com token ✅ `acessoConfig.js:28-35`.
 - Com token, a API sobrescreve `id_usuario_sessao` e os campos de autoria (`created_by`, `updated_by`, `deleted_by`, `aprovado_por`, `decidido_por`, `cancelado_por`) pelo id do token ✅ `identidadeUsuario.js:55-64`.
-- O `backendToken` dura 15 minutos e não renova depois de expirar; quem fica ocioso volta a chamar só com a chave ❓ (v1, não reconferido no HUB).
+- O `backendToken` dura 15 minutos. O BFF o renova quando faltam menos de 5 min (a sessão é relida a cada 4 min com a aba aberta); quem fica ocioso além da validade não renova (a API recusa token vencido): a sessão é marcada como expirada e a tela leva ao login. Rota com `requirePermission` responde 401 sem token, em vez de seguir só com a chave ✅ HUB `d0ef359` (`app/api/auth/[...nextauth]/route.ts`, `lib/api/requirePermission.ts`, `providers/SessaoExpiradaGuard.tsx`); ❓ não testado na homologação.
 - A tabela `auth.rotas_telas` existe no dump, com `acao` entre `pode_visualizar`, `pode_criar`, `pode_editar`, `pode_deletar`, `pode_aprovar` ✅ (`CREATE TABLE auth.rotas_telas`). Quais linhas existem em produção ❓ Gustavo.
 
 ## Números no HUB `b55ac55`

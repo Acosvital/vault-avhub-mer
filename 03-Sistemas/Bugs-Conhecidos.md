@@ -1,7 +1,7 @@
 ---
 tags: [sistemas, bugs, pendencias, mes, av-hub, pipeline]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-15
 status: vigente
 dono: Nathan
 fontes: [api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, HUB b55ac55, omie-elt-pipeline 0f739f0, Dump MES e Dump Avhub de 14/10, v1 AV-Hub-Bugs-Catalogo (revisado item a item)]
@@ -28,7 +28,6 @@ Só entra aqui o que foi **conferido no código ou no dump de 14/10**. Cada linh
 | # | Severidade | Dono | Bug | Selo e evidência |
 |---|---|---|---|---|
 | B10 | média | Gustavo | **`alterado_desde` é código morto em `GET /produtos` e `GET /parceiros`.** O filtro está escrito depois do `return where`, nunca roda. O contrato API-001 diz "aplicado" | ✅ `core/tables/produtos/produtos.route.js:51-62`, `core/tables/parceiros/parceiros.route.js:95-109` |
-| B11 | média | Nathan | **Criar, editar e excluir produto em `/cadastros/auxiliares/produtos` quebram no BFF**: `app/api/produtos/route.ts` só exporta `GET` e não existe `[id]` | ✅ `HUB app/api/produtos/route.ts:6` |
 | B12 | média | Gustavo | **`pessoa_vendedor` tem model e rota (`/pessoa_vendedor`) e não existe tabela nem view no dump** | ✅ `schemas/core_vendas_faturamento/index.js` (import e rota) x dump sem `pessoa_vendedor` |
 | B13 | baixa | Gustavo | `POST /usuarios/:id/favoritos`: `usuarios_favoritos.model.js` declara `id` como PK sem `defaultValue`/`allowNull`; em setembro dava `400 "Campo obrigatório não informado: id"`. Não reproduzido em 14/10 | ❓ `auth/tables/usuarios_favoritos/usuarios_favoritos.model.js:10-14` |
 | B14 | baixa | Gustavo | O job do status por item ainda lê regra de ambiente (`MES_STATUS_INTERVALO_SEG`, `MES_STATUS_CORTE_INICIAL_DIAS`), contra a regra do Nathan; Torre e custo já são constantes | ✅ `itens_pedido_status.job.js:34-52` x `item_estado_projetado.job.js:41-46` |

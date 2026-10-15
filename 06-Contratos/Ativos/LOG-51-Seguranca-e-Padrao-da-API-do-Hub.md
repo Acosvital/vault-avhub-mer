@@ -16,7 +16,8 @@ criado_original: 2026-10-15
 > [!info] Situação em 15/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (transversal, fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - 🔴 Nenhum item deste contrato está feito. É o resultado de uma auditoria de **leitura de código** da `api-acos-vital` (commit `276dab8`) e do dump de esquema, pedida pelo Nathan para deixar o av-hub seguro e em padrão de ERP.
+> - 🔴 Nenhum item **da API** (S1 a S27) está feito. É o resultado de uma auditoria de **leitura de código** da `api-acos-vital` (commit `276dab8`) e do dump de esquema, pedida pelo Nathan para deixar o av-hub seguro e em padrão de ERP.
+> - 🟡 **Lado do HUB (seção 7):** H1, H3, H4, H5 e H6 estão no código, e o H2 em parte (resta `fetchMenu`), mesclados na PR #206 (`d0ef359`, 15/10/2026). O CI do HUB (lint, typecheck, madge, build e o e2e do Comercial) passou. H7 é manual e segue aberto. ❓ Não testado na homologação com a API e o Azure.
 > - ✅ Os itens S1 a S8, S11 (parte do `/azure`), S12 (`docsAuth.js` e `pagina.js`), S15, S19, S20, S22 (gatilho no dump), S23 (`limit`), S25 e S27 foram **relidos no código ou no dump em 15/10/2026**, depois da auditoria. Os demais (S9, S10, S13, S14, S16, S17, S18, S21, S24 e S26) vêm da auditoria por leitura e o DBA deve reconfirmar ao implementar.
 > - ❓ **Nada foi executado.** Não subi a API nem testei requisição. Os valores reais do `.env` e do Coolify, os GRANTs e o conteúdo de `auth.rotas_telas` em produção não foram vistos (o dump não traz GRANT).
 > - 🟡 Quem decide o que entra e em que ordem é o Nathan com o Gustavo. A seção 9 lista as perguntas.
@@ -81,7 +82,7 @@ Prioridade: **P1** corrigir antes de qualquer expansão de uso; **P2** na sequê
   1. Migrar o MES e o pipeline para chaves de `auth.chaves_servico` com o **menor nível** que servem (`escrita` onde precisam escrever, `leitura` onde só leem). Hoje o nível não restringe rota (não há lista de rotas por chave): acrescentar `rotas_permitidas` à chave (lista de métodos e padrões de caminho, como `auth.rotas_telas`) e recusar com 403 o que sai da lista. Fecha BL-018.
   2. Deixar `API_KEYS` do `.env` **só para o BFF** e ligar `IDENTIDADE_EXIGIR_TOKEN=true` para ele. Depois disso, transformar a variável em regra fixa no código (princípio do [[LOG-38-Regras-Sem-Chave-de-Ambiente]]) e apagar o ramo `exigeUsuario: false` das chaves de `API_KEYS`.
   3. Rotacionar a chave de produção que está hoje em texto no `.env.local` da estação do Nathan (ver S12 e a seção 7).
-- **Dependência com o front (seção 7):** com a variável ligada, só `/autenticacao` e `/me` ficam isentas (`acessoConfig.js:95`). As três chamadas do BFF feitas **antes** do login (`fetchMenu`, `fetchSlugDaTela`, `fetchInfoPerfisDoUsuario`, `app/api/auth/[...nextauth]/route.ts`) usam só a chave e passariam a receber 401. Ou o BFF passa a mandar o token do usuário nelas, ou o DBA inclui as rotas exatas em `ROTAS_SEM_PERMISSAO_DE_TELA`. **Não ligar a variável antes de resolver isso** (derruba o login).
+- **Dependência com o front (seção 7):** com a variável ligada, só `/autenticacao` e `/me` ficam isentas (`acessoConfig.js:95`). As três chamadas do BFF feitas **antes** do login (`fetchMenu`, `fetchSlugDaTela`, `fetchInfoPerfisDoUsuario`, `app/api/auth/[...nextauth]/route.ts`) usam só a chave e passariam a receber 401. Ou o BFF passa a mandar o token do usuário nelas, ou o DBA inclui as rotas exatas em `ROTAS_SEM_PERMISSAO_DE_TELA`. **Não ligar a variável antes de resolver isso** (derruba o login). Em 15/10 o HUB já passou perfis e tela inicial para `GET /me/permissoes` com o Bearer (H2, PR #206): **resta só `fetchMenu`**, que a API precisa isentar (`GET /permissoes_usuario/menu/:id_usuario`, conferindo que o id é o do token).
 - **Aceite:** ver teste T1 da seção 8.
 
 ### S2 — `POST /autenticacao/azure` emite JWT só com o e-mail
@@ -90,7 +91,7 @@ Prioridade: **P1** corrigir antes de qualquer expansão de uso; **P2** na sequê
 - **O que acontece.** Com a validação desligada, qualquer chamador com a chave de serviço obtém um JWT válido de **qualquer usuário ativo**, inclusive de um administrador, informando só o e-mail. Junto com S1, o controle da API fica em um segredo só.
 - **O que fazer (Gustavo, com o Nathan).**
   1. Tornar a validação do `id_token` **regra fixa** (sempre ligada em produção), sem chave de desligamento. O código de validação já existe e está pronto (`emailDoIdToken`).
-  2. O **BFF precisa mandar o `id_token`** do Azure no `POST /autenticacao/azure`. Hoje não manda (✅ `grep id_token` em `app/api/auth/[...nextauth]/route.ts` do HUB não acha ocorrência). Isso é trabalho do Nathan e vai primeiro (seção 7).
+  2. O **BFF precisa mandar o `id_token`** do Azure no `POST /autenticacao/azure`. Até 14/10 não mandava (`grep id_token` em `app/api/auth/[...nextauth]/route.ts` não achava ocorrência); **passou a mandar em 15/10 (H1, PR #206)**, então a API já pode fixar a validação. ❓ Testar o login Azure com a validação ligada.
   3. Restringir `/autenticacao/azure` a uma chave de serviço dedicada (a do BFF), nunca à do MES nem à do pipeline.
 - **Aceite:** teste T2.
 
@@ -194,22 +195,22 @@ Do dump, por script de leitura (estimativa; confirmar no banco): de 124 tabelas,
 | S23 | Dezenas de `Op.iLike: %${query.x}%` (ex.: `parceiros.route.js:86-89`) não escapam `%` e `_`: consulta cara com `%%%%`. O padrão correto está em `pedidos_liberacao.route.js:101-104`. `crudFactory.js:246` — `Math.min(200, parseInt(req.query.limit, 10) \|\| 50)` (✅ relido) — não tem piso: `limit=-5` vira `LIMIT` negativo e dá 500. Usar `parsePagination` (`utils/pagination.js`), que já faz certo. |
 | S24 | 16 arquivos de rota sem `limit`/`usePaginate`, 4 dos 33 `list()` sem paginar (`itens_pedido_status`, `pedidos_vendas_status_historico`, `contas_correntes`, `projetos`, `ip_regras`). As de itens e de histórico crescem. Teto de 200 em todas. |
 | S25 | `double precision` em quantidades: `core_vendas_faturamento.produto_vendas.quantidade` (dump:2498), `historico.hst_produto_vendas.quantidade` (:13650), `core_comissionamento.simulacao_itens.qtd` (:12465) e `qtd_compra` (:12483). Multiplicar por preço perde precisão. Trocar por `numeric(15,4)` (convenção do vault). Migration com cuidado: as views dependentes (por exemplo `quantidade_vendida`, dump:20621) precisam ser recriadas. |
-| S27 | ✅ relido em 15/10: `parceiros.route.js:96` e `produtos.route.js:51` têm `return where;` **antes** do bloco `alterado_desde` (`:97-105` e `:52-60`). O filtro nunca executa, embora o contrato [[API-001-Produtos-Parceiros-Filtro-Incremental]] esteja como entregue. Mover o bloco para antes do `return` e criar teste; ou rebaixar o status do API-001. |
+| S27 | ✅ relido em 15/10 (já listado como B10 em [[Bugs-Conhecidos]]): `parceiros.route.js:96` e `produtos.route.js:51` têm `return where;` **antes** do bloco `alterado_desde` (`:97-105` e `:52-60`). O filtro nunca executa, embora o contrato [[API-001-Produtos-Parceiros-Filtro-Incremental]] esteja como entregue. Mover o bloco para antes do `return` e criar teste; ou rebaixar o status do API-001. |
 | S26 | `maskKey` duplicada (`apiKeyAuth.js:88`, `requestLogger.js:19`); `CAMPOS_AUTORIA` duplicada (`apiKeyAuth.js:72`, `identidadeUsuario.js:35`); três implementações de paginação; `ordens_compra.route.js` com 1359 linhas e `funcionarios.route.js` com 657, misturando SQL, regra e HTTP; stubs "regra fixa, devolve sempre true" em `acessoConfig.js:75-83`; `no-console` desligado (15 `console.log` fora de `docs/`); sem `eslint-plugin-security`; `package.json` com nome `empresa-api`; `Dockerfile` copia o código inteiro (`COPY . .`) sem `.dockerignore` para `docs`/`public` desnecessários. Extrair `middlewares/_comum.js`, dividir os arquivos grandes em rota, serviço e repositório, apagar os stubs, ligar `no-console`. |
 
 ## 7. O que o Nathan (front/BFF do HUB) precisa fazer para destravar
 
 Itens do lado do HUB, que **não** são do DBA. Eles definem a ordem da seção 10.
 
-| # | O quê | Destrava |
-|---|---|---|
-| H1 | Mandar o `id_token` do Azure no `POST /autenticacao/azure` | S2 (ligar a validação) |
-| H2 | As três chamadas pré-login (`fetchMenu`, `fetchSlugDaTela`, `fetchInfoPerfisDoUsuario`) passarem a levar o token do usuário, **ou** combinar com o DBA a lista exata de rotas isentas | S1 (ligar `IDENTIDADE_EXIGIR_TOKEN`) |
-| H3 | Falhar fechado quando a sessão estiver sem `backendToken` (401 "entre novamente"), em vez de seguir só com a chave de serviço; renovar o token por expiração, não só a cada 5 min | S1, S10 |
-| H4 | Tirar `backendToken` e `backendTokenExpiraEm` da `session` devolvida ao navegador (`app/api/auth/[...nextauth]/route.ts:389-390`); nenhum componente usa | defesa em profundidade |
-| H5 | Parar de aceitar `codigo_vendedor`/`vendedor` do navegador em `comissoes/minhas-comissoes` | escopo |
-| H6 | Rotas do BFF com `..` no parâmetro (`grupos-clientes`, `blacklist_*`, `comissoes/*`, `compras/pedidos-venda`) passarem por `parametrosSeguros` | traversal |
-| H7 | Rotacionar a chave de produção que está em texto no `.env.local` e apagar a linha comentada | S1 |
+| # | O quê | Destrava | Estado em 15/10 |
+|---|---|---|---|
+| H1 | Mandar o `id_token` do Azure no `POST /autenticacao/azure` | S2 (ligar a validação) | ✅ `findUserByEmail` manda `id_token` (PR #206) |
+| H2 | As três chamadas pré-login (`fetchMenu`, `fetchSlugDaTela`, `fetchInfoPerfisDoUsuario`) passarem a levar o token do usuário, **ou** combinar com o DBA a lista exata de rotas isentas | S1 (ligar `IDENTIDADE_EXIGIR_TOKEN`) | 🟡 Perfis e tela inicial vêm de `GET /me/permissoes` com o Bearer do próprio usuário; `fetchSlugDaTela` e `/usuarios_perfis` e `/perfis` saíram. **Resta `fetchMenu`**, só com a chave: a API isenta `GET /permissoes_usuario/menu/:id_usuario` |
+| H3 | Falhar fechado quando a sessão estiver sem `backendToken` (401 "entre novamente"), em vez de seguir só com a chave de serviço; renovar o token por expiração, não só a cada 5 min | S1, S10 | ✅ `requirePermission`: 401 sem token, 503 se `/me/permissoes` falhar, 403 fora de `auth.telas`, sem fallback para o menu do JWT; renova com menos de 5 min para vencer; sessão relida a cada 4 min; `SessaoExpiradaGuard` leva ao login |
+| H4 | Tirar `backendToken` e `backendTokenExpiraEm` da `session` devolvida ao navegador | defesa em profundidade | ✅ O servidor lê do cookie (`lib/auth/backendToken.ts`); a sessão só traz `sessaoExpirada` |
+| H5 | Parar de aceitar `codigo_vendedor` do navegador em `comissoes/minhas-comissoes` | escopo | ✅ O escopo vem do token, aplicado pela API (`faturamento_planilha` está no mapa de escopo). `vendedor` segue como filtro de texto que só estreita |
+| H6 | Rotas do BFF com `..` no parâmetro (`grupos-clientes`, `blacklist_*`, `comissoes/*`, `compras/pedidos-venda`) passarem por validação | traversal | ✅ `parametrosSeguros` para ids e códigos, `segmentoSeguro` para texto livre, e trava única no `repassar` de `grupos-clientes` |
+| H7 | Rotacionar a chave de produção que está em texto no `.env.local` e apagar a linha comentada | S1 | 🔴 Manual (Nathan e Gustavo); o assistente não mexe em segredo |
 
 Os demais achados de segurança do BFF (IDOR na observação do PCP, e-mail de proposta com só `pode_visualizar`, PATCH de senha com só `pode_editar`, validação de entrada, CSRF, CSP) ficam em nota própria do HUB, não neste contrato.
 
@@ -254,7 +255,7 @@ A ordem respeita as dependências: o que não depende do HUB vai primeiro, e a c
 |---|---|---|
 | 1 | Gustavo | Responder Q1 a Q5 (só leitura em produção). Define o tamanho real de S1, S8 e S12 |
 | 2 | Gustavo | **Sem dependência do HUB:** S4, S6, S7 (com `CORS_ORIGINS` combinado), S5, S15, S3, S10, S19, S20, S21, S22, S23 |
-| 3 | Nathan | H1, H2, H3, H4, H5, H6 e H7 no HUB, em PR próprio |
+| 3 | Nathan | H1 a H7 no HUB. ✅ H1, H3 a H6 e parte do H2 na PR #206 (`d0ef359`, 15/10/2026); resta `fetchMenu` (com a API) e H7 (manual) |
 | 4 | Gustavo | S2: tornar a validação do `id_token` fixa **depois** de H1 em produção |
 | 5 | Gustavo | S1 parte 1: criar chaves em `auth.chaves_servico` para MES e pipeline, com `rotas_permitidas`; trocar nos dois lados; rotacionar a chave antiga |
 | 6 | Gustavo | S1 parte 2: ligar `IDENTIDADE_EXIGIR_TOKEN` para o BFF, depois de H2 e H3; tornar a regra fixa e apagar o ramo antigo |
@@ -265,7 +266,7 @@ A ordem respeita as dependências: o que não depende do HUB vai primeiro, e a c
 
 ## 11. Riscos e rollback
 
-- **Ligar `IDENTIDADE_EXIGIR_TOKEN` derruba o login do BFF** se H2 não estiver no ar. Por isso o passo 6 vem depois do 3. Rollback: reverter o commit (a variável volta ao padrão `false`).
+- **Ligar `IDENTIDADE_EXIGIR_TOKEN` derruba o login do BFF** se o `fetchMenu` (resto do H2) não for isentado ou não mandar o token. Por isso o passo 6 vem depois do 3. Rollback: reverter o commit (a variável volta ao padrão `false`).
 - **Tornar a validação do Azure fixa** barra o login de quem estiver com sessão em ponta sem `id_token`; o passo 4 só roda com H1 em produção. Rollback: reverter o commit.
 - **Chave do MES e do pipeline restritas a `rotas_permitidas`** podem negar uma rota que eles usam e ninguém lembrou. Fazer primeiro em modo **só registro** (logar o que seria negado por 3 a 5 dias, sem negar) e só então aplicar. Rollback: voltar a chave para `admin` (cadastro em `auth.chaves_servico`, sem deploy; o cache de 30 s limita a demora).
 - **Trocar o `DB_USER` da API** pode falhar por `GRANT` faltando (erro 500 em rotas pouco usadas). Rodar a suíte de testes e um passeio nas telas do HUB na homologação antes. Rollback: voltar o `DB_USER` antigo.

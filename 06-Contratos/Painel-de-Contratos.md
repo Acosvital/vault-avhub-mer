@@ -116,7 +116,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | LOG-48 | Contrato 48 | [[LOG-48-Acompanhamento-de-Clientes-Grupos-de-Empresa\|Acompanhamento de clientes e grupos de empresa]] | `parcial` | Ativos | — | — | Gustavo: §9.1 NF cancelada, §9.2 `codigo_cliente`, §10 deduções, §12 definição de cliente | Nathan: marcas `GAMBIARRA` do detalhe e §12.5 na tela | — |
 | LOG-49 | Contrato 49 | [[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos\|`GET /me/permissoes` com os vínculos de vendedor completos]] | `implementado-no-codigo` | Entregues | — | — | — | Nathan: LOG-50 | — |
 | LOG-50 | Contrato 50 | [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front\|Tirar as 2 marcas de escopo de vendedores do front]] | `para-implementar` | Ativos | — | — | — | Nathan: marcas A e B no BFF | — |
-| LOG-51 | Contrato 51 | [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub\|Segurança e padrão da API do av-hub (auditoria de 15/10): chave de serviço, Azure, senha, erro, helmet, roles, auditoria, testes]] | `proposta` | Ativos | — | — | Gustavo: S1 a S8 na fase 1 (chave de serviço, Azure, senha, mass assignment, rate limit, erro, helmet, role do banco), S9 a S27 depois | Nathan: H1 a H7 no HUB (BL-058), que destravam S1 e S2 | — |
+| LOG-51 | Contrato 51 | [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub\|Segurança e padrão da API do av-hub (auditoria de 15/10): chave de serviço, Azure, senha, erro, helmet, roles, auditoria, testes]] | `proposta` | Ativos | — | — | Gustavo: S1 a S8 na fase 1 (chave de serviço, Azure, senha, mass assignment, rate limit, erro, helmet, role do banco), S9 a S27 depois | Nathan: H1, H3 a H6 feitos (PR #206); resta H2 (`fetchMenu`, com a API) e H7 (manual), BL-058 | — |
 | LOG-52 | Contrato 52 | [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub\|Migrar o módulo Comercial & Suprimentos para a API do hub e aposentar a `api-comercial`]] | `proposta` | Ativos | — | — | Gustavo: schema `core_comercial`, DDL, `GRANT`, linhas de `auth.rotas_telas`, revisão; Q1 (pedidos de compra na pipeline) e Q2 (telas em produção) | Nathan: corte do HUB (BL-063) e decisões Q3, Q4, Q7, Q8, Q10 | Pablo: escrever o módulo na `api-acos-vital` (BL-062) |
 | HIST-Analise-Contratos-vs-Hub-2026-10-01 | — | [[HIST-Analise-Contratos-vs-Hub-2026-10-01\|Análise de contratos x hub (retrato de 01/10)]] | `arquivado` | Arquivados | — | — | — | — | — |
 | HIST-Indice-Contratos | — | [[HIST-Indice-Contratos\|Índice antigo de contratos (v1)]] | `arquivado` | Arquivados | — | — | — | — | — |
@@ -184,7 +184,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 - [[LOG-48-Acompanhamento-de-Clientes-Grupos-de-Empresa|LOG-48]]: Nathan: marcas `GAMBIARRA` do detalhe e §12.5 na tela
 - [[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos|LOG-49]]: Nathan: LOG-50
 - [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front|LOG-50]]: Nathan: marcas A e B no BFF
-- [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub|LOG-51]]: Nathan: H1 a H7 no HUB (BL-058); sem H1 a H3 a API não liga `IDENTIDADE_EXIGIR_TOKEN` nem fixa a validação do Azure
+- [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub|LOG-51]]: Nathan: H1, H3 a H6 feitos na PR #206 (`d0ef359`); resta H2 (`fetchMenu`: a API isenta a rota do menu) e H7 (rotacionar a chave, manual) para a API ligar `IDENTIDADE_EXIGIR_TOKEN`
 - [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub|LOG-52]]: Nathan: corte do HUB para a API única (BL-063); decidir Q3, Q4, Q7, Q8, Q10 e Q11
 
 ### Pablo (Comercial & Suprimentos)

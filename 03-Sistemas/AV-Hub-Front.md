@@ -1,10 +1,10 @@
 ---
 tags: [sistemas, av-hub, hub, nextjs, frontend, bff]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-15
 status: vigente
 dono: Nathan
-fontes: [HUB b55ac55 em C:\Users\nathan.silva\Desktop\TI\NATHAN\00 - HUB (conferido no código em 14/10), api-acos-vital f322dcd, v1 AV-Hub-Arquitetura-BFF, AV-Hub-Modulos, AV-Hub-RBAC]
+fontes: [HUB d0ef359 (PR #206, sobre b55ac55) em C:\Users\nathan.silva\Desktop\TI\NATHAN\00 - HUB (conferido no código em 14/10), api-acos-vital f322dcd, v1 AV-Hub-Arquitetura-BFF, AV-Hub-Modulos, AV-Hub-RBAC]
 ---
 
 # AV-Hub Front (HUB)
@@ -14,9 +14,9 @@ Front do av-hub: Portal do Vendedor, Portal do Gerente, Compras, Comercial & Sup
 ## Como funciona
 
 - **BFF.** O navegador só fala com `app/api/**` (199 `route.ts`); o BFF chama a `api-acos-vital` com `process.env.API_URL` (251 usos) e `x-api-key` (`API_KEY`, 9 usos) ✅ grep em `app lib services`. O módulo Comercial & Suprimentos passa por `app/api/comercial/[...rota]/route.ts` com `COMERCIAL_API_URL` e `COMERCIAL_API_KEY` ✅. O mapa completo de rotas e do que cada uma exige: [[Mapa-Rotas-BFF-Bearer]].
-- **Identidade.** `headersComIdentidade()` (via `headersDaApi()`) soma `x-api-key` e `Authorization: Bearer <token do usuário>` emitido por `POST /autenticacao/*` da API ✅ `lib/api/escopoUnidade.ts:45-47`. Com o token, a API aplica a permissão por rota (`auth.fn_autorizar`) e o escopo de vendedor ([[RBAC-e-Permissoes]]). Autoria (`created_by`, `aprovado_por`…) sai da sessão, nunca do corpo ✅ `lib/compras/api.ts:42-45`.
-- **Login.** NextAuth com Azure AD (`AZURE_AD_CLIENT_ID`, `_SECRET`, `_TENANT_ID`) ✅; `NEXT_PUBLIC_DEV_SEM_LOGIN` liga o modo de desenvolvimento sem login (tudo liberado) ✅ `lib/auth/devSemLogin.ts`, `lib/api/requirePermission.ts:25`.
-- **Permissão no BFF.** `requirePermission(telaSlug | [slugs], acao)` confere primeiro `GET /me/permissoes` (cache 5 s) e, sem backendToken ou com falha, cai no menu preso no JWT ✅ `lib/api/requirePermission.ts:14-50`. Ações: `pode_visualizar`, `pode_criar`, `pode_editar`, `pode_deletar`, `pode_aprovar` ✅ `lib/permissions.ts:7-12`.
+- **Identidade.** `headersComIdentidade()` (via `headersDaApi()`) soma `x-api-key` e `Authorization: Bearer <token do usuário>` emitido por `POST /autenticacao/*` da API `lib/api/escopoUnidade.ts`. O token do usuário é lido do cookie httpOnly no servidor (`lib/auth/backendToken.ts`) e **não** vai na `session` que o navegador lê: a sessão só informa `sessaoExpirada`, e `providers/SessaoExpiradaGuard.tsx` leva ao login ✅ HUB `d0ef359`. Com o token, a API aplica a permissão por rota (`auth.fn_autorizar`) e o escopo de vendedor ([[RBAC-e-Permissoes]]). Autoria (`created_by`, `aprovado_por`…) sai da sessão, nunca do corpo ✅ `lib/compras/api.ts:42-45`.
+- **Login.** NextAuth com Azure AD (o `id_token` vai ao `/autenticacao/azure`, que é a prova de identidade; perfis e tela inicial vêm de `GET /me/permissoes`) (`AZURE_AD_CLIENT_ID`, `_SECRET`, `_TENANT_ID`) ✅; `NEXT_PUBLIC_DEV_SEM_LOGIN` liga o modo de desenvolvimento sem login (tudo liberado) ✅ `lib/auth/devSemLogin.ts`, `lib/api/requirePermission.ts:25`.
+- **Permissão no BFF.** `requirePermission(telaSlug | [slugs], acao)` confere primeiro `GET /me/permissoes` (cache 5 s) e responde 401 sem o token do usuário, 503 se `/me/permissoes` estiver fora do ar e 403 para tela fora de `auth.telas`; o menu preso no JWT é só apresentação e não autoriza nada ✅ `lib/api/requirePermission.ts`. Ações: `pode_visualizar`, `pode_criar`, `pode_editar`, `pode_deletar`, `pode_aprovar` ✅ `lib/permissions.ts:7-12`.
 - **Permissão na tela.** `can('pode_x', 'slug')` lê o menu da sessão; botões e abas dependem disso ✅ ex.: `components/Compras/ComprasRequisicoes.tsx:92,186`.
 - **Sem camada de dados no cliente.** Hooks por módulo (`components/Compras/useCompras.ts`, `Followup/useFollowup.ts`) chamam o BFF; sem regra de negócio no front ("GAMBIARRA(" marca onde ainda há: 11 ocorrências em `app`, `components`, `lib`, `services`) ✅ grep de 14/10.
 
@@ -67,7 +67,6 @@ Resumo; a tabela completa está em [[RBAC-e-Permissoes]].
 
 ## Pontas soltas conferidas no código
 
-- ✅ `app/api/produtos/route.ts` exporta só `GET` e não existe `[id]`: criar, editar e excluir produto na tela `/cadastros/auxiliares/produtos` quebram no BFF (`route.ts:6`; pasta só tem `route.ts`).
 - ✅ `app/api/orcamento/*` não chama mais as views antigas: lê `lib/orcamento/dados.ts`, que importa JSON local (`lib/orcamento/data/*.json`). Orçamento roda sobre dado estático, não sobre `core_compras.orc_*` ([[Orcamento]]).
 - ✅ A aprovação lê `limite_aprovacao` de `GET /compras/parametros` apenas para avisar na tela de OC ("Acima de R$… ela nasce Aguardando aprovação") ✅ `components/Compras/FecharCompra.tsx:604-605,1652`.
 - 🟡 `api-comercial` está dentro do mesmo repositório do HUB (pasta `api-comercial/`) e tem CI próprio ([[API-Comercial]]).
