@@ -9,13 +9,13 @@ fontes: [v1 05-Pessoas-e-Equipe/Equipe-Projeto, v1 Cronograma-2-Meses §3.2 e §
 
 # Equipe e divisão
 
-Nomes completos pelo `git log`. O cargo formal de RH não consta no vault ❓.
+Nomes completos pelo `git log`.
 
 ## Quem faz o quê
 
 | Pessoa | Papel | Frente | Foco no plano | Capacidade S1–FC |
 |---|---|---|---|---|
-| **Nathan** | Coordenador de TI e arquiteto do ERP; dono deste vault e das decisões | Front do av-hub (telas e BFF), contratos, coordenação | 40% | 16,8 pd |
+| **Nathan** | Coordenador de TI e arquiteto do ERP; dono deste vault, das decisões e do pipeline Omie 📝 | Front do av-hub (telas e BFF), `omie-elt-pipeline`, contratos, coordenação | 40% | 16,8 pd |
 | **Gustavo M. de Farias** | Colega, DBA | Banco e API do av-hub (`api-acos-vital`): migrations, `auth.*`, funções, envio fixo da OC, chave do MES (L6), `exclusionSync` | 60% | 25,2 pd |
 | **Robert Wilson** | Colega, fullstack sênior | MES inteiro: `api-pcp` e `app-pcp`, incluindo Recebimento, carga inicial em lote (G1), baixa no despacho, D11 (leitor 2D e posto de recebimento), I1/J2/J5 | 75% | 31,5 pd |
 | **Pablo Cruz** | Colega, fullstack | Comercial & Suprimentos: `api-comercial` e módulo no av-hub. Saiu do MES em 07/10 | 75% | 31,5 pd (hoje fora da conta do plano) |
@@ -44,7 +44,7 @@ Com G1, D11, I1, J2, J5 e D12 no Robert e o custo do lote (K3 a K6) somado, o pl
 | Vendedor, Gerente (equipe) | HUB: Liberar Pedidos, Pedidos da equipe | [[01-Vendas-Liberacao]] |
 | PCP e Almoxarife (setor Estoque) | `app-pcp`: Triagem, Destinação, Atendimento | [[02-PCP-Triagem-e-Destinacao]], [[03-Estoque-Atendimento-e-Despacho]] |
 | Comprador, Gerente de Compras, Diretoria (acima de R$ 30 mil) | HUB: Compras | [[04-Circuito-de-Compra]] |
-| CCP (follow-up de compras) | HUB Follow-up; MES Compras · CCP (leitura) | perfil CCP ainda não existe 🔴 Nathan, Gustavo |
+| CCP (follow-up de compras) | HUB Follow-up; MES Compras · CCP (leitura) | O pessoal do CCP faz parte do PCP e cuida do follow-up das compras; Compras acessa só para ler; havendo ocorrência, o CCP interage aprovando ou não 📝 (Nathan, 14/10). O perfil ainda será criado 🔴 Nathan, Gustavo |
 | Recebimento (doca), Qualidade | `app-pcp` | [[05-Recebimento]], [[06-Qualidade-Entrada]], [[08-Qualidade-Saida]] |
 | Operador de fábrica, Expedição | `app-pcp` | [[07-Producao-e-Roteiro]], [[09-Expedicao]] |
 | Fiscal | Omie | [[10-Fiscal-Omie]] |

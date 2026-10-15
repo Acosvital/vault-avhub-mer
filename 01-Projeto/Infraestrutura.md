@@ -15,7 +15,7 @@ Os sistemas rodam em servidores próprios (self-hosted), não em nuvem gerenciad
 
 | VPS | Papel | O que roda |
 |---|---|---|
-| **VPS1** | Aplicações no Coolify, atrás do Traefik | HUB, `api-acos-vital`, MES (`api-pcp`, `app-pcp`), pipeline Omie, Backlog Ágil, blog; `api-comercial` quando for publicado 🔴 |
+| **VPS1** | Aplicações no Coolify, atrás do Traefik | HUB, `api-acos-vital`, MES (`api-pcp`, `app-pcp`), pipeline Omie, Backlog Ágil, blog. Tudo em contêineres Docker gerenciados pelo Coolify 📝. A `api-comercial` não será publicada (ver abaixo) |
 | **VPS2** | Postgres | Banco do av-hub (um cluster com um schema por domínio), banco do MES (schema `public`) e demais; WAL de backup já configurado (cobre schema novo automaticamente) |
 | **VPS3** | MinIO | Armazenamento de arquivos: laudos e certificados da Qualidade, fotos, imagens do blog |
 
@@ -49,7 +49,7 @@ Não é um app Next.js: são processos Node que precisam de **Redis** e de um **
 | Filas | `omie-extract`, `omie-load`, `omie-load-realtime`, `omie-query`, `omie-envio-oc` ✅ (`src/queue/index.ts:28,101,111`) |
 | Pool de conexões | `PG_POOL_MAX` (padrão 10; `src/db/pool.ts:31`); o `load-worker` exige valor alto (comentário em `docker-compose.yml:70`): dimensionar junto com o limite de conexões do Postgres |
 | Saída | API do Omie, API do BCB (PTAX) e API do av-hub (`AVHUB_API_URL`, envio da OC) ✅ |
-| Onde roda | VPS1 📝. Se sob o Coolify ou outro formato, ❓ confirmar com quem faz o deploy |
+| Onde roda | VPS1, em contêiner Docker junto do Coolify 📝 (Nathan, 14/10) |
 
 Estado e jobs: [[Pipeline-Omie]].
 
@@ -63,10 +63,9 @@ Estado e jobs: [[Pipeline-Omie]].
 
 | Item | Dono |
 |---|---|
-| Backup e restauração testada do banco do MES (B2, B7) | 🔴 Gustavo |
-| Publicar o `api-comercial` (ambiente, cluster do schema `core_comercial`, migrate antes ou no Dockerfile) | 🔴 Pablo, Nathan |
-| Exposição de rede da `api-pcp` (item #13 do Registro do v1) | 🔴 Gustavo |
+| Backup e restauração testada dos bancos do MES e do av-hub (B2, B7) | 🟡 adiado: "papo para outra hora" (Nathan, 14/10), sem data |
+| `api-comercial`: é uma API de teste do Pablo; ele migra tudo para a `api-acos-vital`. Não há ambiente nem cluster próprio a montar | 📝 Pablo |
+| Exposição de rede da `api-pcp` (item #13 do Registro do v1): a `api-pcp` já está no ar (Nathan); restringir a origem não foi discutido | 🟡 Gustavo |
 | Retenção de `auth.logs` (item #53) | 🔴 Gustavo |
-| Confirmar como o pipeline é implantado | ❓ Nathan |
 
 Pendências gerais em [[Pontas-Soltas]]; riscos em [[Riscos]].

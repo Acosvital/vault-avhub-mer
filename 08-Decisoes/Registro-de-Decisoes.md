@@ -25,6 +25,15 @@ Lista única de decisões do projeto: **N14-01 a N14-09** (14/10), **DEC-1 a DEC
 | N14-06 | **Tudo que é fabricado ou comprado vai para o Estoque** e vira lote e saldo. Comprado já vai. Fabricado nunca vira lote (`OrigemLote` só tem RECEBIMENTO e CARGA_INICIAL) (BL-008) | 14/10/2026 | Nathan | 📝, 🔴 sem código | |
 | N14-07 | **Schemas:** o MES usa só `public`; o av-hub divide em `core_*`, `auth`, `omie_*`, `historico`. Não é contradição | 14/10/2026 | Nathan | 📝 ✅ | |
 | N14-08 | **A requisição tem duas origens:** (1) Compras cria no av-hub ("Nova requisição", `POST /compras/requisicoes`, `compras.pode_criar`); (2) o PCP cria no MES a requisição do material do pedido (Estoque, "Solicitar compra", setor `REQUISICAO`) | 14/10/2026 | Nathan | 📝 ✅ | |
+| N14-10 | **Marcos M3 a M7 confirmados** (16/10, 30/10, 13/11, 18/11, 18/12). Há um **protótipo para entregar por volta de 15/11/2026** | 14/10/2026 | Nathan | 📝 | #36 (🟡) |
+| N14-11 | **Déficit de 16,1 pd do Robert:** cobrir com esforço dobrado e horas extras, se for o caso | 14/10/2026 | Nathan | 📝 | |
+| N14-12 | **Torre de Fluxo** é a visão do fluxo inteiro da empresa e de onde está cada pedido. O ranking de gargalos (T.5b) é uma das 4 telas dela e continua candidato ao Ciclo 2 se faltar capacidade | 14/10/2026 | Nathan | 🟡 | |
+| N14-13 | **Donos:** o Nathan é dono do `omie-elt-pipeline`. `HauntedCrusader` é o Gustavo; `oluccaa` e "Nathan Lucca" são o Nathan | 14/10/2026 | Nathan | 📝 | atribuição "pipeline do Gustavo" do v1 |
+| N14-14 | **CCP:** o pessoal do CCP faz parte do PCP e cuida do follow-up das compras. Compras acessa só para ler. Havendo ocorrência, o CCP interage aprovando ou não. O perfil ainda será criado | 14/10/2026 | Nathan | 📝, 🔴 perfil não existe | |
+| N14-15 | **`api-comercial`** é só uma API de teste do Pablo; ele migra tudo para a `api-acos-vital`. Não será publicada | 14/10/2026 | Nathan | 📝 | |
+| N14-16 | **Implantação:** pipeline e demais aplicações rodam na VPS1, em contêiner Docker junto do Coolify. A `api-pcp` já está no ar e os contêineres do av-hub em produção estão saudáveis | 14/10/2026 | Nathan | 📝 | |
+| N14-17 | **Backup** dos bancos do MES e do av-hub: adiado, "papo para outra hora", sem data | 14/10/2026 | Nathan | 🟡 | |
+| N14-18 | **Merge `develop` → `main`:** pode ser feito a qualquer momento; tudo o que está na `develop` foi testado e funciona. Em 14/10 a `develop` está à frente em 13 commits (`api-pcp`), 10 (`app-pcp`), 11 (`api-acos-vital`) e 284 (HUB) | 14/10/2026 | Nathan | 📝 | |
 | N14-09 | **Divisão de trabalho:** Gustavo (DBA) faz banco e API do av-hub; o front do av-hub é do Nathan; o MES é do Robert; Pablo faz Comercial & Suprimentos | 14/10/2026 | Nathan | 📝 | |
 
 ## DEC-1 a DEC-12 (decisões com prazo, de 21 e 22/09/2026)

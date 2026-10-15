@@ -9,6 +9,8 @@ fontes: [HUB b55ac55, pasta C:\Users\nathan.silva\Desktop\TI\NATHAN\00 - HUB\api
 
 # API Comercial (`api-comercial`)
 
+> **Decisão do Nathan, 14/10/2026 📝:** a `api-comercial` é só uma API de teste do Pablo. Ele vai migrar tudo para a `api-acos-vital` (API do av-hub). Ela não será publicada, e o que está descrito abaixo é o estado do código de teste, não um serviço de produção.
+
 Backend do módulo **AV Comercial & Suprimentos**: propostas, ofertas de fornecedor, custo de referência, configurador de telha, solicitações de custo, dashboards e a sincronização com o Omie (produtos, fornecedores, pedidos de compra). Dono: Pablo. Está **fora do fluxo de Atividades**: o pedido de venda do Omie entra no fluxo pelo av-hub ([[AV-Hub-API]]), e não por aqui. Mesmo assim ele compartilha RBAC, usuários e a fonte Omie com o av-hub. Anexo: [[Comercial-Suprimentos]]. Selos: [[Regras-do-Vault]].
 
 ## Onde mora e como roda

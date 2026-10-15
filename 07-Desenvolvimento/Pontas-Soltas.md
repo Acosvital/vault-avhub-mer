@@ -39,7 +39,7 @@ Dúvidas, lacunas de decisão e pontos sem dono que **não são tarefa de códig
 | PS-024 | Baixa no despacho do Estoque (documento de retirada) sem estimativa em pd | Robert | E6 | Dimensionar antes de fechar o Ciclo 1 | BL-007, RS-004 |
 | PS-025 | Comentários do código chamam o pedido manual de "Contrato 30" | Gustavo | — | Trocar para 45 em `pedidoVendaManual.js`, `pedidos_vendas.route.js`, `notas_fiscais.route.js` | #85 |
 | PS-026 | Perguntas abertas da Torre: `{id}` do item, lista fechada de `tipo`, R-08, R-13, LGPD, T.6 sem dono | Robert, Gustavo, Nathan | todos | Responder antes de 23/11 | [[Rastreabilidade-e-Torre-de-Fluxo]] |
-| PS-027 | Regras dos itens 18 e 20 do PCP legado desconhecidas; destino por filial da Caldeiraria como a Flange (🟡) | Nathan | P2, F1 | Nathan descreve as regras | #75, #78 |
+| PS-027 | Regras dos itens 18 (rastreabilidade por material: número no padrão óleo e gás e Data Book) e 20 (ciclo do Book com o cliente: preparação, inspeção pelo cliente, postagem no portal, aprovação) do PCP legado desconhecidas pelo Robert; destino por filial da Caldeiraria como a Flange (🟡). O Robert responde as demais perguntas da Caldeiraria em 15/10 | Nathan | P2, F1 | Nathan descreve os campos | #75, #78 |
 | PS-028 | Notificações do HUB com 403 num servidor local apontado para a `api-test` | Nathan | — | Investigar permissão do usuário de teste | #86 |
 | PS-029 | Exposição pública do `api-pcp` no Coolify | Gustavo | — | Confirmar domínio e restringir origem | #13, RS-009 |
 | PS-030 | Documentos do v1 que ainda falam em "Estoque·Entrada", setor "Requisições de compras" no roteiro ou "registrar compra" manual descrevem desenho superado | Nathan | E, C | Não usar o v1 para esses temas | [[Contradicoes-Resolvidas]] |

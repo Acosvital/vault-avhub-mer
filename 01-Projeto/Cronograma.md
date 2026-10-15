@@ -9,7 +9,7 @@ fontes: [v1 07-Cronograma/Cronograma-2-Meses seções 1, 3.2, 3.3, 3.4, 6, 9, v1
 
 # Cronograma
 
-> As estimativas em pd são do Nathan com apoio do Claude, por complexidade (±30%); o Robert as valida item a item antes de a data valer como compromisso 🟡. As datas de marcos M3 a M7 aguardam o aval do Nathan (#36 do Registro do v1) 🟡.
+> As estimativas em pd são do Nathan com apoio do Claude, por complexidade (±30%); o Robert as valida item a item antes de a data valer como compromisso 🟡. As datas dos marcos M3 a M7 estão confirmadas pelo Nathan (14/10/2026) 📝. Há um **protótipo para entregar por volta de 15/11/2026**, logo depois do M5 (13/11) 📝.
 
 ## Regras de datas (únicas)
 
@@ -67,7 +67,7 @@ Com 100% de foco as ondas terminam em 14/01 (W0), 17/03, 26/04, 07/07 e 06/08/20
 
 | Pessoa | Foco | Capacidade S1–FC | Observação |
 |---|---|---|---|
-| Nathan | 40% | 16,8 pd | S5: 11 pd contra 9,2 pd; propõe-se levar a tela de ranking de gargalos (T.6) ao Ciclo 2 🟡 |
+| Nathan | 40% | 16,8 pd | S5: 11 pd contra 9,2 pd. A tela de ranking de gargalos (T.5b, uma das 4 telas da Torre de Fluxo) é a candidata a ir ao Ciclo 2 se faltar capacidade; o Nathan ainda não decidiu 🟡 |
 | Gustavo | 60% | 25,2 pd | folga de 11,9 pd na S1–FC e 9,8 pd na S5; pode receber parte do backend do MES 🟡 |
 | Robert | 75% | 31,5 pd | S1–FC + S5: capacidade 48,75 pd contra 64,85 planejados, **déficit de 16,1 pd** 🔴 |
 | Pablo | 75% | fora da conta | Comercial & Suprimentos |
@@ -144,11 +144,13 @@ gantt
 
 ## Ordem de corte (para manter a data fixa) 🟡
 
-Se algo estourar, o escopo cede, a data não. Cortar nesta ordem: (1) stretch B9 e B10 (histórico de OC, frete e parcelas); (2) C8, fila "Novo norte" do PCP; (3) status por item só para Fabricação e Recebimento; (4) D11 em Code128 em vez de leitor 2D; (5) reserva de estoque na Fase C. **Nunca cortar:** quarentena, inspeção e RNC; dupla conferência da carga; RBAC por setor. A ordem de corte alivia no máximo ~4,0 pd do Robert; os 12 pd restantes do déficit pedem decisão do Nathan (estender a janela, levar a J5 ao Ciclo 2 ou devolver parte do backend ao Gustavo) 🔴 Nathan. Riscos e gatilhos em [[Riscos]].
+Se algo estourar, o escopo cede, a data não. Cortar nesta ordem: (1) stretch B9 e B10 (histórico de OC, frete e parcelas); (2) C8, fila "Novo norte" do PCP; (3) status por item só para Fabricação e Recebimento; (4) D11 em Code128 em vez de leitor 2D; (5) reserva de estoque na Fase C. **Nunca cortar:** quarentena, inspeção e RNC; dupla conferência da carga; RBAC por setor. A ordem de corte alivia no máximo ~4,0 pd do Robert; o déficit restante será coberto com **dobra de esforço e horas extras, se preciso** 📝 (decisão do Nathan, 14/10); a ordem de corte e a opção de passar parte do backend ao Gustavo continuam como reserva. Riscos e gatilhos em [[Riscos]].
 
 ## Pendências
 
 - 🔴 Robert valida as estimativas de pd das ondas W0 a W4 e de K3 a K6.
-- 🔴 Nathan decide como cobrir os 16,1 pd de déficit e confirma M3 a M7.
-- 🔴 Robert informa a data do merge `develop` → `main` do MES antes do piloto (a `main` do `api-pcp` está em 08/10, 11 commits atrás da `develop`).
-- ❓ Dono do pipeline e dos itens 28 e 29 do levantamento do PCP legado. Ver [[Pontas-Soltas]].
+- 📝 Déficit de 16,1 pd: coberto com esforço dobrado e horas extras (Nathan, 14/10). M3 a M7 confirmados. Protótipo por volta de 15/11.
+- 📝 Merge `develop` → `main`: o Nathan diz que pode ser feito a qualquer momento, porque tudo o que está na `develop` foi testado e funciona. Em 14/10 a `develop` está à frente da `main` em 13 commits no `api-pcp`, 10 no `app-pcp`, 11 no `api-acos-vital` e 284 no HUB ✅ (`git fetch`). Falta só alguém fazer o merge 🔴 Robert (MES), Gustavo (API), Nathan (HUB).
+- 📝 Dono do pipeline: Nathan.
+- 🔴 Itens 28 (valores por mês e por vendedor) e 29 (faturamento mensal) do levantamento do PCP legado: relatórios que hoje rodam em planilha fora do controle da TI e vão para o av-hub (6 pd cada). Seguem sem dono e sem data.
+- 🔴 Itens 18 (rastreabilidade por material: número no padrão óleo e gás e Data Book) e 20 (ciclo do Book com o cliente: preparação, inspeção pelo cliente, postagem no portal, aprovação): o Robert não conhece a regra de negócio. O Nathan descreve os campos 🔴 Nathan. O Robert responde as demais perguntas da Caldeiraria em 15/10. Ver [[Pontas-Soltas]].
