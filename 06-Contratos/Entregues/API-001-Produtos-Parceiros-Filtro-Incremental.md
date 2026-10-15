@@ -17,6 +17,7 @@ criado_original: 2026-09-17
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
 > - ✅ `GET /produtos` e `GET /parceiros` aceitam `alterado_desde` (`api-acos-vital/src/schemas/core/tables/produtos/produtos.route.js:52-60`; `.../parceiros/parceiros.route.js:97`).
+> - 🔴 **Correção de 15/10/2026:** o bloco `alterado_desde` está **depois** de `return where;` (`parceiros.route.js:96`, `produtos.route.js:51`), então o filtro **nunca executa**. O ✅ acima só vale para o código existir, não para funcionar. Corrigir ou rebaixar o status: [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] S27, [[Pontas-Soltas]] PS-033.
 > - 🟡 Os caminhos `src/routes/*.js` citados no texto não existem mais: o código mora em `src/schemas/<schema>/...`.
 > - ❓ Produção: o vault v1 registra aplicação confirmada pelo dump de 21/09; não reconferido hoje.
 >

@@ -1,10 +1,10 @@
 ---
 tags: [contratos, painel, indice]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-15
 status: vigente
 dono: Nathan
-fontes: [06-Contratos/Ativos, 06-Contratos/Entregues, 06-Contratos/Arquivados, plano de 14/10/2026, código de 14/10 (api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, omie-elt-pipeline 0f739f0)]
+fontes: [LOG-51 e LOG-52 (auditoria de 15/10/2026), 06-Contratos/Ativos, 06-Contratos/Entregues, 06-Contratos/Arquivados, plano de 14/10/2026, código de 14/10 (api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, omie-elt-pipeline 0f739f0)]
 ---
 
 # Painel de contratos
@@ -17,14 +17,14 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 9 | 0 | 9 |
+| `Ativos` (a fazer ou parcial) | 11 | 0 | 11 |
 | `Entregues` (feito no código ou aplicado) | 53 | 12 | 65 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
-| **Total** | **73** | **12** | **85** |
+| **Total** | **75** | **12** | **87** |
 
 | Status | Contratos |
 |---|---|
-| `proposta` | 0 |
+| `proposta` | 2 |
 | `para-implementar` | 1 |
 | `parcial` | 8 |
 | `implementado-no-codigo` | 44 |
@@ -58,7 +58,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | SQL-010 | Contrato SQL 010 | [[SQL-010-Itens-Pedido-Status\|`itens_pedido_status`]] | `implementado-no-codigo` | Entregues | F1, X1, Q7 | — | — | — | — |
 | SQL-011 | Contrato SQL 011 | [[SQL-011-Ordens-Compra-Referencia-MES\|`vw_ordens_compra_referencia_mes` e marca por trigger (migration `api004`)]] | `implementado-no-codigo` | Entregues | R0 | — | — | — | — |
 | SQL-012 | Contrato SQL 012 | [[SQL-012-Ordens-Compra-Referencia-Valores\|Valores da OC na `vw_ordens_compra_referencia_mes`]] | `implementado-no-codigo` | Entregues | R0, R4 | — | — | — | — |
-| API-001 | — | [[API-001-Produtos-Parceiros-Filtro-Incremental\|Filtro incremental `alterado_desde` em produtos e parceiros]] | `implementado-no-codigo` | Entregues | — | — | — | — | — |
+| API-001 | — | [[API-001-Produtos-Parceiros-Filtro-Incremental\|Filtro incremental `alterado_desde` em produtos e parceiros]] | `implementado-no-codigo` | Entregues | — | — | Gustavo: o filtro nunca executa (LOG-51 S27, PS-033) | — | — |
 | API-002 | — | [[API-002-Material-Alias-Omie-MES\|Alias de material Omie no MES (rejeitado)]] | `arquivado` | Arquivados | — | — | — | — | — |
 | API-003 | — | [[API-003-Requisicao-Compra-Integracao-MES\|Requisição de compra MES → av-hub (versão polling)]] | `arquivado` | Arquivados | P3 | — | — | — | — |
 | API-004 | Contrato 004 | [[API-004-Referencia-OC-Integracao-MES\|Referência da OC (av-hub → MES)]] | `parcial` | Ativos | C4, R0, R4 | Job de leitura a cada 5 min, projeção da OC e `id_origem` por item; OC do pedido para o PCP e saldo futuro do Estoque (N14-20, BL-049, BL-050) | — | — | — |
@@ -116,6 +116,8 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | LOG-48 | Contrato 48 | [[LOG-48-Acompanhamento-de-Clientes-Grupos-de-Empresa\|Acompanhamento de clientes e grupos de empresa]] | `parcial` | Ativos | — | — | Gustavo: §9.1 NF cancelada, §9.2 `codigo_cliente`, §10 deduções, §12 definição de cliente | Nathan: marcas `GAMBIARRA` do detalhe e §12.5 na tela | — |
 | LOG-49 | Contrato 49 | [[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos\|`GET /me/permissoes` com os vínculos de vendedor completos]] | `implementado-no-codigo` | Entregues | — | — | — | Nathan: LOG-50 | — |
 | LOG-50 | Contrato 50 | [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front\|Tirar as 2 marcas de escopo de vendedores do front]] | `para-implementar` | Ativos | — | — | — | Nathan: marcas A e B no BFF | — |
+| LOG-51 | Contrato 51 | [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub\|Segurança e padrão da API do av-hub (auditoria de 15/10): chave de serviço, Azure, senha, erro, helmet, roles, auditoria, testes]] | `proposta` | Ativos | — | — | Gustavo: S1 a S8 na fase 1 (chave de serviço, Azure, senha, mass assignment, rate limit, erro, helmet, role do banco), S9 a S27 depois | Nathan: H1 a H7 no HUB (BL-058), que destravam S1 e S2 | — |
+| LOG-52 | Contrato 52 | [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub\|Migrar o módulo Comercial & Suprimentos para a API do hub e aposentar a `api-comercial`]] | `proposta` | Ativos | — | — | Gustavo: schema `core_comercial`, DDL, `GRANT`, linhas de `auth.rotas_telas`, revisão; Q1 (pedidos de compra na pipeline) e Q2 (telas em produção) | Nathan: corte do HUB (BL-063) e decisões Q3, Q4, Q7, Q8, Q10 | Pablo: escrever o módulo na `api-acos-vital` (BL-062) |
 | HIST-Analise-Contratos-vs-Hub-2026-10-01 | — | [[HIST-Analise-Contratos-vs-Hub-2026-10-01\|Análise de contratos x hub (retrato de 01/10)]] | `arquivado` | Arquivados | — | — | — | — | — |
 | HIST-Indice-Contratos | — | [[HIST-Indice-Contratos\|Índice antigo de contratos (v1)]] | `arquivado` | Arquivados | — | — | — | — | — |
 | HIST-Indice-Logica-Fora-do-Backend | — | [[HIST-Indice-Logica-Fora-do-Backend\|Índice antigo das gambiarras fora do banco (v1)]] | `arquivado` | Arquivados | — | — | — | — | — |
@@ -166,6 +168,8 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 - [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas|LOG-46]]: Gustavo: responder as perguntas em aberto do §12
 - [[LOG-47-Custo-Real-por-Item-no-Hub|LOG-47]]: Gustavo: perguntas em aberto 🔴
 - [[LOG-48-Acompanhamento-de-Clientes-Grupos-de-Empresa|LOG-48]]: Gustavo: §9.1 NF cancelada, §9.2 `codigo_cliente`, §10 deduções, §12 definição de cliente
+- [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub|LOG-51]]: Gustavo: S1 a S27 em fases; começar pela resposta às perguntas Q1 a Q5 (leitura em produção) e pelos itens sem dependência do HUB (BL-056)
+- [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub|LOG-52]]: Gustavo: schema `core_comercial` por migration, `GRANT`, linhas de `auth.rotas_telas` e `auth.telas`, revisão do módulo; responder Q1 e Q2
 
 ### Nathan (front do av-hub)
 
@@ -180,11 +184,14 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 - [[LOG-48-Acompanhamento-de-Clientes-Grupos-de-Empresa|LOG-48]]: Nathan: marcas `GAMBIARRA` do detalhe e §12.5 na tela
 - [[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos|LOG-49]]: Nathan: LOG-50
 - [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front|LOG-50]]: Nathan: marcas A e B no BFF
+- [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub|LOG-51]]: Nathan: H1 a H7 no HUB (BL-058); sem H1 a H3 a API não liga `IDENTIDADE_EXIGIR_TOKEN` nem fixa a validação do Azure
+- [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub|LOG-52]]: Nathan: corte do HUB para a API única (BL-063); decidir Q3, Q4, Q7, Q8, Q10 e Q11
 
 ### Pablo (Comercial & Suprimentos)
 
 - [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio|LOG-42]]: Pablo: módulo Comercial & Suprimentos substitui o orçamento
 - [[LOG-47-Custo-Real-por-Item-no-Hub|LOG-47]]: Pablo: dono do Ciclo 2 de Comercial & Suprimentos
+- [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub|LOG-52]]: Pablo: escrever o módulo na `api-acos-vital` em *branch*, com o domínio portado e os testes (BL-062)
 
 ## O que mudou de pasta em 14/10/2026
 

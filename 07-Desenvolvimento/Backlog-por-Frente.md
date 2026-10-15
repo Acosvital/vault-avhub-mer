@@ -1,7 +1,7 @@
 ---
 tags: [desenvolvimento, backlog, pendencias]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-15
 status: vigente
 dono: Nathan
 fontes: [00-Fluxo-Mestre-0b, Integracao-AvHub-MES, api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, omie-elt-pipeline 0f739f0, HUB b55ac55, Dump Avhub e Dump MES de 14/10, Registro-de-Decisoes]
@@ -60,6 +60,11 @@ O que **falta desenvolver** no fluxo de Atividades ([[00-Fluxo-Mestre-0b]]), con
 | BL-030 | transversal | Recurso de **locais de estoque** no pipeline (B6, Passo 6); `lead_time` sai | 📝 #29, #63 | 🔴 | `omie-elt-pipeline/src/omie/resources/estoque.ts:16` (`enabled:false`) |
 | BL-039 | transversal | Corrigir `protectedColumns.ts` (comentário de `vendedores` ainda "pendente") e `ARCHITECTURE.md` (nova filial exige `FAMILIA_PADRAO_POR_FILIAL`) | #20, #62 | 🔴 | `protectedColumns.ts:15-24` |
 | BL-054 | O1 | **`DROP` das 5 tabelas `omie_raw` e do schema** (`notasFiscais`, `parceiros`, `pedidosVendas`, `produtos`, `vendedores`, vazias), depois de o Nathan marcar `sql/002_staging_tables.sql` como obsoleto (N14-27, feito). Opcional no repositório do pipeline: tirar `omie_raw` de `sql/001_schemas.sql:13` e `.env.example:41`, e corrigir `README.md:32` ("001 e 002") | #18, N14-27 | 🔴 | `omie-elt-pipeline/sql/002_staging_tables.sql:1`, `ARCHITECTURE.md:41,256-257`; `grep omie_raw src` sem ocorrência |
+| BL-056 | transversal | **Endurecer a API (LOG-51, fase 1 sem dependência do HUB):** `PUT /organograma/node` sem mass assignment (S4), erro 5xx sem `err.message` (S6), `helmet` e CORS fechado (S7), rate limit por IP (S5), corpo JSON pequeno por padrão (S15), troca de senha com limite, revogação e política (S3), teto da sessão (S10), `/health` e prefixos públicos (S19, S20), prefixo da chave nos logs (S21), hash `$2` e `senha` no 201 (S22), `LIKE` e `limit` (S23), `alterado_desde` fora do alcance (S27) | [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] | 🔴 | `api-acos-vital` 276dab8: `node.route.js:63`, `app.js:73-82,188`, `usuarios.route.js:71-95`, `parceiros.route.js:96`, `produtos.route.js:51` |
+| BL-057 | transversal | **Fechar a chave de serviço e o login Azure (LOG-51 S1 e S2):** `rotas_permitidas` por chave de `auth.chaves_servico`, MES e pipeline migrados, `IDENTIDADE_EXIGIR_TOKEN` fixo e validação do `id_token` fixa. **Depende do BL-058.** Absorve o BL-018 | [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] | 🔴 | `apiKeyAuth.js:160-161`, `acessoConfig.js:71`, `azureIdToken.js:27-28` |
+| BL-059 | transversal | **Role `avhub_api` sem `SUPERUSER`, DDL fora do boot e SQL versionado (LOG-51 S8):** schemas e `auth.sessions` por migration, `GRANT` mínimo, migrations com role próprio. Liga com o BL-024 | [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] | 🔴 ❓ | dump `:19-23`, `app.js:102,199-204` |
+| BL-060 | transversal | **Testes e CI na API (LOG-51 S9 e S26):** Vitest, supertest contra Postgres de teste, `npm audit` no CI, `no-console`, divisão dos arquivos acima de 600 linhas. É pré-requisito do BL-062 | [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] | 🔴 | `package.json` sem script `test`; sem `.github/` |
+| BL-061 | transversal | **Auditoria com antes e depois, colunas, índices e `numeric` (LOG-51 S17, S18, S25):** `auth.auditoria` imutável com `antes` e `depois`; `CREATE INDEX CONCURRENTLY` nas chaves de negócio; `created_at/updated_at/created_by/updated_by` nas tabelas operacionais; `double precision` para `numeric(15,4)` | [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] | 🔴 | dump `:10198-10214,:2498,:12465,:12483,:13650` |
 
 ## Frente Nathan (front do av-hub, BFF e coordenação)
 
@@ -75,6 +80,8 @@ O que **falta desenvolver** no fluxo de Atividades ([[00-Fluxo-Mestre-0b]]), con
 | BL-043 | transversal | Remover marcas `GAMBIARRA(` do escopo de vendedores e do login depois que a API fixou as regras (contratos 40, 41, 50); 11 marcas no HUB em 14/10 | [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]] | 🔴 | `HUB lib/api/pedidosVenda.ts:15`, `lib/api/portalPcp.ts:51`, `lib/auth/loginRateLimiter.ts:24` |
 | BL-044 | transversal | Contratos com dono indefinido: reescrever o 38 §6 e o 07 (orçamento por fora) | #60 | 🔴 | [[Pontas-Soltas]] PS-005 |
 | BL-045 | transversal | Vincular compradores a funcionários antes da primeira OC real (só importam os 32 ativos; 20 de 74 vinculados em 07/10) | 📝 #51 | ❓ | [[Omie-Integracao-Estado]] |
+| BL-058 | transversal | **HUB para destravar o LOG-51 (H1 a H7):** mandar o `id_token` no `POST /autenticacao/azure`; passar o token do usuário nas 3 chamadas pré-login ou combinar rotas isentas; falhar fechado sem `backendToken`; tirar o `backendToken` da `session` do navegador; parar de aceitar `codigo_vendedor` do navegador em `minhas-comissoes`; `parametrosSeguros` nas rotas com `..`; rotacionar a chave de produção do `.env.local` | [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] | 🔴 | `app/api/auth/[...nextauth]/route.ts:389-390`, `app/api/comissoes/minhas-comissoes/route.ts:131-161` |
+| BL-063 | transversal | **Corte do HUB para a API do hub (LOG-52 F1 a F7):** `comercialApi.ts` e o BFF apontando para a API única, paginação no envelope do hub, tela de Sincronização Omie lendo a pipeline, remover `COMERCIAL_API_*` e a pasta `api-comercial/` só depois da suíte verde | [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] | 🔴 | `HUB lib/api/comercialApi.ts`, `app/api/comercial/[...rota]/route.ts`, `services/comercial/*` |
 
 ## Frente Pablo (Comercial & Suprimentos)
 
@@ -83,7 +90,8 @@ O módulo `api-comercial` (Express 5, Prisma, schema `core_comercial`, BFF `app/
 | ID | Nó | O que falta | Selo | Evidência |
 |---|---|---|---|---|
 | BL-046 | C1, C4 | Relação entre o orçamento do módulo comercial e a OC/cotação de Compras (decisão #39: orçamento é por fora) | 🔴 | `HUB api-comercial/README.md` |
-| BL-047 | C4 | Sincronização Omie do módulo (produtos, fornecedores, pedidos de compra) coexiste com o pipeline: não duplicar o espelho `pedidos_compras` | ❓ | `HUB api-comercial/README.md` |
+| BL-047 | C4 | Sincronização Omie do módulo (produtos, fornecedores, pedidos de compra) coexiste com o pipeline: não duplicar o espelho `pedidos_compras`. **No desenho do LOG-52 a sincronização própria some** e a pipeline é a fonte; falta o Gustavo confirmar o que ela carrega (Q1) | 🟡 | `HUB api-comercial/README.md` |
+| BL-062 | C4 | **Migrar o módulo Comercial & Suprimentos para a `api-acos-vital` (LOG-52 fases 1 a 5):** schema `core_comercial` por migration, itens transversais (Decimal, zod, `If-Match`, idempotência, `asyncHandler`, XLSX, e-mail), domínio portado com os testes, rotas e `auth.rotas_telas`. O que a API já tem não se recria (produtos, parceiros, pedidos de compra, PTAX, usuários, auditoria) | [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] | 🔴 | N14-15; inventário de 15/10 nos dois lados |
 
 ## Fechados em 14/10/2026
 

@@ -1,7 +1,7 @@
 ---
 tags: [integracao, seguranca, chaves, autenticacao, av-hub, mes, pipeline]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-15
 status: vigente
 dono: Gustavo (DBA)
 fontes: [api-acos-vital f322dcd (apiKeyAuth.js, acessoConfig.js), api-pcp 579a625, app-pcp 1fca8d3, omie-elt-pipeline 0f739f0, HUB b55ac55, v1 Chaves-de-Integracao-AvHub-MES-Pipeline, Registro-de-Decisoes #8 #9 #10 #11 #12 #87 #88]
@@ -89,3 +89,11 @@ As quatro últimas só podem ser fixadas depois de separar as chaves de serviço
 | RS-009 | exposição pública do `api-pcp` | Gustavo |
 
 Ver também: [[Registro-de-Decisoes]], [[Infraestrutura]].
+
+## Endurecimento pendente (auditoria de 15/10/2026)
+
+A auditoria da `api-acos-vital` (`276dab8`) achou que a chave de `API_KEYS` sem token **dispensa permissão, escopo e identidade** (`apiKeyAuth.js:160-161`, `exigirToken` com padrão `false` em `acessoConfig.js:71`) e que `POST /autenticacao/azure` emite JWT só com o e-mail enquanto `AUTENTICACAO_AZURE_VALIDAR_ID_TOKEN` está desligado (padrão, `azureIdToken.js:27-28`). Desenho da correção, ordem e testes: [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] (S1 e S2), com o lado do HUB no BL-058.
+
+- **Ordem importa:** ligar `IDENTIDADE_EXIGIR_TOKEN` derruba o login do BFF enquanto as 3 chamadas pré-login (`fetchMenu`, `fetchSlugDaTela`, `fetchInfoPerfisDoUsuario`) seguirem só com a chave, porque só `/autenticacao` e `/me` são isentas (`acessoConfig.js:95`).
+- O HUB **não** manda o `id_token` do Azure hoje; sem isso a validação do `id_token` não pode ser fixada.
+- Os valores reais dessas variáveis em produção seguem ❓ (Gustavo, perguntas Q1 a Q4 do LOG-51).

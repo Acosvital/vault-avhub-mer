@@ -1,7 +1,7 @@
 ---
 tags: [desenvolvimento, pontas-soltas, pendencias]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-15
 status: vigente
 dono: Nathan
 fontes: [Integracao-AvHub-MES, 00-Fluxo-Mestre-0b, api-pcp 579a625, api-acos-vital f322dcd, omie-elt-pipeline 0f739f0, HUB b55ac55, Registro-de-Decisoes]
@@ -36,6 +36,9 @@ Dúvidas, lacunas de decisão e pontos sem dono que **não são tarefa de códig
 | PS-027 | Regras dos itens 18 (rastreabilidade por material: número no padrão óleo e gás e Data Book) e 20 (ciclo do Book com o cliente: preparação, inspeção pelo cliente, postagem no portal, aprovação) do PCP legado desconhecidas pelo Robert; destino por filial da Caldeiraria como a Flange (🟡). O Robert responde as demais perguntas da Caldeiraria em 15/10 | Nathan | P2, F1 | Nathan descreve os campos; perguntas prontas em [[CON-02-Rastreabilidade-e-Book-Itens-18-e-20]] | #75, #78 |
 | PS-029 | Exposição pública do `api-pcp` no Coolify | Gustavo | — | Confirmar domínio e restringir origem | #13, RS-009 |
 | PS-030 | Documentos do v1 que ainda falam em "Estoque·Entrada", setor "Requisições de compras" no roteiro ou "registrar compra" manual descrevem desenho superado | Nathan | E, C | Não usar o v1 para esses temas | [[Contradicoes-Resolvidas]] |
+| PS-031 | **Quem escreve o módulo Comercial & Suprimentos na `api-acos-vital`?** N14-15 diz que o Pablo migra; a API é do Gustavo (banco e API). O cronograma ainda tem CS5 "Publicar o `api-comercial`", que deixa de existir | Nathan | — | Pablo escreve o módulo num *branch*, Gustavo revisa e faz DDL, `GRANT` e linhas de permissão; reescrever CS5 como "migrar para a `api-acos-vital`" ([[Cronograma]]) | [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] Q10 e Q11, BL-062 |
+| PS-032 | **O que é `vinculados` para propostas e clientes?** No `api-comercial` ele não restringe nada (igual a `todos`); no hub o escopo é por vendedor do Omie (`auth.fn_vendedores_do_usuario`) | Nathan, Pablo, Gustavo | — | Definir como "usuários dos vendedores que o usuário acompanha", com o gestor vendo o time, e o filtro por interseção (nunca sobreposição) | [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] Q3, RS-021 |
+| PS-033 | **API-001 está marcado entregue, mas o filtro `alterado_desde` nunca executa** (fica depois de `return where;` em `parceiros.route.js:96` e `produtos.route.js:51`) | Gustavo | — | Mover o bloco para antes do `return` e testar, ou rebaixar o status do contrato | [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] S27, [[API-001-Produtos-Parceiros-Filtro-Incremental]] |
 
 ## Resolvidas em 14/10/2026
 
