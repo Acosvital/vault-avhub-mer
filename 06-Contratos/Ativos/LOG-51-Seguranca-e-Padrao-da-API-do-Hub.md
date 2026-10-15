@@ -25,7 +25,7 @@ criado_original: 2026-10-15
 > - ❓ **Nada foi executado.** Não subi a API nem testei requisição. Os valores reais do `.env` e do Coolify, os GRANTs e o conteúdo de `auth.rotas_telas` em produção não foram vistos (o dump não traz GRANT).
 > - 🟡 Quem decide o que entra e em que ordem é o Nathan com o Gustavo. A seção 9 lista as perguntas.
 >
-> Divisão de trabalho ([[Regras-do-Vault]]): **banco e API são do Gustavo**; o que o front/BFF precisa mudar para destravar cada item está na seção 7 e é do Nathan. Este contrato **não** pede nada ao Robert (MES).
+> Divisão de trabalho ([[Regras-do-Vault]]): **banco e API são do Gustavo**; o que o front/BFF precisa mudar para destravar cada item está na seção 7 e é do Nathan. O S1 (troca da chave de serviço) vale **nos dois lados**, então há uma parte do Robert (MES), na seção 7b.
 
 ## 1. Por que este contrato existe
 
@@ -215,6 +215,11 @@ Itens do lado do HUB, que **não** são do DBA. Eles definem a ordem da seção 
 | H6 | Rotas do BFF com `..` no parâmetro (`grupos-clientes`, `blacklist_*`, `comissoes/*`, `compras/pedidos-venda`) passarem por validação | traversal | ✅ `parametrosSeguros` para ids e códigos, `segmentoSeguro` para texto livre, e trava única no `repassar` de `grupos-clientes` |
 | H7 | Rotacionar a chave de produção que está em texto no `.env.local` e apagar a linha comentada | S1 | 🔴 Manual (Nathan e Gustavo); o assistente não mexe em segredo |
 
+### 7b. O que o Robert (MES) precisa fazer no S1
+
+- Quando o Gustavo trocar a chave de serviço do MES, **atualizar a variável de ambiente da chave no MES** (`API_KEY` no `api-pcp`, e `AVHUB_MES_INTEGRACAO_KEY` se a chave A também mudar; ver [[Chaves-e-Autenticacao]]).
+- Conferir que as rotas que o MES chama estão nas `rotas_permitidas` da chave nova: a referência da OC, o `PUT` de requisições, os eventos do [[LOG-35-Compras-Marcos-Requisicao-para-MES]] e, depois, a referência de requisições do [[API-009-Referencia-Requisicao-Hub-Integracao-MES]]. Rota fora da lista dá 403 no MES (ver o modo só registro na seção de riscos).
+
 Os demais achados de segurança do BFF (IDOR na observação do PCP, e-mail de proposta com só `pode_visualizar`, PATCH de senha com só `pode_editar`, validação de entrada, CSRF, CSP) ficam em nota própria do HUB, não neste contrato.
 
 ## 8. Testes de aceite
@@ -260,7 +265,7 @@ A ordem respeita as dependências: o que não depende do HUB vai primeiro, e a c
 | 2 | Gustavo | **Sem dependência do HUB:** S4, S6, S7 (com `CORS_ORIGINS` combinado), S5, S15, S3, S10, S19, S20, S21, S22, S23 |
 | 3 | Nathan | H1 a H7 no HUB. ✅ H1, H3 a H6 e parte do H2 na PR #206 (`d0ef359`, 15/10/2026); resta `fetchMenu` (com a API) e H7 (manual) |
 | 4 | Gustavo | S2: tornar a validação do `id_token` fixa **depois** de H1 em produção |
-| 5 | Gustavo | S1 parte 1: criar chaves em `auth.chaves_servico` para MES e pipeline, com `rotas_permitidas`; trocar nos dois lados; rotacionar a chave antiga |
+| 5 | Gustavo (com o Robert) | S1 parte 1: criar chaves em `auth.chaves_servico` para MES e pipeline, com `rotas_permitidas`; trocar nos dois lados (o Robert atualiza a variável da chave no MES); rotacionar a chave antiga |
 | 6 | Gustavo | S1 parte 2: ligar `IDENTIDADE_EXIGIR_TOKEN` para o BFF, depois de H2 e H3; tornar a regra fixa e apagar o ramo antigo |
 | 7 | Gustavo | S8: novo role `avhub_api`, migrations fora do boot, `GRANT` mínimo. Trocar o `DB_USER` da API numa janela combinada |
 | 8 | Gustavo | S17, S18 e S25: auditoria com antes e depois, colunas e índices, `numeric` nas quantidades |

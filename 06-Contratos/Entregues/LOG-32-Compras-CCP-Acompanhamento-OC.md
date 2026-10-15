@@ -21,7 +21,7 @@ criado_original: 2026-09-30
 >
 > - ✅ `GET /compras/acompanhamento` (`ordens_compra_acompanhamento.route.js:298`), `GET`/`PUT /compras/ordens/:id/acompanhamento` (`:393`, `:404`), `POST /compras/ordens/:id/contatos` (`:505`), `POST /compras/ordens/:id/ocorrencias` (`:562`), `PATCH /compras/ocorrencias/:id` (`:586`), montadas em `index.js:190`.
 > - ✅ O MES recebe estes marcos pelo [[LOG-35-Compras-Marcos-Requisicao-para-MES]] (`oc_confirmada`, previsão, despacho, ocorrência) e os mostra em Compras · CCP, só leitura.
-> - 🔴 Perfil CCP no MES não existe (nó C5 do [[00-Fluxo-Mestre-0b]]).
+> - 🔴 Falta criar o perfil CCP: tarefa de cadastro do Nathan e do Gustavo (N14-24), **não** é do Robert nem desenvolvimento no MES (nó C5 do [[00-Fluxo-Mestre-0b]]).
 > - ❓ Front (Follow-up, `/compras/followup`) no HUB: não conferido.
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).

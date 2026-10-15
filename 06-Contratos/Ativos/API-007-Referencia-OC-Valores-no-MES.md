@@ -3,7 +3,7 @@ id: API-007
 aliases: ["Contrato 007 (API)", "007-Referencia-OC-Valores-no-MES"]
 tags: [contrato, contrato-api, mes, estoque, compras, custo, integracao-av-hub-mes]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-15
 status: parcial
 sistemas: [hub-banco, hub-api, mes-api]
 dono: "Robert"
@@ -20,7 +20,8 @@ criado_original: 2026-10-09
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** C4, R4 · **Dono:** Robert
 >
 > - ✅ **Lado do hub entregue:** a rota devolve `moeda`, `cotacao_moeda`, `cotacao_data`, `cotacao_origem`, `valor_frete`, `valor_seguro` na OC e, em cada item, `valor_unitario`, `desconto_pct`, `valor_desconto`, `valor_total_item` (`vw_ordens_compra_referencia_mes.route.js:51-53`; view no `Dump Avhub (Esqueleto).sql:20237-20330`, comentário "Contratos de API 004 e 007 (SQL 012)"). O contrato SQL [[SQL-012-Ordens-Compra-Referencia-Valores]] está aplicado no código e no dump.
-> - 🔴 **Lado do MES não existe:** nenhum job de leitura, nenhuma tabela de projeção da OC e nenhuma gravação de custo vindo da OC em `api-pcp` (`lote_custo` só tem carga inicial; ver [[API-008-Custo-do-Lote-no-MES]]). Mesma lacuna do [[API-004-Referencia-OC-Integracao-MES]].
+> - ✅ **Atualização de 15/10/2026 (Robert):** job de leitura e projeção da OC com valores já são o K4 (`develop` do `api-pcp`, PR #59). Falta só gravar o custo da OC no lote (K5), além dos BL-049, BL-050 e BL-051 do [[API-004-Referencia-OC-Integracao-MES]]. O item abaixo marcado 🔴 é do estado de 14/10.
+> - 🔴 **(14/10, superado pelo K4) Lado do MES não existe:** nenhum job de leitura, nenhuma tabela de projeção da OC e nenhuma gravação de custo vindo da OC em `api-pcp` (`lote_custo` só tem carga inicial; ver [[API-008-Custo-do-Lote-no-MES]]). Mesma lacuna do [[API-004-Referencia-OC-Integracao-MES]].
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.

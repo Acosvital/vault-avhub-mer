@@ -3,7 +3,7 @@ id: API-004
 aliases: ["Contrato 004", "004-Referencia-OC-Integracao-MES"]
 tags: [contrato, contrato-api, mes, integracao-av-hub-mes, compras]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-15
 status: parcial
 sistemas: [hub-banco, hub-api, mes-api]
 dono: "Robert"
@@ -21,7 +21,8 @@ criado_original: 2026-09-22
 >
 > - ✅ **Lado do av-hub entregue:** `GET /ordens-compra/referencia?alterado_desde=&codigo_empresa=&page=&limit=&apos_id=` (`api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_ordens_compra_referencia_mes/vw_ordens_compra_referencia_mes.route.js:70`, montada em `index.js:199`). `alterado_desde` obrigatório (ISO 8601), `limit` padrão 100 e máximo 500; a regra mora na view `vw_ordens_compra_referencia_mes` (`Dump Avhub (Esqueleto).sql:20237`) e a marca `alterado_em` na tabela `ordens_compra_referencia_mes` (trigger).
 > - ✅ Chave: rota de serviço sem token de usuário; a chave `MES_INTEGRACAO_KEYS` do LOG-34 responde `403 CHAVE_MES_ROTA_NAO_PERMITIDA` aqui (`vw_ordens_compra_referencia_mes.route.js:26-30`); o MES lê com chave de leitura de `auth.chaves_servico` ou de `API_KEYS`.
-> - 🔴 **Lado do MES não existe:** o `api-pcp` não tem job nem referência a `/ordens-compra/referencia` nem tabela de projeção da OC (grep em `api-pcp/src` e `api-pcp/prisma` sem resultado). Falta o job de leitura a cada 5 min com UPSERT por `(codigo_empresa, id_ordem_compra)` e itens por `(id_ordem_compra, id_item_oc)`, e o ajuste de `id_origem` em cada item (pedido do Robert em 30/09).
+> - ✅ **Atualização de 15/10/2026 (Robert):** o job de leitura e a projeção da OC já são o K4, na `develop` do `api-pcp` (PR #59, `6914fe9`). Falta só BL-049 (OC do pedido na Triagem, Destinação e Atendimento), BL-050 (saldo futuro), BL-051 (entrada da OC sem requisição do MES) e o custo da OC no lote (K5, [[API-007-Referencia-OC-Valores-no-MES]]). O item abaixo marcado 🔴 é do estado de 14/10.
+> - 🔴 **(14/10, superado pelo K4) Lado do MES não existe:** o `api-pcp` não tem job nem referência a `/ordens-compra/referencia` nem tabela de projeção da OC (grep em `api-pcp/src` e `api-pcp/prisma` sem resultado). Falta o job de leitura a cada 5 min com UPSERT por `(codigo_empresa, id_ordem_compra)` e itens por `(id_ordem_compra, id_item_oc)`, e o ajuste de `id_origem` em cada item (pedido do Robert em 30/09).
 > - ✅ Consequência já tratada: o registro manual `PATCH /compras/requisicoes/:id/compra` saiu do MES (não está mais em `api-pcp/src/compras/compras.controller.ts`); o MES hoje usa os marcos do [[LOG-35-Compras-Marcos-Requisicao-para-MES]]. Fornecedor da OC só chegará ao MES com este job.
 > - Feito o job, o Recebimento passa a conferir também contra a OC (decisão do Nathan: hoje confere só contra a NF) e a extensão [[API-007-Referencia-OC-Valores-no-MES]] alimenta o custo do lote ([[API-008-Custo-do-Lote-no-MES]]).
 >
