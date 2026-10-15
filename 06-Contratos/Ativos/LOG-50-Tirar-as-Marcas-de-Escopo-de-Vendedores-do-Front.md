@@ -17,7 +17,9 @@ criado_original: 2026-10-13
 > **Status:** `para-implementar` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Nathan
 >
 > - ✅ **Pré-requisito da API pronto:** `GET /me/permissoes` já traz `nome_exibicao`, `ativo` e `origem` nos vínculos ([[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos]]) e a API aplica o escopo pelo token ([[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]]).
-> - 🔴 **Marcas A (`pedidosVenda.ts`) e B (`portalPcp.ts`) no front do av-hub:** por fazer (trabalho do Nathan no HUB, ❓ não conferido aqui). A marca C (`nextauth`) foi reclassificada em 13/10.
+> - ✅ **Marcas A (`pedidosVenda.ts`) e B (`portalPcp.ts`) removidas em 15/10/2026** (HUB, branch `feat/bl043-bl022-bl023-bl042`, `484dea6`, ainda sem PR): o BFF lê só `GET /me/permissoes` (`lib/api/escopoSessao.ts`); `resolverVendedoresSessao` e `resolverEscopoPcp` passam a usar essa chamada; `pedidoNoEscopo` e a validação do foco saíram; detalhe, etapas, itens e status-historico repassam o 403 da API. A marca C foi reclassificada em 13/10.
+> - 🟡 **Desvio do §3.2:** em Meus Pedidos, perfil `todos` continua mandando os vínculos próprios (a API não filtra `todos`, e a tela mostraria a empresa inteira). Sem vínculo em detalhe, etapas e itens agora é 403 (era 404). `minhas-notas`, `meus-pedidos/resumo` e `notas-fiscais` seguem mandando `codigo_vendedor` por vínculo, só que lido de `/me/permissoes`.
+> - ❓ **Falta:** os testes de aceite 1 a 10 da §6 na `api-test` (nada foi testado com usuário real); teste 7 (sem token → 401) já é garantido por `requirePermission`.
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.

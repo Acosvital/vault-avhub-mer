@@ -30,11 +30,11 @@ fontes: [v1 07-Cronograma/Cronograma-2-Meses seções 1, 3.2, 3.3, 3.4, 6, 9, v1
 | **M5** Fase 0 fechada + Fase C | 13/11 | Marco zero carregado e conferido em dupla; saldo, movimento e reserva em homologação; status por item no HUB | 🟡 saldo e reserva no código ✅; carga em lote (G1) 🔴 Robert até 23/10 |
 | **M6** Go/no-go do piloto de recebimento | 18/11 | Piloto de 11/11 a 18/11 em 1 posto, em paralelo ao processo manual | 🟡 |
 | **M7** Rastreabilidade completa | 18/12 | Log de eventos e Torre de Fluxo (mapa, trilha, tempo por etapa) em homologação | 🔴 o MES não publica `/fluxo/eventos` (LOG-46) |
-| **Fim do Ciclo 1** | 21/01/2027 | Déficit do Robert (Onda 0) zerado | 🟡 |
-| **M8** Flange alta no MES | 14/04/2027 | Itens 1, 2, 4, 5, 6, 7 e 11 do levantamento do PCP legado | 🟡 |
-| **M9** Flange completa no MES | 04/06/2027 | Itens 3, 8, 9, 10, 12, 13 e 14; só depois dele se desliga a linha Flange do PCP legado | 🟡 |
-| **M10** Caldeiraria HRM no MES | 09/09/2027 | Itens 15 a 22, a Caldeiraria como mais uma fábrica `FABRICACAO` | 🟡 depende de decisões abertas (itens 18 a 20) |
-| **M11** Análise e gestão no MES | 21/10/2027 | Itens 23 a 27; os itens 28 e 29 ficam no av-hub, sem dono nem data | 🟡 |
+| **Fim do Ciclo 1** | 24/02/2027 (era 21/01/2027) | Déficit do Robert (Onda 0, agora 32,6 pd) zerado | 🟡 deslocado pelo N14-30 |
+| **M8** Flange alta no MES | 17/05/2027 (era 14/04) | Itens 1, 2, 4, 5, 6, 7 e 11 do levantamento do PCP legado | 🟡 |
+| **M9** Flange completa no MES | 06/07/2027 (era 04/06) | Itens 3, 8, 9, 10, 12, 13 e 14; só depois dele se desliga a linha Flange do PCP legado | 🟡 |
+| **M10** Caldeiraria HRM no MES | 11/10/2027 (era 09/09) | Itens 15 a 22, a Caldeiraria como mais uma fábrica `FABRICACAO` | 🟡 depende de decisões abertas (itens 18 a 20) |
+| **M11** Análise e gestão no MES | 24/11/2027 (era 21/10) | Itens 23 a 27; os itens 28 e 29 ficam no av-hub, sem dono nem data | 🟡 |
 
 ## Janelas
 
@@ -46,7 +46,7 @@ fontes: [v1 07-Cronograma/Cronograma-2-Meses seções 1, 3.2, 3.3, 3.4, 6, 9, v1
 | S4 | 02/11 a 13/11 | Fase C (saldo, reserva), marco zero, integração |
 | FC | 16/11 a 18/11 | Homologação e go/no-go |
 | S5 | 19/11 a 18/12 | Rastreabilidade completa e genealogia |
-| Ondas W0 a W4 | 21/12/2026 a 21/10/2027 | PCP legado no MES (Robert) |
+| Ondas W0 a W4 | 21/12/2026 a 24/11/2027 (era 21/10/2027) | PCP legado no MES (Robert) |
 
 ## Trilhas do Robert depois de 18/12 (W0 a W4)
 
@@ -54,14 +54,14 @@ Equipe igual à atual: só o Robert no MES, 75% de foco (0,75 pd por dia útil).
 
 | Onda | Entra | pd | Acumulado | Fim |
 |---|---|---|---|---|
-| W0 | Déficit do Ciclo 1 (inclui custo do lote K3 a K6) | 16,1 | 16,1 | 21/01/2027 |
-| W1 | Flange, prioridade alta (itens 1, 2, 4, 5, 6, 7, 11) | 42 | 58,1 | 14/04/2027 (M8) |
-| W2 | Flange, média e baixa (itens 3, 8, 9, 10, 12, 13, 14) | 26 | 84,1 | 04/06/2027 (M9) |
-| W3 | Caldeiraria HRM (itens 15 a 22) | 51 | 135,1 | 09/09/2027 (M10) |
-| W4 | Análise e gestão (itens 23 a 27) | 22 | 157,1 | 21/10/2027 (M11) |
+| W0 | Déficit do Ciclo 1 (inclui custo do lote K3 a K6 e, desde 15/10, o escopo do N14-29: 16,1 + 16,5 pd) | 32,6 | 32,6 | 24/02/2027 |
+| W1 | Flange, prioridade alta (itens 1, 2, 4, 5, 6, 7, 11) | 42 | 74,6 | 17/05/2027 (M8) |
+| W2 | Flange, média e baixa (itens 3, 8, 9, 10, 12, 13, 14) | 26 | 100,6 | 06/07/2027 (M9) |
+| W3 | Caldeiraria HRM (itens 15 a 22) | 51 | 151,6 | 11/10/2027 (M10) |
+| W4 | Análise e gestão (itens 23 a 27) | 22 | 173,6 | 24/11/2027 (M11) |
 | av-hub | Itens 28 e 29 (12 pd) | 12 | fora da conta | sem dono, sem data 🔴 |
 
-Com 100% de foco as ondas terminam em 14/01 (W0), 17/03, 26/04, 07/07 e 06/08/2027. O trabalho que não entra na conta: Ciclo 2 (sobras e perdas de matéria-prima, remessa de produtos, Fase D, transferência etapas 2 a 4, `GET /itens/custo`), baixa no despacho do Estoque (documento de retirada) e fabricado virando lote, ainda sem pd dimensionado 🔴. Levantamento completo em [[Backlog-por-Frente]].
+Com 100% de foco as ondas terminam em 05/02 (W0; o Robert estimou cerca de 17/02), 09/04, 18/05, 29/07 e 30/08/2027 (conta refeita em 15/10 com os feriados da nota). O trabalho que não entra na conta: Ciclo 2 (sobras e perdas de matéria-prima, remessa de produtos, Fase D, transferência etapas 2 a 4, `GET /itens/custo`), baixa no despacho do Estoque (documento de retirada) e fabricado virando lote, ainda sem pd dimensionado 🔴. Levantamento completo em [[Backlog-por-Frente]].
 
 ## Capacidade
 
@@ -69,7 +69,7 @@ Com 100% de foco as ondas terminam em 14/01 (W0), 17/03, 26/04, 07/07 e 06/08/20
 |---|---|---|---|
 | Nathan | 40% | 16,8 pd | S5: 11 pd contra 9,2 pd. A tela de ranking de gargalos (T.5b, uma das 4 telas da Torre de Fluxo) é a candidata a ir ao Ciclo 2 se faltar capacidade; o Nathan ainda não decidiu 🟡 |
 | Gustavo | 60% | 25,2 pd | folga de 11,9 pd na S1–FC e 9,8 pd na S5; pode receber parte do backend do MES 🟡 |
-| Robert | 75% | 31,5 pd | S1–FC + S5: capacidade 48,75 pd contra 64,85 planejados, **déficit de 16,1 pd** 🔴 |
+| Robert | 75% | 31,5 pd | S1–FC + S5: capacidade 48,75 pd contra 81,35 planejados (64,85 + 16,5 do N14-29), **déficit de 32,6 pd** 🔴 (era 16,1 pd) |
 | Pablo | 75% | fora da conta | Comercial & Suprimentos |
 
 Custo do lote (09/10) somou ao Robert K3 1,0 + K4 3,0 + K5 1,5 + K6 0,5 pd; ao Gustavo K1, K2 e K7 (1,5 pd); K8 (`GET /itens/custo`) e K9 a K11 vão ao Ciclo 2 🟡. Detalhe em [[Modelo-Estoque-e-Custo-do-Lote]] e [[API-008-Custo-do-Lote-no-MES]]. Equipe em [[Equipe-e-Divisao]].
@@ -90,7 +90,7 @@ Barras concluídas marcam o que está no código, não o que está em produção
 
 ```mermaid
 gantt
-    title Cronograma de 22/09/2026 a 21/10/2027
+    title Cronograma de 22/09/2026 a 24/11/2027
     dateFormat YYYY-MM-DD
     axisFormat %d/%m
     inclusiveEndDates
@@ -102,12 +102,12 @@ gantt
     M5 Marco zero e Fase C :milestone, m5, 2026-11-13, 0d
     M6 Go ou no-go do piloto :milestone, m6, 2026-11-18, 0d
     M7 Rastreabilidade completa :milestone, m7, 2026-12-18, 0d
-    Fim do Ciclo 1 :milestone, mc1, 2027-01-21, 0d
-    Inicio do Ciclo 2 :milestone, mc2, 2027-01-22, 0d
-    M8 Flange alta no MES :milestone, m8, 2027-04-14, 0d
-    M9 Flange completa no MES :milestone, m9, 2027-06-04, 0d
-    M10 Caldeiraria HRM no MES :milestone, m10, 2027-09-09, 0d
-    M11 Analise e gestao no MES :milestone, m11, 2027-10-21, 0d
+    Fim do Ciclo 1 :milestone, mc1, 2027-02-24, 0d
+    Inicio do Ciclo 2 :milestone, mc2, 2027-02-25, 0d
+    M8 Flange alta no MES :milestone, m8, 2027-05-17, 0d
+    M9 Flange completa no MES :milestone, m9, 2027-07-06, 0d
+    M10 Caldeiraria HRM no MES :milestone, m10, 2027-10-11, 0d
+    M11 Analise e gestao no MES :milestone, m11, 2027-11-24, 0d
     section Janelas do plano
     S1 Destravar e fundacao :done, s1, 2026-09-22, 2026-10-05
     S2 Fase 0 e nucleo do Estoque :active, s2, 2026-10-05, 2026-10-16
@@ -125,11 +125,11 @@ gantt
     K1 K2 SQL 012 e rota 004 com valores :k12, 2026-10-19, 2026-10-30
     K4 K5 Job da referencia da OC e custo no recebimento :k45, 2026-12-21, 2027-01-21
     section Ondas do Robert PCP legado
-    W0 Deficit do Ciclo 1 :w0, 2026-12-21, 2027-01-21
-    W1 Flange prioridade alta :w1, 2027-01-22, 2027-04-14
-    W2 Flange media e baixa :w2, 2027-04-15, 2027-06-04
-    W3 Caldeiraria HRM :w3, 2027-06-07, 2027-09-09
-    W4 Analise e gestao no MES :w4, 2027-09-10, 2027-10-21
+    W0 Deficit do Ciclo 1 :w0, 2026-12-21, 2027-02-24
+    W1 Flange prioridade alta :w1, 2027-02-25, 2027-05-17
+    W2 Flange media e baixa :w2, 2027-05-18, 2027-07-06
+    W3 Caldeiraria HRM :w3, 2027-07-07, 2027-10-11
+    W4 Analise e gestao no MES :w4, 2027-10-13, 2027-11-24
 ```
 
 ## Entregas já no código (14/10)
@@ -144,7 +144,7 @@ gantt
 
 ## Ordem de corte (para manter a data fixa) 🟡
 
-Se algo estourar, o escopo cede, a data não. Cortar nesta ordem: (1) stretch B9 e B10 (histórico de OC, frete e parcelas); (2) C8, fila "Novo norte" do PCP; (3) status por item só para Fabricação e Recebimento; (4) D11 em Code128 em vez de leitor 2D; (5) reserva de estoque na Fase C. **Nunca cortar:** quarentena, inspeção e RNC; dupla conferência da carga; RBAC por setor. A ordem de corte alivia no máximo ~4,0 pd do Robert; o déficit restante será coberto com **dobra de esforço e horas extras, se preciso** 📝 (decisão do Nathan, 14/10); a ordem de corte e a opção de passar parte do backend ao Gustavo continuam como reserva. Riscos e gatilhos em [[Riscos]].
+**Exceção decidida em 15/10/2026 (N14-30):** o escopo do N14-29 (+16,5 pd) **não** foi cortado; o Nathan aceitou **deslocar** o fim do Ciclo 1 e as ondas W0 a W4 (W0 de 21/01 para 24/02/2027, a 75% de foco). Para o que ainda não está decidido, vale a regra: se algo estourar, o escopo cede, a data não. Cortar nesta ordem: (1) stretch B9 e B10 (histórico de OC, frete e parcelas); (2) C8, fila "Novo norte" do PCP; (3) status por item só para Fabricação e Recebimento; (4) D11 em Code128 em vez de leitor 2D; (5) reserva de estoque na Fase C. **Nunca cortar:** quarentena, inspeção e RNC; dupla conferência da carga; RBAC por setor. A ordem de corte alivia no máximo ~4,0 pd do Robert; o déficit restante será coberto com **dobra de esforço e horas extras, se preciso** 📝 (decisão do Nathan, 14/10); a ordem de corte e a opção de passar parte do backend ao Gustavo continuam como reserva. Riscos e gatilhos em [[Riscos]].
 
 ## Pendências
 

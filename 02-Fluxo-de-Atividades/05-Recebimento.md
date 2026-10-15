@@ -150,6 +150,10 @@ Caminho necessário 🟡 (proposta; o desenho é do Robert):
 4. O que o `destino` marca como **pedido de venda** reserva o lote para aquele pedido e avisa o PCP; o que é **estoque** vira saldo livre; o que era "saldo futuro" deixa de ser futuro e passa a saldo atual ([[03-Estoque-Atendimento-e-Despacho]]).
 5. Receber parte da OC mantém o restante como esperado (como o split de hoje).
 
+📝 **N14-28 (15/10/2026):** o Recebimento recebe produtos para **pedido de venda, estoque e uso interno**, e tudo aparece no Estoque. **Proposta do Robert:** os esperados passam a ser **por item da OC**, com ou sem requisição do MES; o lote nasce ligado à OC (`id_item_oc`) já com o custo (K5), o que também resolve o D1 do 008; se a OC tinha destino em pedido de venda, a parcial daquele item segue o caminho normal. **Torre:** lote de estoque, uso interno ou compra por fora não gera evento de fluxo (só o item de pedido de venda). Perguntas em aberto em [[Pontas-Soltas]] PS-034 (uso interno, chave do cruzamento, rateio entre destinos, reserva).
+
+📝 **Uso interno (N14-30, 15/10/2026):** a OC de uso interno entra nos esperados pelo mesmo caminho da OC sem requisição do MES; a doca confere contra a NF; **não cria lote nem saldo**, é registrada como entrada de uso interno, entregue ao setor que pediu e visível no Estoque como entrada registrada; fica fora do saldo futuro (o MES separa pela `finalidade` da OC, pois o `destino` vem como estoque); o custo vai para despesa; sem quarentena, salvo categoria que o Nathan pedir (EPI). Estimativa do Robert: 0,5 pd.
+
 Pontos a decidir pelo Robert: se o "esperado por OC" é entidade própria ou uma requisição sintética criada pelo job; como evitar entrada duplicada (a mesma OC com requisição do MES e a referência); e a quantidade já recebida por OC, necessária também ao cálculo do saldo futuro (BL-050).
 
 ## O que falta desenvolver

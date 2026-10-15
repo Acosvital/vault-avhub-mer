@@ -17,14 +17,14 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 11 | 0 | 11 |
+| `Ativos` (a fazer ou parcial) | 12 | 0 | 12 |
 | `Entregues` (feito no código ou aplicado) | 53 | 12 | 65 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
-| **Total** | **75** | **12** | **87** |
+| **Total** | **76** | **12** | **88** |
 
 | Status | Contratos |
 |---|---|
-| `proposta` | 2 |
+| `proposta` | 3 |
 | `para-implementar` | 1 |
 | `parcial` | 8 |
 | `implementado-no-codigo` | 44 |
@@ -66,6 +66,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | API-006 | Contrato 006 | [[API-006-Status-por-Item-Leitura-no-Hub\|Status por item: leitura no hub (job e rota)]] | `implementado-no-codigo` | Entregues | F1, X1, Q7 | — | — | — | — |
 | API-007 | Contrato 007 (API) | [[API-007-Referencia-OC-Valores-no-MES\|Valores da OC na referência (hub → MES) e projeção no MES]] | `parcial` | Ativos | C4, R4 | Job de leitura e projeção da OC com valores; gravar `lote_custo` origem OC no Recebimento (R4) | — | — | — |
 | API-008 | Contrato 008 | [[API-008-Custo-do-Lote-no-MES\|Custo do lote no MES (`lote_custo`, G1, recebimento, consumo, `GET /itens/custo`)]] | `parcial` | Ativos | R4, E3, E5 | §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`; modelo do imposto por item para os cenários com e sem imposto (PS-014, BL-053; contrato não editado) | — | — | — |
+| API-009 | Contrato 009 | [[API-009-Referencia-Requisicao-Hub-Integracao-MES\|Referência da requisição do Compras com pedido de venda (av-hub → MES)]] | `proposta` | Ativos | C0, P1, P2, P3, E1 | Job de leitura junto do da referência da OC, projeção, tela do PCP e aviso de compra duplicada (BL-065) | Gustavo: POST/PATCH com pedido de venda e a rota `GET /compras/requisicoes/referencia` (BL-064); responder Q1 a Q4 | Nathan: campo "Pedido de venda" na "Nova requisição" (BL-041); decidir Q5 | — |
 | LOG-01 | Contrato 01 | [[LOG-01-Compras-Fluxo-Completo\|Compras: requisição, ordem de compra e sincronização com o Omie]] | `implementado-no-codigo` | Entregues | C0, C1, C4 | — | — | — | — |
 | LOG-02 | Contrato 02 | [[LOG-02-Funcionarios-Listagem-Filtros-Ordenacao-Resumo\|Funcionários: filtro, ordenação, paginação e resumo no servidor]] | `implementado-no-codigo` | Entregues | — | — | — | — | — |
 | LOG-03 | Contrato 03 | [[LOG-03-Funcionarios-Cadastro-Organograma-Transacional\|Funcionários: salvar e excluir com o organograma numa operação]] | `implementado-no-codigo` | Entregues | — | — | — | — | — |
@@ -151,6 +152,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Robert (MES: `api-pcp` e `app-pcp`)
 
+- [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: job e projeção da requisição do Compras com pedido de venda, tela do PCP e aviso de compra duplicada (BL-065)
 - [[API-004-Referencia-OC-Integracao-MES|API-004]]: Job de leitura a cada 5 min, projeção da OC e `id_origem` por item; OC do pedido para o PCP e saldo futuro do Estoque (N14-20, BL-049, BL-050); entrada no Recebimento da OC sem requisição do MES (BL-051)
 - [[API-007-Referencia-OC-Valores-no-MES|API-007]]: Job de leitura e projeção da OC com valores; gravar `lote_custo` origem OC no Recebimento (R4)
 - [[API-008-Custo-do-Lote-no-MES|API-008]]: §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`; modelo do imposto por item (PS-014, BL-053; Nathan e Gustavo desenham, o contrato não é editado)
@@ -160,6 +162,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Gustavo (DBA: banco e API do av-hub)
 
+- [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Gustavo: pedido de venda no POST/PATCH da requisição e `GET /compras/requisicoes/referencia` (BL-064); responder Q1 a Q4
 - [[SQL-005-Locais-Estoque|SQL-005]]: Gustavo: responder a pergunta da FK opcional
 - [[SQL-009-Categoria-Sem-Escopo-Empresa-Views|SQL-009]]: Gustavo: esclarecer 53 x 311 linhas do pedido 25970
 - [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio|LOG-42]]: Gustavo: responder as perguntas do §10
@@ -173,6 +176,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Nathan (front do av-hub)
 
+- [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Nathan: campo "Pedido de venda" na "Nova requisição" (BL-041); decidir Q5 (avisa ou bloqueia)
 - [[LOG-04b-Pedidos-Notas-Dashboards-Agregacao-no-Banco|LOG-04b]]: Nathan: P6 no front (ver LOG-43)
 - [[LOG-05-Permissoes-e-Escopo-no-Banco|LOG-05]]: Nathan: marcas S3 no front (LOG-50)
 - [[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend|LOG-40]]: Nathan: LOG-50 (marcas A e B no front)
