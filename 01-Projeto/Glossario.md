@@ -58,15 +58,16 @@ Termos do projeto em ordem alfabética, com o nome atual primeiro. Nomes de tela
 - **Grupo de dedução** — G1 Cancelado, G2 Devolvido, G2P Devolvido Parcial, G3 Recusado ou Denegado, G4 blacklist de destinatário, G5 blacklist de vendedor, G6 Refaturamento, LÍQUIDO o resto. Cascata da venda líquida ([[Dashboards]]).
 - **HUB** — front do av-hub (Next.js). O BFF e o repositório do `api-comercial` ficam junto dele.
 - **Ida e volta (da requisição)** — ida: o MES empurra a requisição ao hub (contrato 34, `PUT`). Volta: o MES lê os marcos do hub (contrato 35, polling e sob demanda).
-- **`id_origem`** — id do `RequisicaoCompraItem` do MES, chave do PUT e dos eventos. Requisição criada só no hub não tem `id_origem` e não chega ao MES 🔴.
+- **`id_origem`** — id do `RequisicaoCompraItem` do MES, chave do PUT e dos eventos. Requisição criada só no hub não tem `id_origem` e não chega ao MES; o MES lê a OC dela pela referência (N14-20, 🔴 ainda não lê).
 - **Inspeção de entrada e de saída** — ver tabela de telas.
 - **`ItemParcial`** — fração de um item percorrendo o roteiro. Status: `CRIADO`, `RECEBIDO`, `EM_ANDAMENTO`, `EM_TRANSITO`, `PAUSADO`, `REPROVADO`, `CONCLUIDO`, `CANCELADO`, mais `RETRABALHO` por legado ✅ ([[Estados]]).
 - **Lote** — unidade de saldo, com origem, status de qualidade e, quando é cisão, `idLotePai`. Lote recebido nasce `PENDENTE` (quarentena).
 - **Liberação (do pedido)** — o vendedor marca se a Qualidade acompanha e libera numa ação só. Só pedido liberado vai ao MES ([[01-Vendas-Liberacao]]).
 - **MES** — o sistema de execução da produção: `api-pcp` (back, NestJS e Prisma) e `app-pcp` (front, Next.js). Dono: Robert.
 - **Movimento de estoque** — `ENTRADA`, `SAIDA`, `TRANSFERENCIA` ou `AJUSTE` ✅.
-- **OC (Ordem de Compra)** — nasce no HUB (nó `C4`), é aprovada (Gerente sempre; Diretoria acima de R$ 30 mil 📝) e enviada ao Omie pela pipeline. Status `rascunho`, `aguardando_aprovacao`, `aprovado`, `cancelado` ✅.
-- **OP (Ordem de Produção)** — termo antigo para a Destinação do Pedido (campo `ordemProducao`, códigos `OP-`). Pela proposta de nome, a ordem de produção passa a ser só a emitida para o que será fabricado; essa entidade ainda não existe 🔴.
+- **OC (Ordem de Compra)** — nasce no HUB (nó `C4`), é aprovada pelo Gerente de Compras se **exceder R$ 30 mil**, e liberada sem aprovação (compradores livres) se for **até** R$ 30 mil ✅ 📝 N14-21 (regra provisória, endurece depois com Compras 🟡), e enviada ao Omie pela pipeline. Status `rascunho`, `aguardando_aprovacao`, `aprovado`, `cancelado` ✅.
+- **OP (Ordem de Produção)** — **entidade** do sistema e também **documento para impressão** (formalidade), emitido só para o que será fabricado 📝 N14-22, #74. Ainda não existe 🔴 (BL-052). O termo antigo (campo `ordemProducao`, códigos `OP-`) designava a Destinação do Pedido e hoje é só o texto do pedido no código.
+- **Saldo futuro** — o que o Estoque ainda vai receber das **OCs em andamento** de itens de estoque (sem pedido de venda): a parte da OC que preenche o estoque. O Estoque do MES mostra **saldo atual + saldo futuro** 📝 N14-20. A OC vinculada a pedido de venda não entra: o PCP a vê no pedido. Fonte: referência da OC do hub (`destino` `estoque`); 🔴 o MES ainda não lê (BL-050).
 - **OS (Ordem de Serviço)** — beneficiamento ou retrabalho de item de Revenda (por exemplo, corte de chapa); setor `PRODUTIVO` opcional no roteiro da Revenda.
 - **Parcial** — três sentidos que não se misturam: (1) `sequencial` do Omie, uma linha de pedido por nota fiscal parcial (0 é o guarda-chuva); (2) `ItemParcial` do MES; (3) `Entrega`, entrega parcial ao cliente. Exemplo: pedido 27645, sequenciais 0 a 4, soma igual aos 10 itens ([[LOG-08-Itens-por-Parcela-Pedidos]]).
 - **PCP** — o mesmo departamento nos dois sistemas: o Portal PCP do HUB e o MES. Não é ambiguidade a corrigir.

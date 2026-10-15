@@ -43,9 +43,9 @@ As rotas de apoio do BFF de Compras exigem `compras.pode_visualizar`: `condicoes
 | Nó | Estado no HUB | Selo |
 |---|---|---|
 | V2, V3 | Tela de liberação completa, com as duas fontes (vendedor e equipe) e mapa de unidades | ✅ |
-| C0 | "Nova requisição" cria requisição própria do Compras (sem `id_origem`, não chega ao MES) | ✅ tela; 🔴 chegada ao MES |
+| C0 | "Nova requisição" cria requisição própria do Compras (sem `id_origem`; a requisição não chega ao MES, a **OC** dela chega pela referência, N14-20). Se o Compras vincula a requisição ou a OC a um pedido de venda, o PCP vê a OC no MES; se é de estoque, o Estoque vê o saldo futuro | ✅ tela; 🔴 o MES ler a OC (BL-006); tela no HUB só se o MES precisar (BL-041) 🟡 |
 | C1 | Mudança de status da requisição; cancelar exige motivo (3 a 500 caracteres, regra da API) | ✅ `api-acos-vital` `requisicoes_compra.route.js:442-448` |
-| C2/C3 | Uma única tela de aprovação, com **uma** permissão (`compras.pode_aprovar`, perfil Gerência de Compras). Não há segundo aprovador (Diretoria) acima de R$ 30 mil | ✅ tela; 🔴 regra da Diretoria (ver [[AV-Hub-API]], [[Pontas-Soltas]]) |
+| C2/C3 | Uma única tela de aprovação, com **uma** permissão (`compras.pode_aprovar`, perfil Gerência de Compras): aprova a OC que excede o limite (R$ 30 mil por padrão); até o limite a OC é liberada sem aprovação e a Diretoria não aprova (N14-21) | ✅ tela e regra (ver [[AV-Hub-API]]); 🟡 endurecer depois com Compras |
 | C4 | OC com valor, desconto, moeda, cotação (no cabeçalho da OC), CIF/FOB (`tipo_frete`), flag `tipo_material` por item | ✅ `FecharCompra.tsx` |
 | C5 | Follow-up do CCP | ✅ |
 | Torre de Fluxo (LOG-46) | **Sem tela**: nenhum arquivo do HUB referencia `fluxo/torre`, `torre-fluxo` | 🔴 front do Nathan |
@@ -76,5 +76,6 @@ Resumo; a tabela completa está em [[RBAC-e-Permissoes]].
 
 1. Tela Torre de Fluxo (`/fluxo/torre`, trilha, tempo, SLA) sobre `GET /fluxo/*` da API 🔴.
 2. Tela/coluna de custo por item (`custo-itens`) sobre `GET /itens_pedido_custo` 🔴.
-3. Decidir com Compras a aprovação em duas alçadas (Gerente sempre, Diretoria acima de R$ 30 mil) e então ajustar `ComprasAprovacoes.tsx` e a API 🔴.
-4. Ligar "Nova requisição" do Compras ao MES (hoje só o av-hub a enxerga) 🔴 — depende do Robert e do Gustavo.
+3. A aprovação da OC já funciona (N14-21); quando Compras definir a regra mais rígida 🟡, ajustar `ComprasAprovacoes.tsx` e a API junto com o Gustavo. Nada a construir agora.
+4. O MES enxergar a OC de "Nova requisição" (N14-20): o trabalho é do Robert (MES) e, se a API precisar expor por produto ou pedido, do Gustavo; o Nathan só faz tela no HUB se o MES precisar (BL-041) 🟡.
+5. Desenhar com o Gustavo o modelo do imposto por item, para ter os cenários com e sem imposto (BL-053, PS-014) 🟡.

@@ -107,7 +107,7 @@ Dados em `auth.rotas_telas` e `auth.telas`: **o dump é só esqueleto** (sem `CO
 | `liberacao-equipe` | `pode_visualizar` | BFF | caixa da equipe | ✅ `app/api/liberar-pedidos/route.ts:31-36` |
 | **`compras`** | **`pode_criar`** | BFF (`requirePermission('compras','pode_criar')`) e tela | **"Nova requisição"** (`POST /compras/requisicoes`, C0) e **emitir OC** (`POST /compras/ordens`, C4); também o botão "Gerar OC" | ✅ `HUB app/api/compras/requisicoes/route.ts:80`, `app/api/compras/ordens/route.ts:111`, `components/Compras/ComprasRequisicoes.tsx:92,186` |
 | `compras` | `pode_editar` | BFF e API | mudar status da requisição (cotação, cancelar com motivo); **reenviar OC ao Omie** | ✅ `app/api/compras/requisicoes/[id]/route.ts:32`, `api-acos-vital …/ordens_compra.route.js:1343` |
-| **`compras`** | **`pode_aprovar`** | BFF **e** API (regra fixa `EXIGIR_PODE_APROVAR = true`) | **aprovar e cancelar OC** (perfil Gerência de Compras) | ✅ `HUB app/api/compras/ordens/[id]/route.ts:35`, `ordens_compra.route.js:38-42,1235` |
+| **`compras`** | **`pode_aprovar`** | BFF **e** API (regra fixa `EXIGIR_PODE_APROVAR = true`) | **aprovar e cancelar OC** que excede o limite (R$ 30 mil por padrão; perfil Gerência de Compras); até o limite a OC é liberada sem aprovação (N14-21) | ✅ `HUB app/api/compras/ordens/[id]/route.ts:35`, `ordens_compra.route.js:38-42,1235` |
 | `compras` | `pode_visualizar` | BFF | listas, detalhes, catálogos de apoio | ✅ `app/api/compras/**` |
 | `followup` | `pode_visualizar`, `pode_editar`, `pode_aprovar` | BFF e API | ler a fila do CCP; gravar confirmação, previsão, despacho, contato, ocorrência; **decidir ocorrência** (precisa também ser o comprador da OC ou admin) | ✅ `HUB app/api/compras/ocorrencias/[id]/route.ts:13`, `api-acos-vital …/ordens_compra_acompanhamento.route.js:154`, `utils/acessoConfig.js` |
 | `compradores` | `pode_visualizar`, `pode_editar` | BFF e API | vínculo comprador × funcionário; só quem é comprador vinculado na unidade emite OC (regra fixa, `BLOQUEAR_SEM_COMPRADOR = true`) | ✅ `compradores.route.js:210`, `ordens_compra.route.js:35` |
@@ -125,8 +125,8 @@ Dados em `auth.rotas_telas` e `auth.telas`: **o dump é só esqueleto** (sem `CO
 
 | Item | Estado |
 |---|---|
-| Aprovação da OC "Gerente sempre; Diretoria também acima de R$ 30 mil" (📝 14/10) | 🔴 No código existe **uma** permissão (`compras.pode_aprovar`); abaixo do limite o banco auto-aprova e acima dele só a Gerência decide ([[AV-Hub-API]]). Falta uma segunda alçada (ex.: `compras-diretoria` ou `pode_aprovar` em tela própria) e a regra "Gerente sempre" |
-| Perfil CCP no MES (C5) | 🔴 "Compras · CCP" é só leitura, sem perfil próprio; hoje usa `pedidos-compra` + setor `COMPRAS` |
+| Aprovação da OC (N14-21, 14/10): acima de R$ 30 mil, Gerente de Compras; até R$ 30 mil, compradores livres; sem Diretoria | ✅ Uma permissão (`compras.pode_aprovar`); até o limite o banco aprova sozinho e acima dele só a Gerência decide ([[AV-Hub-API]]). Não há segunda alçada nem papel Diretoria. 🟡 A regra endurece depois da conversa com Compras. A Gerência de Compras ainda não tem usuários vinculados (tarefa cadastral, Nathan e Gustavo) |
+| Perfil CCP no MES (C5) | "Compras · CCP" é só leitura, sem perfil próprio; hoje usa `pedidos-compra` + setor `COMPRAS`. Criar o perfil é tarefa cadastral simples, em breve (Nathan, Gustavo; N14-24) |
 | Permissão do documento de retirada (E6) | 🔴 não existe (a tela e a rota também não) |
 | Quem vê custo no MES e no av-hub | duas permissões distintas: `estoque-custo` (MES, custo do lote) e `custo-itens` (av-hub, custo do pedido) 🟡 alinhar perfis |
 | Chave própria do MES com escopo mínimo para ler o av-hub (hoje `API_KEY` de leitura e escrita) | 🔴 Gustavo ([[Chaves-e-Autenticacao]]) |

@@ -20,10 +20,9 @@ Transformar uma **necessidade de material** em uma **Ordem de Compra aprovada**,
 | Quem | Papel | Onde |
 |---|---|---|
 | PCP | Abre a requisição do material do pedido (origem PCP) | MES, setor Requisições (`/compras/requisicoes`) |
-| Comprador | Cota, negocia, emite a OC | HUB, `/compras/requisicoes`, `/compras/nova` |
-| Compras (necessidade própria) | Cria requisição sem pedido de venda ("Nova requisição") | HUB, `compras.pode_criar` |
-| Gerente de Compras | Aprova a OC (perfil com `pode_aprovar` na tela `compras`) | HUB, `/compras/aprovacoes` |
-| Diretoria | Aprova também as OCs acima de R$ 30 mil | 📝 decidido, 🔴 sem código |
+| Comprador | Cota, negocia, emite a OC; OC **até R$ 30 mil sai livre**, sem aprovação | HUB, `/compras/requisicoes`, `/compras/nova` |
+| Compras (necessidade própria) | Cria requisição sem pedido de venda ("Nova requisição"); a OC dela chega ao MES pela referência | HUB, `compras.pode_criar` |
+| Gerente de Compras | Aprova a OC **acima de R$ 30 mil** (perfil com `pode_aprovar` na tela `compras`) | HUB, `/compras/aprovacoes` |
 | CCP | Follow-up com o fornecedor: confirmação, previsão, despacho, ocorrência | HUB, `/compras/followup` |
 | Pipeline | Envia a OC aprovada ao Omie (fila) | `omie-elt-pipeline`, `envioOrdensCompra.ts` |
 | Fornecedor | Recebe a OC e entrega (CIF) ou libera para coleta (FOB); sem acesso ao sistema | externo |
@@ -39,7 +38,7 @@ Transformar uma **necessidade de material** em uma **Ordem de Compra aprovada**,
 | 2 | O circuito do MES é **fixo do sistema, fora do roteiro**: `Estoque → Requisições → Compras · CCP → Recebimento → Qualidade · Entrada → Estoque` | 📝 ✅ `circuito-compra.ts:9-25` |
 | 3 | **Ida (LOG-34):** o MES **empurra** cada item da requisição por `PUT /compras/requisicoes/origem/{id_origem}`; fila própria, sem perder se o av-hub cair | 📝 ✅ `envio-avhub.service.ts:21`, `:130` |
 | 4 | **Volta (LOG-35):** o MES **lê** os marcos por `GET /compras/requisicoes/eventos` com cursor; polling de 5 min mais leitura sob demanda | 📝 ✅ `eventos-avhub.service.ts:25-31` |
-| 5 | **Aprovação:** o **Gerente de Compras aprova sempre**; **acima de R$ 30 mil a Diretoria aprova também** | 📝 🔴 o código difere (ver "Como está no código", C2/C3) |
+| 5 | **Aprovação:** a OC que **excede R$ 30 mil** é aprovada pelo **Gerente de Compras**; a OC **até R$ 30 mil** é liberada sem aprovação (**compradores livres**). **A Diretoria não aprova.** Regra provisória: fica mais rígida depois da conversa com Compras (🟡, ver Pendências) | 📝 N14-21 ✅ `ordens_compra.route.js:1230-1240`, `FecharCompra.tsx:604-605`, trigger `fn_ordens_compra_recalcular` |
 | 6 | Limite de aprovação é **por unidade**, configurável (`parametros_compras.limite_aprovacao`, padrão 30.000,00), em BRL (OC em moeda estrangeira converte pela cotação) | 📝 ✅ `parametros_compras.model.js:16`; Dump Avhub `fn_ordens_compra_recalcular` (linha 6779) |
 | 7 | OC emitida marca a requisição `atendida` por trigger; **nunca** pelo PATCH; OC cancelada devolve **todas** as requisições dela a `aberta` ("nenhum estado é beco sem saída") | 📝 ✅ `requisicoes_compra.route.js:15-17`, `:424-430`; Dump `fn_ordens_compra_requisicao` |
 | 8 | Cancelar requisição exige motivo (3 a 500 caracteres) | ✅ `requisicoes_compra.route.js:442-448` |
@@ -144,15 +143,18 @@ Montagem em `core_vendas_faturamento/index.js:190-193`. Contratos de banco: [[SQ
 
 ✅ `fn_requisicao_mes_aplicar` aplica a ida (Dump Avhub, linha 8680). A caixa lê as **duas origens** sem distinção (`GET /compras/requisicoes`). Trigger grava marcos `requisicao_recebida` (INSERT) e `em_cotacao` (`aberta → em_cotacao`) (Dump, linha 8966). Cotação e negociação com o fornecedor são **fora do sistema** 📝.
 
-### C2 e C3: aprovação (🔴 código difere da decisão)
+### C2 e C3: aprovação (✅ código igual à decisão)
 
-- ✅ **O que o código faz:** a OC nasce `aguardando_aprovacao`; a trigger de recálculo **aprova automaticamente** a OC cujo total em BRL é **menor ou igual** ao limite da unidade (30.000,00 por padrão) e deixa `aguardando_aprovacao` a que passa do limite (Dump, linhas 6779-6794). O HUB avisa "Acima de {limite}, ela nasce Aguardando aprovação" (`FecharCompra.tsx:1652`). Quem aprova ou cancela uma OC aguardando é **um** usuário com `pode_aprovar` na tela `compras` (Gerência de Compras): `ordens_compra.route.js:1230-1240`, `FecharCompra.tsx:604-605`. **Não existe segundo aprovador nem papel "Diretoria".**
-- 📝 **O que foi decidido (14/10):** o Gerente de Compras aprova **sempre**; acima de R$ 30 mil a Diretoria aprova **também**. Gap: (a) OC até R$ 30 mil hoje **dispensa** o Gerente; (b) acima de R$ 30 mil falta o segundo nível. Evento `oc_enviada_aprovacao` só marca a mudança para `aguardando_aprovacao` (Dump, linha 6929).
-- 🟡 Segregação comprador ≠ aprovador (DEC-3 do v1): o `aprovado_por` vem do BFF (sessão), mas a API **não** compara com `created_by` (`ordens_compra.route.js:1217-1240`) ❓ conferir se há trava no banco.
+- ✅ 📝 **Regra (N14-21):** OC que **excede R$ 30 mil** é aprovada pelo Gerente de Compras; OC **até R$ 30 mil** sai livre para os compradores. A Diretoria não participa.
+- ✅ **Como o código faz:** a OC nasce `aguardando_aprovacao`; a trigger de recálculo **aprova automaticamente** a OC cujo total em BRL é **menor ou igual** ao limite da unidade (`parametros_compras.limite_aprovacao`, 30.000,00 por padrão) e deixa `aguardando_aprovacao` a que passa do limite; OC já aprovada que sobe acima do limite volta a `aguardando_aprovacao` (Dump, linhas 6779-6794; texto da função em `docs/ENVIAR - contrato-compras-backend.md:649-694` do HUB). O HUB avisa "Acima de {limite}, ela nasce Aguardando aprovação" (`FecharCompra.tsx:604-605`, `:1652`). Quem aprova ou cancela uma OC aguardando é um usuário com `pode_aprovar` na tela `compras` (Gerência de Compras): `ordens_compra.route.js:1230-1240`. `condicoes_pagamento_compras.route.js:17` devolve o limite padrão 30.000,00 quando a unidade não tem linha.
+- 🟡 **Regra provisória:** o Nathan precisa de algo funcional agora; a regra vai ficar mais rígida quando conversarem com o setor de Compras (por exemplo, finalidade, tipo de item ou aprovação do Gerente também abaixo do limite). Não há desenho nem data.
+- 🟡 Segregação comprador ≠ aprovador: o `aprovado_por` vem do BFF (sessão), mas a API **não** compara com `created_by` (`ordens_compra.route.js:1217-1240`) ❓ conferir se há trava no banco. Evento `oc_enviada_aprovacao` só marca a mudança para `aguardando_aprovacao` (Dump, linha 6929).
 
 ### C4: emissão da OC e envio ao Omie
 
 ✅ A OC carrega fornecedor, transportadora, previsão de chegada, condição e parcelas, `tipo_frete`, `moeda` com `cotacao_moeda`/`cotacao_data`/`cotacao_origem` (PTAX), `valor_frete`, `valor_seguro`, `finalidade`, e por item: `valor_unitario`, `desconto`, `tipo_material` (acabado ou não), `id_requisicao` e `vinculos` ao pedido de venda (`ordens_compra.route.js:109-132`). Várias requisições do MES cabem numa OC (uma por item). ✅ A pipeline lê `fila-omie` e envia com `UpsertPedCompra` (`cCodIntPed` = número da OC), exclui OC cancelada que já estava no Omie com `ExcluirPedCompra`, e devolve `nCodPed` pelo `PATCH …/sincronizacao`; OC com erro **sai** da fila e só volta por "Reenviar" (`envioOrdensCompra.ts:18-40`). O evento `oc_no_omie` leva `numero_pedido_omie` ao MES.
+
+✅ **Envio real testado:** o Nathan testou o envio da OC ao Omie em 14/10 e funciona em teste; produção ❓ (checklist de subida em [[Omie-Integracao-Estado]]). O Omie **não tem ambiente de teste**, por isso o Nathan criou cadastros **TESTE** (fornecedor, cliente e transportadora) para ninguém se confundir. 🟡 Cuidado: esses cadastros são do Omie de verdade, então a pipeline os traz para o av-hub e eles aparecem em listas, relatórios e conferências (por exemplo o CON-01). Ao emitir OC de verdade, não escolher o fornecedor nem a transportadora TESTE; ao conferir relatórios, filtrar ou ignorar esses cadastros.
 
 ### C5: follow-up do CCP
 
@@ -164,11 +166,13 @@ Montagem em `core_vendas_faturamento/index.js:190-193`. Contratos de banco: [[SQ
 
 ### Pontas soltas da requisição
 
-1. 🔴 **Requisição criada só no av-hub (C0) não chega ao MES.** `id_origem` é `NOT NULL` em `requisicoes_compra_eventos` (Dump, linha 18683), então ela não gera marco; e nenhuma rota entrega ao MES o material que ela comprou. Resultado: não há caminho para o MES receber, conferir e dar entrada no material comprado por requisição de necessidade própria. Opções: (a) contrato novo de OC → MES (job do 004/007) que cria "compra avulsa" no Recebimento; (b) a mercadoria da C0 entra por carga manual; (c) o Recebimento também passa a ler OC aprovada sem requisição do MES. Decisão do Nathan.
+1. 🔴 **A OC de uma requisição criada só no av-hub (C0) precisa ser lida pelo MES** (requisito de integração, N14-20). A requisição em si não chega ao MES (`id_origem` é `NOT NULL` em `requisicoes_compra_eventos`, Dump, linha 18683, então não gera marco), e isso fica assim: o MES lê a **OC**. Regra: (a) se o Compras vincula a requisição ou a OC a um pedido de venda, o PCP vê no MES que já existe OC para aquele pedido; (b) se a OC é para itens de **estoque** (sem pedido), o Estoque do MES mostra o **saldo futuro** ([[Glossario]]): saldo atual mais as OCs em andamento e a parte delas que preenche o estoque.
+   - ✅ **O que o av-hub já tem:** `ordens_compra.finalidade` (`pedidos_venda`, `recompra`, `estoque`, `uso_interno`; só as duas primeiras ligam a pedido de venda, `ordens_compra.route.js:92-94`, `:572-578`; sem finalidade a OC nasce `estoque`, `:982`); a tabela `ordens_compra_itens_vinculos` (item da OC para pedido de venda, `index.js:38`); a view `vw_pedido_venda_itens_compra` (vendido, pendente, em OC, saldo, `vw_pedido_venda_compras.route.js:12`, `:144`); `GET /compras/pedidos-venda/:numero` e `GET /compras/pedidos-venda/:numero/compras` (`index.js:195`, `vw_pedido_venda_compras.route.js:52`); e `GET /ordens-compra/referencia`, cujo item traz `destino[]` com `pedido_venda` (com `numero_pedido_venda`) e `estoque`, somando a quantidade do item (`vw_ordens_compra_referencia_mes.swagger.json:61-88`), mais `finalidade` e `situacao` da OC (`vw_ordens_compra_referencia_mes.route.js:44-47`). Os eventos do contrato 35 não são o caminho (só existem para requisição com `id_origem`).
+   - 🔴 **O que falta no MES:** consumir a referência (job K4, BL-001 e [[API-004-Referencia-OC-Integracao-MES]], [[API-007-Referencia-OC-Valores-no-MES]]); mostrar a OC do pedido na Triagem, na Destinação e no Atendimento (BL-049); calcular e mostrar o saldo futuro no Atendimento e no Saldo (BL-050); dar um caminho de entrada à mercadoria dessa OC no Recebimento (BL-051, ver [[05-Recebimento]]). No hub, BL-028 (Gustavo) confere se a referência e uma consulta por produto e por pedido bastam.
 2. 🔴 `GET /requisicoes-compra` do MES ([[API-003-Requisicao-Compra-Integracao-MES]], `integracao-avhub.controller.ts:20-24`) ficou **sem consumidor** (a ida é por PUT).
 3. 🟡 O comentário "JOB DE POLLING do MES" em `requisicoes_compra.route.js:31-34` está velho.
 4. 🔴 **Fornecedor da OC só chega ao MES** com o job do contrato 004/007 (K4), sem código: `RequisicaoCompra.fornecedor` fica vazio e a conferência usa o que a doca digita (`compras.prisma:84-91`).
-5. 🔴 A aprovação em dois níveis (item C2/C3 acima).
+5. 🟡 A regra de aprovação é provisória: endurece depois da conversa com Compras (item C2/C3 acima).
 6. ❓ O SQL de `fn_requisicao_mes_aplicar` (migration 034) está em produção mas não versionado (Gustavo).
 7. 🟡 Recompra por RNC não tem contrato: a OC antiga segue `atendida` (ver [[06-Qualidade-Entrada]], pendência 2).
 8. 🟡 Um item cancelado pelo Compras volta a Requisições com motivo, e o PCP decide: abrir outra requisição ou devolver ao Estoque (`compras.service.ts:222-227`).
@@ -177,8 +181,8 @@ Montagem em `core_vendas_faturamento/index.js:190-193`. Contratos de banco: [[SQ
 
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
-| 1 | **Aprovação em dois níveis:** Gerente de Compras sempre; Diretoria acima do limite. Mudar a trigger (hoje auto-aprova ≤ limite), criar o papel (`pode_aprovar` por nível ou tela `compras-diretoria`), UI de Aprovações com segunda etapa e marco `oc_enviada_aprovacao` por nível | Gustavo (banco e API), Nathan (tela) | C2, C3 | 🔴 |
-| 2 | **Requisição só do av-hub chegar ao MES** (ponta solta 1) | Nathan decide; Gustavo (API), Robert (MES) | C0, R0 | 🔴 |
+| 1 | **Endurecer a regra de aprovação** depois da conversa com Compras (a regra atual já funciona); sem desenho nem data. Pendência cadastral: vincular usuários à Gerência de Compras (PS-008) | Nathan, com Compras | C2, C3 | 🟡 |
+| 2 | **MES ler as OCs do hub:** OC do pedido para o PCP, saldo futuro no Estoque e entrada da mercadoria no Recebimento (ponta solta 1; BL-006, BL-049, BL-050, BL-051; BL-028 no hub) | Robert (MES), Gustavo (API) | C0, R0 | 🔴 |
 | 3 | **Job do contrato 004/007 no MES:** projeção da OC (fornecedor, valores) e custo do lote | Robert | C4, R4 | 🔴 |
 | 4 | **Perfil CCP:** edição só pelo CCP | Gustavo, Nathan | C5 | 🔴 |
 | 5 | Remover ou arquivar `GET /requisicoes-compra` (contrato 003) e o comentário velho | Gustavo, Robert | — | 🟡 |
@@ -190,22 +194,22 @@ Montagem em `core_vendas_faturamento/index.js:190-193`. Contratos de banco: [[SQ
 
 ## Pendências
 
-- Nathan: o segundo nível é só valor (acima de R$ 30 mil) ou também finalidade (por exemplo, uso interno)? O limite é por unidade ou global? O código tem por unidade.
-- Nathan: segregação comprador ≠ aprovador continua valendo se o Gerente também compra?
+- Nathan e Compras (🟡, futuro): como endurecer a regra de aprovação (só valor, finalidade, tipo de item, aprovação abaixo do limite). O limite é por unidade (o código já tem assim).
+- Nathan: segregação comprador ≠ aprovador vale se o Gerente também compra?
 - Compras: prazo máximo de OC sem confirmação do fornecedor até destacar na fila do CCP.
 - Compras: quem avisa quando uma OC é cancelada depois de aprovada e a parcial já estava esperada no Recebimento (o MES tira da lista, mas ninguém avisa a doca).
-- Gustavo: `requisicoes_compra_eventos.id_origem NOT NULL` precisa mudar se a decisão da ponta solta 1 for gerar marcos para requisição do Compras.
+- Robert e Gustavo: o MES vê a OC de requisição do Compras só pela referência; `requisicoes_compra_eventos.id_origem` continua `NOT NULL` e não precisa mudar.
 
 ## Subfluxo
 
 ```mermaid
 flowchart TD
     E4{"E4 · Restante: solicitar compra"} --> P3["P3 · Requisição de compra<br/>origem PCP, setor Requisições do MES<br/>PUT compras requisicoes origem, LOG-34"]
-    C0["C0 · Requisição de compra<br/>origem Compras, Nova requisição no av-hub<br/>sem id_origem, não chega ao MES"] --> C1
+    C0["C0 · Requisição de compra<br/>origem Compras, Nova requisição no av-hub<br/>sem id_origem, a OC chega ao MES pela referência"] --> C1
     P3 --> C1["C1 · Cotação e negociação<br/>comprador no av-hub, marcos recebida e em_cotacao"]
     C1 --> C2{"C2 · Acima de R$ 30 mil?"}
-    C2 -->|sim| C3["C3 · Gerente de Compras aprova<br/>acima de R$ 30 mil a Diretoria também<br/>código: um nível, auto-aprova até o limite"]
-    C2 -->|"não"| C4
+    C2 -->|sim| C3["C3 · Gerente de Compras aprova<br/>OC acima de R$ 30 mil"]
+    C2 -->|"não: compradores livres"| C4
     C3 --> C4["C4 · Emite a Ordem de Compra<br/>CIF ou FOB, valor, moeda e cotação por item<br/>pipeline envia ao Omie pela fila"]
     C4 --> C5["C5 · Follow-up do CCP<br/>confirmou, previsão, despachada, ocorrência<br/>marcos do LOG-35"]
     C5 -->|"GET compras requisicoes eventos, 5 min ou sob demanda"| CCP["Compras · CCP no MES<br/>só leitura, linha do tempo"]

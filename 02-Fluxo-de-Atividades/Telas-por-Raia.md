@@ -33,6 +33,8 @@ Repositórios: **HUB** é o front do av-hub (`b55ac55`, conferido em disco), **a
 | — | Acompanhamento dos Pedidos, detalhe | Ordem de Produção (detalhe) | `/ordens-producao/[id]` | app-pcp | `ordens-producao` | ✅ mini-roteiro, histórico, anexos, embalagens; 🟡 falta mostrar o split atendido pelo estoque e a reserva |
 | — | Pedidos excluídos | — | `/pedidos-excluidos` | app-pcp | ❓ | ✅ snapshot de pedido excluído |
 | P6 | Novo norte (retrabalho ou reabrir compra) | Fila "Novo norte" (2.5) | — | app-pcp | — | 🔴 sem tela; `/decisoes-pcp` só trata recebimento |
+| P1, P2 | OC do pedido (coluna ou cartão na Triagem e na Destinação) | — | `/carteira`, `/ordens-producao/novo` | app-pcp | — | 🔴 não existe (N14-20, BL-049): o PCP deve ver que já há OC para o pedido |
+| P2 | Ordem de Produção (entidade e documento imprimível, só do que será fabricado) | — | — | app-pcp | — | 🔴 não existe (N14-22, BL-052) |
 
 ## Estoque (E1 a E6) · [[03-Estoque-Atendimento-e-Despacho]]
 
@@ -47,6 +49,7 @@ Repositórios: **HUB** é o front do av-hub (`b55ac55`, conferido em disco), **a
 | — | Mapa do Depósito | — | `/estoque-operacao/mapa-deposito` | app-pcp | ❓ | 🟡 sobre `MOCK_DEPOSITOS` |
 | — | Materiais, Depósitos | Cadastro de material, Depósitos (8.1, 8.2) | `/cadastros/estoque/materiais`, `/cadastros/estoque/depositos` | app-pcp | ❓ | ✅ API real |
 | E6 | Documento de retirada | — | — | app-pcp | — | 🔴 não existe |
+| E1 | Saldo futuro (no Atendimento e no Saldo: saldo atual + OCs em andamento de estoque) | — | `/estoque-operacao/atendimento`, `/estoque-operacao/saldo` | app-pcp | — | 🔴 não existe (N14-20, BL-050) |
 
 ## Compras e fornecedor (P3, C0 a C5, FN1) · [[04-Circuito-de-Compra]]
 
@@ -57,7 +60,7 @@ Repositórios: **HUB** é o front do av-hub (`b55ac55`, conferido em disco), **a
 | C0, C1 | Requisições (caixa do Compras), "Nova requisição" | Caixa de entrada de Requisições (3.1) | `/compras/requisicoes`, `/compras/requisicoes/kanban` | HUB | ❓ | ✅ `components/Compras/ComprasRequisicoes.tsx:188`, `:426` |
 | C4 | Nova Ordem de Compra | Emissão da OC (3.2) | `/compras/nova`, `/compras/nova/[requisicaoId]` | HUB | ❓ | ✅ |
 | C4 | Ordens de Compra | Ordens de Compra (3.3) | `/compras/ordens`, `/compras/ordens/kanban`, `/compras/ordem/[id]`, `/compras/pedido-omie/[id]` | HUB | ❓ | ✅ |
-| C2, C3 | Aprovações | Fila de Aprovações (3.4) | `/compras/aprovacoes` | HUB | ❓ | ✅ regra da Diretoria acima de R$ 30 mil ❓ |
+| C2, C3 | Aprovações | Fila de Aprovações (3.4) | `/compras/aprovacoes` | HUB | ❓ | ✅ aprova só a OC acima de R$ 30 mil (Gerência de Compras); sem Diretoria (N14-21) |
 | C5 | Follow-up | Follow-up do CCP (3.6) | `/compras/followup` | HUB | ❓ | ✅ |
 | — | Dashboard de Compras | (3.5) | `/compras/dashboard-compras` | HUB | ❓ | ✅ |
 | — | Compradores | — | `/compras/compradores` | HUB | ❓ | ✅ cadastro de compradores usado pela OC (LOG-18, LOG-28, LOG-36) |

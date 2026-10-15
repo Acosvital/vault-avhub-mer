@@ -19,15 +19,16 @@ Depois da liberação, esta raia continua como leitura: o vendedor acompanha o i
 
 ## Quem atua
 
-| Quem                                           | Papel                                                                             | Onde                                     |
-| ---------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------- |
-| Vendedor                                       | Marca Sim ou Não e libera os pedidos dele                                         | Portal do Vendedor, `/liberar-pedidos`   |
-| Auxiliar do titular                            | Libera pelos titulares que auxilia (mesmo escopo de Meus Pedidos)                 | idem                                     |
-| Gerente (perfis que já veem Pedidos da Equipe) | Vê todos os pedidos da liberação, só leitura; descobre quem está segurando pedido | Portal do Gerente, `/liberacao-equipe`   |
-| PCP                                            | Consome os liberados (não marca nada)                                             | MES, ver [[02-PCP-Triagem-e-Destinacao]] |
-| Gustavo (DBA)                                  | Banco e API desta raia                                                            | `api-acos-vital`                         |
-| Nathan                                         | Front do av-hub (telas e BFF)                                                     | HUB                                      |
-| Robert                                         | Lado MES do contrato (`importado`, polling)                                       | `api-pcp`                                |
+| Quem | Papel | Onde |
+|---|---|---|
+| Vendedor | Marca Sim ou Não e libera os pedidos dele | Portal do Vendedor, `/liberar-pedidos` |
+| Auxiliar do titular | Libera pelos titulares que auxilia (mesmo escopo de Meus Pedidos) | idem |
+| Gerente (perfis que já veem Pedidos da Equipe) | Vê todos os pedidos da liberação, só leitura; descobre quem está segurando pedido | Portal do Gerente, `/liberacao-equipe` |
+| Admin (Dev) | Vê e libera | as duas telas |
+| PCP | Consome os liberados (não marca nada) | MES, ver [[02-PCP-Triagem-e-Destinacao]] |
+| Gustavo (DBA) | Banco e API desta raia | `api-acos-vital` |
+| Nathan | Front do av-hub (telas e BFF) | HUB |
+| Robert | Lado MES do contrato (`importado`, polling) | `api-pcp` |
 
 Pedidos manuais (anexo) e comissões ficam fora desta raia (decisão do Nathan: Atividades é a espinha).
 
@@ -73,7 +74,7 @@ O desenho do v1 (estados do item visto pelo vendedor) tem 8 valores: `AGUARDANDO
 
 | Nome atual | Nome antigo | Rota | App | Quem |
 |---|---|---|---|---|
-| Liberar Pedidos | Caixa de entrada do vendedor (tela 1.1) | `/liberar-pedidos` | HUB (Portal do Vendedor) | Vendedor: `pode_visualizar` e `pode_editar` |
+| Liberar Pedidos | Caixa de entrada do vendedor (tela 1.1) | `/liberar-pedidos` | HUB (Portal do Vendedor) | Vendedor e Admin (Dev): `pode_visualizar` e `pode_editar` |
 | Liberação da Equipe | visão do gerente da 1.1 | `/liberacao-equipe` | HUB (Portal do Gerente) | perfis com `pedidos-equipe`: só `pode_visualizar` |
 | Meus Pedidos (detalhe, cartão Etapa dos itens) | Meus Pedidos por etapa (tela 1.2) | `/meus-pedidos/pedido/:empresa/:numero` | HUB | Vendedor |
 | Pedidos da Equipe (detalhe, mesmo cartão) | idem | `/pedidos-equipe/pedido/:empresa/:numero` | HUB | Gerência |

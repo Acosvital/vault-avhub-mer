@@ -18,7 +18,7 @@ criado_original: 2026-10-01
 >
 > - ✅ **MES:** cada item da requisição entra na fila `integracao_avhub_envios` na mesma transação; `EnvioAvhubService` faz `PUT {API_URL}/compras/requisicoes/origem/{id_origem}` (`api-pcp/src/integracao-avhub/envio-avhub.service.ts:130`), `id_origem` = id do item; dispara após criar ou cancelar e repete a cada `AVHUB_ENVIO_INTERVALO_SEG` (padrão 60 s, `:46`), backoff 1, 2, 5, 10, 30, 60 min. Chave `AVHUB_MES_INTEGRACAO_KEY`, só vale para esse PUT.
 > - ✅ **av-hub:** `PUT /compras/requisicoes/origem/:id_origem` (`api-acos-vital/src/schemas/core_vendas_faturamento/tables/requisicoes_compra/requisicoes_compra.route.js:221`) chama `fn_requisicao_mes_aplicar` (`Dump Avhub (Esqueleto).sql:8680`): cria, atualiza, cancela ou ignora. Cada requisição do av-hub tem 1 material; `409 REQUISICAO_COM_OC` ao cancelar requisição que já tem OC.
-> - 🔴 Lacuna: requisição criada pelo Compras no av-hub (nó C0, "Nova requisição") não tem `id_origem` e **não chega ao MES**; não há caminho para receber no MES material comprado por ela ([[Pontas-Soltas]]).
+> - 📝 Requisição criada pelo Compras no av-hub (nó C0, "Nova requisição") não tem `id_origem` e **não chega ao MES**, e não precisa chegar: o MES lê a **OC** dela pela referência (N14-20, [[Integracao-AvHub-MES]]); 🔴 o MES ainda não lê.
 > - Anexo SQL em `LOG-34-anexos/` (`0001-requisicoes-pedido-omie.sql`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).

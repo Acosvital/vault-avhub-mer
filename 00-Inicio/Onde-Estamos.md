@@ -14,9 +14,9 @@ Estado do fluxo 0b por raia. Detalhe e evidência em cada nota de raia; fila de 
 | Raia | Nós | Estado | O que falta | Dono |
 |---|---|---|---|---|
 | [[01-Vendas-Liberacao]] | V1–V3 | ✅ | — | Nathan |
-| [[02-PCP-Triagem-e-Destinacao]] | P1, P2, P6 | ✅ P1/P2 · 🔴 P6 | Novo norte (retrabalho ou reabre compra): `RoteiroItem` tem CRUD, mas nenhuma movimentação o lê; renomear rotas antigas | Robert |
-| [[03-Estoque-Atendimento-e-Despacho]] | E1–E6 | ✅ E1–E5 · 🔴 E6 | **Documento de retirada com baixa na retirada** (hoje baixa em `receber()`); custo do item (`GET /itens/custo`); fabricado virar lote | Robert |
-| [[04-Circuito-de-Compra]] | P3, C0–C5, FN1 | ✅ ida e volta · 🟡 C3 · 🔴 C0→MES | Aprovação em dois níveis (Gerente sempre; Diretoria acima de R$ 30 mil) não existe no código; requisição criada no av-hub não chega ao MES; job do contrato 004 | Gustavo, Robert |
+| [[02-PCP-Triagem-e-Destinacao]] | P1, P2, P6 | ✅ P1/P2 · 🔴 P6 | Novo norte (retrabalho ou reabre compra): `RoteiroItem` tem CRUD, mas nenhuma movimentação o lê; renomear rotas antigas; **OC do pedido** visível ao PCP; **Ordem de Produção** como entidade e documento imprimível (só para o que será fabricado) | Robert |
+| [[03-Estoque-Atendimento-e-Despacho]] | E1–E6 | ✅ E1–E5 · 🔴 E6 | **Documento de retirada com baixa na retirada** (hoje baixa em `receber()`); custo do item (`GET /itens/custo`); fabricado virar lote; **saldo futuro** (saldo atual + OCs em andamento de estoque) | Robert |
+| [[04-Circuito-de-Compra]] | P3, C0–C5, FN1 | ✅ ida e volta e aprovação (C3) · 🔴 MES ler a OC do hub (C0) | Aprovação já funciona (OC acima de R$ 30 mil: Gerente de Compras; até R$ 30 mil: compradores livres) e endurece depois com Compras 🟡; **o MES precisa ler as OCs do hub** (PCP vê a OC do pedido; Estoque vê o saldo futuro): job do contrato 004/007, telas e caminho de entrada no Recebimento; envio real da OC ao Omie testado em 14/10, produção ❓ | Robert, Gustavo |
 | [[05-Recebimento]] | R0–R6 | ✅ | Gravar custo da OC no lote (`lote_custo`); cruzar com a OC quando existir o job do contrato 004 | Robert |
 | [[06-Qualidade-Entrada]] | Q1–Q4 | ✅ | Recompra por RNC sem contrato | Robert, Gustavo |
 | [[07-Producao-e-Roteiro]] | F1 | ✅ filas · 🔴 consumo | Consumo de matéria-prima; `EM_PRODUCAO` e `BLOQUEADO` nunca são gravados; divergência de produção sem tela | Robert |
@@ -31,7 +31,9 @@ Estado do fluxo 0b por raia. Detalhe e evidência em cada nota de raia; fila de 
 | Integração requisição MES ↔ av-hub (LOG-34, LOG-35) | ✅ ida e volta; sob demanda e polling de 5 min ([[Integracao-AvHub-MES]]) |
 | Status por item (API-005, API-006) | ✅ |
 | Torre de Fluxo (LOG-46) | 🟡 API e jobs no av-hub; o MES não publica `/fluxo/eventos`; o HUB não tem tela |
-| Custo por item (API-008, LOG-47) | 🟡 `lote_custo` existe; faltam `GET /itens/custo` e custo da OC; a migration 047b não está no dump |
+| Custo por item (API-008, LOG-47) | 🟡 `lote_custo` existe; faltam `GET /itens/custo` e custo da OC; a migration 047b não está no dump. O Ciclo 1 segue sem imposto; o modelo com impostos (ICMS, IPI, ST, frete) precisa ser desenhado já (PS-014, BL-053) |
+| Cadastros TESTE no Omie | 🟡 O Omie não tem ambiente de teste; os cadastros TESTE do Nathan entram na pipeline e nos relatórios: filtrar ao conferir (BL-055) |
+| Pendências cadastrais | Perfil CCP e vínculo de usuários à Gerência de Compras: serão criados em breve, assunto cadastral simples (Nathan e Gustavo), sem bloqueio de desenho |
 
 ## Próximos passos
 

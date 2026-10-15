@@ -105,7 +105,6 @@ As duas opções do nó `E4` (compra ou produção) são alternativas para o res
 flowchart LR
     COM(["Comprador no HUB"])
     GCO(["Gerente de Compras"])
-    DIR(["Diretoria"])
     CCP(["CCP"])
     FOR(["Fornecedor"])
     subgraph SIS4["Sistema HUB, api-acos-vital e Compras CCP no MES"]
@@ -119,8 +118,7 @@ flowchart LR
     COM --> C0U
     COM --> C1U
     COM --> C4U
-    GCO --> C3U
-    DIR -.->|acima de 30 mil| C3U
+    GCO -->|"OC acima de 30 mil"| C3U
     CCP --> C5U
     FOR --> C5U
     CCP --> CLM
@@ -128,9 +126,9 @@ flowchart LR
 
 | Caso | Estado | Selo |
 |---|---|---|
-| C0 | `POST /compras/requisicoes` no HUB; não chega ao MES | ✅ 🔴 |
-| C1, C4 | Requisições e Ordens no HUB | ✅ |
-| C3 | Aprovações; Diretoria acima de R$ 30 mil | ✅ ❓ regra a conferir |
+| C0 | `POST /compras/requisicoes` no HUB; a requisição não chega ao MES, a OC dela deve chegar pela referência (N14-20) | ✅ 🔴 MES não lê a OC |
+| C1, C4 | Requisições e Ordens no HUB; OC até R$ 30 mil sai livre | ✅ |
+| C3 | Aprovações: Gerente de Compras aprova a OC acima de R$ 30 mil | ✅ (N14-21) |
 | C5 | Follow-up no HUB | ✅ perfil CCP 🔴 |
 | Ler no MES | Compras · CCP, só leitura | ✅ |
 
@@ -204,4 +202,4 @@ flowchart LR
 - Saiu **Registrar a compra no MES manualmente** (UC13 do v1): o `PATCH :id/compra` foi removido; o MES só espelha.
 - Saíram **Pesar material**, **Etiquetar lote**, **Separar item para Expedição** e **Contagem cíclica** como casos soltos: peso entra no R2; etiqueta é geração sob demanda; separação e contagem não existem no schema (fora do fluxo 0b).
 - Entraram **Criar requisição de necessidade própria** (C0), **Liberar o recebimento sem OC**, **Gerar documento de retirada** (E6) e **Carga inicial**.
-- A aprovação mudou: Gerente de Compras sempre, Diretoria acima de R$ 30 mil (antes só acima de R$ 30 mil, aprovador genérico).
+- A aprovação é do Gerente de Compras para a OC acima de R$ 30 mil; até esse valor os compradores ficam livres; a Diretoria não é ator (N14-21).

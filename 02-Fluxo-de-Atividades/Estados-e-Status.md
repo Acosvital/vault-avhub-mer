@@ -174,7 +174,7 @@ Etapa desconhecida: a tela mostra o texto cru em tom neutro (`etapas-item.ts:49-
 | `pedidos_compras_etapas.status_equivalente` | `aprovado`, `cancelado` | 18148 ✅ |
 | `contadores_documento.tipo` | `ordem_compra`, `requisicao_compra` | 16560 ✅ |
 
-Aprovação: Gerente de Compras sempre; acima de R$ 30 mil, Diretoria também (decisão de 14/10, `C3`). A regra da Diretoria ❓ conferir em `parametros_compras`. Detalhes em [[04-Circuito-de-Compra]].
+Aprovação (`C3`, N14-21): OC acima do limite da unidade (`parametros_compras.limite_aprovacao`, padrão R$ 30 mil) fica `aguardando_aprovacao` até o Gerente de Compras aprovar; OC até o limite vira `aprovado` sozinha (compradores livres); a Diretoria não aprova ✅. Detalhes em [[04-Circuito-de-Compra]].
 
 ### Torre de Fluxo (`core_fluxo`)
 

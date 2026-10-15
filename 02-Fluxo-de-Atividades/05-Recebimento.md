@@ -139,13 +139,26 @@ Contratos de apoio: [[LOG-35-Compras-Marcos-Requisicao-para-MES]] (marco `oc_apr
 
 Migrations: `20261006140000_recebimento_conferencia`, `20261014120000_compras_ccp`. Modelo geral em [[Banco-MES]].
 
+## Mercadoria de OC sem requisição do MES (C0)
+
+📝 N14-20: o MES passa a ler as OCs do hub. A mercadoria de uma OC criada a partir de requisição só do av-hub (ou de uma OC de estoque, sem requisição) precisa ter entrada no Estoque, mas o Recebimento do MES hoje **exige requisição do MES**: a chegada pede requisição não cancelada, `podeReceber`, parcial do mesmo item do pedido **em Compras · CCP** e `pode_atuar` no Recebimento (`compras.service.ts:362-382`), e a conferência valida que cada item pertence à requisição (`recebimento.service.ts:147-162`). Uma OC sem `id_origem` não tem parcial nem requisição no MES, então não cai nos esperados.
+
+Caminho necessário 🟡 (proposta; o desenho é do Robert):
+1. O job do contrato 004/007 (BL-001) grava a projeção da OC aprovada; o item traz `id_requisicao` nulo ou sem `id_origem` e o `destino` (pedido de venda ou estoque) ✅ `vw_ordens_compra_referencia_mes.swagger.json:44-88`.
+2. A OC aprovada sem requisição do MES entra nos **esperados** do Recebimento como "esperado por OC", sem parcial, com fornecedor, quantidade, previsão e destino vindos da referência.
+3. A doca registra a chegada com a NF e confere contra a NF (regra de hoje, N14-04); o lote nasce `PENDENTE`, em quarentena, e segue para a Qualidade como qualquer outro.
+4. O que o `destino` marca como **pedido de venda** reserva o lote para aquele pedido e avisa o PCP; o que é **estoque** vira saldo livre; o que era "saldo futuro" deixa de ser futuro e passa a saldo atual ([[03-Estoque-Atendimento-e-Despacho]]).
+5. Receber parte da OC mantém o restante como esperado (como o split de hoje).
+
+Pontos a decidir pelo Robert: se o "esperado por OC" é entidade própria ou uma requisição sintética criada pelo job; como evitar entrada duplicada (a mesma OC com requisição do MES e a referência); e a quantidade já recebida por OC, necessária também ao cálculo do saldo futuro (BL-050).
+
 ## O que falta desenvolver
 
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
 | 1 | **Gravar o custo da OC no lote** (`lote_custo`, `origem OC`, `id_item_oc`, `cotacao_a_conferir`) com o job do 004/007; lote por produto dentro da OC; lote sem custo sinalizado quando a unidade difere | Robert (MES), Gustavo (rota) | R4 | 🔴 |
 | 2 | **Cruzar a conferência com a OC** (quantidade comprada, fornecedor) quando existir o job 004/007; hoje só NF | Robert | R1, R3 | 🔴 |
-| 3 | **Material comprado por requisição só do av-hub (C0)** não tem como ser esperado nem conferido | Nathan decide | R0 | 🔴 (ver [[04-Circuito-de-Compra]]) |
+| 3 | **Caminho de entrada da mercadoria de OC sem requisição do MES** (requisição criada só no av-hub, C0; BL-051): ver "Mercadoria de OC sem requisição do MES" abaixo | Robert (MES), Gustavo (API) | R0 | 🔴 📝 N14-20 |
 | 4 | Reabertura de divergência de produção e o `P6` novo norte | Robert | R6, P6 | 🔴 |
 | 5 | Leitor de código de barras da chave da NF e posto de recebimento (impressora, leitor) | Robert | R1 | 🔴 |
 | 6 | Avisar o av-hub quando o PCP **reabre** o recebimento (devolução ao fornecedor, nova compra) | Nathan, Gustavo, Robert | R6 | 🔴 |
@@ -166,6 +179,7 @@ Migrations: `20261006140000_recebimento_conferencia`, `20261014120000_compras_cc
 flowchart TD
     FN1["FN1 · Fornecedor entrega<br/>CIF direto ou coleta FOB"] --> R0["R0 · Esperados: OC aprovada<br/>doca registra a chegada com NF<br/>POST compras requisicoes chegada"]
     C5["C5 · Marco oc_aprovada do av-hub"] -.->|"entra nos esperados"| R0
+    C0["C0 · OC de requisição só do av-hub<br/>ou de estoque, lida pela referência"] -.->|"esperado por OC, a construir"| R0
     R0 --> R1["R1 · Confere contra a NF<br/>chave de 44 dígitos, contado x NF"]
     R1 --> R2["R2 · Pesagem<br/>peso real obrigatório se há peso teórico<br/>tolerância 5%"]
     R2 --> R3{"R3 · Bate com o esperado?"}

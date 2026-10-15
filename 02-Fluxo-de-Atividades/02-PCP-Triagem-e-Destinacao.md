@@ -41,6 +41,8 @@ O PCP enxerga os pedidos que o vendedor liberou (`P1`) e, por **rodada**, decide
 | 11 | **Saldo zero exige clique**: nenhuma parcial passa sozinha pelo Estoque (#31b, 08/10) | 📝 ✅ `itens-parciais.service.ts:588-590` |
 | 12 | Confirmação de importação ao av-hub depois de gravar; falhou, o MES reenvia a cada 10 min por 7 dias (20 por rodada) | ✅ `pedidos.service.ts:63-122`, `:399-406` |
 | 13 | O PCP **decide o novo norte** (retrabalho ou reabrir compra) quando a Qualidade de saída reprova ou o Recebimento reabre | 📝 🔴 sem tela de fila |
+| 14 | **Ordem de Produção (OP)** é uma **entidade** do sistema e também um **documento para impressão** (formalidade), emitido **só para o que será fabricado** (revenda e o que o Estoque atende não geram OP). Não confundir com a "ordem" que hoje o código grava por destino (`Pedidos`, `pedidoVenda/N`), nem com o campo `ordemProducao`, que hoje é só o texto do pedido | 📝 N14-22, #74 🔴 a entidade e o documento não existem (`producao.prisma:97`) |
+| 15 | **Se o Compras já emitiu OC vinculada ao pedido de venda, o PCP vê, no MES, que existe ordem de compra para aquele pedido** (número da OC, situação, quantidade, previsão), na Triagem, na Destinação e no Atendimento do Estoque. Fonte: a referência da OC do hub, item com `destino` do tipo `pedido_venda` | 📝 N14-20 🔴 o MES não lê a referência (BL-049) |
 
 ### Matriz de destinação (eixo 1 × eixo 2)
 
@@ -100,6 +102,8 @@ O `POST /pedidos/completo` singular foi apagado (PR #50); só o `/lote` existe.
 - ✅ **Excluir ordem** devolve reservas ATIVAS (`liberarReservas`), enfileira o cancelamento das requisições no av-hub (`enfileirarCancelamentosDoPedido`, 409 se já tem OC) e apaga com snapshot (`pedidos.service.ts:622-712`).
 - ✅ **Reenvio do `importado`** com `AVHUB_REENVIO_IMPORTADO_MIN` (padrão 10; 0 desliga) (`pedidos.service.ts:80-85`).
 - 🟡 **Nomes técnicos antigos:** a rota é `/carteira`, o campo é `ordemProducao`, os códigos são `OP-`. Os rótulos novos já estão na tela (09/10, `9bb47e4`).
+- 🔴 **Ordem de Produção como entidade e documento (N14-22).** Não existe no código: `ordemProducao` é só o texto do pedido (`producao.prisma:97`). Falta criar a entidade (emitida só para o que será fabricado), o documento imprimível e a numeração; a contagem de esforço é do Robert (BL-052).
+- 🔴 **OC do pedido na Triagem e na Destinação (N14-20).** O PCP não vê hoje se o Compras já emitiu OC para o pedido. O MES precisa ler a referência da OC do hub (`GET /ordens-compra/referencia`, item com `destino` do tipo `pedido_venda`) e mostrar a OC ao lado do pedido e do item (BL-049); do lado do hub já existem o vínculo `ordens_compra_itens_vinculos`, a view `vw_pedido_venda_itens_compra` e `GET /compras/pedidos-venda/:numero/compras` ✅ ([[04-Circuito-de-Compra]]).
 - 🔴 **P6 Novo norte:** a Qualidade de saída pode reprovar e abrir retrabalho (`PATCH /itens-parciais/:id/reprovar`, `/resolver`, `/retrabalho`, `itens-parciais.controller.ts:205-239`), mas **não existe a fila "Novo norte"** nem o `RoteiroItem` (C8, EC-03). A única fila de decisão do PCP existente é a de divergência de recebimento.
 
 ## O que falta desenvolver
@@ -108,7 +112,9 @@ O `POST /pedidos/completo` singular foi apagado (PR #50); só o `/lote` existe.
 |---|---|---|---|---|
 | 1 | Fila "Novo norte" (P6): decidir retrabalho ou reabrir compra depois de reprovação de saída ou recompra | Robert | P6 | 🔴 |
 | 2 | `RoteiroItem` (roteiro por item, C8, EC-03) | Robert | P2, P6 | 🔴 |
-| 3 | Renomear rota, campo e prefixo (`/carteira`, `ordemProducao`, `OP-`) para os nomes novos | Robert | P1, P2 | 🔴 |
+| 3 | Renomear rota, campo e prefixo (`/carteira`, `ordemProducao`, `OP-`) para os nomes novos (BL-036) | Robert | P1, P2 | 🔴 |
+| 7 | **Ordem de Produção: entidade e documento imprimível**, só para o que será fabricado (BL-052; esforço a estimar pelo Robert) | Robert | P2 | 🔴 📝 N14-22 |
+| 8 | **Mostrar a OC do pedido** (Triagem, Destinação, Atendimento) lendo a referência da OC do hub (BL-049, depende de BL-001) | Robert | P1, P2, E1 | 🔴 📝 N14-20 |
 | 4 | Consumo de matéria-prima ao enviar à produção (J2, J3): hoje o restante segue o roteiro sem baixa | Robert | P2, E4 | 🔴 |
 | 5 | Pedido manual (`SistemaOrigem.MANUAL`) fora da espinha; ver anexo [[Pedido-Manual]] | Nathan | P2 | 🟡 |
 | 6 | Pedido liberado anterior à data de corte não aparece na Triagem (404 nos itens) | Nathan | P1 | 🔴 pergunta aberta (ver [[01-Vendas-Liberacao]]) |
@@ -116,7 +122,8 @@ O `POST /pedidos/completo` singular foi apagado (PR #50); só o `/lote` existe.
 ## Pendências
 
 - Nathan: o saldo zero continua exigindo clique mesmo depois do marco zero do Estoque (13/11)? Hoje vale o clique sempre (#31b).
-- Nathan e Robert: a Triagem deve mostrar o saldo do Estoque por item (hoje não mostra; a decisão de saldo é só no Estoque).
+- Nathan e Robert: a Triagem deve mostrar o saldo do Estoque por item (hoje não mostra; a decisão de saldo é só no Estoque). Com N14-20, ela também mostraria o saldo futuro e a OC do pedido.
+- Robert: a OP é uma entidade por destino de fabricação, por item ou por rodada? Como se relaciona com a "ordem" que o código grava hoje (`pedidoVenda/N`)?
 - Robert: se `ensureEtapasPorTipo` deve aceitar roteiro de Revenda **sem nenhuma** etapa além do Estoque (o front exige roteiro não vazio, `ordens-producao/novo/page.tsx:376-379`).
 
 ## Subfluxo
@@ -126,7 +133,8 @@ flowchart TD
     V3["V3 · Vendedor libera o pedido"] --> P1["P1 · Triagem do Pedido<br/>GET pedidos carteira, só liberados"]
     P1 --> P2["P2 · Destinação do Pedido<br/>destino, quantidade e roteiro por rodada<br/>Estoque entra como etapa 1<br/>POST pedidos completo lote"]
     P2 -->|"POST importado ao av-hub"| V3
-    P2 --> E1["E1 · Saldo disponível na filial do pedido"]
+    P2 --> E1["E1 · Saldo disponível na filial do pedido<br/>mais saldo futuro das OCs do hub"]
+    C0["C0 · OC do hub, lida pela referência"] -.->|"PCP vê a OC do pedido"| P1
     E1 --> E2{"E2 · Saldo cobre o item?"}
     E2 --> E4{"E4 · O que fazer com o restante?"}
     E4 -->|"solicitar compra"| P3["P3 · Requisição de compra, origem PCP"]

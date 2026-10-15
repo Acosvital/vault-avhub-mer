@@ -9,6 +9,8 @@ fontes: [HUB b55ac55 app/api/**/route.ts (extração por script em 14/10), api-a
 
 # Mapa de rotas do BFF para a API: quem chama com Bearer
 
+> **Correção (reauditoria de 14/10/2026):** a contagem "Sem Bearer (`headersCompras`, `headersApi` ou `x-api-key` inline)" abaixo classifica errado: `headersCompras` (`lib/compras/api.ts:31`) e `headersApi` (`lib/api/pedidosVenda.ts:96`) são apelidos de `headersComIdentidade` e **mandam o Bearer**. Na leitura arquivo a arquivo, só `app/api/auth/[...nextauth]/route.ts` (3 funções do login) chama a API sem o token do usuário ✅. Veja BL-042 em [[Backlog-por-Frente]] e PS-018 em [[Pontas-Soltas]].
+
 Fora do fluxo 0b, mas decide se o usuário comum leva 403. Regras de chave e token: [[Chaves-e-Autenticacao]]; permissões: [[RBAC-e-Permissoes]].
 
 ## A regra na API (✅ conferida)

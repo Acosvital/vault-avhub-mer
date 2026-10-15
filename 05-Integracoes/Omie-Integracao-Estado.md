@@ -47,7 +47,8 @@ Não são Omie: PTAX (API do BCB, `core.cotacoes_moeda`, 13:30 e 17:30 seg a sex
 - `UpsertPedCompra` (reenvio altera, não duplica: `cCodIntPed` = número da OC) e `ExcluirPedCompra` ✅ `omie-elt-pipeline/src/jobs/envioOrdensCompra.ts:25-26,132`. Sem parcelas (só `cCodParc`/`nQtdeParc`).
 - Fixo no código, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN` ✅ (`src/config/index.ts:155-156`; PR #3, 0f739f0) 📝 #7. Cron `1-59/2 * * * *` (`config/index.ts:159`). Riscos L10.1, L10.6 (FOB) e L10.7 (b) a (d): aceitos 📝.
 - A fila e o retorno passam pela API do av-hub: `GET /compras/ordens/fila-omie`, `PATCH /compras/ordens/:id/sincronizacao`, `POST /compras/ordens/:id/reenviar` ([[Chaves-e-Autenticacao]], chave C).
-- Falta antes do uso real: deploy da API com o contrato 36 e compradores vinculados (20 de 74 vinculados em 07/10; só importam os 32 ativos) 🔴 Nathan ([[Pontas-Soltas]] PS-009).
+- ✅ **Testado pelo Nathan em 14/10: o envio real da OC ao Omie funciona em teste.** Produção ❓. O que resta é o checklist de subida ([[Pontas-Soltas]] PS-009): deploy da API com o contrato 36 e compradores vinculados (20 de 74 vinculados em 07/10; só importam os 32 ativos, BL-045).
+- 🟡 **Cadastros TESTE no Omie.** O Omie **não tem ambiente de teste**. Para ninguém se confundir, o Nathan criou cadastros **TESTE** de fornecedor, cliente e transportadora no Omie de verdade. Como são cadastros reais, a pipeline os lê (`parceiros`, `pedidosVendas`, `pedidosCompras`) e eles entram no av-hub e em listas, relatórios e conferências (por exemplo o CON-01). Cuidado: filtrar ou ignorar esses cadastros em relatórios e conferências, e nunca usá-los em OC ou pedido de verdade. O README do pipeline também cita um fornecedor de teste usado no teste real de 05/10 (`README.md:163-165`).
 
 ## Processos e jobs
 
@@ -77,7 +78,8 @@ Os crons dos jobs mais antigos ainda lêem variável de ambiente com padrão no 
 | `exclusionSync` apaga pedido manual (`manual` não filtrado) | Gustavo | RS-001, BL-027, #15 |
 | 500 em `exclusion_sync_curta` (497 erros em Mogi, 490 HTTP 500): causa em `omie_ctl.run_log` | Gustavo | PS-020, #16 |
 | Pedido de compra apagado por fora no Omie não é detectado: limitação aceita | Nathan | #17 🟡 |
-| Camada raw removida em 06/10 (contrato 38); `sql/002` obsoleto, `DROP` das 5 tabelas `omie_raw.*` | Nathan marca, Gustavo apaga | PS-021, #18 |
+| `sql/002_staging_tables.sql` **obsoleto** (marcado pelo Nathan em 14/10): auditoria `omie_raw` removida do código no contrato 38. Resta o `DROP` das 5 tabelas e do schema `omie_raw` no banco | Gustavo | BL-054, N14-27, #18 |
+| Cadastros TESTE (fornecedor, cliente, transportadora) entram na pipeline e nos relatórios: filtrar ou ignorar em relatórios e conferências 🟡 | Nathan | BL-055, N14-25 |
 | Manifesto: o login de Mogi traz as duas empresas; confirmar linhas de Uberaba; HRM não coberta | Gustavo | PS-022, #19 |
 | `FAMILIA_PADRAO_POR_FILIAL` hardcoded para mogi e uberaba; corrigir `ARCHITECTURE.md` | Gustavo | PS-016, #20 |
 | Locais de estoque (B6) sem recurso | Gustavo | BL-030, #63 |

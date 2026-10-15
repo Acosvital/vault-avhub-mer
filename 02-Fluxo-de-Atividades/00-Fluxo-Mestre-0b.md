@@ -17,7 +17,8 @@ Selos: ✅ no código · 📝 decidido · 🟡 proposta · 🔴 aberto ou sem c�
 
 | Nó | Antes | Agora |
 |---|---|---|
-| C3 | "Aprovação da diretoria" | **Gerente de Compras aprova sempre; acima de R$ 30 mil a Diretoria aprova também** 📝 |
+| C3 | "Aprovação da diretoria" | **OC acima de R$ 30 mil: o Gerente de Compras aprova. OC até R$ 30 mil: os compradores ficam livres, sem aprovação.** A Diretoria não aprova. É o que o código faz ✅ (N14-21); a regra deve ficar mais rígida depois de conversar com Compras 🟡 |
+| C0 | "Requisição de compra, origem Compras, não chega ao MES" | **O MES lê as OCs do hub.** Se a OC está vinculada a um pedido de venda, o PCP vê no MES que já há OC para o pedido; se é de estoque, o Estoque do MES mostra o **saldo futuro** (saldo atual mais OCs em andamento) 📝 (N14-20); o MES ainda não lê 🔴 |
 | P3 | Uma origem (PCP) | **Duas origens:** PCP no MES (material do pedido) e Compras no av-hub (necessidade própria) 📝 |
 | E4 | "solicitar compra, sempre na Revenda" | "solicitar compra" (matéria-prima também é comprada) ✅ |
 | R1 | "Confere a NF contra a OC ou o pedido de venda" | **Chegada com NF na doca, conferência contra a NF** (chave de 44 dígitos) ✅ |
@@ -59,15 +60,15 @@ flowchart TD
     end
 
     subgraph SEC_COMP["Compras · av-hub + Compras · CCP no MES"]
-        C0["C0 · Requisição de compra<br/>(origem Compras, no av-hub)"]
+        C0["C0 · Requisição de compra<br/>(origem Compras, no av-hub)<br/>o MES lê a OC, não a requisição"]
         C1["C1 · Cotação e negociação"]
         C2{"C2 · Acima de R$ 30 mil?"}
-        C3["C3 · Gerente de Compras aprova<br/>acima de R$ 30 mil, a Diretoria também"]
+        C3["C3 · Gerente de Compras aprova<br/>OC acima de R$ 30 mil"]
         C4["C4 · Emite a Ordem de Compra<br/>CIF ou FOB<br/>valor, moeda e cotação por item"]
         C5["C5 · Follow-up do CCP<br/>marcos do contrato 35"]
         C1 --> C2
         C2 -->|sim| C3 --> C4
-        C2 -->|não| C4
+        C2 -->|"não: compradores livres"| C4
         C4 --> C5
     end
 
@@ -147,8 +148,8 @@ flowchart TD
     classDef ok fill:#e6f4ea,stroke:#1e7e34,color:#0b2e13
     classDef parcial fill:#fff4d6,stroke:#a8860f,color:#3b2f00
     classDef falta fill:#fde8e8,stroke:#b3261e,color:#410002
-    class V1,V2,V3,P1,P2,P3,E1,E2,E3,E4,C1,C2,C4,C5,FN1,R0,R1,R2,R3,R4,R6,Q1,Q2,Q3,Q4,F1,Q7,X1,O1,O2 ok
-    class E5,X2,X3,X4,P6,C3,Q8,C0 parcial
+    class V1,V2,V3,P1,P2,P3,E1,E2,E3,E4,C1,C2,C3,C4,C5,FN1,R0,R1,R2,R3,R4,R6,Q1,Q2,Q3,Q4,F1,Q7,X1,O1,O2 ok
+    class E5,X2,X3,X4,P6,Q8,C0 parcial
     class E6 falta
 ```
 
@@ -164,13 +165,13 @@ flowchart TD
 | P1 | PCP | Lista os pedidos liberados | Triagem dos Pedidos · "Carteira" · `/carteira` (app-pcp) | `GET /pedidos/carteira` → `GET /pedidos_liberados` · LOG-26 | ✅ nomes técnicos antigos 🔴 |
 | P2 | PCP | Define destino (FABRICACAO ou REVENDA) e quantidade ≤ restante por item e rodada; insere Estoque como etapa 1; confirma importação | Destinação do Pedido · "Nova Ordem de Produção" · `/ordens-producao/novo` | `POST /pedidos/completo/lote`; `POST /pedidos_liberados/:n/importado` · LOG-26 | ✅ |
 | P3 | PCP | Requisição de compra do material do pedido (origem PCP) | Requisições de compras · `/compras/requisicoes` | `POST /compras/requisicoes`; envio `PUT /compras/requisicoes/origem/:id_origem` · LOG-34 | ✅ |
-| C0 | Compras | Requisição de necessidade própria do Compras (origem av-hub), sem pedido de venda | Nova requisição · `/compras/requisicoes` (HUB) | `POST /compras/requisicoes` (av-hub) | ✅ no av-hub; **não chega ao MES** 🔴 |
+| C0 | Compras | Requisição de necessidade própria do Compras (origem av-hub), sem pedido de venda | Nova requisição · `/compras/requisicoes` (HUB) | `POST /compras/requisicoes` (av-hub) | ✅ no av-hub; a requisição não chega ao MES, mas a **OC** dela deve chegar (o MES lê `GET /ordens-compra/referencia`): PCP vê a OC do pedido e o Estoque vê o saldo futuro 📝 (N14-20), 🔴 MES não lê |
 | E1 | Estoque | Saldo disponível = lotes LIBERADO − reservas ATIVA na filial do pedido | Atendimento · `/estoque-operacao/atendimento` | `GET /estoque/saldo/disponivel-parcial/:idItemParcial` | ✅ |
 | E2 | Estoque | Decide se o saldo cobre (saldo zero exige clique, #31b) | idem | — | ✅ |
 | E3 | Estoque | Atende pelo saldo: split + reserva; custo do item = média dos lotes | idem | `PATCH /itens-parciais/:id/atender-estoque` | ✅ custo do item 🔴 (sem `GET /itens/custo`) |
 | E4 | Estoque | Para o restante: solicitar compra ou enviar à produção | idem | `PATCH /itens-parciais/:id/atender-estoque` (`destinoRestante`) | ✅ compra; 🔴 enviar à produção sem baixa de matéria-prima |
 | C1 | Compras | Cotação e negociação (fora do sistema) | Requisições · Ordens · `/compras/*` (HUB) | marcos `requisicao_recebida`, `em_cotacao` · LOG-35 | ✅ |
-| C2/C3 | Compras | Aprovação: Gerente sempre; Diretoria acima de R$ 30 mil | Aprovações · `/compras/aprovacoes` (HUB) | parametros_compras; `oc_enviada_aprovacao`, `oc_aprovada` | 🟡 a trigger `fn_ordens_compra_recalcular` auto-aprova OC até `parametros_compras.limite_aprovacao` (R$ 30 mil); acima disso basta um usuário com `pode_aprovar` (Gerência). **Não há degrau da Diretoria nem "Gerente sempre" 🔴** (`ordens_compra.route.js:1235`, `FecharCompra.tsx:605`) |
+| C2/C3 | Compras | Aprovação: OC acima de R$ 30 mil, o Gerente de Compras aprova; até R$ 30 mil, compradores livres (sem aprovação) | Aprovações · `/compras/aprovacoes` (HUB) | parametros_compras; `oc_enviada_aprovacao`, `oc_aprovada` | ✅ 📝 N14-21: a trigger `fn_ordens_compra_recalcular` aprova sozinha a OC até `parametros_compras.limite_aprovacao` (padrão R$ 30 mil, por unidade); acima disso a OC fica `aguardando_aprovacao` e só quem tem `pode_aprovar` na tela `compras` (Gerência) aprova (`ordens_compra.route.js:1230-1240`, `FecharCompra.tsx:604-605`). Regra mais rígida depois, com Compras 🟡 |
 | C4 | Compras | Emite a OC (CIF/FOB; valor, desconto, moeda, cotação PTAX por item; flag acabado/não-acabado) | Ordens · `/compras/ordens` (HUB) | `POST /compras/ordens`; envio ao Omie `GET /compras/ordens/fila-omie` (pipeline) · LOG-23, LOG-36 | ✅ |
 | C5 | Compras · CCP | Follow-up (confirmação, previsão, despacho, ocorrência) | Follow-up · `/compras/followup` (HUB); Compras · CCP · `/compras/pedidos-compra` (MES, só leitura) | `GET /compras/requisicoes/eventos` · LOG-35, LOG-32 | ✅ perfil CCP 🔴 |
 | FN1 | Fornecedor | Recebe a OC; entrega (CIF direto ou coleta FOB) | — (fora do sistema) | — | — |

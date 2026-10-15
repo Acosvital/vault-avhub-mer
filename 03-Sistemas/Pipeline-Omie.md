@@ -72,6 +72,14 @@ O pedido de venda entra no av-hub **travado** (sem marcação de liberação); a
 4. Recusa do Omie marca `erro` e a OC sai da fila até alguém clicar em "Reenviar" no HUB; rede, 429/425 e "aguarde N segundos" deixam pendente. Depois de 3 recusas seguidas (`MAX_RECUSAS_SEGUIDAS`) a rodada da unidade para ✅ `:41-47`.
 5. Só vai a condição de pagamento (`cCodParc`), nunca as parcelas; todo item precisa de produto do cadastro da unidade (`nCodProd`) ✅ README `:153-158`. O bloco `[AV-HUB]` do `cObsInt` leva o "Destino:" por PV (campos separados por ` ; `, porque o `|` é quebra de linha no Omie).
 6. Modo de teste: `npm run envio-oc -- --dry-run` (monta o payload e não envia) ✅ README `:143-145`.
+7. ✅ **Testado pelo Nathan em 14/10: o envio real funciona em teste;** produção ❓ (checklist de subida: PS-009). O Omie **não tem ambiente de teste**, então o Nathan criou cadastros **TESTE** (fornecedor, cliente e transportadora) no Omie de verdade. A pipeline lê esses cadastros como quaisquer outros e eles chegam ao av-hub, às listas e aos relatórios (por exemplo o CON-01). 🟡 Filtrar ou ignorar os cadastros TESTE em relatórios e conferências (BL-055); a pipeline não os distingue.
+
+## `sql/002` e `omie_raw` (obsoletos)
+
+- `sql/002_staging_tables.sql` cria 5 tabelas de staging `jsonb` em `omie_raw` (`produtos`, `parceiros`, `vendedores`, `"pedidosVendas"`, `"notasFiscais"`) e era **opcional**: só servia a `RAW_AUDIT_ENABLED=true` ✅ `sql/002_staging_tables.sql:1`.
+- **Marcado obsoleto pelo Nathan em 14/10 (N14-27).** A auditoria foi removida do código no contrato 38: `ARCHITECTURE.md:41` e `:256-257` dizem que as tabelas de `sql/002` ficam só como histórico. O README manda rodar só `001` e `003` (`README.md:66-67`). Nada lê nem escreve em `omie_raw`: `grep omie_raw` em `src` não acha nada ✅.
+- 🟡 Divergências de documentação no repositório: `README.md:32` ainda diz "as duas migrações do DBA (`001` e `002`)"; `sql/001_schemas.sql:13` ainda cria o schema `omie_raw` e `.env.example:41` ainda o cita.
+- 🔴 O que sobra: o `DROP` das 5 tabelas e do schema `omie_raw` no banco, que é do Gustavo (BL-054).
 
 Cotação PTAX gravada em `core.cotacoes_moeda` é a base da cotação da OC em moeda estrangeira ([[Rastreabilidade-e-Torre-de-Fluxo]] não depende dela).
 

@@ -55,12 +55,12 @@ O que existe no banco sem código (ou o código usa só em parte) e o que o cód
 | `itens_pedido_custo` e cursor | só o job escreve; o MES não tem `/itens/custo` | 🔴 | idem |
 | Schema `core_estoque` | criado, **sem nenhum objeto** | 🟡 | dump `:163` |
 | `core.estoque_saldo` e `core.locais_estoque` | tabelas, model e rotas existem; o sync do Omie está desligado (`enabled: false`, `table: null`) | 🟡 | `omie-elt-pipeline/src/omie/resources/estoque.ts:16,32` |
-| `omie_raw.*` (5 tabelas de staging) | **nenhum código da pipeline escreve nelas** (caminho opcional de auditoria nunca ligado) | 🟡 | grep `omie_raw` em `omie-elt-pipeline/src` sem ocorrência |
+| `omie_raw.*` (5 tabelas de staging: `notasFiscais`, `parceiros`, `pedidosVendas`, `produtos`, `vendedores`) | **obsoleto** (N14-27): `sql/002_staging_tables.sql` era opcional (só para `RAW_AUDIT_ENABLED=true`); a auditoria saiu do código no contrato 38 (`ARCHITECTURE.md:41`, `:256-257`); o README manda rodar só `001` e `003` (`README.md:66-67`); nada lê nem escreve. Resta o `DROP` das tabelas e do schema (Gustavo, BL-054) | 🟡 | grep `omie_raw` em `omie-elt-pipeline/src` sem ocorrência |
 | `omie_ctl.run_log` | usado pela pipeline (`logRun`) | ✅ | `src/db/upsert.ts` |
 | `historico.hst_*` | lidas pela API (escopo e planilha de faturamento); **a pipeline não as escreve** (carga congelada) | 🟡 | `escopoVendedor.js`, `vw_faturamento_planilha.model.js` |
 | `core_vendas_faturamento.pedidos_compras_etapas` | de-para de etapa do Omie, lido pelo dashboard de OC; nenhum código escreve | 🟡 | `ordens_compra.dashboard.js:316` |
 | `ordens_compra_referencia_mes` e a view `vw_ordens_compra_referencia_mes` | prontas e servidas por `GET /ordens-compra/referencia`; **nenhum consumidor** (o MES não chama) | 🔴 | [[Integracao-AvHub-MES]] INT-04 |
-| `requisicoes_compra_eventos` para requisição do Compras | `fn_req_evento` ignora requisição sem `id_origem`: o marco nunca nasce | 🔴 | dump `:8580` |
+| `requisicoes_compra_eventos` para requisição do Compras | `fn_req_evento` ignora requisição sem `id_origem`: o marco nunca nasce. **Não é a lacuna:** o MES vê a OC dessa requisição pela referência (`GET /ordens-compra/referencia`, N14-20); falta o MES lê-la (BL-006, BL-049 a BL-051) | 🔴 | dump `:8580` |
 
 ## av-hub: código sem banco, ou banco antigo
 
@@ -92,7 +92,7 @@ O que existe no banco sem código (ou o código usa só em parte) e o que o cód
 
 | Documento | Código | Selo |
 |---|---|---|
-| 0b e decisão de 14/10: "Gerente aprova sempre; acima de R$ 30 mil a Diretoria também" | OC até o limite é **auto-aprovada** pelo banco; acima dele só a alçada `compras.pode_aprovar` decide; sem Diretoria | 🔴 [[AV-Hub-API]] |
+| 0b e decisão N14-21 (14/10): "OC acima de R$ 30 mil, o Gerente de Compras aprova; até R$ 30 mil, compradores livres; sem Diretoria" | igual: OC até o limite é **auto-aprovada** pelo banco; acima dele só a alçada `compras.pode_aprovar` decide (`ordens_compra.route.js:1230-1240`) | ✅ [[AV-Hub-API]] |
 | 0b: "cotação PTAX por item" | a cotação é **da OC** (`ordens_compra.cotacao_moeda`, `cotacao_data`, `cotacao_origem`); o valor é por item | 🟡 |
 | 0b: "despacho no Estoque, baixa na retirada" | baixa na Embalagem/Expedição (`consumirReservasDaParcial`) | 🔴 [[Modelo-Estoque-e-Custo-do-Lote]] |
 | 0b: "Q8 sim → Estoque (E5)" | segue para a Expedição | 🔴 |

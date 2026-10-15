@@ -43,8 +43,12 @@ Com G1, D11, I1, J2, J5 e D12 no Robert e o custo do lote (K3 a K6) somado, o pl
 |---|---|---|
 | Vendedor, Gerente (equipe) | HUB: Liberar Pedidos, Pedidos da equipe | [[01-Vendas-Liberacao]] |
 | PCP e Almoxarife (setor Estoque) | `app-pcp`: Triagem, Destinação, Atendimento | [[02-PCP-Triagem-e-Destinacao]], [[03-Estoque-Atendimento-e-Despacho]] |
-| Comprador, Gerente de Compras, Diretoria (acima de R$ 30 mil) | HUB: Compras | [[04-Circuito-de-Compra]] |
-| CCP (follow-up de compras) | HUB Follow-up; MES Compras · CCP (leitura) | O pessoal do CCP faz parte do PCP e cuida do follow-up das compras; Compras acessa só para ler; havendo ocorrência, o CCP interage aprovando ou não 📝 (Nathan, 14/10). O perfil ainda será criado 🔴 Nathan, Gustavo |
+| Comprador (livre até R$ 30 mil), Gerente de Compras (aprova acima de R$ 30 mil) | HUB: Compras | [[04-Circuito-de-Compra]] |
+| CCP (follow-up de compras) | HUB Follow-up; MES Compras · CCP (leitura) | O pessoal do CCP faz parte do PCP e cuida do follow-up das compras; Compras acessa só para ler; havendo ocorrência, o CCP interage aprovando ou não 📝 (Nathan, 14/10). O perfil será criado em breve: tarefa cadastral simples, sem bloqueio de desenho (Nathan, Gustavo; N14-24) |
+
+## Tarefas cadastrais (não são desenvolvimento)
+
+Nathan e Gustavo criam em breve, sem bloqueio de desenho 📝 N14-24: o **perfil CCP** (BL-017) e o **vínculo de usuários à Gerência de Compras** (hoje sem usuários, dump de 07/10 ❓ conferir no de 14/10), além do vínculo de compradores a funcionários (BL-045).
 | Recebimento (doca), Qualidade | `app-pcp` | [[05-Recebimento]], [[06-Qualidade-Entrada]], [[08-Qualidade-Saida]] |
 | Operador de fábrica, Expedição | `app-pcp` | [[07-Producao-e-Roteiro]], [[09-Expedicao]] |
 | Fiscal | Omie | [[10-Fiscal-Omie]] |

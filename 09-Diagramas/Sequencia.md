@@ -74,7 +74,7 @@ Selo ✅: `itens-parciais.service.ts:607-700` (`atenderEstoque`, `destinoRestant
 
 ## 3. Requisição de compra: ida (P3) e volta (C1 a C5)
 
-Duas origens de requisição ([[00-Fluxo-Mestre-0b]], nós P3 e C0). Este diagrama é a origem PCP; a origem Compras (C0) nasce no av-hub e não chega ao MES (🔴 lacuna em [[Integracao-AvHub-MES]]).
+Duas origens de requisição ([[00-Fluxo-Mestre-0b]], nós P3 e C0). Este diagrama é a origem PCP; a origem Compras (C0) nasce no av-hub e a requisição não chega ao MES; o MES lê a OC dela pela referência (N14-20, 🔴 ainda não lê; ver [[Integracao-AvHub-MES]]).
 
 ### 3.1 Ida (LOG-34)
 
@@ -112,7 +112,7 @@ sequenceDiagram
     CMP->>API: C1 cotacao
     CMP->>API: C4 emite a OC
     API->>API: trigger grava requisicoes_compra_eventos
-    CMP->>API: C3 aprovacao, Gerente sempre e Diretoria acima de 30 mil
+    CMP->>API: C3 aprovacao pelo Gerente de Compras, so OC acima de 30 mil
     API->>API: evento oc_aprovada
     loop a cada 5 min
         MES->>API: GET compras requisicoes eventos desde o cursor

@@ -90,6 +90,8 @@ Estados do pedido e da parcial: [[Estados-e-Status]].
 | `recebimentos_itens` (`:1164`) | linha conferida | `quantidade_pendente`, `quantidade_nf`, `quantidade_contada`, `quantidade_recontada`, `peso_teorico`, `peso_real`, `peso_recontado`, `tolerancia_peso`, `id_localizacao` (sem FK), **`id_lote`** (sem FK) |
 | `recebimentos_divergencias` (`:1145`) | divergência da conferência | `tipo`, `etapa` (15), `evidencia_url` |
 
+🔴 **Não há tabela para a OC do hub** (N14-20): o MES não guarda a projeção da referência da OC (OC por pedido, quantidade, `destino` por pedido ou estoque). Ela é necessária para a OC do pedido no PCP e para o **saldo futuro** do Estoque; o desenho da tabela é do Robert (BL-006, BL-049, BL-050) e depende do job do contrato 004/007 (BL-001).
+
 ### Acesso e auditoria
 
 `usuarios` (`:1415`, `username` e `email` únicos, `senha` bcrypt, `anonymized_at` para LGPD), `perfis`, `telas`, `permissoes`, `usuarios_perfis`, `perfil_setores`, `perfil_depositos`, `auditoria_login`, `auditoria_acesso` ✅ [[RBAC-e-Permissoes]].

@@ -25,7 +25,7 @@ PostgreSQL do av-hub, de responsabilidade do DBA (Gustavo). Usado pela `api-acos
 | `core_organograma` | 7 | 2 | organograma e "welcome" | av-hub |
 | `core_mapas` | 0 | 2 | `mapa_unidades`, `vw_todos_os_clientes` | view |
 | `historico` | 3 | 0 | `hst_pedidos_vendas`, `hst_notas_fiscais`, `hst_produto_vendas` (histórico congelado) | pipeline |
-| `omie_raw` | 5 | 0 | staging bruto: `"notasFiscais"`, `"pedidosVendas"`, `parceiros`, `produtos`, `vendedores` (caminho opcional de auditoria) | pipeline |
+| `omie_raw` | 5 | 0 | **obsoleto e vazio** (N14-27): staging bruto `"notasFiscais"`, `"pedidosVendas"`, `parceiros`, `produtos`, `vendedores`, de `sql/002_staging_tables.sql`, que só servia à auditoria opcional `RAW_AUDIT_ENABLED`, removida do código no contrato 38; nada lê nem escreve ([[Pipeline-Omie]]). `DROP` das tabelas e do schema: Gustavo (BL-054) | — |
 | `omie_ctl` | 1 | 0 | `run_log` (execuções da pipeline) | pipeline |
 | `core_estoque` | 0 | 0 | **vazio** (criado e sem objetos) 🟡 | — |
 
@@ -102,8 +102,8 @@ Lista, com a regra de aprovação por limite, em [[AV-Hub-API]]. Resumo dos obje
 | Falta | Para | Selo |
 |---|---|---|
 | Aplicar a migration **047b** na base que gerou o dump | custo por item | 🔴 |
-| Segunda alçada de aprovação (Diretoria acima do limite) e a regra "Gerente sempre" | C2/C3 | 🔴 |
-| `id_origem` (ou outra chave) também para requisição do Compras, e marcos para ela | C0 → MES | 🔴 |
+| Nada na aprovação: a trigger `fn_ordens_compra_recalcular` já aprova até o limite e deixa `aguardando_aprovacao` acima dele (N14-21 ✅); só endurecer depois, com Compras 🟡 | C2/C3 | ✅ |
+| A referência da OC para o MES (`vw_ordens_compra_referencia_mes`) já traz `destino` por pedido de venda ou estoque e `finalidade`, mas só das OCs `aprovado` e das canceladas que já foram aprovadas: OC `aguardando_aprovacao` não aparece. Conferir se isso basta para o **saldo futuro** do Estoque (N14-20) ou se o MES precisa também das OCs em aprovação e de uma consulta por produto e por pedido (BL-028) | C0 → MES | 🔴 |
 | Instrumentar `core_fluxo.evento` com os marcos do hub (Comercial e Compras) | Torre | 🔴 |
 | Linhas de `auth.rotas_telas` e `auth.telas` para `torre-fluxo`, `torre-fluxo-trilha`, `custo-itens` | permissões | ❓ |
 | Tabela `core_comercial.*` publicada e conferida | Comercial | ❓ |

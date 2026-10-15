@@ -61,11 +61,11 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | API-001 | — | [[API-001-Produtos-Parceiros-Filtro-Incremental\|Filtro incremental `alterado_desde` em produtos e parceiros]] | `implementado-no-codigo` | Entregues | — | — | — | — | — |
 | API-002 | — | [[API-002-Material-Alias-Omie-MES\|Alias de material Omie no MES (rejeitado)]] | `arquivado` | Arquivados | — | — | — | — | — |
 | API-003 | — | [[API-003-Requisicao-Compra-Integracao-MES\|Requisição de compra MES → av-hub (versão polling)]] | `arquivado` | Arquivados | P3 | — | — | — | — |
-| API-004 | Contrato 004 | [[API-004-Referencia-OC-Integracao-MES\|Referência da OC (av-hub → MES)]] | `parcial` | Ativos | C4, R0, R4 | Job de leitura a cada 5 min, projeção da OC e `id_origem` por item | — | — | — |
+| API-004 | Contrato 004 | [[API-004-Referencia-OC-Integracao-MES\|Referência da OC (av-hub → MES)]] | `parcial` | Ativos | C4, R0, R4 | Job de leitura a cada 5 min, projeção da OC e `id_origem` por item; OC do pedido para o PCP e saldo futuro do Estoque (N14-20, BL-049, BL-050) | — | — | — |
 | API-005 | Contrato 005 | [[API-005-Status-Item-Integracao-MES\|Status por item (MES → av-hub), lado do MES]] | `implementado-no-codigo` | Entregues | F1, X1, Q7 | — | — | — | — |
 | API-006 | Contrato 006 | [[API-006-Status-por-Item-Leitura-no-Hub\|Status por item: leitura no hub (job e rota)]] | `implementado-no-codigo` | Entregues | F1, X1, Q7 | — | — | — | — |
 | API-007 | Contrato 007 (API) | [[API-007-Referencia-OC-Valores-no-MES\|Valores da OC na referência (hub → MES) e projeção no MES]] | `parcial` | Ativos | C4, R4 | Job de leitura e projeção da OC com valores; gravar `lote_custo` origem OC no Recebimento (R4) | — | — | — |
-| API-008 | Contrato 008 | [[API-008-Custo-do-Lote-no-MES\|Custo do lote no MES (`lote_custo`, G1, recebimento, consumo, `GET /itens/custo`)]] | `parcial` | Ativos | R4, E3, E5 | §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo` | — | — | — |
+| API-008 | Contrato 008 | [[API-008-Custo-do-Lote-no-MES\|Custo do lote no MES (`lote_custo`, G1, recebimento, consumo, `GET /itens/custo`)]] | `parcial` | Ativos | R4, E3, E5 | §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`; modelo do imposto por item para os cenários com e sem imposto (PS-014, BL-053; contrato não editado) | — | — | — |
 | LOG-01 | Contrato 01 | [[LOG-01-Compras-Fluxo-Completo\|Compras: requisição, ordem de compra e sincronização com o Omie]] | `implementado-no-codigo` | Entregues | C0, C1, C4 | — | — | — | — |
 | LOG-02 | Contrato 02 | [[LOG-02-Funcionarios-Listagem-Filtros-Ordenacao-Resumo\|Funcionários: filtro, ordenação, paginação e resumo no servidor]] | `implementado-no-codigo` | Entregues | — | — | — | — | — |
 | LOG-03 | Contrato 03 | [[LOG-03-Funcionarios-Cadastro-Organograma-Transacional\|Funcionários: salvar e excluir com o organograma numa operação]] | `implementado-no-codigo` | Entregues | — | — | — | — | — |
@@ -97,7 +97,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | LOG-29 | Contrato 29; contrato 28 (nos comentários do código) | [[LOG-29-Notas-Fiscais-Manuais-So-Admin\|Notas fiscais manuais: só administrador cria]] | `implementado-no-codigo` | Entregues | — | — | — | — | — |
 | LOG-30 | Contrato 30 (PDF; não confundir com o "Contrato 30" do código, que é o LOG-45) | [[LOG-30-Compras-Pedido-Omie-PDF-Completo\|Pedido de compra do Omie: dados para o PDF]] | `implementado-no-codigo` | Entregues | C4 | — | — | — | — |
 | LOG-31 | Contrato 31 | [[LOG-31-Compras-Dashboard\|Compras: dashboard com valores]] | `implementado-no-codigo` | Entregues | C4 | — | — | — | — |
-| LOG-32 | Contrato 32 | [[LOG-32-Compras-CCP-Acompanhamento-OC\|Compras: acompanhamento da OC pelo CCP (confirmação, prazo, despacho)]] | `implementado-no-codigo` | Entregues | C5 | Perfil CCP no MES | — | — | — |
+| LOG-32 | Contrato 32 | [[LOG-32-Compras-CCP-Acompanhamento-OC\|Compras: acompanhamento da OC pelo CCP (confirmação, prazo, despacho)]] | `implementado-no-codigo` | Entregues | C5 | Perfil CCP: tarefa cadastral simples, em breve (Nathan e Gustavo; N14-24) | — | — | — |
 | LOG-33 | Contrato 33 | [[LOG-33-Dashboards-Unidade-de-Origem-do-Vendedor\|Dashboards: unidade de origem e período de atividade do vendedor]] | `implementado-no-codigo` | Entregues | — | — | — | — | — |
 | LOG-34 | Contrato 34 | [[LOG-34-Requisicoes-MES-Empurra-para-o-Hub\|Requisições: o MES empurra para o av-hub (PUT por `id_origem`)]] | `implementado-no-codigo` | Entregues | P3, E4 | — | — | — | — |
 | LOG-35 | Contrato 35 | [[LOG-35-Compras-Marcos-Requisicao-para-MES\|Compras: marcos da requisição (av-hub → MES)]] | `implementado-no-codigo` | Entregues | C1, C3, C4, C5, R0, P3 | — | — | — | — |
@@ -149,10 +149,10 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Robert (MES: `api-pcp` e `app-pcp`)
 
-- [[API-004-Referencia-OC-Integracao-MES|API-004]]: Job de leitura a cada 5 min, projeção da OC e `id_origem` por item
+- [[API-004-Referencia-OC-Integracao-MES|API-004]]: Job de leitura a cada 5 min, projeção da OC e `id_origem` por item; OC do pedido para o PCP e saldo futuro do Estoque (N14-20, BL-049, BL-050); entrada no Recebimento da OC sem requisição do MES (BL-051)
 - [[API-007-Referencia-OC-Valores-no-MES|API-007]]: Job de leitura e projeção da OC com valores; gravar `lote_custo` origem OC no Recebimento (R4)
-- [[API-008-Custo-do-Lote-no-MES|API-008]]: §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`
-- [[LOG-32-Compras-CCP-Acompanhamento-OC|LOG-32]]: Perfil CCP no MES
+- [[API-008-Custo-do-Lote-no-MES|API-008]]: §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`; modelo do imposto por item (PS-014, BL-053; Nathan e Gustavo desenham, o contrato não é editado)
+- [[LOG-32-Compras-CCP-Acompanhamento-OC|LOG-32]]: Perfil CCP (tarefa cadastral simples, em breve; Nathan e Gustavo, N14-24)
 - [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas|LOG-46]]: I2/I3: publicar `GET /fluxo/eventos` e instrumentar os eventos no MES
 - [[LOG-47-Custo-Real-por-Item-no-Hub|LOG-47]]: Publicar `GET /itens/custo` (API-008 §5)
 

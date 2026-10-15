@@ -72,7 +72,7 @@ Estados da requisição no av-hub: `aberta`, `em_cotacao`, `atendida`, `cancelad
 | `GET /compras/pedidos-venda/:numero` e `/:numero/compras` | itens do PV com saldo a comprar | ✅ `views/vw_pedido_venda_compras/…route.js:52,92` |
 | `GET /compras/condicoes-pagamento`, `/compras/parametros` | catálogos e `limite_aprovacao` | ✅ `tables/condicoes_pagamento_compras/…route.js:19,24` |
 | `GET /compras/fornecedores`, `/compras/transportadoras` | projeções de `core.parceiros` | ✅ `core/aggregates/compras_parceiros/…route.js:84-85` |
-| `GET /ordens-compra/referencia?alterado_desde=&codigo_empresa=&page=&limit=` | referência da OC para o MES (API-004/007), limite 100 padrão e 500 máximo; **o MES não consome** | ✅ `views/vw_ordens_compra_referencia_mes/…route.js:70`, `:38-39` |
+| `GET /ordens-compra/referencia?alterado_desde=&codigo_empresa=&page=&limit=` | referência da OC para o MES (API-004/007), limite 100 padrão e 500 máximo; item com `destino[]` (`pedido_venda` ou `estoque`) e OC com `finalidade`; **o MES não consome** (precisa consumir: OC do pedido e saldo futuro, N14-20, BL-049 e BL-050) | ✅ `views/vw_ordens_compra_referencia_mes/…route.js:70`, `:38-39` |
 
 **Regra de aprovação conferida no banco** (a que de fato roda):
 
@@ -81,7 +81,7 @@ Estados da requisição no av-hub: `aberta`, `em_cotacao`, `atendida`, `cancelad
 - `fn_ordens_compra_status` (BEFORE UPDATE): `cancelado` é final; aprovar acima do limite exige que a OC tenha passado por `aguardando_aprovacao`; carimba `aprovado_em` e `cancelado_em` ✅ dump `:6851`.
 - Quem decide: um usuário com `compras.pode_aprovar` (perfil Gerência de Compras) ✅ `ordens_compra.route.js:1235`.
 
-Isto difere do 0b e da decisão de 14/10 ("Gerente aprova sempre; acima de R$ 30 mil a Diretoria também"): no código, abaixo do limite a OC é **auto-aprovada** pelo banco e acima do limite existe **uma única** alçada (Gerência de Compras); não há segunda aprovação da Diretoria 🔴. Entra em [[Pontas-Soltas]] e [[Contradicoes-Resolvidas]].
+Isto **é** a regra decidida em 14/10 (N14-21): a OC que excede R$ 30 mil é aprovada pelo Gerente de Compras; até R$ 30 mil os compradores ficam livres (o banco aprova sozinho); a Diretoria não aprova ✅ (`ordens_compra.route.js:1230-1240`; função `fn_ordens_compra_recalcular` em `docs/ENVIAR - contrato-compras-backend.md:649-694` do HUB). 🟡 A regra é provisória: endurece depois da conversa com Compras. Ver [[Contradicoes-Resolvidas]] CR-13.
 
 ### Status por item (API-005/006) — todos os nós
 

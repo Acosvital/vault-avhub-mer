@@ -17,8 +17,6 @@ Só entra aqui o que foi **conferido no código ou no dump de 14/10**. Cada linh
 |---|---|---|---|---|
 | B1 | alta | Gustavo | **Custo por item sem banco compatível.** O código (`f322dcd`, migration 047b) lê `fn_itens_pedido_custo_do_pedido` com `codigo_produto_omie`; o dump de 14/10 ainda tem a versão 047: coluna `item`, `UNIQUE (codigo_empresa, numero_pedido, item)` e a função devolve `item`. `GET /itens_pedido_custo` responde 500 "exige a migration 047b" contra esse banco | ✅ `itens_pedido_custo.route.js:98-103` x dump `:4393`, `:16782`, `:23010` |
 | B2 | alta | Robert | **O MES não publica `GET /fluxo/eventos`, `/fluxo/itens/:id(/tempo)`, `/fluxo/sla-etapas` nem `GET /itens/custo`.** Os jobs do av-hub (Torre e custo) recebem 404, avisam uma vez e tentam de novo a cada 10 min; `core_fluxo.item_estado_projetado` e `itens_pedido_custo` ficam vazias | ✅ grep sem ocorrência em `api-pcp/src`; `item_estado_projetado.job.js:41-60`, `itens_pedido_custo.job.js:49-56` |
-| B3 | alta | Gustavo + Nathan | **Aprovação da OC não segue a decisão de 14/10.** O banco auto-aprova OC até o limite (padrão R$ 30 000 por unidade) e acima dele só existe a alçada `compras.pode_aprovar`; não há segunda aprovação da Diretoria nem "Gerente sempre" | ✅ dump `fn_ordens_compra_recalcular` `:6750`, `fn_ordens_compra_status` `:6851`; `ordens_compra.route.js:1235` |
-| B4 | alta | Gustavo + Robert | **Requisição criada pelo Compras no av-hub não chega ao MES.** `fn_req_evento` só grava marco quando a requisição tem `id_origem` (veio do MES); sem `id_origem` não há marco e o MES não tem como receber o material comprado | ✅ dump `:8580`; `requisicoes_compra.route.js:384-411` |
 | B5 | alta | Robert | **Fabricado aprovado nunca vira lote nem saldo.** `OrigemLote` só tem `RECEBIMENTO` e `CARGA_INICIAL` | ✅ dump `:155-158`; `prisma/models/estoque.prisma:17-20` |
 | B6 | alta | Robert | **A baixa de saldo acontece na Embalagem/Expedição, não no despacho do Estoque.** `consumirReservasDaParcial` roda no `receber` da parcial atendida pelo estoque e, de novo, na entrega; não há documento de retirada | ✅ `itens-parciais.service.ts:279`, `entregas.service.ts:88`, `estoque-operacao.helpers.ts:208` |
 | B7 | média | Robert | **O custo da OC nunca é gravado no lote.** `lote_custo` só é escrito na carga inicial e copiado na cisão (reprovação parcial); as origens `OC` e `MANUAL` de `OrigemCusto` não têm escritor | ✅ `estoque-operacao.service.ts:440`, `estoque-operacao.helpers.ts:432-452`; grep `loteCusto` |
@@ -51,6 +49,8 @@ Itens do catálogo de bugs do v1 (revisão de 07/10) que o código de 14/10 já 
 - ✅ **"Registrar compra" manual do MES** (`PATCH /compras/requisicoes/:id/compra`): removido.
 - ✅ **Contrato 35 incompleto no MES**: o MES agora usa **todos** os 14 marcos ✅ `requisicao-avhub.eventos.ts:234-246` (ver [[Integracao-AvHub-MES]]).
 - ✅ **`lote_custo`, `core_fluxo` e `itens_pedido_custo` "não existem"**: existem no código e no dump (a versão do custo é a do B1).
+- ✅ **Aprovação da OC** (antes B3): não é bug. O banco aprova até o limite e a API exige `pode_aprovar` acima dele, que é a regra decidida em 14/10 (N14-21; `ordens_compra.route.js:1230-1240`).
+- ✅ **Requisição criada só no av-hub não chega ao MES** (antes B4): a requisição não precisa chegar; o MES lê a **OC** pela referência. Virou requisito de integração (N14-20; BL-006, BL-049 a BL-051), não bug.
 
 ## Como usar esta lista
 

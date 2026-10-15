@@ -183,14 +183,15 @@ Selo ✅ `requisicoes_compra.route.js:13-22` (`atendida` só pela trigger da OC,
 stateDiagram-v2
     [*] --> rascunho
     rascunho --> aguardando_aprovacao : C4 envia
-    aguardando_aprovacao --> aprovado : C3 Gerente, e Diretoria acima de 30 mil
+    aguardando_aprovacao --> aprovado : valor ate 30 mil, a trigger aprova sozinha
+    aguardando_aprovacao --> aprovado : C3 Gerente de Compras, valor acima de 30 mil
     aguardando_aprovacao --> cancelado : reprovada ou cancelada
     aprovado --> cancelado : oc_cancelada
     aprovado --> [*]
     cancelado --> [*]
 ```
 
-Selo ✅ valores em `ordens_compra.route.js:91` e no `CHECK` do dump (`ck_ordens_compra_status`); 🟡 as transições exatas são feitas por trigger do banco e não foram relidas; ❓ regra da Diretoria acima de R$ 30 mil a conferir (Mestre, nós C2/C3). Envio ao Omie tem estado próprio (`status_sincronizacao_omie`) fora deste diagrama.
+Selo ✅ valores em `ordens_compra.route.js:91` e no `CHECK` do dump (`ck_ordens_compra_status`); 🟡 as transições exatas são feitas por trigger do banco e não foram relidas; ✅ regra de aprovação N14-21: até o limite da unidade (R$ 30 mil por padrão) a trigger `fn_ordens_compra_recalcular` aprova sozinha; acima dele, só o Gerente de Compras (`ordens_compra.route.js:1230-1240`); a Diretoria não aprova (Mestre, nós C2/C3). Envio ao Omie tem estado próprio (`status_sincronizacao_omie`) fora deste diagrama.
 
 ## 10. Envio da requisição ao av-hub (`StatusEnvioAvhub`)
 

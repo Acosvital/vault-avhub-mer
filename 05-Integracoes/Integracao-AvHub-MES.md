@@ -117,7 +117,7 @@ sequenceDiagram
 - **Periodicidade:** 5 min (`AVHUB_EVENTOS_INTERVALO_MIN`) e uma rodada 10 s depois de subir; até 50 páginas de 200 por rodada ✅ `:25-27`. **Sob demanda:** `POST /compras/requisicoes/sincronizar` (`compras.controller.ts:57`) — a tela Compras · CCP chama ao abrir e no "Atualizar" (`FilaSetor.tsx:370-396`); pula se a última leitura boa tem menos de 30 s e rodadas simultâneas compartilham a mesma ✅ `eventos-avhub.service.ts:31,80`.
 - **Idempotência:** o evento é gravado por `id_evento`; reler não reprocessa.
 - **Falha:** evento que não aplica fica gravado com `ERRO:` em `acao`, sem `processadoEm`, e a leitura segue ✅ `eventos-avhub.service.ts:150-181`. Falha de rede reagenda sem mexer no cursor.
-- **Só existem eventos de requisição com `id_origem`** (a do MES). Requisição criada só no av-hub não gera evento: `id_origem` é `NOT NULL` em `requisicoes_compra_eventos` (Dump Avhub) 🔴 (ver a seção "Lacuna: requisição só do av-hub").
+- **Só existem eventos de requisição com `id_origem`** (a do MES). Requisição criada só no av-hub não gera evento: `id_origem` é `NOT NULL` em `requisicoes_compra_eventos` (Dump Avhub), e isso fica assim: o MES enxerga a **OC** dessa requisição pela referência (INT-04; ver "Requisito: o MES lê as OCs do hub").
 
 Tratamento de cada `tipo` pelo MES (`requisicao-avhub.eventos.ts:234-318`, `etapaCompra`):
 
@@ -157,7 +157,7 @@ sequenceDiagram
 
 ## INT-04 Referência da OC (contratos 004 e 007)
 
-**Para quê:** o Recebimento conferir contra o que foi comprado e o lote nascer com custo (nós C4, R0, R1, R4). Hoje o Recebimento confere contra a **NF** 📝, e o cruzamento com a OC espera o job abaixo.
+**Para quê:** (1) o Recebimento conferir contra o que foi comprado e o lote nascer com custo (nós C4, R0, R1, R4); hoje o Recebimento confere contra a **NF** 📝, e o cruzamento com a OC espera o job abaixo; (2) o PCP ver a OC de cada pedido e o Estoque ver o **saldo futuro** das OCs de estoque, inclusive as de requisição criada só no hub (C0, N14-20; ver "Requisito: o MES lê as OCs do hub").
 
 - **Rota no hub:** `GET /ordens-compra/referencia?alterado_desde=&codigo_empresa=&apos_id=&page=&limit=` (`alterado_desde` obrigatório; limite padrão 100, máximo 500) ✅ `vw_ordens_compra_referencia_mes.route.js:44-89`, montada em `core_vendas_faturamento/index.js:199`. Entram OC `aprovada` e as canceladas depois de aprovadas. `alterado_em` é o maior `updated_at` da OC, dos itens e dos vínculos (trigger da migration `api004`). A regra mora no banco.
 - **Valores (contrato 007):** a resposta traz `moeda`, `cotacao_moeda`, `cotacao_data`, `cotacao_origem`, `valor_frete`, `valor_seguro` na OC e `valor_unitario`, `desconto_pct`, `valor_desconto`, `valor_total_item` em cada item ✅ `vw_ordens_compra_referencia_mes.route.js:51-53`. A rota tolera banco sem a migration `api007` (200 sem os campos) e responde 500 sem a `api004` ❓ se aplicadas em produção (Gustavo, SQL em [[SQL-012-Ordens-Compra-Referencia-Valores]]). Ainda sem fornecedor, condição de pagamento, categoria nem conta corrente.
@@ -266,9 +266,15 @@ sequenceDiagram
 
 `GET /requisicoes-compra` e `GET /itens/status` ficam no mesmo controller do MES, protegidos por `MES_API_KEY` ✅ `integracao-avhub.controller.ts:20`. A primeira rota era o antigo desenho "o hub puxa a requisição". Foi substituída pelo INT-02 e **nenhum job do hub a consome** ✅ (nenhuma referência em `api-acos-vital/src`). Fica como código morto 🔴 Robert decidir remover (BL-032). O comentário "JOB DE POLLING do MES" no `api-acos-vital` está velho (Gustavo, BL-033).
 
-## Lacuna: requisição só do av-hub
+## Requisito: o MES lê as OCs do hub (requisição só do av-hub, C0)
 
-Compras cria requisição de necessidade própria no HUB (nó C0, `POST /compras/requisicoes`, número por trigger, permissão `compras.pode_criar`) ✅ `requisicoes_compra.route.js:384`. Ela **não chega ao MES**: sem `id_origem` não há evento do contrato 35, e o MES não tem `RequisicaoCompra`, esperado nem NF para ela; a mercadoria só entra no Estoque por carga inicial 🔴. Opções: (a) gerar evento também para requisição sem `id_origem` e o MES criar o esperado a partir da OC (INT-04); (b) o Recebimento aceitar entrada avulsa contra NF. Decisão 🟡 proposta: (a) com (INT-04) como caminho único. Dono: Nathan decide, Robert implementa, Gustavo ajusta o evento. Backlog BL-006 e BL-028, pendência [[Pontas-Soltas]] PS-003.
+Compras cria requisição de necessidade própria no HUB (nó C0, `POST /compras/requisicoes`, número por trigger, permissão `compras.pode_criar`) ✅ `requisicoes_compra.route.js:384`. A **requisição** não chega ao MES (sem `id_origem` não há evento do contrato 35) e **não precisa chegar**. 📝 Decisão N14-20 (14/10): o MES lê a **OC**, pela referência (INT-04), e com ela:
+
+- **OC vinculada a pedido de venda:** o PCP vê, no MES, que já existe ordem de compra para aquele pedido (Triagem, Destinação e Atendimento). Fonte: `destino[]` do item com `tipo = pedido_venda` e `numero_pedido_venda`.
+- **OC de itens de estoque (sem pedido):** o Estoque do MES mostra o **saldo futuro**: as OCs em andamento e a parte que preenche o estoque (`destino` com `tipo = estoque`), somada ao saldo atual.
+- **Entrada da mercadoria:** o Recebimento do MES exige requisição do MES; é preciso um caminho para a OC sem requisição ([[05-Recebimento]], "Mercadoria de OC sem requisição do MES").
+
+✅ No hub já existe: `ordens_compra.finalidade` (`estoque`, `pedidos_venda`, `recompra`, `uso_interno`), `ordens_compra_itens_vinculos`, a view `vw_pedido_venda_itens_compra`, `GET /compras/pedidos-venda/:numero` e `/:numero/compras`, e a referência com `destino[]` e `finalidade` (arquivos em [[04-Circuito-de-Compra]]). 🔴 Falta no MES: o job K4 (BL-001), a projeção da OC, as telas e o cálculo do saldo futuro (BL-049, BL-050, BL-051). Falta no hub só conferir se a referência (que traz só OC aprovada) e uma consulta por produto e por pedido bastam (BL-028). Dono: Robert (MES), Gustavo se a API precisar expor por produto ou pedido, Nathan se precisar de tela no HUB (BL-041). Pendência [[Pontas-Soltas]] (PS-003, resolvida em 14/10).
 
 ## Outras pontes com o MES
 
@@ -291,7 +297,7 @@ Compras cria requisição de necessidade própria no HUB (nó C0, `POST /compras
 | Job do MES que lê a referência da OC com valores | Robert | R0 R1 R4 | BL-001 |
 | `GET /itens/custo` e custo no recebimento | Robert | E3 R4 | BL-004, BL-005 |
 | Módulo `fluxo` e feed `GET /fluxo/eventos` | Robert | todos | BL-003 |
-| Requisição só do av-hub chegar ao MES | Robert + Gustavo | C0 R0 | BL-006 |
+| MES ler as OCs do hub: OC do pedido, saldo futuro e entrada da mercadoria sem requisição do MES | Robert (+ Gustavo, + Nathan se precisar de tela) | C0 R0 E1 | BL-006, BL-028, BL-049, BL-050, BL-051 |
 | Etapa de compra mais fina no 005 | Robert | C1 a C5 | BL-009 |
 | Chave do MES com escopo mínimo | Gustavo | — | BL-018 |
 | Aplicar 047b e conceder `torre-fluxo`, `custo-itens` | Gustavo | — | BL-019 a BL-021 |
