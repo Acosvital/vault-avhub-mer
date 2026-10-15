@@ -3,7 +3,7 @@ id: LOG-48
 aliases: ["Contrato 48", "48-Acompanhamento-de-Clientes-Grupos-de-Empresa"]
 tags: [contrato, contrato-sql, contrato-api, dba, av-hub, clientes, grupos-de-empresa, portal-do-gerente, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-15
 status: parcial
 dono: "Gustavo (DBA)"
 etapa_0b: []
@@ -20,6 +20,9 @@ criado_original: 2026-10-13
 > - 🔴 **§9.1 NF cancelada entra no total do mês:** a CTE `nfs` da função lê `notas_fiscais` só com `deleted_at IS NULL` (`Dump Avhub (Esqueleto).sql:3070-3077`), sem excluir cancelada, denegada ou inutilizada: confirmado em 14/10.
 > - 🔴 **§9.2** `GET /acompanhamento_clientes` ignora `codigo_cliente` (só o `/movimento` o aceita, `fn_acompanhamento_clientes.route.js:138`); **§10** venda e faturamento do mês com deduções separadas e **§12** definição de cliente e status "Sem compra" seguem como pedido ao DBA.
 > - Fora do fluxo de Atividades (anexo `10-Anexo-Fora-do-Fluxo`, Acompanhamento-Clientes). Front v2 (páginas por cliente e por grupo) no HUB: ❓ não conferido.
+
+> [!success] Conferido na `api-test` em 15/10/2026 (só GET)
+> O DBA entregou o que estava aberto: **§9.1** a NF cancelada saiu dos totais, **§9.2** `codigo_cliente` filtra a lista, **§10** venda e faturamento com deduções, **§12** base de clientes e status `sem_compra`. Números em §12.7. **Produção não conferida.** O front (av-hub, develop `b55ac55`) já lê tudo isso; falta tirar as marcas `GAMBIARRA` da página do cliente (§9.1 e §9.2, abaixo, em §12.7). Excel da tela: §13.
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
@@ -349,6 +352,55 @@ Revisão do av-hub em 14/10 contra a API (`origin/develop`, 63871f3). O front fo
 2. GALVANIZACAO JOSITA LTDA (10/2026): `ultima_compra` = data da última NF, status `ativo`.
 3. Um cliente cadastrado sem pedido nem NF: `status = 'sem_compra'`, `ultima_compra` nula, conta em `kpis.sem_compra` e não em `kpis.inativos`.
 4. `status=sem_compra` no filtro devolve só esses; `ativos + inativos + coberto_grupo + sem_compra = total_clientes`.
+
+### 12.7 Conferido em 15/10/2026 na `api-test`
+
+| Pedido | Resultado |
+|---|---|
+| §12.2 base pelo cadastro | `total_clientes` = **3.964** (era 1.265), igual à conta de 13/10 (3.842 com tipo Cliente + 122 que compram sem a etiqueta) |
+| §12.2 status `sem_compra` | `kpis.sem_compra` = **2.701** e `status=sem_compra` filtra (2.701). Inativos (90 dias) caiu de 733 para **548**: quem só tem NF deixou de ser inativo |
+| §12.2 compra = pedido ou NF | a linha traz `ultimo_pedido`, `ultima_nf`, `ultima_compra` (a maior das duas), `qtd_nfs_total`, `cliente_cadastro` e `inativo_omie` |
+| §10 venda e faturamento | `venda_bruta/deducoes/liquida_mes`, `faturamento_*`, `composicao_mes` (10 linhas) e `fora_dos_numeros` na lista e nos `kpis` (venda líquida 10/2026: R$ 9.332.667,57) |
+| §9.1 NF cancelada | ONESUBSEA 09/2026: `/movimento` → `totais.qtd_nfs = 5`, `valor_nfs = 412.035,99`; a lista continua com as 7 notas e o `totais` ganhou `qtd_nfs_fora_do_total = 2` (R$ 898.981,06) |
+| §9.2 `codigo_cliente` | `GET /acompanhamento_clientes?...&codigo_cliente=11797642613` devolve `total = 1` |
+
+**Resta no front** (av-hub): a página do cliente ainda busca por `busca=` e avisa "NF cancelada somada" (`AcompanhamentoDetalhe.tsx`, duas marcas `GAMBIARRA` de §9.1 e §9.2). Já podem sair.
+**Ainda aberto:** §12.3 itens 1 a 9 (ordenação por venda/faturamento líquido, status do grupo, escopo dos números do cliente, `totais.qtd_pedidos` por linha, 409 de grupos…), conferir **produção** e a decisão do escopo de vendedor sem token (§12.3 item 8).
+
+## 13. Excel da tela (15/10/2026)
+
+Botão **Exportar Excel** no cabeçalho da lista. Rota do BFF: `GET /api/acompanhamento-clientes/exportar?mes=&ano=&dias_inativo=&codigo_empresa=&busca=` (permissão `pode_visualizar` da tela; o escopo de vendedor é o da API). Segue o **mês, a unidade e a busca** da tela. Status e prazo não filtram: as abas já cobrem cada um.
+
+### 13.1 O que tem o arquivo
+
+| Aba | Conteúdo |
+|---|---|
+| Resumo | indicadores do mês (clientes, ativos, inativos, sem compra, venda e faturamento com deduções), situação por prazo (30, 60, 90 e 180 dias), índice de abas com link, notas de leitura e conferência |
+| Clientes | todos os clientes, da compra mais recente à mais antiga; 26 colunas |
+| Inativos +30, +60, +90, +180 dias | cada uma pedida à API com `status=inativo&dias_inativo=N`; coluna "Dias além de N" (fórmula) |
+| Sem compra | `status=sem_compra` (lista de prospecção) |
+| Cobertos pelo grupo | só aparece quando existe CNPJ coberto |
+| Top 50 venda / Top 50 faturamento | `sort=venda_liquida_mes` e `sort=faturamento_liquido_mes` na API; a aba some se a API ignorar a ordenação |
+| Grupos de empresa, CNPJs dos grupos | só aparecem quando existem grupos |
+| Vendedores, Cliente x Vendedor | carteira de cada vendedor segundo os pedidos (GAMBIARRA abaixo) |
+| Dicionário | significado de cada status e coluna |
+
+Todas as colunas têm filtro; a linha "Total do filtro" (SUBTOTAL) acima do cabeçalho recalcula só o que está visível. Cabeçalho e cliente congelados, status colorido (formatação condicional), dias sem comprar em escala de cor, link "No Hub" para a página do cliente.
+
+### 13.2 Como é montado e o que fica para o backend
+
+- A rota faz cerca de **27 consultas** à API (todas as páginas de cada recorte, 500 por página, 5 ao mesmo tempo) e formata. Com a base inteira (3.964 clientes) leva **15 a 25 segundos** e o arquivo tem ~1,2 MB. Nada é recalculado: status, deduções e vendas vêm prontos.
+- 🟡 **Resumo por vendedor e `vendedores` do grupo** são somados na rota (duas marcas `GAMBIARRA` em `lib/api/acompanhamentoClientesPlanilha.ts`). Pedido: a API devolver o resumo por vendedor (clientes atendidos, pedidos no histórico e no mês, última venda) e `vendedores` agregado na linha do grupo.
+- 🟡 **Endpoint de exportação no backend** (o `.xlsx` pronto, como o relatório do `api-comercial`) tiraria as 27 idas e voltas do BFF e o risco de um proxy cortar a requisição antes dos 120 s. Opcional.
+- 🟡 **Permissão própria:** hoje exportar exige só `pode_visualizar`, e o arquivo sai do sistema com CNPJ e CPF dos clientes. Decidir se pede uma ação específica (`pode_exportar`).
+
+### 13.3 Como conferir
+
+1. A aba Clientes tem tantas linhas quanto `kpis.total_clientes` (3.964 em 10/2026) e o Resumo diz "3.964 linhas para 3.964 informadas pela API".
+2. A aba "Inativos +90 dias" tem tantas linhas quanto `kpis.inativos` com `dias_inativo=90` (548), e o mesmo vale para 30 (837), 60 (671) e 180 (315).
+3. "Venda líquida" e "Faturamento líquido" do Resumo são iguais aos cartões da tela.
+4. Com busca, unidade e prazo na tela, o arquivo vem só com esse recorte (ex.: busca "onesubsea", unidade Hrm).
+5. Token de vendedor: só a carteira dele em todas as abas.
 
 Ver também: [[HIST-Indice-Contratos|Indice-Contratos]], [[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend|40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]], [[AV-Hub-API|AV-Hub-API-Estado-Atual]].
 
