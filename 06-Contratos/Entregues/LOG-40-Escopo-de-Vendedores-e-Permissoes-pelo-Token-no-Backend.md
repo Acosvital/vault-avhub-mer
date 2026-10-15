@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-api, seguranca, escopo, permissoes, r
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/middlewares/escopoVendedor.js:165", "api-acos-vital/src/middlewares/identidadeUsuario.js"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-07
 ---
 
 # Contrato 40 — Escopo de vendedores e permissões pelo token, no backend (fecha as GAMBIARRAS S1, S2 e S3)
+
+> **Onde atua:** av-hub: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

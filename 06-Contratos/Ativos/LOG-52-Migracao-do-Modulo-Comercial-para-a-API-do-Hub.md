@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-api, contrato-sql, comercial, suprime
 criado: 2026-10-15
 atualizado: 2026-10-15
 status: proposta
+sistemas: [hub-banco, hub-api, hub-front]
 dono: "Pablo"
 etapa_0b: []
 fontes: ["api-comercial (HUB b55ac55, pasta 00 - HUB/api-comercial: README, prisma/models/*.prisma, prisma/migrations, src/**, test/**)", "api-acos-vital 276dab8 (schemas/**, middlewares/**, utils/**)", "Dump Avhub (Esqueleto).sql", "HUB app/api/comercial/[...rota]/route.ts, lib/api/comercialApi.ts, services/comercial/*", "Registro-de-Decisoes N14-15", "auditoria de 15/10/2026"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-15
 ---
 
 # Contrato 52 — Migrar o módulo Comercial & Suprimentos para a API do av-hub e aposentar a `api-comercial`
+
+> **Onde atua:** av-hub: banco, API, front
 
 > [!info] Situação em 15/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Pablo (módulo) · **Banco e API:** Gustavo (DBA), dono da `api-acos-vital`

@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, mes, integracao-av-hub-mes, compras, recebimento,
 criado: 2026-10-15
 atualizado: 2026-10-15
 status: proposta
+sistemas: [mes-banco, mes-api, mes-front]
 dono: "Robert"
 etapa_0b: [P1, P2, P3, E1, R0, R1, R4]
 fontes: ["N14-20, N14-28, N14-29, N14-30, N14-31, N14-32 (Registro-de-Decisoes)", "Proposta-OP-Lote-Compra-em-Andamento.pdf (Robert, 15/10/2026)", "api-pcp origin/develop 6914fe9 (K4, PR #59): prisma/models/integracao.prisma (OcReferencia, OcReferenciaItem), src/integracao-avhub/oc-referencia-avhub.service.ts", "api-pcp develop: prisma/models/compras.prisma (RequisicaoCompra, RequisicaoCompraItem, Recebimento, RecebimentoItem), prisma/models/estoque.prisma (Material, Lote, LoteCusto, Reserva), src/compras/compras.service.ts:135-218,305-351,356-399, recebimento.service.ts:135,420,452, circuito-compra.ts:62-99,166-250", "API-004, API-007, API-008, API-009, API-010"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-15
 ---
 
 # Contrato de API 011 — Compra em andamento, recebimento por item da OC e uso interno (MES)
+
+> **Onde atua:** MES: banco, API, front
 
 > [!info] Situação em 15/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** P1, P2, P3, E1, R0, R1, R4 · **Dono:** Robert (MES). O Gustavo entrega as leituras do hub ([[API-009-Referencia-Requisicao-Hub-Integracao-MES]] e [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto]]).

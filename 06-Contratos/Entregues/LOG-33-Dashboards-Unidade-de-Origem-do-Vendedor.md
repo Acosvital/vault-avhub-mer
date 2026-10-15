@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-sql, contrato-api, dashboards, vended
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js:53-54"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-30
 ---
 
 # Contrato 33 — Dashboards: unidade de origem e período de atividade do vendedor
+
+> **Onde atua:** av-hub: banco, API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

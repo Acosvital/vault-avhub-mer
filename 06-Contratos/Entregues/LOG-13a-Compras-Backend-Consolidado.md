@@ -5,12 +5,15 @@ tags: [contrato, contrato-logica, compras, backend]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C0, C1, C4]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:190-197", "Dump Avhub (Esqueleto).sql (schema core_vendas_faturamento)"]
 ---
 
 # Contrato — Compras: tudo o que falta no BACKEND (banco + API)
+
+> **Onde atua:** av-hub: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C0, C1, C4 · **Dono:** Gustavo (DBA)

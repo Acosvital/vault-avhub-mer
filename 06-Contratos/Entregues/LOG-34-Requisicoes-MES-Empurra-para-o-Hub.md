@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, contrato-sql, compras, integracao-mes, seguranca]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco, hub-api, mes-api]
 dono: "Robert"
 etapa_0b: [P3, E4]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/requisicoes_compra/requisicoes_compra.route.js:221", "api-pcp/src/integracao-avhub/envio-avhub.service.ts:9,46,130", "Dump Avhub (Esqueleto).sql:8680", "api-pcp/prisma/migrations/20261002120000_envio_requisicoes_avhub"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-01
 ---
 
 # Contrato 34 — Requisições: o MES empurra para o av-hub (PUT por `id_origem`)
+
+> **Onde atua:** av-hub: banco, API · MES: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** P3, E4 · **Dono:** Robert

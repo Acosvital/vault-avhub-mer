@@ -5,11 +5,14 @@ tags: [contrato, contrato-logica, compras, historico]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:62-66", "api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_ordens_compra_historico"]
 ---
 # Contrato — Compras: histórico único (OC do av-hub + pedido de compra antigo do Omie)
+
+> **Onde atua:** av-hub: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)

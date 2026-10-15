@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-api, comissoes, orcamento, av-hub, fo
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: parcial
+sistemas: [hub-banco, hub-api, hub-front]
 dono: "Nathan"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core_compras/aggregates/orcamento/orcamento.route.js", "api-acos-vital/src/schemas/core_compras/index.js:37", "api-acos-vital/src/schemas/core_comissionamento/functions/fn_dashboard_comissoes/fn_dashboard_comissoes.route.js", "Dump Avhub (Esqueleto).sql:12228"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-07
 ---
 
 # Contrato 42 — Coordenadores e Orçamento: sair do JSON do repositório
+
+> **Onde atua:** av-hub: banco, API, front
 
 > [!info] Situação em 14/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Nathan

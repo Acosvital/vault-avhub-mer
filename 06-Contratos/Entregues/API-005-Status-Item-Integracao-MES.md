@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, mes, integracao-av-hub-mes, rastreabilidade]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api, mes-api]
 dono: "Robert"
 etapa_0b: [F1, X1, Q7]
 fontes: ["api-pcp/src/integracao-avhub/integracao-avhub.controller.ts:26", "api-pcp/src/integracao-avhub/integracao-avhub.service.ts:108", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_status/itens_pedido_status.job.js:217"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-22
 ---
 
 # Contrato de API 005 — Status por item (MES → av-hub)
+
+> **Onde atua:** av-hub: API · MES: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** F1, X1, Q7 · **Dono:** Robert

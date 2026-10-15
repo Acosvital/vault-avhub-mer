@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-pipeline, compras, omie]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [pipeline-omie]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4]
 fontes: ["omie-elt-pipeline/src/jobs/envioOrdensCompra.ts", "omie-elt-pipeline/src/avhub/client.ts:111", "omie-elt-pipeline/src/jobs/scheduler.ts:121-125", "omie-elt-pipeline/src/jobs/cotacaoPtax.ts"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-23
 ---
 
 # Contrato — Compras: tudo o que falta na PIPELINE (`omie-elt-pipeline`)
+
+> **Onde atua:** pipeline Omie
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)

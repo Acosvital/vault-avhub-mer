@@ -2,6 +2,7 @@
 id: CON-01
 tipo: Consulta
 status: aguardando-resposta
+sistemas: [consulta]
 tags: [contrato, consulta, relatorios, faturamento, av-hub]
 criado: 2026-10-14
 atualizado: 2026-10-14
@@ -15,6 +16,8 @@ fontes: [v1 03-Sistemas-Existentes/PCP-Legado-x-MES-Lacunas.md (itens 28 e 29), 
 ---
 
 # CON-01 · Relatórios de valores por vendedor e de faturamento mensal (itens 28 e 29)
+
+> **Onde atua:** consulta (sem código)
 
 ## Para quem é
 

@@ -5,11 +5,14 @@ tags: [contrato, contrato-logica, compras]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C0, C1, C4]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:190-197", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:857"]
 ---
 # Contrato — Módulo de Compras: requisição → ordem de compra → sincronização com o Omie
+
+> **Onde atua:** av-hub: banco, API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C0, C1, C4 · **Dono:** Gustavo (DBA)

@@ -5,11 +5,14 @@ tags: [contrato, contrato-sql, compras, historico, substituido]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: arquivado
+sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: [C0, C4]
 fontes: ["[[LOG-13a-Compras-Backend-Consolidado]]", "api-acos-vital/src/schemas/core_vendas_faturamento/index.js:190-197"]
 ---
 # Compras — pedido para o DBA (banco)
+
+> **Onde atua:** av-hub: banco
 
 > [!info] Situação em 14/10/2026
 > **Status:** `arquivado` · **Pasta:** `Arquivados` · **Nós do 0b:** C0, C4 · **Dono:** Gustavo (DBA)

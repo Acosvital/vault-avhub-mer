@@ -5,6 +5,7 @@ tags: [contrato, contrato-sql, dba, integracao-av-hub-mes, rastreabilidade]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: [F1, X1, Q7]
 fontes: ["Dump Avhub (Esqueleto).sql (core_vendas_faturamento.itens_pedido_status)", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_status/itens_pedido_status.job.js"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-08
 ---
 
 # Contrato SQL 010 — `core_vendas_faturamento.itens_pedido_status` (novo)
+
+> **Onde atua:** av-hub: banco
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** F1, X1, Q7 · **Dono:** Gustavo (DBA)

@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, mes, integracao-av-hub-mes, compras]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: parcial
+sistemas: [hub-banco, hub-api, mes-api]
 dono: "Robert"
 etapa_0b: [C4, R0, R4]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_ordens_compra_referencia_mes/vw_ordens_compra_referencia_mes.route.js:70", "api-acos-vital/src/schemas/core_vendas_faturamento/index.js:199", "Dump Avhub (Esqueleto).sql:20237", "api-pcp (grep: nenhuma referência à rota)"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-22
 ---
 
 # Contrato de API 004 — Referência da Ordem de Compra (av-hub → MES)
+
+> **Onde atua:** av-hub: banco, API · MES: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** C4, R0, R4 · **Dono:** Robert

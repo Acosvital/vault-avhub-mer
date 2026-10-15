@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-api, faturamento, permissoes, fora-do
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/notas_fiscais/notas_fiscais.route.js:115,297,306"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-29
 ---
 
 # Contrato 29 — Notas fiscais manuais: só o administrador cria (permissão no backend)
+
+> **Onde atua:** av-hub: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

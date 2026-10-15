@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, mes, producao, estoque, op, sql, prisma]
 criado: 2026-10-15
 atualizado: 2026-10-15
 status: proposta
+sistemas: [mes-banco, mes-api, mes-front]
 dono: "Robert"
 etapa_0b: [P2, F1, Q7, Q8, E5]
 fontes: ["N14-06, N14-22, N14-29 (Registro-de-Decisoes)", "Proposta-OP-Lote-Compra-em-Andamento.pdf (Robert, 15/10/2026), seções 1 e 2", "api-pcp develop: prisma/models/producao.prisma (Pedidos, ItensPedido, ItemParcial, Roteiros, TipoAnexo), prisma/models/fabricas.prisma (Fabrica.tipo), prisma/models/estoque.prisma (OrigemLote, Lote, MovimentoEstoque), src/pedidos/pedidos.controller.ts, pedidos.service.ts:191-424 (criarCompletoLote), pedidos-pdf.service.ts (relatorio, imprimir), src/itens-parciais/itens-parciais.service.ts (mover, reprovar, atenderEstoque), src/compras/circuito-compra.ts:166-250", "02-PCP-Triagem-e-Destinacao, 08-Qualidade-Saida, 03-Estoque-Atendimento-e-Despacho"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-15
 ---
 
 # Contrato 53 — Ordem de Produção e lote do fabricado (MES)
+
+> **Onde atua:** MES: banco, API, front
 
 > [!info] Situação em 15/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** P2, F1, Q7, Q8, E5 · **Dono:** Robert (MES, sem API entre sistemas)

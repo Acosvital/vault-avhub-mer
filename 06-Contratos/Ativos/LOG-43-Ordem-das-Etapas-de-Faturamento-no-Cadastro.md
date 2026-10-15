@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, contrato-sql, etapas-faturamento, pipeline, front
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: parcial
+sistemas: [hub-banco, hub-api, hub-front, pipeline-omie]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core/tables/etapas_faturamento/etapas_faturamento.route.js:66-76", "Dump Avhub (Esqueleto).sql:11084-11101,19354", "omie-elt-pipeline/src/db/protectedColumns.ts (sem entrada de etapas_faturamento)"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-07
 ---
 
 # Contrato 43 — Ordem das etapas de faturamento vem do cadastro (fecha a marca P6)
+
+> **Onde atua:** av-hub: banco, API, front · pipeline Omie
 
 > [!info] Situação em 14/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

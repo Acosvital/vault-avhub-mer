@@ -5,6 +5,7 @@ tags: [contrato, contrato-sql, dba, omie-elt-pipeline]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: aplicado-em-producao
+sistemas: [hub-banco, pipeline-omie]
 dono: "Gustavo (DBA)"
 etapa_0b: [V1]
 fontes: ["Dump Avhub (Esqueleto).sql (pedidos_vendas_frete, pedidos_vendas_parcelas)"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-17
 ---
 
 # Contrato SQL 003 (antes 008 no omie-elt-pipeline) — `pedidos_vendas` (desconto) + 2 tabelas novas (frete, parcelas)
+
+> **Onde atua:** av-hub: banco · pipeline Omie
 
 > [!info] Situação em 14/10/2026
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** V1 · **Dono:** Gustavo (DBA)

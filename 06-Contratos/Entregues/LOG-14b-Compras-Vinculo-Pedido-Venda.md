@@ -5,11 +5,14 @@ tags: [contrato, contrato-logica, compras, pedido-venda]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4, P3]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:195", "api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_pedido_venda_compras/vw_pedido_venda_compras.route.js:52-92", "Dump Avhub (Esqueleto).sql (ordens_compra_itens_vinculos)"]
 ---
 # Contrato — Compras: vínculo da ordem de compra com o pedido de venda
+
+> **Onde atua:** av-hub: banco, API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4, P3 · **Dono:** Gustavo (DBA)

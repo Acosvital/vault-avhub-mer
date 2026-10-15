@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, orcamento, comissoes, substituido]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: arquivado
+sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core_compras/aggregates/orcamento/orcamento.route.js:10-30", "Dump Avhub (Esqueleto).sql:12228", "[[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio]]"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-20
 ---
 
 # Contrato — Dados de Orçamento e de coordenadores no banco (fora do repositório)
+
+> **Onde atua:** av-hub: banco, API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `arquivado` · **Pasta:** `Arquivados` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

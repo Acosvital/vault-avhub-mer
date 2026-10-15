@@ -5,6 +5,7 @@ tags: [contrato, contrato-sql, dba, integracao-av-hub-mes, compras, api004]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: [R0]
 fontes: ["Dump Avhub (Esqueleto).sql:6164,17962,20237"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-09
 ---
 
 # Contrato SQL 011 — `vw_ordens_compra_referencia_mes` + `ordens_compra_referencia_mes` (marca por trigger) + índice (migration `api004`)
+
+> **Onde atua:** av-hub: banco
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** R0 · **Dono:** Gustavo (DBA)

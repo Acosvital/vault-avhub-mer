@@ -5,11 +5,14 @@ tags: [contrato, contrato-logica, seguranca, permissoes, rbac]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/middlewares/identidadeUsuario.js", "api-acos-vital/src/middlewares/escopoVendedor.js:165", "api-acos-vital/src/middlewares/escopoUnidade.js", "api-acos-vital/src/middlewares/auditoria.js"]
 ---
 # Contrato — Permissão, escopo e identidade aplicados no banco/backend
+
+> **Onde atua:** av-hub: banco
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

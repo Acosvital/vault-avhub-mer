@@ -5,12 +5,15 @@ tags: [contrato, contrato-logica, vagas, fora-do-fluxo]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core_aprovacao_de_vagas/tables/vaga/vaga.route.js:247-338"]
 ---
 
 # Contrato — Solicitações de vagas: fila, decisão e permissões no banco
+
+> **Onde atua:** av-hub: banco
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

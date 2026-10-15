@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, mes, integracao-av-hub-mes, compras, requisicao, 
 criado: 2026-10-15
 atualizado: 2026-10-15
 status: proposta
+sistemas: [hub-banco, hub-api, mes-api, mes-front]
 dono: "Gustavo"
 etapa_0b: [C0, P1, P2, P3, E1]
 fontes: ["N14-28, N14-31, N14-32, N14-33 (Registro-de-Decisoes)", "api-acos-vital src/schemas/core_vendas_faturamento/views/vw_ordens_compra_referencia_mes/vw_ordens_compra_referencia_mes.route.js (molde da rota), index.js:190-199 (montagem)", "Dump Avhub (Esqueleto).sql:6129-6174 (fn_oc_referencia_mes_marcar), :17965-17969 e :24219 (marca e índice da OC), :20240-20278 (vw_ordens_compra_referencia_mes), :10181 (set_updated_at), :25898-26280 (triggers de requisicoes_compra)", "Proposta do Robert (15/10/2026) e revisão do API-009 pelo Robert"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-15
 ---
 
 # Contrato de API 009 — Referência da requisição do Compras (av-hub → MES)
+
+> **Onde atua:** av-hub: banco, API · MES: API, front
 
 > [!info] Situação em 15/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** C0, P1, P2, P3, E1 · **Dono:** Gustavo (rota, view, marca); Robert (job e telas no MES, [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno]])
@@ -158,14 +161,14 @@ Rota de serviço, sem token de usuário e sem linha em `auth.rotas_telas`. O MES
 
 ## 6. Perguntas em aberto
 
-| # | Pergunta | Dono | Selo |
-|---|---|---|---|
-| Q1 | ✅ Respondida pelo Robert (15/10): `material` não é `codigo_produto_omie`; a rota devolve os dois | Robert | ✅ |
-| Q2 | ✅ A trigger da OC atualiza o `updated_at` da requisição (existe `trg_requisicoes_compra_updated_at`), mas com `NOW()`; por isso a marca própria | Gustavo | ✅ |
-| Q3 | Unidade do pedido de venda: ✅ sempre a da requisição (N14-31); a rota não precisa devolver `codigo_empresa_pv` | Nathan | ✅ 📝 |
-| Q4 | O aviso de compra duplicada só avisa ✅ (N14-29) | Nathan | ✅ 📝 |
-| Q5 | ✅ 500 por página basta (Robert, 15/10) | Robert | ✅ |
-| Q6 | A transação do `POST /compras/requisicoes` e a marca: o `INSERT` já dispara a trigger; nenhum ajuste na API | Gustavo | ✅ |
-| Q7 | Volume real: quantas requisições do hub com pedido de venda por dia? O índice `(alterado_em, id_requisicao)` e o limite de 500 devem bastar | Gustavo | ❓ |
+| #   | Pergunta                                                                                                                                        | Dono    | Selo |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ---- |
+| Q1  | ✅ Respondida pelo Robert (15/10): `material` não é `codigo_produto_omie`; a rota devolve os dois                                                | Robert  | ✅    |
+| Q2  | ✅ A trigger da OC atualiza o `updated_at` da requisição (existe `trg_requisicoes_compra_updated_at`), mas com `NOW()`; por isso a marca própria | Gustavo | ✅    |
+| Q3  | Unidade do pedido de venda: ✅ sempre a da requisição (N14-31); a rota não precisa devolver `codigo_empresa_pv`                                  | Nathan  | ✅ 📝 |
+| Q4  | O aviso de compra duplicada só avisa ✅ (N14-29)                                                                                                 | Nathan  | ✅ 📝 |
+| Q5  | ✅ 500 por página basta (Robert, 15/10)                                                                                                          | Robert  | ✅    |
+| Q6  | A transação do `POST /compras/requisicoes` e a marca: o `INSERT` já dispara a trigger; nenhum ajuste na API                                     | Gustavo | ✅    |
+| Q7  | Volume real: quantas requisições do hub com pedido de venda por dia? O índice `(alterado_em, id_requisicao)` e o limite de 500 devem bastar     | Gustavo | ❓    |
 
 Relacionados: [[API-004-Referencia-OC-Integracao-MES]], [[API-007-Referencia-OC-Valores-no-MES]], [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto]], [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno]], [[LOG-34-Requisicoes-MES-Empurra-para-o-Hub]], [[LOG-35-Compras-Marcos-Requisicao-para-MES]], [[04-Circuito-de-Compra]], [[02-PCP-Triagem-e-Destinacao]], [[Backlog-por-Frente]] (BL-064, BL-065), [[Registro-de-Decisoes]] (N14-28 a N14-33).

@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, mes, integracao-av-hub-mes, rastreabilidade, port
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api, hub-front, mes-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [F1, X1, Q7]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_status/itens_pedido_status.job.js:217", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_status/itens_pedido_status.route.js:54", "api-acos-vital/src/schemas/core_vendas_faturamento/index.js:183", "Dump Avhub (Esqueleto).sql (tabela itens_pedido_status)"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-08
 ---
 
 # Contrato de API 006 — Leitura do status por item no hub (job + rota)
+
+> **Onde atua:** av-hub: API, front · MES: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** F1, X1, Q7 · **Dono:** Gustavo (DBA)

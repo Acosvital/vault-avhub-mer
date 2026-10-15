@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, compras, comissoes, fora-de-escopo]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: arquivado
+sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core/tables/produtos/produtos.route.js:80", "v1 Registro-de-Decisoes-2026-10-07 #40"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-10
 ---
 
 # Contrato — Relação Produto ↔ Fornecedor (pro Simulador de Comissão)
+
+> **Onde atua:** av-hub: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `arquivado` · **Pasta:** `Arquivados` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

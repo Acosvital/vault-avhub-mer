@@ -5,6 +5,7 @@ tags: [contrato, contrato-sql, contrato-api, dba, av-hub, clientes, grupos-de-em
 criado: 2026-10-14
 atualizado: 2026-10-15
 status: parcial
+sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/functions/fn_acompanhamento_clientes/fn_acompanhamento_clientes.route.js:114-141", "api-acos-vital/src/schemas/core_vendas_faturamento/index.js:171-172", "Dump Avhub (Esqueleto).sql:3021,3070-3077,4825"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-13
 ---
 
 # Contrato 48 — Acompanhamento de Clientes e grupos de empresa
+
+> **Onde atua:** av-hub: banco, API, front
 
 > [!info] Situação em 14/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

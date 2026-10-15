@@ -5,12 +5,15 @@ tags: [contrato, contrato-logica, compras, compradores]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/compradores/compradores.route.js:76-197", "omie-elt-pipeline/src/omie/resources/compradores.ts"]
 ---
 
 # Contrato — Compradores (Omie) ↔ Funcionário (RH)
+
+> **Onde atua:** av-hub: banco, API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)

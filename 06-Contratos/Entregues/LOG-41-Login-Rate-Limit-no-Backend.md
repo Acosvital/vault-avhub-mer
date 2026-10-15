@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-api, seguranca, login]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/auth/aggregates/autenticacao/autenticacao.route.js:59-79", "api-acos-vital/src/utils/acessoConfig.js"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-07
 ---
 
 # Contrato 41 — Login: rate limit no backend (fecha a GAMBIARRA S9)
+
+> **Onde atua:** av-hub: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

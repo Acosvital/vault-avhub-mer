@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, mes, integracao-av-hub-mes, substituido]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: arquivado
+sistemas: [hub-api, mes-api]
 dono: "Robert"
 etapa_0b: [P3]
 fontes: ["api-pcp/src/integracao-avhub/integracao-avhub.controller.ts:20-23", "api-pcp/src/integracao-avhub/envio-avhub.service.ts:130", "[[LOG-34-Requisicoes-MES-Empurra-para-o-Hub]]"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-22
 ---
 
 # Contrato de API 003 — Requisição de compra (MES → av-hub)
+
+> **Onde atua:** av-hub: API · MES: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `arquivado` · **Pasta:** `Arquivados` · **Nós do 0b:** P3 · **Dono:** Robert

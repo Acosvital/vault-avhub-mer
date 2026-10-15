@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, mes, estoque, rejeitado]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: arquivado
+sistemas: [mes-api]
 dono: "Robert"
 etapa_0b: []
 fontes: ["api-pcp/prisma/migrations/20260929170000_remove_material_alias_omie", "v1 09-Contratos/02-Contratos-API/002-Material-Alias-Omie-MES.md"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-17
 ---
 
 # Contrato de API 002 — `material_alias_omie` (a implementar no MES/Estoque)
+
+> **Onde atua:** MES: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `arquivado` · **Pasta:** `Arquivados` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Robert

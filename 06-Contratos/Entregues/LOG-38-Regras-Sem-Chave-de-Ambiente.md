@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, configuracao, seguranca, regra-nathan]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/utils/acessoConfig.js:10", "api-acos-vital/src/middlewares/identidadeUsuario.js:24"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-06
 ---
 
 # Contrato 38 — Regras decididas sem chave de ambiente
+
+> **Onde atua:** av-hub: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

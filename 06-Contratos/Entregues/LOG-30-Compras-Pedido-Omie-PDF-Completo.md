@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-api, contrato-pipeline, compras]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [pipeline-omie, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/pedidos_compras", "omie-elt-pipeline/src/omie/resources/pedidosCompras.ts"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-30
 ---
 
 # Contrato 30 — Compras: dados que faltam no PDF do pedido de compra do Omie
+
+> **Onde atua:** av-hub: API · pipeline Omie
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)

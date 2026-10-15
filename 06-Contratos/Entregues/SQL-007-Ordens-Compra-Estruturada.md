@@ -5,6 +5,7 @@ tags: [contrato, contrato-sql, dba, integracao-av-hub-mes, compras]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: aplicado-em-producao
+sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4]
 fontes: ["Dump Avhub (Esqueleto).sql:17735-17775", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-22
 ---
 
 # Contrato SQL 007 — `core_vendas_faturamento.ordens_compra` + itens + parcelas (novo)
+
+> **Onde atua:** av-hub: banco
 
 > [!info] Situação em 14/10/2026
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)

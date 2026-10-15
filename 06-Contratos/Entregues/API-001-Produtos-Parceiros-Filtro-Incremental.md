@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, api-acos-vital, pipeline]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api, pipeline-omie]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core/tables/produtos/produtos.route.js:52-60", "api-acos-vital/src/schemas/core/tables/parceiros/parceiros.route.js:97"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-17
 ---
 
 # Contrato de API 001 — filtro incremental `alterado_desde` em `GET /produtos` e `GET /parceiros`
+
+> **Onde atua:** av-hub: API · pipeline Omie
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

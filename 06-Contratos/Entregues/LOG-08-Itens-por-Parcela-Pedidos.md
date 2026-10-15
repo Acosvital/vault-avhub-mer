@@ -5,11 +5,14 @@ tags: [contrato, contrato-sql, pedidos, fora-do-fluxo]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_pedido_venda_itens/vw_pedido_venda_itens.model.js:36"]
 ---
 # Pedido de melhoria — dizer a que PARCELA (sequencial) cada item de `vw_pedido_venda_itens` pertence
+
+> **Onde atua:** av-hub: banco
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

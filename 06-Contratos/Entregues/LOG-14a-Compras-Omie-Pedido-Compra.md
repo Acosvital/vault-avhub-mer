@@ -5,12 +5,15 @@ tags: [contrato, contrato-logica, pipeline, compras, omie]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [pipeline-omie, hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4]
 fontes: ["omie-elt-pipeline/src/omie/resources/pedidosCompras.ts", "omie-elt-pipeline/src/jobs/envioOrdensCompra.ts", "omie-elt-pipeline/src/avhub/client.ts:111"]
 ---
 
 # Contrato — Compras ↔ Omie: puxar pedidos de compra e criar a OC lá
+
+> **Onde atua:** av-hub: banco · pipeline Omie
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)

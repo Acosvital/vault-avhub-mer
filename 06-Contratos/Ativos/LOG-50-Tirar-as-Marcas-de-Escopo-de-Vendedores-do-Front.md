@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, av-hub, bff, escopo, front]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: para-implementar
+sistemas: [hub-front]
 dono: "Nathan"
 etapa_0b: []
 fontes: ["Dump Avhub (Esqueleto).sql:615-678", "api-acos-vital/src/middlewares/escopoVendedor.js:165"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-13
 ---
 
 # Contrato 50 — Tirar as 2 marcas que restam do [[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend|40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] no front
+
+> **Onde atua:** av-hub: front
 
 > [!info] Situação em 14/10/2026
 > **Status:** `para-implementar` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Nathan

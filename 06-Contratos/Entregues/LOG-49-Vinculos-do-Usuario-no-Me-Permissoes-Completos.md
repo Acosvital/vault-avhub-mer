@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, contrato-sql, dba, escopo, permissoes, me-permiss
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/auth/aggregates/me/me.route.js:7", "Dump Avhub (Esqueleto).sql:615-678"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-13
 ---
 
 # Contrato 49 — `GET /me/permissoes` com os vínculos de vendedor completos (destrava as marcas S3 do [[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend|40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]])
+
+> **Onde atua:** av-hub: banco, API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

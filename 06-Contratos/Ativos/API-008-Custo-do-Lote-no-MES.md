@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, mes, estoque, custo, g1, genealogia]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: parcial
+sistemas: [mes-api, hub-api]
 dono: "Robert"
 etapa_0b: [R4, E3, E5]
 fontes: ["api-pcp/prisma/models/estoque.prisma:394-423", "api-pcp/prisma/migrations/20261009140000_lote_custo", "api-pcp/src/estoque/operacao/estoque-operacao.service.ts:403-445", "api-pcp/src/common/constants/estoque-custo.constants.ts:5", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_custo/itens_pedido_custo.job.js:78"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-09
 ---
 
 # Contrato 008 — Custo do lote no MES (`lote_custo`, G1, recebimento, consumo e `GET /itens/custo`)
+
+> **Onde atua:** av-hub: API · MES: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** R4, E3, E5 · **Dono:** Robert

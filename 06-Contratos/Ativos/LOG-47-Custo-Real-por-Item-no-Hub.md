@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, av-hub, comissao, compras, orcamento, custo]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: parcial
+sistemas: [hub-banco, hub-api, hub-front, mes-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [E3, R4]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_custo/itens_pedido_custo.job.js:14,78", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_custo/itens_pedido_custo.route.js:66", "api-acos-vital/src/schemas/core_vendas_faturamento/index.js:186", "api-acos-vital/src/app.js:209"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-09
 ---
 
 # Contrato 47 — Custo real por item no av-hub: simulador (etapa 2), comissão por faturamento (etapa 3), Compras e Orçamento
+
+> **Onde atua:** av-hub: banco, API, front · MES: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** E3, R4 · **Dono:** Gustavo (DBA)

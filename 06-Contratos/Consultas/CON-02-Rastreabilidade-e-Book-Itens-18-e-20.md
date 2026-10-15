@@ -2,6 +2,7 @@
 id: CON-02
 tipo: Consulta
 status: aguardando-resposta
+sistemas: [consulta]
 tags: [contrato, consulta, caldeiraria, rastreabilidade, book]
 criado: 2026-10-14
 atualizado: 2026-10-14
@@ -15,6 +16,8 @@ fontes: [v1 03-Sistemas-Existentes/PCP-Legado-x-MES-Lacunas.md (itens 18 a 22), 
 ---
 
 # CON-02 · Rastreabilidade por material e ciclo do Book (Caldeiraria HRM)
+
+> **Onde atua:** consulta (sem código)
 
 ## Para quem é
 

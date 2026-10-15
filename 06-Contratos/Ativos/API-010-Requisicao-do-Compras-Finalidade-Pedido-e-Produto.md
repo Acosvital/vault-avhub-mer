@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, compras, requisicao, av-hub, sql]
 criado: 2026-10-15
 atualizado: 2026-10-15
 status: proposta
+sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
 etapa_0b: [C0]
 fontes: ["N14-28, N14-30, N14-31, N14-33 (Registro-de-Decisoes)", "api-acos-vital src/schemas/core_vendas_faturamento/tables/requisicoes_compra/requisicoes_compra.route.js:30-45 (CAMPOS), :384-411 (POST), :413-466 (PATCH), requisicoes_compra.model.js, requisicoes_compra.swagger.json", "Dump Avhub (Esqueleto).sql:18541-18572 (requisicoes_compra), :8680-8826 (fn_requisicao_mes_aplicar), :6319-6394 (fn_oc_vinculos_validar), :11648-11666 (core.produtos), :2328-2377 (pedidos_vendas)", "HUB PR #209 (tela própria da Nova requisição)"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-15
 ---
 
 # Contrato de API 010 — Requisição do Compras: finalidade, pedido de venda e produto do cadastro
+
+> **Onde atua:** av-hub: banco, API, front
 
 > [!info] Situação em 15/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nó do 0b:** C0 · **Dono:** Gustavo (banco e API); Nathan (front, já pronto)

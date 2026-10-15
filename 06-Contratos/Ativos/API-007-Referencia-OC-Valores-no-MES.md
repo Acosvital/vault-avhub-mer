@@ -5,6 +5,7 @@ tags: [contrato, contrato-api, mes, estoque, compras, custo, integracao-av-hub-m
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: parcial
+sistemas: [hub-banco, hub-api, mes-api]
 dono: "Robert"
 etapa_0b: [C4, R4]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_ordens_compra_referencia_mes/vw_ordens_compra_referencia_mes.route.js:51-53", "Dump Avhub (Esqueleto).sql:20237-20330", "api-pcp (grep sem resultado)"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-09
 ---
 
 # Contrato de API 007 — Valores da OC na referência (hub → MES) e projeção no MES
+
+> **Onde atua:** av-hub: banco, API · MES: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** C4, R4 · **Dono:** Robert

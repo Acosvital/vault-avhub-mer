@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-sql, contrato-api, vendas, integracao
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco, hub-api, hub-front, mes-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [V2, V3, P1, P2]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/aggregates/pedidos_liberacao/pedidos_liberacao.route.js:88,164", "api-acos-vital/src/schemas/core_vendas_faturamento/aggregates/pedidos_liberados/pedidos_liberados.route.js:57,115,143", "api-pcp/src/pedidos/omie-integracao.ts:141,338,405"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-28
 ---
 
 # Contrato 26 — Vendas: liberação do pedido pelo vendedor (acompanhamento da Qualidade) + Fluxo 4 para o MES
+
+> **Onde atua:** av-hub: banco, API, front · MES: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** V2, V3, P1, P2 · **Dono:** Gustavo (DBA)

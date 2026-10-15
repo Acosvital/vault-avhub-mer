@@ -5,6 +5,7 @@ tags: [contrato, contrato-sql, dba, bug, vendas, faturamento]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: aplicado-em-producao
+sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["Dump Avhub (Esqueleto).sql (views vw_vendas_base, vw_faturamento_planilha)"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-24
 ---
 
 # Contrato SQL 009 — `core.categorias` sem `codigo_empresa` no JOIN de 4 views (bug real, testado)
+
+> **Onde atua:** av-hub: banco
 
 > [!info] Situação em 14/10/2026
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

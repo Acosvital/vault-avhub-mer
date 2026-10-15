@@ -5,6 +5,7 @@ tags: [contrato, contrato-sql, dba, omie-elt-pipeline]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: aplicado-em-producao
+sistemas: [hub-banco, pipeline-omie]
 dono: "Gustavo (DBA)"
 etapa_0b: [V1]
 fontes: ["Dump Avhub (Esqueleto).sql (core.parceiros, core.parceiros_dados_bancarios)"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-17
 ---
 
 # Contrato SQL 001 (antes 006 no omie-elt-pipeline) — `core.parceiros` (dados fiscais) + 2 tabelas novas
+
+> **Onde atua:** av-hub: banco · pipeline Omie
 
 > [!info] Situação em 14/10/2026
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** V1 · **Dono:** Gustavo (DBA)

@@ -5,11 +5,14 @@ tags: [contrato, contrato-api, vendas, paginacao, fora-do-fluxo]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_vendas_planilha/vw_vendas_planilha.route.js:71,323"]
 ---
 # Contrato — paginar /vendas_planilha por pedido, não por linha crua
+
+> **Onde atua:** av-hub: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

@@ -5,6 +5,7 @@ tags: [contrato, contrato-sql, dba, omie-elt-pipeline]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: aplicado-em-producao
+sistemas: [hub-banco, pipeline-omie]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["Dump Avhub (Esqueleto).sql (core.locais_estoque)", "api-acos-vital/src/schemas/core/tables/locais_estoque"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-17
 ---
 
 # Contrato SQL 005 (antes 010 no omie-elt-pipeline) — `core.locais_estoque`
+
+> **Onde atua:** av-hub: banco · pipeline Omie
 
 > [!info] Situação em 14/10/2026
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

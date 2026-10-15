@@ -5,11 +5,14 @@ tags: [contrato, contrato-api, blacklist, pedidos, fora-do-fluxo]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/blacklist_pedidos/blacklist_pedidos.route.js:15-31"]
 ---
 # Contrato — chave composta (numero_pedido + codigo_empresa) em blacklist_pedidos
+
+> **Onde atua:** av-hub: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

@@ -5,6 +5,7 @@ tags: [contrato, contrato-sql, contrato-api, compras, integracao-mes, torre-de-f
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco, hub-api, mes-api]
 dono: "Robert"
 etapa_0b: [C1, C3, C4, C5, R0, P3]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/requisicoes_compra/requisicoes_compra.route.js:289", "api-pcp/src/integracao-avhub/eventos-avhub.service.ts:31,61,80,185", "api-pcp/src/integracao-avhub/requisicao-avhub.eventos.ts", "api-pcp/src/compras/compras.controller.ts:48,57,96,108"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-02
 ---
 
 # Contrato 35 — Compras: marcos da requisição de compra (av-hub → MES)
+
+> **Onde atua:** av-hub: banco, API · MES: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C1, C3, C4, C5, R0, P3 · **Dono:** Robert

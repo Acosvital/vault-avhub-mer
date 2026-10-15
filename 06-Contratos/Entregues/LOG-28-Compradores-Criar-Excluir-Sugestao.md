@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-api, vendedores, compradores, fora-do
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js:127"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-29
 ---
 
 # Contrato 28 — Vendedores e Compradores: cadastro do Omie só para leitura, período de atividade e sugestão por semelhança
+
+> **Onde atua:** av-hub: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

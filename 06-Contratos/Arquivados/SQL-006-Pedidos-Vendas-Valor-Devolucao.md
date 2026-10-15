@@ -5,6 +5,7 @@ tags: [contrato, contrato-sql, invalidado]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: arquivado
+sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["Dump Avhub (Esqueleto).sql:2371", "v1 Registro-de-Decisoes-2026-10-07 #31"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-17
 ---
 
 # Contrato SQL 006 (antes 011 no omie-elt-pipeline) — `pedidos_vendas.valor_devolucao`
+
+> **Onde atua:** av-hub: banco
 
 > [!info] Situação em 14/10/2026
 > **Status:** `arquivado` · **Pasta:** `Arquivados` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

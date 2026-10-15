@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, mes, estoque, retirada, expedicao, sql, prisma
 criado: 2026-10-15
 atualizado: 2026-10-15
 status: proposta
+sistemas: [mes-banco, mes-api, mes-front]
 dono: "Robert"
 etapa_0b: [E6, X1, F1]
 fontes: ["N14-05, N14-06 (Registro-de-Decisoes)", "Estimativa do Robert (15/10/2026): BL-007 3,5 pd, fora da conta", "api-pcp develop: src/itens-parciais/itens-parciais.service.ts:224-289 (receber, chamada em :275-285), :1557-1609 (desfazerRecebimento, :1587), src/entregas/entregas.service.ts:25-135 (create, chamada em :84-94), src/estoque/operacao/estoque-operacao.helpers.ts:208-277 (consumirReservasDaParcial), :287-363 (estornarConsumosDaParcial), :369-383 (liberarReservas), prisma/models/estoque.prisma (Reserva, MovimentoEstoque, SaldoEstoque)", "03-Estoque-Atendimento-e-Despacho (regra 10, seção 'Documento de retirada')"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-15
 ---
 
 # Contrato 54 — Documento de retirada e baixa do saldo na retirada (MES)
+
+> **Onde atua:** MES: banco, API, front
 
 > [!info] Situação em 15/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** E6, X1, F1 · **Dono:** Robert (MES, sem API entre sistemas)

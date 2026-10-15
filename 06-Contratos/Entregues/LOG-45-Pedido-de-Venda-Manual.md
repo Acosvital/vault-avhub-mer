@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-api, vendas, permissoes, pipeline]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [V1]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/pedidos_vendas/pedidos_vendas.route.js:391,454,491", "api-acos-vital/src/utils/pedidoVendaManual.js"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-09
 ---
 
 # Contrato 45 — Pedido de venda manual (só administrador; convivência com o pipeline)
+
+> **Onde atua:** av-hub: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** V1 · **Dono:** Gustavo (DBA)

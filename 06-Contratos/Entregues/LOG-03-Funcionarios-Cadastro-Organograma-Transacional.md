@@ -5,11 +5,14 @@ tags: [contrato, contrato-logica, funcionarios, organograma, fora-do-fluxo]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital/src/schemas/core/tables/funcionarios/funcionarios.route.js:119-123,423"]
 ---
 # Contrato — Funcionários: salvar/excluir com o organograma numa operação só
+
+> **Onde atua:** av-hub: banco, API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

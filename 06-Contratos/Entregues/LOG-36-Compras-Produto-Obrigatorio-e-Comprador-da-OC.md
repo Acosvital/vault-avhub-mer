@@ -5,6 +5,7 @@ tags: [contrato, contrato-sql, contrato-api, compras, omie]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:1058", "omie-elt-pipeline/src/omie/ordemCompraOmie.ts:242-300"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-05
 ---
 
 # Contrato 36 — Compras: produto obrigatório no item e comprador da OC vindo do Omie
+
+> **Onde atua:** av-hub: banco, API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)

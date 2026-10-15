@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-api, compras, dashboards]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:810"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-30
 ---
 
 # Contrato 31 — Compras: dashboard com valores (gasto, fornecedores, recebimento, atrasos)
+
+> **Onde atua:** av-hub: API
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)

@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, seguranca, armazenamento, upload]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: aplicado-em-producao
+sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["v1 09-Contratos/Realizados/03-.../44-Upload-de-Fotos-Politica-de-Bucket.md"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-07
 ---
 
 # Contrato 44 — Upload de fotos: política no bucket (reforço da GAMBIARRA S10)
+
+> **Onde atua:** av-hub: banco
 
 > [!info] Situação em 14/10/2026
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

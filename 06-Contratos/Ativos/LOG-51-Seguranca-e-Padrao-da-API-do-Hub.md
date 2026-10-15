@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-api, contrato-sql, seguranca, api-aco
 criado: 2026-10-15
 atualizado: 2026-10-15
 status: proposta
+sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo (DBA)"
 etapa_0b: []
 fontes: ["api-acos-vital 276dab8 (app.js, middlewares/apiKeyAuth.js, middlewares/identidadeUsuario.js, utils/acessoConfig.js, utils/azureIdToken.js, utils/crudFactory.js, schemas/auth/**, schemas/core_organograma/tables/node/node.route.js)", "Dump Avhub (Esqueleto).sql:19-23, :519, :2498, :10198-10214, :12465, :12483, :13650", "auditoria de segurança de 15/10/2026 (leitura de código, sem teste dinâmico)"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-15
 ---
 
 # Contrato 51 — Segurança e padrão da API do av-hub (`api-acos-vital`)
+
+> **Onde atua:** av-hub: banco, API, front
 
 > [!info] Situação em 15/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (transversal, fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)

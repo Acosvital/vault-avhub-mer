@@ -5,6 +5,7 @@ tags: [contrato, contrato-logica, contrato-sql, contrato-api, compras, ccp]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo (DBA)"
 etapa_0b: [C5]
 fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra_acompanhamento/ordens_compra_acompanhamento.route.js:298,393,404,505,562,586", "Dump Avhub (Esqueleto).sql (ordens_compra_acompanhamento, ordens_compra_ocorrencias)"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-30
 ---
 
 # Contrato 32 — Compras: acompanhamento da OC pelo CCP (confirmação, prazo, despacho, renegociação)
+
+> **Onde atua:** av-hub: banco, API, front
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C5 · **Dono:** Gustavo (DBA)

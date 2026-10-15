@@ -5,6 +5,7 @@ tags: [contrato, contrato-sql, dba, omie-elt-pipeline, compras]
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: aplicado-em-producao
+sistemas: [hub-banco, pipeline-omie]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4]
 fontes: ["Dump Avhub (Esqueleto).sql (core_vendas_faturamento.pedidos_compras)", "omie-elt-pipeline/src/omie/resources/pedidosCompras.ts"]
@@ -12,6 +13,8 @@ criado_original: 2026-09-17
 ---
 
 # Contrato SQL 004 (antes 009 no omie-elt-pipeline) — `core_vendas_faturamento.pedidos_compras` + itens
+
+> **Onde atua:** av-hub: banco · pipeline Omie
 
 > [!info] Situação em 14/10/2026
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)

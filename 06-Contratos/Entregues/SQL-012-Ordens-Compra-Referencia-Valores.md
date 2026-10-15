@@ -5,6 +5,7 @@ tags: [contrato, contrato-sql, dba, integracao-av-hub-mes, compras, custo, api00
 criado: 2026-10-14
 atualizado: 2026-10-14
 status: implementado-no-codigo
+sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: [R0, R4]
 fontes: ["Dump Avhub (Esqueleto).sql:20237-20330", "api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_ordens_compra_referencia_mes/vw_ordens_compra_referencia_mes.route.js:51-53"]
@@ -12,6 +13,8 @@ criado_original: 2026-10-09
 ---
 
 # Contrato SQL 012 — valores da OC na `vw_ordens_compra_referencia_mes` e na marca `alterado_em`
+
+> **Onde atua:** av-hub: banco
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** R0, R4 · **Dono:** Gustavo (DBA)
