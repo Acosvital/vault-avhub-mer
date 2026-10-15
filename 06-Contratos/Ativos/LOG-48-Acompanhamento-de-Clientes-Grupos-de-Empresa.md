@@ -22,7 +22,7 @@ criado_original: 2026-10-13
 > - Fora do fluxo de Atividades (anexo `10-Anexo-Fora-do-Fluxo`, Acompanhamento-Clientes). Front v2 (páginas por cliente e por grupo) no HUB: ❓ não conferido.
 
 > [!success] Conferido na `api-test` em 15/10/2026 (só GET)
-> O DBA entregou o que estava aberto: **§9.1** a NF cancelada saiu dos totais, **§9.2** `codigo_cliente` filtra a lista, **§10** venda e faturamento com deduções, **§12** base de clientes e status `sem_compra`. Números em §12.7. **Produção não conferida.** O front (av-hub, develop `b55ac55`) já lê tudo isso; falta tirar as marcas `GAMBIARRA` da página do cliente (§9.1 e §9.2, abaixo, em §12.7). Excel da tela: §13.
+> O DBA entregou o que estava aberto: **§9.1** a NF cancelada saiu dos totais, **§9.2** `codigo_cliente` filtra a lista, **§10** venda e faturamento com deduções, **§12** base de clientes e status `sem_compra`. Números em §12.7. **Produção não conferida.** O front (av-hub) já lê tudo isso e as marcas `GAMBIARRA` da página do cliente (§9.1 e §9.2) saíram em 15/10 (§12.7). Excel da tela: §13.
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
@@ -364,7 +364,7 @@ Revisão do av-hub em 14/10 contra a API (`origin/develop`, 63871f3). O front fo
 | §9.1 NF cancelada | ONESUBSEA 09/2026: `/movimento` → `totais.qtd_nfs = 5`, `valor_nfs = 412.035,99`; a lista continua com as 7 notas e o `totais` ganhou `qtd_nfs_fora_do_total = 2` (R$ 898.981,06) |
 | §9.2 `codigo_cliente` | `GET /acompanhamento_clientes?...&codigo_cliente=11797642613` devolve `total = 1` |
 
-**Resta no front** (av-hub): a página do cliente ainda busca por `busca=` e avisa "NF cancelada somada" (`AcompanhamentoDetalhe.tsx`, duas marcas `GAMBIARRA` de §9.1 e §9.2). Já podem sair.
+**Front (av-hub, 15/10):** as duas marcas `GAMBIARRA` da página do cliente saíram. A página busca o cliente com `codigo_cliente` (§9.2) e o aviso das notas canceladas usa `totais.qtd_nfs_fora_do_total` e `valor_nfs_fora_do_total` da API (§9.1), sem contar nada no navegador.
 **Ainda aberto:** §12.3 itens 1 a 9 (ordenação por venda/faturamento líquido, status do grupo, escopo dos números do cliente, `totais.qtd_pedidos` por linha, 409 de grupos…), conferir **produção** e a decisão do escopo de vendedor sem token (§12.3 item 8).
 
 ## 13. Excel da tela (15/10/2026)
