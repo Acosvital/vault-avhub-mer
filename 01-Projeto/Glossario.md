@@ -36,7 +36,7 @@ Termos do projeto em ordem alfabética, com o nome atual primeiro. Nomes de tela
 - **Casamento av-hub e MES** — como o pedido ou a requisição de um sistema encontra o do outro. Decidido por REST com polling (DEC-2); a requisição de compra evoluiu para o PUT do MES (contrato 34). Ver [[Integracao-AvHub-MES]].
 - **CCP** — acompanhamento de prazo de entrega do fornecedor (nó `C5`). No HUB é o Follow-up; no MES, a tela Compras · CCP, só leitura.
 - **Chegada** — registro da doca de que a mercadoria chegou com a NF. A parcial sai de Compras · CCP e vai ao Recebimento. `POST /compras/requisicoes/:id/chegada` exige o número ou a chave da NF ✅ `compras.service.ts:356`.
-- **Ciclo 1 e Ciclo 2** — Ciclo 1 fecha em 24/02/2027 (era 21/01; deslocado pelo N14-30); Ciclo 2 começa em 25/02/2027 e leva transferência entre filiais (etapas 2 a 4), `GET /itens/custo`, sobras e perdas, entre outros 📝. Ver [[Cronograma]].
+- **Ciclo 1 e Ciclo 2** — Ciclo 1 fecha em 18/02/2027 (era 21/01; deslocado pelo N14-30 e abatido pelo K4, N14-32); Ciclo 2 começa em 19/02/2027 e leva transferência entre filiais (etapas 2 a 4), `GET /itens/custo`, sobras e perdas, entre outros 📝. Ver [[Cronograma]].
 - **CIF e FOB** — quem paga e contrata o frete da compra. CIF: o fornecedor entrega direto. FOB: coleta no fornecedor. Definido na emissão da OC (nó `C4`) ✅.
 - **Circuito de compra** — caminho fixo, fora do roteiro do PCP: Estoque, Requisições, Compras, Recebimento, Qualidade de entrada e de volta ao mesmo Estoque. Ver [[04-Circuito-de-Compra]].
 - **Compras · CCP** — ver tabela de telas.

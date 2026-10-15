@@ -80,4 +80,4 @@ Comissões, RH (vagas e funcionários), dashboards, orçamento, pedido manual, a
 
 ## Datas
 
-Ciclo 1 até 24/02/2027 (era 21/01; N14-30); Ciclo 2 a partir de 25/02/2027; marco zero do saldo em 13/11/2026. Plano completo em [[Cronograma]].
+Ciclo 1 até 18/02/2027 (era 21/01; N14-30 e N14-32); Ciclo 2 a partir de 19/02/2027; marco zero do saldo em 13/11/2026. Plano completo em [[Cronograma]].

@@ -35,7 +35,7 @@ Evidência no git (desde 15/09/2026, 14/10): os commits do MES são do Robert (2
 
 ## Capacidade do Robert (risco)
 
-Com G1, D11, I1, J2, J5 e D12 no Robert e o custo do lote (K3 a K6) somado, o plano fecha em **déficit de 16,1 pd** no Ciclo 1 (**32,6 pd desde 15/10**, com o N14-29, e o Nathan aceitou deslocar a data: N14-30) (planejado 64,85 pd contra 48,75 pd de capacidade), sem contar a baixa no despacho do Estoque, que não tem pd dimensionado 🟡 (estimativas minhas, ±30%, o Robert valida). Consequência: o Ciclo 1 só fecha em 21/01/2027 e o Ciclo 2 começa em 22/01/2027 (**desde 15/10, 24/02/2027 e 25/02/2027**, N14-30). Conta em [[Cronograma]]; risco em [[Riscos]].
+Com G1, D11, I1, J2, J5 e D12 no Robert e o custo do lote (K3 a K6) somado, o plano fecha em **déficit de 16,1 pd** no Ciclo 1 (**32,6 pd desde 15/10**, com o N14-29, e o Nathan aceitou deslocar a data: N14-30) (planejado 64,85 pd contra 48,75 pd de capacidade), sem contar a baixa no despacho do Estoque, que não tem pd dimensionado 🟡 (estimativas minhas, ±30%, o Robert valida). Consequência: o Ciclo 1 só fecha em 21/01/2027 e o Ciclo 2 começa em 22/01/2027 (**desde 15/10, 18/02/2027 e 19/02/2027**, N14-30 e N14-32). Conta em [[Cronograma]]; risco em [[Riscos]].
 
 ## Outros atores do processo (perfis de uso, não de desenvolvimento)
 

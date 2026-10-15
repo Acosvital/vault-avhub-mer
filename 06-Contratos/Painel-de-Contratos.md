@@ -17,14 +17,14 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 12 | 0 | 12 |
+| `Ativos` (a fazer ou parcial) | 16 | 0 | 16 |
 | `Entregues` (feito no código ou aplicado) | 53 | 12 | 65 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
-| **Total** | **76** | **12** | **88** |
+| **Total** | **80** | **12** | **92** |
 
 | Status | Contratos |
 |---|---|
-| `proposta` | 3 |
+| `proposta` | 7 |
 | `para-implementar` | 1 |
 | `parcial` | 8 |
 | `implementado-no-codigo` | 44 |
@@ -67,6 +67,10 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | API-007 | Contrato 007 (API) | [[API-007-Referencia-OC-Valores-no-MES\|Valores da OC na referência (hub → MES) e projeção no MES]] | `parcial` | Ativos | C4, R4 | Job de leitura e projeção da OC com valores; gravar `lote_custo` origem OC no Recebimento (R4) | — | — | — |
 | API-008 | Contrato 008 | [[API-008-Custo-do-Lote-no-MES\|Custo do lote no MES (`lote_custo`, G1, recebimento, consumo, `GET /itens/custo`)]] | `parcial` | Ativos | R4, E3, E5 | §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`; modelo do imposto por item para os cenários com e sem imposto (PS-014, BL-053; contrato não editado) | — | — | — |
 | API-009 | Contrato 009 | [[API-009-Referencia-Requisicao-Hub-Integracao-MES\|Referência da requisição do Compras com pedido de venda (av-hub → MES)]] | `proposta` | Ativos | C0, P1, P2, P3, E1 | Job de leitura junto do da referência da OC, projeção, tela do PCP e aviso de compra duplicada (BL-065) | Gustavo: POST/PATCH com pedido de venda e a rota `GET /compras/requisicoes/referencia` (BL-064); responder Q1 a Q4 | Nathan: campo "Pedido de venda" na "Nova requisição" (BL-041); decidir Q5 | — |
+| API-010 | Contrato 010 | [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto\|Requisição do Compras: finalidade, pedido de venda e produto do cadastro]] | `proposta` | Ativos | C0 | — | Gustavo: migration (`finalidade`), POST/PATCH com pedido de venda e produto, trava da OC na mesma unidade; responder Q1 e Q4 | Nathan: tela nova pronta (PR #209); a OC herda a finalidade; decidir Q2 e Q3 | — |
+| API-011 | Contrato 011 | [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno\|Compra em andamento, recebimento por item da OC e uso interno (MES)]] | `proposta` | Ativos | P1, P2, P3, E1, R0, R1, R4 | Cruzamento e abate, aviso ao requisitar, requisição interna "origem hub", saldo futuro, recebimento por item da OC e por NF, uso interno (BL-049, BL-050, BL-051, BL-065) | Gustavo: API-009 e API-010 | Nathan: Q3 (contabilidade e EPI) e Q5 (BL-049 e BL-050 no Ciclo 1) | — |
+| LOG-53 | Contrato 53 | [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado\|Ordem de Produção e lote do fabricado (MES)]] | `proposta` | Ativos | P2, F1, Q7, Q8, E5 | Entidade e PDF da OP, lote `PRODUCAO` por OP e produto, aprovado volta ao Estoque (BL-052, BL-008) | — | Nathan: Q4 (HRM) e conteúdo do PDF | — |
+| LOG-54 | Contrato 54 | [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada\|Documento de retirada e baixa do saldo na retirada (MES)]] | `proposta` | Ativos | E6, X1, F1 | Modelo, rotas, telas e baixa na confirmação; tirar a baixa da Embalagem e da entrega (BL-007) | — | Nathan: Q1 e Q2 (quem gera, o que imprime, reserva) e Q3 (entra no Ciclo 1?) | — |
 | LOG-01 | Contrato 01 | [[LOG-01-Compras-Fluxo-Completo\|Compras: requisição, ordem de compra e sincronização com o Omie]] | `implementado-no-codigo` | Entregues | C0, C1, C4 | — | — | — | — |
 | LOG-02 | Contrato 02 | [[LOG-02-Funcionarios-Listagem-Filtros-Ordenacao-Resumo\|Funcionários: filtro, ordenação, paginação e resumo no servidor]] | `implementado-no-codigo` | Entregues | — | — | — | — | — |
 | LOG-03 | Contrato 03 | [[LOG-03-Funcionarios-Cadastro-Organograma-Transacional\|Funcionários: salvar e excluir com o organograma numa operação]] | `implementado-no-codigo` | Entregues | — | — | — | — | — |
@@ -152,6 +156,9 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Robert (MES: `api-pcp` e `app-pcp`)
 
+- [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno|API-011]]: cruzamento e abate, aviso ao requisitar, requisição interna "origem hub", saldo futuro, recebimento por item da OC e por NF, uso interno
+- [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado|LOG-53]]: entidade e PDF da OP, lote `PRODUCAO` por OP e produto, aprovado volta ao Estoque
+- [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada|LOG-54]]: documento de retirada e baixa na retirada (tirar a baixa da Embalagem e da entrega)
 - [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: job e projeção da requisição do Compras com pedido de venda, tela do PCP e aviso de compra duplicada (BL-065)
 - [[API-004-Referencia-OC-Integracao-MES|API-004]]: Job de leitura a cada 5 min, projeção da OC e `id_origem` por item; OC do pedido para o PCP e saldo futuro do Estoque (N14-20, BL-049, BL-050); entrada no Recebimento da OC sem requisição do MES (BL-051)
 - [[API-007-Referencia-OC-Valores-no-MES|API-007]]: Job de leitura e projeção da OC com valores; gravar `lote_custo` origem OC no Recebimento (R4)
@@ -162,6 +169,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Gustavo (DBA: banco e API do av-hub)
 
+- [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Gustavo: migration `finalidade`, POST/PATCH com pedido de venda e produto do cadastro, trava da OC na mesma unidade; responder Q1 e Q4 (junto do API-009, BL-064)
 - [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Gustavo: pedido de venda no POST/PATCH da requisição e `GET /compras/requisicoes/referencia` (BL-064); responder Q1 a Q4
 - [[SQL-005-Locais-Estoque|SQL-005]]: Gustavo: responder a pergunta da FK opcional
 - [[SQL-009-Categoria-Sem-Escopo-Empresa-Views|SQL-009]]: Gustavo: esclarecer 53 x 311 linhas do pedido 25970
@@ -176,6 +184,9 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Nathan (front do av-hub)
 
+- [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Nathan: tela nova pronta (PR #209); a OC herda a finalidade da requisição; decidir Q2 e Q3
+- [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno|API-011]]: Nathan: contabilidade do uso interno e EPI (Q3); BL-049 e BL-050 no Ciclo 1 (Q5)
+- [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada|LOG-54]]: Nathan: quem gera o documento, o que imprime, reserva depois da retirada (Q1, Q2) e se entra no Ciclo 1 (Q3)
 - [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Nathan: campo "Pedido de venda" na "Nova requisição" (BL-041); decidir Q5 (avisa ou bloqueia)
 - [[LOG-04b-Pedidos-Notas-Dashboards-Agregacao-no-Banco|LOG-04b]]: Nathan: P6 no front (ver LOG-43)
 - [[LOG-05-Permissoes-e-Escopo-no-Banco|LOG-05]]: Nathan: marcas S3 no front (LOG-50)
