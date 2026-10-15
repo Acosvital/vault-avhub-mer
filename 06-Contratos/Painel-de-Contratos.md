@@ -17,10 +17,10 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 16 | 0 | 16 |
+| `Ativos` (a fazer ou parcial) | 16 | 6 | 22 |
 | `Entregues` (feito no código ou aplicado) | 53 | 12 | 65 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
-| **Total** | **80** | **12** | **92** |
+| **Total** | **80** | **18** | **98** |
 
 | Status | Contratos |
 |---|---|
