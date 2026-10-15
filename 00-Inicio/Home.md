@@ -21,7 +21,7 @@ Este vault é o manual para desenvolver o fluxo de **Atividades** do ERP Aços V
 | `03-Sistemas` | [[AV-Hub-Front]] · [[AV-Hub-API]] · [[API-Comercial]] · [[MES-Backend]] · [[MES-Front]] · [[Pipeline-Omie]] · [[RBAC-e-Permissoes]] · [[Bugs-Conhecidos]] |
 | `04-Dados` | [[Banco-AvHub]] · [[Banco-MES]] · [[Modelo-Estoque-e-Custo-do-Lote]] · [[Schemas-Postgres]] · [[Diferencas-Codigo-x-Banco]] |
 | `05-Integracoes` | [[Integracao-AvHub-MES]] · [[Chaves-e-Autenticacao]] · [[Omie-Integracao-Estado]] · [[Colunas-Protegidas]] · [[Rastreabilidade-e-Torre-de-Fluxo]] |
-| `06-Contratos` | [[Painel-de-Contratos]] (todos os contratos, texto integral) |
+| `06-Contratos` | [[Painel-de-Contratos]] (todos os contratos, texto integral) · Consultas: [[Modelo-de-Consulta]] |
 | `07-Desenvolvimento` | [[Backlog-por-Frente]] · [[Pontas-Soltas]] · [[Contradicoes-Resolvidas]] · [[Riscos]] |
 | `08-Decisoes` | [[Registro-de-Decisoes]] |
 | `09-Diagramas` | [[Indice-de-Diagramas]] · [[Classes]] · [[Estados]] · [[Casos-de-Uso]] · [[Sequencia]] · [[Componentes-e-Implantacao]] · [[Modelo-de-Dados]] |

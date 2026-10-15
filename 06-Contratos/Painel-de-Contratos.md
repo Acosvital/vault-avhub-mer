@@ -33,6 +33,15 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 Vocabulário de status: `proposta` (ainda sem decisão), `para-implementar` (decidido, falta código), `parcial` (parte no código, parte não), `implementado-no-codigo` (conferido no código de 14/10), `aplicado-em-producao` (aplicado no banco, confirmado por dump; produção não reconferida em 14/10 ❓), `arquivado` (superado, rejeitado, fora de escopo ou histórico, com o motivo na nota).
 
+## Consultas abertas (tipo `CON`)
+
+Contrato que pede uma resposta de negócio a quem conhece o assunto, com contexto, cenário e perguntas; a resposta volta pelo WhatsApp do Nathan. Modelo em [[Modelo-de-Consulta]].
+
+| ID | Assunto | Para quem | Prazo | Status | Bloqueia |
+|---|---|---|---|---|---|
+| [[CON-01-Relatorios-Valores-e-Faturamento-Itens-28-e-29\|CON-01]] | Relatórios de valores por vendedor e de faturamento mensal (itens 28 e 29 do PCP legado) | quem gera e quem lê os relatórios | 20/10/2026 | aguardando-resposta | itens 28 e 29, sem dono e sem data |
+| [[CON-02-Rastreabilidade-e-Book-Itens-18-e-20\|CON-02]] | Rastreabilidade por material e ciclo do Book (Caldeiraria HRM, itens 18 e 20) | Qualidade da HRM, quem acompanha o Book, Robert | 20/10/2026 | aguardando-resposta | PS-027, marco M10 |
+
 ## Todos os contratos
 
 | ID | Alias | Contrato | Status | Pasta | Nós do 0b | Robert (MES) | Gustavo (DBA) | Nathan (front) | Pablo (Comercial) |

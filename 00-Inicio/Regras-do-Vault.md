@@ -60,7 +60,8 @@ fontes: [notas do v1, arquivo:linha, commits]
 ## Contratos
 
 - IDs únicos: `SQL-007`, `API-004`, `LOG-34`. O número original é preservado; duplicados ganham letra (`LOG-04a`, `LOG-04b`).
-- Pastas: `Ativos/` (a fazer ou parcial), `Entregues/` (feito no código ou aplicado), `Arquivados/` (superado, fora de escopo ou histórico).
+- Pastas: `Ativos/` (a fazer ou parcial), `Entregues/` (feito no código ou aplicado), `Arquivados/` (superado, fora de escopo ou histórico) e `Consultas/`.
+- **Contrato de Consulta (`CON-NN`):** tipo que pede uma **resposta**, não uma mudança. Dá contexto e um cenário, faz perguntas numeradas a quem conhece o assunto e traz uma mensagem pronta para o WhatsApp; as respostas voltam pelo WhatsApp do Nathan e são registradas na própria nota. Modelo e regras em [[Modelo-de-Consulta]].
 - O texto do contrato é copiado inteiro. Só o frontmatter e um bloco "Situação em 14/10" no topo são acrescentados.
 - Todo contrato novo ou seção nova entra **completo** em `06-Contratos/` e no [[Painel-de-Contratos]].
 - Vocabulário de status: `proposta`, `para-implementar`, `parcial`, `implementado-no-codigo`, `aplicado-em-producao`, `arquivado`.

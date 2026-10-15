@@ -34,6 +34,7 @@ Lista única de decisões do projeto: **N14-01 a N14-09** (14/10), **DEC-1 a DEC
 | N14-16 | **Implantação:** pipeline e demais aplicações rodam na VPS1, em contêiner Docker junto do Coolify. A `api-pcp` já está no ar e os contêineres do av-hub em produção estão saudáveis | 14/10/2026 | Nathan | 📝 | |
 | N14-17 | **Backup** dos bancos do MES e do av-hub: adiado, "papo para outra hora", sem data | 14/10/2026 | Nathan | 🟡 | |
 | N14-18 | **Merge `develop` → `main`:** pode ser feito a qualquer momento; tudo o que está na `develop` foi testado e funciona. Em 14/10 a `develop` está à frente em 13 commits (`api-pcp`), 10 (`app-pcp`), 11 (`api-acos-vital`) e 284 (HUB) | 14/10/2026 | Nathan | 📝 | |
+| N14-19 | **Novo tipo de contrato, a Consulta (`CON-NN`):** pede uma resposta de negócio, com contexto, cenário e perguntas por pessoa; a resposta volta pelo WhatsApp do Nathan. Primeiras: CON-01 (itens 28 e 29) e CON-02 (itens 18 e 20) | 14/10/2026 | Nathan | 📝 | |
 | N14-09 | **Divisão de trabalho:** Gustavo (DBA) faz banco e API do av-hub; o front do av-hub é do Nathan; o MES é do Robert; Pablo faz Comercial & Suprimentos | 14/10/2026 | Nathan | 📝 | |
 
 ## DEC-1 a DEC-12 (decisões com prazo, de 21 e 22/09/2026)
