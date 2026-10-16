@@ -20,8 +20,8 @@ criado_original: 2026-10-07
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
 > - ✅ A API aplica o escopo de vendedores pelo token (`api-acos-vital/src/middlewares/escopoVendedor.js:165`, `aplicarEscopoVendedor`) e a identidade do usuário (`identidadeUsuario.js`). Fecha as marcas S1, S2 e S3 do lado da API.
-> - 🟡 Nenhum teste da seção 5 foi rodado com usuário vendedor (vault v1).
-> - 🔴 Restam 2 marcas no front: [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]] (Nathan); a API já devolve os vínculos completos em `GET /me/permissoes` ([[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos]]).
+> - 🟡 Testes da seção 5 rodados em 15/10 só para vendedor, diligenciador PCP e Gerência PCP (resultado no LOG-50); faltam gerente de equipe, auxiliar e vendedor sem vínculo.
+> - ✅ As marcas do front saíram ([[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]], 15/10); a API devolve os vínculos completos em `GET /me/permissoes` ([[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos]]). Testado na `api-test` com vendedor, diligenciador PCP e Gerência PCP (15/10).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.

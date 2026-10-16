@@ -3,8 +3,8 @@ id: LOG-50
 aliases: ["Contrato 50", "50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front"]
 tags: [contrato, contrato-logica, av-hub, bff, escopo, front]
 criado: 2026-10-14
-atualizado: 2026-10-14
-status: para-implementar
+atualizado: 2026-10-15
+status: implementado-no-codigo
 sistemas: [hub-front]
 dono: "Nathan"
 etapa_0b: []
@@ -16,15 +16,21 @@ criado_original: 2026-10-13
 
 > **Onde atua:** av-hub: front
 
-> [!info] Situação em 14/10/2026
-> **Status:** `para-implementar` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Nathan
+> [!info] Situação em 15/10/2026
+> **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Nathan
 >
-> - ✅ **Pré-requisito da API pronto:** `GET /me/permissoes` já traz `nome_exibicao`, `ativo` e `origem` nos vínculos ([[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos]]) e a API aplica o escopo pelo token ([[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]]).
-> - ✅ **Marcas A (`pedidosVenda.ts`) e B (`portalPcp.ts`) removidas em 15/10/2026** (HUB, branch `feat/bl043-bl022-bl023-bl042`, `484dea6`, ainda sem PR): o BFF lê só `GET /me/permissoes` (`lib/api/escopoSessao.ts`); `resolverVendedoresSessao` e `resolverEscopoPcp` passam a usar essa chamada; `pedidoNoEscopo` e a validação do foco saíram; detalhe, etapas, itens e status-historico repassam o 403 da API. A marca C foi reclassificada em 13/10.
-> - 🟡 **Desvio do §3.2:** em Meus Pedidos, perfil `todos` continua mandando os vínculos próprios (a API não filtra `todos`, e a tela mostraria a empresa inteira). Sem vínculo em detalhe, etapas e itens agora é 403 (era 404). `minhas-notas`, `meus-pedidos/resumo` e `notas-fiscais` seguem mandando `codigo_vendedor` por vínculo, só que lido de `/me/permissoes`.
-> - ❓ **Falta:** os testes de aceite 1 a 10 da §6 na `api-test` (nada foi testado com usuário real); teste 7 (sem token → 401) já é garantido por `requirePermission`.
+> - ✅ **Pré-requisito da API pronto:** `GET /me/permissoes` traz `nome_exibicao`, `ativo` e `origem` nos vínculos ([[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos]]) e a API aplica o escopo pelo token ([[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]]).
+> - ✅ **Marcas A (`pedidosVenda.ts`) e B (`portalPcp.ts`) removidas** (HUB, `484dea6`, na `develop` pela PR #208): o BFF lê só `GET /me/permissoes` (`lib/api/escopoSessao.ts`); `resolverEscopo` e `resolverEscopoPcp` usam essa chamada; `pedidoNoEscopo`, `resolverVendedoresDiligenciador` e a checagem por nome de perfil saíram; detalhe, etapas, itens e status-historico repassam o 403 da API. A marca C foi reclassificada em 13/10. Não resta `GAMBIARRA(` de escopo de vendedores no front. `resolverPedidoDoEscopoPcp` continua só para ler o `codigo_empresa` que o POST de observação exige; quem confere o dono é a API.
+> - 🟡 **Desvio do §3.2:** em Meus Pedidos, perfil `todos` continua mandando os vínculos próprios (a API não filtra `todos`, e a tela mostraria a empresa inteira). Sem vínculo em detalhe, etapas e itens é 403 (era 404).
+> - ✅ **Testado na `api-test` em 15/10/2026, com usuário real** (só leitura, HUB local na `develop` + `484dea6`):
+>   - **Vendedor** (Joares Alves): Meus Pedidos traz 34 pedidos, todos do código dele e com `proprio: true`; pedido de outro vendedor dá 403 `PEDIDO_FORA_DO_ESCOPO` no detalhe e no status-histórico (etapas e itens também dão 403, com o código errado, ver abaixo); `?vendedor=` alheio é ignorado na fonte `vendedor`; fontes `equipe` e `pcp` dão 403 "Acesso negado"; a tela de pedido alheio mostra "Pedido não encontrado" (Q3 respondida: serve).
+>   - **Diligenciador PCP** (`pcp04`): lista e dashboard só com os 34 pedidos do vendedor vinculado; foco em vendedor de fora dá 403 `VENDEDOR_FORA_DO_ESCOPO` (lista, resumo, dashboard, notas); detalhe e status-histórico de pedido alheio dão 403 `PEDIDO_FORA_DO_ESCOPO`; POST de observação em pedido alheio dá 404 e não grava. O "focar" lista só os vendedores ativos (2 de 4 vínculos); o histórico dos inativos continua visível, de propósito.
+>   - **Gerência PCP** (`danilo.silva`): `todos: true`, 88 vendedores no catálogo, 339 pedidos de 41 vendedores e 3 unidades; foco, detalhe, histórico e notas de qualquer vendedor abrem; fontes `equipe` e `vendedor` dão 403.
+>   - **Sem sessão** (teste 7, parcial): as 8 rotas de pedidos, notas e PCP redirecionam ao login (307), sem dado. Sessão com cookie mas sem `backendToken` não foi reproduzida (o cookie é httpOnly).
+> - ❓ **Não testados** (faltou conta): gerente de equipe (6), auxiliar de titular com `proprio: false` (2), vendedor sem vínculo (3), token expirado no meio da sessão (8) e a contagem de chamadas por carga do PCP (10).
+> - 🟡 **Achados para o Gustavo (API, sem risco de vazamento, só o código e a mensagem):** `GET /itens_pedido_status` e `GET /pedido_venda_itens/{numero}` respondem 403 `SEM_VENDEDOR_VINCULADO` ("Usuário sem vendedor vinculado") para pedido de outro vendedor, mesmo com vínculo; o certo seria `PEDIDO_FORA_DO_ESCOPO`, como no detalhe. Além disso, o resumo de notas do PCP com foco alheio (`/api/pcp/notas/resumo`) devolve 200 vazio em vez de 403 (talvez só o nome do parâmetro nessa rota; não confirmado).
 >
-> Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
+> Conferido em 15/10/2026 no código do HUB (`develop`) e contra a `api-test`.
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
 
@@ -118,4 +124,4 @@ Quem deixa de filtrar no BFF passa a depender 100% do token. O `backendToken` du
 
 Ver também: [[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend|40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] (§9, efeito nas marcas), [[HIST-Indice-Logica-Fora-do-Backend|Indice-Logica-Fora-do-Backend]].
 
-[^c1]: Nota de 14/10/2026: Status vigente: `para-implementar` (a API já entrega o que o front precisa).
+[^c1]: Nota de 15/10/2026: Status vigente: `implementado-no-codigo` (marcas A e B removidas; testes de aceite 1, 4, 5 e 7 feitos na `api-test`).

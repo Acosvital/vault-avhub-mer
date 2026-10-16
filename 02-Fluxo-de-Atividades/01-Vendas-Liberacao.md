@@ -169,7 +169,7 @@ Escopo (contrato 40, ✅ fixo na API): vale quando o usuário entrou por tela co
 | 8 | **Estados macro do vendedor** (os 8 do desenho): decidir se entram ou se o vendedor fica com `status_liberacao` mais 11 etapas; se entrarem, depende do feed do MES (`estado_macro`) | Nathan decide, Robert (feed) | V1 a O2 | 🔴 |
 | 9 | **Cartão Etapa dos itens:** teste ponta a ponta com a migration `api005` aplicada; `quantidade_na_etapa` tipado como número e a API pode mandar `null`; sem linha do tempo, SLA nem filtro por etapa; `compras.fechamento` ainda aparece como "Em compra" (sem cotação, aprovação ou trânsito) | Nathan (front), Gustavo (migration), Robert (etapa de compra mais fina) | V1 | 🔴 |
 | 10 | **Migration `api005`** (função, tabela e mapa de rotas do status por item) não verificada no banco; DDL não versionado | Gustavo | V1 | ❓ |
-| 11 | Remover as marcas `GAMBIARRA(` de escopo que restam no front (`lib/api/pedidosVenda.ts:15`, `lib/api/portalPcp.ts:51`) depois do item 4: contrato [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]] | Nathan | V2 | 🔴 |
+| 11 | ✅ Marcas `GAMBIARRA(` de escopo removidas do front (`lib/api/pedidosVenda.ts`, `lib/api/portalPcp.ts`; `484dea6`, 15/10): contrato [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]] | Nathan | V2 | ✅ |
 | 12 | **Valor da data de corte em produção** e documentar | Nathan e Gustavo | V1 | ❓ |
 | 13 | Pedido manual: o desenho só prevê pedido que chega do Omie; o risco do `exclusionSync` apagar pedido manual está em [[Riscos]] | Gustavo | V1 | 🔴 |
 
