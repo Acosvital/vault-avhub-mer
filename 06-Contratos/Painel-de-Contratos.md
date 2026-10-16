@@ -17,17 +17,17 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 16 | 6 | 22 |
-| `Entregues` (feito no código ou aplicado) | 53 | 12 | 65 |
+| `Ativos` (a fazer ou parcial) | 15 | 6 | 21 |
+| `Entregues` (feito no código ou aplicado) | 54 | 12 | 66 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
 | **Total** | **80** | **18** | **98** |
 
 | Status | Contratos |
 |---|---|
 | `proposta` | 7 |
-| `para-implementar` | 1 |
+| `para-implementar` | 0 |
 | `parcial` | 8 |
-| `implementado-no-codigo` | 44 |
+| `implementado-no-codigo` | 45 |
 | `aplicado-em-producao` | 9 |
 | `arquivado` | 11 |
 
@@ -78,7 +78,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | LOG-03 | Contrato 03 | [[LOG-03-Funcionarios-Cadastro-Organograma-Transacional\|Funcionários: salvar e excluir com o organograma numa operação]] | `implementado-no-codigo` | av-hub: banco, API | Entregues | — | — | — | — | — |
 | LOG-04a | Contrato 04 (vagas) | [[LOG-04a-Vagas-Fila-Decisao-no-Banco\|Vagas: fila, decisão e permissões no banco]] | `implementado-no-codigo` | av-hub: banco | Entregues | — | — | — | — | — |
 | LOG-04b | Contrato 05; 05 P6/P8 | [[LOG-04b-Pedidos-Notas-Dashboards-Agregacao-no-Banco\|Pedidos, notas e dashboards: agregação no banco]] | `implementado-no-codigo` | av-hub: banco, API | Entregues | — | — | — | Nathan: P6 no front (ver LOG-43) | — |
-| LOG-05 | Contrato 05 (permissões) | [[LOG-05-Permissoes-e-Escopo-no-Banco\|Permissão, escopo e identidade aplicados no banco/backend]] | `implementado-no-codigo` | av-hub: banco | Entregues | — | — | — | Nathan: marcas S3 no front (LOG-50) | — |
+| LOG-05 | Contrato 05 (permissões) | [[LOG-05-Permissoes-e-Escopo-no-Banco\|Permissão, escopo e identidade aplicados no banco/backend]] | `implementado-no-codigo` | av-hub: banco | Entregues | — | — | — | — | — |
 | LOG-06 | Contrato 06 | [[LOG-06-Ordenacao-Listagens\|Ordenação (`sort`/`order`) nas listagens]] | `implementado-no-codigo` | av-hub: API | Entregues | — | — | — | — | — |
 | LOG-07a | — | [[LOG-07a-Dados-Orcamento-e-Coordenadores-no-Banco\|Orçamento e coordenadores no banco (v1, superado pelo LOG-42)]] | `arquivado` | av-hub: banco, API | Arquivados | — | — | — | — | — |
 | LOG-07b | Contrato 07 (blacklist) | [[LOG-07b-Chave-Composta-Blacklist-Pedidos\|`blacklist_pedidos`: chave composta (número + empresa)]] | `implementado-no-codigo` | av-hub: API | Entregues | — | — | — | — | — |
@@ -112,7 +112,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | LOG-37 | Contrato 37 | [[LOG-37-Dashboard-Mensal-Variacao\|`variacao_pct` nas rotas `/dashboard_mensal_*`]] | `implementado-no-codigo` | av-hub: API | Entregues | — | — | — | — | — |
 | LOG-38 | Contrato 38 | [[LOG-38-Regras-Sem-Chave-de-Ambiente\|Regras decididas sem chave de ambiente]] | `implementado-no-codigo` | av-hub: API | Entregues | — | — | — | — | — |
 | LOG-39 | Contrato 39 | [[LOG-39-Vendedores-Fila-de-Vinculo\|Vendedores: fila de vínculo com o funcionário]] | `implementado-no-codigo` | av-hub: API | Entregues | — | — | — | — | — |
-| LOG-40 | Contrato 40 | [[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend\|Escopo de vendedores e permissões pelo token, no backend]] | `implementado-no-codigo` | av-hub: API | Entregues | — | — | — | Nathan: LOG-50 (marcas A e B no front) | — |
+| LOG-40 | Contrato 40 | [[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend\|Escopo de vendedores e permissões pelo token, no backend]] | `implementado-no-codigo` | av-hub: API | Entregues | — | — | — | — | — |
 | LOG-41 | Contrato 41 | [[LOG-41-Login-Rate-Limit-no-Backend\|Login: rate limit no backend]] | `implementado-no-codigo` | av-hub: API | Entregues | — | — | — | Nathan: confirmar a remoção do limitador do front (HUB) | — |
 | LOG-42 | Contrato 42 | [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio\|Coordenadores e Orçamento: sair do JSON do repositório]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | Gustavo: responder as perguntas do §10 | Nathan: §6 coordenadores no front e decidir corte do orçamento | Pablo: módulo Comercial & Suprimentos substitui o orçamento |
 | LOG-43 | Contrato 43; Contrato 05 (P6) | [[LOG-43-Ordem-das-Etapas-de-Faturamento-no-Cadastro\|Ordem das etapas de faturamento vem do cadastro (marca P6)]] | `parcial` | av-hub: banco, API, front · pipeline Omie | Ativos | — | — | Gustavo: protectedColumns no pipeline, conferir seed e versionar a view | Nathan: apagar a constante do front (passo 3.4) | — |
@@ -121,8 +121,8 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | LOG-46 | Contrato 46 | [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas\|Torre de Fluxo: feed do MES, jobs de projeção e telas (I5 e I6)]] | `parcial` | av-hub: banco, API, front · MES: API | Ativos | F1, X1, Q7 | I2/I3: publicar `GET /fluxo/eventos` e instrumentar os eventos no MES | Gustavo: responder as perguntas em aberto do §12 | Nathan: BFF `/api/fluxo/*` e 4 telas | — |
 | LOG-47 | Contrato 47 | [[LOG-47-Custo-Real-por-Item-no-Hub\|Custo real por item no hub (simulador, comissão, Compras e Orçamento)]] | `parcial` | av-hub: banco, API, front · MES: API | Ativos | E3, R4 | Publicar `GET /itens/custo` (API-008 §5) | Gustavo: perguntas em aberto 🔴 | Nathan: §2 simulador, §3 comissão, §4 telas | Pablo: dono do Ciclo 2 de Comercial & Suprimentos |
 | LOG-48 | Contrato 48 | [[LOG-48-Acompanhamento-de-Clientes-Grupos-de-Empresa\|Acompanhamento de clientes e grupos de empresa]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | Gustavo: §9.1 NF cancelada, §9.2 `codigo_cliente`, §10 deduções, §12 definição de cliente | Nathan: marcas `GAMBIARRA` do detalhe e §12.5 na tela | — |
-| LOG-49 | Contrato 49 | [[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos\|`GET /me/permissoes` com os vínculos de vendedor completos]] | `implementado-no-codigo` | av-hub: banco, API | Entregues | — | — | — | Nathan: LOG-50 | — |
-| LOG-50 | Contrato 50 | [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front\|Tirar as 2 marcas de escopo de vendedores do front]] | `para-implementar` | av-hub: front | Ativos | — | — | — | Nathan: marcas A e B no BFF | — |
+| LOG-49 | Contrato 49 | [[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos\|`GET /me/permissoes` com os vínculos de vendedor completos]] | `implementado-no-codigo` | av-hub: banco, API | Entregues | — | — | — | — | — |
+| LOG-50 | Contrato 50 | [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front\|Tirar as 2 marcas de escopo de vendedores do front]] | `implementado-no-codigo` | av-hub: front | Entregues | — | — | Gustavo: `SEM_VENDEDOR_VINCULADO` no lugar de `PEDIDO_FORA_DO_ESCOPO` em etapas e itens | Nathan: testes de aceite 2, 3, 6 e 8 a 10 (faltou conta) | — |
 | LOG-51 | Contrato 51 | [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub\|Segurança e padrão da API do av-hub (auditoria de 15/10): chave de serviço, Azure, senha, erro, helmet, roles, auditoria, testes]] | `proposta` | av-hub: banco, API, front | Ativos | — | — | Gustavo: S1 a S8 na fase 1 (chave de serviço, Azure, senha, mass assignment, rate limit, erro, helmet, role do banco), S9 a S27 depois | Nathan: H1, H3 a H6 feitos (PR #206); resta H2 (`fetchMenu`, com a API) e H7 (manual), BL-058 | — |
 | LOG-52 | Contrato 52 | [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub\|Migrar o módulo Comercial & Suprimentos para a API do hub e aposentar a `api-comercial`]] | `proposta` | av-hub: banco, API, front | Ativos | — | — | Gustavo: schema `core_comercial`, DDL, `GRANT`, linhas de `auth.rotas_telas`, revisão; Q1 (pedidos de compra na pipeline) e Q2 (telas em produção) | Nathan: corte do HUB (BL-063) e decisões Q3, Q4, Q7, Q8, Q10 | Pablo: escrever o módulo na `api-acos-vital` (BL-062) |
 | HIST-Analise-Contratos-vs-Hub-2026-10-01 | — | [[HIST-Analise-Contratos-vs-Hub-2026-10-01\|Análise de contratos x hub (retrato de 01/10)]] | `arquivado` | — | Arquivados | — | — | — | — | — |
@@ -173,6 +173,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 - [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Gustavo: migration `finalidade`, POST/PATCH com pedido de venda e produto do cadastro, trava da OC na mesma unidade; responder Q1 e Q4 (junto do API-009, BL-064)
 - [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Gustavo: pedido de venda no POST/PATCH da requisição e `GET /compras/requisicoes/referencia` (BL-064); responder Q1 a Q4
+- [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front|LOG-50]]: Gustavo: `GET /itens_pedido_status` e `GET /pedido_venda_itens/{numero}` respondem `SEM_VENDEDOR_VINCULADO` (e não `PEDIDO_FORA_DO_ESCOPO`) para pedido de outro vendedor; conferir o `notas/resumo` do PCP com foco alheio (200 vazio)
 - [[SQL-005-Locais-Estoque|SQL-005]]: Gustavo: responder a pergunta da FK opcional
 - [[SQL-009-Categoria-Sem-Escopo-Empresa-Views|SQL-009]]: Gustavo: esclarecer 53 x 311 linhas do pedido 25970
 - [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio|LOG-42]]: Gustavo: responder as perguntas do §10
@@ -191,16 +192,13 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 - [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada|LOG-54]]: Nathan: quem gera o documento, o que imprime, reserva depois da retirada (Q1, Q2) e se entra no Ciclo 1 (Q3)
 - [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Nathan: campo "Pedido de venda" na "Nova requisição" (BL-041); decidir Q5 (avisa ou bloqueia)
 - [[LOG-04b-Pedidos-Notas-Dashboards-Agregacao-no-Banco|LOG-04b]]: Nathan: P6 no front (ver LOG-43)
-- [[LOG-05-Permissoes-e-Escopo-no-Banco|LOG-05]]: Nathan: marcas S3 no front (LOG-50)
-- [[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend|LOG-40]]: Nathan: LOG-50 (marcas A e B no front)
 - [[LOG-41-Login-Rate-Limit-no-Backend|LOG-41]]: Nathan: confirmar a remoção do limitador do front (HUB)
 - [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio|LOG-42]]: Nathan: §6 coordenadores no front e decidir corte do orçamento
 - [[LOG-43-Ordem-das-Etapas-de-Faturamento-no-Cadastro|LOG-43]]: Nathan: apagar a constante do front (passo 3.4)
 - [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas|LOG-46]]: Nathan: BFF `/api/fluxo/*` e 4 telas
 - [[LOG-47-Custo-Real-por-Item-no-Hub|LOG-47]]: Nathan: §2 simulador, §3 comissão, §4 telas
 - [[LOG-48-Acompanhamento-de-Clientes-Grupos-de-Empresa|LOG-48]]: Nathan: marcas `GAMBIARRA` do detalhe e §12.5 na tela
-- [[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos|LOG-49]]: Nathan: LOG-50
-- [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front|LOG-50]]: Nathan: marcas A e B no BFF
+- [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front|LOG-50]]: Nathan: testes de aceite que faltaram (gerente de equipe, auxiliar, vendedor sem vínculo, token expirado)
 - [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub|LOG-51]]: Nathan: H1, H3 a H6 feitos na PR #206 (`d0ef359`); resta H2 (`fetchMenu`: a API isenta a rota do menu) e H7 (rotacionar a chave, manual) para a API ligar `IDENTIDADE_EXIGIR_TOKEN`
 - [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub|LOG-52]]: Nathan: corte do HUB para a API única (BL-063); decidir Q3, Q4, Q7, Q8, Q10 e Q11
 

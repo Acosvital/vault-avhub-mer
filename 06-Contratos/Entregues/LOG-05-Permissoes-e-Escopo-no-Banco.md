@@ -18,7 +18,7 @@ fontes: ["api-acos-vital/src/middlewares/identidadeUsuario.js", "api-acos-vital/
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
 > - ✅ Contrato guarda-chuva entregue em partes: identidade por token (`identidadeUsuario.js`), escopo de unidade (`escopoUnidade.js`), escopo de vendedores (`escopoVendedor.js:165`, ver [[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]]), rate limit do login ([[LOG-41-Login-Rate-Limit-no-Backend]]), auditoria (`auditoria.js`).
-> - 🟡 S10 (upload de foto, política de bucket) está em [[LOG-44-Upload-de-Fotos-Politica-de-Bucket]] (palavra do DBA, ❓). As marcas S3 que restam no front estão em [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]].
+> - 🟡 S10 (upload de foto, política de bucket) está em [[LOG-44-Upload-de-Fotos-Politica-de-Bucket]] (palavra do DBA, ❓). As marcas S3 do front saíram ([[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]], 15/10).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
