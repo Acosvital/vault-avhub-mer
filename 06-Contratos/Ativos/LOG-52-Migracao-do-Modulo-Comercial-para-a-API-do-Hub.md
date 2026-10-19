@@ -255,13 +255,13 @@ Achado durante este inventário (✅ relido em 15/10/2026): em `src/schemas/core
 
 | # | Pergunta | Quem | Bloqueia |
 |---|---|---|---|
-| Q1 | 🔴 A pipeline carrega `pedidos_compras` e `pedidos_compras_itens` em produção com **IPI, ST, desconto, etapa e cancelado** e na janela de 180/60 dias? O `GET /pedidos_compras` vinha vazio na api-test: era dado ausente ou rota que não devolve o que a tela precisa? | Gustavo | 3.4 e fase 5 |
-| Q2 | 🔴 Quais dos 20 slugs já existem em `auth.telas` de produção, e quais perfis os têm? (O vault diz que o cadastro está pendente.) | Gustavo | 8.2, fase 1 |
-| Q3 | 🔴 `vinculados`, para propostas e clientes: os usuários dos vendedores que o usuário logado acompanha (por `vendedores`, `auxiliar_vendedor` e `diligenciador_vendedor`)? O gestor enxerga o time? Cliente comercial sem pedido no Omie tem dono por `id_responsavel`? | Nathan, Pablo, Gustavo | 8.3, critérios 1 e 2 |
+| Q1 | ✅ **No teste:** 23.060 pedidos de compra e 44.598 itens. Pedidos têm etapa (só 10, 15 e 20) e desconto; **sem** colunas de IPI, ST nem cancelado. `GET /pedidos_compras` não esconde nada: o vazio de antes era falta de dado (a carga de 09/10 ainda não tinha entrado). 🟡 Janela parece ser sync completa diária + cargas do dia/mês/meses — deduzido pelos registros da pipeline; código não estava na pasta. 💡 Pedir à pipeline para gravar IPI, ST e cancelado antes da fase 5. | Gustavo | 3.4 e fase 5 |
+| Q2 | ✅ **No teste, antes da migration 052:** telas `fornecedores` (perfis Orçamentos), `suprimentos` e `painel-comprador` (sem perfil vinculado). A migration 052 criou as demais telas, liberadas só para o perfil de testes do TI. Produção a confirmar. | Gustavo | 8.2, fase 1 |
+| Q3 | ✅ No banco, `vinculados` cobre os vendedores do próprio usuário, os titulares que ele auxilia e os que ele diligencia. ✅ Não existe relação de gestor com o time. 💡 O gestor usaria o perfil "todos" ou um vínculo explícito; cliente sem pedido no Omie fica com o dono em `id_responsavel`. | Nathan, Pablo, Gustavo | 8.3, critérios 1 e 2 |
 | Q4 | 🟡 A tela "Sincronização Omie" some ou vira leitura do estado da pipeline (`omie_ctl.run_log`)? Alguém dispara sincronização manual hoje? | Nathan, Pablo | F4 |
 | Q5 | 🟡 Câmbio: aceitar só a **PTAX** do hub (fechamento do dia, `cotacoes_moeda`) no lugar da cotação de venda (AwesomeAPI) que o vendedor vê hoje? | Pablo, Compras | 5 |
-| Q6 | 🟡 `core.unidades` já tem inscrição estadual, endereço e CRC? Ou `unidades_emissoras` guarda tudo? | Gustavo | 3.3 |
-| Q7 | 🟡 E-mail e consulta de CNPJ ficam **na API** ou no **BFF** do HUB (que já gera os PDFs e é servidor)? Sugestão: na API, para um só lugar com segredo e registro de evento | Nathan, Gustavo | 5 e 7 |
+| Q6 | ✅ `unidades_emissoras` foi criada na migration 052. | Gustavo | 3.3 |
+| Q7 | 💡 E-mail e consulta de CNPJ ficam **na API** (não no BFF) — um só lugar com segredo e registro de evento. | Nathan, Gustavo | 5 e 7 |
 | Q8 | 🟡 Envelope de paginação: o do hub (`{ total, page, totalPages, limit, [chave] }`, limite 200) ou o atual do módulo? Sugestão: o do hub | Nathan | T9, F3 |
 | Q9 | 🟡 A carga do ERP antigo (`erp_quotations`) ainda vai rodar? Se sim, quando e quem tem o JSON? | Pablo | 5 e fase 2 |
 | Q10 | 🟡 **Quem escreve o código na `api-acos-vital`?** A decisão N14-15 diz "o Pablo migra". A API é do Gustavo (banco e API). Proposta: o Pablo escreve o módulo num *branch*, o Gustavo revisa e faz o DDL, o `GRANT` e as linhas de permissão | Nathan | todas as fases |

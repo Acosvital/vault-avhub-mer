@@ -3,7 +3,7 @@ id: LOG-43
 aliases: ["Contrato 43", "Contrato 05 (P6)", "43-Ordem-das-Etapas-de-Faturamento-no-Cadastro"]
 tags: [contrato, contrato-api, contrato-sql, etapas-faturamento, pipeline, front, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-19
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front, pipeline-omie]
 dono: "Gustavo (DBA)"
@@ -25,6 +25,9 @@ criado_original: 2026-10-07
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
+
+> [!warning] Verificação em 19/10/2026 — pipeline ainda pendente
+> **Gustavo (DBA)** · `omie-elt-pipeline/src/db/protectedColumns.ts` conferido em 19/10/2026: **ainda não tem** a entrada `'core.etapas_faturamento': ['ordem_fluxo']` (§3.2). Enquanto o `mapRow` não emitir `ordem_fluxo`, o bug não aparece, mas a proteção formal está em aberto. Nenhuma outra alteração necessária além de adicionar essa linha ao arquivo.
 
 
 > Status: proposta (leitura de código e vault em 07/10/2026;[^c1] **produção só pelo dump de 07/10**, que não mostra colunas de `core.etapas_faturamento`) | fecha o item **P6** de [[LOG-04b-Pedidos-Notas-Dashboards-Agregacao-no-Banco|04-Pedidos-Notas-Dashboards-Agregacao-no-Banco]] e a marca `GAMBIARRA(` de `utils/etapasFluxo.ts:10` do av-hub. Decisões em [[Registro-de-Decisoes|Registro-de-Decisoes-2026-10-07]].

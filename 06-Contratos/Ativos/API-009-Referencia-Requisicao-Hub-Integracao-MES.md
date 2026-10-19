@@ -3,8 +3,8 @@ id: API-009
 aliases: ["Contrato 009", "009-Referencia-Requisicao-Hub-Integracao-MES"]
 tags: [contrato, contrato-api, mes, integracao-av-hub-mes, compras, requisicao, sql]
 criado: 2026-10-15
-atualizado: 2026-10-15
-status: proposta
+atualizado: 2026-10-19
+status: parcial
 sistemas: [hub-banco, hub-api, mes-api, mes-front]
 dono: "Gustavo"
 etapa_0b: [C0, P1, P2, P3, E1]
@@ -169,6 +169,6 @@ Rota de serviço, sem token de usuário e sem linha em `auth.rotas_telas`. O MES
 | Q4  | O aviso de compra duplicada só avisa ✅ (N14-29)                                                                                                 | Nathan  | ✅ 📝 |
 | Q5  | ✅ 500 por página basta (Robert, 15/10)                                                                                                          | Robert  | ✅    |
 | Q6  | A transação do `POST /compras/requisicoes` e a marca: o `INSERT` já dispara a trigger; nenhum ajuste na API                                     | Gustavo | ✅    |
-| Q7  | Volume real: quantas requisições do hub com pedido de venda por dia? O índice `(alterado_em, id_requisicao)` e o limite de 500 devem bastar     | Gustavo | ❓    |
+| Q7  | ✅ O banco de teste tem 1 requisição com pedido de venda (e 1 OC vinculada). Usando o Omie como teto: ~76 pedidos de compra por dia útil (pico 144); o limite de 500 por página a cada 5 minutos dá conta com folga. | Gustavo | ✅    |
 
 Relacionados: [[API-004-Referencia-OC-Integracao-MES]], [[API-007-Referencia-OC-Valores-no-MES]], [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto]], [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno]], [[LOG-34-Requisicoes-MES-Empurra-para-o-Hub]], [[LOG-35-Compras-Marcos-Requisicao-para-MES]], [[04-Circuito-de-Compra]], [[02-PCP-Triagem-e-Destinacao]], [[Backlog-por-Frente]] (BL-064, BL-065), [[Registro-de-Decisoes]] (N14-28 a N14-33).

@@ -245,14 +245,14 @@ Todos rodam contra a API de homologação, com a `develop` publicada e o BFF no 
 
 | # | Pergunta | Por que importa |
 |---|---|---|
-| Q1 | 🔴 Com que `DB_USER` a API roda em produção? Ele é `SUPERUSER`? | S8 |
-| Q2 | 🔴 `IDENTIDADE_EXIGIR_TOKEN`, `AUTENTICACAO_AZURE_VALIDAR_ID_TOKEN` e `CORS_ORIGINS` estão definidas em produção, e com que valor? | S1, S2, S7 |
-| Q3 | 🔴 A `DOCS_API_KEY` de produção é uma chave admin? Quem acessa o `/docs` hoje? | S12 |
-| Q4 | 🔴 Quantos proxies existem entre o cliente e a API (Traefik, Coolify, CDN)? O `trust proxy 1` está certo? | S5 (IP do limiter), S21 |
+| Q1 | ✅ **No teste:** `DB_USER=postgres` e `postgres` é `SUPERUSER`. Confirma S8. `DB_HOST` é IP público (porta 3111); porta não aberta para fora (Gustavo). Produção a confirmar. | S8 |
+| Q2 | ✅ **No teste:** `IDENTIDADE_EXIGIR_TOKEN=false`; `AUTENTICACAO_AZURE_VALIDAR_ID_TOKEN` não definida → vale `false`; `CORS_ORIGINS` não definida → vale `"*"` (aceita qualquer origem). Produção a confirmar. | S1, S2, S7 |
+| Q3 | ✅ **No teste:** `API_KEYS` tem ~5 chaves e toda chave do `API_KEYS` é admin. `DOCS_API_KEY` (`c98390b9`) **não está** no `API_KEYS`; não tem formato `avk_`; no teste não abre nada (botão do `/docs` daria 401). Não houve acesso ao `/docs` nos logs. 💡 Ou remove a `DOCS_API_KEY` do teste, ou cria chave de serviço de leitura para o `/docs`. Produção a confirmar. | S12 |
+| Q4 | ✅ **No teste:** 1 proxy (Traefik do Coolify); sem Cloudflare (sem `cf-ray` no `/health`); `trust proxy 1` correto. 🟡 Logs batem: tráfego externo chega com IP público da empresa; interno com `172.16.1.1` (rede docker). **Achado:** resposta traz `X-Powered-By: Express` e sem cabeçalhos de segurança do helmet — confirma S7. | S5 (IP do limiter), S21 |
 | Q5 | 🔴 Quais rotas têm linha em `auth.rotas_telas` e quais estão em `auth.rotas_administrativas`? `/usuarios`, `/perfis`, `/permissoes` e `/usuarios_perfis` exigem permissão de tela, ou um usuário comum com token pode editá-las (escalada de privilégio)? O comentário de `usuarios.route.js:23-28` admite que quem edita usuário pode dar `setor_irrestrito` a si mesmo | S1 e todo o RBAC. Maior incógnita desta auditoria |
 | Q6 | 🟡 Há `GRANT` por schema hoje, ou todos os acessos são por superusuário? | S8 |
 | Q7 | 🟡 O corpo de `public.set_updated_at()` preenche `updated_by`? | S18 |
-| Q8 | 🟡 Quem mais usa a chave B (MES) e a C (pipeline)? Dá para dar uma chave por sistema? | S1 |
+| Q8 | ✅ **No teste:** `da26afd5` está no `API_KEYS` — é a `API_KEY` do BFF. 🟡 Pelas rotas que chama, pipeline e máquinas da rede também usam a mesma chave. ✅ `e4d2a1b9` = `MES_INTEGRACAO_KEYS` (só o `PUT` da requisição, contrato 34). 🟡 `0192850a`, pelas rotas, é a chave leitora do MES — provavelmente uma das 5 do `API_KEYS`. 💡 Uma chave por sistema: `mes-integracao` já existe; falta criar `pipeline-omie` (passo 2 do roteiro) e depois enxugar o `API_KEYS` (passo 5). | S1 |
 | Q9 | 🟡 O repositório da API passa a versionar o SQL (migrations e `GRANT`)? Sugestão: sim, numa pasta `sql/` com numeração. Liga com BL-024 | S8, S18 |
 
 ## 10. Passo a passo e ordem

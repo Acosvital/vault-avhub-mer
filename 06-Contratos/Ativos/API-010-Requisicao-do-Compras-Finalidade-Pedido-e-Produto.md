@@ -3,8 +3,8 @@ id: API-010
 aliases: ["Contrato 010", "010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto"]
 tags: [contrato, contrato-api, compras, requisicao, av-hub, sql]
 criado: 2026-10-15
-atualizado: 2026-10-15
-status: proposta
+atualizado: 2026-10-19
+status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
 etapa_0b: [C0]

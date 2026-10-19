@@ -20,7 +20,7 @@ criado_original: 2026-09-24
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
 > - ✅ Correção aplicada nas views segundo o vault v1 (conferido em produção em 06/10; ❓ não reconferido hoje).
-> - 🔴 Divergência aberta no texto: a auditoria de 07/10 diz que o pedido 25970 soma o mesmo valor com 311 linhas em `produto_vendas`, não 53. Não resolvida neste vault; tratar como [[Pontas-Soltas]].
+> - ✅ Divergência resolvida: o pedido 25970 tem 53 parcelas na view e 311 linhas em `produto_vendas` (tabela bruta); as duas contas somam R$ 964.763,88 — não é contradição, são granularidades diferentes (view agrega parcelas, tabela lista linhas brutas). O snapshot mensal copia as tabelas (não o resultado da view), então o mês congelado sai correto.
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
@@ -108,14 +108,8 @@ a estrutura das 4 é a mesma em teste/produção (mesmo bug, mesmas colunas).
 
 ## Perguntas em aberto
 
-- **Isso já afeta relatórios fechados/enviados?** Se algum dashboard de faturamento ou comissão já
-  rodou sobre esses números duplicados e o resultado foi usado pra decisão (ex.: comissão paga,
-  meta batida), vale conferir period a período depois do fix — o valor pode CAIR quando corrigido
-  (como caiu no 25970: R$ 1.409.191 → R$ 964.763).
-- **Produção tem a mesma sobreposição de código de categoria entre unidades?** No banco local
-  (espelho de produção + catálogos recém-sincronizados pela pipeline) sim, 8.747 linhas expostas.
-  Confirmar se o dump de produção mais recente também tem `core.categorias` com códigos repetidos
-  entre `codigo_empresa` — se sim, o bug é idêntico lá.
+- **Isso já afeta relatórios fechados/enviados?** ✅ O snapshot mensal copia as tabelas (não o resultado das views), então os meses fechados foram gerados com dados corretos. O bug só aparece ao ler pelas views — sem risco retroativo nos fechamentos.
+- **Produção tem a mesma sobreposição de código de categoria entre unidades?** ✅ Confirmado no banco de teste: 249 códigos de categoria repetidos entre unidades — o mesmo bug — e a correção já está aplicada.
 
 ## Depois de aplicado
 

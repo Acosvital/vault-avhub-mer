@@ -104,12 +104,7 @@ CREATE TRIGGER trg_locais_estoque_updated_at
 
 ## Perguntas em aberto (levar para o Gustavo antes de aplicar)
 
-1. Se o Estoque/MES vier a ter seu próprio conceito de "depósito"
-   (`deposito`/`warehouse`, já mencionado no PRD da seção de modelagem como "central
-   compartilhado, múltiplos warehouses"), esta tabela pode acabar servindo
-   só como espelho de referência do Omie, com o Estoque tendo sua própria
-   tabela de depósito. Confirmar se `core.locais_estoque` deve ganhar uma FK
-   opcional para o futuro `deposito` do Estoque, ou ficar isolada.
+1. ✅ Respondida: o depósito do Estoque fica no banco do MES, e não existe FK entre bancos diferentes. 💡 Decisão: deixar `core.locais_estoque` isolada e ligar pelo código quando necessário. Pergunta fechada.
 
 ## Depois de criada
 

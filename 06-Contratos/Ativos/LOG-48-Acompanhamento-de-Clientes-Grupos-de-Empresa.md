@@ -16,13 +16,15 @@ criado_original: 2026-10-13
 
 > **Onde atua:** av-hub: banco, API, front
 
-> [!info] Situação em 14/10/2026
+> [!info] Situação em 15/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - ✅ **Entregue:** tabelas `grupos_clientes` e `grupos_clientes_membros`, funções `fn_acompanhamento_clientes` (`Dump Avhub (Esqueleto).sql:3021`) e `fn_movimento_cliente_mes` (`:4825`), rotas `GET /acompanhamento_clientes` e `/movimento`, `/grupos_clientes` (`index.js:171-172`).
-> - 🔴 **§9.1 NF cancelada entra no total do mês:** a CTE `nfs` da função lê `notas_fiscais` só com `deleted_at IS NULL` (`Dump Avhub (Esqueleto).sql:3070-3077`), sem excluir cancelada, denegada ou inutilizada: confirmado em 14/10.
-> - 🔴 **§9.2** `GET /acompanhamento_clientes` ignora `codigo_cliente` (só o `/movimento` o aceita, `fn_acompanhamento_clientes.route.js:138`); **§10** venda e faturamento do mês com deduções separadas e **§12** definição de cliente e status "Sem compra" seguem como pedido ao DBA.
-> - Fora do fluxo de Atividades (anexo `10-Anexo-Fora-do-Fluxo`, Acompanhamento-Clientes). Front v2 (páginas por cliente e por grupo) no HUB: ❓ não conferido.
+> - ✅ **Entregue (banco + API):** tabelas `grupos_clientes` e `grupos_clientes_membros`, funções `fn_acompanhamento_clientes` e `fn_movimento_cliente_mes`, rotas `GET /acompanhamento_clientes`, `/movimento` e `/grupos_clientes` — conferido na `api-test` em 15/10.
+> - ✅ **§9.1** NF cancelada saiu dos totais do mês (verificado 15/10).
+> - ✅ **§9.2** `codigo_cliente` filtra a lista (verificado 15/10).
+> - ✅ **§10** Venda e faturamento com deduções separadas (verificado 15/10).
+> - ✅ **§12** Base de clientes e status `sem_compra` (verificado 15/10).
+> - ❓ **Produção não conferida.** Front v2 (páginas por cliente e por grupo) no HUB: ❓ não conferido.
 
 > [!success] Conferido na `api-test` em 15/10/2026 (só GET)
 > O DBA entregou o que estava aberto: **§9.1** a NF cancelada saiu dos totais, **§9.2** `codigo_cliente` filtra a lista, **§10** venda e faturamento com deduções, **§12** base de clientes e status `sem_compra`. Números em §12.7. **Produção não conferida.** O front (av-hub) já lê tudo isso e as marcas `GAMBIARRA` da página do cliente (§9.1 e §9.2) saíram em 15/10 (§12.7). Excel da tela: §13.

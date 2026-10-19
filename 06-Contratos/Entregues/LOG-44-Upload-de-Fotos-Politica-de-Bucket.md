@@ -57,7 +57,7 @@ criado_original: 2026-10-07
 - ✅ O código usa só API S3 padrão (`PutObject`, `GetObject`, `DeleteObject`, `ListObjectsV2` no script, URL assinada), `forcePathStyle: true` e região padrão `us-east-1`: **funciona nos dois produtos**, então o código não decide.
 - ✅ Não há `.env.example` no front. O `.env.local` tem os **nomes** `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_REGION`, `S3_BUCKET_PESSOAS`, `S3_BUCKET_EMPRESA`; o `S3_ENDPOINT` local não contém "minio" nem "seaweed" (valores não impressos).
 - 🟡 Os comentários de SeaweedFS são de quem escreveu o código, e o vault também só "presume"; o vault do MinIO é de nota de arquitetura. **Sem prova em nenhum dos lados.**
-- 🔴 **Pergunta exata ao Gustavo/infra:** "Na VPS 3, o serviço que responde em `S3_ENDPOINT` em produção é MinIO ou SeaweedFS? (tela do Coolify, `docker ps`, ou o cabeçalho `Server` de uma resposta do endpoint). Se SeaweedFS, é `weed s3` com identidades em `s3.json`?"
+- ✅ **Confirmado pelo DBA:** SeaweedFS versão 4.41. O endpoint de teste `https://s3.acosvital.com.br` responde `Server: SeaweedFS 30GB 4.41` — bate com o comentário no código do av-hub. Acesso anônimo negado corretamente (403 AccessDenied na raiz).
 
 ### C. Buckets e variáveis (somente nomes)
 
@@ -106,11 +106,11 @@ Recolocar a credencial anterior em `S3_ACCESS_KEY`/`S3_SECRET_KEY` e redeployar 
 
 | # | Pergunta | Dono |
 |---|---|---|
-| Q1 | 🔴 MinIO ou SeaweedFS? Pergunta exata na seção B. | Gustavo / infra |
-| Q2 | 🔴 Nomes reais (`S3_BUCKET_PESSOAS`, `S3_BUCKET_EMPRESA`) e quem além do av-hub escreve ou apaga neles. | Gustavo / infra |
-| Q3 | 🔴 O Organograma legado pode seguir com a credencial atual enquanto o av-hub usa a nova? | Gustavo |
+| Q1 | ✅ **SeaweedFS 4.41.** Endpoint `https://s3.acosvital.com.br` responde `Server: SeaweedFS 30GB 4.41`. Acesso anônimo negado (403 AccessDenied). | Gustavo / infra |
+| Q2 | ✅ Buckets do teste: `organograma-tst-pessoas` e `organograma-tst-empresa`. | Gustavo / infra |
+| Q3 | 🟡 No teste o BFF usa a credencial `organograma-tst-key` (do Organograma); o av-hub ainda não tem credencial própria — a separação do LOG-44 não está feita no teste. 💡 Decisão proposta: Organograma mantém a credencial atual, av-hub ganha uma nova, aceita-se ficar sem antivírus. | Gustavo |
 | Q4 | 🔴 Aceitar reclassificar a marca (seção A) e a limitação de R3/R4? | Nathan |
-| Q6 | 🔴 Há objetos órfãos em `uploads/` (UUID sem registro no banco)? Só então decidir R6. | Gustavo |
+| Q6 | 🔴 Há objetos órfãos em `uploads/` (UUID sem registro no banco)? Varredura ainda não rodou. | Gustavo |
 
 ---
 
@@ -186,9 +186,9 @@ O vault diz que a VPS 3 roda **MinIO** ([[Infraestrutura|Infraestrutura-Self-Hos
 
 | # | Pergunta | Dono |
 |---|---|---|
-| Q1 | 🔴 O storage da VPS 3 é MinIO ou SeaweedFS? | Gustavo / infra |
-| Q2 | 🔴 Nomes reais dos buckets (`S3_BUCKET_PESSOAS`, `S3_BUCKET_EMPRESA`) e quem além do av-hub escreve neles (Organograma, outros). | Gustavo |
-| Q3 | 🔴 Existe antivírus/varredura no stack? Se não, aceitar sem (risco baixo, §1)? | Gustavo / Nathan |
+| Q1 | ✅ SeaweedFS versão 4.41 (endpoint de teste confirmado). | Gustavo / infra |
+| Q2 | ✅ No teste: `organograma-tst-pessoas` e `organograma-tst-empresa`. Confirmar nomes de produção. | Gustavo |
+| Q3 | 💡 Aceitar sem antivírus. O Organograma mantém a credencial atual; o av-hub ganha uma nova. | Gustavo / Nathan |
 | Q4 | 🔴 Aceitar a prioridade baixa e fazer só E1 a E4, mantendo o BFF como está? | Nathan |
 | Q5 | 🟡 Limitar quantidade/taxa de uploads por usuário no BFF? Hoje não há. | Nathan |
 
