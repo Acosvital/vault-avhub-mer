@@ -234,6 +234,12 @@ Fonte: PDFs do Robert de 24/09 e 28/09 e respostas do Nathan de 25/09 e 29/09 ([
 | #98 | **Contrato 008: decisões D1 a D8.** D1 lote por produto dentro da OC, com o preço do item da OC (`id_item_oc`); sobra de compra no mesmo lote; mesmo produto em duas OCs, lotes separados; OC é de um só fornecedor. D2 unidade diferente: lote sem custo e sinalizado no Ciclo 1, fator de conversão no Ciclo 2 (🟡 duas perguntas a Compras). D3 a OC não muda depois da chegada. D4 correção vale para saldo e reservas abertas; o baixado mantém o snapshot; sem movimento de ajuste. D5 custo sem impostos no Ciclo 1. D6 pedido manual nunca entra no custo e precisa de marca de origem manual (🔴 requisito novo, dono a definir). D7 o mesmo produto pode cair em mais de uma ordem; soma por filial + pedido + produto. D8 custo MANUAL só com `estoque-custo` editar, motivo obrigatório e auditoria. Ver [[Modelo-Estoque-e-Custo-do-Lote]] e [[API-008-Custo-do-Lote-no-MES]]. | 14/10/2026 | Nathan, 14/10 | 📝 (Nathan, 14/10) / 🟡 D2 com Compras |  |
 | #99 | **Pendências do 008 com o hub (Gustavo).** H1 chave de leitura de `GET /ordens-compra/referencia` (a do contrato 34 dá 403; sem ela não há K4 nem K5); H2 SQL da `fn_itens_pedido_custo_gravar` (migration 047) fora do repositório e gravando por "unidade, pedido, item" (deve ser por produto); H3 nenhum perfil tem a tela `custo-itens`; H4 contratos 007 e 47 e migrations 007/047 só na `develop` (`80581d0`). Plano do Robert: G1 em lote até 23/10 (antes do levantamento físico de 26 a 30/10); K4 a K6 no Ciclo 1; K8 no Ciclo 2, podendo ser antecipado. | 14/10/2026 | Nathan | 🔴 |  |
 
+## Matéria-prima no atendimento (#100)
+
+| ID | Decisão | Data | Dono | Selo | Superada |
+|---|---|---|---|---|---|
+| #100 | **MP no atendimento sobe antes da carga inicial (G1).** A feature de baixa de matéria-prima no "Atender pelo estoque" (BL-010, `api-pcp` `8d07917`, `app-pcp` `34d531b`) entra em produção antes do G1 (carga inicial em lote até 23/10). Consequência: sem saldo de MP carregado, toda ordem de fabricação vai para compra até o levantamento físico de 26 a 30/10. Ver [[Backlog-por-Frente]] (BL-010, BL-031). | 19/10/2026 | Nathan | 📝 (Nathan, 19/10) |  |
+
 ## Estado no código das decisões que mexem em código (14/10/2026)
 
 | Decisão | No código hoje | Selo |
