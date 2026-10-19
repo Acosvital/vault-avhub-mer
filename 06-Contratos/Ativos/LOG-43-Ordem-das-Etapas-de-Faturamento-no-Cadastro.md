@@ -21,7 +21,8 @@ criado_original: 2026-10-07
 >
 > - ✅ **Banco e API:** a coluna `core.etapas_faturamento.ordem_fluxo smallint` com `CHECK` 1..999 existe (`Dump Avhub (Esqueleto).sql:11084-11101`), a view `vw_etapas_fluxo_pedido` também (`:19354`), e `GET /etapas_faturamento?ordem=fluxo` ordena pelo cadastro (`api-acos-vital/src/schemas/core/tables/etapas_faturamento/etapas_faturamento.route.js:66-76`).
 > - 🔴 **Pipeline:** `omie-elt-pipeline/src/db/protectedColumns.ts` não tem a entrada `'core.etapas_faturamento': ['ordem_fluxo']` (§3.2); hoje o upsert não sobrescreve a ordem "por acaso".
-> - ❓ **Seed dos valores 1..6 (operação 11) e front:** o seed é dado (o dump é só esqueleto) e o front (`utils/etapasFluxo.ts`, HUB) não foi conferido. Fora do fluxo de Atividades.
+> - ✅ **Front:** `utils/etapasFluxo.ts` e `services/portalGerente/etapasEmpresa.ts` não existem no av-hub (verificado 19/10); `etapasFaturamento.ts` já chama a API. Código morto removido.
+> - ❓ **Seed dos valores 1..6 (operação 11):** o seed é dado (o dump é só esqueleto). Fora do fluxo de Atividades.
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
