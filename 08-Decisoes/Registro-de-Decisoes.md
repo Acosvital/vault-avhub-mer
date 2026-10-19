@@ -239,6 +239,7 @@ Fonte: PDFs do Robert de 24/09 e 28/09 e respostas do Nathan de 25/09 e 29/09 ([
 | ID | Decisão | Data | Dono | Selo | Superada |
 |---|---|---|---|---|---|
 | #100 | **MP no atendimento sobe antes da carga inicial (G1).** A feature de baixa de matéria-prima no "Atender pelo estoque" (BL-010, `api-pcp` `8d07917`, `app-pcp` `34d531b`) entra em produção antes do G1 (carga inicial em lote até 23/10). Consequência: sem saldo de MP carregado, toda ordem de fabricação vai para compra até o levantamento físico de 26 a 30/10. Ver [[Backlog-por-Frente]] (BL-010, BL-031). | 19/10/2026 | Nathan | 📝 (Nathan, 19/10) |  |
+| #101 | **Produtos — Prováveis Duplicatas reativada (19/10/2026).** A tela fica, melhora e continua **só leitura** (sem alias; a rejeição de 21/09 vale). O cálculo sai do navegador e vai para o banco e a API: semelhança de nome e de código com tolerância (acento, medida, zeros, ordem das palavras), nota, motivos e uso (vendas, OC, estoque, fornecedores), **por unidade**. Contratos [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso]] e [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela]]. | 19/10/2026 | Nathan | 📝 |  |
 
 ## Estado no código das decisões que mexem em código (14/10/2026)
 
