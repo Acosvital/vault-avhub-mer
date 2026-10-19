@@ -3,8 +3,8 @@ id: LOG-51
 aliases: ["Contrato 51", "51-Seguranca-e-Padrao-da-API-do-Hub"]
 tags: [contrato, contrato-logica, contrato-api, contrato-sql, seguranca, api-acos-vital, dba]
 criado: 2026-10-15
-atualizado: 2026-10-15
-status: proposta
+atualizado: 2026-10-19
+status: aplicado-em-producao
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo (DBA)"
 etapa_0b: []
