@@ -3,8 +3,8 @@ id: API-011
 aliases: ["Contrato 011", "011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno"]
 tags: [contrato, contrato-api, mes, integracao-av-hub-mes, compras, recebimento, estoque, sql, prisma]
 criado: 2026-10-15
-atualizado: 2026-10-15
-status: proposta
+atualizado: 2026-10-19
+status: parcial
 sistemas: [mes-banco, mes-api, mes-front]
 dono: "Robert"
 etapa_0b: [P1, P2, P3, E1, R0, R1, R4]
@@ -114,7 +114,7 @@ model Recebimento {
 
 model RecebimentoItem {
   // idRequisicaoItem passa a ser opcional; novo:
-  idOcItem   String  @map("id_oc_item") @db.Uuid
+  idOcItem   String? @map("id_oc_item") @db.Uuid   // opcional: CHECK exige idRequisicaoItem OU idOcItem (Robert, 19/10)
   usoInterno Boolean @default(false) @map("uso_interno")
   // CHECK: idRequisicaoItem OU idOcItem
 }
@@ -144,7 +144,7 @@ model EntradaUsoInterno {                  // registrada, sem lote e sem saldo (
 
 **Mudanças no código que isso força** (todas em `api-pcp/src`):
 - `ComprasService.enfileirarRequisicao` (fila do contrato 34): **pular** requisição com `origem = HUB`. Critério de aceite 10.
-- `ComprasService.esperados()` hoje fica com a requisição **mais recente por `idItemPedido`**; com duas requisições do mesmo item (a coberta pela OC e a que sobra), isso erra. Passa a casar a requisição **pela parcela** (`RequisicaoCompra.idItemParcial`).
+- `ComprasService.esperados()` hoje fica com a requisição **mais recente por `idItemPedido`**; com duas requisições do mesmo item (a coberta pela OC e a que sobra), isso erra. Passa a casar a requisição **pela parcela** (`RequisicaoCompra.idItemParcial`). Sem pd próprio — soma ao BL-051 (Robert, 19/10).
 - `Recebimento.requisicao` e `Recebimento.itemParcial` viram relações opcionais: ajustar `RecebimentoService` (`conferir`, `recontar`, `decidir`, `darEntrada`, `criarRecebimento`) para tratar os dois caminhos.
 
 ## 4. Jobs
@@ -153,7 +153,7 @@ model EntradaUsoInterno {                  // registrada, sem lote e sem saldo (
 
 Serviço novo no módulo `integracao-avhub`, espelho do `oc-referencia-avhub.service.ts` do K4 (mesmas constantes): `AVHUB_REQ_INTERVALO_MIN` (padrão 5), uma rodada 15 s após subir, rodada compartilhada, `IntegracaoAvhubCursor` com `chave = 'requisicoes-referencia'`, `SOBREPOSICAO_MS = 5 min`, `LIMITE = 500`, `INICIO_PADRAO`. Chamada: `GET {API_URL}/compras/requisicoes/referencia?alterado_desde=…&apos_id=…&limit=500` com `x-api-key`. UPSERT por `id`. Linha com `visivel_ao_pcp = false` → **apaga** da projeção. A leitura do `POST /compras/requisicoes/sincronizar` dispara também este job, como já dispara o da OC.
 
-### 4.2 K4: o que falta tratar (OC cancelada e item removido)
+### 4.2 K4: o que falta tratar (OC cancelada e item removido) — sem pd, soma ao BL-051 (Robert, 19/10)
 
 Hoje o K4 grava a OC `cancelada` como qualquer outra e marca `removidoEm` no item que sumiu, **sem efeito nenhum** no resto. Passa a: ao gravar OC `cancelada` ou item `removidoEm`, **desfazer os vínculos** dela: cancelar as `RequisicaoCompra` de origem `HUB` ligadas (`idOcItem`), devolver a parcela a Requisições com aviso (mesmo comportamento da OC cancelada de requisição do MES, `requisicao-avhub.eventos.ts`) e tirar a OC dos esperados.
 
@@ -355,7 +355,7 @@ Estoque, uso interno e compra por fora **não geram evento** de fluxo: a Torre a
 | # | Pergunta | Dono | Selo |
 |---|---|---|---|
 | Q1 | A resolução do `codigo_produto_omie` do item da OC para o `Material` da unidade, quando o `Material` ainda não existe | Robert | ❓ |
-| Q2 | O rateio do **recebido** entre os destinos de uma OC que cobre vários pedidos e estoque (a fórmula da seção 6 é proporcional e provisória), e em que ordem atende o pedido | Robert, Nathan | 🔴 |
+| Q2 | O rateio do **recebido** entre os destinos de uma OC que cobre vários pedidos e estoque (a fórmula da seção 6 é proporcional e provisória), e em que ordem atende o pedido. **Decidir antes do R1 (Robert, 19/10).** | Robert, Nathan | 🔴 |
 | Q3 | Contabilidade: custo de uso interno vai para despesa? EPI tem inspeção? | Nathan | 🟡 |
 | Q4 | De onde vem o setor que pediu o uso interno (campo novo na requisição do hub) | Nathan, Gustavo | 🔴 |
 | Q5 | BL-049 e BL-050 (3,0 pd) entram no Ciclo 1? Aguardando decisão | Nathan | 🟡 |

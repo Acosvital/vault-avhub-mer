@@ -3,7 +3,7 @@ id: LOG-53
 aliases: ["Contrato 53", "53-Ordem-de-Producao-e-Lote-do-Fabricado"]
 tags: [contrato, contrato-logica, mes, producao, estoque, op, sql, prisma]
 criado: 2026-10-15
-atualizado: 2026-10-15
+atualizado: 2026-10-19
 status: proposta
 sistemas: [mes-banco, mes-api, mes-front]
 dono: "Robert"
@@ -123,7 +123,7 @@ A migration do valor novo do enum fica **sozinha** (arquivo 0001): no PostgreSQL
 - Efeito: grava `fabricadoAprovadoEm`, move a parcela ao setor `estoque` (`status EM_TRANSITO`, `idSetorOrigem` o atual) e cria `HistoricoItemParcial` ("Inspeção de saída aprovada"). **Ainda não cria lote.**
 - `PATCH /itens-parciais/:id/mover` num setor de Qualidade de uma ordem de `FABRICACAO` passa a responder `409 "Use Aprovar na inspeção de saída"`.
 
-**R2. `PATCH /itens-parciais/:id/receber-fabricado`** — `movimentacao:criar` (permissão de movimentação do Estoque), corpo:
+**R2. `PATCH /itens-parciais/:id/receber-fabricado`** — `movimentacao:criar` (permissão de movimentação do Estoque — ❓ confirmar o slug exato da tela de movimentação no `auth.rotas_telas`, Robert, 19/10), corpo:
 ```json
 { "idLocalizacao": "uuid", "observacao": "Prateleira B-3" }
 ```
@@ -155,7 +155,7 @@ A Triagem e a Destinação, o roteiro dos setores produtivos, a inspeção de **
 
 1. Destinação com 3 destinos (2 `FABRICACAO`, 1 `REVENDA`) cria 3 `Pedidos` e **2 OPs** (`opEmitidaEm` preenchido só nas 2); `GET /pedidos/:id/op` devolve o PDF das 2 e `409` na revenda.
 2. A numeração segue `pedidoVenda/N`; a OP pode sair `/2` e `/3`.
-3. `aprovar-saida` leva a parcela ao Estoque (não à Expedição) e `mover` na Qualidade de saída é recusado.
+3. `aprovar-saida` leva a parcela ao Estoque (não à Expedição) e `mover` na Qualidade de saída é recusado. ✅ tela do `app-pcp` atualizada (Robert, 19/10).
 4. `receber-fabricado` cria o lote `PRODUCAO` ligado à OP, com `ENTRADA` e saldo na localização informada, e grava `idLoteFabricado` (✅ a unicidade por OP e produto está validada no banco de teste).
 5. Aprovar em duas partes **soma** ao mesmo lote da OP e produto; OP com dois produtos gera dois lotes.
 6. `atender-estoque` recusa a parcela do fabricado que ainda não foi recebida no Estoque.
