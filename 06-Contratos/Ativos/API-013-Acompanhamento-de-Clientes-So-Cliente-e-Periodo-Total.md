@@ -41,6 +41,8 @@ O time comercial quer ver, e levar para o Excel, a lista de **clientes** (parcei
 |---|---|---|---|
 | `so_cliente` | booleano (`true`/`false`) | `false` | `true` devolve só as linhas com `cliente_cadastro = true` (parceiro com o tipo `CLIENTE` em `core.parceiros_tipos` / `core.tipos_parceiro`, a mesma regra da CTE `cadastro` e de `core_mapas.vw_todos_os_clientes`). Valor diferente de `true`/`false`: `400 { detail: "so_cliente deve ser true ou false." }` |
 
+**Regra da tag (decisão do Nathan, 19/10/2026):** o parceiro entra se tiver a tag `CLIENTE` **entre todas as suas tags** (`core.parceiros_tipos` → `core.tipos_parceiro`, `upper(tipo) = 'CLIENTE'`, ambos sem `deleted_at`), **independente das outras**. Quem é Fornecedor **e** Cliente aparece; quem é só Fornecedor, Transportadora ou sem tipo, não. 🔴 **Gustavo confirma** que `cliente_cadastro` é calculada assim (um `EXISTS` sobre todas as tags, como a CTE `cadastro`) e não pela tag "principal"; se for diferente, `so_cliente` usa o `EXISTS` e não a coluna.
+
 Sem mudar a função: a rota já filtra a saída dela (busca, `status`, `id_grupo`); `so_cliente` é mais um filtro do mesmo tipo (`AND cliente_cadastro IS TRUE`), aplicado **antes** de paginar e de calcular os KPIs.
 
 ### O que muda com `so_cliente=true`
@@ -135,7 +137,7 @@ O Excel do front (`GET /api/acompanhamento-clientes/exportar`) junta ~30 chamada
 ## Checklist
 
 **Gustavo (API e banco)**
-- [ ] `so_cliente` na rota `GET /acompanhamento_clientes` (lista, KPIs, grupo) e no swagger.
+- [ ] Confirmar que `cliente_cadastro` = tem a tag CLIENTE entre todas as tags (seção 1) e `so_cliente` na rota `GET /acompanhamento_clientes` (lista, KPIs, grupo) e no swagger.
 - [ ] Decidir o comportamento do grupo com `so_cliente=true` (seção 1) e escrever aqui.
 - [ ] `p_inicio`/`p_fim` na `fn_acompanhamento_clientes` (migration) e `periodo=total` na rota; eco `periodo` na resposta.
 - [ ] Medir o tempo do período total na unidade maior; se passar de 30 s, avisar o Nathan (o BFF espera até 120 s por chamada).
