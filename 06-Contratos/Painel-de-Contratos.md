@@ -17,14 +17,14 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 17 | 6 | 23 |
+| `Ativos` (a fazer ou parcial) | 19 | 6 | 25 |
 | `Entregues` (feito no código ou aplicado) | 54 | 12 | 66 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
-| **Total** | **82** | **18** | **100** |
+| **Total** | **84** | **18** | **102** |
 
 | Status | Contratos |
 |---|---|
-| `proposta` | 9 |
+| `proposta` | 11 |
 | `para-implementar` | 0 |
 | `parcial` | 8 |
 | `implementado-no-codigo` | 45 |
@@ -61,6 +61,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | SQL-011 | Contrato SQL 011 | [[SQL-011-Ordens-Compra-Referencia-MES\|`vw_ordens_compra_referencia_mes` e marca por trigger (migration `api004`)]] | `implementado-no-codigo` | av-hub: banco | Entregues | R0 | — | — | — | — |
 | SQL-012 | Contrato SQL 012 | [[SQL-012-Ordens-Compra-Referencia-Valores\|Valores da OC na `vw_ordens_compra_referencia_mes`]] | `implementado-no-codigo` | av-hub: banco | Entregues | R0, R4 | — | — | — | — |
 | SQL-013 | Contrato SQL 013 | [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso\|Produtos: prováveis duplicatas (normalização, pares por semelhança e uso)]] | `proposta` | av-hub: banco | Ativos | — | — | Gustavo: validar o script, medir o tempo e conferir o formato das datas de venda | — | — |
+| SQL-014 | Contrato SQL 014 | [[SQL-014-Pedido-Encerrado-por-Saldo-Zerado\|Pedido encerrado por saldo zerado ("Faturado, encerrado") e encerrado em atraso]] | `proposta` | av-hub: banco | Ativos | — | — | Gustavo: validar a consulta (G1–G4) e implementar; decisões de borda já respondidas | — | — |
 | API-001 | — | [[API-001-Produtos-Parceiros-Filtro-Incremental\|Filtro incremental `alterado_desde` em produtos e parceiros]] | `implementado-no-codigo` | av-hub: API · pipeline Omie | Entregues | — | — | Gustavo: o filtro nunca executa (LOG-51 S27, PS-033) | — | — |
 | API-002 | — | [[API-002-Material-Alias-Omie-MES\|Alias de material Omie no MES (rejeitado)]] | `arquivado` | MES: API | Arquivados | — | — | — | — | — |
 | API-003 | — | [[API-003-Requisicao-Compra-Integracao-MES\|Requisição de compra MES → av-hub (versão polling)]] | `arquivado` | av-hub: API · MES: API | Arquivados | P3 | — | — | — | — |
@@ -75,6 +76,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | API-012 | Contrato 012 | [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela\|Produtos: prováveis duplicatas (rota `GET /produtos/duplicatas` e nova tela)]] | `proposta` | av-hub: banco, API, front | Ativos | — | — | Gustavo: rota `GET /produtos/duplicatas` antes de `/:id` e cache de 60 s | Nathan: BFF, serviço sem varredura e tela nova | — |
 | API-013 | Contrato 013 | [[API-013-Acompanhamento-de-Clientes-So-Cliente-e-Periodo-Total\|Acompanhamento de clientes: só clientes (tag) e período total]] | `aplicado-em-producao` | av-hub: API, front | Entregues | — | — | — | — | — |
 | LOG-53 | Contrato 53 | [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado\|Ordem de Produção e lote do fabricado (MES)]] | `proposta` | MES: banco, API, front | Ativos | P2, F1, Q7, Q8, E5 | Entidade e PDF da OP, lote `PRODUCAO` por OP e produto, aprovado volta ao Estoque (BL-052, BL-008) | — | Nathan: Q4 (HRM) e conteúdo do PDF | — |
+| LOG-55 | Contrato 55 | [[LOG-55-Compras-Excluir-Requisicao\|Compras: excluir requisição de compra (exclusão lógica, só criada no Hub e sem OC)]] | `proposta` | av-hub: banco, API, front | Ativos | C0, C1 | — | Gustavo: `deleted_at` + trigger + filtrar views | Nathan: Q1 (do MES?) e Q2 (`pode_deletar` do Comprador); front escrito | — |
 | LOG-54 | Contrato 54 | [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada\|Documento de retirada e baixa do saldo na retirada (MES)]] | `proposta` | MES: banco, API, front | Ativos | E6, X1, F1 | Modelo, rotas, telas e baixa na confirmação; tirar a baixa da Embalagem e da entrega (BL-007) | — | Nathan: Q1 e Q2 (quem gera, o que imprime, reserva) e Q3 (entra no Ciclo 1?) | — |
 | LOG-01 | Contrato 01 | [[LOG-01-Compras-Fluxo-Completo\|Compras: requisição, ordem de compra e sincronização com o Omie]] | `implementado-no-codigo` | av-hub: banco, API | Entregues | C0, C1, C4 | — | — | — | — |
 | LOG-02 | Contrato 02 | [[LOG-02-Funcionarios-Listagem-Filtros-Ordenacao-Resumo\|Funcionários: filtro, ordenação, paginação e resumo no servidor]] | `implementado-no-codigo` | av-hub: banco, API | Entregues | — | — | — | — | — |
@@ -174,6 +176,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Gustavo (DBA: banco e API do av-hub)
 
+- [[SQL-014-Pedido-Encerrado-por-Saldo-Zerado|SQL-014]]: Gustavo: validar a consulta de pedidos com original zerado e calcular `encerrado_por_saldo`, `encerrado_em_atraso` e a situação `faturado_encerrado` em `fn_pedidos_venda`; decisões de borda do Nathan já respondidas
 - [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso|SQL-013]] e [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela|API-012]]: Gustavo: funções de normalização, pares e uso, colunas geradas em `core.produtos`, rota `GET /produtos/duplicatas`
 - [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Gustavo: migration `finalidade`, POST/PATCH com pedido de venda e produto do cadastro, trava da OC na mesma unidade; responder Q1 e Q4 (junto do API-009, BL-064)
 - [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Gustavo: pedido de venda no POST/PATCH da requisição e `GET /compras/requisicoes/referencia` (BL-064); responder Q1 a Q4
