@@ -1,10 +1,10 @@
 ---
 tags: [anexo, comercial, suprimentos, api-comercial, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-19
+atualizado: 2026-10-20
 status: vigente
 dono: Pablo
-fontes: [HUB 9c280c7 (develop de 19/10/2026) api-comercial/ (prisma, src/modules, src/domain/simulador, Dockerfile, env.ts), app/(protected)/vendas, orcamento e compras, app/api/comercial, next.config.ts, PRs #211 a #216 e #219]
+fontes: [HUB fd81624 (develop de 20/10/2026) api-comercial/ (prisma, src/modules, src/domain/simulador, Dockerfile, env.ts), app/(protected)/vendas, orcamento e compras, components/Propostas/PropostaForm, lib/comercial/AprovacaoPropostaPdf.tsx, app/api/comercial, next.config.ts, PRs #211 a #216, #219 a #222 e #225]
 ---
 
 # Comercial e Suprimentos (`api-comercial`)
@@ -28,6 +28,10 @@ Fora do fluxo 0b e do MES. É o segundo backend do HUB: propostas, clientes, ofe
 | Escopo de vendedores | `proprios` restringe ao responsável; `todos` vê tudo; **`vinculados` ainda não restringe nada** (ver Pendências). O filtro `?responsavel=` soma ao escopo e não o substitui mais | ✅ `propostas.service.ts` (`whereEscopo`), `clientes.routes.ts` (`restricaoCarteira`), PR #219 |
 | Motor do Simulador de Comissões | Cópia de `lib/simulador/motor.ts` em `src/domain/simulador/`, sem mudança de fórmula, com 47 testes e um teste de paridade que falha se as duas cópias divergirem. Vive até a migração do LOG-52 | ✅ PR #215, `test/unit/simulador-motor.test.ts` |
 | Análise da proposta | Ao salvar e no `POST /calcular`, o motor calcula custo líquido, preço sugerido, margem e letra com os parâmetros do simulador da unidade (lidos do hub) e grava na proposta. A proposta salva mesmo sem análise e a resposta lista o que falta (`analise_pendencias`). A comissão prevista é gravada e não é devolvida | ✅ PR #215, `src/modules/propostas/analise.ts` |
+| Análise na tela da proposta | Para quem vê custo: seção "Análise de margem" (destino pré-selecionado pela UF do cliente, condição da tabela de encargos, frete na compra e DIFAL) e, em cada item, o lado da compra com custo líquido, preço sugerido (botão "usar"), margem e letra ou o selo FAB. As listas vêm de `GET /propostas/parametros_analise` (só as chaves das tabelas) | ✅ PR #220 |
+| "Sugerir custos" | Com as origens da vigência, `POST /custos/sugerir` devolve também o lado da compra da oferta escolhida (preço, quantidade e unidade comprada, origem, IPI e ST), pela mesma decomposição do Simulador de Comissões (`ladoCompra.ts`), e a tela preenche os itens de revenda | ✅ PR #221 |
+| Fórmula antiga de preço (RN-020) | Com a análise disponível, sai da tela (custo, kg/m, metragem, margem % e margem real); item ainda na fórmula mostra "Fixar preço". O servidor continua aplicando a fórmula onde ela está preenchida (telha, propostas antigas, carga do ERP antigo) | ✅ PR #222 |
+| PDF de aprovação interna | Proposta com análise: custo líquido com o resumo da compra, preço praticado e sugerido, margem e letra (ou FAB) por item; no topo, custo líquido, margem líquida do pedido com a letra e itens no prejuízo. Proposta sem análise: o formato antigo. A comissão não sai | ✅ PR #225 |
 | BFF | `app/api/comercial/[...rota]/route.ts` com lista de rota, método, tela e ação | ✅ |
 | Publicação | Sem ambiente de produção decidido; roteiro em `docs/ENVIAR - roteiro-publicacao-api-comercial.md` | 🔴 Pablo, Nathan |
 
@@ -50,5 +54,6 @@ A URL é a cadeia de slugs do `auth.telas`; as telas seguem a distribuição fei
 
 - **Escopo `vinculados`** (RS-021): a regra está definida na Q3 do [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] (os vendedores do próprio usuário, os titulares que ele auxilia e os que diligencia) 📝. Falta implementar: o `api-comercial` não guarda os vendedores do Omie de cada usuário, e aplicar a regra muda o que a auxiliar vê hoje 🔴 Pablo (implementação), Nathan (aceite).
 - Publicar o serviço, decidir cluster do schema `core_comercial` e se a migração roda no Dockerfile ou antes 🔴 Pablo e Nathan.
-- Proposta de Orçamento (a tela da proposta com as condições e os itens do simulador) e a emissão só pela auxiliar: não começadas 🔴 Pablo.
+- **Emissão só pela auxiliar** (fase 5 da Proposta de Orçamento): rascunho sem número até a auxiliar emitir. 📝 O vendedor pode tirar uma prévia do PDF marcada como rascunho. 🔴 Comercial: a revisão de uma proposta emitida volta para a auxiliar? Item no prejuízo bloqueia a emissão ou só avisa? Pablo (implementação).
+- **Relatório Gerencial com a margem líquida** (fase 6): misturar a margem bruta das propostas antigas com a líquida das novas na mesma média distorce o número 🔴 gestão comercial (decisão), Pablo (implementação).
 - E-mail da proposta: `EMAIL_TRANSPORTE` aceita `smtp` ou `memoria` (padrão `smtp`) ✅ `env.ts`; se o SMTP está configurado em produção ❓.
