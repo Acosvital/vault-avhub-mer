@@ -118,6 +118,12 @@ Casos para conferir (dados do preview de 21/10/2026):
 
 Hoje a API devolve `false` nos dois, porque compara com a previsão da parcela (28/09 e 15/10).
 
+## Etapa do pedido encerrado (21/10/2026)
+
+Com a regra ligada, o pedido 27762 (encerrado) ainda vem com `etapa_atual_descricao = 'Liberado Compras'` e a página mostra "Etapa 2 de 6", porque `etapa_atual` é a primeira parcial não faturada e o original zerado (valor 0, sem flag `faturado`) conta como aberto.
+
+Pedido ao Gustavo: quando `encerrado_por_saldo`, `etapa_atual` e `etapa_atual_descricao` devem ser os da **última etapa do fluxo** (a da última parcial faturada, "Faturado"/"Despachado"), e a parcial 0 de valor 0 não deve contar como "não faturada" nessa escolha. Conferir no 27762 e no 23966.
+
 ## Dá para saber a data em que zerou?
 
 Sim, de forma aproximada e sem tabela nova: `max(data_faturamento)` das parciais faturadas. `pedidos_vendas_status_historico` guarda só mudanças de `situacao` e `data_previsao` (com `detectado_em`); **não** guarda mudança de valor, então não dá o instante exato em que o original zerou. Se o Nathan quiser o instante exato, o caminho é gravar a mudança de `valor_total_pedido` do original no sync (fora do escopo desta proposta).
