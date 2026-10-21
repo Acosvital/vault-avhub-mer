@@ -3,8 +3,8 @@ id: API-012
 aliases: ["Contrato 012", "012-Produtos-Provaveis-Duplicatas"]
 tags: [contrato, contrato-api, produtos, duplicatas, catalogo, av-hub, leitura, sql]
 criado: 2026-10-19
-atualizado: 2026-10-19
-status: proposta
+atualizado: 2026-10-21
+status: implementado-no-codigo
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
 etapa_0b: []
@@ -16,13 +16,17 @@ criado_original: 2026-10-19
 
 > **Onde atua:** av-hub: banco, API, front
 
-> [!info] Situação em 19/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
+> [!info] Situação em 21/10/2026
+> **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
 >
 > - ✅ **Tela atual** (`/cadastros/auxiliares/produtos-duplicados`): só leitura, cálculo no navegador, agrupa por descrição normalizada **igual** + família + unidade; mostra código, código Omie, família e status; o botão "Vincular como alias" está desabilitado (`page.tsx:181-189`).
 > - ✅ **Não existe** rota de duplicatas na `api-acos-vital`; a rota `/produtos` só lista e filtra por texto (`produtos.route.js:44-60`).
 > - 📝 **Decisão do Nathan, 19/10/2026:** cálculo no banco e na API; **só leitura, sem alias** (mantém a rejeição de 21/09/2026, [[API-002-Material-Alias-Omie-MES]]); **por unidade**; mostrar uso em venda, OC, estoque e fornecedores.
-> - 🔴 Nada deste contrato está codificado nem testado. Depende do [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso]] (funções do banco).
+> - ✅ **Rota na `develop` da `api-acos-vital`** (commit `c685571`, 21/10/2026): `GET /produtos/duplicatas` registrada antes de `/:id`, com escopo de unidade (403), 404 para unidade inexistente, cache de 60 s dos pares, swagger e testes unitários (`test/unit/produtosDuplicatas.test.js`). Devolve também `motivo_sugestao` no item sugerido (`unico_ativo`, `mais_usado`, `maior_estoque`, `mais_antigo`, `menor_id`), além do contrato.
+> - ✅ **Tela no `av-hub`** (`develop`, PR #223): consome a rota por BFF `GET /api/produtos/duplicatas`, com uma chamada só. Testado em 21/10/2026 contra a API real: 200 nas 3 unidades (Aços Vital 7.079 grupos em 53.515 produtos), 0,9 a 9,6 s sem cache e cerca de 0,45 s com cache.
+> - 🟡 **Ainda no front:** o fallback de dados de exemplo (`produtosDuplicadosMock.ts` e o tratamento de 404/400 em `produtosDuplicados.ts`) segue no código; remover. A tela calcula o texto do motivo da sugestão; trocar por `motivo_sugestao` da API.
+> - 🟡 **Qualidade da nota, a melhorar** (ver [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso]]): medidas em ordem, variações por unidade, grupos em corrente e faixa `alta`.
+> - 📝 **Em modelagem (21/10/2026, experimental):** curadoria dos grupos (tirar, incluir, confirmar, salvar, nome do grupo e referência nos pedidos). Mudaria a decisão de "só leitura" e é assunto de contrato novo, ainda não escrito.
 > - **MES (Robert): sem trabalho.** Este contrato não toca o MES nem o `api-pcp`.
 >
 > Selos em [[Regras-do-Vault]].

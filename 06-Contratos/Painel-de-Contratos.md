@@ -17,17 +17,17 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 18 | 6 | 24 |
-| `Entregues` (feito no código ou aplicado) | 55 | 12 | 67 |
+| `Ativos` (a fazer ou parcial) | 17 | 6 | 23 |
+| `Entregues` (feito no código ou aplicado) | 56 | 12 | 68 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
 | **Total** | **84** | **18** | **102** |
 
 | Status | Contratos |
 |---|---|
-| `proposta` | 10 |
+| `proposta` | 6 |
 | `para-implementar` | 0 |
-| `parcial` | 8 |
-| `implementado-no-codigo` | 45 |
+| `parcial` | 11 |
+| `implementado-no-codigo` | 46 |
 | `aplicado-em-producao` | 10 |
 | `arquivado` | 11 |
 
@@ -70,12 +70,12 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | API-006 | Contrato 006 | [[API-006-Status-por-Item-Leitura-no-Hub\|Status por item: leitura no hub (job e rota)]] | `implementado-no-codigo` | av-hub: API, front · MES: API | Entregues | F1, X1, Q7 | — | — | — | — |
 | API-007 | Contrato 007 (API) | [[API-007-Referencia-OC-Valores-no-MES\|Valores da OC na referência (hub → MES) e projeção no MES]] | `parcial` | av-hub: banco, API · MES: API | Ativos | C4, R4 | Job e projeção com valores já no K4 (PR #59); falta gravar o custo da OC no lote (K5, R4) | — | — | — |
 | API-008 | Contrato 008 | [[API-008-Custo-do-Lote-no-MES\|Custo do lote no MES (`lote_custo`, G1, recebimento, consumo, `GET /itens/custo`)]] | `parcial` | av-hub: API · MES: API | Ativos | R4, E3, E5 | §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`; modelo do imposto por item para os cenários com e sem imposto (PS-014, BL-053; contrato não editado) | — | — | — |
-| API-009 | Contrato 009 | [[API-009-Referencia-Requisicao-Hub-Integracao-MES\|Referência da requisição do Compras com pedido de venda (av-hub → MES)]] | `proposta` | av-hub: banco, API · MES: API, front | Ativos | C0, P1, P2, P3, E1 | Job de leitura junto do da referência da OC, projeção, tela do PCP e aviso de compra duplicada (BL-065) | Gustavo: POST/PATCH com pedido de venda e a rota `GET /compras/requisicoes/referencia` (BL-064); responder Q1 a Q4 | Nathan: campo "Pedido de venda" na "Nova requisição" (BL-041); decidir Q5 | — |
-| API-010 | Contrato 010 | [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto\|Requisição do Compras: finalidade, pedido de venda e produto do cadastro]] | `proposta` | av-hub: banco, API, front | Ativos | C0 | — | Gustavo: migration (`finalidade`), POST/PATCH com pedido de venda e produto, trava da OC na mesma unidade; responder Q1 e Q4 | Nathan: tela nova pronta (PR #209); a OC herda a finalidade; decidir Q2 e Q3 | — |
+| API-009 | Contrato 009 | [[API-009-Referencia-Requisicao-Hub-Integracao-MES\|Referência da requisição do Compras com pedido de venda (av-hub → MES)]] | `parcial` | av-hub: banco, API · MES: API, front | Ativos | C0, P1, P2, P3, E1 | Job de leitura junto do da referência da OC, projeção, tela do PCP e aviso de compra duplicada (BL-065) | Gustavo: POST/PATCH com pedido de venda e a rota `GET /compras/requisicoes/referencia` (BL-064); responder Q1 a Q4 | Nathan: campo "Pedido de venda" na "Nova requisição" (BL-041); decidir Q5 | — |
+| API-010 | Contrato 010 | [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto\|Requisição do Compras: finalidade, pedido de venda e produto do cadastro]] | `parcial` | av-hub: banco, API, front | Ativos | C0 | — | Gustavo: migration (`finalidade`), POST/PATCH com pedido de venda e produto, trava da OC na mesma unidade; responder Q1 e Q4 | Nathan: tela nova pronta (PR #209); a OC herda a finalidade; decidir Q2 e Q3 | — |
 | API-011 | Contrato 011 | [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno\|Compra em andamento, recebimento por item da OC e uso interno (MES)]] | `proposta` | MES: banco, API, front | Ativos | P1, P2, P3, E1, R0, R1, R4 | Cruzamento e abate, aviso ao requisitar, requisição interna "origem hub", saldo futuro, recebimento por item da OC e por NF, uso interno (BL-049, BL-050, BL-051, BL-065) | Gustavo: API-009 e API-010 | Nathan: Q3 (contabilidade e EPI) e Q5 (BL-049 e BL-050 no Ciclo 1) | — |
-| API-012 | Contrato 012 | [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela\|Produtos: prováveis duplicatas (rota `GET /produtos/duplicatas` e nova tela)]] | `proposta` | av-hub: banco, API, front | Ativos | — | — | Gustavo: rota `GET /produtos/duplicatas` antes de `/:id` e cache de 60 s | Nathan: BFF, serviço sem varredura e tela nova | — |
+| API-012 | Contrato 012 | [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela\|Produtos: prováveis duplicatas (rota `GET /produtos/duplicatas` e nova tela)]] | `implementado-no-codigo` | av-hub: banco, API, front | Entregues | — | — | Gustavo: rota `GET /produtos/duplicatas` antes de `/:id` e cache de 60 s | Nathan: BFF, serviço sem varredura e tela nova | — |
 | API-013 | Contrato 013 | [[API-013-Acompanhamento-de-Clientes-So-Cliente-e-Periodo-Total\|Acompanhamento de clientes: só clientes (tag) e período total]] | `aplicado-em-producao` | av-hub: API, front | Entregues | — | — | — | — | — |
-| API-014 | Contrato 014 | [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes\|Setor do cliente e do grupo no Acompanhamento de clientes]] | `proposta` | av-hub: banco, API, front | Ativos | — | — | Gustavo: tabelas `setores_clientes` e `clientes_setor`, rotas de setor e `id_setor`/`setor` na lista | Nathan: coluna, filtro e quadro por setor, campo Setor e Excel | — |
+| API-014 | Contrato 014 | [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes\|Setor do cliente e do grupo no Acompanhamento de clientes]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | Gustavo: tabelas `setores_clientes` e `clientes_setor`, rotas de setor e `id_setor`/`setor` na lista | Nathan: coluna, filtro e quadro por setor, campo Setor e Excel | — |
 | LOG-53 | Contrato 53 | [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado\|Ordem de Produção e lote do fabricado (MES)]] | `proposta` | MES: banco, API, front | Ativos | P2, F1, Q7, Q8, E5 | Entidade e PDF da OP, lote `PRODUCAO` por OP e produto, aprovado volta ao Estoque (BL-052, BL-008) | — | Nathan: Q4 (HRM) e conteúdo do PDF | — |
 | LOG-55 | Contrato 55 | [[LOG-55-Compras-Excluir-Requisicao\|Compras: excluir requisição de compra (exclusão lógica, só criada no Hub e sem OC)]] | `proposta` | av-hub: banco, API, front | Ativos | C0, C1 | — | Gustavo: `deleted_at` + trigger + filtrar views | Nathan: Q2 (`pode_deletar` do Comprador); front escrito | — |
 | LOG-54 | Contrato 54 | [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada\|Documento de retirada e baixa do saldo na retirada (MES)]] | `proposta` | MES: banco, API, front | Ativos | E6, X1, F1 | Modelo, rotas, telas e baixa na confirmação; tirar a baixa da Embalagem e da entrega (BL-007) | — | Nathan: Q1 e Q2 (quem gera, o que imprime, reserva) e Q3 (entra no Ciclo 1?) | — |

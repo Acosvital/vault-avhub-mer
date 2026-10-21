@@ -17,11 +17,12 @@ criado_original: 2026-10-21
 > **Onde atua:** av-hub: banco, API, front
 
 > [!info] Situação em 21/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
+> **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
 >
 > - 📝 **Pedido do Nathan, 21/10/2026:** quem cuida dos clientes precisa poder **categorizar o cliente (CNPJ) ou o grupo de empresa por setor**, escolhendo de uma lista e **podendo acrescentar um setor novo** quando o cliente não é de nenhum dos listados. Lista inicial: Agricultura, Arquitetura e Design, Automotivo, Construção Civil, Energia, Indústria Naval, Mineração, Óleo & Gás, Papel & Celulose, Petroquímica, Saneamento e Siderurgia.
 > - ✅ **Hoje não existe** setor do cliente na tela nem no banco do Acompanhamento. `core.parceiros` traz só `cnae` e `tipo_atividade` (vêm do Omie e não servem como lista de setores). O campo `segmento` de `core_comercial.clientes` é do CRM do Comercial, tem outra lista (INDUSTRIA, MINERACAO, ENGENHARIA…) e **não** é o setor deste contrato: os dois ficam separados.
-> - 🔴 Nada deste contrato está codificado nem testado.
+> - ✅ **Front no `av-hub`** (`develop`, PR #235, `77ef66f`): campo de setor na tela do Acompanhamento (`SetorCampo.tsx`), serviço, tipos e planilha.
+> - 🔴 **Banco e API não existem** (busca na `develop` da `api-acos-vital`, 21/10/2026): nenhuma rota `/setores_clientes` nem `PUT /clientes_setor`, e `fn_acompanhamento_clientes` não traz `id_setor`. Enquanto isso o front chama algo que a API ainda não oferece.
 > - **MES (Robert): sem trabalho.**
 >
 > Selos em [[Regras-do-Vault]].
