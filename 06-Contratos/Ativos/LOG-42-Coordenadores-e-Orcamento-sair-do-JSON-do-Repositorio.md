@@ -16,11 +16,12 @@ criado_original: 2026-10-07
 
 > **Onde atua:** av-hub: banco, API, front
 
-> [!info] Situação em 14/10/2026
+> [!info] Situação em 21/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Nathan
 >
 > - ✅ **API pronta:** `GET /orcamento/*` (`api-acos-vital/src/schemas/core_compras/aggregates/orcamento/orcamento.route.js`, montada em `core_compras/index.js:37`; tabelas `core_compras.orc_*` no dump) e `GET /dashboard/comissoes` com os coordenadores vindos de `core_comissionamento.comissao_coordenadores` (`Dump Avhub (Esqueleto).sql:12228`).
-> - 🔴 **Front (HUB):** não conferido; o contrato ainda pede que o Nathan tire os JSON de `lib/orcamento/data/` e `lib/comissoes/coordenadores.json` do repositório e remova as marcas O1, O2, C1 a C3 (❓ HUB fora da pasta de repos).
+> - ✅ **Orçamento:** `lib/orcamento/data/` não existe mais no `av-hub` (`develop`, 21/10/2026).
+> - 🔴 **Coordenadores:** `lib/comissoes/coordenadores.json` e `coordenadores.ts` continuam no repositório; falta o Nathan tirá-los e remover as marcas C1 a C3.
 > - 📝 Orçamento: desenvolvido por fora, no módulo Comercial & Suprimentos (decisão #39 do vault v1); proposta de remover a tela e o código legado do av-hub quando o módulo novo a substituir. Fora do fluxo de Atividades (ver anexo `10-Anexo-Fora-do-Fluxo`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
