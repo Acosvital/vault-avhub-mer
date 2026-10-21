@@ -165,8 +165,8 @@ Observação sobre o desvio: a mediana de `data_previsao − data_inclusao` das 
 Para o **Nathan:**
 
 1. **Q5 (respondida em 21/10/2026).** O cartão "Em avanço" mostra a **quantidade e o valor**. Valor = saldo em carteira dos pedidos marcados (suposição mantida, o Nathan não pediu outra); o já faturado fica na linha de apoio.
-2. **Q6.** A marca é só "Avanço" por enquanto ou já quer outras opções no dropdown?
-3. **Q7.** Qualquer diligenciador do vendedor pode marcar/desmarcar, ou só um responsável?
+2. **Q6 (respondida em 21/10/2026).** O dropdown tem **só "Avanço"** (além do "—" sem marca).
+3. **Q7 (respondida em 21/10/2026).** **Qualquer diligenciador do vendedor** pode marcar e desmarcar. Não há responsável único.
 
 Para o **Gustavo:** a marca é uma tabela de histórico (proposto) ou uma coluna em `pedidos_vendas`? A coluna é mais simples, mas a tabela guarda quem marcou e desmarcou sem perder o passado e não é apagada pelo sync do Omie.
 
