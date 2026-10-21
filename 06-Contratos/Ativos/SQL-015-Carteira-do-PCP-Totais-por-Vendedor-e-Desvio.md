@@ -22,6 +22,7 @@ criado_original: 2026-10-21
 > - 📝 **Pedido do Nathan, 21/10/2026:** o PCP (diligenciadores) precisa ver no **Dashboard PCP** o valor total em carteira, o que está dentro do prazo, o que está atrasado, os itens com desvio e a **carteira por vendedor**. O faturamento do mês já existe no dashboard. "Valor em avanço" ficou **de fora** por decisão do Nathan. A **previsão atualizada** (CCP) não faz parte deste contrato: a regra ainda não foi decidida, ver "Fora deste contrato".
 > - ✅ Os números abaixo foram medidos em 21/10/2026 no preview (perfil admin, pedidos incluídos em 2026, 8.455 pedidos fora da blacklist, 66 vendedores) somando no navegador as parcelas de `GET /pedidos_venda`. Servem de **conferência**: o banco deve chegar nos mesmos valores com a mesma janela.
 > - 🔴 Nenhum SQL deste contrato existe. Não montei script: o desenho (funções, nomes e plano de consulta) é do Gustavo. O contrato define **o que significa cada número**.
+> - ✅ Decisões Q1 a Q4 do Nathan registradas em 21/10/2026 (seção "Perguntas em aberto"). Falta o Gustavo (G1 a G3).
 > - ❓ Desempenho: somar no navegador pede 43 páginas de 200 pedidos (cerca de 100 segundos). Por isso o cálculo tem de ser no banco.
 >
 > Selos em [[Regras-do-Vault]].
@@ -144,12 +145,12 @@ Observação sobre o desvio: a mediana de `data_previsao − data_inclusao` das 
 
 ## Perguntas em aberto
 
-Para o **Nathan**:
+Decididas pelo **Nathan** em 21/10/2026:
 
-1. **Q1.** Pedido de cliente YPFB (`eh_ypfb`) entra na carteira? Hoje ele fica fora do "bruto" das vendas, mas aparece na lista.
-2. **Q2.** "No prazo" inclui "vence hoje" (suposição deste contrato)? Ou "vence hoje" vira um balde separado?
-3. **Q3.** Na carteira por vendedor, no prazo e atrasados são da **carteira inteira** (suposição) ou só dos pedidos incluídos no mês? Só `pedidos_mes` usa o período neste contrato.
-4. **Q4.** O corte do desvio é 10 dias corridos a partir da inclusão do cabeçalho. Confirma, ou prefere dias úteis?
+1. **Q1.** Pedido de cliente YPFB (`eh_ypfb`) **entra** na carteira, como qualquer outro.
+2. **Q2.** "No prazo" **inclui** "vence hoje".
+3. **Q3.** No prazo e atrasados, na carteira por vendedor, são da **carteira inteira**; só `pedidos_mes` usa o período.
+4. **Q4.** O desvio usa **10 dias corridos** a partir da inclusão do cabeçalho.
 
 Para o **Gustavo**:
 
