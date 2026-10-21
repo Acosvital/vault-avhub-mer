@@ -60,7 +60,7 @@ flowchart TD
     end
 
     subgraph SEC_COMP["Compras · av-hub + Compras · CCP no MES"]
-        C0["C0 · Requisição de compra<br/>(origem Compras, no av-hub)<br/>o MES lê a OC, não a requisição"]
+        C0["C0 · Requisição de compra<br/>(origem Compras, no av-hub)<br/>o MES lê a OC, não a requisição<br/>pode ser excluída enquanto sem OC"]
         C1["C1 · Cotação e negociação"]
         C2{"C2 · Acima de R$ 30 mil?"}
         C3["C3 · Gerente de Compras aprova<br/>OC acima de R$ 30 mil"]
@@ -165,7 +165,7 @@ flowchart TD
 | P1 | PCP | Lista os pedidos liberados | Triagem dos Pedidos · "Carteira" · `/carteira` (app-pcp) | `GET /pedidos/carteira` → `GET /pedidos_liberados` · LOG-26 | ✅ nomes técnicos antigos 🔴 |
 | P2 | PCP | Define destino (FABRICACAO ou REVENDA) e quantidade ≤ restante por item e rodada; insere Estoque como etapa 1; confirma importação | Destinação do Pedido · "Nova Ordem de Produção" · `/ordens-producao/novo` | `POST /pedidos/completo/lote`; `POST /pedidos_liberados/:n/importado` · LOG-26 | ✅ |
 | P3 | PCP | Requisição de compra do material do pedido (origem PCP) | Requisições de compras · `/compras/requisicoes` | `POST /compras/requisicoes`; envio `PUT /compras/requisicoes/origem/:id_origem` · LOG-34 | ✅ |
-| C0 | Compras | Requisição de necessidade própria do Compras (origem av-hub), sem pedido de venda | Nova requisição · `/compras/requisicoes` (HUB) | `POST /compras/requisicoes` (av-hub) | ✅ no av-hub; a requisição não chega ao MES, mas a **OC** dela deve chegar (o MES lê `GET /ordens-compra/referencia`): PCP vê a OC do pedido e o Estoque vê o saldo futuro 📝 (N14-20), 🔴 MES não lê |
+| C0 | Compras | Requisição de necessidade própria do Compras (origem av-hub), sem pedido de venda | Nova requisição · `/compras/requisicoes` (HUB) | `POST /compras/requisicoes` (av-hub); `DELETE /compras/requisicoes/:id` 🔴 (exclusão lógica da requisição criada no Hub e sem OC; a do MES se cancela com motivo; [[LOG-55-Compras-Excluir-Requisicao]]) | ✅ no av-hub; a requisição não chega ao MES, mas a **OC** dela deve chegar (o MES lê `GET /ordens-compra/referencia`): PCP vê a OC do pedido e o Estoque vê o saldo futuro 📝 (N14-20), 🔴 MES não lê |
 | E1 | Estoque | Saldo disponível = lotes LIBERADO − reservas ATIVA na filial do pedido | Atendimento · `/estoque-operacao/atendimento` | `GET /estoque/saldo/disponivel-parcial/:idItemParcial` | ✅ |
 | E2 | Estoque | Decide se o saldo cobre (saldo zero exige clique, #31b) | idem | — | ✅ |
 | E3 | Estoque | Atende pelo saldo: split + reserva; custo do item = média dos lotes | idem | `PATCH /itens-parciais/:id/atender-estoque` | ✅ custo do item 🔴 (sem `GET /itens/custo`) |

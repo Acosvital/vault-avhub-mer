@@ -21,7 +21,8 @@ criado_original: 2026-10-20
 >
 > - ✅ **Front (av-hub) escrito, ainda não verificado na tela:** botão "Excluir" na lista de Requisições, confirmação, rota `DELETE /api/compras/requisicoes/:id` no BFF. Sem a API, o botão devolve o erro do backend.
 > - 🔴 **Banco e API: não existem.** Hoje a requisição só tem `GET`, `PATCH` de status e `POST`. Não há `deleted_at` em `requisicoes_compra` nem rota `DELETE`.
-> - 🔴 **Perguntas abertas** (seção 6): excluir requisição que veio do MES, e o perfil Comprador ter `pode_deletar` em `compras`.
+> - ✅ **Q1 decidida (20/10):** só a criada no Hub; a do MES continua cancelada com motivo.
+> - 🔴 **Pergunta aberta** (seção 6): o perfil Comprador ter `pode_deletar` em `compras` (Q2).
 
 ## 1. Por quê
 
@@ -33,7 +34,7 @@ O comprador não consegue apagar uma requisição. Só existe **cancelar** (kanb
 |---|---|---|
 | 1 | Excluir é **exclusão lógica** (`deleted_at`, `deleted_by`): a linha fica no banco para auditoria. Nada de `DELETE` físico | 🟡 |
 | 2 | Só exclui requisição **sem OC** (`id_ordem_compra IS NULL`) e com status diferente de `atendida` | 🟡 |
-| 3 | Só exclui requisição **criada no Hub** (`id_origem IS NULL`). A que veio do MES se **cancela com motivo**; apagar deixaria o MES com a parcial pendurada | 🟡 Q1 |
+| 3 | Só exclui requisição **criada no Hub** (`id_origem IS NULL`). A que veio do MES se **cancela com motivo**; apagar deixaria o MES com a parcial pendurada | 📝 Q1 (Nathan, 20/10) |
 | 4 | Requisição excluída some de **todas** as leituras (lista, resumo, kanban, eventos para o MES, `GET /:id` devolve 404) e não conta nos KPIs | 🟡 |
 | 5 | Quem exclui precisa de `pode_deletar` na tela `compras` **e** ser comprador da unidade (`codigo_empresa`) da requisição, como já vale para fechar a compra | 🟡 Q2 |
 | 6 | Excluir requisição **já vinculada a pedido de venda** (`numero_pedido_venda`) é permitido: o vínculo é só referência. A API recalcula o "saldo a comprar" do pedido | 🟡 |
@@ -96,7 +97,7 @@ O `error` dos 4xx é repassado ao usuário como está (o BFF já faz isso em `re
 
 | # | Pergunta | Para | Padrão adotado |
 |---|---|---|---|
-| Q1 | O comprador precisa **excluir requisição que veio do MES** (e não só cancelar)? Se sim, o MES precisa ser avisado (novo marco) e o polling por `id_origem` não pode recriá-la | Nathan, Robert | **Não**: só a criada no Hub |
+| Q1 | O comprador precisa **excluir requisição que veio do MES** (e não só cancelar)? Se sim, o MES precisa ser avisado (novo marco) e o polling por `id_origem` não pode recriá-la | Nathan, Robert | ✅ **Decidido (Nathan, 20/10): não**; só a criada no Hub, a do MES se cancela com motivo |
 | Q2 | O perfil **Comprador** recebe `pode_deletar` em `compras`? Sem isso o botão não aparece, mesmo com tudo pronto | Nathan (perfis) | Ajustar o perfil no banco, não no código |
 
 ## 7. Como testar

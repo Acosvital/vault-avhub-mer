@@ -173,7 +173,13 @@ stateDiagram-v2
     aberta --> atendida : trigger da OC
     em_cotacao --> atendida : trigger da OC
     atendida --> [*]
+    aberta --> excluida : DELETE, so criada no Hub (LOG-55)
+    em_cotacao --> excluida : DELETE, so criada no Hub (LOG-55)
+    cancelada --> excluida : DELETE, so criada no Hub (LOG-55)
+    excluida --> [*]
 ```
+
+🔴 `excluida` é 📝 proposta ([[LOG-55-Compras-Excluir-Requisicao]]): exclusão lógica (`deleted_at`), sem OC e sem `id_origem`; a requisição do MES continua só cancelável. Banco e API ainda não existem.
 
 Selo ✅ `requisicoes_compra.route.js:13-22` (`atendida` só pela trigger da OC, nunca pelo PATCH); 409 `REQUISICAO_COM_OC` ao cancelar com OC (`:221-265`).
 
