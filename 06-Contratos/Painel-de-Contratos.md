@@ -75,6 +75,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | API-011 | Contrato 011 | [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno\|Compra em andamento, recebimento por item da OC e uso interno (MES)]] | `proposta` | MES: banco, API, front | Ativos | P1, P2, P3, E1, R0, R1, R4 | Cruzamento e abate, aviso ao requisitar, requisição interna "origem hub", saldo futuro, recebimento por item da OC e por NF, uso interno (BL-049, BL-050, BL-051, BL-065) | Gustavo: API-009 e API-010 | Nathan: Q3 (contabilidade e EPI) e Q5 (BL-049 e BL-050 no Ciclo 1) | — |
 | API-012 | Contrato 012 | [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela\|Produtos: prováveis duplicatas (rota `GET /produtos/duplicatas` e nova tela)]] | `proposta` | av-hub: banco, API, front | Ativos | — | — | Gustavo: rota `GET /produtos/duplicatas` antes de `/:id` e cache de 60 s | Nathan: BFF, serviço sem varredura e tela nova | — |
 | API-013 | Contrato 013 | [[API-013-Acompanhamento-de-Clientes-So-Cliente-e-Periodo-Total\|Acompanhamento de clientes: só clientes (tag) e período total]] | `aplicado-em-producao` | av-hub: API, front | Entregues | — | — | — | — | — |
+| API-014 | Contrato 014 | [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes\|Setor do cliente e do grupo no Acompanhamento de clientes]] | `proposta` | av-hub: banco, API, front | Ativos | — | — | Gustavo: tabelas `setores_clientes` e `clientes_setor`, rotas de setor e `id_setor`/`setor` na lista | Nathan: coluna, filtro e quadro por setor, campo Setor e Excel | — |
 | LOG-53 | Contrato 53 | [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado\|Ordem de Produção e lote do fabricado (MES)]] | `proposta` | MES: banco, API, front | Ativos | P2, F1, Q7, Q8, E5 | Entidade e PDF da OP, lote `PRODUCAO` por OP e produto, aprovado volta ao Estoque (BL-052, BL-008) | — | Nathan: Q4 (HRM) e conteúdo do PDF | — |
 | LOG-55 | Contrato 55 | [[LOG-55-Compras-Excluir-Requisicao\|Compras: excluir requisição de compra (exclusão lógica, só criada no Hub e sem OC)]] | `proposta` | av-hub: banco, API, front | Ativos | C0, C1 | — | Gustavo: `deleted_at` + trigger + filtrar views | Nathan: Q2 (`pode_deletar` do Comprador); front escrito | — |
 | LOG-54 | Contrato 54 | [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada\|Documento de retirada e baixa do saldo na retirada (MES)]] | `proposta` | MES: banco, API, front | Ativos | E6, X1, F1 | Modelo, rotas, telas e baixa na confirmação; tirar a baixa da Embalagem e da entrega (BL-007) | — | Nathan: Q1 e Q2 (quem gera, o que imprime, reserva) e Q3 (entra no Ciclo 1?) | — |
@@ -176,6 +177,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Gustavo (DBA: banco e API do av-hub)
 
+- [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes|API-014]]: Gustavo: tabelas `setores_clientes` e `clientes_setor`, rotas `/setores_clientes` e `PUT /clientes_setor`, setor na lista, filtros e `kpis.por_setor`
 - [[SQL-014-Pedido-Encerrado-por-Saldo-Zerado|SQL-014]]: Gustavo: validar a consulta de pedidos com original zerado e calcular `encerrado_por_saldo`, `encerrado_em_atraso` e a situação `faturado_encerrado` em `fn_pedidos_venda`; decisões de borda do Nathan já respondidas
 - [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso|SQL-013]] e [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela|API-012]]: Gustavo: funções de normalização, pares e uso, colunas geradas em `core.produtos`, rota `GET /produtos/duplicatas`
 - [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Gustavo: migration `finalidade`, POST/PATCH com pedido de venda e produto do cadastro, trava da OC na mesma unidade; responder Q1 e Q4 (junto do API-009, BL-064)
@@ -194,6 +196,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Nathan (front do av-hub)
 
+- [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes|API-014]]: Nathan: coluna, filtro e quadro por setor, campo Setor (com "Adicionar setor…") e Excel; definir perfis e o lote
 - [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela|API-012]]: Nathan: BFF `/api/produtos/duplicatas`, serviço sem varredura do catálogo e tela nova (KPIs, filtros, motivos, uso); decidir se vale o "não é duplicata"
 - [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Nathan: tela nova pronta (PR #209); a OC herda a finalidade da requisição; decidir Q2 e Q3
 - [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno|API-011]]: Nathan: contabilidade do uso interno e EPI (Q3); BL-049 e BL-050 no Ciclo 1 (Q5)
