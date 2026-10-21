@@ -50,7 +50,7 @@ Causa nos dados: `fn_pedido_dias_para_prazo` só zera o prazo quando **a própri
 | `saldo_zerado` | `boolean` | o original (`sequencial` 0 ou nulo, não excluído) tem `total_pedido_venda = 0` **e** `valor_total` do pedido > 0 **e** existe ao menos uma parcial (`sequencial` > 0) |
 | `encerrado_por_saldo` | `boolean` | `saldo_zerado` **e** nenhuma parcial com valor > 0 está aberta (toda parcial com valor está faturada; cancelada/devolvida/denegada não contam como aberta, Q2) |
 | `data_encerramento_calculada` | `text` (AAAA-MM-DD, como o resto) | `max(data_faturamento)` das parciais faturadas. Só preenchida quando `encerrado_por_saldo` |
-| `encerrado_em_atraso` | `boolean` | `encerrado_por_saldo` **e** `data_encerramento_calculada` > a previsão de referência (Q7: previsão vigente) |
+| `encerrado_em_atraso` | `boolean` | `encerrado_por_saldo` **e** `data_encerramento_calculada` > a **previsão mais antiga** (Q7, revisada em 21/10/2026) |
 | `dias_atraso_no_encerramento` | `integer` | dias entre a previsão de referência e `data_encerramento_calculada`, só quando `encerrado_em_atraso` |
 
 **Caso extra (Q4):** `encerrado_por_saldo` também é `true` quando o original tem a flag `faturado` e não há parcial aberta com valor (pedido faturado inteiro sem dividir). Nesse caso `data_encerramento_calculada` é a `data_faturamento` do original.
@@ -91,6 +91,32 @@ max(l.data_faturamento) FILTER (WHERE l.faturado)                             AS
 Depois, `situacao`, `prazo`, `dias_para_prazo` e `precisa_atencao` consultam `encerrado_por_saldo` primeiro. `fn_pedidos_venda_resumo` já chama `fn_pedidos_venda`, então herda.
 
 Ponto de atenção: `l.eh_cabecalho` é o `sequencial` 0 ou nulo; o cabeçalho excluído não entra (`deleted_at IS NULL` já está no filtro).
+
+## Sem chave: a regra vale sempre (decisão do Nathan, 21/10/2026)
+
+A API entregue (`api-acos-vital` 2d5ff24) só aplica a regra com `PEDIDOS_ENCERRADO_POR_SALDO=true` (padrão desligada). O Nathan decidiu que **não quer essa chave**: a regra vale sempre.
+
+Pedido ao Gustavo:
+
+1. Remover `PEDIDOS_ENCERRADO_POR_SALDO`, `encerrarPorSaldoLigado()` e `argEncerrarPorSaldo()` de `src/utils/pedidoEncerradoPorSaldo.js`; passar `p_encerrar_por_saldo => true` fixo (ou tornar `true` o padrão da função no banco e tirar o argumento).
+2. `faturado_encerrado` sempre aceito em `situacao` (rota e swagger); tirar as frases "com PEDIDOS_ENCERRADO_POR_SALDO ligada" do swagger.
+3. Ajustar o teste `test/unit/pedidoEncerradoPorSaldo.test.js`.
+4. Conferir no preview: o pedido 27762 (original 0, parciais 1 e 2 faturadas) passa a vir com `situacao = 'faturado_encerrado'` e `prazo = null`.
+
+Evidência de 21/10/2026 (preview, PCP): os campos novos já vinham na resposta e `faturados_encerrados` = 181, mas nenhum pedido vinha com `situacao = 'faturado_encerrado'` e os de original zerado seguiam "atrasado".
+
+## Revisão da regra de atraso (21/10/2026)
+
+Pedido ao Gustavo: em `encerrado_em_atraso` e `dias_atraso_no_encerramento`, trocar a previsão de referência da "linha faturada por último" para **`MIN(data_previsao)` entre todas as linhas do pedido** (original e parciais, não excluídas, com previsão preenchida). Ajustar o swagger (`encerrado_em_atraso`, `dias_atraso_no_encerramento`) e o teste.
+
+Casos para conferir (dados do preview de 21/10/2026):
+
+| pedido | previsão mais antiga | último faturamento | esperado |
+|---|---|---|---|
+| 27762 | 18/09/2026 (original) | 28/09/2026 | `encerrado_em_atraso = true`, 10 dias |
+| 23966 | 14/10/2026 (original) | 15/10/2026 | `encerrado_em_atraso = true`, 1 dia |
+
+Hoje a API devolve `false` nos dois, porque compara com a previsão da parcela (28/09 e 15/10).
 
 ## Dá para saber a data em que zerou?
 
@@ -139,7 +165,7 @@ Decididas pelo **Nathan** em 19/10/2026 (aceitou as sugestões):
 2. **Q2.** Entra como encerrado se nenhuma parcial com valor está aberta. `cancelado`, `devolvido`, `devolucao_parcial` e `denegado` seguem com a situação própria, por precedência.
 3. **Q4.** Pedido faturado inteiro sem dividir (original com a flag `faturado`) também vira "Faturado, encerrado". Sem nota de atraso quando a NF saiu até a previsão.
 4. **Q5.** Pedido manual (`MAN-…`) segue a mesma regra dos demais; sem tratamento à parte.
-5. **Q7.** A previsão de referência é a **vigente** (`data_previsao` atual). Compara-se o último faturamento com a previsão da parcial faturada por último; basta essa estar atrasada para ser "encerrado em atraso".
+5. **Q7 (revisada em 21/10/2026).** A previsão de referência é a **mais antiga** entre o original (`sequencial` 0) e as parciais, vigente de cada uma (`MIN(data_previsao)` das linhas do pedido). "Encerrado em atraso" = o último faturamento (`data_encerramento_calculada`) é depois dessa data; `dias_atraso_no_encerramento` = diferença em dias. Motivo: a parcial é só o desdobramento do original, e a previsão da parcial costuma ser remarcada para o dia em que fatura, o que escondia o atraso. Antes valia a previsão da parcial faturada por último.
 6. **Q8.** Pedido com a flag `encerrado` do Omie mantém o rótulo "Encerrado"; "Faturado, encerrado" é só o calculado por saldo.
 7. **Q9.** As três telas (Meus Pedidos, Pedidos da Equipe, Pedidos do PCP) mudam juntas.
 8. **Q10.** Pedido encerrado sai de "atrasados"/"atenção" e entra em "Faturados".
