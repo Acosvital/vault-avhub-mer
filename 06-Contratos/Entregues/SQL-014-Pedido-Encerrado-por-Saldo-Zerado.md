@@ -3,8 +3,8 @@ id: SQL-014
 aliases: ["Contrato SQL 014", "014-Pedido-Encerrado-por-Saldo-Zerado"]
 tags: [contrato, contrato-sql, dba, pedidos, vendas, prazo, situacao]
 criado: 2026-10-19
-atualizado: 2026-10-19
-status: proposta
+atualizado: 2026-10-21
+status: implementado-no-codigo
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: []
@@ -16,14 +16,16 @@ criado_original: 2026-10-19
 
 > **Onde atua:** av-hub: banco
 
-> [!info] Situação em 19/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
+> [!info] Situação em 21/10/2026
+> **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - 📝 **Pedido do Nathan, 19/10/2026:** nas telas Meus Pedidos, Pedidos da Equipe (e Pedidos do PCP, que usa o mesmo componente) todo pedido cujo **pedido original está zerado** já terminou e deve aparecer como **"Faturado, encerrado"**. Se estava atrasado e foi todo faturado, mostrar "Faturado, encerrado" e deixar claro que **foi encerrado em atraso**. Os demais seguem como hoje. O banco calcula; não depende de alguém encerrar no Omie.
-> - ✅ Hoje a função `fn_pedidos_venda` já devolve `parciais[]` com `total_pedido_venda`, `faturado`, `data_faturamento` e `data_previsao` por parcial; a tela só exibe.
-> - 🔴 Nenhum SQL deste contrato foi executado. O script é proposta de desenho, **não testado**; o Gustavo valida contra os dados reais (consulta de validação abaixo).
-> - ❓ A hipótese "o original zera quando tudo vai para parciais" vem do LOG-08 e do código do pipeline; **não foi conferida no banco de produção**.
-> - ✅ Decisões de borda Q1–Q10 respondidas pelo Nathan em 19/10/2026 (seção "Perguntas em aberto"). Falta o Gustavo (G1–G4).
+> - ✅ **Banco e API:** o Gustavo implementou (migrations 014 e 014b, `api-acos-vital` commits `2d5ff24` e `d989de2`). A chave `PEDIDOS_ENCERRADO_POR_SALDO` foi **removida** a pedido do Nathan: a regra vale sempre. `GET /pedidos_venda` devolve `saldo_zerado`, `encerrado_por_saldo`, `data_encerramento_calculada`, `encerrado_em_atraso`, `dias_atraso_no_encerramento`; `situacao = 'faturado_encerrado'` (aceita no filtro); prazo `null` e fora de atrasados/atenção; `etapa_atual` é a última do fluxo; o resumo traz `faturados_encerrados` e `encerrados_em_atraso`.
+> - ✅ **Atraso pela previsão mais antiga** (Q7 revisada, 21/10): 27762 vem com 10 dias e 23966 com 1 dia.
+> - ✅ **Front** (av-hub, PR #230 e #233 em `develop`): pílula "Faturado, encerrado", "Em atraso · N dias" na coluna Previsão, alerta amarelo na página do pedido, etapa final no Andamento e filtro de situação. Vale para Meus Pedidos, Pedidos da Equipe e Pedidos do PCP.
+> - ✅ **Conferido em 21/10/2026** no preview (Portal do PCP, vendedora SARALIGIA SIMÕES, 2026 inteiro): 145 pedidos `encerrado_por_saldo`, todos com a situação nova, nenhum com prazo aberto nem com a etapa antiga; resumo com 181 faturados encerrados e 3 em atraso.
+> - ❓ **Produção:** não verificado se o banco do preview é o de produção; por isso o status não é `aplicado-em-producao`.
+> - ❓ O script da seção "Script proposto" abaixo era a proposta de 19/10, não o SQL aplicado; o que vale é o das migrations 014 e 014b (não lidas aqui).
+> - 📝 Perguntas G1 a G4 ao Gustavo: não respondidas por escrito; a implementação entregue as resolveu na prática (campo calculado dentro de `fn_pedidos_venda`, sem chave).
 >
 > Selos em [[Regras-do-Vault]].
 
