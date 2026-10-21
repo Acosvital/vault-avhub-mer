@@ -17,18 +17,18 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 18 | 6 | 24 |
-| `Entregues` (feito no código ou aplicado) | 55 | 12 | 67 |
+| `Ativos` (a fazer ou parcial) | 19 | 6 | 25 |
+| `Entregues` (feito no código ou aplicado) | 54 | 12 | 66 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
 | **Total** | **84** | **18** | **102** |
 
 | Status | Contratos |
 |---|---|
-| `proposta` | 10 |
+| `proposta` | 11 |
 | `para-implementar` | 0 |
 | `parcial` | 8 |
 | `implementado-no-codigo` | 45 |
-| `aplicado-em-producao` | 10 |
+| `aplicado-em-producao` | 9 |
 | `arquivado` | 11 |
 
 Vocabulário de status: `proposta` (ainda sem decisão), `para-implementar` (decidido, falta código), `parcial` (parte no código, parte não), `implementado-no-codigo` (conferido no código de 14/10), `aplicado-em-producao` (aplicado no banco, confirmado por dump; produção não reconferida em 14/10 ❓), `arquivado` (superado, rejeitado, fora de escopo ou histórico, com o motivo na nota).
@@ -60,7 +60,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | SQL-010 | Contrato SQL 010 | [[SQL-010-Itens-Pedido-Status\|`itens_pedido_status`]] | `implementado-no-codigo` | av-hub: banco | Entregues | F1, X1, Q7 | — | — | — | — |
 | SQL-011 | Contrato SQL 011 | [[SQL-011-Ordens-Compra-Referencia-MES\|`vw_ordens_compra_referencia_mes` e marca por trigger (migration `api004`)]] | `implementado-no-codigo` | av-hub: banco | Entregues | R0 | — | — | — | — |
 | SQL-012 | Contrato SQL 012 | [[SQL-012-Ordens-Compra-Referencia-Valores\|Valores da OC na `vw_ordens_compra_referencia_mes`]] | `implementado-no-codigo` | av-hub: banco | Entregues | R0, R4 | — | — | — | — |
-| SQL-013 | Contrato SQL 013 | [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso\|Produtos: prováveis duplicatas (normalização, pares por semelhança e uso)]] | `aplicado-em-producao` | av-hub: banco | Entregues | — | — | Gustavo: informar os ajustes feitos no script | — | — |
+| SQL-013 | Contrato SQL 013 | [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso\|Produtos: prováveis duplicatas (normalização, pares por semelhança e uso)]] | `proposta` | av-hub: banco | Ativos | — | — | Gustavo: validar o script, medir o tempo e conferir o formato das datas de venda | — | — |
 | SQL-014 | Contrato SQL 014 | [[SQL-014-Pedido-Encerrado-por-Saldo-Zerado\|Pedido encerrado por saldo zerado ("Faturado, encerrado") e encerrado em atraso]] | `proposta` | av-hub: banco | Ativos | — | — | Gustavo: validar a consulta (G1–G4) e implementar; decisões de borda já respondidas | — | — |
 | API-001 | — | [[API-001-Produtos-Parceiros-Filtro-Incremental\|Filtro incremental `alterado_desde` em produtos e parceiros]] | `implementado-no-codigo` | av-hub: API · pipeline Omie | Entregues | — | — | Gustavo: o filtro nunca executa (LOG-51 S27, PS-033) | — | — |
 | API-002 | — | [[API-002-Material-Alias-Omie-MES\|Alias de material Omie no MES (rejeitado)]] | `arquivado` | MES: API | Arquivados | — | — | — | — | — |
@@ -177,7 +177,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 ### Gustavo (DBA: banco e API do av-hub)
 
 - [[SQL-014-Pedido-Encerrado-por-Saldo-Zerado|SQL-014]]: Gustavo: validar a consulta de pedidos com original zerado e calcular `encerrado_por_saldo`, `encerrado_em_atraso` e a situação `faturado_encerrado` em `fn_pedidos_venda`; decisões de borda do Nathan já respondidas
-- [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela|API-012]]: Gustavo: rota `GET /produtos/duplicatas` (o SQL-013 já está aplicado); informar os ajustes feitos no script do [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso|SQL-013]]
+- [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso|SQL-013]] e [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela|API-012]]: Gustavo: funções de normalização, pares e uso, colunas geradas em `core.produtos`, rota `GET /produtos/duplicatas`
 - [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Gustavo: migration `finalidade`, POST/PATCH com pedido de venda e produto do cadastro, trava da OC na mesma unidade; responder Q1 e Q4 (junto do API-009, BL-064)
 - [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Gustavo: pedido de venda no POST/PATCH da requisição e `GET /compras/requisicoes/referencia` (BL-064); responder Q1 a Q4
 - [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front|LOG-50]]: Gustavo: `GET /itens_pedido_status` e `GET /pedido_venda_itens/{numero}` respondem `SEM_VENDEDOR_VINCULADO` (e não `PEDIDO_FORA_DO_ESCOPO`) para pedido de outro vendedor; conferir o `notas/resumo` do PCP com foco alheio (200 vazio)
