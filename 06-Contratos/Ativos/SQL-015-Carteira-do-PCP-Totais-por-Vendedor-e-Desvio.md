@@ -152,7 +152,7 @@ Observação sobre o desvio: a mediana de `data_previsao − data_inclusao` das 
 
 - **Página do pedido (Pedidos PCP):** dropdown **"Classificação"** ao lado das pílulas do resumo, com "—" e "Avanço". Quem marcou e quando aparece no apoio do dropdown. Só habilita para quem pode editar; os demais veem só a pílula "Avanço".
 - **Lista de Pedidos PCP:** selo **Avanço** na linha e filtro **Avanço**.
-- **Dashboard PCP:** cartão **Em avanço** (valor em carteira e nº de pedidos; na linha de apoio, quanto já foi faturado) e a coluna correspondente na carteira por vendedor.
+- **Dashboard PCP:** cartão **Em avanço**, que mostra a **quantidade de pedidos e o valor** (valor = saldo em carteira dos pedidos marcados; na linha de apoio, quanto já foi faturado) e a coluna correspondente na carteira por vendedor.
 
 ### Conferência
 
@@ -164,7 +164,7 @@ Observação sobre o desvio: a mediana de `data_previsao − data_inclusao` das 
 
 Para o **Nathan:**
 
-1. **Q5.** O cartão "Em avanço" mostra o **saldo em carteira** dos pedidos marcados (suposição, com o faturado na linha de apoio) ou o **já faturado**?
+1. **Q5 (respondida em 21/10/2026).** O cartão "Em avanço" mostra a **quantidade e o valor**. Valor = saldo em carteira dos pedidos marcados (suposição mantida, o Nathan não pediu outra); o já faturado fica na linha de apoio.
 2. **Q6.** A marca é só "Avanço" por enquanto ou já quer outras opções no dropdown?
 3. **Q7.** Qualquer diligenciador do vendedor pode marcar/desmarcar, ou só um responsável?
 
