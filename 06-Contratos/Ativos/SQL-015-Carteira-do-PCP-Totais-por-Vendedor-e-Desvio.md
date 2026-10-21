@@ -19,7 +19,7 @@ criado_original: 2026-10-21
 > [!info] Situação em 21/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - 📝 **Pedido do Nathan, 21/10/2026:** o PCP (diligenciadores) precisa ver no **Dashboard PCP** o valor total em carteira, o que está dentro do prazo, o que está atrasado, os itens com desvio e a **carteira por vendedor**. O faturamento do mês já existe no dashboard. "Valor em avanço" ficou **de fora** por decisão do Nathan. A **previsão atualizada** (CCP) não faz parte deste contrato: a regra ainda não foi decidida, ver "Fora deste contrato".
+> - 📝 **Pedido do Nathan, 21/10/2026:** o PCP (diligenciadores) precisa ver no **Dashboard PCP** o valor total em carteira, o que está dentro do prazo, o que está atrasado, os itens com desvio e a **carteira por vendedor**. O faturamento do mês já existe no dashboard. "Valor em avanço" **entra como marca do diligenciador** (ver "Avanço: marca do diligenciador"). A **previsão atualizada** (CCP) não faz parte deste contrato: a regra ainda não foi decidida, ver "Fora deste contrato".
 > - ✅ Os números abaixo foram medidos em 21/10/2026 no preview (perfil admin, pedidos incluídos em 2026, 8.455 pedidos fora da blacklist, 66 vendedores) somando no navegador as parcelas de `GET /pedidos_venda`. Servem de **conferência**: o banco deve chegar nos mesmos valores com a mesma janela.
 > - 🔴 Nenhum SQL deste contrato existe. Não montei script: o desenho (funções, nomes e plano de consulta) é do Gustavo. O contrato define **o que significa cada número**.
 > - ✅ Decisões Q1 a Q4 do Nathan registradas em 21/10/2026 (seção "Perguntas em aberto"). Falta o Gustavo (G1 a G3).
@@ -128,9 +128,50 @@ Observação sobre o desvio: a mediana de `data_previsao − data_inclusao` das 
 - **Notas PCP**: sem mudança.
 - Padrão visual do projeto (skill `interface-hub`), sem o filtro de mês alterar a carteira (só `pedidos_mes`).
 
+## Avanço: marca do diligenciador (acréscimo de 21/10/2026)
+
+**Faturar em avanço** (faturamento progressivo) é a cobrança dividida em etapas: a empresa fatura conforme o percentual concluído, e não só no fim da entrega. O Omie não diz isso de forma que o hub consiga ler, então **quem diz é o diligenciador**. Decisão do Nathan: ele abre um **dropdown** no pedido e escolhe se aquele pedido é "Avanço". **Por padrão não é marcado.**
+
+### Regras
+
+1. A marca é **por pedido** (`codigo_empresa` + `numero_pedido`), não por parcela. Vale para todas as parcelas do pedido.
+2. Valores do dropdown: **"—" (sem marca, padrão)** e **"Avanço"**. A coluna aceita novos valores no futuro (ex.: outros tipos de acompanhamento) sem mudar a tela de desenho.
+3. Quem marca e desmarca: usuário com a tela **Pedidos PCP** (`pcp-pedidos`) com `pode_editar`, **só em pedido de vendedor do seu escopo** (o mesmo escopo de `GET /pedidos_venda`; conferido no backend, não só escondido na tela).
+4. Guardar **quem marcou e quando**. Desmarcar grava quem e quando; o histórico fica (não apagar), como nas observações do PCP (`pedido_observacao_pcp`).
+5. O pedido **encerrado** (SQL-014) pode continuar marcado, mas sai dos totais de carteira e de avanço (não tem parcela aberta).
+
+### O que pedir ao banco
+
+- **Tabela nova** `core_vendas_faturamento.pedido_marcacao_pcp` (nome a critério do Gustavo): `id`, `codigo_empresa`, `numero_pedido`, `marcacao` (texto, `'avanco'`), `marcada_por` (uuid do usuário), `marcada_em`, `removida_por`, `removida_em`. Marca **vigente** = linha sem `removida_em`. No máximo uma vigente por pedido e valor.
+- **Campos por pedido** em `fn_pedidos_venda` (e na lista): `avanco` (boolean, marca vigente), `avanco_marcado_por`, `avanco_marcado_em`.
+- **Filtro** `p_avanco boolean` em `fn_pedidos_venda` e `fn_pedidos_venda_resumo`.
+- **Totais** em `fn_carteira_pcp_resumo`: `avanco_valor` (soma das parcelas **abertas** dos pedidos marcados) e `avanco_pedidos`; mais `avanco_faturado_valor` (soma das parcelas já faturadas dos pedidos marcados, para mostrar quanto da obra já foi cobrado). Na `fn_carteira_pcp_vendedores`: `avanco_pedidos` e `avanco_valor`.
+- **Rotas:** `PUT /pedidos_venda/{codigo_empresa}/{numero_pedido}/marcacao` (corpo `{ "marcacao": "avanco" | null }`; `null` desmarca) e `GET` dos totais com os campos acima. Validar escopo e permissão no servidor.
+
+### O que muda na tela
+
+- **Página do pedido (Pedidos PCP):** dropdown **"Classificação"** ao lado das pílulas do resumo, com "—" e "Avanço". Quem marcou e quando aparece no apoio do dropdown. Só habilita para quem pode editar; os demais veem só a pílula "Avanço".
+- **Lista de Pedidos PCP:** selo **Avanço** na linha e filtro **Avanço**.
+- **Dashboard PCP:** cartão **Em avanço** (valor em carteira e nº de pedidos; na linha de apoio, quanto já foi faturado) e a coluna correspondente na carteira por vendedor.
+
+### Conferência
+
+1. Marcar o pedido 28377 (24% faturado, R$ 343 mil abertos em 21/10) deve levar `avanco_valor` a incluir esses R$ 343 mil abertos e `avanco_faturado_valor` a incluir os R$ 108 mil já faturados.
+2. Desmarcar tira o pedido dos totais e grava quem desmarcou.
+3. Usuário fora do escopo recebe o mesmo erro que `GET /pedidos_venda` dá hoje.
+
+### Perguntas em aberto
+
+Para o **Nathan:**
+
+1. **Q5.** O cartão "Em avanço" mostra o **saldo em carteira** dos pedidos marcados (suposição, com o faturado na linha de apoio) ou o **já faturado**?
+2. **Q6.** A marca é só "Avanço" por enquanto ou já quer outras opções no dropdown?
+3. **Q7.** Qualquer diligenciador do vendedor pode marcar/desmarcar, ou só um responsável?
+
+Para o **Gustavo:** a marca é uma tabela de histórico (proposto) ou uma coluna em `pedidos_vendas`? A coluna é mais simples, mas a tabela guarda quem marcou e desmarcou sem perder o passado e não é apagada pelo sync do Omie.
+
 ## Fora deste contrato
 
-- **Valor em avanço:** descartado pelo Nathan em 21/10/2026.
 - **Previsão atualizada pelo CCP** ("a compra chega em N dias, recalcular a previsão de faturamento"): ainda sem regra fechada (hoje + N + 1, previsão atual + N + 1, ou maior chegada das compras ligadas + 1). Medi 90 pedidos em carteira: **44% têm compra ligada**, todas de origem Omie (ligadas lendo o número do pedido dentro de `numero_pedido_fornecedor`), **nenhuma de ordem de compra do hub**; o CCP atualiza a chegada na OC do hub (LOG-32), que hoje não está ligada a pedido de venda, e o perfil CCP ainda não foi criado (N14-24). Vira contrato próprio depois do estudo.
 
 ## Como conferir que ficou certo
