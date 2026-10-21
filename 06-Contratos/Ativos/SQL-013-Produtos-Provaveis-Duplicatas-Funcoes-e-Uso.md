@@ -3,7 +3,7 @@ id: SQL-013
 aliases: ["Contrato SQL 013", "013-Produtos-Provaveis-Duplicatas"]
 tags: [contrato, contrato-sql, dba, produtos, duplicatas, catalogo, leitura]
 criado: 2026-10-19
-atualizado: 2026-10-19
+atualizado: 2026-10-21
 status: proposta
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
@@ -16,13 +16,13 @@ criado_original: 2026-10-19
 
 > **Onde atua:** av-hub: banco
 
-> [!info] Situação em 19/10/2026
+> [!info] Situação em 21/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
 > - ✅ A tela **Produtos — Prováveis Duplicatas** existe e é só leitura. Hoje baixa o catálogo inteiro da unidade pela API e agrupa **no navegador** por descrição normalizada **igual** + família + unidade (`produtosDuplicados.ts:21-29, 94-115`).
 > - 📝 **Decisão do Nathan, 19/10/2026:** melhorar a tela; cálculo no banco e na API; **só leitura** (a rejeição do alias, [[API-002-Material-Alias-Omie-MES]], de 21/09/2026, continua valendo: quem resolve a duplicata é o Omie); escopo **por unidade**; mostrar uso em venda, OC, estoque e fornecedores.
 > - ✅ `pg_trgm` e `unaccent` já estão instaladas no schema `public` do banco (`Dump Avhub (Esqueleto).sql:275-321`).
-> - 🔴 Nenhum SQL deste contrato foi executado. O script abaixo é proposta de desenho, **não testado**; o Gustavo valida nomes de coluna, desempenho e o formato das datas de venda (checklist).
+> - 🔴 **Aplicação não confirmada (21/10/2026).** O Nathan informou que o Gustavo implementou, mas a consulta em `pg_proc` por `%duplicat%`, `%norm_nome%` e `%produtos_uso%`, rodada pelo Nathan no banco em que ele estava conectado, voltou **vazia** (a função `core.fn_norm_nome` não existe lá). Falta saber **em qual banco** o Gustavo aplicou, ou se aplicou com outros nomes (e os ajustes que fez no script). O script abaixo é proposta, não testado.
 > - Contrato de API que consome este: [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela]].
 >
 > Selos em [[Regras-do-Vault]].
