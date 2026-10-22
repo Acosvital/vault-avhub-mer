@@ -17,18 +17,18 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 19 | 6 | 23 |
-| `Entregues` (feito no código ou aplicado) | 56 | 12 | 68 |
+| `Ativos` (a fazer ou parcial) | 17 | 6 | 23 |
+| `Entregues` (feito no código ou aplicado) | 58 | 12 | 68 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
 | **Total** | **86** | **18** | **102** |
 
 | Status | Contratos |
 |---|---|
-| `proposta` | 8 |
+| `proposta` | 6 |
 | `para-implementar` | 0 |
 | `parcial` | 11 |
-| `implementado-no-codigo` | 46 |
-| `aplicado-em-producao` | 10 |
+| `implementado-no-codigo` | 47 |
+| `aplicado-em-producao` | 11 |
 | `arquivado` | 11 |
 
 Vocabulário de status: `proposta` (ainda sem decisão), `para-implementar` (decidido, falta código), `parcial` (parte no código, parte não), `implementado-no-codigo` (conferido no código de 14/10), `aplicado-em-producao` (aplicado no banco, confirmado por dump; produção não reconferida em 14/10 ❓), `arquivado` (superado, rejeitado, fora de escopo ou histórico, com o motivo na nota).
@@ -77,8 +77,8 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | API-012 | Contrato 012 | [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela\|Produtos: prováveis duplicatas (rota `GET /produtos/duplicatas` e nova tela)]] | `implementado-no-codigo` | av-hub: banco, API, front | Entregues | — | — | Gustavo: rota `GET /produtos/duplicatas` antes de `/:id` e cache de 60 s | Nathan: BFF, serviço sem varredura e tela nova | — |
 | API-013 | Contrato 013 | [[API-013-Acompanhamento-de-Clientes-So-Cliente-e-Periodo-Total\|Acompanhamento de clientes: só clientes (tag) e período total]] | `aplicado-em-producao` | av-hub: API, front | Entregues | — | — | — | — | — |
 | API-014 | Contrato 014 | [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes\|Setor do cliente e do grupo no Acompanhamento de clientes]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | Gustavo: tabelas `setores_clientes` e `clientes_setor`, rotas de setor e `id_setor`/`setor` na lista | Nathan: coluna, filtro e quadro por setor, campo Setor e Excel | — |
-| API-016 | Contrato 016 | [[API-016-Observacao-do-PCP-por-Item-do-Pedido\|Observação do PCP por item (produto) do pedido, no lugar de por parcial]] | `proposta` | av-hub: banco, API, front | Ativos | — | — | Gustavo: tabela `pedido_item_observacao_pcp`, rotas `/pedido_item_observacao_pcp` (com `/contagem`) e escopo do vendedor | Nathan: observação dentro da linha de cada produto e BFF | — |
-| API-017 | Contrato 017 | [[API-017-Carteira-do-PCP-por-Periodo-e-Previsao-de-Faturamento-por-Mes\|Carteira do PCP por período do seletor e previsão de faturamento por mês]] | `proposta` | av-hub: banco, API, front | Ativos | — | — | Gustavo: `por_periodo`/datas em `/carteira` e `/carteira/vendedores` e rota `/carteira/previsao` | Nathan: mandar o período, cartão "a faturar até o fim do mês" e previsão por mês | — |
+| API-016 | Contrato 016 | [[API-016-Observacao-do-PCP-por-Item-do-Pedido\|Observação do PCP por item (produto) do pedido, no lugar de por parcial]] | `implementado-no-codigo` | av-hub: banco, API, front | Entregues | — | — | — | — | — |
+| API-017 | Contrato 017 | [[API-017-Carteira-do-PCP-por-Periodo-e-Previsao-de-Faturamento-por-Mes\|Carteira do PCP por período do seletor e previsão de faturamento por mês]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | — | — | — | — | — |
 | LOG-53 | Contrato 53 | [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado\|Ordem de Produção e lote do fabricado (MES)]] | `proposta` | MES: banco, API, front | Ativos | P2, F1, Q7, Q8, E5 | Entidade e PDF da OP, lote `PRODUCAO` por OP e produto, aprovado volta ao Estoque (BL-052, BL-008) | — | Nathan: Q4 (HRM) e conteúdo do PDF | — |
 | LOG-55 | Contrato 55 | [[LOG-55-Compras-Excluir-Requisicao\|Compras: excluir requisição de compra (exclusão lógica, só criada no Hub e sem OC)]] | `proposta` | av-hub: banco, API, front | Ativos | C0, C1 | — | Gustavo: `deleted_at` + trigger + filtrar views | Nathan: Q2 (`pode_deletar` do Comprador); front escrito | — |
 | LOG-54 | Contrato 54 | [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada\|Documento de retirada e baixa do saldo na retirada (MES)]] | `proposta` | MES: banco, API, front | Ativos | E6, X1, F1 | Modelo, rotas, telas e baixa na confirmação; tirar a baixa da Embalagem e da entrega (BL-007) | — | Nathan: Q1 e Q2 (quem gera, o que imprime, reserva) e Q3 (entra no Ciclo 1?) | — |
@@ -182,8 +182,6 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 - [[SQL-015-Carteira-do-PCP-Totais-por-Vendedor-e-Desvio|SQL-015]]: Gustavo: `fn_carteira_pcp_resumo`, `fn_carteira_pcp_vendedores`, campos `desvio_previsao` e `dias_previsao_inclusao` e as rotas `/pedidos_venda/carteira`; responder G1 a G3 (Q1 a Q4 do Nathan já respondidas)
 - [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes|API-014]]: Gustavo: tabelas `setores_clientes` e `clientes_setor`, rotas `/setores_clientes` e `PUT /clientes_setor`, setor na lista, filtros e `kpis.por_setor`
-- [[API-016-Observacao-do-PCP-por-Item-do-Pedido|API-016]]: Gustavo: tabela `pedido_item_observacao_pcp`, rotas `GET`/`POST`/`DELETE` e `/contagem` por item, entrada em `escopoVendedor.js` e linhas de `auth.rotas_telas`
-- [[API-017-Carteira-do-PCP-por-Periodo-e-Previsao-de-Faturamento-por-Mes|API-017]]: Gustavo: parâmetros `por_periodo`, `data_inicio` e `data_fim` em `/pedidos_venda/carteira` e `/carteira/vendedores` (funções com `p_inclusao_*`) e a rota `GET /carteira/previsao` (`fn_carteira_pcp_previsao`)
 - [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela|API-012]]: Gustavo: rota publicada; falta melhorar a nota (medidas em ordem, unidade, coesão) e informar os ajustes do script do [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso|SQL-013]]
 - [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Gustavo: migration `finalidade`, POST/PATCH com pedido de venda e produto do cadastro, trava da OC na mesma unidade; responder Q1 e Q4 (junto do API-009, BL-064)
 - [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Gustavo: pedido de venda no POST/PATCH da requisição e `GET /compras/requisicoes/referencia` (BL-064); responder Q1 a Q4
@@ -202,8 +200,6 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 ### Nathan (front do av-hub)
 
 - [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes|API-014]]: Nathan: coluna, filtro e quadro por setor, campo Setor (com "Adicionar setor…") e Excel; definir perfis e o lote
-- [[API-016-Observacao-do-PCP-por-Item-do-Pedido|API-016]]: Nathan: observação dentro da linha de cada produto (com contagem), BFF novo e tirar o bloco por parcela
-- [[API-017-Carteira-do-PCP-por-Periodo-e-Previsao-de-Faturamento-por-Mes|API-017]]: Nathan: mandar `por_periodo` e o período, cartão "a faturar até o fim do mês" e bloco "previsão por mês" (some sem a rota)
 - [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela|API-012]]: Nathan: BFF `/api/produtos/duplicatas`, serviço sem varredura do catálogo e tela nova (KPIs, filtros, motivos, uso); decidir se vale o "não é duplicata"
 - [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Nathan: tela nova pronta (PR #209); a OC herda a finalidade da requisição; decidir Q2 e Q3
 - [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno|API-011]]: Nathan: contabilidade do uso interno e EPI (Q3); BL-049 e BL-050 no Ciclo 1 (Q5)

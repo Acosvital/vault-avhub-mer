@@ -4,7 +4,7 @@ aliases: ["Contrato 016", "016-Observacao-do-PCP-por-Item"]
 tags: [contrato, contrato-api, pcp, pedidos, observacao, item, diligenciador, av-hub]
 criado: 2026-10-22
 atualizado: 2026-10-22
-status: proposta
+status: implementado-no-codigo
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
 etapa_0b: []
@@ -17,13 +17,13 @@ criado_original: 2026-10-22
 > **Onde atua:** av-hub: banco, API, front
 
 > [!info] Situação em 22/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
+> **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
 >
-> - 📝 **Pedido do Nathan, 22/10/2026:** a observação que o diligenciador do PCP escreve hoje **por parcial** tem de ser **por linha de item, por produto do pedido**: cada produto pode ter a sua observação.
-> - ✅ **Hoje** a observação é **por parcial**: tabela `core_vendas_faturamento.pedido_observacao_pcp`, grão `(codigo_empresa, codigo_pedido_omie)`, rotas `GET/POST /pedido_observacao_pcp`, `GET /pedido_observacao_pcp/contagem` e `DELETE /pedido_observacao_pcp/:id`. No detalhe do pedido (Portal do PCP) o botão "Observações do PCP" fica **abaixo de cada parcela**, não de cada produto.
-> - ✅ **Decisão do Nathan (22/10/2026): as observações antigas por parcial são descartadas** (a tela deixa de mostrá-las; não são copiadas para os itens). A tabela antiga **não é apagada** por este contrato (ver "Fora deste contrato").
-> - 🔴 **Banco e API não existem** para o item: nenhuma tabela, rota ou `contagem` por item.
-> - **MES (Robert): sem trabalho.** O MES não lê esta observação.
+> - 📝 **Pedido do Nathan, 22/10/2026:** a observação que o diligenciador do PCP escreve hoje **por parcial** passa a ser **por linha de item, por produto do pedido**. As observações antigas por parcial são descartadas (decisão do Nathan).
+> - ✅ **Banco e API (Gustavo)**, `api-acos-vital` commit `62ac5e7` (22/10/2026): tabela `pedido_item_observacao_pcp` e as rotas `GET`, `POST`, `DELETE /:id` e `GET /contagem` em `/pedido_item_observacao_pcp`; escopo do vendedor em `escopoVendedor.js` (dono "pedido_item_observacao"); o item é conferido no pedido vivo (`fn_pedido_item_existe`, 404 `ITEM_NAO_ENCONTRADO`). **Conferido na produção em 22/10/2026 (só leitura):** contagem e lista respondem 200 vazias, item inexistente 404, pedido inexistente 404, parâmetros inválidos 400.
+> - ✅ **Front no `av-hub`** (`develop`): coluna "Obs." em cada produto do detalhe do pedido (PR #239) e o autor da sessão no BFF (PR #246).
+> - 🟡 **Não testado de ponta a ponta:** criar e apagar uma observação de verdade (grava em produção; não foi autorizado). Quando alguém criar a primeira observação real, conferir lista, contagem e exclusão.
+> - **MES (Robert): sem trabalho.**
 >
 > Selos em [[Regras-do-Vault]].
 
@@ -185,16 +185,16 @@ No detalhe do pedido (Portal do PCP), a observação sai do **rodapé da parcela
 ## Checklist
 
 **Gustavo (banco e API)**
-- [ ] Migration: tabela `pedido_item_observacao_pcp` com os `CHECK`, as FK de `codigo_empresa` e `created_by`/`deleted_by`, os índices e o `GRANT`.
-- [ ] Rotas `GET`, `POST`, `DELETE /:id` e `GET /contagem` em `/pedido_item_observacao_pcp`, com `/contagem` antes de `/:id`, os erros da seção 2 e o item conferido em `produto_vendas`.
-- [ ] `escopoVendedor.js`: entrada `pedido_item_observacao_pcp` (dono pelo pedido; `DELETE` pela observação).
-- [ ] Linhas de `auth.rotas_telas` (`pcp-pedidos`): `GET` (`pode_visualizar`), `POST` (`pode_criar`), `DELETE` (`pode_deletar`).
-- [ ] Swagger das rotas novas.
+- [x] Migration: tabela `pedido_item_observacao_pcp` com os `CHECK`, as FK de `codigo_empresa` e `created_by`/`deleted_by`, os índices e o `GRANT`.
+- [x] Rotas `GET`, `POST`, `DELETE /:id` e `GET /contagem` em `/pedido_item_observacao_pcp`, com `/contagem` antes de `/:id`, os erros da seção 2 e o item conferido em `produto_vendas`.
+- [x] `escopoVendedor.js`: entrada `pedido_item_observacao_pcp` (dono pelo pedido; `DELETE` pela observação).
+- [x] Linhas de `auth.rotas_telas` (`pcp-pedidos`): `GET` (`pode_visualizar`), `POST` (`pode_criar`), `DELETE` (`pode_deletar`).
+- [x] Swagger das rotas novas.
 
 **Nathan (front)**
-- [ ] BFF `/api/pcp/observacoes` (e `[id]`) falando com as rotas novas; serviço `services/pcp/observacoesPedido.ts` por `(empresa, numero_pedido, item)`.
-- [ ] Detalhe do pedido: observação dentro da linha de cada produto, com contagem; remover o bloco por parcela.
-- [ ] Mensagem clara para `403 PEDIDO_FORA_DO_ESCOPO` e `404` de item inexistente.
+- [x] BFF `/api/pcp/observacoes` (e `[id]`) falando com as rotas novas; serviço `services/pcp/observacoesPedido.ts` por `(empresa, numero_pedido, item)`.
+- [x] Detalhe do pedido: observação dentro da linha de cada produto, com contagem; remover o bloco por parcela.
+- [x] Mensagem clara para `403 PEDIDO_FORA_DO_ESCOPO` e `404` de item inexistente.
 
 **Robert (MES):** nada.
 

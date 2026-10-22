@@ -4,7 +4,7 @@ aliases: ["Contrato 017", "017-Carteira-do-PCP-Periodo-e-Previsao"]
 tags: [contrato, contrato-api, pcp, carteira, dashboard, previsao, faturamento, av-hub]
 criado: 2026-10-22
 atualizado: 2026-10-22
-status: proposta
+status: aplicado-em-producao
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
 etapa_0b: []
@@ -17,11 +17,12 @@ criado_original: 2026-10-22
 > **Onde atua:** av-hub: banco, API, front
 
 > [!info] Situação em 22/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
+> **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
 >
-> - 📝 **Pedido do Nathan, 22/10/2026:** (1) os números da **Carteira** do Dashboard PCP devem **mudar conforme a data do seletor** (mês ou "todo o período"); (2) mostrar **o que há para faturar até o fim do mês** e, depois, **todos os meses que tiverem algo para faturar** (a previsão de faturamento mês a mês).
-> - ✅ **Hoje** (Contrato SQL 015, PR #238 no front): `GET /pedidos_venda/carteira` devolve a carteira **inteira**, de qualquer data de inclusão, e não aceita período. `GET /pedidos_venda/carteira/vendedores` recebe `data_inicio`/`data_fim`, mas só para a coluna `pedidos_mes`. Resultado na tela, em outubro: o topo mostra **720 pedidos** (incluídos no mês), e a carteira mostra **875** (saldo aberto de qualquer data). O recorte do mês dá **479** (720 menos os 241 já faturados), número que a **lista** de pedidos já devolve com `carteira=true` e período.
-> - 🔴 **Banco e API não têm** nem o recorte por período nos totais da carteira nem a previsão por mês.
+> - 📝 **Pedido do Nathan, 22/10/2026:** (1) os números da **Carteira** do Dashboard PCP mudam conforme a data do seletor (mês ou "todo o período"); (2) mostrar o que há para faturar até o fim do mês e, depois, todos os meses que tiverem algo a faturar.
+> - ✅ **Banco e API (Gustavo)**, `api-acos-vital` commit `8aa3ca6` (22/10/2026): `por_periodo`, `data_inicio` e `data_fim` em `/pedidos_venda/carteira` e `/carteira/vendedores`, e a rota `GET /pedidos_venda/carteira/previsao` (`fn_carteira_pcp_previsao`, migration api017).
+> - ✅ **Front no `av-hub`** (`develop`): a carteira manda o período do seletor (PR #240), cartão "A faturar até o fim do mês" e bloco "Previsão de faturamento" (PRs #241 e #244) e a rota do BFF da previsão (PR #245).
+> - ✅ **Aceite conferido na produção em 22/10/2026** (outubro, só leitura): sem `por_periodo` a carteira segue inteira (890 pedidos, R$ 77.911.980,65); com `por_periodo`, `carteira_pedidos` = 498 = `total` de `GET /pedidos_venda?carteira=true` no mesmo período, e `desvio_pedidos` = 156 = o da lista com `desvio=true`; a soma por vendedor bate (498 pedidos, R$ 17.899.962,22, 91 atrasados, 156 em desvio); `/carteira/previsao` tem `total_valor` igual a `carteira_valor` (com e sem `por_periodo`) e só traz meses com saldo.
 > - **MES (Robert): sem trabalho.**
 >
 > Selos em [[Regras-do-Vault]].
@@ -143,16 +144,16 @@ Dashboard PCP, bloco **Carteira**:
 ## Checklist
 
 **Gustavo (banco e API)**
-- [ ] Migration: `DROP` + `CREATE` de `fn_carteira_pcp_resumo` e `fn_carteira_pcp_vendedores` com `p_inclusao_inicio`/`p_inclusao_fim` (`DEFAULT NULL`), e `GRANT`.
-- [ ] Função nova `fn_carteira_pcp_previsao` (uma linha por mês e uma sem previsão).
-- [ ] Rotas: `por_periodo`, `data_inicio` e `data_fim` em `/carteira` e `/carteira/vendedores` (com `por_periodo`/datas ecoados na resposta) e a rota `GET /carteira/previsao` antes de `/:codigo_empresa/:pedido_venda`.
-- [ ] Conferir `escopoVendedor.js` e o mapa de rotas (`auth.rotas_telas`) para `/carteira/previsao`.
-- [ ] Swagger das rotas e dos parâmetros novos.
+- [x] Migration: `DROP` + `CREATE` de `fn_carteira_pcp_resumo` e `fn_carteira_pcp_vendedores` com `p_inclusao_inicio`/`p_inclusao_fim` (`DEFAULT NULL`), e `GRANT`.
+- [x] Função nova `fn_carteira_pcp_previsao` (uma linha por mês e uma sem previsão).
+- [x] Rotas: `por_periodo`, `data_inicio` e `data_fim` em `/carteira` e `/carteira/vendedores` (com `por_periodo`/datas ecoados na resposta) e a rota `GET /carteira/previsao` antes de `/:codigo_empresa/:pedido_venda`.
+- [x] Conferir `escopoVendedor.js` e o mapa de rotas (`auth.rotas_telas`) para `/carteira/previsao`.
+- [x] Swagger das rotas e dos parâmetros novos.
 
 **Nathan (front)**
-- [ ] BFF e serviço mandam `por_periodo` e o período; subtítulo conforme `por_periodo` da resposta.
-- [ ] Cartão "A faturar até o fim do mês" e bloco "Previsão por mês" (some sem a rota).
-- [ ] Cartões e meses levam o mesmo recorte à lista de Pedidos PCP.
+- [x] BFF e serviço mandam `por_periodo` e o período; subtítulo conforme `por_periodo` da resposta.
+- [x] Cartão "A faturar até o fim do mês" e bloco "Previsão por mês" (some sem a rota).
+- [x] Cartões e meses levam o mesmo recorte à lista de Pedidos PCP.
 
 **Robert (MES):** nada.
 
