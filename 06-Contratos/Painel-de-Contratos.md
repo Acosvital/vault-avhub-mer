@@ -17,14 +17,14 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 17 | 6 | 23 |
+| `Ativos` (a fazer ou parcial) | 18 | 6 | 23 |
 | `Entregues` (feito no código ou aplicado) | 58 | 12 | 68 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
-| **Total** | **86** | **18** | **102** |
+| **Total** | **87** | **18** | **102** |
 
 | Status | Contratos |
 |---|---|
-| `proposta` | 6 |
+| `proposta` | 7 |
 | `para-implementar` | 0 |
 | `parcial` | 11 |
 | `implementado-no-codigo` | 47 |
@@ -79,6 +79,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | API-014 | Contrato 014 | [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes\|Setor do cliente e do grupo no Acompanhamento de clientes]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | Gustavo: tabelas `setores_clientes` e `clientes_setor`, rotas de setor e `id_setor`/`setor` na lista | Nathan: coluna, filtro e quadro por setor, campo Setor e Excel | — |
 | API-016 | Contrato 016 | [[API-016-Observacao-do-PCP-por-Item-do-Pedido\|Observação do PCP por item (produto) do pedido, no lugar de por parcial]] | `implementado-no-codigo` | av-hub: banco, API, front | Entregues | — | — | — | — | — |
 | API-017 | Contrato 017 | [[API-017-Carteira-do-PCP-por-Periodo-e-Previsao-de-Faturamento-por-Mes\|Carteira do PCP por período do seletor e previsão de faturamento por mês]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | — | — | — | — | — |
+| API-018 | Contrato 018 | [[API-018-Carteira-do-PCP-Vencem-Hoje-e-Atrasados-Conferidos\|Carteira do PCP: "vencem hoje" em valor e atrasados conferidos com a lista]] | `proposta` | av-hub: banco, API, front | Ativos | — | — | Gustavo: `vence_hoje_pedidos`/`vence_hoje_valor` em `/carteira` e conferir `atrasados_pedidos` (353) com a lista (358) | — | — |
 | LOG-53 | Contrato 53 | [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado\|Ordem de Produção e lote do fabricado (MES)]] | `proposta` | MES: banco, API, front | Ativos | P2, F1, Q7, Q8, E5 | Entidade e PDF da OP, lote `PRODUCAO` por OP e produto, aprovado volta ao Estoque (BL-052, BL-008) | — | Nathan: Q4 (HRM) e conteúdo do PDF | — |
 | LOG-55 | Contrato 55 | [[LOG-55-Compras-Excluir-Requisicao\|Compras: excluir requisição de compra (exclusão lógica, só criada no Hub e sem OC)]] | `proposta` | av-hub: banco, API, front | Ativos | C0, C1 | — | Gustavo: `deleted_at` + trigger + filtrar views | Nathan: Q2 (`pode_deletar` do Comprador); front escrito | — |
 | LOG-54 | Contrato 54 | [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada\|Documento de retirada e baixa do saldo na retirada (MES)]] | `proposta` | MES: banco, API, front | Ativos | E6, X1, F1 | Modelo, rotas, telas e baixa na confirmação; tirar a baixa da Embalagem e da entrega (BL-007) | — | Nathan: Q1 e Q2 (quem gera, o que imprime, reserva) e Q3 (entra no Ciclo 1?) | — |
@@ -182,6 +183,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 - [[SQL-015-Carteira-do-PCP-Totais-por-Vendedor-e-Desvio|SQL-015]]: Gustavo: `fn_carteira_pcp_resumo`, `fn_carteira_pcp_vendedores`, campos `desvio_previsao` e `dias_previsao_inclusao` e as rotas `/pedidos_venda/carteira`; responder G1 a G3 (Q1 a Q4 do Nathan já respondidas)
 - [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes|API-014]]: Gustavo: tabelas `setores_clientes` e `clientes_setor`, rotas `/setores_clientes` e `PUT /clientes_setor`, setor na lista, filtros e `kpis.por_setor`
+- [[API-018-Carteira-do-PCP-Vencem-Hoje-e-Atrasados-Conferidos|API-018]]: Gustavo: `vence_hoje_pedidos` e `vence_hoje_valor` em `GET /pedidos_venda/carteira` (`fn_carteira_pcp_resumo`) e conferir `atrasados_pedidos` com o total da lista `prazo=atrasado`
 - [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela|API-012]]: Gustavo: rota publicada; falta melhorar a nota (medidas em ordem, unidade, coesão) e informar os ajustes do script do [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso|SQL-013]]
 - [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Gustavo: migration `finalidade`, POST/PATCH com pedido de venda e produto do cadastro, trava da OC na mesma unidade; responder Q1 e Q4 (junto do API-009, BL-064)
 - [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Gustavo: pedido de venda no POST/PATCH da requisição e `GET /compras/requisicoes/referencia` (BL-064); responder Q1 a Q4
