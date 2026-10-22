@@ -3,8 +3,8 @@ id: SQL-015
 aliases: ["Contrato SQL 015", "015-Carteira-do-PCP"]
 tags: [contrato, contrato-sql, dba, pcp, carteira, pedidos, vendas, prazo, desvio, dashboard]
 criado: 2026-10-21
-atualizado: 2026-10-21
-status: proposta
+atualizado: 2026-10-22
+status: parcial
 sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
@@ -16,8 +16,11 @@ criado_original: 2026-10-21
 
 > **Onde atua:** av-hub: banco, API e front (Portal do PCP)
 
-> [!info] Situação em 21/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
+> [!info] Situação em 22/10/2026
+> **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
+>
+> - ✅ **Conferido em 22/10/2026 no preview** (Portal do PCP, Dashboard PCP, perfil admin), depois de o Gustavo informar que implementou. `GET /pedidos_venda/carteira` e `/carteira/vendedores` respondem 200 com todos os campos do contrato (`carteira_*`, `no_prazo_*`, `atrasados_*`, `sem_previsao_*`, `desvio_*`, `avanco_*`). Carteira R$ 77.702.706,01 em 888 pedidos = no prazo R$ 63.293.656,61 (541) + atrasados R$ 14.409.049,40 (349) + sem previsão 0; desvio R$ 7.094.757,08 em 219 pedidos (10 dias); a soma dos 56 vendedores bate com o resumo em carteira, no prazo, atrasados e desvio, e a lista vem ordenada pela carteira. Euveraldo (R$ 29.712.357, 5 pedidos) e Tiago Viana (R$ 7.640.565, 9) batem com a tabela de 21/10; os totais diferem dos de 21/10 por um dia de movimento (a conferência exata pede a mesma janela de 2026).
+> - 🟡 **Ainda não conferido:** `GET /pedidos_venda?desvio=true` devolver exatamente os 219 pedidos (critério 7); `dias_previsao_inclusao`; a marcação de avanço (`PUT .../marcacao`, histórico e escopo); tempo de resposta (G2) e as respostas G1 a G3 do Gustavo. Por isso o status é `parcial` e não `implementado-no-codigo`.
 >
 > - 📝 **Pedido do Nathan, 21/10/2026:** o PCP (diligenciadores) precisa ver no **Dashboard PCP** o valor total em carteira, o que está dentro do prazo, o que está atrasado, os itens com desvio e a **carteira por vendedor**. O faturamento do mês já existe no dashboard. "Valor em avanço" **entra como marca do diligenciador** (ver "Avanço: marca do diligenciador"). A **previsão atualizada** (CCP) não faz parte deste contrato: a regra ainda não foi decidida, ver "Fora deste contrato".
 > - ✅ Os números abaixo foram medidos em 21/10/2026 no preview (perfil admin, pedidos incluídos em 2026, 8.455 pedidos fora da blacklist, 66 vendedores) somando no navegador as parcelas de `GET /pedidos_venda`. Servem de **conferência**: o banco deve chegar nos mesmos valores com a mesma janela.

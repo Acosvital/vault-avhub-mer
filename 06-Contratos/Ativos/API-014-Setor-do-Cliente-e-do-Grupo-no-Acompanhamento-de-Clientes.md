@@ -3,8 +3,8 @@ id: API-014
 aliases: ["Contrato 014", "014-Setor-do-Cliente-e-do-Grupo"]
 tags: [contrato, contrato-api, acompanhamento-clientes, clientes, setor, categorizacao, grupos-de-empresa, av-hub]
 criado: 2026-10-21
-atualizado: 2026-10-21
-status: proposta
+atualizado: 2026-10-22
+status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
 etapa_0b: []
@@ -22,7 +22,9 @@ criado_original: 2026-10-21
 > - 📝 **Pedido do Nathan, 21/10/2026:** quem cuida dos clientes precisa poder **categorizar o cliente (CNPJ) ou o grupo de empresa por setor**, escolhendo de uma lista e **podendo acrescentar um setor novo** quando o cliente não é de nenhum dos listados. Lista inicial: Agricultura, Arquitetura e Design, Automotivo, Construção Civil, Energia, Indústria Naval, Mineração, Óleo & Gás, Papel & Celulose, Petroquímica, Saneamento e Siderurgia.
 > - ✅ **Hoje não existe** setor do cliente na tela nem no banco do Acompanhamento. `core.parceiros` traz só `cnae` e `tipo_atividade` (vêm do Omie e não servem como lista de setores). O campo `segmento` de `core_comercial.clientes` é do CRM do Comercial, tem outra lista (INDUSTRIA, MINERACAO, ENGENHARIA…) e **não** é o setor deste contrato: os dois ficam separados.
 > - ✅ **Front no `av-hub`** (`develop`, PR #235, `77ef66f`): campo de setor na tela do Acompanhamento (`SetorCampo.tsx`), serviço, tipos e planilha.
-> - 🔴 **Banco e API não existem** (busca na `develop` da `api-acos-vital`, 21/10/2026): nenhuma rota `/setores_clientes` nem `PUT /clientes_setor`, e `fn_acompanhamento_clientes` não traz `id_setor`. Enquanto isso o front chama algo que a API ainda não oferece.
+> - ✅ **Conferido em 22/10/2026 no preview** (perfil admin), depois de o Gustavo informar que concluiu: `GET /setores_clientes` responde 200 com os 12 setores iniciais; `GET /acompanhamento_clientes` responde 200 com `id_setor`, `setor` e `setor_origem` em cada linha e aceita `id_setor` e `sem_setor`. Só leitura: o primeiro cliente veio sem setor, como esperado.
+> - 🟡 **Ainda não conferido** (grava dados reais): criar setor e o `409` de nome repetido, renomear/desativar, `PUT /clientes_setor` (inclusive o lote que não grava nada se um alvo é inválido), os filtros em si, `sort=setor`, o `403` do perfil só de leitura. `kpis.por_setor` **não apareceu** na resposta lida; perguntar ao Gustavo se ficou em outra rota ou não foi entregue.
+> - 🕓 Registro de 21/10 (já superado, mantido como histórico): **Banco e API não existiam** (busca na `develop` da `api-acos-vital`, 21/10/2026): nenhuma rota `/setores_clientes` nem `PUT /clientes_setor`, e `fn_acompanhamento_clientes` não traz `id_setor`. Enquanto isso o front chama algo que a API ainda não oferece.
 > - **MES (Robert): sem trabalho.**
 >
 > Selos em [[Regras-do-Vault]].
