@@ -27,13 +27,10 @@ criado_original: 2026-10-07
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
-> [!warning] Verificação em 19/10/2026 — front ainda pendente
-> **Nathan (front av-hub)** · `av-hub` conferido em 19/10/2026: os arquivos abaixo **ainda estão no repositório** e as marcas `GAMBIARRA(` não foram removidas.
-> - `lib/orcamento/data/familias.json`, `fornecedores.json`, `produtos.json`
-> - `lib/comissoes/coordenadores.json`
-> - `lib/comissoes/coordenadores.ts:10` — marca C1 (`GAMBIARRA(vault 09-Contratos/...)`)
->
-> A API já entrega os dados (✅ banco e API prontos). Falta só remover os JSON do repo e atualizar o front para consumir a API diretamente.
+> [!warning] Verificação em 19/10/2026 na `develop` do HUB (`9c280c7`)
+> - ✅ **Orçamento: feito.** O módulo de Orçamento antigo saiu do HUB com as telas, o BFF `/api/orcamento` e os JSON `lib/orcamento/data/familias.json`, `fornecedores.json` e `produtos.json` (PR #211, `c851cda`). O orçamento agora é o Comercial & Suprimentos ([[Comercial-Suprimentos]]).
+> - 🔴 **Coordenadores: pendente (Nathan).** `lib/comissoes/coordenadores.json` continua no repositório e `lib/comissoes/coordenadores.ts:10` ainda tem a marca C1 (`GAMBIARRA(`). A API já entrega os dados; falta o front consumir a API e tirar o JSON.
+> - A `main` do HUB parou em `cfed113` (06/10), antes do PR #211: conferir pela `main` ainda mostra os JSON do orçamento.
 
 
 > Status: **proposta** (verificado em 07/10/2026[^c1] por leitura de código do av-hub e da `api-acos-vital` `main` = `a6ab058`/`fdafb35`; produção só pelo dump de 07/10, [[Mapa-v1-para-v2|Auditoria-Dump-Producao-2026-10-07]]). Fonte das decisões: [[Registro-de-Decisoes|Registro-de-Decisoes-2026-10-07]] (itens 39 e 40). Este contrato **substitui, para os pontos abaixo**, o [[LOG-07a-Dados-Orcamento-e-Coordenadores-no-Banco|07-Dados-Orcamento-e-Coordenadores-no-Banco]] (histórico).
