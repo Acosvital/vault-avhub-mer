@@ -128,7 +128,7 @@ Dashboard PCP, bloco **Carteira**:
 |---|---|
 | Totais e tabela por vendedor | passam `por_periodo=true` com o período do seletor (mês escolhido ou "todo o período"). O subtítulo diz o recorte ("pedidos incluídos em outubro de 2026"), e volta ao texto atual quando a API ainda não devolve `por_periodo` |
 | **A faturar até o fim do mês** | cartão novo: soma de **todos os meses até o mês do seletor** (inclusive os atrasados de meses anteriores) e quantos estão atrasados |
-| **Previsão por mês** | lista/gráfico de barras novo com **todos os meses que têm algo a faturar**, valor e pedidos por mês, a parte atrasada destacada e uma linha "Sem previsão" quando houver. Cada mês leva à lista de pedidos filtrada |
+| **Previsão por mês** | lista/gráfico de barras novo com **todos os meses que têm algo a faturar**, valor e pedidos por mês, a parte atrasada destacada e uma linha "Sem previsão" quando houver (sem link por mês: a lista de pedidos ainda não filtra por mês de previsão) |
 | Sem a rota nova | o bloco de previsão some (sem erro na tela), como a carteira some quando a API não tem as rotas |
 | Links dos cartões | passam a levar o **mesmo recorte** (período) para a lista de Pedidos PCP, para o número do cartão bater com o total da lista |
 
