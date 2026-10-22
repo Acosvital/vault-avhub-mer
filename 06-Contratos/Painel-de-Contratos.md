@@ -27,8 +27,8 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 | `proposta` | 7 |
 | `para-implementar` | 0 |
 | `parcial` | 11 |
-| `implementado-no-codigo` | 47 |
-| `aplicado-em-producao` | 11 |
+| `implementado-no-codigo` | 46 |
+| `aplicado-em-producao` | 12 |
 | `arquivado` | 11 |
 
 Vocabulário de status: `proposta` (ainda sem decisão), `para-implementar` (decidido, falta código), `parcial` (parte no código, parte não), `implementado-no-codigo` (conferido no código de 14/10), `aplicado-em-producao` (aplicado no banco, confirmado por dump; produção não reconferida em 14/10 ❓), `arquivado` (superado, rejeitado, fora de escopo ou histórico, com o motivo na nota).
@@ -77,7 +77,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | API-012 | Contrato 012 | [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela\|Produtos: prováveis duplicatas (rota `GET /produtos/duplicatas` e nova tela)]] | `implementado-no-codigo` | av-hub: banco, API, front | Entregues | — | — | Gustavo: rota `GET /produtos/duplicatas` antes de `/:id` e cache de 60 s | Nathan: BFF, serviço sem varredura e tela nova | — |
 | API-013 | Contrato 013 | [[API-013-Acompanhamento-de-Clientes-So-Cliente-e-Periodo-Total\|Acompanhamento de clientes: só clientes (tag) e período total]] | `aplicado-em-producao` | av-hub: API, front | Entregues | — | — | — | — | — |
 | API-014 | Contrato 014 | [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes\|Setor do cliente e do grupo no Acompanhamento de clientes]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | Gustavo: tabelas `setores_clientes` e `clientes_setor`, rotas de setor e `id_setor`/`setor` na lista | Nathan: coluna, filtro e quadro por setor, campo Setor e Excel | — |
-| API-016 | Contrato 016 | [[API-016-Observacao-do-PCP-por-Item-do-Pedido\|Observação do PCP por item (produto) do pedido, no lugar de por parcial]] | `implementado-no-codigo` | av-hub: banco, API, front | Entregues | — | — | — | — | — |
+| API-016 | Contrato 016 | [[API-016-Observacao-do-PCP-por-Item-do-Pedido\|Observação do PCP por item (produto) do pedido, no lugar de por parcial]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | — | — | — | — | — |
 | API-017 | Contrato 017 | [[API-017-Carteira-do-PCP-por-Periodo-e-Previsao-de-Faturamento-por-Mes\|Carteira do PCP por período do seletor e previsão de faturamento por mês]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | — | — | — | — | — |
 | API-018 | Contrato 018 | [[API-018-Carteira-do-PCP-Vencem-Hoje-e-Atrasados-Conferidos\|Carteira do PCP: "vencem hoje" em valor e atrasados conferidos com a lista]] | `proposta` | av-hub: banco, API, front | Ativos | — | — | Gustavo: `vence_hoje_pedidos`/`vence_hoje_valor` em `/carteira` e conferir `atrasados_pedidos` (353) com a lista (358) | — | — |
 | LOG-53 | Contrato 53 | [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado\|Ordem de Produção e lote do fabricado (MES)]] | `proposta` | MES: banco, API, front | Ativos | P2, F1, Q7, Q8, E5 | Entidade e PDF da OP, lote `PRODUCAO` por OP e produto, aprovado volta ao Estoque (BL-052, BL-008) | — | Nathan: Q4 (HRM) e conteúdo do PDF | — |

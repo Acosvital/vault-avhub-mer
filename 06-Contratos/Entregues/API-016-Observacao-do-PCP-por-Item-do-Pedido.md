@@ -4,7 +4,7 @@ aliases: ["Contrato 016", "016-Observacao-do-PCP-por-Item"]
 tags: [contrato, contrato-api, pcp, pedidos, observacao, item, diligenciador, av-hub]
 criado: 2026-10-22
 atualizado: 2026-10-22
-status: implementado-no-codigo
+status: aplicado-em-producao
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
 etapa_0b: []
@@ -17,12 +17,12 @@ criado_original: 2026-10-22
 > **Onde atua:** av-hub: banco, API, front
 
 > [!info] Situação em 22/10/2026
-> **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
+> **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
 >
 > - 📝 **Pedido do Nathan, 22/10/2026:** a observação que o diligenciador do PCP escreve hoje **por parcial** passa a ser **por linha de item, por produto do pedido**. As observações antigas por parcial são descartadas (decisão do Nathan).
 > - ✅ **Banco e API (Gustavo)**, `api-acos-vital` commit `62ac5e7` (22/10/2026): tabela `pedido_item_observacao_pcp` e as rotas `GET`, `POST`, `DELETE /:id` e `GET /contagem` em `/pedido_item_observacao_pcp`; escopo do vendedor em `escopoVendedor.js` (dono "pedido_item_observacao"); o item é conferido no pedido vivo (`fn_pedido_item_existe`, 404 `ITEM_NAO_ENCONTRADO`). **Conferido na produção em 22/10/2026 (só leitura):** contagem e lista respondem 200 vazias, item inexistente 404, pedido inexistente 404, parâmetros inválidos 400.
 > - ✅ **Front no `av-hub`** (`develop`): coluna "Obs." em cada produto do detalhe do pedido (PR #239) e o autor da sessão no BFF (PR #246).
-> - 🟡 **Não testado de ponta a ponta:** criar e apagar uma observação de verdade (grava em produção; não foi autorizado). Quando alguém criar a primeira observação real, conferir lista, contagem e exclusão.
+> - ✅ **Escrita testada pelo Nathan (22/10/2026):** criar e apagar observação por produto funcionam no Hub; "tá ok". Fecha o que faltava do aceite.
 > - **MES (Robert): sem trabalho.**
 >
 > Selos em [[Regras-do-Vault]].
