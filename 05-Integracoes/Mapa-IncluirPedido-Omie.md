@@ -4,14 +4,14 @@ criado: 2026-10-23
 atualizado: 2026-10-23
 status: proposta
 dono: Nathan
-fontes: ["Documentação do Omie lida em 23/10/2026: https://app.omie.com.br/api/v1/produtos/pedido/ (serviço PedidoVendaProduto, método IncluirPedido e tipos complexos)", "Exemplo de IncluirPedido enviado pelo Nathan em 23/10/2026", "06-Pesquisa/Estudo-Omie-API (estudo de 21/10)", "av-hub components/Propostas/PropostaForm (PedidoOmieModal.tsx, ItemProposta.tsx, PropostaForm.tsx)", "05-Contratos/SQL-016 (pedido_venda, pedidos_itens)"]
+fontes: ["Documentação do Omie lida em 23/10/2026: https://app.omie.com.br/api/v1/produtos/pedido/ (serviço PedidoVendaProduto, método IncluirPedido e tipos complexos)", "Exemplo de IncluirPedido enviado pelo Nathan em 23/10/2026", "05-Integracoes/Estudo-Omie-API (estudo de 21/10)", "av-hub components/Propostas/PropostaForm (PedidoOmieModal.tsx, ItemProposta.tsx, PropostaForm.tsx)", "06-Contratos/Ativos/SQL-016 (pedido_venda, pedidos_itens)"]
 ---
 
 # Mapa do `IncluirPedido` do Omie: o que o hub manda, de onde vem cada campo e o que ainda não sabemos
 
 Complementa o [[Estudo-Omie-API]]. Aqui a documentação do `IncluirPedido` foi lida campo a campo e cruzada com a proposta do hub. **Nenhuma chamada foi feita ao Omie**: tudo o que depende de comportamento real está marcado ❓ e entra na lista de testes da seção 6.
 
-Selos: ✅ está na documentação ou no código · 📝 decisão do Nathan · 🟡 proposta minha · 🔴 não existe · ❓ não conferido.
+Selos: ✅ está na documentação ou no código · 📝 decisão do Nathan · 🟡 proposta · 🔴 não existe · ❓ não conferido.
 
 ## 1. O método em uma tela
 

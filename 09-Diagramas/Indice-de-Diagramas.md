@@ -20,7 +20,7 @@ O v1 tinha 31 diagramas na UML e outros espalhados nas pastas de fluxo, quase to
 | `Historia-da-Proposta-ao-Pedido.pdf` | A jornada do usuário de ponta a ponta, num caso só (Mogi: flanges, tubos, flanges cegas e flange sobre desenho) | 3 páginas |
 | [[11-Proposta-e-Pedido-de-Venda]], [[12-Orcamento-Base-de-Preco]], [[13-Custo-Real-e-Comissao-no-Fluxo]] | Subfluxos da proposta ao pedido, do Orçamento e do custo real e da comissão | 3 |
 | [[Sequencia]] | Pedido ao PCP, atendimento do Estoque, requisição ida e volta, chegada com NF e Recebimento, inspeção de entrada, produção e Expedição, despacho | 8 |
-| [[Estados]] | Parcial, lote, reserva, recebimento, divergência, requisição (MES e hub), etapa de compra, OC, envio, liberação, etapa do item | 12 |
+| [[Estados]] | Parcial, lote, reserva, recebimento, divergência, requisição (MES e hub), etapa de compra, OC, envio, liberação, etapa do item; proposta, pedido do Hub, pedido de custo e comissão nova (13 a 16, 🟡) | 17 |
 | [[Classes]] | Estoque e compras, produção, compras e integração, api-comercial | 4 |
 | [[Casos-de-Uso]] | Seis blocos por raia | 6 |
 | [[Componentes-e-Implantacao]] | Componentes e integrações, implantação, pacotes de schema, fluxo de dados | 4 |

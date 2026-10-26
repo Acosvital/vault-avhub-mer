@@ -1,15 +1,15 @@
 ---
 tags: [diagramas, estados, uml, mes, av-hub]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: vigente
 dono: Nathan
-fontes: [v1 Diagramas-UML (5, 6, 7, 8, 20, 24), api-pcp 579a625 prisma/models, api-acos-vital f322dcd, 00-Fluxo-Mestre-0b]
+fontes: [v1 Diagramas-UML (5, 6, 7, 8, 20, 24), api-pcp 579a625 prisma/models, api-acos-vital f322dcd, 00-Fluxo-Mestre-0b, api-comercial 5aa5311 enums.prisma, SQL-016 a SQL-018 (migrações de 26/10/2026), Registro-de-Decisoes N16]
 ---
 
 # Diagramas de estados
 
-Os enums vêm do Prisma do `api-pcp` (`prisma/models/*.prisma`) e das rotas do `api-acos-vital` em 14/10/2026. Vocabulário completo de status e etapas: [[Estados-e-Status]]. Destino de cada diagrama do v1: [[Indice-de-Diagramas]].
+Os enums vêm do Prisma do `api-pcp` (`prisma/models/*.prisma`) e das rotas do `api-acos-vital` em 14/10/2026. Os diagramas 13 a 16 (proposta, pedido do Hub, pedido de custo e comissão nova) vêm das migrações propostas em 26/10/2026, ainda fora da produção. Vocabulário completo de status e etapas: [[Estados-e-Status]]. Destino de cada diagrama do v1: [[Indice-de-Diagramas]].
 
 ## 1. Parcial do item (`ItemParcial`, enum `StatusItemParcial`)
 
@@ -249,6 +249,97 @@ flowchart TD
 ```
 
 Selo ✅ `integracao-avhub.service.ts:160-192`. 🟡 `compras.fechamento` ainda é "Em compra", sem cotação, aprovação e trânsito (BL-009).
+
+## 13. Proposta (`core_comercial.propostas.status`, 🟡)
+
+O enum de hoje, no módulo do Pablo, é `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76` ✅). O desenho abaixo é o da migração do [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] (`ck_propostas_status`), pelas N16-02 e N16-03: sem fechamento parcial, ajuste só até aprovar, proposta incompleta não aprova, cancelada não reabre.
+
+```mermaid
+stateDiagram-v2
+    [*] --> ABERTA : V0.1 vendedor cria
+    ABERTA --> ABERTA : revisão, só até aprovar
+    ABERTA --> APROVADA : V0.4 e V0.5 vendedor marca, só se completa
+    ABERTA --> CANCELADA : V0C com motivo
+    APROVADA --> TRANSFORMADA : V0.6 e V0.7 transformar em pedido
+    APROVADA --> CANCELADA : cancela antes do pedido
+    TRANSFORMADA --> [*]
+    CANCELADA --> [*]
+
+    note right of CANCELADA
+        Não reabre: o vendedor duplica.
+        A comissão estimada vira histórico.
+    end note
+```
+
+Selo 🟡 (migração testada em Postgres 18, fora da produção). Nós do Mestre: `V0.1` a `V0.7`, `V0C`. Hoje (✅ no teste) `atualizar` só roda em `ABERTA` (`propostas.service.ts:478-481`), `perder` leva a `PERDIDA` (`:555-575`), `reabrir` e `fechar` parcial existem (`:578-649`) e saem. Regras: [[11-Proposta-e-Pedido-de-Venda]].
+
+## 14. Pedido de venda do Hub (`core_comercial.pedidos.status_sincronizacao_omie`, 🟡)
+
+```mermaid
+stateDiagram-v2
+    [*] --> pendente : V0.7 pedido da proposta grava na fila
+    [*] --> sincronizado : pedido digitado no Omie chega pela pipeline
+    pendente --> sincronizado : pipeline envia, Omie cria e devolve o número
+    pendente --> erro : Omie recusa
+    erro --> pendente : Tentar novamente
+    sincronizado --> [*]
+```
+
+Selo 🟡. Mesmo vocabulário da OC (`ck_ordens_compra_status`, Dump Avhub 17315-17320 ✅). O pedido tem `origem` `PROPOSTA` ou `OMIE` (N16-106); o da proposta nasce com `status_liberacao = liberado` (diagrama 11), e o do Omie segue o diagrama 11 desde `pendente`. Na recusa, o vendedor vê o motivo e o botão "Tentar novamente" (N16-36).
+
+## 15. Pedido de custo ao Orçamento (`StatusSolicitacao`)
+
+```mermaid
+stateDiagram-v2
+    [*] --> ABERTA : B3 vendedor pede o custo
+    ABERTA --> ABERTA : orçamentista assume ou libera
+    ABERTA --> RESPONDIDA : B4 responde com oferta
+    ABERTA --> SEM_FORNECEDOR : B4 responde que não há fornecedor
+    ABERTA --> CANCELADA : cancelada com motivo
+    RESPONDIDA --> [*]
+    SEM_FORNECEDOR --> [*]
+    CANCELADA --> [*]
+```
+
+Selo ✅ valores em `enums.prisma:188-195`; transições conforme `custos.routes.ts:406-510` ❓ não relidas linha a linha. O prazo obrigatório (`prazo_resposta`, 2 dias úteis por padrão, `custos.routes.ts:378`) **sai**: o [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]] deixa a coluna nula, e o tempo é só cronometrado (N16-58). O setor de Orçamento é novo; o Moisés é uma das pessoas (N16-104). Regras: [[12-Orcamento-Base-de-Preco]].
+
+## 16. Comissão nova (`core_comissao`, 🟡)
+
+Dois diagramas: o dossiê da proposta ou do pedido (`comissoes.estado`) e a comissão de cada nota fiscal (`comissoes_nf.estado`). Valores do [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]], resumidos em [[04-Regras-e-Estados-da-Comissao-Nova]].
+
+```mermaid
+stateDiagram-v2
+    [*] --> ESTIMADA : K1 nasce na proposta ou na parte de compras do pedido do Omie
+    ESTIMADA --> ESTIMADA : revisão da proposta
+    ESTIMADA --> CONGELADA : proposta aprovada, a estimativa trava
+    ESTIMADA --> CANCELADA : V0C proposta cancelada
+    CONGELADA --> EM_ACOMPANHAMENTO : pedido criado
+    CONGELADA --> CANCELADA : cancelada antes do pedido
+    EM_ACOMPANHAMENTO --> EM_ACOMPANHAMENTO : K2 recalcula a cada evento de custo
+    EM_ACOMPANHAMENTO --> ENCERRADA : tudo faturado e decidido
+    EM_ACOMPANHAMENTO --> CANCELADA : pedido cancelado, só sem nota faturada
+    ENCERRADA --> [*]
+    CANCELADA --> [*]
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> AGUARDANDO_DECISAO : K3 a nota fecha, já calculada
+    AGUARDANDO_DECISAO --> APROVADA : K4 aprova
+    AGUARDANDO_DECISAO --> CORTADA : K4 corta
+    AGUARDANDO_DECISAO --> ALTERADA : K4 altera, por valor ou percentual
+    AGUARDANDO_DECISAO --> DESAPROVADA : K4 desaprova, R$ 0 visível
+    AGUARDANDO_DECISAO --> BLOQUEADA : K4 bloqueia, valor retido
+    BLOQUEADA --> AGUARDANDO_DECISAO : desbloqueia, com justificativa
+    AGUARDANDO_DECISAO --> NF_CANCELADA : nota cancelada inteira antes da decisão
+    APROVADA --> [*]
+    CORTADA --> [*]
+    ALTERADA --> [*]
+    DESAPROVADA --> [*]
+    NF_CANCELADA --> [*]
+```
+
+Selo 🟡 (SQL-018 testado em Postgres 18, fora da produção; N16-10, N16-43 a N16-49). Toda decisão leva justificativa e rastro, e ninguém decide a própria comissão. O vendedor só vê a comissão real, com a justificativa, depois de `K4` (`K5`). Depois da decisão, o que muda vira **lançamento** na apuração seguinte (`comissao_lancamentos`): `COMPLEMENTO` ou `DESCONTO` quando o custo completa, com nova decisão, e `ABATIMENTO` quando a nota é cancelada, devolvida ou recusada (`K6`), sem decisão. A devolução parcial abre `comissao_devolucao_pendencia` (`ABERTA` → `INFORMADA` ou `DISPENSADA`).
 
 ## Outros enums de status do MES
 

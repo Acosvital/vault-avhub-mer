@@ -1,6 +1,6 @@
 ---
 id: LOG-57
-aliases: ["Contrato 56", "56-Menu-Vendas-Orcamento-Compras"]
+aliases: ["Contrato 57", "57-Menu-Vendas-Orcamento-Compras"]
 tags: [contrato, contrato-logica, hub-front, hub-banco, menu, telas, vendas, orcamento, compras, sql]
 criado: 2026-10-16
 atualizado: 2026-10-21
@@ -12,14 +12,14 @@ fontes: ["Registro-de-Decisoes (N16-14)", "av-hub branch feat/menu-orcamento-ven
 criado_original: 2026-10-16
 ---
 
-# Contrato 56 — Menu em Vendas, Orçamento e Compras: URLs, páginas, rotas removidas e cadastro das telas
+# Contrato 57 — Menu em Vendas, Orçamento e Compras: URLs, páginas, rotas removidas e cadastro das telas
 
 > **Onde atua:** av-hub: front (HUB) e banco (`auth.telas`)
 
 > [!info] Atualização de 21/10/2026
 > - 📝 **OQ-29 respondida (N16-33):** as telas **Pedidos de Venda** e **Notas Fiscais de Saída** ficam **inativadas também em produção**; o SQL ganha o passo do `UPDATE auth.telas` descrito na seção 5 (as páginas seguem no código).
 > - 🟡 **Telas novas que este menu ainda não cobre** (cada uma ganha o seu cadastro quando existir; OQ-21): em Vendas, a área de pendências em **Meus Pedidos** (aprovar ou reprovar compra acima do valor da proposta, `C8`; N16-64), a **aprovação da proposta** e o **"Transformar em pedido"**; em Compras, a **lista dos casos reprovados pelo vendedor** com o registro da solução (N16-73) e a conferência de impostos da OC (`C6`, `C7`); em Orçamento, a **página do produto** do vendedor (`B2`, N16-55); na comissão, a **decisão** (Controladoria, Gerência, Coordenação), a **consulta do vendedor** com a justificativa (`K5`) e a **informação de devolução parcial** (`K6`, Fiscal e Controladoria). Contratos: [[LOG-56-Fluxo-da-Proposta-ao-Pedido]].
-> - 🟡 **Perfil orçamentista** precisa existir (N16-59); o setor orçamentário ainda está em construção.
+> - 🟡 **Perfil orçamentista** precisa existir (N16-59); o setor orçamentário é novo (o Moisés é uma das pessoas, N16-104).
 >
 > Situação do front e do SQL abaixo continua a de 16/10/2026.
 
@@ -32,7 +32,7 @@ criado_original: 2026-10-16
 > - 🟡 **Diferença entre api-test e o SQL:** o Nathan inativou na api-test as telas **Pedidos de Venda** e **Notas Fiscais de Saída**; o SQL **não** as toca. Se a inativação vale em produção, o SQL ganha um passo (OQ-29).
 > - O vocabulário de status tem um valor só por contrato; `parcial` quer dizer "parte no código, parte não": o front está feito, a produção não.
 
-Selos em [[Regras-do-Vault]]. Decisão de origem: N16-14 em [[Registro-de-Decisoes]]. Este contrato **substitui, na parte de menu e telas**, o que o [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio]] dizia do Orçamento (o LOG-42 está encerrado; ver a renumeração da promoção (26/10/2026)).
+Selos em [[Regras-do-Vault]]. Decisão de origem: N16-14 em [[Registro-de-Decisoes]]. Este contrato **substitui, na parte de menu e telas**, o que o [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio]] dizia do Orçamento (o LOG-42 está encerrado, N16-14).
 
 > [!info] Reorganização proposta em 23/10/2026
 > A auditoria de todas as telas ([[14-Telas-e-Experiencia-do-Usuario]]) propõe um menu **mais curto**: Vendas ganha **Meus Pedidos**; Orçamento passa de 10 para 6 entradas (Pedidos de custo, **Produtos**, Ofertas, Fornecedores, Cotação, Parâmetros); Compras troca **Aprovações** por **Aprovar OC** e ganha **Reprovados**; entra uma **Fila do Fiscal**. Isso **não** é parte do que já foi entregue neste contrato (a `develop` já tem o menu de 16/10); é a próxima rodada e vira SQL novo em `auth.telas`, a decidir depois da validação.

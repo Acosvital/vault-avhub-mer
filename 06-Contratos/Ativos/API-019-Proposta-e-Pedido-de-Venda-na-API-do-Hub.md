@@ -1,6 +1,6 @@
 ---
 id: API-019
-aliases: ["Contrato API 015", "015-Proposta-e-Pedido-de-Venda-na-API-do-Hub"]
+aliases: ["Contrato API 019", "019-Proposta-e-Pedido-de-Venda-na-API-do-Hub"]
 tags: [contrato, contrato-api, proposta, pedido-de-venda, omie, fila, compras, cancelamento, api-acos-vital]
 criado: 2026-10-21
 atualizado: 2026-10-21
@@ -12,7 +12,7 @@ fontes: ["LOG-56-Fluxo-da-Proposta-ao-Pedido (regras R1 a R66, rotas da seção 
 criado_original: 2026-10-16
 ---
 
-# Contrato API 015 — proposta, pedido de venda por API no Omie, compra acima do valor e cancelamento (`/comercial`)
+# Contrato API 019 — proposta, pedido de venda por API no Omie, compra acima do valor e cancelamento (`/comercial`)
 
 > **Onde atua:** av-hub: API (`api-acos-vital`) · pipeline Omie
 

@@ -188,7 +188,7 @@ Os 8 estados macro do desenho do vendedor (`AGUARDANDO_LIBERACAO`, `PENDENTE_PCP
 
 ### Proposta, pedido de venda do Hub, custo real e comissão nova (proposta 🟡, SQL-016 a SQL-018)
 
-Valores dos `CHECK` das migrações propostas em 26/10/2026 ([[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]], [[SQL-017-Schema-core_orcamento-Base-de-Preco-e-Pedido-de-Custo]], [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]). Ainda não estão no banco de produção.
+Valores dos `CHECK` das migrações propostas em 26/10/2026 ([[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]], [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]], [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]). Ainda não estão no banco de produção.
 
 | Campo | Valores | Fonte |
 |---|---|---|

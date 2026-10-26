@@ -1,6 +1,6 @@
 ---
 id: API-020
-aliases: ["Contrato API 016", "016-Orcamento-Base-de-Preco-e-Pedido-de-Custo"]
+aliases: ["Contrato API 020", "020-Orcamento-Base-de-Preco-e-Pedido-de-Custo"]
 tags: [contrato, contrato-api, orcamento, base-de-preco, fornecedor, pedido-de-custo, api-acos-vital]
 criado: 2026-10-21
 atualizado: 2026-10-21
@@ -8,19 +8,19 @@ status: proposta
 sistemas: [hub-api]
 dono: "Pablo (módulo) e Gustavo (revisão)"
 etapa_0b: [V0.2, B1, B2, B3, B4]
-fontes: ["12-Orcamento-Base-de-Preco", "SQL-017-Schema-core_orcamento-Base-de-Preco-e-Pedido-de-Custo", "Proposta-Score-e-Volatilidade-OQ-46", "api-comercial 5aa5311: src/modules/custos/custos.routes.ts (pedido de custo, prazo 2 dias úteis em :378, SLA em :338)", "Registro-de-Decisoes (N16-06, N16-07, N16-52 a N16-59)"]
+fontes: ["12-Orcamento-Base-de-Preco", "SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo", "Proposta-Score-e-Volatilidade-OQ-46", "api-comercial 5aa5311: src/modules/custos/custos.routes.ts (pedido de custo, prazo 2 dias úteis em :378, SLA em :338)", "Registro-de-Decisoes (N16-06, N16-07, N16-52 a N16-59)"]
 criado_original: 2026-10-16
 ---
 
-# Contrato API 016 — Orçamento: base de preço, página do produto, fornecedores e pedido de custo (`/orcamento`)
+# Contrato API 020 — Orçamento: base de preço, página do produto, fornecedores e pedido de custo (`/orcamento`)
 
 > **Onde atua:** av-hub: API (`api-acos-vital`)
 
 > [!info] Situação em 21/10/2026
-> **Status:** `proposta` · **Dono:** Pablo; Gustavo revisa · Banco: [[SQL-017-Schema-core_orcamento-Base-de-Preco-e-Pedido-de-Custo]] · Regras: [[12-Orcamento-Base-de-Preco]]
+> **Status:** `proposta` · **Dono:** Pablo; Gustavo revisa · Banco: [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]] · Regras: [[12-Orcamento-Base-de-Preco]]
 >
 > - ✅ Hoje, no `api-comercial` de teste: pedido de custo (com prazo de 2 dias úteis e SLA calculado), média de preços, catálogo. 🔴 O resto não existe.
-> - 📝 **Sai** o prazo obrigatório do pedido de custo e o SLA (`ATRASADA`, `VENCE_HOJE`, `NO_PRAZO`): o tempo é só **cronometrado** (N16-58). O setor orçamentário ainda está em construção (N16-59).
+> - 📝 **Sai** o prazo obrigatório do pedido de custo e o SLA (`ATRASADA`, `VENCE_HOJE`, `NO_PRAZO`): o tempo é só **cronometrado** (N16-58). O setor orçamentário é novo; o Moisés é uma das pessoas (N16-104).
 
 ## 1. Por quê
 
@@ -66,4 +66,4 @@ OQ-10, OQ-21, OQ-38.
 
 ## Ver também
 
-[[12-Orcamento-Base-de-Preco]] · [[SQL-017-Schema-core_orcamento-Base-de-Preco-e-Pedido-de-Custo]] · [[LOG-57-Menu-Vendas-Orcamento-Compras]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[Registro-de-Decisoes]]
+[[12-Orcamento-Base-de-Preco]] · [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]] · [[LOG-57-Menu-Vendas-Orcamento-Compras]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[Registro-de-Decisoes]]

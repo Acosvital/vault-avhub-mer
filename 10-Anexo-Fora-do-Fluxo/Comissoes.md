@@ -41,4 +41,4 @@ Fora do fluxo 0b. Banco e API são do Gustavo; as telas são do Nathan. A comiss
 - Confirmar em produção que as migrations 007 e 007b do DBA foram aplicadas ❓ (o código as cita; o Dump Avhub de 14/10 tem `comissao_coordenadores` e `comissao_coordenadores_historico`).
 - Comissão por faturamento com custo real: Ciclo 2, [[LOG-47-Custo-Real-por-Item-no-Hub]] 🔴.
 
-Ver também: [[Orcamento]] (mesma marca `GAMBIARRA` de LOG-42), [[Dashboards]].
+Ver também: [[12-Orcamento-Base-de-Preco]] (a marca `GAMBIARRA` do LOG-42 saiu do Orçamento em 16/10), [[Dashboards]].

@@ -1,13 +1,16 @@
 ---
 tags: [anexo, orcamento, av-hub, comercial, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-14
-status: vigente
+atualizado: 2026-10-26
+status: arquivado
 dono: Pablo
 fontes: [api-acos-vital f322dcd src/schemas/core_compras/aggregates/orcamento, HUB b55ac55 lib/orcamento e app/api/orcamento, Dump Avhub 14/10, LOG-42, v1 LOG-07a]
 ---
 
 # Orçamento
+
+> [!warning] Arquivado em 26/10/2026
+> O Orçamento entrou no fluxo mestre (`B1` a `B4`, N16-07, N16-16). A nota vigente é [[12-Orcamento-Base-de-Preco]], que diz o que aconteceu com cada item desta. Esta nota fica só como registro do estado de 14/10.
 
 Fora do fluxo 0b. Decisão do Nathan de 07/10 (item 39 do v1): o orçamento é desenvolvido por fora, no módulo Comercial & Suprimentos ([[Comercial-Suprimentos]]); a tela e o código legado do HUB saem quando o módulo novo a substituir 🟡 ([[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio]], proposta).
 

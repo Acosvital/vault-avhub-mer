@@ -1,6 +1,6 @@
 ---
 id: LOG-58
-aliases: ["Contrato 57", "57-Liberacao-do-Pedido-Origem-Proposta"]
+aliases: ["Contrato 58", "58-Liberacao-do-Pedido-Origem-Proposta"]
 tags: [contrato, contrato-logica, contrato-api, sql, vendas, liberacao, proposta, pedido-de-venda, pipeline]
 criado: 2026-10-16
 atualizado: 2026-10-21
@@ -8,11 +8,11 @@ status: proposta
 sistemas: [hub-banco, hub-api, pipeline]
 dono: "Gustavo (DBA) e Nathan"
 etapa_0b: [V0.6, V0.7, V1, V2, V3, P1]
-fontes: ["Registro-de-Decisoes (N16-02, N16-05)", "LOG-26-Vendas-Liberacao-Pedido", "01-Vendas-Liberacao", "Dump Avhub (Esqueleto).sql: pedidos_vendas_liberacao (18285-18298), pedidos_vendas_liberacao_historico (18360-18372), fn_pedidos_vendas_liberacao_historico (7743), fn_pedidos_vendas_liberacao_regras (7783), vw_pedidos_liberacao (20870-20903)", "05-Contratos/SQL-016-anexos/0001-core_comercial.sql (pedido_venda, fn_propostas_transformar_em_pedido; outro agente)", "LOG-56-Fluxo-da-Proposta-ao-Pedido (R19 a R26, rotas da seção 8)"]
+fontes: ["Registro-de-Decisoes (N16-02, N16-05)", "LOG-26-Vendas-Liberacao-Pedido", "01-Vendas-Liberacao", "Dump Avhub (Esqueleto).sql: pedidos_vendas_liberacao (18285-18298), pedidos_vendas_liberacao_historico (18360-18372), fn_pedidos_vendas_liberacao_historico (7743), fn_pedidos_vendas_liberacao_regras (7783), vw_pedidos_liberacao (20870-20903)", "06-Contratos/Ativos/SQL-016-anexos/0001-migracao-core_comercial.sql (pedido_venda, fn_propostas_transformar_em_pedido; outro agente)", "LOG-56-Fluxo-da-Proposta-ao-Pedido (R19 a R26, rotas da seção 8)"]
 criado_original: 2026-10-16
 ---
 
-# Contrato 57 — Liberação do pedido de venda com origem na proposta (V1 com duas origens)
+# Contrato 58 — Liberação do pedido de venda com origem na proposta (V1 com duas origens)
 
 > **Onde atua:** av-hub: banco, API · pipeline Omie
 

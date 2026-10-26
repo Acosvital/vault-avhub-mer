@@ -215,7 +215,7 @@ flowchart TD
 
 | Nó | Raia | O que acontece | Tela (nome atual · antigo · rota) | Endpoint / contrato | Código |
 |---|---|---|---|---|---|
-| V0.1 | Vendas | Vendedor cria a proposta: unidade emissora (logo, cores, CRC no PDF), cliente com cadastro no Omie da conta, itens com CFOP, cenário e impostos digitados, condição de pagamento da lista da conta | Proposta (nova) · `/comercial/propostas` | API-019, SQL-016, SQL-019 · [[11-Proposta-e-Pedido-de-Venda]] | 🔴 (`api-comercial` de teste ✅) |
+| V0.1 | Vendas | Vendedor cria a proposta: unidade emissora (logo, cores, CRC no PDF), cliente com cadastro no Omie da conta, itens com CFOP, cenário e impostos digitados, condição de pagamento da lista da conta | Propostas · `/vendas/propostas` (HUB) | API-019, SQL-016, SQL-019 · [[11-Proposta-e-Pedido-de-Venda]] | 🔴 (`api-comercial` de teste ✅) |
 | V0.2 | Vendas | Vendedor preenche o custo com o que conseguiu, consultando a página do produto, ou pede ao Orçamento (`B3`) e segue | idem | API-019, API-020 | 🔴 |
 | V0.3 | Vendas | Comissão estimada nasce (motor atual); proposta com item sem custo ou sem fornecedor é incompleta e não aprova | idem | API-022, SQL-018 | 🔴 |
 | V0.4 | Gerência | Aprova desconto e margem fisicamente (neste ciclo) | — (fora do sistema) | N16-75 | — |

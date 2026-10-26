@@ -4,14 +4,14 @@ criado: 2026-10-16
 atualizado: 2026-10-21
 status: proposta
 dono: Nathan
-fontes: [dump core_comissionamento convertido (06-Pesquisa/fontes), api-acos-vital f322dcd src/schemas/core_comissionamento, av-hub lib/simulador/motor.ts, av-hub app/(protected)/comissoes/simulador e analise-simuladores, av-hub app/api/comissoes, tela-simulador-comissao.png, N16-10, N16-11, N16-18, N16-19, N16-20]
+fontes: [dump core_comissionamento convertido (09-Diagramas/fontes), api-acos-vital f322dcd src/schemas/core_comissionamento, av-hub lib/simulador/motor.ts, av-hub app/(protected)/comissoes/simulador e analise-simuladores, av-hub app/api/comissoes, tela-simulador-comissao.png, N16-10, N16-11, N16-18, N16-19, N16-20]
 ---
 
 # Como o motor de comissão atual calcula
 
 Esta nota explica, em linguagem simples, **o que o módulo Comissões de hoje faz**. Serve para a Michele (Controladoria) conferir antes de o motor ir para a proposta ([[Registro-de-Decisoes]], N16-11: o motor novo é o mesmo). Nada do módulo atual é alterado. A lista de perguntas está no fim, em "O que a Michele precisa confirmar".
 
-Como ler: **✅** está no código ou no banco (com arquivo e linha) · **📝** decisão do Nathan · **🟡** proposta minha · **🔴** aberto · **❓** não conferido em produção. Nos números, `dump` é `06-Pesquisa\fontes\core_comissionamento-dump-convertido.sql`.
+Como ler: **✅** está no código ou no banco (com arquivo e linha) · **📝** decisão do Nathan · **🟡** proposta · **🔴** aberto · **❓** não conferido em produção. Nos números, `dump` é `09-Diagramas/fontes/core_comissionamento-dump-convertido.sql`.
 
 ## Resumo em dez linhas
 

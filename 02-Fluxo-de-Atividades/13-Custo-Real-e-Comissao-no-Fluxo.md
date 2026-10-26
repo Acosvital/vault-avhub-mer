@@ -1,15 +1,15 @@
 ---
 tags: [fluxo, raia, custo-real, comissao, k1, k2, k3, k4, k5, k6, controladoria, simulador, tela, devolucao, apuracao]
 criado: 2026-10-16
-atualizado: 2026-10-21
+atualizado: 2026-10-26
 status: proposta
 dono: Nathan (fluxo) · Gustavo (banco e API) · Robert (custo no MES) · Michele (decisão da comissão)
-fontes: [Registro-de-Decisoes (N16-09 a N16-11, N16-17 a N16-23, N16-34 a N16-51, N16-57, N16-71, N16-74), Respostas-da-Controladoria-2026-10-19, Respostas-de-Compras-2026-10-19, Estudo-Omie-API, 06-Pesquisa/fontes/tela-simulador-comissao.png, av-hub comissoes/simulador/page.tsx e lib/simulador/motor.ts, 03-Comissao/01-Motor-Atual-Como-Calcula, 00-Fluxo-Mestre-0b, 03-Estoque-Atendimento-e-Despacho, 04-Circuito-de-Compra, Modelo-Estoque-e-Custo-do-Lote, API-008, LOG-47, 10-Anexo-Fora-do-Fluxo/Comissoes, api-pcp (estoque.prisma, compras.service.ts), 08-Reuniao/fluxo-proposta-pedido-artifact.html]
+fontes: [Registro-de-Decisoes (N16-09 a N16-11, N16-17 a N16-23, N16-34 a N16-51, N16-57, N16-71, N16-74), Proposta-Orcamento-Comissao/01-Decisoes/Respostas-da-Controladoria-2026-10-19 (fora do vault), Proposta-Orcamento-Comissao/01-Decisoes/Respostas-de-Compras-2026-10-19 (fora do vault), Estudo-Omie-API, 09-Diagramas/fontes/tela-simulador-comissao.png, av-hub comissoes/simulador/page.tsx e lib/simulador/motor.ts, 03-Sistemas/Comissao/01-Motor-Atual-Como-Calcula, 00-Fluxo-Mestre-0b, 03-Estoque-Atendimento-e-Despacho, 04-Circuito-de-Compra, Modelo-Estoque-e-Custo-do-Lote, API-008, LOG-47, 10-Anexo-Fora-do-Fluxo/Comissoes, api-pcp (estoque.prisma, compras.service.ts), 09-Diagramas/artifact-proposta-pedido.html]
 ---
 
 # Custo real e comissão no fluxo (K1 a K6)
 
-**Só o fluxo.** Esta nota mostra por onde o custo real e a comissão atravessam o fluxo mestre. Os **modelos de dados** são de outros arquivos desta pasta: o custo realizado por item em `core_comercial` (SQL-016), a comissão nova em `core_comissao` (SQL-018, atualizado e testado em 19/10 com as respostas da Controladoria) e as notas de modelo em `03-Comissao`. Decisões: [[Registro-de-Decisoes]]. Selos em [[Regras-do-Vault]].
+**Só o fluxo.** Esta nota mostra por onde o custo real e a comissão atravessam o fluxo mestre. Os **modelos de dados** estão nos contratos: o custo realizado por item em `core_comercial` ([[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]]) e a comissão nova em `core_comissao` ([[SQL-018-Schema-core_comissao-Comissao-da-Proposta]], testado em Postgres 18 com as respostas da Controladoria). O modelo está explicado em [[03-Modelo-Novo-core_comissao]]. Decisões: [[Registro-de-Decisoes]]. Selos em [[Regras-do-Vault]].
 
 ## Nós
 
@@ -38,7 +38,7 @@ Regra (N16-09, N16-40): o custo real de um item do pedido é a **soma das linhas
 | `C7` | Compras usa o valor correto; a proposta **não muda**; se for maior que o da proposta, o vendedor aprova ou reprova (`C8`) | `OC` | 📝 N16-08, N16-17, N16-60 |
 | NF de entrada | No recebimento, o valor da NF substitui o da OC. **O CCP vincula a NF de entrada à OC**, na tela de Follow-up, e o item do pedido vem do vínculo da OC (a ligação automática do Omie não existe na prática; N16-57, N16-86), inclusive com várias NFs por OC e KG contra PC. A NF traz **imposto real** e a **data real de recebimento** | `NF_ENTRADA` | 🔴 recurso novo na pipeline ([[Estudo-Omie-API]]) |
 | `R4` | O lote nasce com custo, **obrigatório**: valor total e valor por item; no fim, o valor unitário | `OC` (ou `CARGA_INICIAL`, `MANUAL`) | 🔴 hoje o lote do Recebimento nasce sem custo (`compras.service.ts:545`); custo obrigatório N16-09. ❓ o dado de estoque hoje não é confiável (aviso de Compras) |
-| `E3` | Item atendido pelo Estoque usa o **custo real do lote** (o da OC que o originou) | lote | ✅ `GET /itens/custo` ainda não existe (BL-004); 🔴 |
+| `E3` | Item atendido pelo Estoque usa o **custo real do lote** (o da OC que o originou) | lote | 🔴 `GET /itens/custo` ainda não existe (BL-004) |
 | `E5` | O fabricado aprovado vira lote; o custo do lote fabricado é **só a matéria-prima** | `PRODUCAO` 🟡 | 🔴 ([[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]]) |
 | `F1` | A matéria-prima enviada à produção para o item fabricado (J2, J3) | lote da matéria-prima | 🔴 BL-010 |
 | `O1` | Fecha a comissão sobre a NF | NF | ✅ lado Omie; `K3` 🔴 |
@@ -94,7 +94,7 @@ Um item de 50 unidades pode ter 50 OCs diferentes: cada uma com a sua condição
 
 - O **custo líquido de cada evento** é calculado com as condições do próprio evento, pela **mesma fórmula do motor** (compra, IPI e crédito de ICMS em `lib/simulador/motor.ts:277-283`; frete e custo líquido em `:307-312`, ver [[01-Motor-Atual-Como-Calcula]]). Depois **soma**: o custo líquido do item é a soma dos eventos e o unitário médio é o total dividido pela quantidade coberta. O custo do pedido é a soma dos itens. **O encargo da condição de pagamento NÃO entra no custo**: entra no **preço sugerido**, como no motor atual (N16-22).
 - **Imposto da compra.** O vendedor registra os impostos na proposta; ao chegar a requisição, o sistema os **puxa para a OC**, Compras os confere e edita **no hub**, e o que edita **volta ao Omie pela mesma sincronização da OC** (N16-38, N16-53). O hub **não** guarda hoje IPI, ICMS, ST nem DIFAL por item; **o Omie guarda** ICMS, ST, IPI, PIS e COFINS por item do pedido de compra, **em valor e sem DIFAL**, e a **NF de entrada** traz base, alíquota e valor ([[Estudo-Omie-API]]). **O Nathan traz esses dados do Omie para o hub.** O **DIFAL da compra** fica fora do custo líquido (provisório, Compras valida).
-- Até os campos existirem, o evento calcula **sem imposto** (como o Ciclo 1) e a linha mostra "sem imposto" 🟡; a Controladoria vê que o custo está sem o imposto real. O impacto no cronograma está em a proposta de cronograma (ainda fora do vault, a validar).
+- Até os campos existirem, o evento calcula **sem imposto** (como o Ciclo 1) e a linha mostra "sem imposto" 🟡; a Controladoria vê que o custo está sem o imposto real. O impacto no cronograma está na proposta de cronograma (`Proposta-Orcamento-Comissao/07-Cronograma/Proposta-de-Cronograma.md`, fora do vault, a validar).
 - No exemplo do Nathan (item A), cada requisição vira uma OC com o seu fornecedor, a sua condição e o seu imposto. O custo líquido de A é a soma das três, cada uma com as suas condições. Impostos e encargos de cada uma são "a definir": **não há valor inventado aqui** 🟡.
 
 ### Drill-down por evento (visão da Controladoria)
@@ -116,7 +116,7 @@ Fonte de cada linha: eventos de custo realizado por item no `core_comercial` (SQ
 
 ## A tela da comissão: três visões da mesma tela (N16-19)
 
-A tela da proposta é **semelhante à do Simulador de Comissão** que o Nathan mandou em 16/10 (`06-Pesquisa/fontes/tela-simulador-comissao.png`; código em `av-hub/app/(protected)/comissoes/simulador/page.tsx`). Mesmo motor e mesmas regras, em **tabelas novas** (N16-21). A Controladoria tem a mesma tela com a verdade na tabela: o custo real e afins.
+A tela da proposta é **semelhante à do Simulador de Comissão** que o Nathan mandou em 16/10 (`09-Diagramas/fontes/tela-simulador-comissao.png`; código em `av-hub/app/(protected)/comissoes/simulador/page.tsx`). Mesmo motor e mesmas regras, em **tabelas novas** (N16-21). A Controladoria tem a mesma tela com a verdade na tabela: o custo real e afins.
 
 ### Blocos da tela e o que cada visão mostra
 
@@ -164,18 +164,19 @@ A lista por mês, vendedor, unidade e status (com exportação para Excel), mais
 | Devolução de **compra** (NF de entrada devolvida ao fornecedor) | ❓ Como aparece no Omie e o efeito na linha de custo: adiado (OQ-42) |
 | Pedido manual (`MAN-`) | Nunca entra no custo (D6 do 008, [[LOG-45-Pedido-de-Venda-Manual]]) |
 
-## Estados da comissão (proposta 🟡)
+## Estados da comissão
 
-Valores propostos para o fluxo; o modelo final é do SQL-018 (que tem o estado em `core_comissao.comissoes`: `ESTIMADA`, `CONGELADA`, `EM_ACOMPANHAMENTO`, `ENCERRADA`, `CANCELADA`, e por NF: `AGUARDANDO_DECISAO`, `APROVADA`, `DESAPROVADA`, `BLOQUEADA`, `CORTADA`, `ALTERADA`, `NF_CANCELADA`, mais os lançamentos de complemento, desconto e abatimento).
+Os estados são os do banco ([[SQL-018-Schema-core_comissao-Comissao-da-Proposta]], testado), resumidos em [[04-Regras-e-Estados-da-Comissao-Nova]]. Por nó do fluxo:
 
-| Valor 🟡 | Nó | Significado |
+| Nó | Dossiê da proposta ou do pedido (`comissoes`) | Comissão da nota (`comissoes_nf`) e lançamentos |
 |---|---|---|
-| `ESTIMADA` | `K1` | Nasceu na proposta; ajusta com cada revisão |
-| `EM_APURACAO` | `K2` | O pedido existe e o custo real está chegando |
-| `CALCULADA` | `K3` | Fechada sobre a NF; aguarda a decisão |
-| `APROVADA`, `DESAPROVADA`, `BLOQUEADA` | `K4` | Decisão. Cortar e alterar resultam em `APROVADA` com o valor ajustado e a justificativa; `BLOQUEADA` pode ser desfeita |
-| `COM_LANCAMENTO` | `K3`, `K6` | Tem complemento, desconto ou abatimento na apuração seguinte |
-| `HISTORICO` | `V0C` | Estimada de proposta cancelada |
+| `K1` | `ESTIMADA` (salva e revisada); `CONGELADA` quando a proposta é aprovada | — |
+| `K2` | `EM_ACOMPANHAMENTO` (o pedido existe e o custo real chega) | — |
+| `K3` | `EM_ACOMPANHAMENTO` | `AGUARDANDO_DECISAO` (a nota fechou, já calculada); lançamento `COMPLEMENTO` ou `DESCONTO` quando o custo completa depois |
+| `K4` | — | `APROVADA`, `DESAPROVADA` (R$ 0, visível), `CORTADA`, `ALTERADA` ou `BLOQUEADA` (desbloquear devolve à fila, com justificativa) |
+| `K6` | — | `NF_CANCELADA` (nota cancelada inteira antes da decisão); lançamento `ABATIMENTO`; devolução parcial em `comissao_devolucao_pendencia` (`ABERTA` → `INFORMADA` ou `DISPENSADA`) |
+| `V0C` | `CANCELADA` (vira histórico, com motivo; só sem nota faturada) | — |
+| fim | `ENCERRADA` (tudo faturado e decidido) | — |
 
 A decisão tem seis ações (`aprovar`, `desaprovar`, `bloquear`, `desbloquear`, `cortar`, `alterar`), sempre com justificativa.
 
@@ -211,7 +212,7 @@ A decisão tem seis ações (`aprovar`, `desaprovar`, `bloquear`, `desbloquear`,
 ```mermaid
 flowchart TD
     subgraph SEC_VENDAS["Vendas · av-hub"]
-        V0.3["V0.3 · Comissão estimada nasce"]
+        V03["V0.3 · Comissão estimada nasce"]
         V0C["V0C · Proposta cancelada"]
     end
     subgraph SEC_COMP["Compras · av-hub"]
@@ -239,7 +240,7 @@ flowchart TD
         K1 --> K2 --> K3 --> K4 --> K5
         K3 -.-> K6
     end
-    V0.3 --> K1
+    V03 --> K1
     V0C -.->|"vira histórico"| K1
     C7 --> C8 --> C4
     C4 -.->|"valor da OC, provisório"| K2

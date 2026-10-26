@@ -1,6 +1,6 @@
 ---
 id: SQL-019
-aliases: ["Contrato SQL 018", "018-Condicoes-de-Pagamento-de-Venda-do-Omie"]
+aliases: ["Contrato SQL 019", "019-Condicoes-de-Pagamento-de-Venda-do-Omie"]
 tags: [contrato, contrato-sql, dba, pipeline, omie, condicao-de-pagamento, pedido-de-venda, catalogo]
 criado: 2026-10-23
 atualizado: 2026-10-23
@@ -8,11 +8,11 @@ status: proposta
 sistemas: [hub-banco, pipeline]
 dono: "Gustavo (tabela) e Nathan (recurso da pipeline)"
 etapa_0b: [V0.2, V0.6, V0.7]
-fontes: ["Resposta real do ListarParcelas colada pelo Nathan em 23/10/2026 (página 1 de 7: 50 de 330 condições)", "Documentação do Omie: https://app.omie.com.br/api/v1/geral/parcelas/ (ListarParcelas, IncluirParcela)", "omie-elt-pipeline src/omie/resources/condicoesPagamentoCompras.ts, contasCorrentes.ts, index.ts, jobs/inativarCatalogos.ts", "omie-elt-pipeline src/omie/ordemCompraOmie.ts:305-326 (teste de 05/10/2026: mandar parcelas troca a condição para 999)", "api-acos-vital core_vendas_faturamento/tables/condicoes_pagamento_compras (modelo)", "06-Pesquisa/Mapa-IncluirPedido-Omie (§5.1)"]
+fontes: ["Resposta real do ListarParcelas colada pelo Nathan em 23/10/2026 (página 1 de 7: 50 de 330 condições)", "Documentação do Omie: https://app.omie.com.br/api/v1/geral/parcelas/ (ListarParcelas, IncluirParcela)", "omie-elt-pipeline src/omie/resources/condicoesPagamentoCompras.ts, contasCorrentes.ts, index.ts, jobs/inativarCatalogos.ts", "omie-elt-pipeline src/omie/ordemCompraOmie.ts:305-326 (teste de 05/10/2026: mandar parcelas troca a condição para 999)", "api-acos-vital core_vendas_faturamento/tables/condicoes_pagamento_compras (modelo)", "05-Integracoes/Mapa-IncluirPedido-Omie (§5.1)"]
 criado_original: 2026-10-23
 ---
 
-# Contrato SQL 018 — catálogo de condições de pagamento de **venda** do Omie (`ListarParcelas`) na pipeline e no banco
+# Contrato SQL 019 — catálogo de condições de pagamento de **venda** do Omie (`ListarParcelas`) na pipeline e no banco
 
 > **Onde atua:** pipeline Omie · av-hub: banco
 
@@ -134,4 +134,4 @@ Criar condição por API, cadastrar o encargo de cada condição (Controladoria)
 
 ## Ver também
 
-[[Mapa-IncluirPedido-Omie]] · [[14-Telas-e-Experiencia-do-Usuario]] · [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[03-Modelo-Novo-core_comissao]] · a renumeração da promoção (26/10/2026)
+[[Mapa-IncluirPedido-Omie]] · [[14-Telas-e-Experiencia-do-Usuario]] · [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[03-Modelo-Novo-core_comissao]]
