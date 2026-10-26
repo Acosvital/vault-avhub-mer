@@ -95,4 +95,4 @@ Todos no Omie de verdade, com **cadastros TESTE** e conferindo que nada vá a cl
 7. `ListarNF` de uma NF com **devolução parcial**: `nItemQtdDevolvida` preenchido?
 8. `UpsertPedCompra` com `nValorIcms` e `nValorIpi`: o Omie grava e devolve nas consultas?
 
-Ver também: [[Perguntas-Proposta-Pedido-Comissao]], [[Registro-de-Decisoes]], a proposta de cronograma (ainda fora do vault, a validar).
+Ver também: [[Perguntas-Proposta-Pedido-Comissao]], [[Registro-de-Decisoes]], a proposta de cronograma (`Proposta-Orcamento-Comissao/07-Cronograma/Proposta-de-Cronograma.md`, fora do vault, a validar).

@@ -8,7 +8,7 @@ status: proposta
 sistemas: [hub-front]
 dono: "Nathan"
 etapa_0b: [K1, K2, K3, K4, K5, K6]
-fontes: ["Registro-de-Decisoes (N16-10, N16-19, N16-44 a N16-51, N16-74)", "06-Pesquisa/fontes/tela-simulador-comissao.png", "av-hub app/(protected)/comissoes/simulador/page.tsx, lib/simulador/motor.ts", "API-022-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria", "SQL-018-Schema-core_comissao-Comissao-da-Proposta"]
+fontes: ["Registro-de-Decisoes (N16-10, N16-19, N16-44 a N16-51, N16-74)", "09-Diagramas/fontes/tela-simulador-comissao.png", "av-hub app/(protected)/comissoes/simulador/page.tsx, lib/simulador/motor.ts", "API-022-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria", "SQL-018-Schema-core_comissao-Comissao-da-Proposta"]
 criado_original: 2026-10-21
 ---
 

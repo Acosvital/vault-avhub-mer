@@ -1,6 +1,6 @@
 ---
 id: SQL-017
-aliases: ["Contrato SQL 016", "016-Schema-core_orcamento-Base-de-Preco-e-Pedido-de-Custo"]
+aliases: ["Contrato SQL 017", "017-Orcamento-em-core_comercial"]
 tags: [contrato, contrato-sql, dba, migracao, orcamento, base-de-preco, ofertas, pedido-de-custo, core_comercial]
 criado: 2026-10-21
 atualizado: 2026-10-26
@@ -8,18 +8,18 @@ status: proposta
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: [V0.2, B1, B2, B3, B4]
-fontes: ["Dump do Avhub para referência (schema), 26/10/2026", "Registro-de-Decisoes (N16-06, N16-07, N16-52 a N16-59)", "SQL-017-anexos/0001-migracao-orcamento-em-core_comercial.sql, 0002-teste-migracao.sql", "SQL-017-anexos/_desenho-antigo-nao-usar (histórico)", "12-Orcamento-Base-de-Preco", "Proposta-Score-e-Volatilidade-OQ-46"]
+fontes: ["Dump do Avhub para referência (schema), 26/10/2026", "Registro-de-Decisoes (N16-06, N16-07, N16-52 a N16-59)", "SQL-017-anexos/0001-migracao-orcamento-em-core_comercial.sql, 0002-teste-migracao.sql", "Proposta-Orcamento-Comissao/05-Contratos/SQL-016-anexos/_desenho-antigo-nao-usar (histórico, fora do vault)", "12-Orcamento-Base-de-Preco", "Proposta-Score-e-Volatilidade-OQ-46"]
 criado_original: 2026-10-16
 ---
 
-# Contrato SQL 016 — o Orçamento sobre o `core_comercial` real: ofertas das OCs, base e estatística de preço, pedido de custo sem prazo
+# Contrato SQL 017 — o Orçamento sobre o `core_comercial` real: ofertas das OCs, base e estatística de preço, pedido de custo sem prazo
 
 > **Onde atua:** av-hub: banco
 
 > [!info] Situação em 26/10/2026
 > **Status:** `proposta` · **Dono:** Gustavo · Regra: [[12-Orcamento-Base-de-Preco]] · Rotas: [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]]
 >
-> - 📝 **Mudou de natureza em 26/10.** O desenho de 16 a 21/10 propunha um schema novo `core_orcamento`. O banco real **já tem**, em `core_comercial`, as ofertas (imutáveis, com histórico), as categorias de suprimento, os fornecedores (perfil, categorias, certificados, apelidos), os produtos (perfil e pendentes), os parâmetros de custo e a tabela da telha com vigência, e as solicitações de custo. O contrato agora é só o que **falta**. O desenho antigo está em `SQL-017-anexos/_desenho-antigo-nao-usar`.
+> - 📝 **Mudou de natureza em 26/10.** O desenho de 16 a 21/10 propunha um schema novo `core_orcamento`. O banco real **já tem**, em `core_comercial`, as ofertas (imutáveis, com histórico), as categorias de suprimento, os fornecedores (perfil, categorias, certificados, apelidos), os produtos (perfil e pendentes), os parâmetros de custo e a tabela da telha com vigência, e as solicitações de custo. O contrato agora é só o que **falta**. O desenho antigo está em `Proposta-Orcamento-Comissao/05-Contratos/SQL-016-anexos/_desenho-antigo-nao-usar` (fora do vault).
 > - 🧪 **Testado em Postgres 18** sobre o dump de referência, depois do SQL-016: a migração aplica sem erro e o teste `0002` passa (14 verificações). Nunca rodou em produção.
 > - As tabelas de oferta, solicitação, fornecedor e produto pendente têm **0 linhas** no dump completo: não há dado a converter.
 

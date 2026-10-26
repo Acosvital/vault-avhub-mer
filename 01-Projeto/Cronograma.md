@@ -1,10 +1,10 @@
 ---
 tags: [projeto, cronograma, marcos, gantt]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: vigente
 dono: Nathan
-fontes: [v1 07-Cronograma/Cronograma-2-Meses seções 1, 3.2, 3.3, 3.4, 6, 9, v1 Registro-de-Decisoes #27 #33b #34 #36 #75 #77 #96, código de 14/10 (api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, HUB b55ac55)]
+fontes: [v1 07-Cronograma/Cronograma-2-Meses seções 1, 3.2, 3.3, 3.4, 6, 9, v1 Registro-de-Decisoes #27 #33b #34 #36 #75 #77 #96, código de 14/10 (api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, HUB b55ac55), proposta de cronograma de 16/10 (Proposta-Orcamento-Comissao, fora do vault), Registro-de-Decisoes N16-09 e N16-15]
 ---
 
 # Cronograma
@@ -15,7 +15,7 @@ fontes: [v1 07-Cronograma/Cronograma-2-Meses seções 1, 3.2, 3.3, 3.4, 6, 9, v1
 
 - A execução do plano vai de **22/09/2026 a 18/12/2026**. S1 a FC terminam em **18/11/2026**; S5 e M7 terminam em **18/12/2026** 📝.
 - **Marco zero do saldo: 13/11/2026** (M5): carga inicial conferida em dupla; nenhum consumo por PCP ou Comercial antes disso 📝.
-- **Ciclo 1 fecha em 21/01/2027** (o Robert zera o déficit da Onda 0 nessa data). **Ciclo 2 começa em 22/01/2027** 📝 (item 27 do Registro do v1, aceito pelo Nathan em 09/10).
+- **Ciclo 1 fecha em 18/02/2027** (o Robert zera o déficit da Onda 0 nessa data; era 21/01, deslocado pelo N14-30 e abatido pelo K4, N14-32). **Ciclo 2 começa em 19/02/2027** 📝 (item 27 do Registro do v1, aceito pelo Nathan em 09/10).
 - Feriados considerados: 12/10 e 02/11 de 2026; 25/12, 01/01, Carnaval (08 e 09/02), 26/03, 21/04, 27/05, 07/09, 12/10, 02/11 e 15/11 de 2027.
 - O plano de 2 meses (e a duração de 60 dias) não vale mais; esta nota é a única fonte de datas.
 
@@ -72,7 +72,7 @@ Com 100% de foco as ondas terminam em 02/02 (W0), 06/04, 13/05, 26/07 e 25/08/20
 | Robert | 75% | 31,5 pd | S1–FC + S5: capacidade 48,75 pd contra 78,35 planejados (64,85 + 16,5 do N14-29 − 3,0 do K4), **déficit de 29,6 pd** 🔴 (era 16,1 pd; 32,6 antes do crédito do K4) |
 | Pablo | 75% | fora da conta | Comercial & Suprimentos |
 
-Custo do lote (09/10) somou ao Robert K3 1,0 + K4 3,0 + K5 1,5 + K6 0,5 pd; ao Gustavo K1, K2 e K7 (1,5 pd); K8 (`GET /itens/custo`) e K9 a K11 vão ao Ciclo 2 🟡. Detalhe em [[Modelo-Estoque-e-Custo-do-Lote]] e [[API-008-Custo-do-Lote-no-MES]]. Equipe em [[Equipe-e-Divisao]].
+Custo do lote (09/10) somou ao Robert K3 1,0 + K4 3,0 + K5 1,5 + K6 0,5 pd; ao Gustavo K1, K2 e K7 (1,5 pd); K8 (`GET /itens/custo`) e K9 a K11 iam ao Ciclo 2; com a N16-09 (custo obrigatório e custo real por evento) a proposta de 16/10 os traz de volta como R3 e R5 (seção "Novas frentes de 16/10") 🟡. Detalhe em [[Modelo-Estoque-e-Custo-do-Lote]] e [[API-008-Custo-do-Lote-no-MES]]. Equipe em [[Equipe-e-Divisao]].
 
 ## Comercial & Suprimentos (Pablo, fora do plano original)
 
@@ -82,7 +82,56 @@ Custo do lote (09/10) somou ao Robert K3 1,0 + K4 3,0 + K5 1,5 + K6 0,5 pd; ao G
 | CS2 | Suprimentos: catálogo, fornecedores, ofertas, mapa de cotação, solicitações de custo | ✅ na `develop` |
 | CS3 | Painel do Comprador, histórico de compras, produtos pendentes | ✅ na `develop` |
 | CS4 | E2E Playwright e CI | ✅ na `develop` |
-| CS5 | Publicar o `api-comercial`, cadastrar telas em `auth.telas`, claim `perfis` no token | 🔴 Pablo, sem data. Ver [[Comercial-Suprimentos]] |
+| CS5 | **Migrar o módulo para a `api-acos-vital`** (no lugar de publicar o `api-comercial`; LOG-52 fases 1 a 5; o `api-comercial` fica só de teste, N16-15), cadastrar telas em `auth.telas`, claim `perfis` no token | 🔴 Pablo; pd e datas em "Novas frentes de 16/10" (P1 a P7) 🟡. Ver [[Comercial-Suprimentos]] e [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] |
+
+## Novas frentes de 16/10: proposta, Orçamento, custo real e comissão nova (🟡 a validar)
+
+Estimativas da proposta de cronograma de 16/10/2026 (`Proposta-Orcamento-Comissao/07-Cronograma/Proposta-de-Cronograma.md`, fora do vault), com o mesmo método desta nota (pd por complexidade, ±30%, dias úteis = pd ÷ foco, mesmos feriados, crédito só do que está na `develop`). **Nada aqui vale como compromisso:** cada pessoa confirma os seus pd e o seu foco livre. **Os marcos M1 a M11, o fim do Ciclo 1 e as trilhas W0 a W4 não mudam** até essa validação. Os itens estão no [[Backlog-por-Frente]] (BL-066 a BL-078) e as regras em [[11-Proposta-e-Pedido-de-Venda]], [[12-Orcamento-Base-de-Preco]] e [[13-Custo-Real-e-Comissao-no-Fluxo]].
+
+| Pessoa | Blocos | pd (faixa) | Foco | Início | Fim proposto |
+|---|---|---|---|---|---|
+| Pablo | P1 domínio portado e testes (8,0) · P2 clientes e propostas com as regras novas (13,0) · P3 pedido por API (6,0) · P4 suprimentos e pedido de custo (8,0) · P5 Orçamento: matriz, consulta do vendedor, valor da OC no histórico (10,0) · P6 motor da comissão na API (8,0) · P7 custo por evento (6,0) | 59,0 (41,3 a 76,7) | 75% | 19/10/2026 | 15/02/2027 |
+| Gustavo | G1 migração do `core_comercial` (SQL-016, 6,0) · G2 Orçamento no `core_comercial` (SQL-017, 4,0) · G3 `core_comissao` (SQL-018, 6,0) · G4 contadores, telas e `auth.rotas_telas` (2,5) · G5 liberação do pedido da proposta (2,0) · G6 rotas da proposta, do pedido e do Orçamento (API-019, API-020, 8,0) · G7 rotas da comissão (API-022, 5,0) · G8 rotas do custo por evento e job do `GET /itens/custo` (API-021, 7,0) | 40,5 (28,4 a 52,7) | 60% | 19/10/2026 | G1 a G5 em 08/12/2026, dentro da folga (20,5 de 21,7 pd ❓ o Gustavo confirma); G6 a G8 em 11/02/2027 |
+| Nathan | N1 tela da proposta (10,0) · N2 aprovar, transformar, cancelar (3,0) · N3 pipeline do pedido (5,0) · N4 visão de Compras (5,0) · N5 Controladoria (10,0) · N6 visão geral, minhas comissões, parâmetros (10,0) · N7 Orçamento: consulta e matriz (9,0) · N8 cadastro de telas (1,0) | 53,0 (37,1 a 68,9) | 40% | 21/12/2026 (depois da S5) | 06/07/2027: **é o gargalo** |
+| Robert | R1 custo obrigatório na carga inicial (1,5) · R2 custo obrigatório no Recebimento (1,5) · R3 `GET /itens/custo`, o antigo K8 (3,0) · R4 origem e documento em cada linha de custo (2,0) · R5 custo do fabricado = matéria-prima, os antigos K9 a K11 (4,0) | 12,0 (8,4 a 15,6) | 75% | R1 já; o resto em 21/12/2026 | R1 leva a G1 do MES de 23/10 a 27/10; K5, K6, R2 a R4 em 07/01/2027; o resto entra na W0 (cenários na proposta) |
+
+Desde 16/10 o desenho andou: em 26/10 as migrações SQL-016 a SQL-018 já estavam escritas e testadas em Postgres 18, e o Gustavo passa a revisar e aplicar, não a criar do zero (G1 a G3 devem encolher); o pedido do Omie no mesmo fluxo (N16-106), as datas, os sequenciais e o calendário do marketing entraram depois da estimativa e não têm pd ❓. R5 depende de BL-008 e BL-010, sem pd ❓. O imposto real por evento (BL-053, OQ-11 e OQ-12) não está em nenhum bloco.
+
+Alternativas para o gargalo do Nathan 🟡 (decisão do Nathan):
+
+| Alternativa | Efeito |
+|---|---|
+| (A) O Pablo faz as telas de Orçamento (N7, 9 pd) | Nathan termina em 03/06/2027; o Pablo vai a 68 pd e termina em 01/03/2027 |
+| (B) Foco do Nathan sobe de 40% para 60% a partir de 21/12 | Os 53 pd terminam em 30/04/2027 (faixa 22/03 a 08/06/2027) |
+| (C) Primeiro corte só com proposta e pedido (N1 a N3, 18 pd) | Fim em 26/02/2027; comissão, Compras e Orçamento vão ao Ciclo 2 |
+
+```mermaid
+gantt
+    title Novas frentes de 16/10 (proposta, a validar)
+    dateFormat YYYY-MM-DD
+    axisFormat %d/%m
+    inclusiveEndDates
+    section Pablo
+    P1 Dominio portado :p1, 2026-10-19, 2026-11-03
+    P2 Propostas e clientes :p2, 2026-11-04, 2026-11-27
+    P3 Pedido por API :p3, 2026-11-30, 2026-12-09
+    P4 Suprimentos :p4, 2026-12-10, 2026-12-24
+    P5 Orcamento :p5, 2026-12-28, 2027-01-15
+    P6 Motor da comissao :p6, 2027-01-18, 2027-02-01
+    P7 Custo por evento :p7, 2027-02-02, 2027-02-15
+    section Gustavo
+    G1 a G3 Migracoes SQL-016 a SQL-018 :g1, 2026-10-19, 2026-11-25
+    G4 e G5 Contadores e liberacao :g4, 2026-11-26, 2026-12-08
+    G6 a G8 Rotas API-019 a API-022 :g6, 2026-12-21, 2027-02-11
+    section Nathan
+    N1 a N3 Proposta e pedido :n1, 2026-12-21, 2027-02-26
+    N4 Visao de Compras :n4, 2027-03-01, 2027-03-17
+    N5 e N6 Comissao :n5, 2027-03-18, 2027-05-31
+    N7 e N8 Orcamento e telas :n7, 2027-06-01, 2027-07-06
+    section Robert
+    R1 Custo na carga inicial :r1, 2026-10-26, 2026-10-27
+    K5 K6 R2 R3 R4 Custo e itens custo :r2, 2026-12-21, 2027-01-07
+```
 
 ## Gantt
 
@@ -149,6 +198,8 @@ gantt
 ## Pendências
 
 - 🔴 Robert valida as estimativas de pd das ondas W0 a W4 e de K3 a K6.
+- 🔴 Pablo, Gustavo, Robert e Nathan validam as estimativas das novas frentes de 16/10 (P1 a P7, G1 a G8, N1 a N8, R1 a R5); o Nathan escolhe a alternativa para o gargalo dele (A, B ou C). Só depois os marcos e a W0 mudam.
+- 🔴 OQ-11 e OQ-12 (imposto real e encargo de cada evento de custo) até 04/12/2026, para o custo real não sair sem imposto ([[Perguntas-Proposta-Pedido-Comissao]]).
 - 📝 Déficit de 16,1 pd: coberto com esforço dobrado e horas extras (Nathan, 14/10). M3 a M7 confirmados. Protótipo por volta de 15/11.
 - 📝 Merge `develop` → `main`: o Nathan diz que pode ser feito a qualquer momento, porque tudo o que está na `develop` foi testado e funciona. Em 14/10 a `develop` está à frente da `main` em 13 commits no `api-pcp`, 10 no `app-pcp`, 11 no `api-acos-vital` e 284 no HUB ✅ (`git fetch`). Falta só alguém fazer o merge 🔴 Robert (MES), Gustavo (API), Nathan (HUB).
 - 📝 Dono do pipeline: Nathan.

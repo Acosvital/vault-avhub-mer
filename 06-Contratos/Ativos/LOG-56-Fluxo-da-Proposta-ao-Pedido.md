@@ -1,6 +1,6 @@
 ---
 id: LOG-56
-aliases: ["Contrato 55", "55-Fluxo-da-Proposta-ao-Pedido"]
+aliases: ["Contrato 56", "56-Fluxo-da-Proposta-ao-Pedido"]
 tags: [contrato, contrato-logica, contrato-api, proposta, pedido-de-venda, compras, comissao, av-hub, fluxo, cancelamento, devolucao]
 criado: 2026-10-16
 atualizado: 2026-10-21
@@ -8,11 +8,11 @@ status: proposta
 sistemas: [hub-banco, hub-api, hub-front, pipeline]
 dono: "Nathan e Pablo"
 etapa_0b: [V0.1, V0.2, V0.3, V0.4, V0.5, V0C, V0.6, V0.7, V1, C6, C7, C8, K1, K2, K3, K4, K5, K6]
-fontes: ["Registro-de-Decisoes (N16-01 a N16-74)", "Estudo-Omie-API (documentação do Omie lida em 21/10/2026)", "Respostas-da-Controladoria-2026-10-19", "Respostas-de-Compras-2026-10-19", "06-Pesquisa/fontes/tela-simulador-comissao.png", "06-Pesquisa/fontes/email-divergencia-margem-pv27824.jpg e pv28204.jpg", "av-hub app/(protected)/comissoes/simulador/page.tsx, lib/simulador/motor.ts", "03-Comissao/01-Motor-Atual-Como-Calcula", "11-Proposta-e-Pedido-de-Venda", "api-comercial 5aa5311: prisma/models/vendas.prisma, enums.prisma, src/modules/propostas/propostas.service.ts, propostas.routes.ts, src/modules/custos/custos.routes.ts, src/domain/permissoes/capacidades.ts, src/domain/numeracao/numeroProposta.ts", "Dump Avhub (Esqueleto).sql: contadores_documento (16552), fn_proximo_numero_documento (8110), pedidos_vendas_liberacao (18285)", "omie-elt-pipeline envioOrdensCompra.ts:18-40", "08-Reuniao/Proposta-Orcamento-Pedido-Comissao.docx"]
+fontes: ["Registro-de-Decisoes (N16-01 a N16-74)", "Estudo-Omie-API (documentação do Omie lida em 21/10/2026)", "Proposta-Orcamento-Comissao/01-Decisoes/Respostas-da-Controladoria-2026-10-19 (fora do vault)", "Proposta-Orcamento-Comissao/01-Decisoes/Respostas-de-Compras-2026-10-19 (fora do vault)", "09-Diagramas/fontes/tela-simulador-comissao.png", "09-Diagramas/fontes/email-divergencia-margem-pv27824.jpg e pv28204.jpg", "av-hub app/(protected)/comissoes/simulador/page.tsx, lib/simulador/motor.ts", "03-Sistemas/Comissao/01-Motor-Atual-Como-Calcula", "11-Proposta-e-Pedido-de-Venda", "api-comercial 5aa5311: prisma/models/vendas.prisma, enums.prisma, src/modules/propostas/propostas.service.ts, propostas.routes.ts, src/modules/custos/custos.routes.ts, src/domain/permissoes/capacidades.ts, src/domain/numeracao/numeroProposta.ts", "Dump Avhub (Esqueleto).sql: contadores_documento (16552), fn_proximo_numero_documento (8110), pedidos_vendas_liberacao (18285)", "omie-elt-pipeline envioOrdensCompra.ts:18-40", "Proposta-Orcamento-Comissao/08-Reuniao/Proposta-Orcamento-Pedido-Comissao.docx (fora do vault)"]
 criado_original: 2026-10-16
 ---
 
-# Contrato 55 — Fluxo da proposta ao pedido de venda (regras de negócio ponta a ponta)
+# Contrato 56 — Fluxo da proposta ao pedido de venda (regras de negócio ponta a ponta)
 
 > **Onde atua:** av-hub: banco, API, front · pipeline Omie
 
@@ -62,7 +62,7 @@ Cada regra tem a decisão de origem. 🟡 = proposta deste contrato (default de 
 | R6 | O câmbio da proposta em moeda estrangeira vem da PTAX do Hub, **do dia da aprovação** | 📝 N16-13, N16-27 |
 | R7 | O cliente é do cadastro comercial; para virar pedido precisa existir no Omie da conta da empresa emissora 🟡 | 🟡 caso de borda 5 |
 | R8 | A comissão estimada nasce ao criar e se recalcula a cada revisão (`V0.3`, `K1`). O vendedor vê só a que ele colocou | 📝 N16-10 |
-| R8a | O **pedido de custo** não tem prazo fixo: o mais rápido possível, com o **tempo cronometrado**. O vendedor nunca fica bloqueado. O setor orçamentário **ainda está em construção** e o sistema funciona sem ele | 📝 N16-58, N16-59 |
+| R8a | O **pedido de custo** não tem prazo fixo: o mais rápido possível, com o **tempo cronometrado**. O vendedor nunca fica bloqueado. O setor orçamentário é **novo** (o Moisés é uma das pessoas, N16-104) e o sistema funciona sem orçamentista | 📝 N16-58, N16-59 |
 
 ### 3.2 Incompleta, aprovar, cancelar (`V0.3` a `V0.5`, `V0C`)
 
@@ -140,7 +140,7 @@ Cada regra tem a decisão de origem. 🟡 = proposta deste contrato (default de 
 
 ### 3.7 A tela da proposta, a visão de Compras e a da Controladoria (N16-19, N16-20)
 
-Referência: a tela atual do Simulador de Comissão (`06-Pesquisa/fontes/tela-simulador-comissao.png`; `av-hub/app/(protected)/comissoes/simulador/page.tsx`). Comparação bloco a bloco, por visão, em [[13-Custo-Real-e-Comissao-no-Fluxo]].
+Referência: a tela atual do Simulador de Comissão (`09-Diagramas/fontes/tela-simulador-comissao.png`; `av-hub/app/(protected)/comissoes/simulador/page.tsx`). Comparação bloco a bloco, por visão, em [[13-Custo-Real-e-Comissao-no-Fluxo]].
 
 | # | Regra | Origem |
 |---|---|---|

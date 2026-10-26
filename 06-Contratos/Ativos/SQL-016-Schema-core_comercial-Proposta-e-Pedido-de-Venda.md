@@ -1,6 +1,6 @@
 ---
 id: SQL-016
-aliases: ["Contrato SQL 015", "015-Schema-core_comercial-Proposta-e-Pedido-de-Venda"]
+aliases: ["Contrato SQL 016", "016-Schema-core_comercial-Proposta-e-Pedido-de-Venda"]
 tags: [contrato, contrato-sql, dba, migracao, proposta, pedido-de-venda, custo-real, sequencial, previsao-de-faturamento, core_comercial]
 criado: 2026-10-21
 atualizado: 2026-10-26
@@ -8,18 +8,18 @@ status: proposta
 sistemas: [hub-banco, pipeline]
 dono: "Gustavo (DBA)"
 etapa_0b: [V0.1, V0.3, V0.5, V0C, V0.6, V0.7, V1, C6, C7, C8, K2]
-fontes: ["Dump do Avhub para referência (schema) e Dump completo, 26/10/2026", "Registro-de-Decisoes (N16-01 a N16-100)", "SQL-016-anexos/0001-migracao-core_comercial.sql, 0002-teste-migracao.sql", "SQL-016-anexos/_desenho-antigo-nao-usar (histórico)", "av-hub components/Propostas/PropostaForm", "omie-elt-pipeline src/omie/resources/pedidosVendas.ts, produtoVendas.ts"]
+fontes: ["Dump do Avhub para referência (schema) e Dump completo, 26/10/2026", "Registro-de-Decisoes (N16-01 a N16-100)", "SQL-016-anexos/0001-migracao-core_comercial.sql, 0002-teste-migracao.sql", "Proposta-Orcamento-Comissao/05-Contratos/SQL-015-anexos/_desenho-antigo-nao-usar (histórico, fora do vault)", "av-hub components/Propostas/PropostaForm", "omie-elt-pipeline src/omie/resources/pedidosVendas.ts, produtoVendas.ts"]
 criado_original: 2026-10-16
 ---
 
-# Contrato SQL 015 — migração do `core_comercial` real: proposta nova, pedido do Hub, custo real, datas, sequenciais e cancelamento
+# Contrato SQL 016 — migração do `core_comercial` real: proposta nova, pedido do Hub, custo real, datas, sequenciais e cancelamento
 
 > **Onde atua:** av-hub: banco
 
 > [!info] Situação em 26/10/2026
 > **Status:** `proposta` · **Dono:** Gustavo (revisa e aplica) · Regra: [[LOG-56-Fluxo-da-Proposta-ao-Pedido]] · Rotas: [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]]
 >
-> - 📝 **Este contrato mudou de natureza em 26/10.** O desenho de 16 a 21/10 criava um schema `core_comercial` novo, a partir do dump "Esqueleto". O **banco real já tem `core_comercial`** (Contrato 52) com 25 tabelas, no plural e no modelo antigo de proposta. Agora o contrato é uma **migração por cima do que existe**. O desenho antigo ficou em `SQL-016-anexos/_desenho-antigo-nao-usar` só como histórico.
+> - 📝 **Este contrato mudou de natureza em 26/10.** O desenho de 16 a 21/10 criava um schema `core_comercial` novo, a partir do dump "Esqueleto". O **banco real já tem `core_comercial`** (Contrato 52) com 25 tabelas, no plural e no modelo antigo de proposta. Agora o contrato é uma **migração por cima do que existe**. O desenho antigo ficou em `Proposta-Orcamento-Comissao/05-Contratos/SQL-015-anexos/_desenho-antigo-nao-usar` (fora do vault) só como histórico.
 > - 🧪 **Testado em Postgres 18** sobre o dump de referência (schema): `0001` aplica sem erro; `0002` roda **72 verificações** (erros esperados e conferências), todas ok, incluindo o pedido do Omie trazido ao Hub com a parte de vendas travada (N16-106), o custo real e a divergência num pedido digitado direto no Omie, a OC gerando custo (N16-102), as datas de todo pedido e o calendário (N16-104). Também aplicado sobre uma cópia **com os dados reais** de `pedidos_vendas` (13.924 linhas) e `produto_vendas` (39.060): o preenchimento do histórico funcionou (seção 4). **Nunca rodou no banco de produção.**
 
 ## 1. Por quê
@@ -113,7 +113,7 @@ Medido no dump completo de 26/10/2026:
 
 ## 5. Fora deste contrato
 
-Telas e rotas ([[LOG-56-Fluxo-da-Proposta-ao-Pedido]], [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]]); a comissão ([[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]); a base de preço ([[SQL-017-Schema-core_orcamento-Base-de-Preco-e-Pedido-de-Custo]]); a carga da pipeline que preenche `pedidos_vendas_sequenciais_itens`, `condicoes_pagamento_vendas` e `cenarios_impostos`; o calendário de feriados (biblioteca + exceções do marketing); a devolução de compra.
+Telas e rotas ([[LOG-56-Fluxo-da-Proposta-ao-Pedido]], [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]]); a comissão ([[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]); a base de preço ([[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]]); a carga da pipeline que preenche `pedidos_vendas_sequenciais_itens`, `condicoes_pagamento_vendas` e `cenarios_impostos`; o calendário de feriados (biblioteca + exceções do marketing); a devolução de compra.
 
 ## 6. Checklist do DBA
 
@@ -131,4 +131,4 @@ OQ-16 (testes no Omie, depois das telas), formato do número da proposta, em que
 
 ## Ver também
 
-[[LOG-56-Fluxo-da-Proposta-ao-Pedido]] · [[LOG-58-Liberacao-do-Pedido-Origem-Proposta]] · [[SQL-017-Schema-core_orcamento-Base-de-Preco-e-Pedido-de-Custo]] · [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]] · [[SQL-019-Condicoes-de-Pagamento-de-Venda-do-Omie]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[Registro-de-Decisoes]] · [[Mapa-IncluirPedido-Omie]]
+[[LOG-56-Fluxo-da-Proposta-ao-Pedido]] · [[LOG-58-Liberacao-do-Pedido-Origem-Proposta]] · [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]] · [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]] · [[SQL-019-Condicoes-de-Pagamento-de-Venda-do-Omie]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[Registro-de-Decisoes]] · [[Mapa-IncluirPedido-Omie]]

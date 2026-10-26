@@ -17,7 +17,7 @@ criado_original: 2026-10-21
 > **Onde atua:** av-hub: front (Orçamento e Vendas)
 
 > [!info] Situação em 21/10/2026
-> **Status:** `proposta` · **Dono:** Nathan · Rotas: [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] · Menu: [[LOG-57-Menu-Vendas-Orcamento-Compras]]. O setor orçamentário ainda está em construção (N16-59).
+> **Status:** `proposta` · **Dono:** Nathan · Rotas: [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] · Menu: [[LOG-57-Menu-Vendas-Orcamento-Compras]]. O setor orçamentário é novo; o Moisés é uma das pessoas (N16-104).
 
 ## 1. Por quê
 
@@ -48,4 +48,4 @@ O vendedor decide o valor que põe na proposta, mas não é o dono do dado de cu
 
 ## Ver também
 
-[[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] · [[SQL-017-Schema-core_orcamento-Base-de-Preco-e-Pedido-de-Custo]] · [[12-Orcamento-Base-de-Preco]] · [[LOG-57-Menu-Vendas-Orcamento-Compras]] · [[LOG-56-Fluxo-da-Proposta-ao-Pedido]]
+[[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] · [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]] · [[12-Orcamento-Base-de-Preco]] · [[LOG-57-Menu-Vendas-Orcamento-Compras]] · [[LOG-56-Fluxo-da-Proposta-ao-Pedido]]

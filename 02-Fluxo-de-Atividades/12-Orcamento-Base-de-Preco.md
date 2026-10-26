@@ -1,19 +1,19 @@
 ---
 tags: [fluxo, raia, orcamento, base-de-preco, matriz-de-precos, pedido-de-custo, pagina-do-produto, score, volatilidade, b1, b2, b3, b4]
 criado: 2026-10-16
-atualizado: 2026-10-21
+atualizado: 2026-10-26
 status: proposta
 dono: Pablo (módulo) · Gustavo (banco e API) · Nathan (front)
-fontes: [Registro-de-Decisoes (N16-06, N16-07, N16-14, N16-16, N16-41, N16-52, N16-54, N16-55, N16-56, N16-58, N16-59, N16-72), Proposta-Score-e-Volatilidade-OQ-46, Respostas-de-Compras-2026-10-19, Estudo-Omie-API, 10-Anexo-Fora-do-Fluxo/Orcamento (antigo, substituído), LOG-42, LOG-52, api-comercial 5aa5311 (suprimentos.prisma, suprimentos.routes.ts, custos.routes.ts), HUB branch feat/menu-orcamento-vendas-compras (ededeea, 200e860, 5aa5311), telas-vendas-orcamento-compras.sql, Dump Avhub 14/10]
+fontes: [Registro-de-Decisoes (N16-06, N16-07, N16-14, N16-16, N16-41, N16-52, N16-54, N16-55, N16-56, N16-58, N16-59, N16-72), Proposta-Score-e-Volatilidade-OQ-46, Proposta-Orcamento-Comissao/01-Decisoes/Respostas-de-Compras-2026-10-19 (fora do vault), Estudo-Omie-API, 10-Anexo-Fora-do-Fluxo/Orcamento (antigo, substituído), LOG-42, LOG-52, api-comercial 5aa5311 (suprimentos.prisma, suprimentos.routes.ts, custos.routes.ts), HUB branch feat/menu-orcamento-vendas-compras (ededeea, 200e860, 5aa5311), telas-vendas-orcamento-compras.sql, Dump Avhub 14/10]
 ---
 
 # Raia Orçamento: base de preço de compra, página do produto, pedido de custo (B1 a B4)
 
-**Esta nota substitui `10-Anexo-Fora-do-Fluxo/Orcamento.md`**, que é apagado na promoção. O que foi do antigo está na última seção. Nós do [[00-Fluxo-Mestre-0b]]: `B1` a `B4`. Ligações: `V0.2` (o vendedor preenche o custo, consulta ou pede cotação) e `V0.3` em [[11-Proposta-e-Pedido-de-Venda]]; `C6` a `C8` em [[04-Circuito-de-Compra]]. Selos em [[Regras-do-Vault]].
+**Esta nota substitui o anexo [[Orcamento]]**, arquivado em 26/10/2026. O que foi do antigo está na última seção. Nós do [[00-Fluxo-Mestre-0b]]: `B1` a `B4`. Ligações: `V0.2` (o vendedor preenche o custo, consulta ou pede cotação) e `V0.3` em [[11-Proposta-e-Pedido-de-Venda]]; `C6` a `C8` em [[04-Circuito-de-Compra]]. Selos em [[Regras-do-Vault]].
 
 ## Objetivo
 
-O **Orçamento é o setor orçamentário** (N16-07): vai atrás de fornecedores e mantém a **base de precificação**, que é o **preço de compra do produto, sempre com histórico**. O setor **ainda está em construção, sem pessoa nomeada** (N16-59): o sistema funciona sem ele, e o perfil "orçamentista" deve existir para quando houver.
+O **Orçamento é o setor orçamentário** (N16-07): vai atrás de fornecedores e mantém a **base de precificação**, que é o **preço de compra do produto, sempre com histórico**. O setor é **novo e ainda está em formação**; uma das pessoas é o **Moisés** (N16-104). O sistema funciona mesmo sem orçamentista disponível (N16-59), e o perfil "orçamentista" deve existir.
 
 **O vendedor não é o dono do dado de custo** (N16-54). Na proposta, ele preenche a parte de orçamento e compra com o que conseguiu (telefone, e-mail). Quando não tem o dado, ele **consulta a página do produto** (histórico, média) ou **pede uma cotação** ao orçamentista. A base tem **duas fontes** (N16-41): as **ordens de compra efetivadas** (o custo da última compra, item a item) e o **setor orçamentário**, que também atualiza os valores à mão; **vale sempre o valor mais atualizado** (N16-52).
 
@@ -34,11 +34,11 @@ Os nós (numeração 🟡: o desenho do Nathan fixou só o intervalo `B1` a `B4`
 
 | Quem | Papel | Onde |
 |---|---|---|
-| Orçamento (setor orçamentário, em construção) | Cota com fornecedores, atualiza ofertas, responde pedidos de custo | Orçamento (`/orcamento/*`) |
+| Orçamento (setor orçamentário, novo; o Moisés é uma das pessoas) | Cota com fornecedores, atualiza ofertas, responde pedidos de custo | Orçamento (`/orcamento/*`) |
 | Vendedor | Consulta a página do produto, pede cotação; **decide o valor que põe na proposta** | Vendas e Orçamento (só consulta) |
 | Compras | Dona do dado de compra; o valor das OC efetivadas alimenta a base; o valor correto da OC (`C7`) entra no histórico | Compras |
 | Pablo | Escreve o módulo na `api-acos-vital` | `api-acos-vital` |
-| Gustavo (DBA) | Revisa e cria `core_orcamento` | `api-acos-vital` |
+| Gustavo (DBA) | Revisa e aplica a migração do Orçamento no `core_comercial` (SQL-017) | `api-acos-vital` |
 | Nathan | Telas | HUB |
 
 `Admin (Dev)` não é ator.
@@ -47,7 +47,7 @@ Os nós (numeração 🟡: o desenho do Nathan fixou só o intervalo `B1` a `B4`
 
 | # | Regra | Selo |
 |---|---|---|
-| 1 | Orçamento é o setor orçamentário; mantém a base de precificação; está em construção, sem pessoa nomeada | 📝 N16-07, N16-59 |
+| 1 | Orçamento é o setor orçamentário; mantém a base de precificação; é um setor novo (o Moisés é uma das pessoas) e o sistema funciona sem orçamentista | 📝 N16-07, N16-59, N16-104 |
 | 2 | A base é o preço de compra do produto, **sempre com histórico** | 📝 N16-07 |
 | 3 | A base tem **duas fontes**: OC efetivadas (custo da última compra) e atualização do orçamentista. **Vale sempre o valor mais atualizado** | 📝 N16-41, N16-52 |
 | 4 | A matriz de preços é por produto × fornecedor × unidade × vigência | 📝 N16-32 |
@@ -120,7 +120,7 @@ Rotas do `api-comercial` (módulo de teste) que serão migradas ([[LOG-52-Migrac
 | `POST /custos/sugerir` | sugestão de custo | `B2` | ✅ `custos.routes.ts:30` |
 | Matriz de preços | 🟡 | `B1`, `B2` | 🔴 |
 
-Contratos: [[SQL-017-Schema-core_orcamento-Base-de-Preco-e-Pedido-de-Custo]] (schema `core_orcamento`) e [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]]. Dependências: [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] (fases 4 e 5).
+Contratos: [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]] (o Orçamento sobre o `core_comercial` real) e [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]]. Dependências: [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] (fases 4 e 5).
 
 ## Como está no código (✅)
 
@@ -134,7 +134,7 @@ Contratos: [[SQL-017-Schema-core_orcamento-Base-de-Preco-e-Pedido-de-Custo]] (sc
 
 ## Dados 🟡
 
-Schema `core_orcamento` (SQL-017): base de preço com histórico, ofertas, solicitações de custo, matriz de preços. Atenção: o [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] hoje põe ofertas e solicitações em `core_comercial`; o schema `core_orcamento` é proposta do briefing e o `LOG-52-Ajustes-Propostos` concilia.
+Tudo no `core_comercial` (SQL-017). O banco real já tem as ofertas (imutáveis, com histórico), as solicitações de custo, os fornecedores, os produtos e os parâmetros de custo; a migração acrescenta só o que falta: ofertas geradas das OCs, base e estatística de preço e o pedido de custo sem prazo. O schema separado `core_orcamento`, do desenho de 16 a 21/10, foi abandonado em 26/10 (o mesmo que o [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] já fazia).
 
 Campos novos pelas decisões 🟡: `oferta.prazo_entrega_dias` (número); `solicitacao_custo.aberta_em` e `respondida_em` (cronômetro); parâmetros do score (pesos, limite de volatilidade, dias de "dado recente", mínimo de pontos) em tabela de parâmetros **com vigência**, por categoria.
 
@@ -161,41 +161,41 @@ Hoje a regra do código é mais restrita: `veCusto` vem de `custo-item` ou de se
 | 5 | Base com a fonte "OC efetivada" (última compra por item) e a atualização do orçamentista; regra do valor mais atualizado | Pablo, Gustavo | `B1` | 🔴 |
 | 6 | Matriz de preços: modelo e tela (produto × fornecedor × unidade × vigência) | Pablo, Gustavo, Nathan | `B1`, `B2` | 🔴 |
 | 7 | Cronômetro do pedido de custo no lugar do prazo | Pablo | `B3` | 🔴 |
-| 8 | Perfil "orçamentista" (setor em construção) | Gustavo | — | 🔴 |
+| 8 | Perfil "orçamentista" (setor novo) | Gustavo | — | 🔴 |
 | 9 | O valor correto da OC (`C7`) vira oferta ou linha do histórico de compras | Pablo, Gustavo | `B1` | 🟡 |
 | 10 | Cadastro das telas em produção (SQL do 16/10) | Gustavo | — | 🟡 ([[LOG-57-Menu-Vendas-Orcamento-Compras]]) |
 
 ## Pendências
 
-OQ-21 (perfis), PS-031 e PS-032 de [[Pontas-Soltas]] (quem escreve o módulo; `vinculados`). Quem opera o Orçamento: **setor em construção, sem pessoa** (N16-59). Produtos duplicados dividem o histórico de preço de um mesmo produto: ligar com a frente de **Prováveis Duplicatas**.
+OQ-21 (perfis), PS-031 e PS-032 de [[Pontas-Soltas]] (quem escreve o módulo; `vinculados`). Quem opera o Orçamento: setor novo; o Moisés é uma das pessoas (N16-104). Produtos duplicados dividem o histórico de preço de um mesmo produto: ligar com a frente de **Prováveis Duplicatas**.
 
 ## Diagrama do subfluxo
 
 ```mermaid
 flowchart TD
     subgraph SEC_VENDAS["Vendas · av-hub"]
-        V0.2["V0.2 · Vendedor preenche o custo<br/>com o que conseguiu<br/>não é o dono do dado"]
-        V0.3["V0.3 · Comissão estimada nasce"]
+        V02["V0.2 · Vendedor preenche o custo<br/>com o que conseguiu<br/>não é o dono do dado"]
+        V03["V0.3 · Comissão estimada nasce"]
     end
     subgraph SEC_ORC["Orçamento · av-hub"]
         B1["B1 · Base de preço de compra<br/>sempre com histórico<br/>fontes: OC efetivadas e orçamentista"]
         B2["B2 · Página do produto<br/>histórico, score, volatilidade, média<br/>vale o valor mais atualizado"]
         B3["B3 · Pedido de custo<br/>sem prazo, tempo cronometrado"]
-        B4["B4 · Orçamentista cota e preenche o custo<br/>setor em construção"]
+        B4["B4 · Orçamentista cota e preenche o custo<br/>setor de Orçamento"]
         B3 --> B4 --> B1 --> B2
     end
     subgraph SEC_COMP["Compras · av-hub"]
         OC["OC efetivada<br/>custo da última compra"]
         C7["C7 · Compras usa o valor correto na OC"]
     end
-    V0.2 -.->|"sem o dado, pede cotação"| B3
-    B2 -.->|"só leitura"| V0.2
-    B4 -->|"custo na proposta"| V0.3
+    V02 -.->|"sem o dado, pede cotação"| B3
+    B2 -.->|"só leitura"| V02
+    B4 -->|"custo na proposta"| V03
     OC -->|"alimenta a base"| B1
     C7 -.->|"valor da OC entra no histórico 🟡"| B1
 ```
 
-## O que foi do antigo `Orcamento.md` (registro para a promoção)
+## O que foi do antigo anexo `Orcamento.md`
 
 O anexo `10-Anexo-Fora-do-Fluxo/Orcamento.md` (14/10) dizia que o orçamento era "por fora" ([[Comercial-Suprimentos]]) e descrevia a tela antiga. O que aconteceu com cada item:
 
@@ -207,4 +207,4 @@ O anexo `10-Anexo-Fora-do-Fluxo/Orcamento.md` (14/10) dizia que o orçamento era
 | Marcas `GAMBIARRA` O1 e O2 (`lib/orcamento/dados.ts`) | **Saíram:** o arquivo não tem mais a marca; as funções O1 e O2 foram removidas junto das telas |
 | Tabelas `orc_*` e views `orc_vw_*` no schema `core_compras` (13.896 linhas carregadas em 02/10, dump de 07/10) | **Seguem no banco** e as rotas `/orcamento/*` da `api-acos-vital` seguem montadas (`orcamento.route.js`), **sem consumidor**. Aposentadoria: fase 7 do LOG-52 ("só depois do Nathan confirmar o corte do orçamento", agora confirmado por N16-14 e N16-16), a cargo do Gustavo 🔴 |
 | Decisão "migrar a tela para a API ou removê-la" | Resolvida: removida (N16-14); o módulo novo é o do Pablo (N16-07, N16-15) |
-| Contratos [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio]] e `LOG-07a` | LOG-42 encerrado (N16-14); a metade de coordenadores segue pendente e ganha item no backlog (a renumeração da promoção (26/10/2026) seção 6) |
+| Contratos [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio]] e `LOG-07a` | LOG-42 encerrado (N16-14); a metade de coordenadores segue pendente e ganha item no backlog ([[Backlog-por-Frente]]) |

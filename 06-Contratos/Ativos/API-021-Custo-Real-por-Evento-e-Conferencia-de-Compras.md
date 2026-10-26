@@ -1,6 +1,6 @@
 ---
 id: API-021
-aliases: ["Contrato API 017", "017-Custo-Real-por-Evento-e-Conferencia-de-Compras"]
+aliases: ["Contrato API 021", "021-Custo-Real-por-Evento-e-Conferencia-de-Compras"]
 tags: [contrato, contrato-api, custo-real, compras, oc, nf-de-entrada, omie, impostos, api-acos-vital, pipeline]
 criado: 2026-10-21
 atualizado: 2026-10-21
@@ -12,7 +12,7 @@ fontes: ["13-Custo-Real-e-Comissao-no-Fluxo", "SQL-016-Schema-core_comercial-Pro
 criado_original: 2026-10-21
 ---
 
-# Contrato API 017 — custo real por evento, impostos da OC vindos do Omie e conferência de Compras
+# Contrato API 021 — custo real por evento, impostos da OC vindos do Omie e conferência de Compras
 
 > **Onde atua:** av-hub: API · pipeline Omie · MES (requisição e recebimento)
 

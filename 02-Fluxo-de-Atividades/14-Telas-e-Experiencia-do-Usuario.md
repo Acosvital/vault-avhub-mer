@@ -4,14 +4,14 @@ criado: 2026-10-23
 atualizado: 2026-10-23
 status: proposta
 dono: Nathan
-fontes: ["av-hub develop (23/10/2026): lidos os 47 arquivos page.tsx de app/(protected)/vendas, orcamento e compras e os componentes que cada um abre (components/Propostas, Clientes, Relatorios, Suprimentos, PainelComprador, CustoItens, Configuracoes, Compras, Painel, Orcamento)", "lib/auth/devSemLogin.ts (MENU_DEV)", "av-hub docs/ENVIAR - contrato-comercial-suprimentos-telas.md", "Registro-de-Decisoes (N16-01 a N16-78)", "11-Proposta-e-Pedido-de-Venda, 12-Orcamento-Base-de-Preco, 13-Custo-Real-e-Comissao-no-Fluxo", "06-Pesquisa/Mapa-IncluirPedido-Omie"]
+fontes: ["av-hub develop (23/10/2026): lidos os 47 arquivos page.tsx de app/(protected)/vendas, orcamento e compras e os componentes que cada um abre (components/Propostas, Clientes, Relatorios, Suprimentos, PainelComprador, CustoItens, Configuracoes, Compras, Painel, Orcamento)", "lib/auth/devSemLogin.ts (MENU_DEV)", "av-hub docs/ENVIAR - contrato-comercial-suprimentos-telas.md", "Registro-de-Decisoes (N16-01 a N16-78)", "11-Proposta-e-Pedido-de-Venda, 12-Orcamento-Base-de-Preco, 13-Custo-Real-e-Comissao-no-Fluxo", "05-Integracoes/Mapa-IncluirPedido-Omie"]
 ---
 
 # Telas de Vendas, Orçamento e Compras no modelo novo: auditoria, conexões, redundâncias e a página de proposta
 
 Esta nota substitui a primeira versão de 23/10. Agora **todas as páginas foram lidas** (telas e componentes: títulos, colunas, filtros, ações e serviços que chamam). O que não foi lido por dentro está marcado ❓: o comportamento exato de cada botão no servidor, as telas de Cadastros e as de PCP e Meus Pedidos (só vistas de fora).
 
-Selos: ✅ existe e foi lido · 🔴 não existe · 🟡 proposta minha · ❓ não conferido.
+Selos: ✅ existe e foi lido · 🔴 não existe · 🟡 proposta · ❓ não conferido.
 
 ## 1. Auditoria: o que cada tela faz hoje
 

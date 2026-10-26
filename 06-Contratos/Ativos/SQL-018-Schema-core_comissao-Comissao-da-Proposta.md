@@ -1,6 +1,6 @@
 ---
 id: SQL-018
-aliases: ["Contrato SQL 017", "017-Schema-core_comissao-Comissao-da-Proposta"]
+aliases: ["Contrato SQL 018", "018-Schema-core_comissao-Comissao-da-Proposta"]
 tags: [contrato, contrato-sql, dba, comissao, controladoria, devolucao, core_comissao]
 criado: 2026-10-21
 atualizado: 2026-10-21
@@ -8,11 +8,11 @@ status: proposta
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: [K1, K2, K3, K4, K5, K6]
-fontes: ["Registro-de-Decisoes (N16-10, N16-11, N16-19 a N16-22, N16-39, N16-42 a N16-51, N16-74)", "SQL-018-anexos/0000-stubs-de-teste.sql, 0001-core-comissao.sql (1.831 linhas), 0002-teste-funcional.sql, 0003-entradas-do-motor-em-core_comercial.sql, 0004-devolucao-parcial-pendencia.sql, 0005-teste-devolucao-parcial.sql", "03-Comissao/03-Modelo-Novo-core_comissao", "av-hub lib/simulador/motor.ts", "Respostas-da-Controladoria-2026-10-19"]
+fontes: ["Registro-de-Decisoes (N16-10, N16-11, N16-19 a N16-22, N16-39, N16-42 a N16-51, N16-74)", "SQL-018-anexos/0000-stubs-de-teste.sql, 0001-core-comissao.sql (1.831 linhas), 0002-teste-funcional.sql, 0003-entradas-do-motor-em-core_comercial.sql, 0004-devolucao-parcial-pendencia.sql, 0005-teste-devolucao-parcial.sql", "03-Sistemas/Comissao/03-Modelo-Novo-core_comissao", "av-hub lib/simulador/motor.ts", "Proposta-Orcamento-Comissao/01-Decisoes/Respostas-da-Controladoria-2026-10-19 (fora do vault)"]
 criado_original: 2026-10-16
 ---
 
-# Contrato SQL 017 — schema `core_comissao`: comissão da proposta, custo realizado por evento, decisão e abatimento
+# Contrato SQL 018 — schema `core_comissao`: comissão da proposta, custo realizado por evento, decisão e abatimento
 
 > **Onde atua:** av-hub: banco
 

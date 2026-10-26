@@ -9,7 +9,7 @@ fontes: [av-hub 5aa5311 (branch feat/menu-orcamento-vendas-compras) api-comercia
 
 # Mapa do módulo do Pablo (Comercial e Suprimentos), como está hoje
 
-**Área de preparação.** Nada daqui foi para o vault `vault-avhub-mer-v2`. Este mapa descreve o código de teste `av-hub\api-comercial` (N14-15, N16-15) e o que as decisões N16 mudam nele. Cada fato do código traz arquivo e linha (✅). Decisão traz o ID `N16-xx` (📝). O que é proposta nova leva 🟡. O que não deu para conferir leva ❓ ou 🔴. Os desenhos que nascem daqui estão em [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]], [[SQL-017-Schema-core_orcamento-Base-de-Preco-e-Pedido-de-Custo]] e [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]]. Decisões: [[Registro-de-Decisoes]].
+Este mapa descreve o código de teste `av-hub\api-comercial` (N14-15, N16-15) e o que as decisões N16 mudam nele. Cada fato do código traz arquivo e linha (✅). Decisão traz o ID `N16-xx` (📝). O que é proposta nova leva 🟡. O que não deu para conferir leva ❓ ou 🔴. Os desenhos que nascem daqui estão em [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]], [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]] e [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]. Decisões: [[Registro-de-Decisoes]].
 
 Caminhos abaixo são relativos a `av-hub\api-comercial\` quando não dizem o contrário.
 
@@ -23,7 +23,7 @@ Caminhos abaixo são relativos a `av-hub\api-comercial\` quando não dizem o con
 | Banco publicado | Não existe `core_comercial` no dump do hub | ✅ `Dump Avhub (Esqueleto).sql` (só há `core_comissionamento`, `core_compras`, `core_vendas_faturamento` e outros; nenhum `CREATE SCHEMA core_comercial`) |
 | Permissão | 100% do RBAC do hub: telas × ações e escopo de vendedores viram "capacidades" | ✅ `src/domain/permissoes/capacidades.ts:8-19,64-84` |
 | Front | Telas em `app/(protected)/vendas`, `orcamento` e `compras/historico-compras`; BFF em `app/api/comercial/[...rota]/route.ts` | ✅ |
-| Cadastro das telas | Feito pelo Nathan na api-test em 16/10; em produção o Gustavo roda o SQL | 📝 N16-14, `06-Pesquisa\fontes\telas-vendas-orcamento-compras.sql` |
+| Cadastro das telas | Feito pelo Nathan na api-test em 16/10; em produção o Gustavo roda o SQL | 📝 N16-14, `06-Contratos/Ativos/LOG-57-anexos/telas-vendas-orcamento-compras.sql` |
 
 ## 2. Camadas da requisição
 
@@ -137,7 +137,7 @@ Configurador por classe, espessura, núcleo (EPS ou PIR) e pintura; o custo base
 - Escopo por usuário dono (`id_responsavel`): `PROPRIAS`, `COMPARTILHADA` (que não restringe nada) e `TODAS` ✅ `propostas.service.ts:23-34`.
 - Slugs que decidem capacidade ✅ `src/domain/permissoes/capacidades.ts:47-56`: `propostas`, `propostas-delegacao`, `propostas-valores`, `custo-item`, `relatorio-gerencial`, `painel-comprador`, `clientes`, `simulador`. Capacidades: `veValores`, `veCusto`, `comprador`, `podeDelegar`, `editaTerceiros`, `exclui`, `escopo`, `escopoClientes`, `relatorioGerencial`, `simulador`.
 - Perfis de teste (bypass de desenvolvimento): `Comercial - Vendedor`, `Auxiliar`, `Gestão`, `Diretoria`, `Suprimentos - Comprador`, `Pós-venda`, `Comissões - Simulador` ✅ `perfisDev.ts:12-77`. São fixtures do bypass; não migram.
-- Telas cadastradas em 16/10 (nome, slug, pai, ordem relativa) ✅ `06-Pesquisa\fontes\telas-vendas-orcamento-compras.sql:51-70`:
+- Telas cadastradas em 16/10 (nome, slug, pai, ordem relativa) ✅ `06-Contratos/Ativos/LOG-57-anexos/telas-vendas-orcamento-compras.sql:51-70`:
 
 | Grupo | Slugs |
 |---|---|
@@ -254,7 +254,7 @@ Tipos de tela ainda dizem "api-comercial" e `PARCIAL`/`FECHADA` (`lib/domain/com
 
 ## 9. Defeitos do código de teste que a migração não pode herdar
 
-A auditoria de 15/10 (24 itens) está em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §10. Os que tocam as tabelas e regras desta pasta: filtro por responsável que anula o escopo `proprios` (item 1), `vinculados` que não restringe (item 2), CNPJ alfanumérico rejeitado (item 4), cliente criado na proposta que sobrescreve o cadastro de outro vendedor (item 6), custo e margem apagados por `PUT` sem `veCusto` (item 8), `normalizarIpi` na oferta digitada (item 16), sem FK nem `CHECK` (item 17). Os DDL de [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] e [[SQL-017-Schema-core_orcamento-Base-de-Preco-e-Pedido-de-Custo]] já trazem FK, `CHECK` e CNPJ de 14 posições alfanuméricas.
+A auditoria de 15/10 (24 itens) está em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §10. Os que tocam as tabelas e regras da proposta, do Orçamento e da comissão: filtro por responsável que anula o escopo `proprios` (item 1), `vinculados` que não restringe (item 2), CNPJ alfanumérico rejeitado (item 4), cliente criado na proposta que sobrescreve o cadastro de outro vendedor (item 6), custo e margem apagados por `PUT` sem `veCusto` (item 8), `normalizarIpi` na oferta digitada (item 16), sem FK nem `CHECK` (item 17). Os DDL de [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] e [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]] já trazem FK, `CHECK` e CNPJ de 14 posições alfanuméricas.
 
 ## 10. Perguntas que nascem deste mapa
 

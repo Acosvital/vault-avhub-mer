@@ -4,12 +4,12 @@ criado: 2026-10-16
 atualizado: 2026-10-16
 status: proposta
 dono: Gustavo (DBA)
-fontes: [dump core_comissionamento convertido (06-Pesquisa/fontes), api-acos-vital f322dcd src/schemas/core_comissionamento, N16-11]
+fontes: [dump core_comissionamento convertido (09-Diagramas/fontes), api-acos-vital f322dcd src/schemas/core_comissionamento, N16-11]
 ---
 
 # Tabelas, views e funções atuais do `core_comissionamento`
 
-Inventário do que existe hoje, com o que está bom e o que deve ser **melhorado no módulo novo** ([[03-Modelo-Novo-core_comissao]]). O schema atual **não é alterado** (N16-11). Citações: `dump` = `06-Pesquisa\fontes\core_comissionamento-dump-convertido.sql`; "API" = `api-acos-vital\src\schemas\core_comissionamento`. Selos em [[Regras-do-Vault]].
+Inventário do que existe hoje, com o que está bom e o que deve ser **melhorado no módulo novo** ([[03-Modelo-Novo-core_comissao]]). O schema atual **não é alterado** (N16-11). Citações: `dump` = `09-Diagramas/fontes/core_comissionamento-dump-convertido.sql`; "API" = `api-acos-vital\src\schemas\core_comissionamento`. Selos em [[Regras-do-Vault]].
 
 **Contagem conferida no dump:** 9 tabelas, 4 views, **5 funções** (o briefing diz 6; ver [[01-Motor-Atual-Como-Calcula]], ponto 11). Linhas hoje: `blacklist_comissoes_destinatario` 1, `blacklist_comissoes_vendedores` 8, `bloqueio_comissoes` 2, `comissao_coordenadores` 6, `comissao_coordenadores_historico` 6, `regras_comissoes_fixas` 5 (1 apagada), `simulacoes` 14, `simulacao_itens` 21, `simulador_parametros` 3 (`dump:1549-1662`).
 

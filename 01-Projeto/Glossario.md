@@ -1,7 +1,7 @@
 ---
 tags: [projeto, glossario, termos]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: vigente
 dono: Nathan
 fontes: [v1 06-Glossario/Glossario, 00-Fluxo-Mestre-0b, Regras-do-Vault, api-pcp 579a625, api-acos-vital f322dcd, app-pcp 1fca8d3, HUB b55ac55, Cronograma]
@@ -27,14 +27,14 @@ Termos do projeto em ordem alfabética, com o nome atual primeiro. Nomes de tela
 
 ## Termos
 
-- **0b, Fluxo mestre** — o diagrama que acompanha um pedido de 0 a 100%, do Omie à nota fiscal. É a referência dos IDs de nó. Ver [[00-Fluxo-Mestre-0b]].
+- **0b, Fluxo mestre** — o diagrama que acompanha um pedido de 0 a 100%, da proposta (ou do pedido digitado no Omie) à nota fiscal e à comissão. É a referência dos IDs de nó. Ver [[00-Fluxo-Mestre-0b]].
 - **Acompanhamento de Clientes** — tela do HUB que mostra, por cliente e por grupo de empresa, compra, faturamento e inatividade. Fora do fluxo 0b: [[Acompanhamento-Clientes]].
 - **Atendimento (do Estoque)** — ação de "Atender pelo estoque": split da parcial e reserva de lotes sobre o saldo (nó `E3`). Tela `/estoque-operacao/atendimento`. Rota `PATCH /itens-parciais/:id/atender-estoque` ✅.
 - **BFF** — Backend For Frontend: camada que só faz proxy e orquestração, sem banco. O HUB tem um (`app/api/**/route.ts`) e o `app-pcp` também. Ver [[Mapa-Rotas-BFF-Bearer]].
 - **Bearer** — token do usuário (`Authorization: Bearer`) emitido pela `api-acos-vital`; com ele a API confere a permissão por rota. Sem ele a chamada é de serviço (só `x-api-key`). Ver [[Chaves-e-Autenticacao]].
 - **Carga inicial** — lote criado direto como `LIBERADO` (`OrigemLote.CARGA_INICIAL`), marco zero do saldo. `POST /estoque/lotes/carga-inicial` ✅.
 - **Casamento av-hub e MES** — como o pedido ou a requisição de um sistema encontra o do outro. Decidido por REST com polling (DEC-2); a requisição de compra evoluiu para o PUT do MES (contrato 34). Ver [[Integracao-AvHub-MES]].
-- **CCP** — acompanhamento de prazo de entrega do fornecedor (nó `C5`). No HUB é o Follow-up; no MES, a tela Compras · CCP, só leitura.
+- **CCP** — equipe do PCP que acompanha o prazo de entrega do fornecedor (nó `C5`): registra a nova data com o motivo e vincula a NF de entrada à OC (N16-86, N16-88). No HUB é o Follow-up; no MES, a tela Compras · CCP, só leitura.
 - **Chegada** — registro da doca de que a mercadoria chegou com a NF. A parcial sai de Compras · CCP e vai ao Recebimento. `POST /compras/requisicoes/:id/chegada` exige o número ou a chave da NF ✅ `compras.service.ts:356`.
 - **Ciclo 1 e Ciclo 2** — Ciclo 1 fecha em 18/02/2027 (era 21/01; deslocado pelo N14-30 e abatido pelo K4, N14-32); Ciclo 2 começa em 19/02/2027 e leva transferência entre filiais (etapas 2 a 4), `GET /itens/custo`, sobras e perdas, entre outros 📝. Ver [[Cronograma]].
 - **CIF e FOB** — quem paga e contrata o frete da compra. CIF: o fornecedor entrega direto. FOB: coleta no fornecedor. Definido na emissão da OC (nó `C4`) ✅.
@@ -91,3 +91,23 @@ Termos do projeto em ordem alfabética, com o nome atual primeiro. Nomes de tela
 - **L6** — chave própria do MES para escrever no av-hub, restrita por rota. Hoje a chave do contrato 34 só abre o PUT; as leituras usam outra 🔴 ([[Chaves-e-Autenticacao]]).
 - **`vendas_base` e `nf_classified`** — views curadas que entregam o grupo de dedução pronto por nota e pedido ([[Dashboards]]).
 - **Waterfall de dedução** — cascata que reconcilia Venda Bruta e Venda Líquida.
+
+## Proposta, Orçamento, custo real e comissão nova (desenho aprovado em 26/10/2026)
+
+- **Proposta** — documento do vendedor no Hub, antes do pedido (nós `V0.1` a `V0.7`). Só a aprovada vira pedido, e uma proposta vira um pedido só (N16-02). Estados (SQL-016): `ABERTA`, `APROVADA`, `TRANSFORMADA`, `CANCELADA`. Ver [[11-Proposta-e-Pedido-de-Venda]].
+- **Proposta incompleta** — a que tem item sem custo e sem fornecedor. É um campo calculado, não um estado, e impede a aprovação (N16-03, N16-31).
+- **Transformar em pedido** — botão da proposta aprovada (`V0.6`): pede a previsão de faturamento, se a Qualidade acompanha e se o pedido pode faturar em partes; depois o Hub cria o pedido no Omie por fila e pipeline (`V0.7`).
+- **Pedido do Hub** — pedido de venda em `core_comercial.pedidos`, com `origem` `PROPOSTA` ou `OMIE`. Os dois seguem o mesmo fluxo e a mesma tela; o do Omie chega com a parte de vendas pronta, que só se altera no Omie (N16-106).
+- **Parte de vendas e parte de compras** — as duas metades do item da proposta ou do pedido. A de vendas é cliente, itens, valores, impostos e previsão; a de compras é custo, fornecedor, origem e frete, que o vendedor preenche e que é a simulação da comissão (N16-104, N16-106).
+- **Orçamento (setor)** — setor novo que cota com fornecedores e mantém a base de preço de compra, sempre com histórico (`B1` a `B4`). O Moisés é uma das pessoas (N16-104). Ver [[12-Orcamento-Base-de-Preco]].
+- **Orçamentista** — perfil de quem atende o pedido de custo no setor de Orçamento (N16-59).
+- **Pedido de custo** — o vendedor sem o dado pede a cotação de um item ao Orçamento (`B3`). Sem prazo fixo, com o tempo cronometrado; o vendedor nunca fica bloqueado (N16-58).
+- **Página do produto** — consulta do vendedor (`B2`): histórico de preço, top fornecedores com score, flutuação, volatilidade e média. Só leitura.
+- **Compra acima do valor** — Compras comprou por mais que o custo que o vendedor pôs (`C8`). O vendedor é avisado em Meus Pedidos e aprova ou reprova, por produto e sem tolerância (N16-60 a N16-67). Tabela `divergencias_compra`.
+- **Previsão vigente** — a data de faturamento que vale agora: a maior entre a inicial e a última de cada item, mais 1 dia útil pelo calendário da unidade. Fica só no Hub; o Omie guarda a inicial (N16-88, N16-96, N16-97).
+- **Sequencial** — agrupamento que o Fiscal cria para faturar o mesmo pedido em várias notas, por item e quantidade. Não é outro pedido nem parcela de pagamento (N16-92 a N16-94).
+- **Custo real (por evento)** — custo do item do pedido somado das linhas de cada evento: OC (com o valor da NF de entrada no recebimento), lote do Estoque ou matéria-prima do fabricado (`K2`, N16-09, N16-40). Ver [[13-Custo-Real-e-Comissao-no-Fluxo]].
+- **Comissão estimada e comissão real** — a estimada nasce na proposta ou na parte de compras do pedido do Omie (`K1`) e é a única que o vendedor vê antes da decisão; a real fecha por nota fiscal com o custo real (`K3`) e só aparece ao vendedor depois da decisão (`K5`).
+- **Apuração seguinte** — quando o custo completa depois da decisão, a diferença (complemento ou desconto) vai para a próxima apuração, para nova decisão (N16-49).
+- **Abatimento** — redução da comissão na mesma proporção da nota cancelada, devolvida ou recusada (`K6`, N16-47).
+- **`core_comissao`** — schema novo da comissão, em Operações ([[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]). O `core_comissionamento` atual não muda (N16-11).

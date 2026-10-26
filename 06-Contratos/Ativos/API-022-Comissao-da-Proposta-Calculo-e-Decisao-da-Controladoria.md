@@ -1,6 +1,6 @@
 ---
 id: API-022
-aliases: ["Contrato API 018", "018-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria"]
+aliases: ["Contrato API 022", "022-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria"]
 tags: [contrato, contrato-api, comissao, motor, controladoria, devolucao, api-acos-vital]
 criado: 2026-10-21
 atualizado: 2026-10-21
@@ -8,11 +8,11 @@ status: proposta
 sistemas: [hub-api, hub-banco]
 dono: "Pablo (módulo) e Gustavo (revisão)"
 etapa_0b: [K1, K2, K3, K4, K5, K6]
-fontes: ["SQL-018-Schema-core_comissao-Comissao-da-Proposta", "03-Comissao/03-Modelo-Novo-core_comissao, 01-Motor-Atual-Como-Calcula", "av-hub lib/simulador/motor.ts (calcularSimulacao em app/(protected)/comissoes/simulador/page.tsx:1053)", "Registro-de-Decisoes (N16-10, N16-11, N16-19 a N16-22, N16-39, N16-42 a N16-51, N16-74)", "Respostas-da-Controladoria-2026-10-19"]
+fontes: ["SQL-018-Schema-core_comissao-Comissao-da-Proposta", "03-Sistemas/Comissao/03-Modelo-Novo-core_comissao, 01-Motor-Atual-Como-Calcula", "av-hub lib/simulador/motor.ts (calcularSimulacao em app/(protected)/comissoes/simulador/page.tsx:1053)", "Registro-de-Decisoes (N16-10, N16-11, N16-19 a N16-22, N16-39, N16-42 a N16-51, N16-74)", "Proposta-Orcamento-Comissao/01-Decisoes/Respostas-da-Controladoria-2026-10-19 (fora do vault)"]
 criado_original: 2026-10-16
 ---
 
-# Contrato API 018 — comissão da proposta: cálculo, custo real, decisão, abatimento e visão geral (`/comissao`)
+# Contrato API 022 — comissão da proposta: cálculo, custo real, decisão, abatimento e visão geral (`/comissao`)
 
 > **Onde atua:** av-hub: API (`api-acos-vital`)
 

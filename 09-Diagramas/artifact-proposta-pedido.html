@@ -94,7 +94,7 @@
 </style>
 
 <div class="wrap">
-  <div class="meta">FLUXO MESTRE 0b · ATUALIZADO EM 26/10/2026 · DECISÕES N16-01 A N16-106 · RASCUNHO PARA CONFERÊNCIA</div>
+  <div class="meta">FLUXO MESTRE 0b · ATUALIZADO EM 26/10/2026 · DECISÕES N16-01 A N16-106 · FLUXO APROVADO EM 26/10/2026</div>
   <h1>Fluxo da Proposta ao Pedido</h1>
 
   <div class="legend" aria-label="Legenda">
@@ -127,7 +127,7 @@
       <div class="ramos" style="margin-top: 10px;">
         <div class="ramo">
           <div class="rotulo">Não</div>
-          <div class="card novo"><b>Proposta cancelada</b><small>Não reabre: o vendedor duplica. A comissão estimada vira histórico, com motivo, quem cancelou e a data.</small></div>
+          <div class="card novo"><b><span class="id">V0C</span>Proposta cancelada</b><small>Não reabre: o vendedor duplica. A comissão estimada vira histórico, com motivo, quem cancelou e a data.</small></div>
         </div>
         <div class="ramo">
           <div class="rotulo">Sim</div>
@@ -155,7 +155,9 @@
         <div class="seta">↓</div>
         <div class="card novo"><b><span class="id">C6</span>Compras confere a parte de compras</b><small>O sistema puxa da proposta os impostos, o frete e o fornecedor. Compras confere e pode alterar os impostos da OC no Hub; o que editar volta ao Omie pela sincronização da OC.</small></div>
         <div class="seta">↓</div>
-        <div class="card decide"><b><span class="id">C2</span>Segue ou busca valor e condição melhor?</b></div>
+        <div class="card atual"><b><span class="id">C1</span>Cotação e negociação</b><small>Fora do sistema, como hoje.</small></div>
+        <div class="seta">↓</div>
+        <div class="card decide"><b><span class="id">C7</span>Segue ou busca valor e condição melhor?</b></div>
       </div>
       <div class="ramos" style="margin-top: 10px;">
         <div class="ramo">
@@ -164,7 +166,7 @@
         </div>
         <div class="ramo">
           <div class="rotulo">Busca melhor</div>
-          <div class="card novo"><b><span class="id">C7</span>Compras usa o valor correto</b><small>Pode trocar de fornecedor. A proposta não é alterada.</small></div>
+          <div class="card novo"><b>Compras usa o valor correto</b><small>Pode trocar de fornecedor. A proposta não é alterada.</small></div>
           <div class="seta">↓</div>
           <div class="card novo"><b><span class="id">C4</span>OC com valor e fornecedor corrigidos</b></div>
         </div>
@@ -251,7 +253,7 @@
         <div class="lin"><span>D. Flange sobre desenho</span><span>Só a matéria-prima requisitada</span><span>Dia 05</span></div>
         <div class="lin"><span>E. 50 Flanges cegas</span><span>Custo real do lote que já está no Estoque (o da OC que o originou)</span><span>Dia 04</span></div>
       </div>
-      <p class="nota">Exemplo do item A, com números inventados: 10 a R$ 140 + 20 a R$ 150 + 20 a R$ 160 = R$ 7.600 para 50 unidades, ou R$ 152 de unitário médio. A linha da OC nasce na aprovação com o valor da OC; no recebimento, o valor da NF de entrada a substitui. Lote que veio de uma OC já contada não soma de novo. OC cancelada estorna a linha; pedido cancelado estorna tudo, e o comprado vai ao Estoque. Enquanto o item não estiver todo coberto, o custo é parcial.</p>
+      <p class="nota">Exemplo do item A (o vendedor cotou R$ 100; as três compras são ilustrativas): 10 a R$ 140 + 20 a R$ 150 + 20 a R$ 155 = R$ 7.500 para 50 unidades, ou R$ 150 de unitário médio, o valor real do exemplo do Nathan. A linha da OC nasce na aprovação com o valor da OC; no recebimento, o valor da NF de entrada a substitui. Lote que veio de uma OC já contada não soma de novo. OC cancelada estorna a linha; pedido cancelado estorna tudo, e o comprado vai ao Estoque. Enquanto o item não estiver todo coberto, o custo é parcial.</p>
     </div>
   </section>
 
@@ -312,13 +314,13 @@
 
   <section class="etapa" id="aberto">
     <h2>O que ainda está em aberto</h2>
-    <p>Pontos que mudam o desenho e precisam de resposta antes de ir ao vault.</p>
+    <p>Pontos que ainda mudam o desenho. No vault, estão nas Pontas Soltas PS-035 a PS-039 e nas perguntas da proposta (OQ-xx).</p>
     <div class="board">
       <ol class="pend">
         <li><b>Módulo comercial do Pablo.</b> As tabelas da proposta já existem no banco, com fechamento parcial, "perdida" e "reabrir", e as telas do av-hub usam esse ciclo. O desenho novo substitui esse ciclo. <span class="quem">PABLO · GUSTAVO · NATHAN</span></li>
         <li><b>Carteira do PCP lendo a previsão vigente do Hub.</b> Decidido: o PCP vê todas as datas. Falta a Carteira passar a ler a vigente, e a Qualidade respondida na proposta chegar à liberação que o MES lê. <span class="quem">GUSTAVO · NATHAN</span></li>
         <li><b>Formato do número da proposta.</b> Só dígitos (ano e sequência) ou o atual com prefixo. <span class="quem">NATHAN</span></li>
-        <li><b>Pipeline.</b> Carregar condições de pagamento, cenários de impostos e a ligação dos sequenciais das três contas. <span class="quem">GUSTAVO</span></li>
+        <li><b>Pipeline.</b> Carregar condições de pagamento, cenários de impostos e a ligação dos sequenciais das três contas. <span class="quem">NATHAN (PIPELINE) · GUSTAVO (TABELAS)</span></li>
         <li><b>Testes no Omie.</b> Só depois das telas: cancelar e excluir, criar sequencial, o número do Hub no pedido. <span class="quem">NATHAN</span></li>
       </ol>
     </div>

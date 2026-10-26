@@ -24,7 +24,9 @@ fontes: [plano de 14/10/2026]
 | Robert (MES) | [[Backlog-por-Frente]] (frente MES), [[MES-Backend]], [[MES-Front]], [[Estados-e-Status]] |
 | Gustavo (DBA, API do av-hub) | [[Backlog-por-Frente]] (frente DBA), [[AV-Hub-API]], [[Banco-AvHub]], [[Diferencas-Codigo-x-Banco]] |
 | Nathan (front do av-hub) | [[AV-Hub-Front]], [[Telas-por-Raia]], [[Mapa-Rotas-BFF-Bearer]] |
-| Pablo (Comercial & Suprimentos) | [[API-Comercial]], [[Comercial-Suprimentos]] |
+| Pablo (Comercial & Suprimentos) | [[Mapa-do-Modulo-do-Pablo]], [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]], [[API-Comercial]], [[Comercial-Suprimentos]] |
+| Controladoria (Michele) | [[13-Custo-Real-e-Comissao-no-Fluxo]], [[04-Regras-e-Estados-da-Comissao-Nova]] |
+| Compras e Orçamento | [[04-Circuito-de-Compra]], [[12-Orcamento-Base-de-Preco]], [[11-Proposta-e-Pedido-de-Venda]] (`C6` a `C8`) |
 
 ## Como achar as coisas
 
@@ -32,7 +34,7 @@ fontes: [plano de 14/10/2026]
 - **Uma decisão:** [[Registro-de-Decisoes]].
 - **Um termo:** [[Glossario]].
 - **Uma nota do vault antigo:** [[Mapa-v1-para-v2]].
-- **O que está solto:** [[Pontas-Soltas]] e [[Contradicoes-Resolvidas]].
+- **O que está solto:** [[Pontas-Soltas]], [[Perguntas-Proposta-Pedido-Comissao]] e [[Contradicoes-Resolvidas]].
 
 ## Selos
 

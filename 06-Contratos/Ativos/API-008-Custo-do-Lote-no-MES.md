@@ -3,7 +3,7 @@ id: API-008
 aliases: ["Contrato 008", "008-Custo-do-Lote-no-MES"]
 tags: [contrato, contrato-api, mes, estoque, custo, g1, genealogia]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: parcial
 sistemas: [mes-api, hub-api]
 dono: "Robert"
@@ -25,6 +25,8 @@ criado_original: 2026-10-09
 > - 🔴 **§3 Recebimento com custo da OC:** o lote de recebimento nasce sem `lote_custo` (depende da projeção da OC, ver [[API-007-Referencia-OC-Valores-no-MES]]). Rota de custo `MANUAL` (`PUT /estoque/lotes/:id/custo`, decisão D8): não existe no controller de Estoque.
 > - 🔴 **§4 Snapshot do custo na `SAIDA`:** não há (o movimento não grava o custo do lote).
 > - 🔴 **§5 `GET /itens/custo`:** não existe no `api-pcp` (grep sem resultado). O av-hub já tem o consumidor (`itens_pedido_custo.job.js:78`) e responde 404 "ainda não publicado" no MES: o job só avisa no log.
+> - ✅ **§3 em 19/10 (Robert, BL-005, `api-pcp` `97b9adc`):** o lote do Recebimento nasce com `idOcItem` e `lote_custo` origem `OC`; unidade diferente da OC ou OC fora da projeção gera lote sem custo e sinalizado ([[Backlog-por-Frente]]).
+> - 📝 **N16-09 (16/10):** todo lote tem custo, **obrigatório**, inclusive na carga inicial; o lote tem valor total e valor por item e, no fim, o valor unitário. Isto supera o #93 e o trecho "o custo é opcional e nunca bloqueia", o A3 do #97 (`0` = sem custo) e o D2 do #98 (lote sem custo e sinalizado). O item do pedido soma as linhas por evento (OC, lote, matéria-prima do fabricado), que alimentam o `K2` da comissão nova ([[13-Custo-Real-e-Comissao-no-Fluxo]]). Escopo e data da carga de 13/11: OQ-07 🔴. Trabalho: BL-066 e BL-067.
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
