@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, raia, vendas, liberacao, av-hub, v1, v2, v3]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: vigente
 dono: Nathan
 fontes: [LOG-26 (contrato de liberação), LOG-40 (escopo do vendedor), API-005, API-006, SQL-010, 00-Fluxo-Mestre-0b, v1 01-Fluxo-Operacional/Entrada-Comercial, v1 Fluxograma-Telas-por-Bloco bloco 1, v1 Fluxo-Sistema-no-Meio atos 1b e 17, api-acos-vital f322dcd, HUB b55ac55, api-pcp 579a625, app-pcp 1fca8d3, Dump Avhub 14/10]
@@ -10,6 +10,9 @@ fontes: [LOG-26 (contrato de liberação), LOG-40 (escopo do vendedor), API-005,
 # Raia Vendas: liberação do pedido (V1 a V3)
 
 Nós do [[00-Fluxo-Mestre-0b]]: `V1` pedido chega do Omie travado, `V2` vendedor marca se a Qualidade acompanha, `V3` vendedor libera. Selos e convenções em [[Regras-do-Vault]].
+
+> [!info] Proposta ao pedido (decisões de 16 a 26/10/2026, fluxo aprovado em 26/10)
+> Esta nota descreve a liberação que **existe hoje** ✅. O desenho aprovado põe a **proposta** antes do `V1` e dá ao `V1` **duas origens no mesmo fluxo**: o pedido da proposta nasce liberado (a Qualidade é respondida no "Transformar em pedido"); o pedido digitado no Omie continua chegando travado, mas o vendedor responde a Qualidade e o faturamento em partes **na tela do pedido** e preenche ali a parte de compras, sem travar o fluxo 📝 (N16-05, N16-91, N16-106) 🔴. A liberação gravada é a mesma desta nota, que o MES lê. Detalhe em [[11-Proposta-e-Pedido-de-Venda]] e [[LOG-58-Liberacao-do-Pedido-Origem-Proposta]].
 
 ## Objetivo
 

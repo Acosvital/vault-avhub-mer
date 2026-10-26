@@ -1,7 +1,7 @@
 ---
 tags: [diagramas, indice, uml, mapa]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: vigente
 dono: Nathan
 fontes: [v1 04-Arquitetura-Transversal/Diagramas-UML, v1 01-Fluxo-Operacional (Fluxogramas-Completos, Fluxograma-Telas-por-Bloco, Fluxo-Sistema-no-Meio, Fluxo-Operacional-Visao-Geral, Encaixe-Estoque-Revenda-no-PCP), v1 02-PRD-Estoque (Fluxo-*-Completo, Proposta-Transferencia-Estoque-Filiais), 00-Fluxo-Mestre-0b, código de 14/10/2026]
@@ -15,7 +15,10 @@ O v1 tinha 31 diagramas na UML e outros espalhados nas pastas de fluxo, quase to
 
 | Nota | Conteúdo | Diagramas |
 |---|---|---|
-| [[00-Fluxo-Mestre-0b]] | Fluxo de atividades de ponta a ponta, com IDs `V1` a `O2` | 1 |
+| [[00-Fluxo-Mestre-0b]] | Fluxo de atividades de ponta a ponta, com IDs `V0.1` a `O2` e `K1` a `K6` | 1 |
+| `artifact-proposta-pedido.html` | Fluxo da proposta ao pedido, aprovado em 26/10/2026: proposta, compra, datas, faturamento em partes, custo real, comissão e cancelamento (página publicada "Fluxo da Proposta ao Pedido") | 1 página |
+| `Historia-da-Proposta-ao-Pedido.pdf` | A jornada do usuário de ponta a ponta, num caso só (Mogi: flanges, tubos, flanges cegas e flange sobre desenho) | 3 páginas |
+| [[11-Proposta-e-Pedido-de-Venda]], [[12-Orcamento-Base-de-Preco]], [[13-Custo-Real-e-Comissao-no-Fluxo]] | Subfluxos da proposta ao pedido, do Orçamento e do custo real e da comissão | 3 |
 | [[Sequencia]] | Pedido ao PCP, atendimento do Estoque, requisição ida e volta, chegada com NF e Recebimento, inspeção de entrada, produção e Expedição, despacho | 8 |
 | [[Estados]] | Parcial, lote, reserva, recebimento, divergência, requisição (MES e hub), etapa de compra, OC, envio, liberação, etapa do item | 12 |
 | [[Classes]] | Estoque e compras, produção, compras e integração, api-comercial | 4 |

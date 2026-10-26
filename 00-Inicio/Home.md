@@ -1,7 +1,7 @@
 ---
 tags: [home, moc]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: vigente
 dono: Nathan
 fontes: [plano de 14/10/2026]
@@ -9,7 +9,7 @@ fontes: [plano de 14/10/2026]
 
 # Home: manual do fluxo de Atividades (0b)
 
-Este vault é o manual para desenvolver o fluxo de **Atividades** do ERP Aços Vital: um pedido de venda de 0 a 100%, do Omie à nota fiscal. Ele substitui o `vault-avhub-mer` (v1, congelado). Novo por aqui? Comece por [[Comece-Aqui]]. Quer saber o que falta fazer? Veja [[Onde-Estamos]].
+Este vault é o manual para desenvolver o fluxo de **Atividades** do ERP Aços Vital: um pedido de venda de 0 a 100%, da proposta (ou do pedido digitado no Omie) à nota fiscal e à comissão. Ele substitui o `vault-avhub-mer` (v1, congelado). Novo por aqui? Comece por [[Comece-Aqui]]. Quer saber o que falta fazer? Veja [[Onde-Estamos]].
 
 ## Mapa
 

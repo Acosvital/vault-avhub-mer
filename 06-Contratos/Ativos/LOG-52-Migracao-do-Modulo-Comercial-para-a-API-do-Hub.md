@@ -26,6 +26,8 @@ criado_original: 2026-10-15
 > - 🟡 O desenho das seções 3 a 9 é **proposta**; as decisões que dependem do Nathan, do Pablo e do Gustavo estão na seção 13.
 > - ❓ Não conferi: `auth.rotas_telas` e `auth.telas` em produção, o que a pipeline carrega de pedidos de compra, e nada foi executado.
 >
+> - 🟡 **Desenho aprovado em 26/10/2026 muda o ciclo da proposta** (N16-02, N16-03, N16-84, N16-106): sem fechamento parcial, cancelada no lugar de perdida, sem reabrir, pedido criado pelo Hub e pedido do Omie no mesmo fluxo. A migração proposta está em [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] e as rotas em [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]]; o domínio de preço, margem e custo continua portado como está. Combinar antes da fase 3 (PS-035).
+>
 > **Não confundir** com [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]]: aquele corrige a API que já existe; este traz o módulo novo para dentro dela. O módulo **tem de entrar já seguindo o LOG-51**, para não herdar o problema.
 
 ## 1. O que muda e o que fica

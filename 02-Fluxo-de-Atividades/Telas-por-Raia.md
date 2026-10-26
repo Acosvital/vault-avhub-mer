@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, telas, rotas, raias, referencia]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: vigente
 dono: Nathan
 fontes: [app-pcp 1fca8d3 (app/(protected)/**/page.tsx, títulos dos PageHeader), HUB b55ac55 em disco (app/(protected), components), v1 Fluxograma-Telas-por-Bloco, 00-Fluxo-Mestre-0b, Regras-do-Vault]
@@ -116,6 +116,22 @@ Repositórios: **HUB** é o front do av-hub (`b55ac55`, conferido em disco), **a
 | O1 | Fila de sinalização de faturamento | (11.1) | — | app-pcp | — | 🔴 |
 | O2 | Notas Fiscais de Saída | — | `/vendas/notas-fiscais-saida` | HUB | ❓ | ✅ título `page.tsx:98` |
 | O2 | Minhas Notas, Notas da Equipe, Notas do PCP | — | `/minhas-notas`, `/notas-equipe`, `/pcp-notas` | HUB | ❓ | ✅ pós-fato |
+
+## Proposta, Orçamento e comissão nova (`V0`, `B1` a `B4`, `C6` a `C8`, `K1` a `K6`) · [[11-Proposta-e-Pedido-de-Venda]]
+
+Telas novas do desenho aprovado em 26/10/2026, ainda sem código 🔴. A auditoria das telas que existem, as conexões e a página de proposta estão em [[14-Telas-e-Experiencia-do-Usuario]]; o menu em [[LOG-57-Menu-Vendas-Orcamento-Compras]].
+
+| Nós | Tela | Quem | Estado |
+|---|---|---|---|
+| `V0.1` a `V0.7`, `V0C` | Proposta (cinco blocos e um botão principal por estado) | vendedor | 🔴 (`api-comercial` de teste ✅) |
+| `V1` a `V3`, `C8`, datas | Meus Pedidos: o pedido das duas origens, a parte de compras, as respostas, as pendências de compra acima do valor e o histórico de datas | vendedor | 🔴 |
+| `B2` | Página do produto | vendedor, Orçamento, Compras | 🔴 |
+| `B3`, `B4` | Orçamento · Pedidos de custo | setor de Orçamento | 🔴 (`api-comercial` de teste ✅) |
+| `C6`, `C7` | Emitir OC com os dados do vendedor e imposto por item | comprador | 🔴 |
+| `C8` | Compras · Reprovados | comprador | 🔴 |
+| `O1` | Faturamento em partes (bloco do pedido) | Fiscal | 🔴 |
+| datas | Calendário (exceções de feriado e dia útil por unidade) | marketing | 🔴 |
+| `K1` a `K6` | Comissões novas: estimada, Minhas Comissões, fila e decisão da Controladoria, notas esperando a simulação, devoluções | vendedor, Controladoria, Gerência, Coordenação, Fiscal | 🔴 |
 
 ## Transversais
 
