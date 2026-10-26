@@ -3,8 +3,8 @@ id: API-018
 aliases: ["Contrato 018", "018-Carteira-Vencem-Hoje"]
 tags: [contrato, contrato-api, pcp, carteira, dashboard, vence-hoje, atrasados, av-hub]
 criado: 2026-10-22
-atualizado: 2026-10-22
-status: proposta
+atualizado: 2026-10-26
+status: aplicado-em-producao
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
 etapa_0b: []
@@ -16,12 +16,14 @@ criado_original: 2026-10-22
 
 > **Onde atua:** av-hub: banco, API, front
 
-> [!info] Situação em 22/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
+> [!info] Situação em 26/10/2026
+> **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
 >
+> - ✅ **Implementado e aplicado (26/10/2026), informado pelo Gustavo** (dump de produção de 26/10): API no commit `b1bc564` e migration `api018` em produção. O 353 x 358 era o **pedido original zerado com previsão vencida** entrando como atrasado na lista; corrigido em `fn_pedidos_venda`. "Vence hoje" ficou como os pedidos cuja **parcela mais urgente** vence hoje, igual à lista `prazo=vence-hoje`.
+> - ✅ **Conferido por mim em 26/10/2026** na API em uso pelo av-hub (perfil admin): `/carteira` traz `vence_hoje_pedidos` = 59 e `vence_hoje_valor` = R$ 1.087.534,20, iguais ao `total` e à soma do `valor_carteira` da lista `prazo=vence-hoje` (aceite 1) e abaixo de `no_prazo_valor` (aceite 2); `atrasados_pedidos` = 390 = `total` da lista `prazo=atrasado` (aceite 3), e com filtro de vendedor (Tiago Viana) 1 = 1 em atrasados e em vence hoje; `/carteira/vendedores` traz os campos e a soma por vendedor dá 59 e o mesmo valor. 🟡 Não olhei o cartão "Vencem hoje" na tela do Dashboard (aceite 4).
 > - 📝 **Pedido do Nathan, 22/10/2026:** o cartão "Vencem hoje" do Dashboard PCP precisa mostrar **valor** (como "Atrasados" e "A faturar"), não só a quantidade.
-> - ✅ **Hoje:** `GET /pedidos_venda/carteira` traz `atrasados_valor`/`atrasados_pedidos` e `no_prazo_*` (que **inclui** o que vence hoje), mas **nada separado para "vence hoje"**. O front só consegue a **quantidade** (pela lista, `GET /pedidos_venda?carteira=true&prazo=vence-hoje`, 20 pedidos em 22/10/2026) e **não** o valor: o `valor_carteira` de cada pedido da lista é o saldo do **pedido inteiro**, que superestima quando o pedido tem parcelas em outros dias (soma de 20 pedidos: R$ 420.417,73, sem saber quanto é da parcela que vence hoje).
-> - 🔴 **Diferença a conferir:** `/carteira` diz **353** pedidos atrasados (`atrasados_pedidos`) e a lista `GET /pedidos_venda?carteira=true&prazo=atrasado` diz **358** (`total`), no mesmo momento, sem filtro de período, sem pedido em blacklist nem com saldo zero entre os 358. Os dois falam da mesma coisa e precisam bater.
+> - 🕓 Registro de 22/10 (superado): **hoje** `GET /pedidos_venda/carteira` traz `atrasados_valor`/`atrasados_pedidos` e `no_prazo_*` (que **inclui** o que vence hoje), mas **nada separado para "vence hoje"**. O front só consegue a **quantidade** (pela lista, `GET /pedidos_venda?carteira=true&prazo=vence-hoje`, 20 pedidos em 22/10/2026) e **não** o valor: o `valor_carteira` de cada pedido da lista é o saldo do **pedido inteiro**, que superestima quando o pedido tem parcelas em outros dias (soma de 20 pedidos: R$ 420.417,73, sem saber quanto é da parcela que vence hoje).
+> - ✅ **Diferença explicada e corrigida (26/10):** `/carteira` dizia **353** atrasados e a lista `prazo=atrasado` dizia **358** em 22/10; a causa era o pedido original zerado entrando como atrasado na lista (ver o primeiro item acima). Hoje os dois dão 390.
 > - **MES (Robert): sem trabalho.**
 >
 > Selos em [[Regras-do-Vault]].
@@ -70,9 +72,9 @@ O cartão "Vencem hoje" do Dashboard PCP já está pronto para os campos novos: 
 ## Checklist
 
 **Gustavo (banco e API)**
-- [ ] `fn_carteira_pcp_resumo` com `vence_hoje_pedidos` e `vence_hoje_valor` (`DROP` + `CREATE`, `GRANT`).
-- [ ] `GET /pedidos_venda/carteira` devolvendo os dois campos; Swagger.
-- [ ] Conferir `atrasados_pedidos` da carteira contra o `total` da lista `prazo=atrasado` (353 x 358 em 22/10/2026) e alinhar a definição.
+- [x] `fn_carteira_pcp_resumo` com `vence_hoje_pedidos` e `vence_hoje_valor` (`DROP` + `CREATE`, `GRANT`).
+- [x] `GET /pedidos_venda/carteira` devolvendo os dois campos; Swagger.
+- [x] Conferir `atrasados_pedidos` da carteira contra o `total` da lista `prazo=atrasado` (353 x 358 em 22/10/2026) e alinhar a definição.
 
 **Nathan (front):** nada (pronto para os campos novos).
 

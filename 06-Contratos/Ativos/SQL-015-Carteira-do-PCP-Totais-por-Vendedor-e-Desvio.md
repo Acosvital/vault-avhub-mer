@@ -3,7 +3,7 @@ id: SQL-015
 aliases: ["Contrato SQL 015", "015-Carteira-do-PCP"]
 tags: [contrato, contrato-sql, dba, pcp, carteira, pedidos, vendas, prazo, desvio, dashboard]
 criado: 2026-10-21
-atualizado: 2026-10-22
+atualizado: 2026-10-26
 status: parcial
 sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
@@ -16,16 +16,18 @@ criado_original: 2026-10-21
 
 > **Onde atua:** av-hub: banco, API e front (Portal do PCP)
 
-> [!info] Situação em 22/10/2026
+> [!info] Situação em 26/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
+> - ✅ **Conferido por mim em 26/10/2026** na API em uso pelo av-hub (perfil admin): `GET /pedidos_venda?carteira=true&desvio=true` devolve **221** pedidos, igual a `desvio_pedidos` do `/carteira` (critério 7); cada pedido traz `desvio_previsao`, `dias_previsao_inclusao` (exemplo: 9) e os campos de avanço (`avanco`, `avanco_marcado_por`, `avanco_marcado_por_nome`, `avanco_marcado_em`); a soma dos 57 vendedores bate com o resumo (carteira R$ 77.952.537,88 e 221 de desvio); avanço em 0 pedidos (ninguém marcou). 🟡 **Não testei `PUT .../marcacao`** (marcar e desmarcar grava dado; o escopo e o histórico seguem sem conferência).
+> - ✅ **G1 a G3 decididos em 21/10/2026, informado pelo Gustavo (26/10):** G1 lê direto de `pedidos_vendas`; G2 deu cerca de **45 ms** no resumo no teste dele; G3 ficou com **duas rotas** (`/carteira` e `/carteira/vendedores`).
 > - ✅ **Conferido em 22/10/2026 no preview** (Portal do PCP, Dashboard PCP, perfil admin), depois de o Gustavo informar que implementou. `GET /pedidos_venda/carteira` e `/carteira/vendedores` respondem 200 com todos os campos do contrato (`carteira_*`, `no_prazo_*`, `atrasados_*`, `sem_previsao_*`, `desvio_*`, `avanco_*`). Carteira R$ 77.702.706,01 em 888 pedidos = no prazo R$ 63.293.656,61 (541) + atrasados R$ 14.409.049,40 (349) + sem previsão 0; desvio R$ 7.094.757,08 em 219 pedidos (10 dias); a soma dos 56 vendedores bate com o resumo em carteira, no prazo, atrasados e desvio, e a lista vem ordenada pela carteira. Euveraldo (R$ 29.712.357, 5 pedidos) e Tiago Viana (R$ 7.640.565, 9) batem com a tabela de 21/10; os totais diferem dos de 21/10 por um dia de movimento (a conferência exata pede a mesma janela de 2026).
-> - 🟡 **Ainda não conferido:** `GET /pedidos_venda?desvio=true` devolver exatamente os 219 pedidos (critério 7); `dias_previsao_inclusao`; a marcação de avanço (`PUT .../marcacao`, histórico e escopo); tempo de resposta (G2) e as respostas G1 a G3 do Gustavo. Por isso o status é `parcial` e não `implementado-no-codigo`.
+> - 🕓 Registro de 22/10 (parte superada): `desvio=true`, `dias_previsao_inclusao` e G1 a G3 estão resolvidos acima; segue sem teste a marcação de avanço (`PUT .../marcacao`).
 >
 > - 📝 **Pedido do Nathan, 21/10/2026:** o PCP (diligenciadores) precisa ver no **Dashboard PCP** o valor total em carteira, o que está dentro do prazo, o que está atrasado, os itens com desvio e a **carteira por vendedor**. O faturamento do mês já existe no dashboard. "Valor em avanço" **entra como marca do diligenciador** (ver "Avanço: marca do diligenciador"). A **previsão atualizada** (CCP) não faz parte deste contrato: a regra ainda não foi decidida, ver "Fora deste contrato".
 > - ✅ Os números abaixo foram medidos em 21/10/2026 no preview (perfil admin, pedidos incluídos em 2026, 8.455 pedidos fora da blacklist, 66 vendedores) somando no navegador as parcelas de `GET /pedidos_venda`. Servem de **conferência**: o banco deve chegar nos mesmos valores com a mesma janela.
-> - 🔴 Nenhum SQL deste contrato existe. Não montei script: o desenho (funções, nomes e plano de consulta) é do Gustavo. O contrato define **o que significa cada número**.
-> - ✅ Decisões Q1 a Q4 do Nathan registradas em 21/10/2026 (seção "Perguntas em aberto"). Falta o Gustavo (G1 a G3).
+> - 🕓 Registro de 21/10 (superado): nenhum SQL existia; hoje as funções e as rotas estão no ar, e o desenho é do Gustavo.
+> - ✅ Decisões Q1 a Q4 do Nathan registradas em 21/10/2026 (seção "Perguntas em aberto"); G1 a G3 do Gustavo decididos, ver acima.
 > - ❓ Desempenho: somar no navegador pede 43 páginas de 200 pedidos (cerca de 100 segundos). Por isso o cálculo tem de ser no banco.
 >
 > Selos em [[Regras-do-Vault]].

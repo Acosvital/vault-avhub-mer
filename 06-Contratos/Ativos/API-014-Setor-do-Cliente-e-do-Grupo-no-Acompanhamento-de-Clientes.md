@@ -3,7 +3,7 @@ id: API-014
 aliases: ["Contrato 014", "014-Setor-do-Cliente-e-do-Grupo"]
 tags: [contrato, contrato-api, acompanhamento-clientes, clientes, setor, categorizacao, grupos-de-empresa, av-hub]
 criado: 2026-10-21
-atualizado: 2026-10-23
+atualizado: 2026-10-26
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
@@ -16,14 +16,16 @@ criado_original: 2026-10-21
 
 > **Onde atua:** av-hub: banco, API, front
 
-> [!info] Situação em 23/10/2026
+> [!info] Situação em 26/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
 >
+> - ✅ **Vários setores por cliente: feito no banco e na API, informado pelo Gustavo (26/10/2026):** commit `43dbec3` e migration `api014b` em produção; `kpis.por_setor` existe em `/acompanhamento_clientes` e o cliente conta em cada um dos setores dele.
+> - ✅ **Conferido por mim em 26/10/2026 (só leitura, na API em uso pelo av-hub):** cada linha traz `setores` (lista; vem com `setor_ativo` a mais) além de `id_setor`/`setor`; `kpis.por_setor` vem com Construção Civil 1, Farmacêutico 1, Mineração 1, Óleo & Gás 2 e "sem setor" 4.004 (soma 4.009 = `total_clientes`). 🟡 **Ainda não vi nenhum cliente com 2 ou mais setores** (por isso a soma fecha no total), então **salvar 2 setores**, o filtro `id_setor` com 2, o Excel e o `403` do perfil só de leitura **não foram conferidos** (gravam dados reais). O front de vários setores está na `develop` do av-hub (`a24d187`, 23/10).
 > - 📝 **Pedido do Nathan, 21/10/2026:** quem cuida dos clientes precisa poder **categorizar o cliente (CNPJ) ou o grupo de empresa por setor**, escolhendo de uma lista e **podendo acrescentar um setor novo** quando o cliente não é de nenhum dos listados. Lista inicial: Agricultura, Arquitetura e Design, Automotivo, Construção Civil, Energia, Indústria Naval, Mineração, Óleo & Gás, Papel & Celulose, Petroquímica, Saneamento e Siderurgia.
 > - ✅ **Hoje não existe** setor do cliente na tela nem no banco do Acompanhamento. `core.parceiros` traz só `cnae` e `tipo_atividade` (vêm do Omie e não servem como lista de setores). O campo `segmento` de `core_comercial.clientes` é do CRM do Comercial, tem outra lista (INDUSTRIA, MINERACAO, ENGENHARIA…) e **não** é o setor deste contrato: os dois ficam separados.
 > - ✅ **Front no `av-hub`** (`develop`, PR #235, `77ef66f`): campo de setor na tela do Acompanhamento (`SetorCampo.tsx`), serviço, tipos e planilha.
 > - ✅ **Conferido em 22/10/2026 no preview** (perfil admin), depois de o Gustavo informar que concluiu: `GET /setores_clientes` responde 200 com os 12 setores iniciais; `GET /acompanhamento_clientes` responde 200 com `id_setor`, `setor` e `setor_origem` em cada linha e aceita `id_setor` e `sem_setor`. Só leitura: o primeiro cliente veio sem setor, como esperado.
-> - 🟡 **Ainda não conferido** (grava dados reais): criar setor e o `409` de nome repetido, renomear/desativar, `PUT /clientes_setor` (inclusive o lote que não grava nada se um alvo é inválido), os filtros em si, `sort=setor`, o `403` do perfil só de leitura. `kpis.por_setor` **não apareceu** na resposta lida; perguntar ao Gustavo se ficou em outra rota ou não foi entregue.
+> - 🕓 Registro de 22/10 (superado pelo item acima): `kpis.por_setor` não aparecia na resposta; hoje aparece.
 > - 🕓 Registro de 21/10 (já superado, mantido como histórico): **Banco e API não existiam** (busca na `develop` da `api-acos-vital`, 21/10/2026): nenhuma rota `/setores_clientes` nem `PUT /clientes_setor`, e `fn_acompanhamento_clientes` não traz `id_setor`. Enquanto isso o front chama algo que a API ainda não oferece.
 > - 📝 **Mudança de regra, Nathan, 23/10/2026: um cliente (CNPJ ou grupo) pode ter MAIS DE UM setor.** Substitui a regra 1 ("um setor por alvo"). Decididos na mesma conversa: (a) **herança**: o CNPJ com setor(es) próprio(s) usa **só os dele** e ignora os do grupo (o que o grupo tem só vale para o CNPJ que não tem nenhum); (b) **contagem**: nos totais por setor o cliente conta **em cada um dos seus setores**, então a soma dos setores pode passar do total de clientes. O banco e a API entregues em 22/10 (um setor só) precisam mudar: ver as seções 1 e 2 e o checklist.
 > - **MES (Robert): sem trabalho.**
@@ -185,8 +187,8 @@ Corpo (revisado em 23/10/2026: **`id_setores`**, uma lista; o `id_setor` único 
 
 **Gustavo (banco e API)**
 - [x] Migration: `setores_clientes` (com os 12 setores iniciais) e `clientes_setor`, com os `CHECK` e os índices únicos (entregue em 22/10, **um setor por alvo**).
-- [ ] **Migration nova (23/10): vários setores por alvo**: derrubar os índices únicos por alvo e criar os únicos por `(alvo, id_setor)`.
-- [ ] `fn_acompanhamento_clientes` (ou a rota) devolvendo `setores` (lista) e `setor_origem` pela regra de herança, mantendo `id_setor`/`setor` do primeiro.
+- [x] **Migration nova (23/10): vários setores por alvo**: derrubar os índices únicos por alvo e criar os únicos por `(alvo, id_setor)`.
+- [x] `fn_acompanhamento_clientes` (ou a rota) devolvendo `setores` (lista) e `setor_origem` pela regra de herança, mantendo `id_setor`/`setor` do primeiro.
 - [ ] Rotas `GET`/`POST`/`PUT /setores_clientes` e `PUT /clientes_setor`, com a transação e os erros da seção 2 (**`id_setores`** em lista; `id_setor` ainda aceito).
 - [ ] Filtros `id_setor` e `sem_setor`, `sort=setor` e `kpis.por_setor` em `GET /acompanhamento_clientes` (cliente conta em cada setor).
 - [ ] Linhas de `auth.rotas_telas` (`acompanhamento-clientes`): `GET /setores_clientes` (`pode_visualizar`), `POST /setores_clientes` (`pode_criar`), `PUT /setores_clientes/*` e `PUT /clientes_setor` (`pode_editar`).

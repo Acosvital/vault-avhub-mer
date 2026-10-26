@@ -3,7 +3,7 @@ id: SQL-009
 aliases: ["009-Categoria-Sem-Escopo-Empresa-Views"]
 tags: [contrato, contrato-sql, dba, bug, vendas, faturamento]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: aplicado-em-producao
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
@@ -16,9 +16,10 @@ criado_original: 2026-09-24
 
 > **Onde atua:** av-hub: banco
 
-> [!info] Situação em 14/10/2026
+> [!info] Situação em 26/10/2026
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
+> - ✅ **Resposta do Gustavo (16/10/2026), registrada em 26/10:** o pedido 25970 tem **53 parcelas** e **311 linhas de item**, e as duas contas dão o mesmo valor. Não é divergência.
 > - ✅ Correção aplicada nas views segundo o vault v1 (conferido em produção em 06/10; ❓ não reconferido hoje).
 > - ✅ Divergência resolvida: o pedido 25970 tem 53 parcelas na view e 311 linhas em `produto_vendas` (tabela bruta); as duas contas somam R$ 964.763,88 — não é contradição, são granularidades diferentes (view agrega parcelas, tabela lista linhas brutas). O snapshot mensal copia as tabelas (não o resultado da view), então o mês congelado sai correto.
 >

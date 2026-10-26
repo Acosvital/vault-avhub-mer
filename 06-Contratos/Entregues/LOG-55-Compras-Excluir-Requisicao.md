@@ -3,8 +3,8 @@ id: LOG-55
 aliases: ["Contrato 55", "55-Compras-Excluir-Requisicao"]
 tags: [contrato, contrato-sql, contrato-api, compras, requisicao]
 criado: 2026-10-20
-atualizado: 2026-10-20
-status: proposta
+atualizado: 2026-10-26
+status: aplicado-em-producao
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Nathan"
 etapa_0b: [C0, C1]
@@ -16,11 +16,13 @@ criado_original: 2026-10-20
 
 > **Onde atua:** av-hub: banco, API, front
 
-> [!info] Situação em 20/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Dono:** Nathan (front); Gustavo (DBA) e a API entregam o resto
+> [!info] Situação em 26/10/2026
+> **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Dono:** Nathan (front); Gustavo (DBA) e a API entregam o resto
 >
-> - ✅ **Front (av-hub) escrito, ainda não verificado na tela:** botão "Excluir" na lista de Requisições, confirmação, rota `DELETE /api/compras/requisicoes/:id` no BFF. Sem a API, o botão devolve o erro do backend.
-> - 🔴 **Banco e API: não existem.** Hoje a requisição só tem `GET`, `PATCH` de status e `POST`. Não há `deleted_at` em `requisicoes_compra` nem rota `DELETE`.
+> - ✅ **Banco e API entregues, informado pelo Gustavo (26/10/2026):** `DELETE /compras/requisicoes/:id` no commit `3c10bbb` (lido por mim na `develop` em 23/10) e migration `055` em produção. Respostas: `404` não existe, `403` sem `pode_deletar` ou comprador de outra unidade, `409` com OC/atendida ou vinda do MES, com `codigo` e `detail`.
+> - ✅ **Front escrito e testado por mim (23/10/2026):** o front que este contrato dava como escrito **não estava no repositório**; foi feito do zero e está na `develop` do av-hub (`0e43b39`): rota `DELETE` no BFF, `excluirRequisicaoCompra`, `excluirRequisicao`, `podeExcluirRequisicao` e o botão **Excluir** com confirmação em `ComprasRequisicoes.tsx`. Na API de produção: `DELETE` de id inexistente deu `404 "Requisição não encontrada"`; excluí a REQ-000001 (autorizado pelo Nathan) e ela sumiu da lista, do resumo (tudo zerado) e do toast confirmou. 🟡 Não testei os `409` (OC e MES) nem o `403`.
+> - 🕓 Registro de 20/10 (superado): front dado como escrito, não verificado na tela.
+> - 🕓 Registro de 20/10 (superado): banco e API não existiam.
 > - ✅ **Q1 decidida (20/10):** só a criada no Hub; a do MES continua cancelada com motivo.
 > - 🔴 **Pergunta aberta** (seção 6): o perfil Comprador ter `pode_deletar` em `compras` (Q2).
 

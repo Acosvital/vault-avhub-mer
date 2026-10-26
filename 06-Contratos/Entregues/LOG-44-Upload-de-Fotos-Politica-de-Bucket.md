@@ -3,7 +3,7 @@ id: LOG-44
 aliases: ["Contrato 44", "44-Upload-de-Fotos-Politica-de-Bucket"]
 tags: [contrato, contrato-logica, seguranca, armazenamento, upload]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: aplicado-em-producao
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
@@ -16,9 +16,10 @@ criado_original: 2026-10-07
 
 > **Onde atua:** av-hub: banco
 
-> [!info] Situação em 14/10/2026
+> [!info] Situação em 26/10/2026
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
+> - ✅ **Resposta do Gustavo (16/10/2026), registrada em 26/10:** o storage é **SeaweedFS** e o **acesso anônimo é negado**. O av-hub ainda usa a credencial do Organograma; a **credencial própria** e o **teste da seção F** ficam com ele.
 > - ❓ **Aplicado na palavra do DBA (relato do Nathan em 13/10).** É configuração do bucket (storage), sem código nos repos desta pasta; nenhum teste da seção F foi rodado por quem escreveu o contrato. Não conferível pelo código.
 > - Prioridade baixa. Fecha o reforço da marca S10 do [[LOG-05-Permissoes-e-Escopo-no-Banco]].
 >

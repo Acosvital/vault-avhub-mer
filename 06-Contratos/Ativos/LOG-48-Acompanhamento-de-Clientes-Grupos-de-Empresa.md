@@ -3,7 +3,7 @@ id: LOG-48
 aliases: ["Contrato 48", "48-Acompanhamento-de-Clientes-Grupos-de-Empresa"]
 tags: [contrato, contrato-sql, contrato-api, dba, av-hub, clientes, grupos-de-empresa, portal-do-gerente, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-15
+atualizado: 2026-10-26
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo (DBA)"
@@ -16,9 +16,10 @@ criado_original: 2026-10-13
 
 > **Onde atua:** av-hub: banco, API, front
 
-> [!info] Situação em 15/10/2026
+> [!info] Situação em 26/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
+> - ✅ **Lista do Gustavo (26/10/2026):** §9.1, §9.2, §10 e §12 já constam verificados em 15/10 e saem da lista dele no Painel. O **§13.2** (resumo por vendedor) foi **entregue em 19/10**.
 > - ✅ **Entregue (banco + API):** tabelas `grupos_clientes` e `grupos_clientes_membros`, funções `fn_acompanhamento_clientes` e `fn_movimento_cliente_mes`, rotas `GET /acompanhamento_clientes`, `/movimento` e `/grupos_clientes` — conferido na `api-test` em 15/10.
 > - ✅ **§9.1** NF cancelada saiu dos totais do mês (verificado 15/10).
 > - ✅ **§9.2** `codigo_cliente` filtra a lista (verificado 15/10).
