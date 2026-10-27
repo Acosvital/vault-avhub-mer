@@ -1,0 +1,71 @@
+---
+id: roteiro-proposta-em-diante
+tags: [roteiro, proposta, pedido-de-venda, compras, custo-real, comissao, api-acos-vital]
+criado: 2026-10-27
+atualizado: 2026-10-27
+status: rascunho
+fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status em 27/10/2026)", "Registro-de-Decisoes N16-110 a N16-112", "Perguntas-Proposta-Pedido-Comissao (OQ-16, OQ-21, OQ-48)", "Dump do Avhub para referência (completo), 26/10/2026", "av-hub branch refactor/menu-enxuto-vendas-orcamento-compras (11844de)", "[[Conexao-das-Telas-do-Pablo-com-a-API-do-Hub]]"]
+---
+
+# Roteiro: o que falta para o sistema ficar redondo, da proposta em diante
+
+> [!info] Situação em 27/10/2026
+> Levantamento pedido pelo Nathan. As **regras** estão decididas (LOG-56 e as N16); **nada** desta parte está construído. Os 14 contratos (LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019) estão em `proposta`: nenhum implementado, nenhum aplicado em produção.
+>
+> Legenda: ✅ existe · 🟡 existe em parte · 🔴 não existe.
+
+## 1. Antes de construir: realinhar os contratos à N16-111 e à N16-112
+
+- **SQL-016, SQL-017 e SQL-018 foram desenhados sobre o `core_comercial` do Pablo.** Pela N16-111 (toda a API no Hub, sem recriar o que ele já tem) e pela N16-112 (um Hub só), precisam ser revistos antes de o Gustavo aplicar:
+  - **SQL-017** usa ofertas, categorias de suprimento, perfil de fornecedor e produtos pendentes do `core_comercial`: repete o Orçamento do Hub (`orc_*`), que ainda passa pela revisão completa.
+  - **SQL-016** mantém `unidades_emissoras` e `perfis_comerciais` como fonte própria.
+  - Mapa do que reusar: [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §0 e a tabela de unificação em [[Conexao-das-Telas-do-Pablo-com-a-API-do-Hub]].
+- **O `core_comercial` está em produção, vazio** (dump de 26/10: só `categorias_suprimento` 17, `parametros_custo` 1 e `unidades_emissoras` 3). Decidir com o Gustavo se é reaproveitado (só com proposta, pedido e o que é realmente novo) ou recriado.
+
+## 2. O fluxo, etapa por etapa
+
+| Etapa | Banco | API do Hub | Tela | O que falta | Contratos |
+|---|---|---|---|---|---|
+| **V0 · Criar e revisar a proposta** | 🔴 | 🔴 | 🟡 | **Banco e API:** proposta, itens, revisões e número próprio só com dígitos. **Tela:** já tem o layout novo (padrão do Simulador e da emissão da OC), mas ainda usa o modelo antigo (fechar, perder, reabrir) e não salva. Faltam a lista com filtros e KPIs e o cálculo de margem e letra na API | LOG-56, API-019, SQL-016 |
+| **Escolher cliente** | 🟡 | 🟡 | 🔴 | Busca de cliente da carteira (`core.parceiros` não filtra por tipo). Decidir prospect, consulta à Receita e compradores | LOG-52 §0 |
+| **Condições de venda** | 🔴 | 🔴 | 🟡 | Condições de pagamento de venda do Omie (pipeline `ListarParcelas`). CFOP e cenário de impostos por item (N16-83) | SQL-019, SQL-016 |
+| **V0.3–V0.5 · Incompleta e aprovar** | 🔴 | 🔴 | 🔴 | Aprovar com a revisão atual, travar a aprovada, selo "incompleta" (item sem custo e sem fornecedor) | LOG-56 R9–R14, API-019 |
+| **V0C · Cancelar a proposta** | 🔴 | 🔴 | 🔴 | Cancelar com motivo, duplicar, comissão estimada virando histórico | LOG-56 R15–R16 |
+| **B3/B4 · Pedido de custo** | 🔴 | 🔴 | 🔴 | Fila do Orçamento, cronometrada e sem prazo (N16-58). A tela atual é a do Pablo, com SLA | API-020, SQL-017 |
+| **B2 · Página do produto e matriz de preços** | 🟡 | 🟡 | 🟡 | Os dados existem (compras do Omie e cotações do Orçamento antigo). Faltam estatística de 90 dias, score e volatilidade do fornecedor e a matriz | LOG-60, API-020 |
+| **Ofertas e cotação a fornecedor** | 🟡 | 🔴 | 🟡 | Uma tabela de oferta (`parceiros_produtos` está vazia), importar mapa, envio do pedido de cotação por e-mail | API-020, SQL-017 |
+| **V0.6–V0.7 · Transformar em pedido** | 🔴 | 🔴 | 🔴 | **Pedido:** `pedidos`, `pedidos_itens` e as 3 respostas obrigatórias (Qualidade, faturar em partes ou inteiro, data de previsão). **Omie:** fila e pipeline com `IncluirPedido`, erro com "Tentar novamente" | LOG-56 R18–R26, API-019, SQL-016 |
+| **V1–V3 · Liberação** | 🟡 | 🟡 | ✅ | A liberação do pedido do Omie existe (LOG-26). Falta gravar a liberação na resposta do `IncluirPedido` | LOG-58 |
+| **Pedido digitado no Omie no mesmo fluxo** | 🔴 | 🔴 | 🟡 | Trazer o pedido para `pedidos` e o vendedor preencher a parte de compras em Meus Pedidos | N16-106, SQL-016 |
+| **C6/C7 · Compras usa os dados da proposta** | 🔴 | 🔴 | 🔴 | A OC puxar impostos, frete e fornecedor da proposta, com os campos de imposto na OC. O circuito de OC do Hub ainda não emitiu nenhuma em produção (`ordens_compra` = 0) | LOG-56 R27–R31, API-019 §3.5 |
+| **C8 · Compra acima do valor** | 🔴 | 🔴 | 🔴 | Aviso ao vendedor em Meus Pedidos, aprovar ou reprovar, lista de reprovados de Compras | LOG-61, API-019 §3.3 |
+| **K1–K6 · Custo real e comissão nova** | 🔴 | 🔴 | 🔴 | **Custo e decisão:** custo por evento (OC, NF de entrada, lote), comissão estimada e real, decisão da Controladoria. **Notas:** abatimento por devolução e recusa | SQL-018, API-021, API-022, LOG-59 |
+| **Cancelar pedido** | 🔴 | 🔴 | 🔴 | Cancelar no Omie, cancelar a requisição e a OC não emitida, tarja, mandar o comprado ao Estoque | LOG-56 R58–R62, API-019 §3.4 |
+| **Datas e previsão de faturamento** | 🔴 | 🔴 | 🔴 | Previsão inicial, entrega de Compras e do CCP, +1 dia útil, calendário com exceções do marketing | LOG-56 R67–R76, SQL-016 |
+| **Faturar em partes (sequenciais)** | 🔴 | 🔴 | 🔴 | Criar, mostrar e cancelar sequenciais. A terceira tabela já tem os dados ligados (SQL-016 §4) | LOG-56 R79–R87 |
+
+## 3. O que vale para tudo
+
+- **Serviço de e-mail do Hub:** a API não envia e-mail. A proposta ao cliente e o pedido de cotação dependem disso.
+- **Notificações do Hub:** o sino existe na tela, mas não há nada no Hub.
+- **Um motor de margem e comissão na API:** hoje está só no front (`lib/simulador/motor.ts`); LOG-56 R42 e N16-109 pedem uma fonte só.
+- **Perfis e permissões novos** de Vendas, Orçamento, Compras e Comissão (OQ-21, adiada). Hoje só o Admin (Dev) tem as telas.
+- **Testes no Omie** (OQ-16, OQ-48): pedido que nasce bloqueado, cancelar ou excluir, e como criar sequencial.
+- **Revisão completa do Orçamento antigo** do Hub (`/orcamento/*`, `orc_*`), pedida pelo Nathan em 27/10.
+
+## 4. Pendências do que já foi feito (27/10/2026)
+
+- **PR da branch** `refactor/menu-enxuto-vendas-orcamento-compras` do av-hub, que o Nathan ainda vai revisar.
+- **Telas que hoje mostram "ainda não existe na API do Hub":** propostas, relatórios, Dashboard Comercial, ofertas, pedidos de custo, telha e o sino. Decidir se ficam no menu até existirem.
+- **Tirar a `api-comercial` de produção** (infraestrutura e Pablo).
+- **Família do produto aparece como código:** o Hub nega `/familias_produtos` ao perfil Admin (Dev), por permissão no Hub.
+
+## 5. Ordem que o vault sugere (N16-110, sem confirmação)
+
+1. **Fase 1:** proposta nova, pedido pela fila do Omie, condições de pagamento, liberação, imposto por item na OC e comissão estimada.
+2. **Fase 2:** compra acima do valor (C8), cancelamento com tarja e custo real por evento.
+3. **Fase 3:** comissão real, faturar em partes, datas e calendário, fila do Fiscal, score e matriz de preços.
+
+## Ver também
+
+[[Conexao-das-Telas-do-Pablo-com-a-API-do-Hub]] · [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] · [[LOG-56-Fluxo-da-Proposta-ao-Pedido]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] · [[Registro-de-Decisoes]] · [[Perguntas-Proposta-Pedido-Comissao]]
