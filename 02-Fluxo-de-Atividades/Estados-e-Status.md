@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, estados, status, enums, referencia]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: vigente
 dono: Nathan
 fontes: [api-pcp 579a625 prisma/models/*.prisma, integracao-avhub.service.ts, requisicao-avhub.eventos.ts, Dump MES 14/10 (CREATE TYPE, linhas 128-424), Dump Avhub 14/10 (CHECK constraints), app-pcp 1fca8d3 movimentacoes/labels.ts e acoes.ts, HUB b55ac55 lib/domain/etapas-item.ts, 00-Fluxo-Mestre-0b]
@@ -185,6 +185,27 @@ Aprovação (`C3`, N14-21): OC acima do limite da unidade (`parametros_compras.l
 | `item_estado_projetado.estado_macro` | `varchar(40)`, vocabulário não definido 🔴 | linha 2176 |
 
 Os 8 estados macro do desenho do vendedor (`AGUARDANDO_LIBERACAO`, `PENDENTE_PCP`, `EM_ESTOQUE`, `EM_COMPRA`, `EM_PRODUCAO`, `EM_RECEBIMENTO`, `EM_INSPECAO`, `PRONTO_EXPEDICAO`, `FATURADO`) não existem no código 🟡 ([[01-Vendas-Liberacao]]). O MES ainda não publica `/fluxo/eventos` 🔴 ([[Rastreabilidade-e-Torre-de-Fluxo]]).
+
+### Proposta, pedido de venda do Hub, custo real e comissão nova (proposta 🟡, SQL-016 a SQL-018)
+
+Valores dos `CHECK` das migrações propostas em 26/10/2026 ([[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]], [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]], [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]). Ainda não estão no banco de produção.
+
+| Campo | Valores | Fonte |
+|---|---|---|
+| `core_comercial.propostas.status` | `ABERTA`, `APROVADA`, `TRANSFORMADA`, `CANCELADA` | N16-02, N16-03 |
+| `core_comercial.pedidos.origem` | `PROPOSTA`, `OMIE` | N16-106 |
+| `core_comercial.pedidos.status_sincronizacao_omie` | `pendente`, `sincronizado`, `erro` (o pedido do Omie nasce `sincronizado`) | padrão da OC |
+| `core_comercial.pedidos_previsoes.tipo` | `INICIAL`, `ENTREGA_COMPRAS`, `ENTREGA_CCP` | N16-88 |
+| `core_comercial.pedidos_sequenciais.status` | `ABERTO`, `FATURADO`, `CANCELADO` | N16-92 |
+| `core_vendas_faturamento.pedidos_vendas_sequenciais_itens.origem_vinculo` | `HUB`, `PRODUTO`, `AMBIGUO`, `SEM_VINCULO` | N16-99, N16-100 |
+| `core_comercial.calendario_excecoes.tipo` | `FERIADO`, `DIA_UTIL` | N16-104 |
+| `core_comercial.ofertas.fonte` | `MANUAL`, `MAPA_COTACAO`, `MIGRACAO`, `OC_HUB`, `OC_OMIE` | SQL-017 |
+| `core_comercial.custos_eventos.origem` | `OC_MATERIAL`, `LOTE_ESTOQUE`, `MATERIA_PRIMA_FABRICACAO`, `MAO_DE_OBRA_OC_SERVICO`; `status` `VALIDO`, `DESCARTADO`; `sentido` `1` ou `-1` (estorno) | N16-09, N16-20 |
+| `core_comercial.divergencias_compra.estado` | `PENDENTE`, `APROVADO`, `REPROVADO`, `RESOLVIDO`; `solucao_tipo` `NOVO_VALOR`, `NOVO_FORNECEDOR`, `MANTIDO`, `PEDIDO_CANCELADO` | N16-60 a N16-73 |
+| `core_comissao.comissoes.estado` | `ESTIMADA`, `CONGELADA`, `EM_ACOMPANHAMENTO`, `ENCERRADA`, `CANCELADA`; `origem` `PROPOSTA`, `PEDIDO_OMIE` | N16-10, N16-103 |
+| `core_comissao.comissao_calculos.tipo` | `COTADO` (estimada ou simulação do vendedor), `REAL` (custo real) | N16-10 |
+| `core_comissao.comissoes_nf.estado` | `AGUARDANDO_DECISAO`, `APROVADA`, `DESAPROVADA`, `BLOQUEADA`, `CORTADA`, `ALTERADA`, `NF_CANCELADA` | N16-43 a N16-46 |
+| `core_comissao.comissao_lancamentos.tipo` | `COMPLEMENTO`, `DESCONTO`, `ABATIMENTO` | N16-47, N16-48 |
 
 ## 4. Pontes entre os dois lados
 

@@ -3,7 +3,7 @@ id: API-009
 aliases: ["Contrato 009", "009-Referencia-Requisicao-Hub-Integracao-MES"]
 tags: [contrato, contrato-api, mes, integracao-av-hub-mes, compras, requisicao, sql]
 criado: 2026-10-15
-atualizado: 2026-10-19
+atualizado: 2026-10-26
 status: parcial
 sistemas: [hub-banco, hub-api, mes-api, mes-front]
 dono: "Gustavo"
@@ -16,11 +16,13 @@ criado_original: 2026-10-15
 
 > **Onde atua:** av-hub: banco, API · MES: API, front
 
-> [!info] Situação em 15/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** C0, P1, P2, P3, E1 · **Dono:** Gustavo (rota, view, marca); Robert (job e telas no MES, [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno]])
+> [!info] Situação em 26/10/2026
+> **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** C0, P1, P2, P3, E1 · **Dono:** Gustavo (rota, view, marca); Robert (job e telas no MES, [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno]])
 >
+> - ✅ **Migration `api009` em produção desde 20/10/2026** (entrou na MEGA de 19/10), informado pelo Gustavo em 26/10; não conferi no banco. O lado do MES segue aberto.
 > - 📝 **N14-28:** a requisição criada no av-hub pelo Compras **com pedido de venda** aparece no MES **antes de virar OC**, para o PCP saber que o item já está em compra e não requisitar de novo. A OC vinculada já chega pela referência da OC ([[API-004-Referencia-OC-Integracao-MES]]). Este contrato cobre o intervalo **entre a requisição e a OC aprovada**.
-> - 🔴 **Nada existe ainda:** nem a rota, nem a view, nem a marca. Depende do [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto]] (coluna `finalidade`, produto e pedido no POST).
+> - ✅ **Lado do hub entregue** (conferido na `develop` de `api-acos-vital`, 21/10/2026): `GET /compras/requisicoes/referencia?alterado_desde=&codigo_empresa=&apos_id=&page=&limit=` (`vw_requisicoes_compra_referencia_mes.route.js`, montada em `core_vendas_faturamento/index.js:195`).
+> - 🔴 **Lado do MES não existe:** o `api-pcp` não tem job que leia `/compras/requisicoes/referencia` nem a projeção da requisição do hub (busca em `src` sem resultado); falta também a tela do PCP e o aviso de compra duplicada (BL-065). ✅ (26/10) A migration `api009` está em produção, segundo o Gustavo.
 > - ✅ **SQL escrito e testado em banco descartável** (PostgreSQL 18, schema restaurado do dump, tabelas vazias): [[0001-requisicoes-referencia-mes.sql]] em `API-009-anexos/`. Testes feitos: requisição do hub com pedido entra na marca e na view; a sem pedido não entra; `codigo_produto_omie` resolvido pelo cadastro da unidade; cancelar e retirar o pedido marcam a saída (`visivel_ao_pcp = false`); a OC emitida marca a requisição `atendida` e a **aprovação da OC avança a marca** (trigger na OC); a OC cancelada devolve a requisição a `aberta`. **Não testado:** a rota (ainda não existe) e o volume real.
 > - Migration **`api009`**, depois da `api010`.
 >

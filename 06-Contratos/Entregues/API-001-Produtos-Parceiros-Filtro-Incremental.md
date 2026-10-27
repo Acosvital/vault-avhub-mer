@@ -3,7 +3,7 @@ id: API-001
 aliases: ["001-Produtos-Parceiros-Filtro-Incremental"]
 tags: [contrato, contrato-api, api-acos-vital, pipeline]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: implementado-no-codigo
 sistemas: [hub-api, pipeline-omie]
 dono: "Gustavo (DBA)"
@@ -16,11 +16,12 @@ criado_original: 2026-09-17
 
 > **Onde atua:** av-hub: API · pipeline Omie
 
-> [!info] Situação em 14/10/2026
+> [!info] Situação em 26/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
+> - ✅ **`alterado_desde` de produtos e parceiros corrigido, informado pelo Gustavo (26/10/2026):** fecha a pendência S27 do [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] e PS-033. Não reconferi no código nem na produção.
 > - ✅ `GET /produtos` e `GET /parceiros` aceitam `alterado_desde` (`api-acos-vital/src/schemas/core/tables/produtos/produtos.route.js:52-60`; `.../parceiros/parceiros.route.js:97`).
-> - 🔴 **Correção de 15/10/2026:** o bloco `alterado_desde` está **depois** de `return where;` (`parceiros.route.js:96`, `produtos.route.js:51`), então o filtro **nunca executa**. O ✅ acima só vale para o código existir, não para funcionar. Corrigir ou rebaixar o status: [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] S27, [[Pontas-Soltas]] PS-033.
+> - 🕓 Registro de 15/10 (superado): o bloco `alterado_desde` ficava depois de `return where;` e o filtro nunca executava; corrigido, ver o item acima.
 > - 🟡 Os caminhos `src/routes/*.js` citados no texto não existem mais: o código mora em `src/schemas/<schema>/...`.
 > - ❓ Produção: o vault v1 registra aplicação confirmada pelo dump de 21/09; não reconferido hoje.
 >

@@ -67,7 +67,7 @@ Resumo; a tabela completa está em [[RBAC-e-Permissoes]].
 
 ## Pontas soltas conferidas no código
 
-- ✅ `app/api/orcamento/*` não chama mais as views antigas: lê `lib/orcamento/dados.ts`, que importa JSON local (`lib/orcamento/data/*.json`). Orçamento roda sobre dado estático, não sobre `core_compras.orc_*` ([[Orcamento]]).
+- ✅ `app/api/orcamento/*` não chama mais as views antigas: lê `lib/orcamento/dados.ts`, que importa JSON local (`lib/orcamento/data/*.json`). Orçamento roda sobre dado estático, não sobre `core_compras.orc_*`. Em 16/10 as 5 telas antigas e as rotas BFF delas saíram; ficam `familias`, `produtos` e `todos-fornecedores` ([[12-Orcamento-Base-de-Preco]]).
 - ✅ A aprovação lê `limite_aprovacao` de `GET /compras/parametros` apenas para avisar na tela de OC ("Acima de R$… ela nasce Aguardando aprovação") ✅ `components/Compras/FecharCompra.tsx:604-605,1652`.
 - 🟡 `api-comercial` está dentro do mesmo repositório do HUB (pasta `api-comercial/`) e tem CI próprio ([[API-Comercial]]).
 

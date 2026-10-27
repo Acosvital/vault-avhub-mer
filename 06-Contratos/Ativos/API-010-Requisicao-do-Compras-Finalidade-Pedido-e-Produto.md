@@ -3,7 +3,7 @@ id: API-010
 aliases: ["Contrato 010", "010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto"]
 tags: [contrato, contrato-api, compras, requisicao, av-hub, sql]
 criado: 2026-10-15
-atualizado: 2026-10-19
+atualizado: 2026-10-26
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
@@ -16,11 +16,13 @@ criado_original: 2026-10-15
 
 > **Onde atua:** av-hub: banco, API, front
 
-> [!info] Situação em 15/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nó do 0b:** C0 · **Dono:** Gustavo (banco e API); Nathan (front, já pronto)
+> [!info] Situação em 26/10/2026
+> **Status:** `parcial` · **Pasta:** `Ativos` · **Nó do 0b:** C0 · **Dono:** Gustavo (banco e API); Nathan (front, já pronto)
 >
+> - ✅ **Migration `api010` em produção desde 20/10/2026** (entrou na MEGA de 19/10), informado pelo Gustavo em 26/10; não conferi no banco.
 > - ✅ **Front pronto (HUB PR #209):** a "Nova requisição" é uma tela própria (`/compras/requisicoes/nova`) e já envia `finalidade`, `numero_pedido_venda` e `material` = `codigo_produto` do cadastro.
-> - 🔴 **A API não atende** (conferido em `api-acos-vital`): não há `finalidade`; a lista `CAMPOS` do POST (`requisicoes_compra.route.js:30-45`) não traz `numero_pedido_venda`; `material` é texto livre; nada valida pedido ou produto.
+> - ✅ **A API atende** (conferido na `develop` de `api-acos-vital`, 21/10/2026): `requisicoes_compra.model.js` tem `finalidade` e `numero_pedido_venda`; a rota valida e responde `FINALIDADE_INVALIDA`, `PEDIDO_VENDA_INEXISTENTE` e `PRODUTO_INEXISTENTE` (`requisicoes_compra.route.js:82,124,497,508`).
+> - ✅ (26/10) A migration `api010` e a trava de unidade estão em produção desde 20/10, segundo o Gustavo.
 > - ✅ **SQL escrito e testado em banco descartável** (PostgreSQL 18, schema restaurado de `Dump Avhub (Esqueleto).sql`, tabelas vazias): [[0001-requisicoes-finalidade.sql]] em `API-010-anexos/`. Testes feitos: o PUT do MES grava a finalidade (`pedidos_venda` com pedido, `estoque` sem); os dois `CHECK` recusam `estoque` com pedido, `pedidos_venda` sem pedido e finalidade inválida; a trava do vínculo da OC aceita a mesma unidade e a unidade que compra por ela, e recusa outra. **Não testado:** o código da rota (ainda não existe) e uma carga real.
 > - A migration se chama **`api010`** (padrão `apiNNN`, como `api004` e `api007`).
 >

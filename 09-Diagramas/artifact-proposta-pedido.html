@@ -1,0 +1,329 @@
+<title>Fluxo da Proposta ao Pedido</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  /* Layout: cada etapa é uma coluna de cartões ligados por setas; decisões abrem duas colunas (sim e não). */
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --fg: #14181f;
+    --muted: #596273;
+    --line: #aeb6c4;
+    --accent: #0b5cad;
+    --novo-bg: #e4f1e6;   --novo-bd: #2e7d45;
+    --atual-bg: #eceff4;  --atual-bd: #7a8497;
+    --decide-bg: #e6edfb; --decide-bd: #2f55b8;
+    --fora-bg: #fff3d1;   --fora-bd: #a8860f;
+    --aberto-bg: #fbe9e7; --aberto-bd: #b4442f;
+    --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #171b23; --fg: #e8ebf1; --muted: #9aa3b4; --line: #566079; --accent: #6db0f2;
+      --novo-bg: #1d3a26; --novo-bd: #5fbf7c; --atual-bg: #232a36; --atual-bd: #8a94a8;
+      --decide-bg: #1f2c52; --decide-bd: #7d9cf0; --fora-bg: #3d3414; --fora-bd: #d3b23c;
+      --aberto-bg: #3d1f1a; --aberto-bd: #e0806c;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #171b23; --fg: #e8ebf1; --muted: #9aa3b4; --line: #566079; --accent: #6db0f2;
+    --novo-bg: #1d3a26; --novo-bd: #5fbf7c; --atual-bg: #232a36; --atual-bd: #8a94a8;
+    --decide-bg: #1f2c52; --decide-bd: #7d9cf0; --fora-bg: #3d3414; --fora-bd: #d3b23c;
+    --aberto-bg: #3d1f1a; --aberto-bd: #e0806c;
+    color-scheme: dark;
+  }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.5; }
+  .wrap { max-width: 960px; margin: 0 auto; padding-block: 28px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  h1 { font-size: 30px; line-height: 1.2; margin: 0 0 8px; font-weight: 600; text-wrap: balance; }
+  h2 { font-size: 21px; margin: 0 0 6px; font-weight: 600; text-wrap: balance; }
+  .lede { color: var(--muted); max-width: 70ch; margin: 0 0 20px; }
+  .meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: .03em; margin-bottom: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 16px; height: 16px; border-radius: 3px; border: 2px solid; display: inline-block; }
+  .etapa { margin-top: 40px; }
+  .etapa > p { color: var(--muted); margin: 0 0 14px; max-width: 70ch; }
+  .board { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px 18px; }
+
+  .flow { display: flex; flex-direction: column; align-items: stretch; max-width: 560px; margin: 0 auto; }
+  .card { border: 2px solid; border-radius: 8px; padding: 10px 14px; min-width: 0; overflow-wrap: anywhere; }
+  .card b { display: block; font-weight: 600; }
+  .card small { display: block; color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .card .id { font-family: var(--font-mono); font-size: 13px; margin-right: 6px; opacity: .85; }
+  .novo { background: var(--novo-bg); border-color: var(--novo-bd); }
+  .atual { background: var(--atual-bg); border-color: var(--atual-bd); }
+  .decide { background: var(--decide-bg); border-color: var(--decide-bd); text-align: center; }
+  .fora { background: var(--fora-bg); border-color: var(--fora-bd); border-style: dashed; }
+  .aberto { background: var(--aberto-bg); border-color: var(--aberto-bd); border-style: dashed; }
+  .opcional { border-style: dashed; }
+  .seta { align-self: center; color: var(--line); font-size: 22px; line-height: 1; padding: 4px 0; }
+  .seta.tag { display: flex; flex-direction: column; align-items: center; font-size: 13px; color: var(--muted); }
+
+  .duo { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: center; }
+  .duo .ou { color: var(--muted); font-size: 14px; }
+  .ramos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 760px; margin: 0 auto; }
+  .ramo { display: flex; flex-direction: column; align-items: stretch; min-width: 0; }
+  .rotulo { text-align: center; font-weight: 600; font-size: 14px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding-bottom: 6px; }
+  .entra { margin: 6px 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--muted); }
+  .entra li { margin: 2px 0; padding-left: 14px; position: relative; }
+  .entra li::before { content: "+"; position: absolute; left: 0; font-weight: 600; color: var(--accent); }
+
+  .tabela { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .tabela .lin { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.8fr) minmax(0, .8fr); gap: 12px; padding: 10px 14px; border-top: 1px solid var(--line); }
+  .tabela .lin:first-child { border-top: 0; }
+  .tabela .cab { background: var(--atual-bg); font-weight: 600; font-size: 14px; }
+  .tabela .lin span { min-width: 0; overflow-wrap: anywhere; }
+  .tabela.tres .lin { grid-template-columns: minmax(0, .9fr) minmax(0, 2fr); }
+  .nota { color: var(--muted); font-size: 14px; margin: 14px 0 0; max-width: 78ch; }
+  ol { margin: 0; padding-left: 22px; }
+  li { margin-bottom: 9px; }
+  code { font-family: var(--font-mono); font-size: 14px; background: var(--atual-bg); padding: 1px 5px; border-radius: 4px; }
+  .pend { display: grid; gap: 10px; }
+  .pend li { margin: 0; }
+  .pend b { font-weight: 600; }
+  .quem { font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: .03em; }
+  @media (max-width: 760px) {
+    .tabela .lin, .tabela.tres .lin { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+    h1 { font-size: 24px; }
+    .ramos { grid-template-columns: minmax(0, 1fr); }
+    .duo { grid-template-columns: minmax(0, 1fr); }
+    .duo .ou { text-align: center; }
+  }
+</style>
+
+<div class="wrap">
+  <div class="meta">FLUXO MESTRE 0b · ATUALIZADO EM 26/10/2026 · DECISÕES N16-01 A N16-106 · FLUXO APROVADO EM 26/10/2026</div>
+  <h1>Fluxo da Proposta ao Pedido</h1>
+
+  <div class="legend" aria-label="Legenda">
+    <span><i class="sw novo"></i>Novo</span>
+    <span><i class="sw atual"></i>Já existe no 0b</span>
+    <span><i class="sw decide"></i>Decisão</span>
+    <span><i class="sw fora"></i>Fora do sistema neste ciclo</span>
+    <span><i class="sw aberto"></i>Em aberto</span>
+  </div>
+
+  <section class="etapa" id="proposta">
+    <h2>1. Da proposta ao pedido de venda</h2>
+    <p>O vendedor monta a proposta e preenche as partes de vendas e de orçamento e compra, mas não é o dono do dado de custo. A proposta vive só no Hub. Só a aprovada vira pedido, e só aí vai ao Omie.</p>
+    <div class="board">
+      <div class="flow">
+        <div class="card novo"><b><span class="id">V0.1</span>Vendedor cria a proposta</b><small>A unidade é a emissora: logo, cores e CRC saem no PDF. Cliente, itens, condição de pagamento (a lista da conta Omie da unidade) e, por item, CFOP e cenário de impostos. O vendedor digita os impostos de cada item, e eles seguem até o pedido sem serem trocados pelos do Omie. Ajustável até ser aprovada.</small></div>
+        <div class="seta">↓</div>
+        <div class="duo">
+          <div class="card novo"><b><span class="id">V0.2</span>Vendedor preenche o custo</b><small>Com o que conseguiu por telefone ou e-mail. Consulta a página do produto: preços que Compras pagou nas OCs, top fornecedores com score, flutuação e volatilidade (como bolsa de valores) e valor médio. Ele decide o valor que põe.</small></div>
+          <div class="ou">ou</div>
+          <div class="card novo opcional"><b>Pede custo ao Orçamento</b><small>Responde o Orçamento, setor novo (o Moisés é uma das pessoas). Sem prazo fixo, com o tempo cronometrado. O vendedor nunca fica bloqueado.</small></div>
+        </div>
+        <div class="seta">↓</div>
+        <div class="card novo"><b><span class="id">V0.3</span>Comissão estimada nasce</b><small>Mesmo motor do simulador atual. Item sem custo ou sem fornecedor deixa a proposta incompleta, e incompleta não pode ser aprovada.</small></div>
+        <div class="seta">↓</div>
+        <div class="card fora"><b><span class="id">V0.4</span>Gerência aprova desconto e margem</b><small>Aprovação física neste ciclo.</small></div>
+        <div class="seta">↓</div>
+        <div class="card decide"><b><span class="id">V0.5</span>Proposta aprovada?</b><small>O vendedor marca "aprovada", confirmando a aprovação física. O sistema grava quem, quando e qual revisão. Depois disso, a proposta não se ajusta mais.</small></div>
+      </div>
+      <div class="ramos" style="margin-top: 10px;">
+        <div class="ramo">
+          <div class="rotulo">Não</div>
+          <div class="card novo"><b><span class="id">V0C</span>Proposta cancelada</b><small>Não reabre: o vendedor duplica. A comissão estimada vira histórico, com motivo, quem cancelou e a data.</small></div>
+        </div>
+        <div class="ramo">
+          <div class="rotulo">Sim</div>
+          <div class="card novo"><b><span class="id">V0.6</span>Transformar em pedido de venda</b><small>Três respostas obrigatórias: a data de previsão de faturamento; se a Qualidade acompanha todo o processo, desde o zero; e se o pedido pode faturar em partes ou somente inteiro. Produto sem cadastro no Omie bloqueia o botão.</small></div>
+          <div class="seta">↓</div>
+          <div class="card novo"><b><span class="id">V0.7</span>Cria o pedido por API no Omie</b><small>Fila e pipeline, como a OC. O Omie aceita o nosso número de pedido. Se recusar, o vendedor vê o motivo e usa "Tentar novamente". As respostas e datas que o Omie não tem ficam só no Hub; nada vai para as observações do Omie.</small></div>
+          <div class="seta">↓</div>
+          <div class="card novo"><b><span class="id">V1</span>Pedido de venda liberado</b><small>Segue direto ao PCP, com a resposta da Qualidade. O preço fechado com o cliente não muda.</small></div>
+        </div>
+      </div>
+      <p class="nota">O pedido digitado direto no Omie entra no mesmo fluxo e na mesma tela. Ele já chega com a parte de vendas pronta (cliente, itens, valores, impostos e previsão), que só se altera no Omie, assim como o cancelamento. No Hub, o vendedor preenche a parte de compras, que é a simulação da comissão, e responde se a Qualidade acompanha e se o pedido fatura em partes. Nada trava: PCP e Compras seguem, Compras confere e avisa se comprar mais caro. Só a comissão espera: se a nota sair antes da parte de compras, a Controladoria já vê a margem real e, com as duas, a comissão fecha pelo menor.</p>
+    </div>
+  </section>
+
+  <section class="etapa" id="compra">
+    <h2>2. Do pedido à compra</h2>
+    <p>O PCP abre a requisição. Compras recebe, o sistema puxa os dados que o vendedor preencheu, e Compras decide se segue ou busca um valor ou condição melhor.</p>
+    <div class="board">
+      <div class="flow">
+        <div class="card novo"><b><span class="id">V1</span>Pedido de venda nasce liberado</b><small>Sem etapa de liberação: a escolha da Qualidade já foi feita no "Transformar em pedido".</small></div>
+        <div class="seta">↓</div>
+        <div class="card atual"><b><span class="id">P1 · P2</span>PCP: triagem e destinação</b><small>Vê se o produto está no Estoque ou se precisa comprar. É a divisão para produzir e comprar, que não se confunde com a quebra para faturar em partes (etapa 4).</small></div>
+        <div class="seta">↓</div>
+        <div class="card atual"><b><span class="id">P3</span>PCP abre a requisição de compra</b></div>
+        <div class="seta">↓</div>
+        <div class="card novo"><b><span class="id">C6</span>Compras confere a parte de compras</b><small>O sistema puxa da proposta os impostos, o frete e o fornecedor. Compras confere e pode alterar os impostos da OC no Hub; o que editar volta ao Omie pela sincronização da OC.</small></div>
+        <div class="seta">↓</div>
+        <div class="card atual"><b><span class="id">C1</span>Cotação e negociação</b><small>Fora do sistema, como hoje.</small></div>
+        <div class="seta">↓</div>
+        <div class="card decide"><b><span class="id">C7</span>Segue ou busca valor e condição melhor?</b></div>
+      </div>
+      <div class="ramos" style="margin-top: 10px;">
+        <div class="ramo">
+          <div class="rotulo">Segue</div>
+          <div class="card novo"><b><span class="id">C4</span>OC com o fornecedor do vendedor</b><small>Opção de puxar da proposta.</small></div>
+        </div>
+        <div class="ramo">
+          <div class="rotulo">Busca melhor</div>
+          <div class="card novo"><b>Compras usa o valor correto</b><small>Pode trocar de fornecedor. A proposta não é alterada.</small></div>
+          <div class="seta">↓</div>
+          <div class="card novo"><b><span class="id">C4</span>OC com valor e fornecedor corrigidos</b></div>
+        </div>
+      </div>
+      <div class="flow" style="margin-top: 14px;">
+        <div class="card novo"><b><span class="id">C8</span>Compra acima do custo do vendedor</b><small>Por produto e sem tolerância: qualquer valor acima do custo que o vendedor pôs na proposta (por exemplo, ele pôs 10 e Compras pagou 20). No pedido do Omie, vale o custo que o vendedor preencheu no pedido. Compra mais barata só gera aviso informativo.</small></div>
+        <div class="seta">↓</div>
+        <div class="card novo"><b>Aviso na tela Meus Pedidos</b><small>PV e OC, margem atual e margem considerada, motivo escrito por Compras, diferença de custo e fornecedor escolhido com prazo e pagamento. Sem tempo limite.</small></div>
+        <div class="seta">↓</div>
+        <div class="card decide"><b>Vendedor aprova a compra?</b><small>Porque muda a margem e a comissão dele.</small></div>
+      </div>
+      <div class="ramos" style="margin-top: 10px;">
+        <div class="ramo">
+          <div class="rotulo">Sim</div>
+          <div class="card novo"><b>O processo continua</b><small>A OC segue. A margem e a comissão caem; o preço do cliente não muda.</small></div>
+        </div>
+        <div class="ramo">
+          <div class="rotulo">Não</div>
+          <div class="card fora"><b>Compras leva à Gerência</b><small>Conversa física com João Vitor ou Sérgio Vital, e com o vendedor se preciso. A Gerência não cancela no sistema.</small></div>
+          <div class="seta">↓</div>
+          <div class="card novo"><b>Compras resolve e notifica</b><small>Novo valor, novo fornecedor, mantém, ou o pedido é cancelado. Os reprovados ficam numa lista de Compras com o tempo parado.</small></div>
+        </div>
+      </div>
+      <div class="flow" style="margin-top: 10px;">
+        <div class="seta tag">↓<span>os caminhos seguem</span></div>
+        <div class="card atual"><b><span class="id">R0 a X4</span>Recebimento, Qualidade, Estoque, Produção e Expedição</b><small>Como no 0b. O CCP (equipe do PCP que faz o follow-up) vincula cada NF de entrada à OC na tela de Follow-up, inclusive quando a OC chega em várias NFs ou em KG. Sobra de chapa devolvida tem o peso calculado e entra no Estoque.</small></div>
+        <div class="seta">↓</div>
+        <div class="card atual"><b><span class="id">O1</span>Omie emite a nota fiscal</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="etapa" id="datas">
+    <h2>3. As datas do pedido</h2>
+    <p>As datas são internas: o cliente não vê nenhuma, e mudar data não muda preço, desconto nem total. Todas ficam registradas, e a inicial nunca se perde.</p>
+    <div class="board">
+      <div class="flow">
+        <div class="card novo"><b>Previsão inicial do vendedor</b><small>Informada no "Transformar em pedido": quando o pedido deve estar sendo entregue ao cliente. É a que vai ao Omie e vale enquanto o item não tem OC.</small></div>
+        <div class="seta">↓</div>
+        <div class="card novo"><b>Compras registra a entrega do fornecedor</b><small>Depois de conversar com o fornecedor e, fisicamente, com o vendedor. Nasce a nova previsão: entrega + 1 dia útil, pelo calendário da unidade: feriados do estado mais as exceções que o marketing cadastra na tela de calendário.</small></div>
+        <div class="seta">↓</div>
+        <div class="card novo"><b>CCP registra a nova data quando o fornecedor atrasa</b><small>Com o motivo (o que o fornecedor disse). O sistema calcula o atraso em dias e só avisa o vendedor, sem pedir aval.</small></div>
+        <div class="seta">↓</div>
+        <div class="card decide"><b>Como o pedido fatura?</b></div>
+      </div>
+      <div class="ramos" style="margin-top: 10px;">
+        <div class="ramo">
+          <div class="rotulo">Somente inteiro</div>
+          <div class="card novo"><b>Vale a última data</b><small>A maior entrega entre todos os itens, mais 1 dia útil.</small></div>
+        </div>
+        <div class="ramo">
+          <div class="rotulo">Em partes</div>
+          <div class="card novo"><b>Cada item tem a sua</b><small>A entrega da OC daquele item, mais 1 dia útil. A do pedido mostra a maior.</small></div>
+        </div>
+      </div>
+      <p class="nota">O vendedor (em Meus Pedidos) e o PCP (na Carteira) veem todas as datas e a vigente. Isso vale também para o pedido digitado no Omie, cuja data inicial é a do Omie. A previsão vigente não volta ao Omie: o Omie guarda a inicial.</p>
+    </div>
+  </section>
+
+  <section class="etapa" id="sequenciais">
+    <h2>4. Faturar em partes: os sequenciais</h2>
+    <p>Sequencial não é outro pedido nem parcela de pagamento. É um agrupamento para o Fiscal faturar o mesmo pedido em várias notas.</p>
+    <div class="board">
+      <div class="flow">
+        <div class="card novo"><b>Fiscal separa o pedido em sequenciais</b><small>Por item e por quantidade; o valor de cada sequencial sai daí. O original (sequencial 0) guarda o valor cheio, e cada sequencial tira uma parte. Original zerado quer dizer que todo o valor foi distribuído.</small></div>
+        <div class="seta">↓</div>
+        <div class="card novo"><b>A OC e o custo ficam no item do pedido</b><small>Quebrar em 2, 3 ou mais sequenciais não muda o vínculo da OC nem o custo dos itens.</small></div>
+        <div class="seta">↓</div>
+        <div class="card novo"><b>Cada sequencial vira uma nota</b><small>No Omie, a linha do sequencial ganha código novo, e o que se repete é o produto. O Hub liga essa linha à do original numa tabela própria, para a comissão não perder o item nem pagar a mesma peça duas vezes.</small></div>
+      </div>
+      <p class="nota">Cancelar um sequencial devolve o valor ao original, e o número cancelado não se reusa. Se o pedido foi marcado "somente inteiro" e alguém faturar em partes, o sistema só avisa. Como o Omie cria o sequencial ainda será testado: não há um botão claro para isso.</p>
+    </div>
+  </section>
+
+  <section class="etapa" id="custo">
+    <h2>5. Custo real do item, por evento</h2>
+    <p>O vendedor pode cotar 50 flanges a R$ 100 e a compra real sair em dias diferentes, fechando em R$ 150. O custo vem de cada OC ou lote, é gravado por evento, e o unitário sai no fim. Vale para o pedido da proposta e para o digitado no Omie: o item é a unidade, o número do pedido e o produto.</p>
+    <div class="board">
+      <div class="tabela">
+        <div class="lin cab"><span>Item</span><span>De onde vem o custo real</span><span>Quando</span></div>
+        <div class="lin"><span>A. 50 Flanges</span><span>Ordens de compra, em partes (10, 20 e o restante)</span><span>Dias 01 a 03</span></div>
+        <div class="lin"><span>B. 1 Mão de obra</span><span>OC de serviço: categoria "Despesas com Industrialização", ou "Serviços Tomados" quando o Nº do Pedido do Fornecedor aponta um PV</span><span>Dia 03</span></div>
+        <div class="lin"><span>C. 50 Tubos</span><span>Ordem de compra</span><span>Dia 01</span></div>
+        <div class="lin"><span>D. Flange sobre desenho</span><span>Só a matéria-prima requisitada</span><span>Dia 05</span></div>
+        <div class="lin"><span>E. 50 Flanges cegas</span><span>Custo real do lote que já está no Estoque (o da OC que o originou)</span><span>Dia 04</span></div>
+      </div>
+      <p class="nota">Exemplo do item A (o vendedor cotou R$ 100; as três compras são ilustrativas): 10 a R$ 140 + 20 a R$ 150 + 20 a R$ 155 = R$ 7.500 para 50 unidades, ou R$ 150 de unitário médio, o valor real do exemplo do Nathan. A linha da OC nasce na aprovação com o valor da OC; no recebimento, o valor da NF de entrada a substitui. Lote que veio de uma OC já contada não soma de novo. OC cancelada estorna a linha; pedido cancelado estorna tudo, e o comprado vai ao Estoque. Enquanto o item não estiver todo coberto, o custo é parcial.</p>
+    </div>
+  </section>
+
+  <section class="etapa" id="comissao">
+    <h2>6. A comissão, da proposta à decisão</h2>
+    <p>Nasce estimada na proposta, recalcula com o custo real, fecha por nota fiscal e chega já calculada. Decide uma vez só quem tem a permissão, e o vendedor só vê a comissão real depois da decisão.</p>
+    <div class="board">
+      <div class="flow">
+        <div class="card novo"><b><span class="id">K1</span>Comissão estimada</b><small>Nasce na proposta (V0.3). O vendedor só vê esta. No pedido digitado no Omie, ela nasce quando o vendedor preenche a parte de compras do pedido.</small></div>
+        <div class="seta">↓</div>
+        <div class="card novo"><b><span class="id">K2</span>Recalcula com o custo real</b><small>Automático, a cada evento de custo. Só as peças com custo real entram; o restante espera.</small>
+          <ul class="entra">
+            <li>C4: ordens de compra, inclusive mão de obra, com o valor da NF de entrada. Custo acima do cotado reduz a comissão</li>
+            <li>E3: custo real do lote do Estoque</li>
+            <li>F1: fabricação, só a matéria-prima</li>
+          </ul>
+        </div>
+        <div class="seta">↓</div>
+        <div class="card novo"><b><span class="id">K3</span>Fecha por nota fiscal</b><small>Percentual final = o menor entre o do vendedor e o do custo real. Cada nota fecha com o percentual vigente; quando o custo completa, a diferença vai para a apuração seguinte, para nova decisão. A mesma peça nunca é paga duas vezes, nem entre sequenciais.</small>
+          <ul class="entra"><li>O1: nota fiscal emitida pelo Omie</li></ul>
+        </div>
+        <div class="seta">↓</div>
+        <div class="card decide"><b><span class="id">K4</span>Controladoria, Gerência ou Coordenação decidem</b><small>Aprovar, desaprovar, bloquear (e desbloquear), cortar ou alterar, por valor ou percentual. Sempre com justificativa e rastro. Ninguém decide sobre a própria comissão.</small></div>
+        <div class="seta">↓</div>
+        <div class="card novo"><b><span class="id">K5</span>Vendedor vê a comissão real</b><small>Só depois da decisão, junto com a justificativa. Desaprovada aparece com R$ 0 e o motivo.</small></div>
+        <div class="seta">↓</div>
+        <div class="card novo"><b><span class="id">K6</span>NF cancelada, devolvida ou recusada</b><small>A comissão é abatida na mesma proporção. Se não foi paga, reduz o valor a pagar; se já foi, o desconto entra na próxima apuração. A devolução total vem do Omie; na parcial, o Fiscal ou a Controladoria informam o que voltou.</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="etapa" id="cancelamento">
+    <h2>7. Se o pedido é cancelado</h2>
+    <p>O vendedor renegocia fisicamente com o cliente. O cancelamento avisa quem já estava trabalhando no pedido e preserva o que já foi comprado.</p>
+    <div class="board">
+      <div class="flow">
+        <div class="card decide"><b>Cancelar ou excluir?</b><small>Quem faz é o vendedor, antes de faturar. O Hub chama o Omie por API.</small></div>
+      </div>
+      <div class="ramos" style="margin-top: 10px;">
+        <div class="ramo">
+          <div class="rotulo">Cancelar</div>
+          <div class="card novo"><b>O pedido fica marcado</b><small>Com quem, quando e o motivo. Continua consultável.</small></div>
+        </div>
+        <div class="ramo">
+          <div class="rotulo">Excluir</div>
+          <div class="card novo"><b>O pedido é apagado</b><small>No Hub e no Omie. O número não se reusa.</small></div>
+        </div>
+      </div>
+      <div class="flow" style="margin-top: 10px;">
+        <div class="seta">↓</div>
+        <div class="card novo"><b>Requisição do PCP e OC ainda não emitida</b><small>Canceladas automaticamente, com uma tarja dizendo que o pedido foi cancelado. A OC e o PCP são avisados.</small></div>
+        <div class="seta">↓</div>
+        <div class="card novo"><b>O que já foi comprado vai ao Estoque</b><small>Entra como lote, com o custo da OC, livre para outro pedido. O custo sai do pedido e as divergências abertas se encerram.</small></div>
+      </div>
+      <p class="nota">Pedido já faturado: o cancelamento não desfaz compra nem produção. Vale o abatimento da comissão (nota cancelada, devolvida ou recusada) e o saldo ainda não faturado.</p>
+    </div>
+  </section>
+
+  <section class="etapa" id="aberto">
+    <h2>O que ainda está em aberto</h2>
+    <p>Pontos que ainda mudam o desenho. No vault, estão nas Pontas Soltas PS-035 a PS-039 e nas perguntas da proposta (OQ-xx).</p>
+    <div class="board">
+      <ol class="pend">
+        <li><b>Módulo comercial do Pablo.</b> As tabelas da proposta já existem no banco, com fechamento parcial, "perdida" e "reabrir", e as telas do av-hub usam esse ciclo. O desenho novo substitui esse ciclo. <span class="quem">PABLO · GUSTAVO · NATHAN</span></li>
+        <li><b>Carteira do PCP lendo a previsão vigente do Hub.</b> Decidido: o PCP vê todas as datas. Falta a Carteira passar a ler a vigente, e a Qualidade respondida na proposta chegar à liberação que o MES lê. <span class="quem">GUSTAVO · NATHAN</span></li>
+        <li><b>Formato do número da proposta.</b> Só dígitos (ano e sequência) ou o atual com prefixo. <span class="quem">NATHAN</span></li>
+        <li><b>Pipeline.</b> Carregar condições de pagamento, cenários de impostos e a ligação dos sequenciais das três contas. <span class="quem">NATHAN (PIPELINE) · GUSTAVO (TABELAS)</span></li>
+        <li><b>Testes no Omie.</b> Só depois das telas: cancelar e excluir, criar sequencial, o número do Hub no pedido. <span class="quem">NATHAN</span></li>
+      </ol>
+    </div>
+  </section>
+
+</div>

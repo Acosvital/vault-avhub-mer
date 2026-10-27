@@ -3,8 +3,8 @@ id: LOG-52
 aliases: ["Contrato 52", "52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub"]
 tags: [contrato, contrato-logica, contrato-api, contrato-sql, comercial, suprimentos, api-acos-vital, api-comercial, migracao]
 criado: 2026-10-15
-atualizado: 2026-10-15
-status: proposta
+atualizado: 2026-10-26
+status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Pablo"
 etapa_0b: []
@@ -16,14 +16,17 @@ criado_original: 2026-10-15
 
 > **Onde atua:** av-hub: banco, API, front
 
-> [!info] Situação em 15/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Pablo (módulo) · **Banco e API:** Gustavo (DBA), dono da `api-acos-vital`
+> [!info] Situação em 26/10/2026
+> **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Pablo (módulo) · **Banco e API:** Gustavo (DBA), dono da `api-acos-vital`
 >
+> - ✅ **Fase 1 do banco feita, informado pelo Gustavo (26/10/2026):** schema `core_comercial` (migration `052`) aplicado no teste em 16/10 e **em produção em 20/10**. Não conferi no banco. O resto (rotas na `api-acos-vital`, módulo, corte do HUB) segue aberto e é com o Pablo.
 > - 📝 **A decisão já existe:** [[Registro-de-Decisoes]] N14-15 (14/10/2026): a `api-comercial` é uma API de teste do Pablo, **não será publicada**, e ele migra tudo para a `api-acos-vital`. Este contrato não decide *se* migra; propõe **como**, separando o que a API do hub já tem, o que precisa ser criado e o que deve ser descartado.
 > - ✅ **Inventário feito em 15/10/2026** nos dois lados, por leitura de código: `api-comercial` (30 tabelas, 24 enums, 13 migrations, ~91 handlers, cerca de 300 testes) e `api-acos-vital` `276dab8` (124 tabelas, rotas por schema).
-> - 🔴 Nada migrado. Nenhuma linha escrita na `api-acos-vital`.
+> - 🕓 Registro de 15/10 (parte superada): nada migrado; hoje só a fase 1 do banco existe (item acima).
 > - 🟡 O desenho das seções 3 a 9 é **proposta**; as decisões que dependem do Nathan, do Pablo e do Gustavo estão na seção 13.
 > - ❓ Não conferi: `auth.rotas_telas` e `auth.telas` em produção, o que a pipeline carrega de pedidos de compra, e nada foi executado.
+>
+> - 🟡 **Desenho aprovado em 26/10/2026 muda o ciclo da proposta** (N16-02, N16-03, N16-84, N16-106): sem fechamento parcial, cancelada no lugar de perdida, sem reabrir, pedido criado pelo Hub e pedido do Omie no mesmo fluxo. A migração proposta está em [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] e as rotas em [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]]; o domínio de preço, margem e custo continua portado como está. Combinar antes da fase 3 (PS-035).
 >
 > **Não confundir** com [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]]: aquele corrige a API que já existe; este traz o módulo novo para dentro dela. O módulo **tem de entrar já seguindo o LOG-51**, para não herdar o problema.
 

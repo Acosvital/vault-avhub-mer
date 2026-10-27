@@ -3,7 +3,7 @@ id: LOG-46
 aliases: ["Contrato 46", "46-Torre-de-Fluxo-Feed-Jobs-e-Telas"]
 tags: [contrato, contrato-api, torre-de-fluxo, rastreabilidade, integracao-av-hub-mes, bff, front]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front, mes-api]
 dono: "Robert"
@@ -16,9 +16,10 @@ criado_original: 2026-10-09
 
 > **Onde atua:** av-hub: banco, API, front · MES: API
 
-> [!info] Situação em 14/10/2026
+> [!info] Situação em 26/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** F1, X1, Q7 · **Dono:** Robert
 >
+> - ✅ **Respostas do Gustavo (16/10/2026), registradas em 26/10:** **Q1**, o id é o da projeção do hub; **Q5**, a trilha fica sob demanda no MES; **Q12** está feita; **Q3**, proposta dele: gravar os eventos do hub por **trigger no banco** (aguarda decisão).
 > - ✅ **API e banco do av-hub entregues:** tabelas `core_fluxo.item_estado_projetado` e `core_fluxo.feed_cursor` no dump; job de projeção a cada 90 s (`item_estado_projetado.job.js`, constantes `INTERVALO_MS`, `LIMITE_PAGINA` 1000, janela de sobreposição 200; iniciado em `app.js:208`) e rotas `GET /fluxo/torre` (`item_estado_projetado.route.js:185`), `/fluxo/sla-etapas` (`:262`), `/fluxo/itens/:id/tempo` (`:281`), `/fluxo/itens/:id` (`:302`), montadas em `core_fluxo/index.js:20`. Migrations 046 e 046b (`77223e9`, `7c3f57a`).
 > - 🔴 **MES não publica o feed:** `GET /fluxo/eventos?apos_seq=&limite=` não existe no `api-pcp` (grep sem resultado). O job do av-hub recebe 404, avisa uma vez e tenta de novo a cada 10 min (`INTERVALO_SEM_FEED_MS`), sem mexer no cursor. Por isso `GET /fluxo/torre` responde vazio. Tarefas I2 e I3 (instrumentação) são do Robert.
 > - 🔴 **Front:** BFF `GET /api/fluxo/torre` e as 4 telas (T.3, T.4, T.5, T.5b) são do Nathan e não foram conferidas (❓ HUB fora da pasta de repos).

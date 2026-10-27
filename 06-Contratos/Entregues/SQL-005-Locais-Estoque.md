@@ -3,7 +3,7 @@ id: SQL-005
 aliases: ["Contrato SQL 010 do omie-elt-pipeline", "005-Locais-Estoque"]
 tags: [contrato, contrato-sql, dba, omie-elt-pipeline]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-26
 status: aplicado-em-producao
 sistemas: [hub-banco, pipeline-omie]
 dono: "Gustavo (DBA)"
@@ -16,11 +16,12 @@ criado_original: 2026-09-17
 
 > **Onde atua:** av-hub: banco · pipeline Omie
 
-> [!info] Situação em 14/10/2026
+> [!info] Situação em 26/10/2026
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
+> - ✅ **Resposta do Gustavo (16/10/2026), registrada em 26/10:** o depósito fica no banco do MES e **não existe FK entre bancos**; a ligação é pelo código. A pergunta da FK opcional está respondida: sem FK.
 > - ✅ `core.locais_estoque` existe no dump de 14/10 e tem rota própria (`api-acos-vital/src/schemas/core/tables/locais_estoque/locais_estoque.route.js`).
-> - 🔴 Pergunta sobre FK opcional continua sem resposta (texto original).
+> - ✅ Pergunta sobre FK opcional respondida em 16/10 pelo Gustavo (sem FK entre bancos), ver o item acima.
 > - ❓ Produção: aplicado segundo o dump de 21/09 (vault v1); não reconferido.
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).

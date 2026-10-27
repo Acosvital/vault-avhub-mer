@@ -1,7 +1,7 @@
 ---
 tags: [contratos, painel, indice]
 criado: 2026-10-14
-atualizado: 2026-10-15
+atualizado: 2026-10-26
 status: vigente
 dono: Nathan
 fontes: [LOG-51 e LOG-52 (auditoria de 15/10/2026), 06-Contratos/Ativos, 06-Contratos/Entregues, 06-Contratos/Arquivados, plano de 14/10/2026, código de 14/10 (api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, omie-elt-pipeline 0f739f0)]
@@ -17,18 +17,18 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 15 | 6 | 21 |
-| `Entregues` (feito no código ou aplicado) | 54 | 12 | 66 |
+| `Ativos` (a fazer ou parcial) | 30 | 20 | 50 |
+| `Entregues` (feito no código ou aplicado) | 63 | 12 | 75 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
-| **Total** | **80** | **18** | **98** |
+| **Total** | **104** | **32** | **136** |
 
 | Status | Contratos |
 |---|---|
-| `proposta` | 7 |
+| `proposta` | 15 |
 | `para-implementar` | 0 |
-| `parcial` | 8 |
-| `implementado-no-codigo` | 45 |
-| `aplicado-em-producao` | 9 |
+| `parcial` | 15 |
+| `implementado-no-codigo` | 46 |
+| `aplicado-em-producao` | 17 |
 | `arquivado` | 11 |
 
 Vocabulário de status: `proposta` (ainda sem decisão), `para-implementar` (decidido, falta código), `parcial` (parte no código, parte não), `implementado-no-codigo` (conferido no código de 14/10), `aplicado-em-producao` (aplicado no banco, confirmado por dump; produção não reconferida em 14/10 ❓), `arquivado` (superado, rejeitado, fora de escopo ou histórico, com o motivo na nota).
@@ -52,15 +52,22 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | SQL-002 | Contrato SQL 007 do omie-elt-pipeline | [[SQL-002-Estoque-Saldo\|`core.estoque_saldo`]] | `aplicado-em-producao` | av-hub: banco · pipeline Omie | Entregues | — | — | — | — | — |
 | SQL-003 | Contrato SQL 008 do omie-elt-pipeline | [[SQL-003-Pedidos-Vendas-Frete-Parcelas\|`pedidos_vendas` (desconto) e tabelas de frete e parcelas]] | `aplicado-em-producao` | av-hub: banco · pipeline Omie | Entregues | V1 | — | — | — | — |
 | SQL-004 | Contrato SQL 009 do omie-elt-pipeline | [[SQL-004-Pedidos-Compras\|`pedidos_compras` e itens]] | `aplicado-em-producao` | av-hub: banco · pipeline Omie | Entregues | C4 | — | — | — | — |
-| SQL-005 | Contrato SQL 010 do omie-elt-pipeline | [[SQL-005-Locais-Estoque\|`core.locais_estoque`]] | `aplicado-em-producao` | av-hub: banco · pipeline Omie | Entregues | — | — | Gustavo: responder a pergunta da FK opcional | — | — |
+| SQL-005 | Contrato SQL 010 do omie-elt-pipeline | [[SQL-005-Locais-Estoque\|`core.locais_estoque`]] | `aplicado-em-producao` | av-hub: banco · pipeline Omie | Entregues | — | — | — (respondida: sem FK entre bancos) | — | — |
 | SQL-006 | — | [[SQL-006-Pedidos-Vendas-Valor-Devolucao\|`pedidos_vendas.valor_devolucao` (invalidado)]] | `arquivado` | av-hub: banco | Arquivados | — | — | — | — | — |
 | SQL-007 | Contrato SQL 007 | [[SQL-007-Ordens-Compra-Estruturada\|`ordens_compra`, itens e parcelas]] | `aplicado-em-producao` | av-hub: banco | Entregues | C4 | — | — | — | — |
 | SQL-008 | Contrato SQL 008 | [[SQL-008-Requisicoes-Compra\|`requisicoes_compra`]] | `aplicado-em-producao` | av-hub: banco | Entregues | P3, C0 | — | — | — | — |
-| SQL-009 | — | [[SQL-009-Categoria-Sem-Escopo-Empresa-Views\|`core.categorias` sem `codigo_empresa` no JOIN de 4 views]] | `aplicado-em-producao` | av-hub: banco | Entregues | — | — | Gustavo: esclarecer 53 x 311 linhas do pedido 25970 | — | — |
+| SQL-009 | — | [[SQL-009-Categoria-Sem-Escopo-Empresa-Views\|`core.categorias` sem `codigo_empresa` no JOIN de 4 views]] | `aplicado-em-producao` | av-hub: banco | Entregues | — | — | — (respondido: não é divergência) | — | — |
 | SQL-010 | Contrato SQL 010 | [[SQL-010-Itens-Pedido-Status\|`itens_pedido_status`]] | `implementado-no-codigo` | av-hub: banco | Entregues | F1, X1, Q7 | — | — | — | — |
 | SQL-011 | Contrato SQL 011 | [[SQL-011-Ordens-Compra-Referencia-MES\|`vw_ordens_compra_referencia_mes` e marca por trigger (migration `api004`)]] | `implementado-no-codigo` | av-hub: banco | Entregues | R0 | — | — | — | — |
 | SQL-012 | Contrato SQL 012 | [[SQL-012-Ordens-Compra-Referencia-Valores\|Valores da OC na `vw_ordens_compra_referencia_mes`]] | `implementado-no-codigo` | av-hub: banco | Entregues | R0, R4 | — | — | — | — |
-| API-001 | — | [[API-001-Produtos-Parceiros-Filtro-Incremental\|Filtro incremental `alterado_desde` em produtos e parceiros]] | `implementado-no-codigo` | av-hub: API · pipeline Omie | Entregues | — | — | Gustavo: o filtro nunca executa (LOG-51 S27, PS-033) | — | — |
+| SQL-013 | Contrato SQL 013 | [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso\|Produtos: prováveis duplicatas (normalização, pares por semelhança e uso)]] | `aplicado-em-producao` | av-hub: banco | Entregues | — | — | Gustavo: informar os ajustes feitos no script | — | — |
+| SQL-014 | Contrato SQL 014 | [[SQL-014-Pedido-Encerrado-por-Saldo-Zerado\|Pedido encerrado por saldo zerado ("Faturado, encerrado") e encerrado em atraso]] | `aplicado-em-producao` | av-hub: banco | Entregues | — | — | — | — | — |
+| SQL-015 | Contrato SQL 015 | [[SQL-015-Carteira-do-PCP-Totais-por-Vendedor-e-Desvio\|Carteira do PCP: totais, por vendedor e desvio de previsão]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | — (G1 a G3 decididos; `desvio=true` conferido 26/10) | Nathan: testar `PUT .../marcacao` (marcar e desmarcar) | — |
+| SQL-016 | Contrato SQL 016 | [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda\|`core_comercial`: proposta, pedido de venda (proposta e Omie), datas, sequenciais, custo real e compra acima do valor (migração)]] | `proposta` | av-hub: banco | Ativos | V0.1 a V0.7, V0C, V1 a V3, C6 a C8, K2 | — | Gustavo: revisar e aplicar a migração `0001`, rodar o `0002` (72 verificações); combinar o ciclo da proposta com o Pablo (LOG-52) | — | Pablo: o ciclo da proposta muda (sem fechamento parcial, sem "perdida" e "reabrir") |
+| SQL-017 | Contrato SQL 017 | [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo\|Orçamento em `core_comercial`: ofertas das OCs, base e estatística de preço, pedido de custo sem prazo (migração)]] | `proposta` | av-hub: banco | Ativos | B1 a B4 | — | Gustavo: aplicar depois do SQL-016 e rodar o `0002`; agendar `fn_ofertas_gerar_de_ocs` | — | — |
+| SQL-018 | Contrato SQL 018 | [[SQL-018-Schema-core_comissao-Comissao-da-Proposta\|`core_comissao`: comissão nova (dossiê, cálculos, NF, decisão, abatimentos), também para o pedido do Omie]] | `proposta` | av-hub: banco | Ativos | K1 a K6 | — | Gustavo: aplicar `0001`, `0003`, `0004` e `0006`; testes `0002`, `0005` e `0007` | — | — |
+| SQL-019 | Contrato SQL 019 | [[SQL-019-Condicoes-de-Pagamento-de-Venda-do-Omie\|Condições de pagamento de venda do Omie (`ListarParcelas` por conta)]] | `proposta` | av-hub: banco · pipeline Omie | Ativos | V0.1, V0.7 | — | Gustavo: tabela `condicoes_pagamento_vendas` (vai na migração do SQL-016) | Nathan: recurso da pipeline para as três contas | — |
+| API-001 | — | [[API-001-Produtos-Parceiros-Filtro-Incremental\|Filtro incremental `alterado_desde` em produtos e parceiros]] | `implementado-no-codigo` | av-hub: API · pipeline Omie | Entregues | — | — | — (`alterado_desde` corrigido, informado 26/10) | — | — |
 | API-002 | — | [[API-002-Material-Alias-Omie-MES\|Alias de material Omie no MES (rejeitado)]] | `arquivado` | MES: API | Arquivados | — | — | — | — | — |
 | API-003 | — | [[API-003-Requisicao-Compra-Integracao-MES\|Requisição de compra MES → av-hub (versão polling)]] | `arquivado` | av-hub: API · MES: API | Arquivados | P3 | — | — | — | — |
 | API-004 | Contrato 004 | [[API-004-Referencia-OC-Integracao-MES\|Referência da OC (av-hub → MES)]] | `parcial` | av-hub: banco, API · MES: API | Ativos | C4, R0, R4 | K4 (job de leitura e projeção da OC) já na `develop` do `api-pcp` (PR #59); falta OC do pedido para o PCP e saldo futuro do Estoque (N14-20, BL-049, BL-050) e BL-051 | — | — | — |
@@ -68,10 +75,27 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | API-006 | Contrato 006 | [[API-006-Status-por-Item-Leitura-no-Hub\|Status por item: leitura no hub (job e rota)]] | `implementado-no-codigo` | av-hub: API, front · MES: API | Entregues | F1, X1, Q7 | — | — | — | — |
 | API-007 | Contrato 007 (API) | [[API-007-Referencia-OC-Valores-no-MES\|Valores da OC na referência (hub → MES) e projeção no MES]] | `parcial` | av-hub: banco, API · MES: API | Ativos | C4, R4 | Job e projeção com valores já no K4 (PR #59); falta gravar o custo da OC no lote (K5, R4) | — | — | — |
 | API-008 | Contrato 008 | [[API-008-Custo-do-Lote-no-MES\|Custo do lote no MES (`lote_custo`, G1, recebimento, consumo, `GET /itens/custo`)]] | `parcial` | av-hub: API · MES: API | Ativos | R4, E3, E5 | §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`; modelo do imposto por item para os cenários com e sem imposto (PS-014, BL-053; contrato não editado) | — | — | — |
-| API-009 | Contrato 009 | [[API-009-Referencia-Requisicao-Hub-Integracao-MES\|Referência da requisição do Compras com pedido de venda (av-hub → MES)]] | `proposta` | av-hub: banco, API · MES: API, front | Ativos | C0, P1, P2, P3, E1 | Job de leitura junto do da referência da OC, projeção, tela do PCP e aviso de compra duplicada (BL-065) | Gustavo: POST/PATCH com pedido de venda e a rota `GET /compras/requisicoes/referencia` (BL-064); responder Q1 a Q4 | Nathan: campo "Pedido de venda" na "Nova requisição" (BL-041); decidir Q5 | — |
-| API-010 | Contrato 010 | [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto\|Requisição do Compras: finalidade, pedido de venda e produto do cadastro]] | `proposta` | av-hub: banco, API, front | Ativos | C0 | — | Gustavo: migration (`finalidade`), POST/PATCH com pedido de venda e produto, trava da OC na mesma unidade; responder Q1 e Q4 | Nathan: tela nova pronta (PR #209); a OC herda a finalidade; decidir Q2 e Q3 | — |
+| API-009 | Contrato 009 | [[API-009-Referencia-Requisicao-Hub-Integracao-MES\|Referência da requisição do Compras com pedido de venda (av-hub → MES)]] | `parcial` | av-hub: banco, API · MES: API, front | Ativos | C0, P1, P2, P3, E1 | Job de leitura junto do da referência da OC, projeção, tela do PCP e aviso de compra duplicada (BL-065) | Gustavo: responder Q1 a Q4 (migration `api009` em produção desde 20/10) | Nathan: campo "Pedido de venda" na "Nova requisição" (BL-041); decidir Q5 | — |
+| API-010 | Contrato 010 | [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto\|Requisição do Compras: finalidade, pedido de venda e produto do cadastro]] | `parcial` | av-hub: banco, API, front | Ativos | C0 | — | Gustavo: responder Q1 e Q4 (migration `api010` em produção desde 20/10) | Nathan: tela nova pronta (PR #209); a OC herda a finalidade; decidir Q2 e Q3 | — |
 | API-011 | Contrato 011 | [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno\|Compra em andamento, recebimento por item da OC e uso interno (MES)]] | `proposta` | MES: banco, API, front | Ativos | P1, P2, P3, E1, R0, R1, R4 | Cruzamento e abate, aviso ao requisitar, requisição interna "origem hub", saldo futuro, recebimento por item da OC e por NF, uso interno (BL-049, BL-050, BL-051, BL-065) | Gustavo: API-009 e API-010 | Nathan: Q3 (contabilidade e EPI) e Q5 (BL-049 e BL-050 no Ciclo 1) | — |
+| API-012 | Contrato 012 | [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela\|Produtos: prováveis duplicatas (rota `GET /produtos/duplicatas` e nova tela)]] | `implementado-no-codigo` | av-hub: banco, API, front | Entregues | — | — | Gustavo: rota `GET /produtos/duplicatas` antes de `/:id` e cache de 60 s | Nathan: BFF, serviço sem varredura e tela nova | — |
+| API-013 | Contrato 013 | [[API-013-Acompanhamento-de-Clientes-So-Cliente-e-Periodo-Total\|Acompanhamento de clientes: só clientes (tag) e período total]] | `aplicado-em-producao` | av-hub: API, front | Entregues | — | — | — | — | — |
+| API-014 | Contrato 014 | [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes\|Setor do cliente e do grupo no Acompanhamento de clientes]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | — (vários setores e `kpis.por_setor` no ar, conferido 26/10) | Nathan: testar salvar 2 setores, filtro e Excel; definir perfis e o lote | — |
+| API-016 | Contrato 016 | [[API-016-Observacao-do-PCP-por-Item-do-Pedido\|Observação do PCP por item (produto) do pedido, no lugar de por parcial]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | — | — | — | — | — |
+| API-017 | Contrato 017 | [[API-017-Carteira-do-PCP-por-Periodo-e-Previsao-de-Faturamento-por-Mes\|Carteira do PCP por período do seletor e previsão de faturamento por mês]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | — | — | — | — | — |
+| API-018 | Contrato 018 | [[API-018-Carteira-do-PCP-Vencem-Hoje-e-Atrasados-Conferidos\|Carteira do PCP: "vencem hoje" em valor e atrasados conferidos com a lista]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | — | — | — (feito, conferido em 26/10) | — | — |
+| API-019 | Contrato API 019 | [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub\|Proposta e pedido de venda na API do Hub]] | `proposta` | av-hub: API | Ativos | V0.1 a V0.7, V1, C8 | — | Gustavo: rotas de proposta, pedido, datas e compra acima do valor | Nathan: proposta nova e Meus Pedidos | Pablo: escrever o módulo na `api-acos-vital` (LOG-52) |
+| API-020 | Contrato API 020 | [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo\|Orçamento: base de preço e pedido de custo]] | `proposta` | av-hub: API | Ativos | B1 a B4 | — | Gustavo: rotas da base de preço e do pedido de custo | Nathan: página do produto e fila do Orçamento | Pablo: suprimentos (LOG-52 fase 4) |
+| API-021 | Contrato API 021 | [[API-021-Custo-Real-por-Evento-e-Conferencia-de-Compras\|Custo real por evento e conferência de Compras]] | `proposta` | av-hub: API · MES: API | Ativos | C4, C6, R0, E3, F1, K2 | Robert: custo do lote (`GET /itens/custo`, API-008) | Gustavo: jobs dos eventos de custo | — | — |
+| API-022 | Contrato API 022 | [[API-022-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria\|Comissão nova: cálculo e decisão da Controladoria]] | `proposta` | av-hub: API | Ativos | K1 a K6 | — | Gustavo: motor na API e rotas da Controladoria | Nathan: telas da comissão (LOG-59) | — |
 | LOG-53 | Contrato 53 | [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado\|Ordem de Produção e lote do fabricado (MES)]] | `proposta` | MES: banco, API, front | Ativos | P2, F1, Q7, Q8, E5 | Entidade e PDF da OP, lote `PRODUCAO` por OP e produto, aprovado volta ao Estoque (BL-052, BL-008) | — | Nathan: Q4 (HRM) e conteúdo do PDF | — |
+| LOG-55 | Contrato 55 | [[LOG-55-Compras-Excluir-Requisicao\|Compras: excluir requisição de compra (exclusão lógica, só criada no Hub e sem OC)]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | C0, C1 | — | — (feito: migration 055 e `DELETE`) | Nathan: Q2 (`pode_deletar` do Comprador); front feito e testado (23/10) | — |
+| LOG-56 | Contrato 56 | [[LOG-56-Fluxo-da-Proposta-ao-Pedido\|Fluxo da proposta ao pedido: regras, validações, permissões e casos de borda]] | `proposta` | av-hub: banco, API, front · pipeline Omie | Ativos | V0.1 a V0.7, V0C, V1 a V3, C6 a C8, K1 | — | Gustavo: regras no banco e na API (SQL-016, API-019) | Nathan: telas e testes no Omie depois das telas | Pablo: ciclo da proposta (LOG-52) |
+| LOG-57 | Contrato 57 | [[LOG-57-Menu-Vendas-Orcamento-Compras\|Menu de Vendas, Orçamento e Compras]] | `parcial` | av-hub: banco, front | Ativos | — | — | Gustavo: aplicar o anexo de telas em produção | Nathan: menu novo | — |
+| LOG-58 | Contrato 58 | [[LOG-58-Liberacao-do-Pedido-Origem-Proposta\|Liberação do pedido: o da proposta nasce liberado; o do Omie libera na tela do pedido]] | `proposta` | av-hub: banco, API · pipeline Omie | Ativos | V0.6, V0.7, V1, V2, V3, P1 | — | Gustavo: gravar a liberação na resposta do `IncluirPedido` | Nathan: resposta de Qualidade e faturamento em partes na tela do pedido | — |
+| LOG-59 | Contrato 59 | [[LOG-59-Telas-da-Comissao-Nova\|Telas da comissão nova]] | `proposta` | av-hub: front | Ativos | K1 a K6 | — | — | Nathan: estimada, Minhas Comissões, fila e decisão da Controladoria, devoluções | — |
+| LOG-60 | Contrato 60 | [[LOG-60-Matriz-de-Precos-e-Consulta-do-Vendedor\|Matriz de preços e consulta do vendedor]] | `proposta` | av-hub: front | Ativos | B2 | — | — | Nathan: página do produto e matriz | Pablo: matriz de preços |
+| LOG-61 | Contrato 61 | [[LOG-61-Custo-Real-do-Pedido-Telas\|Custo real do pedido: telas]] | `proposta` | av-hub: front | Ativos | K2 | — | — | Nathan: custo do pedido e drill-down por evento | — |
 | LOG-54 | Contrato 54 | [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada\|Documento de retirada e baixa do saldo na retirada (MES)]] | `proposta` | MES: banco, API, front | Ativos | E6, X1, F1 | Modelo, rotas, telas e baixa na confirmação; tirar a baixa da Embalagem e da entrega (BL-007) | — | Nathan: Q1 e Q2 (quem gera, o que imprime, reserva) e Q3 (entra no Ciclo 1?) | — |
 | LOG-01 | Contrato 01 | [[LOG-01-Compras-Fluxo-Completo\|Compras: requisição, ordem de compra e sincronização com o Omie]] | `implementado-no-codigo` | av-hub: banco, API | Entregues | C0, C1, C4 | — | — | — | — |
 | LOG-02 | Contrato 02 | [[LOG-02-Funcionarios-Listagem-Filtros-Ordenacao-Resumo\|Funcionários: filtro, ordenação, paginação e resumo no servidor]] | `implementado-no-codigo` | av-hub: banco, API | Entregues | — | — | — | — | — |
@@ -116,15 +140,15 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | LOG-41 | Contrato 41 | [[LOG-41-Login-Rate-Limit-no-Backend\|Login: rate limit no backend]] | `implementado-no-codigo` | av-hub: API | Entregues | — | — | — | Nathan: confirmar a remoção do limitador do front (HUB) | — |
 | LOG-42 | Contrato 42 | [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio\|Coordenadores e Orçamento: sair do JSON do repositório]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | Gustavo: responder as perguntas do §10 | Nathan: §6 coordenadores no front e decidir corte do orçamento | Pablo: módulo Comercial & Suprimentos substitui o orçamento |
 | LOG-43 | Contrato 43; Contrato 05 (P6) | [[LOG-43-Ordem-das-Etapas-de-Faturamento-no-Cadastro\|Ordem das etapas de faturamento vem do cadastro (marca P6)]] | `parcial` | av-hub: banco, API, front · pipeline Omie | Ativos | — | — | Gustavo: protectedColumns no pipeline, conferir seed e versionar a view | Nathan: apagar a constante do front (passo 3.4) | — |
-| LOG-44 | Contrato 44 | [[LOG-44-Upload-de-Fotos-Politica-de-Bucket\|Upload de fotos: política no bucket]] | `aplicado-em-producao` | av-hub: banco | Entregues | — | — | Gustavo: confirmar a política aplicada (teste da seção F) | — | — |
+| LOG-44 | Contrato 44 | [[LOG-44-Upload-de-Fotos-Politica-de-Bucket\|Upload de fotos: política no bucket]] | `aplicado-em-producao` | av-hub: banco | Entregues | — | — | Gustavo: credencial própria do av-hub e teste da seção F | — | — |
 | LOG-45 | Contrato 45; Contrato 30 (no código) | [[LOG-45-Pedido-de-Venda-Manual\|Pedido de venda manual (só administrador)]] | `implementado-no-codigo` | av-hub: API | Entregues | V1 | — | — | — | — |
-| LOG-46 | Contrato 46 | [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas\|Torre de Fluxo: feed do MES, jobs de projeção e telas (I5 e I6)]] | `parcial` | av-hub: banco, API, front · MES: API | Ativos | F1, X1, Q7 | I2/I3: publicar `GET /fluxo/eventos` e instrumentar os eventos no MES | Gustavo: responder as perguntas em aberto do §12 | Nathan: BFF `/api/fluxo/*` e 4 telas | — |
+| LOG-46 | Contrato 46 | [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas\|Torre de Fluxo: feed do MES, jobs de projeção e telas (I5 e I6)]] | `parcial` | av-hub: banco, API, front · MES: API | Ativos | F1, X1, Q7 | I2/I3: publicar `GET /fluxo/eventos` e instrumentar os eventos no MES | Gustavo: Q3 proposta (eventos do hub por trigger), aguarda decisão | Nathan: BFF `/api/fluxo/*` e 4 telas | — |
 | LOG-47 | Contrato 47 | [[LOG-47-Custo-Real-por-Item-no-Hub\|Custo real por item no hub (simulador, comissão, Compras e Orçamento)]] | `parcial` | av-hub: banco, API, front · MES: API | Ativos | E3, R4 | Publicar `GET /itens/custo` (API-008 §5) | Gustavo: perguntas em aberto 🔴 | Nathan: §2 simulador, §3 comissão, §4 telas | Pablo: dono do Ciclo 2 de Comercial & Suprimentos |
-| LOG-48 | Contrato 48 | [[LOG-48-Acompanhamento-de-Clientes-Grupos-de-Empresa\|Acompanhamento de clientes e grupos de empresa]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | Gustavo: §9.1 NF cancelada, §9.2 `codigo_cliente`, §10 deduções, §12 definição de cliente | Nathan: marcas `GAMBIARRA` do detalhe e §12.5 na tela | — |
+| LOG-48 | Contrato 48 | [[LOG-48-Acompanhamento-de-Clientes-Grupos-de-Empresa\|Acompanhamento de clientes e grupos de empresa]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | — (§13.2 entregue em 19/10) | Nathan: marcas `GAMBIARRA` do detalhe e §12.5 na tela | — |
 | LOG-49 | Contrato 49 | [[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos\|`GET /me/permissoes` com os vínculos de vendedor completos]] | `implementado-no-codigo` | av-hub: banco, API | Entregues | — | — | — | — | — |
 | LOG-50 | Contrato 50 | [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front\|Tirar as 2 marcas de escopo de vendedores do front]] | `implementado-no-codigo` | av-hub: front | Entregues | — | — | Gustavo: `SEM_VENDEDOR_VINCULADO` no lugar de `PEDIDO_FORA_DO_ESCOPO` em etapas e itens | Nathan: testes de aceite 2, 3, 6 e 8 a 10 (faltou conta) | — |
-| LOG-51 | Contrato 51 | [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub\|Segurança e padrão da API do av-hub (auditoria de 15/10): chave de serviço, Azure, senha, erro, helmet, roles, auditoria, testes]] | `proposta` | av-hub: banco, API, front | Ativos | — | — | Gustavo: S1 a S8 na fase 1 (chave de serviço, Azure, senha, mass assignment, rate limit, erro, helmet, role do banco), S9 a S27 depois | Nathan: H1, H3 a H6 feitos (PR #206); resta H2 (`fetchMenu`, com a API) e H7 (manual), BL-058 | — |
-| LOG-52 | Contrato 52 | [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub\|Migrar o módulo Comercial & Suprimentos para a API do hub e aposentar a `api-comercial`]] | `proposta` | av-hub: banco, API, front | Ativos | — | — | Gustavo: schema `core_comercial`, DDL, `GRANT`, linhas de `auth.rotas_telas`, revisão; Q1 (pedidos de compra na pipeline) e Q2 (telas em produção) | Nathan: corte do HUB (BL-063) e decisões Q3, Q4, Q7, Q8, Q10 | Pablo: escrever o módulo na `api-acos-vital` (BL-062) |
+| LOG-51 | Contrato 51 | [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub\|Segurança e padrão da API do av-hub (auditoria de 15/10): chave de serviço, Azure, senha, erro, helmet, roles, auditoria, testes]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | — | — | Gustavo: S1 a S8 na fase 1 (chave de serviço, Azure, senha, mass assignment, rate limit, erro, helmet, role do banco), S9 a S27 depois | Nathan: H1, H3 a H6 feitos (PR #206); resta H2 (`fetchMenu`, com a API) e H7 (manual), BL-058 | — |
+| LOG-52 | Contrato 52 | [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub\|Migrar o módulo Comercial & Suprimentos para a API do hub e aposentar a `api-comercial`]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | Gustavo: `GRANT`, linhas de `auth.rotas_telas`, revisão (fase 1 do banco feita: migration 052 em produção em 20/10); Q1 (pedidos de compra na pipeline) e Q2 (telas em produção) | Nathan: corte do HUB (BL-063) e decisões Q3, Q4, Q7, Q8, Q10 | Pablo: escrever o módulo na `api-acos-vital` (BL-062) |
 | HIST-Analise-Contratos-vs-Hub-2026-10-01 | — | [[HIST-Analise-Contratos-vs-Hub-2026-10-01\|Análise de contratos x hub (retrato de 01/10)]] | `arquivado` | — | Arquivados | — | — | — | — | — |
 | HIST-Indice-Contratos | — | [[HIST-Indice-Contratos\|Índice antigo de contratos (v1)]] | `arquivado` | — | Arquivados | — | — | — | — | — |
 | HIST-Indice-Logica-Fora-do-Backend | — | [[HIST-Indice-Logica-Fora-do-Backend\|Índice antigo das gambiarras fora do banco (v1)]] | `arquivado` | — | Arquivados | — | — | — | — | — |
@@ -158,6 +182,8 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Robert (MES: `api-pcp` e `app-pcp`)
 
+- [[API-021-Custo-Real-por-Evento-e-Conferencia-de-Compras|API-021]]: Robert: publicar o custo do lote (`GET /itens/custo`, [[API-008-Custo-do-Lote-no-MES|API-008]]), que vira evento de custo real
+
 - [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno|API-011]]: cruzamento e abate, aviso ao requisitar, requisição interna "origem hub", saldo futuro, recebimento por item da OC e por NF, uso interno
 - [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado|LOG-53]]: entidade e PDF da OP, lote `PRODUCAO` por OP e produto, aprovado volta ao Estoque
 - [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada|LOG-54]]: documento de retirada e baixa na retirada (tirar a baixa da Embalagem e da entrega)
@@ -171,22 +197,29 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Gustavo (DBA: banco e API do av-hub)
 
-- [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Gustavo: migration `finalidade`, POST/PATCH com pedido de venda e produto do cadastro, trava da OC na mesma unidade; responder Q1 e Q4 (junto do API-009, BL-064)
-- [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Gustavo: pedido de venda no POST/PATCH da requisição e `GET /compras/requisicoes/referencia` (BL-064); responder Q1 a Q4
+- [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda|SQL-016]], [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo|SQL-017]] e [[SQL-018-Schema-core_comissao-Comissao-da-Proposta|SQL-018]]: Gustavo: revisar e aplicar as migrações nessa ordem e rodar os testes (72, 14, e 14/7/25 verificações); combinar com o Pablo o novo ciclo da proposta (LOG-52)
+- [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda|SQL-016]]: Gustavo: a Carteira do PCP ([[SQL-015-Carteira-do-PCP-Totais-por-Vendedor-e-Desvio|SQL-015]], [[API-017-Carteira-do-PCP-por-Periodo-e-Previsao-de-Faturamento-por-Mes|API-017]]) passa a ler a previsão vigente do Hub (`vw_pedidos_previsao_vigente`); a Qualidade respondida no Hub chega à liberação que o MES lê
+- [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub|API-019]] a [[API-022-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria|API-022]]: Gustavo: rotas da proposta, do pedido, do orçamento, do custo real e da comissão
+- [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela|API-012]]: Gustavo: rota publicada; falta melhorar a nota (medidas em ordem, unidade, coesão) e informar os ajustes do script do [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso|SQL-013]]
+- [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Gustavo: responder Q1 e Q4 (junto do API-009, BL-064); a migration `api010` está em produção desde 20/10
+- [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Gustavo: responder Q1 a Q4 (BL-064); a migration `api009` está em produção desde 20/10
 - [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front|LOG-50]]: Gustavo: `GET /itens_pedido_status` e `GET /pedido_venda_itens/{numero}` respondem `SEM_VENDEDOR_VINCULADO` (e não `PEDIDO_FORA_DO_ESCOPO`) para pedido de outro vendedor; conferir o `notas/resumo` do PCP com foco alheio (200 vazio)
-- [[SQL-005-Locais-Estoque|SQL-005]]: Gustavo: responder a pergunta da FK opcional
-- [[SQL-009-Categoria-Sem-Escopo-Empresa-Views|SQL-009]]: Gustavo: esclarecer 53 x 311 linhas do pedido 25970
 - [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio|LOG-42]]: Gustavo: responder as perguntas do §10
 - [[LOG-43-Ordem-das-Etapas-de-Faturamento-no-Cadastro|LOG-43]]: Gustavo: protectedColumns no pipeline, conferir seed e versionar a view
-- [[LOG-44-Upload-de-Fotos-Politica-de-Bucket|LOG-44]]: Gustavo: confirmar a política aplicada (teste da seção F)
-- [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas|LOG-46]]: Gustavo: responder as perguntas em aberto do §12
+- [[LOG-44-Upload-de-Fotos-Politica-de-Bucket|LOG-44]]: Gustavo: credencial própria do av-hub no storage e teste da seção F (o av-hub ainda usa a do Organograma)
+- [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas|LOG-46]]: Gustavo: Q3 (proposta: gravar os eventos do hub por trigger no banco), aguarda decisão do Nathan e do Robert
 - [[LOG-47-Custo-Real-por-Item-no-Hub|LOG-47]]: Gustavo: perguntas em aberto 🔴
-- [[LOG-48-Acompanhamento-de-Clientes-Grupos-de-Empresa|LOG-48]]: Gustavo: §9.1 NF cancelada, §9.2 `codigo_cliente`, §10 deduções, §12 definição de cliente
 - [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub|LOG-51]]: Gustavo: S1 a S27 em fases; começar pela resposta às perguntas Q1 a Q5 (leitura em produção) e pelos itens sem dependência do HUB (BL-056)
-- [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub|LOG-52]]: Gustavo: schema `core_comercial` por migration, `GRANT`, linhas de `auth.rotas_telas` e `auth.telas`, revisão do módulo; responder Q1 e Q2
+- [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub|LOG-52]]: Gustavo: `GRANT`, linhas de `auth.rotas_telas` e `auth.telas`, revisão do módulo; responder Q1 e Q2 (a fase 1 do banco, `core_comercial`, está em produção desde 20/10)
 
 ### Nathan (front do av-hub)
 
+- [[LOG-56-Fluxo-da-Proposta-ao-Pedido|LOG-56]] a [[LOG-61-Custo-Real-do-Pedido-Telas|LOG-61]]: Nathan: telas da proposta, Meus Pedidos (pedido do Omie no mesmo fluxo), Orçamento, calendário do marketing e comissão nova; testes no Omie depois das telas (sequencial, cancelar e excluir)
+- [[SQL-019-Condicoes-de-Pagamento-de-Venda-do-Omie|SQL-019]]: Nathan: recursos da pipeline para condições de pagamento, cenários de impostos e a ligação dos sequenciais, nas três contas
+- [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes|API-014]]: Nathan: testar salvar 2 setores, o filtro e o Excel na tela (o front de vários setores está na `develop`); definir perfis `pode_editar`/`pode_criar` e o lote
+- [[SQL-015-Carteira-do-PCP-Totais-por-Vendedor-e-Desvio|SQL-015]]: Nathan: testar `PUT .../marcacao` (marcar e desmarcar, escopo, histórico) e conferir o cartão "Em avanço" do Dashboard
+- [[LOG-55-Compras-Excluir-Requisicao|LOG-55]]: Nathan: Q2, dar `pode_deletar` em `compras` ao perfil Comprador (ajuste de perfil no banco)
+- [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela|API-012]]: Nathan: BFF `/api/produtos/duplicatas`, serviço sem varredura do catálogo e tela nova (KPIs, filtros, motivos, uso); decidir se vale o "não é duplicata"
 - [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Nathan: tela nova pronta (PR #209); a OC herda a finalidade da requisição; decidir Q2 e Q3
 - [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno|API-011]]: Nathan: contabilidade do uso interno e EPI (Q3); BL-049 e BL-050 no Ciclo 1 (Q5)
 - [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada|LOG-54]]: Nathan: quem gera o documento, o que imprime, reserva depois da retirada (Q1, Q2) e se entra no Ciclo 1 (Q3)
@@ -204,10 +237,34 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Pablo (Comercial & Suprimentos)
 
+- [[LOG-56-Fluxo-da-Proposta-ao-Pedido|LOG-56]] e [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda|SQL-016]]: Pablo: o ciclo da proposta do módulo muda (sem fechamento parcial, cancelada no lugar de perdida, pedido criado pelo Hub); combinar com o Gustavo antes da fase 3 do [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub|LOG-52]]
 - [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio|LOG-42]]: Pablo: módulo Comercial & Suprimentos substitui o orçamento
 - [[LOG-47-Custo-Real-por-Item-no-Hub|LOG-47]]: Pablo: dono do Ciclo 2 de Comercial & Suprimentos
 - [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub|LOG-52]]: Pablo: escrever o módulo na `api-acos-vital` em *branch*, com o domínio portado e os testes (BL-062)
 
+## O que mudou de pasta em 26/10/2026
+
+Pela lista do Gustavo (que conferiu o vault com o dump de produção de 26/10) e pela conferência que fiz no mesmo dia pelo av-hub, sem mexer em dados.
+
+| Contrato | De | Para | Motivo |
+|---|---|---|---|
+| [[API-018-Carteira-do-PCP-Vencem-Hoje-e-Atrasados-Conferidos\|API-018]] | Ativos | Entregues | Migration `api018` em produção; `vence_hoje_*` e atrasados conferidos contra a lista em 26/10 |
+| [[LOG-55-Compras-Excluir-Requisicao\|LOG-55]] | Ativos | Entregues | `DELETE` e migration `055` em produção; front feito e exclusão testada em 23/10 (só a Q2 do Nathan segue aberta) |
+
+**Entraram em `Ativos` em 26/10/2026:** os 14 contratos da proposta ao pedido, do custo real e da comissão nova (SQL-016 a SQL-019, API-019 a API-022, LOG-56 a LOG-61), com o fluxo aprovado em 26/10 e as decisões N16-01 a N16-106 ([[Registro-de-Decisoes]]). Todos `proposta`, menos o LOG-57 (`parcial`).
+
+Sem mudança de pasta, mas com status corrigido: [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub\|LOG-51]] (a linha dizia Ativos/proposta; a nota já estava em Entregues/`aplicado-em-producao`) e [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub\|LOG-52]] (`proposta` para `parcial`: a fase 1 do banco está em produção).
+
+## Feito sem contrato no vault
+
+Informado pelo Gustavo em 26/10/2026; não conferi no banco.
+
+| O que | Quando | Observação |
+|---|---|---|
+| Organograma: coluna `ordem` nos níveis e o nível 13 (Diretoria Executiva) | aplicado em 21/10 | sem contrato |
+| 035b: os eventos da requisição trazem quem fez e o comprador | aplicado em 16/10 | extensão do [[LOG-35-Compras-Marcos-Requisicao-para-MES]] |
+
+---
 ## O que mudou de pasta em 14/10/2026
 
 Os 85 arquivos chegaram do vault v1 com 51 em `Arquivados/`. A revisão contra o código de 14/10 mostrou que a maior parte já estava **feita**, não superada, e foi para `Entregues/`. Ficam em `Arquivados/` só os rejeitados, substituídos, invalidados, desconsiderados e os índices históricos.

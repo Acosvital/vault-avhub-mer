@@ -1,7 +1,7 @@
 ---
 tags: [anexo, comercial, suprimentos, api-comercial, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-20
+atualizado: 2026-10-26
 status: vigente
 dono: Pablo
 fontes: [HUB fd81624 (develop de 20/10/2026) api-comercial/ (prisma, src/modules, src/domain/simulador, Dockerfile, env.ts), app/(protected)/vendas, orcamento e compras, components/Propostas/PropostaForm, lib/comercial/AprovacaoPropostaPdf.tsx, app/api/comercial, next.config.ts, PRs #211 a #216, #219 a #222 e #225]
@@ -9,10 +9,13 @@ fontes: [HUB fd81624 (develop de 20/10/2026) api-comercial/ (prisma, src/modules
 
 # Comercial e Suprimentos (`api-comercial`)
 
-Fora do fluxo 0b e do MES. É o segundo backend do HUB: propostas, clientes, ofertas de fornecedor, custos, painel do comprador, Simulador de Orçamento e a análise de margem da proposta. Dono: Pablo (código e publicação); ambiente e schema: Nathan e Gustavo. Modelo de classes: [[Classes]], diagrama 4.
+Fora do fluxo 0b e do MES. É o segundo backend do HUB: propostas, clientes, ofertas de fornecedor, custos, painel do comprador, Simulador de Orçamento, a análise de margem da proposta e o orçamento ([[12-Orcamento-Base-de-Preco]]; o anexo antigo [[Orcamento]] está arquivado). Dono: Pablo (código e publicação); ambiente e schema: Nathan e Gustavo. Modelo de classes: [[Classes]], diagrama 4.
 
 > [!info] Migração para a API do hub
 > O serviço `api-comercial` descrito abaixo é de teste e será absorvido pela `api-acos-vital` (N14-15). O que já existe na API do hub, o que criar e o que descartar está em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]].
+
+> [!info] Proposta e Orçamento no fluxo (26/10/2026)
+> A proposta (`V0`) e o Orçamento (`B1` a `B4`) entraram no [[00-Fluxo-Mestre-0b]] (N16-01, N16-07; N14-02 ajustada). O desenho aprovado muda o ciclo da proposta do módulo (sem fechamento parcial, cancelada no lugar de perdida, pedido criado pelo Hub) e está nos contratos [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]], [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]], [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] e [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]]; a combinar com o Pablo antes da fase 3 do LOG-52 🔴. Mapa do módulo: [[Mapa-do-Modulo-do-Pablo]].
 
 ## O serviço
 
