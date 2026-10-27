@@ -34,8 +34,10 @@ criado_original: 2026-10-16
 
 Selos em [[Regras-do-Vault]]. Decisão de origem: N16-14 em [[Registro-de-Decisoes]]. Este contrato **substitui, na parte de menu e telas**, o que o [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio]] dizia do Orçamento (o LOG-42 está encerrado, N16-14).
 
-> [!info] Reorganização proposta em 23/10/2026
-> A auditoria de todas as telas ([[14-Telas-e-Experiencia-do-Usuario]]) propõe um menu **mais curto**: Vendas ganha **Meus Pedidos**; Orçamento passa de 10 para 6 entradas (Pedidos de custo, **Produtos**, Ofertas, Fornecedores, Cotação, Parâmetros); Compras troca **Aprovações** por **Aprovar OC** e ganha **Reprovados**; entra uma **Fila do Fiscal**. Isso **não** é parte do que já foi entregue neste contrato (a `develop` já tem o menu de 16/10); é a próxima rodada e vira SQL novo em `auth.telas`, a decidir depois da validação.
+> [!info] Menu enxuto de 27/10/2026
+> O menu final de Vendas, Orçamento e Compras está em [[LOG-62-Reescopo-Menu-Enxuto-e-Limpeza-do-Modulo-do-Pablo]] (N16-107 e N16-108): **Vendas com 4 entradas** (Propostas, Clientes, Meus Pedidos, Relatórios), **Orçamento com 4** (Pedidos de custo, Produtos, Fornecedores, Parâmetros) e o **Histórico de compras removido**. Isso **substitui** a proposta de 23/10 da nota [[14-Telas-e-Experiencia-do-Usuario]] (Orçamento com 6) e a tabela de telas das seções 3 e 5 abaixo, que descrevem o menu **de 16/10** (já na `develop`). Compras troca **Aprovações** por **Aprovar OC** e ganha **Reprovados**, e entra uma **Fila do Fiscal**, na rodada das telas novas. Vira SQL novo em `auth.telas`, a escrever depois da validação das telas.
+>
+> Observação de 27/10: o `GET /api/menu` devolve `propostas-delegacao`, `propostas-valores`, `solicitacoes-custo` e `custo-item` como entradas comuns, mas a seção 3 as trata como ocultas; o LOG-62 §7 pede a conferência de como a tela oculta é marcada.
 
 ## 1. Por quê
 

@@ -25,6 +25,9 @@ Caminhos abaixo são relativos a `av-hub\api-comercial\` quando não dizem o con
 | Front | Telas em `app/(protected)/vendas`, `orcamento` e `compras/historico-compras`; BFF em `app/api/comercial/[...rota]/route.ts` | ✅ |
 | Cadastro das telas | Feito pelo Nathan na api-test em 16/10; em produção o Gustavo roda o SQL | 📝 N16-14, `06-Contratos/Ativos/LOG-57-anexos/telas-vendas-orcamento-compras.sql` |
 
+> [!info] O que não migra (27/10/2026)
+> O módulo é só ambiente de teste e **não tem dado** (Nathan, N16-109). Para a migração, a lista do que **não portar** (sincronização própria do Omie e suas 7 tabelas de cópia, Histórico de compras, planilha do pedido no Omie, migração do ERP antigo, fechamento parcial, autenticação própria) e do que **reaproveitar** (motor na API, ofertas, fornecedores, parâmetros, pedido de custo, notificações) está em [[LOG-62-Reescopo-Menu-Enxuto-e-Limpeza-do-Modulo-do-Pablo]] §5. O menu das telas descritas aqui também foi enxugado nesse contrato.
+
 ## 2. Camadas da requisição
 
 `helmet`, `pino-http`, `express.json` (8 MB), CORS, tudo em `/v1`: rate limit por IP, `apiKey` (chave do BFF), `autenticacao` (JWT do hub), rate limit por usuário ✅ `src/app.ts:41-57,94-96`. Os routers entram na ordem de `src/app.ts:97-115`: cadastros, produtos pendentes, simulador, `/propostas`, suprimentos, histórico de compras, custos, dashboards, omie, pesquisa de materiais, clientes, relatórios, e-mail e PDF de proposta, pedido de cotação, notificações e painel do comprador.
