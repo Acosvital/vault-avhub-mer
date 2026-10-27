@@ -1,21 +1,21 @@
 ---
 tags: [anexo, comercial, suprimentos, api-comercial, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-26
+atualizado: 2026-10-27
 status: vigente
 dono: Pablo
-fontes: [HUB fd81624 (develop de 20/10/2026) api-comercial/ (prisma, src/modules, src/domain/simulador, Dockerfile, env.ts), app/(protected)/vendas, orcamento e compras, components/Propostas/PropostaForm, lib/comercial/AprovacaoPropostaPdf.tsx, app/api/comercial, next.config.ts, PRs #211 a #216, #219 a #222 e #225]
+fontes: [HUB fd81624 (develop de 20/10/2026) api-comercial/ (prisma, src/modules, src/domain/simulador, Dockerfile, env.ts), app/(protected)/vendas, orcamento e compras, components/Propostas/PropostaForm, lib/comercial/AprovacaoPropostaPdf.tsx, app/api/comercial, next.config.ts, PRs #211 a #216, #219 a #222 e #225, PR #226 (aberto), api-acos-vital 38d2f74]
 ---
 
 # Comercial e Suprimentos (`api-comercial`)
 
-Fora do fluxo 0b e do MES. É o segundo backend do HUB: propostas, clientes, ofertas de fornecedor, custos, painel do comprador, Simulador de Orçamento, a análise de margem da proposta e o orçamento ([[12-Orcamento-Base-de-Preco]]; o anexo antigo [[Orcamento]] está arquivado). Dono: Pablo (código e publicação); ambiente e schema: Nathan e Gustavo. Modelo de classes: [[Classes]], diagrama 4.
+Fora do fluxo 0b e do MES. É o segundo backend do HUB: propostas, clientes, ofertas de fornecedor, custos, painel do comprador, Simulador de Orçamento, a análise de margem da proposta e o orçamento ([[12-Orcamento-Base-de-Preco]]; o anexo antigo [[Orcamento]] está arquivado). Dono: Pablo (código; o serviço não será publicado, N16-15); ambiente e schema: Nathan e Gustavo. Modelo de classes: [[Classes]], diagrama 4.
 
 > [!info] Migração para a API do hub
-> O serviço `api-comercial` descrito abaixo é de teste e será absorvido pela `api-acos-vital` (N14-15). O que já existe na API do hub, o que criar e o que descartar está em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]].
+> O serviço `api-comercial` descrito abaixo é de teste e será absorvido pela `api-acos-vital` (N14-15). O que já existe na API do hub, o que criar e o que descartar está em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]]. 📝 N16-15: continua só de teste e não será publicado. A fase 1 já existe: o schema no banco (migration `052`, em produção desde 20/10) e a base do módulo na API (`38d2f74`, Gustavo).
 
 > [!info] Proposta e Orçamento no fluxo (26/10/2026)
-> A proposta (`V0`) e o Orçamento (`B1` a `B4`) entraram no [[00-Fluxo-Mestre-0b]] (N16-01, N16-07; N14-02 ajustada). O desenho aprovado muda o ciclo da proposta do módulo (sem fechamento parcial, cancelada no lugar de perdida, pedido criado pelo Hub) e está nos contratos [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]], [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]], [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] e [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]]; a combinar com o Pablo antes da fase 3 do LOG-52 🔴. Mapa do módulo: [[Mapa-do-Modulo-do-Pablo]].
+> A proposta (`V0`) e o Orçamento (`B1` a `B4`) entraram no [[00-Fluxo-Mestre-0b]] (N16-01, N16-07; N14-02 ajustada). O desenho aprovado muda o ciclo da proposta do módulo (sem fechamento parcial, cancelada no lugar de perdida, pedido criado pelo Hub) e está nos contratos [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]], [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]], [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] e [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]]; a análise do Pablo, com o que porta, o que troca e o que sai, está em [[PS-035-Modulo-do-Pablo-x-Desenho-de-26-10]] 🟡. Mapa do módulo: [[Mapa-do-Modulo-do-Pablo]].
 
 ## O serviço
 
@@ -36,7 +36,8 @@ Fora do fluxo 0b e do MES. É o segundo backend do HUB: propostas, clientes, ofe
 | Fórmula antiga de preço (RN-020) | Com a análise disponível, sai da tela (custo, kg/m, metragem, margem % e margem real); item ainda na fórmula mostra "Fixar preço". O servidor continua aplicando a fórmula onde ela está preenchida (telha, propostas antigas, carga do ERP antigo) | ✅ PR #222 |
 | PDF de aprovação interna | Proposta com análise: custo líquido com o resumo da compra, preço praticado e sugerido, margem e letra (ou FAB) por item; no topo, custo líquido, margem líquida do pedido com a letra e itens no prejuízo. Proposta sem análise: o formato antigo. A comissão não sai | ✅ PR #225 |
 | BFF | `app/api/comercial/[...rota]/route.ts` com lista de rota, método, tela e ação | ✅ |
-| Publicação | Sem ambiente de produção decidido; roteiro em `docs/ENVIAR - roteiro-publicacao-api-comercial.md` | 🔴 Pablo, Nathan |
+| Contrato OpenAPI | Gerado dos schemas zod e conferido contra as rotas por teste (95 operações em 81 caminhos) | 🟡 PR #226 aberto |
+| Publicação | Não será publicado; o roteiro `docs/ENVIAR - roteiro-publicacao-api-comercial.md` fica sem uso | 📝 N16-15 |
 
 ## Telas do HUB
 
@@ -55,8 +56,7 @@ A URL é a cadeia de slugs do `auth.telas`; as telas seguem a distribuição fei
 
 ## Pendências
 
-- **Escopo `vinculados`** (RS-021): a regra está definida na Q3 do [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] (os vendedores do próprio usuário, os titulares que ele auxilia e os que diligencia) 📝. Falta implementar: o `api-comercial` não guarda os vendedores do Omie de cada usuário, e aplicar a regra muda o que a auxiliar vê hoje 🔴 Pablo (implementação), Nathan (aceite).
-- Publicar o serviço, decidir cluster do schema `core_comercial` e se a migração roda no Dockerfile ou antes 🔴 Pablo e Nathan.
-- **Emissão só pela auxiliar** (fase 5 da Proposta de Orçamento): rascunho sem número até a auxiliar emitir. 📝 O vendedor pode tirar uma prévia do PDF marcada como rascunho. 🔴 Comercial: a revisão de uma proposta emitida volta para a auxiliar? Item no prejuízo bloqueia a emissão ou só avisa? Pablo (implementação).
-- **Relatório Gerencial com a margem líquida** (fase 6): misturar a margem bruta das propostas antigas com a líquida das novas na mesma média distorce o número 🔴 gestão comercial (decisão), Pablo (implementação).
+- **Escopo `vinculados`** (RS-021): a regra está definida na Q3 do [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] (os vendedores do próprio usuário, os titulares que ele auxilia e os que diligencia) 📝. Falta implementar: o `api-comercial` não guarda os vendedores do Omie de cada usuário, e aplicar a regra muda o que a auxiliar vê hoje 🔴 Pablo (implementação, já na migração da fase 3, não no `api-comercial`), Nathan (aceite).
+- **Emissão só pela auxiliar** (fase 5 da Proposta de Orçamento): rascunho sem número até a auxiliar emitir. 📝 O vendedor pode tirar uma prévia do PDF marcada como rascunho. 🔴 Comercial: a revisão de uma proposta emitida volta para a auxiliar? Item no prejuízo bloqueia a emissão ou só avisa? Pablo (implementação). 🟡 Com o desenho de 26/10 a auxiliar tem o mesmo escopo do vendedor e não há emissão separada: proposta de arquivar ([[PS-035-Modulo-do-Pablo-x-Desenho-de-26-10]] §4).
+- **Relatório Gerencial com a margem líquida** (fase 6): misturar a margem bruta das propostas antigas com a líquida das novas na mesma média distorce o número 🔴 gestão comercial (decisão), Pablo (implementação). 🟡 Com a comissão nova a margem vem de `core_comissao`; proposta em [[PS-035-Modulo-do-Pablo-x-Desenho-de-26-10]] §4.
 - E-mail da proposta: `EMAIL_TRANSPORTE` aceita `smtp` ou `memoria` (padrão `smtp`) ✅ `env.ts`; se o SMTP está configurado em produção ❓.
