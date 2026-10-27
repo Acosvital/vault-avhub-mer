@@ -14,7 +14,7 @@ fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status 
 >
 > Legenda: ✅ existe · 🟡 existe em parte · 🔴 não existe.
 >
-> **Quem faz** segue os donos dos contratos: **Pablo** faz as rotas do módulo na `api-acos-vital` (LOG-52, API-019, API-020, API-022), Gustavo o banco e a revisão (SQL-016 a SQL-019), Nathan as telas e a pipeline, Robert o lote do MES (API-021).
+> **Nathan cuida da criação da proposta e do começo da comissão** (N16-115, 27/10/2026); fora isso, **Quem faz** segue os donos dos contratos: **Pablo** faz as rotas do módulo na `api-acos-vital` (LOG-52, API-019, API-020, API-022), Gustavo o banco e a revisão (SQL-016 a SQL-019), Nathan as telas e a pipeline, Robert o lote do MES (API-021).
 
 ## 1. Antes de construir: realinhar os contratos à N16-111 e à N16-112
 
@@ -28,7 +28,7 @@ fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status 
 
 | Etapa | Banco | API do Hub | Tela | O que falta | Contratos | Quem faz |
 |---|---|---|---|---|---|---|
-| **V0 · Criar e revisar a proposta** | 🔴 | 🔴 | 🟡 | **Banco e API:** proposta, itens, revisões e número próprio só com dígitos. **Tela:** já tem o layout novo (padrão do Simulador e da emissão da OC), mas ainda usa o modelo antigo (fechar, perder, reabrir) e não salva. Faltam a lista com filtros e KPIs e o cálculo de margem e letra na API | LOG-56, API-019, SQL-016 | **Pablo** (API), Gustavo (banco), Nathan (tela) |
+| **V0 · Criar e revisar a proposta** | 🔴 | 🔴 | 🟡 | **Banco e API:** proposta, itens, revisões e número próprio só com dígitos. **Tela:** já tem o layout novo (padrão do Simulador e da emissão da OC), mas ainda usa o modelo antigo (fechar, perder, reabrir) e não salva. Faltam a lista com filtros e KPIs e o cálculo de margem e letra na API | LOG-56, API-019, SQL-016 | **Nathan** (criação da proposta, N16-115), Gustavo (banco) |
 | **Escolher cliente** | 🟡 | 🟡 | 🔴 | Busca de cliente da carteira (`core.parceiros` não filtra por tipo). Decidir prospect, consulta à Receita e compradores | LOG-52 §0 | **Pablo** (API), Nathan (tela) |
 | **Condições de venda** | 🔴 | 🔴 | 🟡 | Condições de pagamento de venda do Omie (pipeline `ListarParcelas`). CFOP e cenário de impostos por item (N16-83) | SQL-019, SQL-016 | Gustavo (tabela), Nathan (pipeline), **Pablo** (CFOP e cenário na API) |
 | **V0.3–V0.5 · Incompleta e aprovar** | 🔴 | 🔴 | 🔴 | Aprovar com a revisão atual, travar a aprovada, selo "incompleta" (item sem custo e sem fornecedor) | LOG-56 R9–R14, API-019 | **Pablo** (API), Gustavo (banco), Nathan (tela) |
@@ -41,7 +41,7 @@ fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status 
 | **Pedido digitado no Omie no mesmo fluxo** | 🔴 | 🔴 | 🟡 | Trazer o pedido para `pedidos` e o vendedor preencher a parte de compras em Meus Pedidos | N16-106, SQL-016 | **Pablo** (API), Gustavo (banco), Nathan (tela) |
 | **C6/C7 · Compras usa os dados da proposta** | 🔴 | 🔴 | 🔴 | A OC puxar impostos, frete e fornecedor da proposta, com os campos de imposto na OC. O circuito de OC do Hub ainda não emitiu nenhuma em produção (`ordens_compra` = 0) | LOG-56 R27–R31, API-019 §3.5 | **Pablo** (rota da parte de compras), Nathan (pipeline e tela) |
 | **C8 · Compra acima do valor** | 🔴 | 🔴 | 🔴 | Aviso ao vendedor em Meus Pedidos, aprovar ou reprovar, lista de reprovados de Compras | LOG-61, API-019 §3.3 | **Pablo** (API), Gustavo (banco), Nathan (tela) |
-| **K1–K6 · Custo real e comissão nova** | 🔴 | 🔴 | 🔴 | **Custo e decisão:** custo por evento (OC, NF de entrada, lote), comissão estimada e real, decisão da Controladoria. **Notas:** abatimento por devolução e recusa | SQL-018, API-021, API-022, LOG-59 | **Pablo** (API da comissão), Gustavo (banco), Nathan (custo real e telas), Robert (lote) |
+| **K1–K6 · Custo real e comissão nova** | 🔴 | 🔴 | 🔴 | **Custo e decisão:** custo por evento (OC, NF de entrada, lote), comissão estimada e real, decisão da Controladoria. **Notas:** abatimento por devolução e recusa | SQL-018, API-021, API-022, LOG-59 | **Nathan** (começo da comissão: K1, a estimada, N16-115), **Pablo** (resto da API da comissão), Gustavo (banco), Robert (lote) |
 | **Cancelar pedido** | 🔴 | 🔴 | 🔴 | Cancelar no Omie, cancelar a requisição e a OC não emitida, tarja, mandar o comprado ao Estoque | LOG-56 R58–R62, API-019 §3.4 | **Pablo** (API), Gustavo (banco), Nathan (pipeline e tela) |
 | **Datas e previsão de faturamento** | 🔴 | 🔴 | 🔴 | Previsão inicial, entrega de Compras e do CCP, +1 dia útil, calendário com exceções do marketing | LOG-56 R67–R76, SQL-016 | Gustavo (banco), **Pablo** (API), Nathan (tela) |
 | **Faturar em partes (sequenciais)** | 🔴 | 🔴 | 🔴 | Criar, mostrar e cancelar sequenciais. A terceira tabela já tem os dados ligados (SQL-016 §4) | LOG-56 R79–R87 | Gustavo (banco), **Pablo** (API), Nathan (tela) |
