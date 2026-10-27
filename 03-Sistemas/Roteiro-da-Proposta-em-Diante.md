@@ -16,13 +16,14 @@ fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status 
 >
 > **Nathan cuida da criação da proposta e do começo da comissão** (N16-115, 27/10/2026); fora isso, **Quem faz** segue os donos dos contratos: **Pablo** faz as rotas do módulo na `api-acos-vital` (LOG-52, API-019, API-020, API-022), Gustavo o banco e a revisão (SQL-016 a SQL-019), Nathan as telas e a pipeline, Robert o lote do MES (API-021).
 
-## 1. Antes de construir: realinhar os contratos à N16-111 e à N16-112
+## 1. Antes de construir: realinhar os contratos à N16-111, N16-112 e N16-116
 
 - **SQL-016, SQL-017 e SQL-018 foram desenhados sobre o `core_comercial` do Pablo.** Quem faz: Gustavo (contratos SQL), com o **Pablo** (as rotas dependem deles). Pela N16-111 (toda a API no Hub, sem recriar o que ele já tem) e pela N16-112 (um Hub só), precisam ser revistos antes de o Gustavo aplicar:
   - **SQL-017** usa ofertas, categorias de suprimento, perfil de fornecedor e produtos pendentes do `core_comercial`: repete o Orçamento do Hub (`orc_*`), que ainda passa pela revisão completa.
   - **SQL-016** mantém `unidades_emissoras` e `perfis_comerciais` como fonte própria.
   - Mapa do que reusar: [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §0 e a tabela de unificação em [[Conexao-das-Telas-do-Pablo-com-a-API-do-Hub]].
-- **O `core_comercial` está em produção, vazio** (dump de 26/10: só `categorias_suprimento` 17, `parametros_custo` 1 e `unidades_emissoras` 3). Quem faz: Gustavo e **Pablo**. Decidir se é reaproveitado (só com proposta, pedido e o que é realmente novo) ou recriado.
+- **Não existirá `core_comercial` (N16-116, 27/10/2026): a proposta fica em `core_vendas_faturamento`.** SQL-016, SQL-017 e SQL-018 passam a nomear esse schema, e as rotas `/comercial/*` da fase 1 mudam de prefixo.
+- **O `core_comercial` está em produção, vazio** (dump de 26/10: só `categorias_suprimento` 17, `parametros_custo` 1 e `unidades_emissoras` 3). Quem faz: Gustavo e **Pablo**. Pela N16-116 ele **sai**: o que for útil (parâmetros de custo, emissoras) migra para o lugar certo.
 
 ## 2. O fluxo, etapa por etapa
 
