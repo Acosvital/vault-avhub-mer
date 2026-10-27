@@ -32,6 +32,25 @@ criado_original: 2026-10-15
 >
 > **Não confundir** com [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]]: aquele corrige a API que já existe; este traz o módulo novo para dentro dela. O módulo **tem de entrar já seguindo o LOG-51**, para não herdar o problema.
 
+## 0. Reusar o Hub antes de criar (N16-111, 27/10/2026)
+
+> [!warning] Decisão do Nathan, 27/10: toda rota do módulo nasce na `api-acos-vital` e **nada que o Hub já tem é recriado** em `core_comercial`. A `api-comercial` sai, inclusive de produção. Vale antes das seções 3 a 9: onde elas propõem extensão ou tabela própria para um conceito abaixo, prevalece esta tabela.
+
+| O que o módulo do Pablo criou (`api-comercial` e fase 1 em `core_comercial`) | O que o Hub já tem e deve ser usado |
+|---|---|
+| `unidades_emissoras`, `GET /comercial/empresas_emissoras` | `core.unidades` (`GET /unidades`). Só o que a unidade não tem (logo, CRC, textos do PDF) pode ficar como extensão 1:1, se o Gustavo decidir (N16-80, SQL-016 §2.2) |
+| `perfis_comerciais`, `fn_responsaveis_proposta`, `GET /comercial/responsaveis` | `auth.usuarios`, `auxiliar_vendedor` e os vendedores de `GET /me/permissoes` (`proprio`, `titular`). **"Emitir em nome de"**: o auxiliar escolhe entre os titulares que representa; o vendedor oficial não vê o campo |
+| Capacidades derivadas por rota própria (`GET /comercial/me`) | As telas e ações de `GET /me/permissoes` (`auth.telas`, `auth.rotas_telas`) |
+| Autenticação e perfis próprios (`perfisDev`, JWT próprio) | Token do Hub e `auth.fn_autorizar` (LOG-51) |
+| `produtos`, `produtos_contas_omie` (cópia do Omie) | `core.produtos`, `vw_catalogo_de_produtos` (`GET /produtos`) |
+| `fornecedores`, `fornecedores_contas_omie` | `core.parceiros` (tipo FORNECEDOR) e `parceiros_produtos` |
+| `clientes` (CRM próprio) | `core.parceiros` (clientes), grupos e Acompanhamento de Clientes. 🟡 Prospect sem cadastro no Omie continua em aberto (N16-109) |
+| `GET /cambio` (AwesomeAPI e PTAX próprias) | `core.cotacoes_moeda` (`GET /cotacoes_moeda/atual`), a mesma da OC (LOG-56 R6) |
+| `ordens_compra`, `itens_ordem_compra`, Histórico de compras | `core_vendas_faturamento.pedidos_compras` e a tela Ordens de compra (N16-108) |
+| Parâmetros do simulador lidos por HTTP | `core_comissionamento.simulador_parametros`, no mesmo banco |
+
+**No front (27/10/2026):** "Emitir em nome de" já usa o vínculo do Hub (`GET /api/me/vendedores`, que lê `/me/permissoes`); empresa e câmbio leem o Hub. O vendedor representado ainda não vai ao backend, porque a proposta ainda não existe na API do Hub (API-019).
+
 ## 1. O que muda e o que fica
 
 **Meta:** existir **uma só API** (`api-acos-vital`), um só banco (schemas por domínio, [[Schemas-Postgres]]), um só RBAC (`auth.rotas_telas` e `auth.telas`), um só envelope de erro e de paginação, uma só chave de serviço por sistema. A pasta `api-comercial/` do repositório do HUB sai, junto com `COMERCIAL_API_URL` e `COMERCIAL_API_KEY`. O Dockerfile, o CI próprio (`api-comercial.yml`) e a porta 3001 deixam de existir ([[Infraestrutura]]).
