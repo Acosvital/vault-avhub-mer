@@ -17,10 +17,10 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 30 | 20 | 50 |
+| `Ativos` (a fazer ou parcial) | 31 | 20 | 51 |
 | `Entregues` (feito no código ou aplicado) | 63 | 12 | 75 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
-| **Total** | **104** | **32** | **136** |
+| **Total** | **105** | **32** | **137** |
 
 | Status | Contratos |
 |---|---|
@@ -96,6 +96,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | LOG-59 | Contrato 59 | [[LOG-59-Telas-da-Comissao-Nova\|Telas da comissão nova]] | `proposta` | av-hub: front | Ativos | K1 a K6 | — | — | Nathan: estimada, Minhas Comissões, fila e decisão da Controladoria, devoluções | — |
 | LOG-60 | Contrato 60 | [[LOG-60-Matriz-de-Precos-e-Consulta-do-Vendedor\|Matriz de preços e consulta do vendedor]] | `proposta` | av-hub: front | Ativos | B2 | — | — | Nathan: página do produto e matriz | Pablo: matriz de preços |
 | LOG-61 | Contrato 61 | [[LOG-61-Custo-Real-do-Pedido-Telas\|Custo real do pedido: telas]] | `proposta` | av-hub: front | Ativos | K2 | — | — | Nathan: custo do pedido e drill-down por evento | — |
+| LOG-62 | Contrato 62 | [[LOG-62-Reescopo-Menu-Enxuto-e-Limpeza-do-Modulo-do-Pablo\|Menu enxuto e limpeza do módulo do Pablo]] | `proposta` | av-hub: front, API, banco | Ativos | V0.1, V0.2, B1 a B4, C6, C7 | Telas unidas (Vendas 4, Orçamento 4), Histórico de compras removido, lista do que não portar, `auth.telas` | — | Nathan: fases e Dashboard Comercial; Pablo e Nathan: clientes próprios; Gustavo: tela oculta e SQL | Pablo: não portar a cópia do Omie |
 | LOG-54 | Contrato 54 | [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada\|Documento de retirada e baixa do saldo na retirada (MES)]] | `proposta` | MES: banco, API, front | Ativos | E6, X1, F1 | Modelo, rotas, telas e baixa na confirmação; tirar a baixa da Embalagem e da entrega (BL-007) | — | Nathan: Q1 e Q2 (quem gera, o que imprime, reserva) e Q3 (entra no Ciclo 1?) | — |
 | LOG-01 | Contrato 01 | [[LOG-01-Compras-Fluxo-Completo\|Compras: requisição, ordem de compra e sincronização com o Omie]] | `implementado-no-codigo` | av-hub: banco, API | Entregues | C0, C1, C4 | — | — | — | — |
 | LOG-02 | Contrato 02 | [[LOG-02-Funcionarios-Listagem-Filtros-Ordenacao-Resumo\|Funcionários: filtro, ordenação, paginação e resumo no servidor]] | `implementado-no-codigo` | av-hub: banco, API | Entregues | — | — | — | — | — |
@@ -214,6 +215,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Nathan (front do av-hub)
 
+- [[LOG-62-Reescopo-Menu-Enxuto-e-Limpeza-do-Modulo-do-Pablo|LOG-62]]: Nathan: validar as abas na tela e responder as perguntas da seção 9 (fases, Dashboard Comercial, clientes); filtro por produto em Ordens de compra antes de tirar o Histórico
 - [[LOG-56-Fluxo-da-Proposta-ao-Pedido|LOG-56]] a [[LOG-61-Custo-Real-do-Pedido-Telas|LOG-61]]: Nathan: telas da proposta, Meus Pedidos (pedido do Omie no mesmo fluxo), Orçamento, calendário do marketing e comissão nova; testes no Omie depois das telas (sequencial, cancelar e excluir)
 - [[SQL-019-Condicoes-de-Pagamento-de-Venda-do-Omie|SQL-019]]: Nathan: recursos da pipeline para condições de pagamento, cenários de impostos e a ligação dos sequenciais, nas três contas
 - [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes|API-014]]: Nathan: testar salvar 2 setores, o filtro e o Excel na tela (o front de vários setores está na `develop`); definir perfis `pode_editar`/`pode_criar` e o lote
@@ -252,6 +254,8 @@ Pela lista do Gustavo (que conferiu o vault com o dump de produção de 26/10) e
 | [[LOG-55-Compras-Excluir-Requisicao\|LOG-55]] | Ativos | Entregues | `DELETE` e migration `055` em produção; front feito e exclusão testada em 23/10 (só a Q2 do Nathan segue aberta) |
 
 **Entraram em `Ativos` em 26/10/2026:** os 14 contratos da proposta ao pedido, do custo real e da comissão nova (SQL-016 a SQL-019, API-019 a API-022, LOG-56 a LOG-61), com o fluxo aprovado em 26/10 e as decisões N16-01 a N16-106 ([[Registro-de-Decisoes]]). Todos `proposta`, menos o LOG-57 (`parcial`).
+
+**Entrou em `Ativos` em 27/10/2026:** [[LOG-62-Reescopo-Menu-Enxuto-e-Limpeza-do-Modulo-do-Pablo|LOG-62]] (`proposta`), menu enxuto de Vendas, Orçamento e Compras e limpeza do módulo do Pablo, com as decisões N16-107 a N16-110 ([[Registro-de-Decisoes]]).
 
 Sem mudança de pasta, mas com status corrigido: [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub\|LOG-51]] (a linha dizia Ativos/proposta; a nota já estava em Entregues/`aplicado-em-producao`) e [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub\|LOG-52]] (`proposta` para `parcial`: a fase 1 do banco está em produção).
 

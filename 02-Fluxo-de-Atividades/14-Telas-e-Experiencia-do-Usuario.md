@@ -191,11 +191,14 @@ Quando o vendedor marcou "pode faturar em partes" (N16-89), a tela do **pedido**
 
 ## 6. Organização do menu 🟡
 
+> [!info] Menu de Vendas e Orçamento revisto em 27/10/2026
+> A tabela abaixo foi **enxugada** em [[LOG-62-Reescopo-Menu-Enxuto-e-Limpeza-do-Modulo-do-Pablo]] (N16-107, N16-108): Vendas fica com 4 entradas, Orçamento com 4 (Pedidos de custo com abas Fila e Cotação; Produtos com abas Preços, Comparar e Ofertas; Fornecedores; Parâmetros com abas Custo e Telha) e o **Histórico de compras sai** (a tela Ordens de compra já mostra o histórico). As linhas de Vendas, Orçamento e Compras abaixo já refletem isso.
+
 | Menu | Entradas | Observação |
 |---|---|---|
-| **Vendas** | Propostas · Clientes · **Meus Pedidos** · Relatórios (Cotações e Gerencial) | Meus Pedidos entra no grupo: é onde o vendedor responde `C8` |
-| **Orçamento** | Pedidos de custo (Painel do Comprador) · **Produtos** (página do produto) · Ofertas · Fornecedores · Cotação (Pedido de cotação + Pesquisa de materiais) · Parâmetros (custo e telha) | de 10 entradas para 6; "Catálogo" vira "Produtos" |
-| **Compras** | Requisições · Ordens · **Aprovar OC** · Follow-up (CCP) · **Reprovados** · Histórico · Dashboard | "Aprovações" vira "Aprovar OC" |
+| **Vendas** | Propostas · Clientes · **Meus Pedidos** · Relatórios (Gerencial, com a aba Cotações) | Meus Pedidos entra no grupo: é onde o vendedor responde `C8` |
+| **Orçamento** | **Pedidos de custo** (Painel do Comprador + Pedido de cotação) · **Produtos** (Catálogo + Pesquisa de materiais + Ofertas, com a página do produto) · Fornecedores · **Parâmetros** (custo e telha) | de 9 entradas para 4 |
+| **Compras** | Requisições · Ordens · **Aprovar OC** · Follow-up (CCP) · **Reprovados** · Dashboard | "Aprovações" vira "Aprovar OC"; **sem Histórico** (vira filtro por produto em Ordens) |
 | **Comissões** | atual (não muda) + Comissões da proposta (novas) | nada do módulo atual é tocado |
 | **Cadastros ou Fiscal** | Compradores · **Fila do Fiscal** · Sincronização Omie (TI) | |
 | **Ocultas** | `propostas-delegacao`, `propostas-valores`, `custo-item`, `solicitacoes-custo` | liberam capacidade, não aparecem |
