@@ -48,8 +48,8 @@ fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status 
 
 ## 3. O que vale para tudo
 
-- **Serviço de e-mail do Hub** (❓ dono a definir): a API não envia e-mail. A proposta ao cliente e o pedido de cotação dependem disso.
-- **Notificações do Hub** (❓ dono a definir): o sino existe na tela, mas não há nada no Hub.
+- **Serviço de e-mail do Hub:** ⏸ **último plano, para o futuro** (Nathan, 27/10/2026, N16-113). A API não envia e-mail; até lá, a proposta vai ao cliente e o pedido de cotação ao fornecedor fora do sistema.
+- **Notificações do Hub:** ⏸ **último plano, para o futuro** (N16-113). O sino existe na tela, mas não há nada no Hub.
 - **Um motor de margem e comissão na API** (**Pablo**): hoje está só no front (`lib/simulador/motor.ts`); LOG-56 R42 e N16-109 pedem uma fonte só.
 - **Perfis e permissões novos** de Vendas, Orçamento, Compras e Comissão (OQ-21, adiada; Nathan e Gustavo). Hoje só o Admin (Dev) tem as telas.
 - **Testes no Omie** (OQ-16, OQ-48; Nathan, depois das telas, N16-82): pedido que nasce bloqueado, cancelar ou excluir, e como criar sequencial.
