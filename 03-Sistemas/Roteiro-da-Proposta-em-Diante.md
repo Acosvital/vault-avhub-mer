@@ -62,7 +62,25 @@ fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status 
 - **Tirar a `api-comercial` de produção** (**Pablo**, com a infraestrutura).
 - **Família do produto aparece como código:** o Hub nega `/familias_produtos` ao perfil Admin (Dev), por permissão no Hub (Gustavo).
 
-## 5. Ordem que o vault sugere (N16-110, sem confirmação)
+## 5. Primeiro do Pablo: produtos e histórico de preço (N16-114)
+
+> [!important] Nathan, 27/10/2026: "eu quero que o Pablo faça primeiro a parte de produtos, histórico de preço etc."
+> Vem **antes** das fases da seção 6. É a base de tudo o que vem depois: o custo da proposta, a sugestão de custo, a página do produto do vendedor (`B2`) e a matriz de preços saem daqui.
+
+Na `api-acos-vital`, sobre o que o Hub já tem (N16-111, N16-112), com as regras do [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] e as telas do [[LOG-60-Matriz-de-Precos-e-Consulta-do-Vendedor]]:
+
+| # | Entrega | Fonte no Hub | Contrato |
+|---|---|---|---|
+| 1 | **Revisão completa do Orçamento antigo** (`/orcamento/*`, `orc_*`): o que fica, muda ou sai para atender só o vault | `core_compras` `orc_*` (2.697 cotações, 10.524 fornecedores, 16 categorias) | este roteiro, §3 |
+| 2 | **Lista e busca de produtos** com o nome da família | `core.produtos` (125.852), `core.familia_produtos` | API-020 |
+| 3 | **Histórico de preço do produto**: compras reais do Omie e cotações, por fornecedor e no tempo | `pedidos_compras_itens` (47.125), `orc_cotacoes`, `/produtos/:id/fornecedores` | API-020 `GET /orcamento/produtos/:id` |
+| 4 | **Página do produto (`B2`)**: últimos preços, média, flutuação anual, mensal e total, volatilidade, dado recente (7 dias) e top fornecedores com score (preço 50%, prazo 30%, histórico 20%, pesos como parâmetro com vigência) | idem | API-020 §2 e §3, [[Proposta-Score-e-Volatilidade-OQ-46]] |
+| 5 | **Série do gráfico** ("bolsa de valores") | idem | API-020 `GET /orcamento/produtos/:id/serie` |
+| 6 | 🟡 **Perfil técnico do produto** (norma, material, kg/m, dimensões), se couber nesta etapa: o `especificacoes` do Omie não tem esses dados | extensão de `core.produtos` | LOG-52 §3.2 |
+
+**Depois, na mesma linha:** matriz de preços v1 e ofertas (uma tabela só, N16-112). **Tela (Nathan):** Produtos e Página do produto já leem o Hub; ganham o histórico, a série e o score quando as rotas existirem.
+
+## 6. Ordem que o vault sugere (N16-110, sem confirmação)
 
 1. **Fase 1:** proposta nova, pedido pela fila do Omie, condições de pagamento, liberação, imposto por item na OC e comissão estimada.
 2. **Fase 2:** compra acima do valor (C8), cancelamento com tarja e custo real por evento.
