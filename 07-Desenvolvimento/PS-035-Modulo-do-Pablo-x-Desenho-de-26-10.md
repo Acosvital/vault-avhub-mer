@@ -18,6 +18,7 @@ Resposta do Pablo à [[Pontas-Soltas]] PS-035 ("ciclo da proposta do módulo do 
 - 🔴 O que o Pablo fez de 16 a 19/10 (análise do Simulador de Comissões na proposta) **não está no banco real** e entra no desenho novo com outros nomes (SQL-018 anexo `0003`). Precisa de um único dono do nome das colunas antes da fase 3.
 - 🔴 Um erro no anexo `0003` do SQL-018: ele diz que `propostas_itens.fornecedor_nome` e `id_fornecedor` já existem; no banco real não existem.
 - 🔴 Três entregas do Pablo não têm lugar claro no desenho: o PDF de aprovação interna, a tela Simulador de Orçamento e a "emissão só pela auxiliar".
+- 🟡 Reestimativa do Pablo: 56,0 pd (eram 59,0), de 28/10/2026 a 19/02/2027; com a alternativa A, até 09/03/2027 (seção 8).
 
 ## 2. O que existe hoje em cada lugar
 
@@ -90,6 +91,37 @@ Duas pendências antigas do Pablo perdem o sentido ou mudam com o desenho:
 | A3 | O PDF de aprovação interna, a tela Simulador de Orçamento e a fórmula antiga ficam? (seção 4) | Nathan | fase 3 |
 | A4 | Formato do número (PS-038): só dígitos ou com prefixo? | Nathan | fase 3 |
 | A5 | O Pablo escreve num branch e o Gustavo revisa (Q10 do LOG-52)? Qual branch base: `develop`? | Nathan, Gustavo | fase 2 |
+| A6 | De acordo com a reestimativa da seção 8 e com a alternativa A? | Nathan | [[Cronograma]] |
+
+## 8. Reestimativa do Pablo para P1 a P7
+
+Validação pedida no [[Cronograma]] ("cada pessoa confirma os seus pd e o seu foco livre"). Mesmo método: pd por complexidade, ±30%, dias úteis = pd ÷ foco, foco de 75%, feriados nacionais e Carnaval. Início em 28/10/2026: até 23/10 o Pablo estava nas entregas do `api-comercial` (seção 4), e o P1 não começou em 19/10 como o plano previa.
+
+O que mudou desde a estimativa de 16/10:
+
+- ✅ A base transversal e as capacidades já estão na API (`38d2f74`): saem do P1.
+- ✅ O motor da comissão já foi copiado e testado (PR #215, 47 testes de motor e paridade): portar é mecânico e entra no P1. O P6 fica só com a gravação da versão e o recálculo.
+- ✅ Tamanho medido na `develop`: domínio com 2.668 linhas em 17 arquivos (3 não portam: `fechamento.ts`, `erpAntigo.ts`, `perfisDev.ts`) e 219 casos de teste unitário; módulos de proposta (2.757 linhas), clientes (585), custos (631) e suprimentos (2.255). A API de destino é JavaScript com Express 4 e `vitest`.
+- 🔴 Entrou depois de 16/10 e não tinha pd: o pedido digitado no Omie no mesmo fluxo, com a parte de compras preenchida no Hub (N16-106), e o "+1 dia útil" com a biblioteca de feriados (N16-96). Viram o bloco novo P8.
+
+| Bloco | 16/10 (pd) | Agora (pd) | Por quê | Início | Fim |
+|---|---|---|---|---|---|
+| P1 Domínio portado e testes, com o motor | 8,0 | 6,0 | Base transversal pronta; motor já testado | 28/10/2026 | 09/11/2026 |
+| P2 Clientes e propostas no ciclo novo | 13,0 | 13,0 | Ciclo mais simples, mas entram aprovar, cancelar, PTAX, CFOP, cenário e `vinculados` | 10/11/2026 | 04/12/2026 |
+| P3 Pedido por API | 6,0 | 6,0 | As funções do SQL-016 fazem a maior parte | 07/12/2026 | 16/12/2026 |
+| P4 Suprimentos e pedido de custo | 8,0 | 8,0 | Sai a sincronização Omie; entra o tempo cronometrado | 17/12/2026 | 04/01/2027 |
+| P5 Orçamento | 10,0 | 10,0 | Sem mudança | 05/01/2027 | 22/01/2027 |
+| P6 Motor da comissão na API | 8,0 | 3,0 | O porte foi para o P1; fica a versão gravada e o recálculo | 25/01/2027 | 28/01/2027 |
+| P7 Custo por evento | 6,0 | 6,0 | Sem mudança | 29/01/2027 | 11/02/2027 |
+| P8 Pedido do Omie no fluxo e dias úteis (novo) | — | 4,0 | N16-106, N16-96 | 12/02/2027 | 19/02/2027 |
+| **Total** | **59,0** | **56,0 (39,2 a 72,8)** | | **28/10/2026** | **19/02/2027** |
+
+Dependências que podem mover as datas:
+
+- 🔴 P2 começa em 10/11, antes do SQL-016 aplicado (G1 vai até 25/11 na proposta do cronograma). Mitigação: o Pablo desenvolve contra o dump de referência com o SQL-016 aplicado localmente, como o teste `0002` já faz.
+- 🔴 P3 depende da liberação do pedido da proposta (G5, até 08/12) e começa em 07/12.
+
+**Alternativa A** (o Pablo faz as telas de Orçamento, N7, 9 pd): 🟡 o Pablo concorda. As telas do Orçamento no HUB hoje são dele (painel do comprador, pedido de cotação, ofertas, catálogo, pesquisa de materiais). Com A, o fim dele vai a **09/03/2027**.
 
 ## Ver também
 
