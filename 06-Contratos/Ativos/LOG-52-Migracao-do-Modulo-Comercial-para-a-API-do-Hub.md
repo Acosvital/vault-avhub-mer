@@ -26,9 +26,30 @@ criado_original: 2026-10-15
 > - 🟡 O desenho das seções 3 a 9 é **proposta**; as decisões que dependem do Nathan, do Pablo e do Gustavo estão na seção 13.
 > - ❓ Não conferi: `auth.rotas_telas` e `auth.telas` em produção, o que a pipeline carrega de pedidos de compra, e nada foi executado.
 >
+> - 📝 **O que não migra (Nathan, 27/10/2026, N16-109):** o módulo do Pablo é só ambiente de teste e **não tem dado**, então a migração é escolher o que entra na `api-acos-vital`. **Não portar:** a sincronização própria do Omie e suas tabelas de cópia (`ordens_compra`, `itens_ordem_compra`, `produtos_contas_omie`, `fornecedores_contas_omie`, `omie_registros_brutos`, `sincronizacoes_omie`, `travas_tarefa`), o Histórico de compras, a planilha do pedido a digitar no Omie, a migração do ERP antigo, o fechamento parcial, a autenticação e os perfis próprios. **Reaproveitar** o motor na API (uma fonte), as ofertas, fornecedores, parâmetros e o pedido de custo. Lista completa, com tamanhos e motivos, em [[LOG-62-Reescopo-Menu-Enxuto-e-Limpeza-do-Modulo-do-Pablo]] §5. Isso **confirma e amplia** o corte que a seção 3.4 desta nota já fazia para a sincronização de pedidos de compra ("Some. A pipeline é a fonte"): agora vale também para o Histórico de compras que a lia, para a planilha do pedido e para a migração do ERP antigo.
+>
 > - 🟡 **Desenho aprovado em 26/10/2026 muda o ciclo da proposta** (N16-02, N16-03, N16-84, N16-106): sem fechamento parcial, cancelada no lugar de perdida, sem reabrir, pedido criado pelo Hub e pedido do Omie no mesmo fluxo. A migração proposta está em [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] e as rotas em [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]]; o domínio de preço, margem e custo continua portado como está. Combinar antes da fase 3 (PS-035).
 >
 > **Não confundir** com [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]]: aquele corrige a API que já existe; este traz o módulo novo para dentro dela. O módulo **tem de entrar já seguindo o LOG-51**, para não herdar o problema.
+
+## 0. Reusar o Hub antes de criar (N16-111, 27/10/2026)
+
+> [!warning] Decisão do Nathan, 27/10: toda rota do módulo nasce na `api-acos-vital` e **nada que o Hub já tem é recriado** em `core_comercial`. A `api-comercial` sai, inclusive de produção. Vale antes das seções 3 a 9: onde elas propõem extensão ou tabela própria para um conceito abaixo, prevalece esta tabela.
+
+| O que o módulo do Pablo criou (`api-comercial` e fase 1 em `core_comercial`) | O que o Hub já tem e deve ser usado |
+|---|---|
+| `unidades_emissoras`, `GET /comercial/empresas_emissoras` | `core.unidades` (`GET /unidades`). Só o que a unidade não tem (logo, CRC, textos do PDF) pode ficar como extensão 1:1, se o Gustavo decidir (N16-80, SQL-016 §2.2) |
+| `perfis_comerciais`, `fn_responsaveis_proposta`, `GET /comercial/responsaveis` | `auth.usuarios`, `auxiliar_vendedor` e os vendedores de `GET /me/permissoes` (`proprio`, `titular`). **"Emitir em nome de"**: o auxiliar escolhe entre os titulares que representa; o vendedor oficial não vê o campo |
+| Capacidades derivadas por rota própria (`GET /comercial/me`) | As telas e ações de `GET /me/permissoes` (`auth.telas`, `auth.rotas_telas`) |
+| Autenticação e perfis próprios (`perfisDev`, JWT próprio) | Token do Hub e `auth.fn_autorizar` (LOG-51) |
+| `produtos`, `produtos_contas_omie` (cópia do Omie) | `core.produtos`, `vw_catalogo_de_produtos` (`GET /produtos`) |
+| `fornecedores`, `fornecedores_contas_omie` | `core.parceiros` (tipo FORNECEDOR) e `parceiros_produtos` |
+| `clientes` (CRM próprio) | `core.parceiros` (clientes), grupos e Acompanhamento de Clientes. 🟡 Prospect sem cadastro no Omie continua em aberto (N16-109) |
+| `GET /cambio` (AwesomeAPI e PTAX próprias) | `core.cotacoes_moeda` (`GET /cotacoes_moeda/atual`), a mesma da OC (LOG-56 R6) |
+| `ordens_compra`, `itens_ordem_compra`, Histórico de compras | `core_vendas_faturamento.pedidos_compras` e a tela Ordens de compra (N16-108) |
+| Parâmetros do simulador lidos por HTTP | `core_comissionamento.simulador_parametros`, no mesmo banco |
+
+**No front (27/10/2026):** "Emitir em nome de" já usa o vínculo do Hub (`GET /api/me/vendedores`, que lê `/me/permissoes`); empresa e câmbio leem o Hub. O vendedor representado ainda não vai ao backend, porque a proposta ainda não existe na API do Hub (API-019).
 
 ## 1. O que muda e o que fica
 
