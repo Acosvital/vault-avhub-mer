@@ -31,7 +31,7 @@ fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status 
 
 | Etapa | Banco | API do Hub | Tela | O que falta | Contratos | Quem faz |
 |---|---|---|---|---|---|---|
-| **V0 · Criar e revisar a proposta** | 🔴 | 🔴 | 🟡 | **Banco e API:** proposta, itens, revisões e número próprio só com dígitos. **Tela:** já tem o layout novo (padrão do Simulador e da emissão da OC), mas ainda usa o modelo antigo (fechar, perder, reabrir) e não salva. Faltam a lista com filtros e KPIs e o cálculo de margem e letra na API | LOG-56, API-019, SQL-016 | **Nathan** (criação da proposta, N16-115), Gustavo (banco) |
+| **V0 · Criar e revisar a proposta** | 🔴 | 🔴 | 🟡 | **Banco e API:** proposta, itens, revisões e número próprio só com dígitos. **Tela:** já tem o layout novo (padrão do Simulador e da emissão da OC), mas ainda usa o modelo antigo (fechar, perder, reabrir) e não salva. Faltam a lista com filtros e KPIs e o cálculo de margem e letra na API | LOG-56, API-019, SQL-016 | **Robert** (API, começa por aqui, N16-118), **Nathan** (tela, N16-115), Gustavo (banco) |
 | **Escolher cliente** | 🟡 | 🟡 | 🔴 | Busca de cliente da carteira (`core.parceiros` não filtra por tipo). Decidir prospect, consulta à Receita e compradores | LOG-52 §0 | **Robert** (API), Nathan (tela) |
 | **Condições de venda** | 🔴 | 🔴 | 🟡 | Condições de pagamento de venda do Omie (pipeline `ListarParcelas`). CFOP e cenário de impostos por item (N16-83) | SQL-019, SQL-016 | Gustavo (tabela), Nathan (pipeline), **Robert** (CFOP e cenário na API) |
 | **V0.3–V0.5 · Incompleta e aprovar** | 🔴 | 🔴 | 🔴 | Aprovar com a revisão atual, travar a aprovada, selo "incompleta" (item sem custo e sem fornecedor) | LOG-56 R9–R14, API-019 | **Robert** (API), Gustavo (banco), Nathan (tela) |
@@ -65,12 +65,15 @@ fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status 
 - **Tirar a `api-comercial` de produção** (**Pablo**, com a infraestrutura).
 - **Família do produto aparece como código:** o Hub nega `/familias_produtos` ao perfil Admin (Dev), por permissão no Hub (Gustavo).
 
-## 5. Primeiro do Robert: produtos e histórico de preço (N16-114)
+## 5. Primeiro do Robert: a proposta (N16-118)
 
-> [!important] Nathan, 27/10/2026: "eu quero que o Pablo faça primeiro a parte de produtos, histórico de preço etc." A execução passou ao **Robert** e o Pablo acompanha (N16-117, 28/10/2026).
-> Vem **antes** das fases da seção 6. É a base de tudo o que vem depois: o custo da proposta, a sugestão de custo, a página do produto do vendedor (`B2`) e a matriz de preços saem daqui.
+> [!important] Nathan, 28/10/2026: "Robert começará por proposta". Passa a ser a **primeira entrega** do projeto, **antes** de produtos e histórico de preço (que era a N16-114 e vira a seção 5.2). O Pablo acompanha (N16-117).
 
-Na `api-acos-vital`, sobre o que o Hub já tem (N16-111, N16-112), com as regras do [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] e as telas do [[LOG-60-Matriz-de-Precos-e-Consulta-do-Vendedor]]:
+**5.1 A proposta na `api-acos-vital`, em `core_vendas_faturamento` (N16-116).** O **Robert** faz as rotas e o **Nathan** a tela e o começo da comissão (N16-115), com o Gustavo no banco. As rotas são as das linhas 1 a 17 da lista de rotas que faltam (criar e revisar, lista com filtros e KPIs, revisões, eventos, cálculo de margem e letra, duplicar, aprovar, cancelar e completude), sobre os contratos [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] e [[LOG-56-Fluxo-da-Proposta-ao-Pedido]]. A discussão da parte E (formato do número, critério de "incompleta", revisão, vendedor do Omie, cliente, condições) vem **antes** de escrever o contrato.
+
+**5.2 Em seguida: produtos e histórico de preço** (era a N16-114).
+
+Entrega depois da proposta, na `api-acos-vital`, sobre o que o Hub já tem (N16-111, N16-112), com as regras do [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] e as telas do [[LOG-60-Matriz-de-Precos-e-Consulta-do-Vendedor]]:
 
 | # | Entrega | Fonte no Hub | Contrato |
 |---|---|---|---|
