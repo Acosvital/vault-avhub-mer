@@ -14,49 +14,49 @@ fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status 
 >
 > Legenda: ✅ existe · 🟡 existe em parte · 🔴 não existe.
 >
-> **Atenção (N16-117, 28/10/2026): o Robert conduz as rotas do módulo na `api-acos-vital` e o Pablo só acompanha.** Onde este roteiro diz **Pablo** como quem faz a API, leia **Robert**. A `api-comercial` fica no av-hub só para leitura.
+> **N16-117 (28/10/2026): o Robert conduz as rotas do módulo na `api-acos-vital` e o Pablo só acompanha.** As linhas abaixo já trazem o **Robert** como quem faz a API. A `api-comercial` fica no av-hub só para leitura.
 >
-> **Nathan cuida da criação da proposta e do começo da comissão** (N16-115, 27/10/2026); fora isso, **Quem faz** segue os donos dos contratos: **Pablo** faz as rotas do módulo na `api-acos-vital` (LOG-52, API-019, API-020, API-022), Gustavo o banco e a revisão (SQL-016 a SQL-019), Nathan as telas e a pipeline, Robert o lote do MES (API-021).
+> **Nathan cuida da criação da proposta e do começo da comissão** (N16-115, 27/10/2026); fora isso, **Quem faz** segue os donos dos contratos: **Robert** faz as rotas do módulo na `api-acos-vital` (LOG-52, API-019, API-020, API-022) e o lote do MES (API-021), com o Pablo acompanhando; Gustavo o banco e a revisão (SQL-016 a SQL-019); Nathan as telas e a pipeline.
 
 ## 1. Antes de construir: realinhar os contratos à N16-111, N16-112 e N16-116
 
-- **SQL-016, SQL-017 e SQL-018 foram desenhados sobre o `core_comercial` do Pablo.** Quem faz: Gustavo (contratos SQL), com o **Pablo** (as rotas dependem deles). Pela N16-111 (toda a API no Hub, sem recriar o que ele já tem) e pela N16-112 (um Hub só), precisam ser revistos antes de o Gustavo aplicar:
+- **SQL-016, SQL-017 e SQL-018 foram desenhados sobre o `core_comercial` do Pablo.** Quem faz: Gustavo (contratos SQL), com o **Robert** (as rotas dependem deles). Pela N16-111 (toda a API no Hub, sem recriar o que ele já tem) e pela N16-112 (um Hub só), precisam ser revistos antes de o Gustavo aplicar:
   - **SQL-017** usa ofertas, categorias de suprimento, perfil de fornecedor e produtos pendentes do `core_comercial`: repete o Orçamento do Hub (`orc_*`), que ainda passa pela revisão completa.
   - **SQL-016** mantém `unidades_emissoras` e `perfis_comerciais` como fonte própria.
   - Mapa do que reusar: [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §0 e a tabela de unificação em [[Conexao-das-Telas-do-Pablo-com-a-API-do-Hub]].
 - **Não existirá `core_comercial` (N16-116, 27/10/2026): a proposta fica em `core_vendas_faturamento`.** SQL-016, SQL-017 e SQL-018 passam a nomear esse schema, e as rotas `/comercial/*` da fase 1 mudam de prefixo.
-- **O `core_comercial` está em produção, vazio** (dump de 26/10: só `categorias_suprimento` 17, `parametros_custo` 1 e `unidades_emissoras` 3). Quem faz: Gustavo e **Pablo**. Pela N16-116 ele **sai**: o que for útil (parâmetros de custo, emissoras) migra para o lugar certo.
+- **O `core_comercial` está em produção, vazio** (dump de 26/10: só `categorias_suprimento` 17, `parametros_custo` 1 e `unidades_emissoras` 3). Quem faz: Gustavo e **Robert**. Pela N16-116 ele **sai**: o que for útil (parâmetros de custo, emissoras) migra para o lugar certo.
 
 ## 2. O fluxo, etapa por etapa
 
 | Etapa | Banco | API do Hub | Tela | O que falta | Contratos | Quem faz |
 |---|---|---|---|---|---|---|
 | **V0 · Criar e revisar a proposta** | 🔴 | 🔴 | 🟡 | **Banco e API:** proposta, itens, revisões e número próprio só com dígitos. **Tela:** já tem o layout novo (padrão do Simulador e da emissão da OC), mas ainda usa o modelo antigo (fechar, perder, reabrir) e não salva. Faltam a lista com filtros e KPIs e o cálculo de margem e letra na API | LOG-56, API-019, SQL-016 | **Nathan** (criação da proposta, N16-115), Gustavo (banco) |
-| **Escolher cliente** | 🟡 | 🟡 | 🔴 | Busca de cliente da carteira (`core.parceiros` não filtra por tipo). Decidir prospect, consulta à Receita e compradores | LOG-52 §0 | **Pablo** (API), Nathan (tela) |
-| **Condições de venda** | 🔴 | 🔴 | 🟡 | Condições de pagamento de venda do Omie (pipeline `ListarParcelas`). CFOP e cenário de impostos por item (N16-83) | SQL-019, SQL-016 | Gustavo (tabela), Nathan (pipeline), **Pablo** (CFOP e cenário na API) |
-| **V0.3–V0.5 · Incompleta e aprovar** | 🔴 | 🔴 | 🔴 | Aprovar com a revisão atual, travar a aprovada, selo "incompleta" (item sem custo e sem fornecedor) | LOG-56 R9–R14, API-019 | **Pablo** (API), Gustavo (banco), Nathan (tela) |
-| **V0C · Cancelar a proposta** | 🔴 | 🔴 | 🔴 | Cancelar com motivo, duplicar, comissão estimada virando histórico | LOG-56 R15–R16 | **Pablo** (API), Gustavo (banco), Nathan (tela) |
-| **B3/B4 · Pedido de custo** | 🔴 | 🔴 | 🔴 | Fila do Orçamento, cronometrada e sem prazo (N16-58). A tela atual é a do Pablo, com SLA | API-020, SQL-017 | **Pablo** (API), Gustavo (banco), Nathan (tela) |
-| **B2 · Página do produto e matriz de preços** | 🟡 | 🟡 | 🟡 | Os dados existem (compras do Omie e cotações do Orçamento antigo). Faltam estatística de 90 dias, score e volatilidade do fornecedor e a matriz | LOG-60, API-020 | **Pablo** (API), Nathan (tela) |
-| **Ofertas e cotação a fornecedor** | 🟡 | 🔴 | 🟡 | Uma tabela de oferta (`parceiros_produtos` está vazia), importar mapa, envio do pedido de cotação por e-mail | API-020, SQL-017 | **Pablo** (API), Gustavo (banco), Nathan (tela) |
-| **V0.6–V0.7 · Transformar em pedido** | 🔴 | 🔴 | 🔴 | **Pedido:** `pedidos`, `pedidos_itens` e as 3 respostas obrigatórias (Qualidade, faturar em partes ou inteiro, data de previsão). **Omie:** fila e pipeline com `IncluirPedido`, erro com "Tentar novamente" | LOG-56 R18–R26, API-019, SQL-016 | **Pablo** (API), Gustavo (banco), Nathan (pipeline e tela) |
+| **Escolher cliente** | 🟡 | 🟡 | 🔴 | Busca de cliente da carteira (`core.parceiros` não filtra por tipo). Decidir prospect, consulta à Receita e compradores | LOG-52 §0 | **Robert** (API), Nathan (tela) |
+| **Condições de venda** | 🔴 | 🔴 | 🟡 | Condições de pagamento de venda do Omie (pipeline `ListarParcelas`). CFOP e cenário de impostos por item (N16-83) | SQL-019, SQL-016 | Gustavo (tabela), Nathan (pipeline), **Robert** (CFOP e cenário na API) |
+| **V0.3–V0.5 · Incompleta e aprovar** | 🔴 | 🔴 | 🔴 | Aprovar com a revisão atual, travar a aprovada, selo "incompleta" (item sem custo e sem fornecedor) | LOG-56 R9–R14, API-019 | **Robert** (API), Gustavo (banco), Nathan (tela) |
+| **V0C · Cancelar a proposta** | 🔴 | 🔴 | 🔴 | Cancelar com motivo, duplicar, comissão estimada virando histórico | LOG-56 R15–R16 | **Robert** (API), Gustavo (banco), Nathan (tela) |
+| **B3/B4 · Pedido de custo** | 🔴 | 🔴 | 🔴 | Fila do Orçamento, cronometrada e sem prazo (N16-58). A tela atual é a do Pablo, com SLA | API-020, SQL-017 | **Robert** (API), Gustavo (banco), Nathan (tela) |
+| **B2 · Página do produto e matriz de preços** | 🟡 | 🟡 | 🟡 | Os dados existem (compras do Omie e cotações do Orçamento antigo). Faltam estatística de 90 dias, score e volatilidade do fornecedor e a matriz | LOG-60, API-020 | **Robert** (API), Nathan (tela) |
+| **Ofertas e cotação a fornecedor** | 🟡 | 🔴 | 🟡 | Uma tabela de oferta (`parceiros_produtos` está vazia), importar mapa, envio do pedido de cotação por e-mail | API-020, SQL-017 | **Robert** (API), Gustavo (banco), Nathan (tela) |
+| **V0.6–V0.7 · Transformar em pedido** | 🔴 | 🔴 | 🔴 | **Pedido:** `pedidos`, `pedidos_itens` e as 3 respostas obrigatórias (Qualidade, faturar em partes ou inteiro, data de previsão). **Omie:** fila e pipeline com `IncluirPedido`, erro com "Tentar novamente" | LOG-56 R18–R26, API-019, SQL-016 | **Robert** (API), Gustavo (banco), Nathan (pipeline e tela) |
 | **V1–V3 · Liberação** | 🟡 | 🟡 | ✅ | A liberação do pedido do Omie existe (LOG-26). Falta gravar a liberação na resposta do `IncluirPedido` | LOG-58 | Gustavo (banco e API), Nathan |
-| **Pedido digitado no Omie no mesmo fluxo** | 🔴 | 🔴 | 🟡 | Trazer o pedido para `pedidos` e o vendedor preencher a parte de compras em Meus Pedidos | N16-106, SQL-016 | **Pablo** (API), Gustavo (banco), Nathan (tela) |
-| **C6/C7 · Compras usa os dados da proposta** | 🔴 | 🔴 | 🔴 | A OC puxar impostos, frete e fornecedor da proposta, com os campos de imposto na OC. O circuito de OC do Hub ainda não emitiu nenhuma em produção (`ordens_compra` = 0) | LOG-56 R27–R31, API-019 §3.5 | **Pablo** (rota da parte de compras), Nathan (pipeline e tela) |
-| **C8 · Compra acima do valor** | 🔴 | 🔴 | 🔴 | Aviso ao vendedor em Meus Pedidos, aprovar ou reprovar, lista de reprovados de Compras | LOG-61, API-019 §3.3 | **Pablo** (API), Gustavo (banco), Nathan (tela) |
-| **K1–K6 · Custo real e comissão nova** | 🔴 | 🔴 | 🔴 | **Custo e decisão:** custo por evento (OC, NF de entrada, lote), comissão estimada e real, decisão da Controladoria. **Notas:** abatimento por devolução e recusa | SQL-018, API-021, API-022, LOG-59 | **Nathan** (começo da comissão: K1, a estimada, N16-115), **Pablo** (resto da API da comissão), Gustavo (banco), Robert (lote) |
-| **Cancelar pedido** | 🔴 | 🔴 | 🔴 | Cancelar no Omie, cancelar a requisição e a OC não emitida, tarja, mandar o comprado ao Estoque | LOG-56 R58–R62, API-019 §3.4 | **Pablo** (API), Gustavo (banco), Nathan (pipeline e tela) |
-| **Datas e previsão de faturamento** | 🔴 | 🔴 | 🔴 | Previsão inicial, entrega de Compras e do CCP, +1 dia útil, calendário com exceções do marketing | LOG-56 R67–R76, SQL-016 | Gustavo (banco), **Pablo** (API), Nathan (tela) |
-| **Faturar em partes (sequenciais)** | 🔴 | 🔴 | 🔴 | Criar, mostrar e cancelar sequenciais. A terceira tabela já tem os dados ligados (SQL-016 §4) | LOG-56 R79–R87 | Gustavo (banco), **Pablo** (API), Nathan (tela) |
+| **Pedido digitado no Omie no mesmo fluxo** | 🔴 | 🔴 | 🟡 | Trazer o pedido para `pedidos` e o vendedor preencher a parte de compras em Meus Pedidos | N16-106, SQL-016 | **Robert** (API), Gustavo (banco), Nathan (tela) |
+| **C6/C7 · Compras usa os dados da proposta** | 🔴 | 🔴 | 🔴 | A OC puxar impostos, frete e fornecedor da proposta, com os campos de imposto na OC. O circuito de OC do Hub ainda não emitiu nenhuma em produção (`ordens_compra` = 0) | LOG-56 R27–R31, API-019 §3.5 | **Robert** (rota da parte de compras), Nathan (pipeline e tela) |
+| **C8 · Compra acima do valor** | 🔴 | 🔴 | 🔴 | Aviso ao vendedor em Meus Pedidos, aprovar ou reprovar, lista de reprovados de Compras | LOG-61, API-019 §3.3 | **Robert** (API), Gustavo (banco), Nathan (tela) |
+| **K1–K6 · Custo real e comissão nova** | 🔴 | 🔴 | 🔴 | **Custo e decisão:** custo por evento (OC, NF de entrada, lote), comissão estimada e real, decisão da Controladoria. **Notas:** abatimento por devolução e recusa | SQL-018, API-021, API-022, LOG-59 | **Nathan** (começo da comissão: K1, a estimada, N16-115), **Robert** (resto da API da comissão e o lote do MES), Gustavo (banco) |
+| **Cancelar pedido** | 🔴 | 🔴 | 🔴 | Cancelar no Omie, cancelar a requisição e a OC não emitida, tarja, mandar o comprado ao Estoque | LOG-56 R58–R62, API-019 §3.4 | **Robert** (API), Gustavo (banco), Nathan (pipeline e tela) |
+| **Datas e previsão de faturamento** | 🔴 | 🔴 | 🔴 | Previsão inicial, entrega de Compras e do CCP, +1 dia útil, calendário com exceções do marketing | LOG-56 R67–R76, SQL-016 | Gustavo (banco), **Robert** (API), Nathan (tela) |
+| **Faturar em partes (sequenciais)** | 🔴 | 🔴 | 🔴 | Criar, mostrar e cancelar sequenciais. A terceira tabela já tem os dados ligados (SQL-016 §4) | LOG-56 R79–R87 | Gustavo (banco), **Robert** (API), Nathan (tela) |
 
 ## 3. O que vale para tudo
 
 - **Serviço de e-mail do Hub:** ⏸ **último plano, para o futuro** (Nathan, 27/10/2026, N16-113). A API não envia e-mail; até lá, a proposta vai ao cliente e o pedido de cotação ao fornecedor fora do sistema.
 - **Notificações do Hub:** ⏸ **último plano, para o futuro** (N16-113). O sino existe na tela, mas não há nada no Hub.
-- **Um motor de margem e comissão na API** (**Pablo**): hoje está só no front (`lib/simulador/motor.ts`); LOG-56 R42 e N16-109 pedem uma fonte só.
+- **Um motor de margem e comissão na API** (**Robert**): hoje está só no front (`lib/simulador/motor.ts`); LOG-56 R42 e N16-109 pedem uma fonte só.
 - **Perfis e permissões novos** de Vendas, Orçamento, Compras e Comissão (OQ-21, adiada; Nathan e Gustavo). Hoje só o Admin (Dev) tem as telas.
 - **Testes no Omie** (OQ-16, OQ-48; Nathan, depois das telas, N16-82): pedido que nasce bloqueado, cancelar ou excluir, e como criar sequencial.
-- **Revisão completa do Orçamento antigo** do Hub (`/orcamento/*`, `orc_*`), pedida pelo Nathan em 27/10 (**Pablo**, dono do API-020, com o Gustavo).
+- **Revisão completa do Orçamento antigo** do Hub (`/orcamento/*`, `orc_*`), pedida pelo Nathan em 27/10 (**Robert**, com o Pablo acompanhando, e o Gustavo).
 
 ## 4. Pendências do que já foi feito (27/10/2026)
 
@@ -65,9 +65,9 @@ fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status 
 - **Tirar a `api-comercial` de produção** (**Pablo**, com a infraestrutura).
 - **Família do produto aparece como código:** o Hub nega `/familias_produtos` ao perfil Admin (Dev), por permissão no Hub (Gustavo).
 
-## 5. Primeiro do Pablo: produtos e histórico de preço (N16-114)
+## 5. Primeiro do Robert: produtos e histórico de preço (N16-114)
 
-> [!important] Nathan, 27/10/2026: "eu quero que o Pablo faça primeiro a parte de produtos, histórico de preço etc."
+> [!important] Nathan, 27/10/2026: "eu quero que o Pablo faça primeiro a parte de produtos, histórico de preço etc." A execução passou ao **Robert** e o Pablo acompanha (N16-117, 28/10/2026).
 > Vem **antes** das fases da seção 6. É a base de tudo o que vem depois: o custo da proposta, a sugestão de custo, a página do produto do vendedor (`B2`) e a matriz de preços saem daqui.
 
 Na `api-acos-vital`, sobre o que o Hub já tem (N16-111, N16-112), com as regras do [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] e as telas do [[LOG-60-Matriz-de-Precos-e-Consulta-do-Vendedor]]:
