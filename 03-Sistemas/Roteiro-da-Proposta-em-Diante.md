@@ -14,6 +14,8 @@ fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status 
 >
 > Legenda: ✅ existe · 🟡 existe em parte · 🔴 não existe.
 >
+> **Atenção (N16-117, 28/10/2026): o Robert conduz as rotas do módulo na `api-acos-vital` e o Pablo só acompanha.** Onde este roteiro diz **Pablo** como quem faz a API, leia **Robert**. A `api-comercial` fica no av-hub só para leitura.
+>
 > **Nathan cuida da criação da proposta e do começo da comissão** (N16-115, 27/10/2026); fora isso, **Quem faz** segue os donos dos contratos: **Pablo** faz as rotas do módulo na `api-acos-vital` (LOG-52, API-019, API-020, API-022), Gustavo o banco e a revisão (SQL-016 a SQL-019), Nathan as telas e a pipeline, Robert o lote do MES (API-021).
 
 ## 1. Antes de construir: realinhar os contratos à N16-111, N16-112 e N16-116
