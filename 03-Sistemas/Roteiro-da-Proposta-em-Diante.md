@@ -69,6 +69,8 @@ fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status 
 
 > [!important] Nathan, 28/10/2026: "Robert começará por proposta". Passa a ser a **primeira entrega** do projeto, **antes** de produtos e histórico de preço (que era a N16-114 e vira a seção 5.2). O Pablo acompanha (N16-117).
 
+> **N16-119 (28/10/2026): as telas do Pablo ficam e o Robert troca o backend delas; não se refaz 100%.** O front do módulo não é apagado: o BFF passa a chamar as rotas novas da API do Hub e as telas se adaptam ao vault onde divergem (estados, número, sem fechamento parcial).
+
 **5.1 A proposta na `api-acos-vital`, em `core_vendas_faturamento` (N16-116).** O **Robert** faz as rotas e o **Nathan** a tela e o começo da comissão (N16-115), com o Gustavo no banco. As rotas são as das linhas 1 a 17 da lista de rotas que faltam (criar e revisar, lista com filtros e KPIs, revisões, eventos, cálculo de margem e letra, duplicar, aprovar, cancelar e completude), sobre os contratos [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] e [[LOG-56-Fluxo-da-Proposta-ao-Pedido]]. A discussão da parte E (formato do número, critério de "incompleta", revisão, vendedor do Omie, cliente, condições) vem **antes** de escrever o contrato.
 
 **5.2 Em seguida: produtos e histórico de preço** (era a N16-114).
