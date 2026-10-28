@@ -20,7 +20,7 @@ criado_original: 2026-10-15
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (transversal, fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
 > - 🔴 Nenhum item **da API** (S1 a S27) está feito. É o resultado de uma auditoria de **leitura de código** da `api-acos-vital` (commit `276dab8`) e do dump de esquema, pedida pelo Nathan para deixar o av-hub seguro e em padrão de ERP.
-> - 🟡 **Lado do HUB (seção 7):** H1, H3, H4, H5 e H6 estão no código, e o H2 em parte (resta `fetchMenu`), mesclados na PR #206 (`d0ef359`, 15/10/2026). O CI do HUB (lint, typecheck, madge, build e o e2e do Comercial) passou. H7 é manual e segue aberto. ❓ Não testado na homologação com a API e o Azure.
+> - 🟡 **Lado do HUB (seção 7):** H1, H3, H4, H5 e H6 estão no código, e o H2 em parte (resta `fetchMenu`), mesclados na PR #206 (`d0ef359`, 15/10/2026). O CI do HUB (lint, typecheck, madge, build e o e2e do Comercial) passou. H7 (troca da chave) feito em 28/10/2026. ❓ Não testado na homologação com a API e o Azure.
 > - ✅ Os itens S1 a S8, S11 (parte do `/azure`), S12 (`docsAuth.js` e `pagina.js`), S15, S19, S20, S22 (gatilho no dump), S23 (`limit`), S25 e S27 foram **relidos no código ou no dump em 15/10/2026**, depois da auditoria. Os demais (S9, S10, S13, S14, S16, S17, S18, S21, S24 e S26) vêm da auditoria por leitura e o DBA deve reconfirmar ao implementar.
 > - ❓ **Nada foi executado.** Não subi a API nem testei requisição. Os valores reais do `.env` e do Coolify, os GRANTs e o conteúdo de `auth.rotas_telas` em produção não foram vistos (o dump não traz GRANT).
 > - 🟡 Quem decide o que entra e em que ordem é o Nathan com o Gustavo. A seção 9 lista as perguntas.
@@ -213,7 +213,7 @@ Itens do lado do HUB, que **não** são do DBA. Eles definem a ordem da seção 
 | H4 | Tirar `backendToken` e `backendTokenExpiraEm` da `session` devolvida ao navegador | defesa em profundidade | ✅ O servidor lê do cookie (`lib/auth/backendToken.ts`); a sessão só traz `sessaoExpirada` |
 | H5 | Parar de aceitar `codigo_vendedor` do navegador em `comissoes/minhas-comissoes` | escopo | ✅ O escopo vem do token, aplicado pela API (`faturamento_planilha` está no mapa de escopo). `vendedor` segue como filtro de texto que só estreita |
 | H6 | Rotas do BFF com `..` no parâmetro (`grupos-clientes`, `blacklist_*`, `comissoes/*`, `compras/pedidos-venda`) passarem por validação | traversal | ✅ `parametrosSeguros` para ids e códigos, `segmentoSeguro` para texto livre, e trava única no `repassar` de `grupos-clientes` |
-| H7 | Rotacionar a chave de produção que está em texto no `.env.local` e apagar a linha comentada | S1 | 🔴 Manual (Nathan e Gustavo); o assistente não mexe em segredo |
+| H7 | Rotacionar a chave de produção que está em texto no `.env.local` e apagar a linha comentada | S1 | ✅ **Feito (Nathan, 28/10/2026):** chave trocada no HUB, chave antiga fora de `API_KEYS`, MES e pipeline atualizados, linha comentada apagada, produção conferida. Era manual (Nathan e Gustavo); o assistente não mexe em segredo |
 
 ### 7b. O que o Robert (MES) precisa fazer no S1
 
