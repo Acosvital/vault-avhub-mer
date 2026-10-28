@@ -48,4 +48,4 @@ O vendedor decide o valor que põe na proposta, mas não é o dono do dado de cu
 
 ## Ver também
 
-[[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] · [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]] · [[12-Orcamento-Base-de-Preco]] · [[LOG-57-Menu-Vendas-Orcamento-Compras]] · [[LOG-56-Fluxo-da-Proposta-ao-Pedido]]
+[[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] · [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]] · [[12-Orcamento-Base-de-Preco]] · [[LOG-57-Menu-Vendas-Orcamento-Compras]] · [[LOG-56-Fluxo-da-Proposta-ao-Pedido]]

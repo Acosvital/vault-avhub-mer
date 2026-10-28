@@ -58,10 +58,10 @@ BEGIN
     IF v_origem = 'PEDIDO_OMIE' THEN RETURN v_id; END IF;
     RAISE EXCEPTION 'PEDIDO_TEM_PROPOSTA: o pedido % nasceu de proposta e já tem dossiê de comissão.', p_numero_pedido USING ERRCODE = '23514';
   END IF;
-  -- O pedido do Omie também está em core_comercial.pedidos (origem OMIE, N16-106): o dossiê se liga a ele. O que nasceu de proposta
+  -- O pedido do Omie também está em core_vendas_faturamento.pedidos (origem OMIE, N16-106): o dossiê se liga a ele. O que nasceu de proposta
   -- tem o dossiê da proposta.
-  IF to_regclass('core_comercial.pedidos') IS NOT NULL THEN
-    EXECUTE 'SELECT id, origem FROM core_comercial.pedidos WHERE codigo_empresa = $1 AND numero_pedido_omie = $2'
+  IF to_regclass('core_vendas_faturamento.pedidos') IS NOT NULL THEN
+    EXECUTE 'SELECT id, origem FROM core_vendas_faturamento.pedidos WHERE codigo_empresa = $1 AND numero_pedido_omie = $2'
        INTO v_ped, v_ped_origem USING p_codigo_empresa, p_numero_pedido;
     IF v_ped_origem = 'PROPOSTA' THEN
       RAISE EXCEPTION 'PEDIDO_TEM_PROPOSTA: o pedido % nasceu de proposta; a comissão dele segue o dossiê da proposta.', p_numero_pedido USING ERRCODE = '23514';

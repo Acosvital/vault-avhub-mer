@@ -1,25 +1,27 @@
 ---
 id: SQL-017
-aliases: ["Contrato SQL 017", "017-Orcamento-em-core_comercial"]
-tags: [contrato, contrato-sql, dba, migracao, orcamento, base-de-preco, ofertas, pedido-de-custo, core_comercial]
+aliases: ["Contrato SQL 017", "017-Orcamento-em-core_comercial", "SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo"]
+tags: [contrato, contrato-sql, dba, migracao, orcamento, base-de-preco, ofertas, pedido-de-custo, core_vendas_faturamento]
 criado: 2026-10-21
-atualizado: 2026-10-26
+atualizado: 2026-10-28
 status: proposta
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: [V0.2, B1, B2, B3, B4]
-fontes: ["Dump do Avhub para referência (schema), 26/10/2026", "Registro-de-Decisoes (N16-06, N16-07, N16-52 a N16-59)", "SQL-017-anexos/0001-migracao-orcamento-em-core_comercial.sql, 0002-teste-migracao.sql", "Proposta-Orcamento-Comissao/05-Contratos/SQL-016-anexos/_desenho-antigo-nao-usar (histórico, fora do vault)", "12-Orcamento-Base-de-Preco", "Proposta-Score-e-Volatilidade-OQ-46"]
+fontes: ["Dump do Avhub para referência (schema), 26/10/2026", "Registro-de-Decisoes (N16-06, N16-07, N16-52 a N16-59)", "SQL-017-anexos/0001-migracao-orcamento-em-core_vendas_faturamento.sql, 0002-teste-migracao.sql", "Proposta-Orcamento-Comissao/05-Contratos/SQL-016-anexos/_desenho-antigo-nao-usar (histórico, fora do vault)", "12-Orcamento-Base-de-Preco", "Proposta-Score-e-Volatilidade-OQ-46"]
 criado_original: 2026-10-16
 ---
 
-# Contrato SQL 017 — o Orçamento sobre o `core_comercial` real: ofertas das OCs, base e estatística de preço, pedido de custo sem prazo
+# Contrato SQL 017 — o Orçamento em `core_vendas_faturamento` (vindo do `core_comercial` real): ofertas das OCs, base e estatística de preço, pedido de custo sem prazo
 
 > **Onde atua:** av-hub: banco
 
-> [!info] Situação em 26/10/2026
-> **Status:** `proposta` · **Dono:** Gustavo · Regra: [[12-Orcamento-Base-de-Preco]] · Rotas: [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]]
+> [!info] Situação em 28/10/2026
+> **Status:** `proposta` · **Dono:** Gustavo · Regra: [[12-Orcamento-Base-de-Preco]] · Rotas: [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] (Robert, N16-117)
 >
-> - 📝 **Mudou de natureza em 26/10.** O desenho de 16 a 21/10 propunha um schema novo `core_orcamento`. O banco real **já tem**, em `core_comercial`, as ofertas (imutáveis, com histórico), as categorias de suprimento, os fornecedores (perfil, categorias, certificados, apelidos), os produtos (perfil e pendentes), os parâmetros de custo e a tabela da telha com vigência, e as solicitações de custo. O contrato agora é só o que **falta**. O desenho antigo está em `Proposta-Orcamento-Comissao/05-Contratos/SQL-016-anexos/_desenho-antigo-nao-usar` (fora do vault).
+> - 📝 **28/10/2026, N16-116: não existirá `core_comercial`.** A proposta, o pedido do Hub e o resto do módulo ficam em **`core_vendas_faturamento`**, junto de `pedidos_vendas`, da OC e da liberação. As tabelas do Orçamento que hoje estão em `core_comercial` chegam lá pelo **bloco A0 do SQL-016** (aplicar antes); este anexo passou a nomear `core_vendas_faturamento` (arquivo `0001-migracao-orcamento-em-core_vendas_faturamento.sql`).
+> - 🧪 **Reteste de 28/10 em Postgres 18**, depois do SQL-016 com o bloco A0: aplica sem erro e o `0002` dá a mesma saída de 26/10 (14 verificações: 3 erros esperados e 11 conferências).
+> - 📝 **Mudou de natureza em 26/10.** O desenho de 16 a 21/10 propunha um schema novo `core_orcamento`. O banco real **já tem**, em `core_comercial` (que a N16-116 move para `core_vendas_faturamento`), as ofertas (imutáveis, com histórico), as categorias de suprimento, os fornecedores (perfil, categorias, certificados, apelidos), os produtos (perfil e pendentes), os parâmetros de custo e a tabela da telha com vigência, e as solicitações de custo. O contrato agora é só o que **falta**. O desenho antigo está em `Proposta-Orcamento-Comissao/05-Contratos/SQL-016-anexos/_desenho-antigo-nao-usar` (fora do vault).
 > - 🧪 **Testado em Postgres 18** sobre o dump de referência, depois do SQL-016: a migração aplica sem erro e o teste `0002` passa (14 verificações). Nunca rodou em produção.
 > - As tabelas de oferta, solicitação, fornecedor e produto pendente têm **0 linhas** no dump completo: não há dado a converter.
 
@@ -27,7 +29,7 @@ criado_original: 2026-10-16
 
 O vendedor precisa de uma página do produto (histórico, fornecedores, volatilidade, média) e o Orçamento precisa de uma base de preço de compra **sempre com histórico** (N16-07). A oferta existe, mas **ninguém a alimenta** com o que Compras realmente pagou, não há base nem estatística derivada, e o pedido de custo ainda exige prazo, contra a N16-58.
 
-## 2. O que a migração faz (anexo `0001-migracao-orcamento-em-core_comercial.sql`)
+## 2. O que a migração faz (anexo `0001-migracao-orcamento-em-core_vendas_faturamento.sql`)
 
 | Objeto | O que faz |
 |---|---|
@@ -51,7 +53,7 @@ O vendedor precisa de uma página do produto (histórico, fornecedores, volatili
 
 ## 4. Fora do contrato
 
-As telas e as rotas ([[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]], [[LOG-60-Matriz-de-Precos-e-Consulta-do-Vendedor]]); a proposta e o pedido ([[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]]); a matriz de preços com dimensões além do produto e do fornecedor (OQ-10); o imposto por item da OC (PS-014).
+As telas e as rotas ([[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]], [[LOG-60-Matriz-de-Precos-e-Consulta-do-Vendedor]]); a proposta e o pedido ([[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]]); a matriz de preços com dimensões além do produto e do fornecedor (OQ-10); o imposto por item da OC (PS-014).
 
 ## 5. Checklist do DBA
 
@@ -72,4 +74,4 @@ OQ-10 (dimensões da matriz), OQ-38 (estoque confiável), PS-014 (imposto por it
 
 ## Ver também
 
-[[12-Orcamento-Base-de-Preco]] · [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] · [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] · [[LOG-57-Menu-Vendas-Orcamento-Compras]] · [[Registro-de-Decisoes]]
+[[12-Orcamento-Base-de-Preco]] · [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] · [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] · [[LOG-57-Menu-Vendas-Orcamento-Compras]] · [[Registro-de-Decisoes]]

@@ -96,4 +96,4 @@ Entrega depois da proposta, na `api-acos-vital`, sobre o que o Hub já tem (N16-
 
 ## Ver também
 
-[[Conexao-das-Telas-do-Pablo-com-a-API-do-Hub]] · [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] · [[LOG-56-Fluxo-da-Proposta-ao-Pedido]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] · [[Registro-de-Decisoes]] · [[Perguntas-Proposta-Pedido-Comissao]]
+[[Conexao-das-Telas-do-Pablo-com-a-API-do-Hub]] · [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] · [[LOG-56-Fluxo-da-Proposta-ao-Pedido]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] · [[Registro-de-Decisoes]] · [[Perguntas-Proposta-Pedido-Comissao]]

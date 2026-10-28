@@ -3,12 +3,12 @@ id: API-019
 aliases: ["Contrato API 019", "019-Proposta-e-Pedido-de-Venda-na-API-do-Hub"]
 tags: [contrato, contrato-api, proposta, pedido-de-venda, omie, fila, compras, cancelamento, api-acos-vital]
 criado: 2026-10-21
-atualizado: 2026-10-21
+atualizado: 2026-10-28
 status: proposta
 sistemas: [hub-api, pipeline]
-dono: "Pablo (módulo) e Gustavo (revisão)"
+dono: "Robert (rotas) e Gustavo (revisão)"
 etapa_0b: [V0.1, V0.2, V0.3, V0.5, V0C, V0.6, V0.7, V1, C6, C7, C8]
-fontes: ["LOG-56-Fluxo-da-Proposta-ao-Pedido (regras R1 a R66, rotas da seção 8)", "SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda", "api-comercial 5aa5311: src/modules/propostas/propostas.routes.ts, propostas.service.ts, src/domain/permissoes/capacidades.ts, src/lib/http/erros.ts", "omie-elt-pipeline envioOrdensCompra.ts:18-40 (padrão de fila)", "Estudo-Omie-API"]
+fontes: ["LOG-56-Fluxo-da-Proposta-ao-Pedido (regras R1 a R66, rotas da seção 8)", "SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento", "api-comercial 5aa5311: src/modules/propostas/propostas.routes.ts, propostas.service.ts, src/domain/permissoes/capacidades.ts, src/lib/http/erros.ts", "omie-elt-pipeline envioOrdensCompra.ts:18-40 (padrão de fila)", "Estudo-Omie-API"]
 criado_original: 2026-10-16
 ---
 
@@ -16,9 +16,13 @@ criado_original: 2026-10-16
 
 > **Onde atua:** av-hub: API (`api-acos-vital`) · pipeline Omie
 
-> [!info] Situação em 21/10/2026
-> **Status:** `proposta` · **Dono:** Pablo migra o módulo de `api-comercial` (só de teste, N14-15) para a `api-acos-vital` (N16-15); Gustavo revisa. Regras de negócio: [[LOG-56-Fluxo-da-Proposta-ao-Pedido]]; banco: [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]].
+> [!info] Situação em 28/10/2026
+> **Status:** `proposta` · **Dono:** Robert cria as rotas na `api-acos-vital` (N16-117; antes era o Pablo, que acompanha); Gustavo revisa. A `api-comercial` (só de teste, N14-15) fica como leitura. Regras de negócio: [[LOG-56-Fluxo-da-Proposta-ao-Pedido]]; banco: [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]].
 >
+> - 📝 **28/10/2026, N16-118:** a **proposta é a primeira entrega** do projeto, antes de produtos e histórico de preço (N16-114). O Robert faz as rotas; o **Nathan** faz a tela e o começo da comissão (`V0.1`, `V0.2`, `K1`, N16-115); o Gustavo, o banco. Antes do contrato de rotas fecha-se a parte E do [[Roteiro-da-Proposta-em-Diante]] (§5).
+> - 📝 **28/10/2026, N16-117 a N16-119:** quem faz as rotas na `api-acos-vital` é o **Robert**; o Pablo acompanha. A `api-comercial` fica no repositório do av-hub **só para leitura** (legado de consulta, não roda nem publica; sai de produção). As telas do Pablo **ficam**: o Robert troca o backend delas (o BFF passa a chamar a `api-acos-vital`) e adapta onde divergem do vault, sem refazer do zero.
+> - 📝 **28/10/2026, N16-116:** não existirá `core_comercial`; as tabelas ficam em **`core_vendas_faturamento`** ([[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], bloco A0). O prefixo `/comercial/` das rotas **sai** (N16-116, efeito 3). No Hub, as rotas de `core_vendas_faturamento` são montadas pelo nome do recurso (`/pedidos_vendas`, `/pedidos_liberacao`), então `/comercial/propostas` tende a virar `/propostas`; o nome final é do Robert com o Gustavo ❓. Nesta nota, leia `/comercial/...` como o recurso sem o prefixo.
+> - 📝 **N16-113:** o envio da proposta ao cliente por e-mail e as notificações do Hub ficam para o futuro; a proposta segue saindo fora do sistema (PDF).
 > - ✅ Existe hoje no `api-comercial`: proposta, revisão, versões, cálculo, duplicar, custo por item, pedido de custo, média de preços. 🔴 Não existe: aprovar, transformar, fila do Omie, `C8`, cancelamento, numeração só numérica.
 > - 🟡 Rotas, códigos de erro e nomes são propostas; o envelope de erro do Hub (LOG-52) vale quando existir.
 
@@ -95,4 +99,4 @@ OQ-16, OQ-21 (perfis), OQ-30 (corrigir a marcação da Qualidade até o MES impo
 
 ## Ver também
 
-[[LOG-56-Fluxo-da-Proposta-ao-Pedido]] · [[LOG-58-Liberacao-do-Pedido-Origem-Proposta]] · [[LOG-57-Menu-Vendas-Orcamento-Compras]] · [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] · [[Estudo-Omie-API]] · [[Registro-de-Decisoes]]
+[[LOG-56-Fluxo-da-Proposta-ao-Pedido]] · [[LOG-58-Liberacao-do-Pedido-Origem-Proposta]] · [[LOG-57-Menu-Vendas-Orcamento-Compras]] · [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] · [[Estudo-Omie-API]] · [[Registro-de-Decisoes]]

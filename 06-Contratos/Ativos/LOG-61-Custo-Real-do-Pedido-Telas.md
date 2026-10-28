@@ -52,4 +52,4 @@ Quando Compras compra por mais que o valor da proposta, o vendedor aprova ou rep
 
 ## Ver também
 
-[[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[API-021-Custo-Real-por-Evento-e-Conferencia-de-Compras]] · [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] · [[LOG-56-Fluxo-da-Proposta-ao-Pedido]] · [[LOG-59-Telas-da-Comissao-Nova]] · [[13-Custo-Real-e-Comissao-no-Fluxo]]
+[[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[API-021-Custo-Real-por-Evento-e-Conferencia-de-Compras]] · [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] · [[LOG-56-Fluxo-da-Proposta-ao-Pedido]] · [[LOG-59-Telas-da-Comissao-Nova]] · [[13-Custo-Real-e-Comissao-no-Fluxo]]

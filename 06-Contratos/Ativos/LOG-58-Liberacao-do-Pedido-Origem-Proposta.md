@@ -3,12 +3,12 @@ id: LOG-58
 aliases: ["Contrato 58", "58-Liberacao-do-Pedido-Origem-Proposta"]
 tags: [contrato, contrato-logica, contrato-api, sql, vendas, liberacao, proposta, pedido-de-venda, pipeline]
 criado: 2026-10-16
-atualizado: 2026-10-21
+atualizado: 2026-10-28
 status: proposta
 sistemas: [hub-banco, hub-api, pipeline]
 dono: "Gustavo (DBA) e Nathan"
 etapa_0b: [V0.6, V0.7, V1, V2, V3, P1]
-fontes: ["Registro-de-Decisoes (N16-02, N16-05)", "LOG-26-Vendas-Liberacao-Pedido", "01-Vendas-Liberacao", "Dump Avhub (Esqueleto).sql: pedidos_vendas_liberacao (18285-18298), pedidos_vendas_liberacao_historico (18360-18372), fn_pedidos_vendas_liberacao_historico (7743), fn_pedidos_vendas_liberacao_regras (7783), vw_pedidos_liberacao (20870-20903)", "06-Contratos/Ativos/SQL-016-anexos/0001-migracao-core_comercial.sql (pedido_venda, fn_propostas_transformar_em_pedido; outro agente)", "LOG-56-Fluxo-da-Proposta-ao-Pedido (R19 a R26, rotas da seção 8)"]
+fontes: ["Registro-de-Decisoes (N16-02, N16-05)", "LOG-26-Vendas-Liberacao-Pedido", "01-Vendas-Liberacao", "Dump Avhub (Esqueleto).sql: pedidos_vendas_liberacao (18285-18298), pedidos_vendas_liberacao_historico (18360-18372), fn_pedidos_vendas_liberacao_historico (7743), fn_pedidos_vendas_liberacao_regras (7783), vw_pedidos_liberacao (20870-20903)", "06-Contratos/Ativos/SQL-016-anexos/0001-migracao-proposta-em-core_vendas_faturamento.sql (pedido_venda, fn_propostas_transformar_em_pedido; outro agente)", "LOG-56-Fluxo-da-Proposta-ao-Pedido (R19 a R26, rotas da seção 8)"]
 criado_original: 2026-10-16
 ---
 
@@ -16,12 +16,13 @@ criado_original: 2026-10-16
 
 > **Onde atua:** av-hub: banco, API · pipeline Omie
 
-> [!info] Situação em 21/10/2026
+> [!info] Situação em 28/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** `V0.6`, `V0.7`, `V1`, `V2`, `V3`, `P1` · **Donos:** Gustavo (banco e API) e Nathan (regra e pipeline)
 >
+> - 📝 **28/10/2026, N16-116:** não existirá `core_comercial`; o pedido do Hub fica em `core_vendas_faturamento.pedidos`, no mesmo schema de `pedidos_vendas_liberacao`. A regra deste contrato não muda.
 > - 📝 **Decidido (N16-05):** o "A Qualidade acompanha?" é obrigatório na proposta (`V0.6`); o pedido criado a partir dela **nasce liberado, sem `V3`**; o `V1` tem **duas origens** (a proposta, ou o pedido digitado direto no Omie). O do Omie continua chegando travado, mas o vendedor responde a Qualidade e o faturamento em partes **na tela do pedido** (N16-106), o que grava a mesma liberação do LOG-26.
 > - ✅ **O que existe:** a liberação do pedido que vem do Omie ([[LOG-26-Vendas-Liberacao-Pedido]], `Entregues`): tabela `pedidos_vendas_liberacao` com chave `(codigo_empresa, numero_pedido)` e histórico em `pedidos_vendas_liberacao_historico`, gravado por trigger.
-> - 🔴 **Não existe em código:** o pedido criado pelo hub, a fila para o Omie e a gravação da liberação na criação. O desenho de `core_comercial.pedidos` já guarda a marcação e quem liberou (SQL-016, outro agente).
+> - 🔴 **Não existe em código:** o pedido criado pelo hub, a fila para o Omie e a gravação da liberação na criação. O desenho de `core_vendas_faturamento.pedidos` (N16-116; antes `core_comercial`) já guarda a marcação e quem liberou (SQL-016, outro agente).
 > - 🟡 **Resposta à OQ-15 (a chave é o número do Omie, que só existe depois da resposta da API):** a liberação é gravada **na mesma transação em que o hub recebe o número do Omie**, com a data e o autor da escolha feita na proposta. Detalhes na seção 4.
 > - ✅ **OQ-15 respondida pelo [[Estudo-Omie-API]] (21/10):** o `IncluirPedido` devolve o número do pedido na própria resposta, e o pedido vai com o `codigo_pedido_integracao` (N16-26). A liberação é gravada **na resposta do `IncluirPedido`**, sem esperar a pipeline `ListarPedidos`; o código de integração serve de chave de idempotência.
 > - 🟡 O pedido criado por API pode nascer **bloqueado** no Omie (OQ-16, teste pendente); o **vendedor cancela, edita e exclui** o pedido (N16-84; o Omie tem `CancelarPedidoVenda`), e o cancelamento é guardado no hub (N16-68 a N16-71, [[LOG-56-Fluxo-da-Proposta-ao-Pedido]] R58 a R62).
@@ -41,7 +42,7 @@ Hoje o pedido nasce **no Omie**, chega ao hub **travado** e o vendedor marca a Q
 | | **Origem proposta** (novo) | **Origem Omie** |
 |---|---|---|
 | Quem cria o pedido | O hub, por API no Omie (fila e pipeline, padrão da OC), `V0.7` | O vendedor, direto no Omie |
-| Como chega ao hub | O hub já o tem em `core_comercial.pedidos` ; o Omie devolve o número | A pipeline `ListarPedidos` grava em `pedidos_vendas` |
+| Como chega ao hub | O hub já o tem em `core_vendas_faturamento.pedidos`; o Omie devolve o número | A pipeline `ListarPedidos` grava em `pedidos_vendas` |
 | Marcação da Qualidade | Obrigatória na proposta (`V0.6`) | Marcada pelo vendedor em `V2`, na tela do pedido (N16-106) |
 | Liberação | **Gravada na criação**, a partir da escolha da proposta | Gravada por `V3` (marcação e liberação numa ação só) |
 | Estado inicial em `status_liberacao` | `liberado` (depois `importado`, como sempre) | `pendente` |
@@ -73,7 +74,7 @@ flowchart TD
 
 ### 4.2 A regra
 
-1. Em `V0.6`, o hub grava em `core_comercial.pedidos`: `acompanhamento_qualidade` (a escolha), `liberado_em` (o instante do clique) e `liberado_por` (o usuário que clicou). É a **escolha da proposta**, e nada mais é pedido ao vendedor.
+1. Em `V0.6`, o hub grava em `core_vendas_faturamento.pedidos`: `acompanhamento_qualidade` (a escolha), `liberado_em` (o instante do clique) e `liberado_por` (o usuário que clicou). É a **escolha da proposta**, e nada mais é pedido ao vendedor.
 2. A pipeline cria o pedido no Omie. Quando o Omie responde com sucesso, a pipeline chama `PATCH /comercial/pedidos_venda/:id/sincronizacao` com o número do Omie (rota de [[LOG-56-Fluxo-da-Proposta-ao-Pedido]], seção 8).
 3. **Na mesma transação** em que grava `status_sincronizacao_omie = 'sincronizado'` e `numero_pedido_omie`, a API chama a função `fn_pedido_liberar_da_proposta` (abaixo). Ela insere a linha em `pedidos_vendas_liberacao`, com a marcação, `liberado_por` e `liberado_em` **iguais aos da escolha da proposta**.
 4. O trigger que já existe (`fn_pedidos_vendas_liberacao_historico`, AFTER INSERT) grava sozinho a linha `liberado` em `pedidos_vendas_liberacao_historico`. A função informa o texto de `referencia` (`PROPOSTA <número da proposta>`), para a trilha dizer de onde veio.
@@ -99,7 +100,7 @@ END $$;
 ```
 
 - A coluna `referencia` do histórico (`varchar(60)`) é preenchida pelo trigger; para gravar `PROPOSTA <número>` o Gustavo ajusta o trigger para ler uma variável de sessão (`SET LOCAL app.liberacao_referencia`) ou passa a função a gravar a linha do histórico ela mesma 🟡. **A escolha é do Gustavo** (OQ-15).
-- A hora do histórico (`created_at`) é a da gravação, não a do clique; o clique está em `liberado_em` da liberação e em `core_comercial.pedidos.liberado_em`.
+- A hora do histórico (`created_at`) é a da gravação, não a do clique; o clique está em `liberado_em` da liberação e em `core_vendas_faturamento.pedidos.liberado_em`.
 
 ### 4.4 Por que não as outras opções da OQ-15
 

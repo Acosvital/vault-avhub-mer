@@ -3,7 +3,7 @@ id: API-014
 aliases: ["Contrato 014", "014-Setor-do-Cliente-e-do-Grupo"]
 tags: [contrato, contrato-api, acompanhamento-clientes, clientes, setor, categorizacao, grupos-de-empresa, av-hub]
 criado: 2026-10-21
-atualizado: 2026-10-26
+atualizado: 2026-10-28
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
@@ -22,7 +22,7 @@ criado_original: 2026-10-21
 > - ✅ **Vários setores por cliente: feito no banco e na API, informado pelo Gustavo (26/10/2026):** commit `43dbec3` e migration `api014b` em produção; `kpis.por_setor` existe em `/acompanhamento_clientes` e o cliente conta em cada um dos setores dele.
 > - ✅ **Conferido por mim em 26/10/2026 (só leitura, na API em uso pelo av-hub):** cada linha traz `setores` (lista; vem com `setor_ativo` a mais) além de `id_setor`/`setor`; `kpis.por_setor` vem com Construção Civil 1, Farmacêutico 1, Mineração 1, Óleo & Gás 2 e "sem setor" 4.004 (soma 4.009 = `total_clientes`). 🟡 **Ainda não vi nenhum cliente com 2 ou mais setores** (por isso a soma fecha no total), então **salvar 2 setores**, o filtro `id_setor` com 2, o Excel e o `403` do perfil só de leitura **não foram conferidos** (gravam dados reais). O front de vários setores está na `develop` do av-hub (`a24d187`, 23/10).
 > - 📝 **Pedido do Nathan, 21/10/2026:** quem cuida dos clientes precisa poder **categorizar o cliente (CNPJ) ou o grupo de empresa por setor**, escolhendo de uma lista e **podendo acrescentar um setor novo** quando o cliente não é de nenhum dos listados. Lista inicial: Agricultura, Arquitetura e Design, Automotivo, Construção Civil, Energia, Indústria Naval, Mineração, Óleo & Gás, Papel & Celulose, Petroquímica, Saneamento e Siderurgia.
-> - ✅ **Hoje não existe** setor do cliente na tela nem no banco do Acompanhamento. `core.parceiros` traz só `cnae` e `tipo_atividade` (vêm do Omie e não servem como lista de setores). O campo `segmento` de `core_comercial.clientes` é do CRM do Comercial, tem outra lista (INDUSTRIA, MINERACAO, ENGENHARIA…) e **não** é o setor deste contrato: os dois ficam separados.
+> - ✅ **Hoje não existe** setor do cliente na tela nem no banco do Acompanhamento. `core.parceiros` traz só `cnae` e `tipo_atividade` (vêm do Omie e não servem como lista de setores). O campo `segmento` de `core_comercial.clientes` (que a N16-116 move para `core_vendas_faturamento`) é do CRM do Comercial, tem outra lista (INDUSTRIA, MINERACAO, ENGENHARIA…) e **não** é o setor deste contrato: os dois ficam separados.
 > - ✅ **Front no `av-hub`** (`develop`, PR #235, `77ef66f`): campo de setor na tela do Acompanhamento (`SetorCampo.tsx`), serviço, tipos e planilha.
 > - ✅ **Conferido em 22/10/2026 no preview** (perfil admin), depois de o Gustavo informar que concluiu: `GET /setores_clientes` responde 200 com os 12 setores iniciais; `GET /acompanhamento_clientes` responde 200 com `id_setor`, `setor` e `setor_origem` em cada linha e aceita `id_setor` e `sem_setor`. Só leitura: o primeiro cliente veio sem setor, como esperado.
 > - 🕓 Registro de 22/10 (superado pelo item acima): `kpis.por_setor` não aparecia na resposta; hoje aparece.
@@ -177,7 +177,7 @@ Corpo (revisado em 23/10/2026: **`id_setores`**, uma lista; o `id_setor` único 
 
 ## Fora deste contrato
 
-- **Setor do Omie ou do CRM:** o `segmento` de `core_comercial.clientes` e o `cnae` ficam como estão; nenhum é importado.
+- **Setor do Omie ou do CRM:** o `segmento` de `clientes` do módulo comercial (hoje `core_comercial`, depois `core_vendas_faturamento`, N16-116) e o `cnae` ficam como estão; nenhum é importado.
 - **Hierarquia de setores** (setor e subsetor) e **setor principal** (não há; vários setores valem igual).
 - **Apagar** setor de verdade: só desativa.
 - **Classificação automática** (por CNAE ou nome): a primeira entrega é manual.

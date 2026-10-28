@@ -9,7 +9,7 @@ fontes: [av-hub 5aa5311 (branch feat/menu-orcamento-vendas-compras) api-comercia
 
 # Mapa do módulo do Pablo (Comercial e Suprimentos), como está hoje
 
-Este mapa descreve o código de teste `av-hub\api-comercial` (N14-15, N16-15) e o que as decisões N16 mudam nele. Cada fato do código traz arquivo e linha (✅). Decisão traz o ID `N16-xx` (📝). O que é proposta nova leva 🟡. O que não deu para conferir leva ❓ ou 🔴. Os desenhos que nascem daqui estão em [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]], [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]] e [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]. Decisões: [[Registro-de-Decisoes]].
+Este mapa descreve o código de teste `av-hub\api-comercial` (N14-15, N16-15) e o que as decisões N16 mudam nele. Cada fato do código traz arquivo e linha (✅). Decisão traz o ID `N16-xx` (📝). O que é proposta nova leva 🟡. O que não deu para conferir leva ❓ ou 🔴. Os desenhos que nascem daqui estão em [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]] e [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]. Decisões: [[Registro-de-Decisoes]].
 
 Caminhos abaixo são relativos a `av-hub\api-comercial\` quando não dizem o contrário.
 
@@ -225,7 +225,7 @@ Tipos de tela ainda dizem "api-comercial" e `PARCIAL`/`FECHADA` (`lib/domain/com
 
 | Hoje no código | Muda para | Decisão | Onde fica o desenho |
 |---|---|---|---|
-| Número `CO-AV2026-0012-R03`, com letras, ano e revisão no texto | Número só numérico, em sequência própria; prefixo só na tela e no PDF | 📝 N16-04 | [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]], SQL-016 |
+| Número `CO-AV2026-0012-R03`, com letras, ano e revisão no texto | Número só numérico, em sequência própria; prefixo só na tela e no PDF | 📝 N16-04 | [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], SQL-016 |
 | Status `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` e editar só em `ABERTA` | `ABERTA` (ajusta), `APROVADA` (trava), `TRANSFORMADA`, `CANCELADA` | 📝 N16-02, N16-03 | API-019 |
 | `PUT` edita e reabre depois de fechada ou perdida | Depois de aprovada não se ajusta nem se reabre | 📝 N16-03 | API-019 |
 | Fechamento parcial por itens, `valor_fechado`, `valor_aberto`, evento `FECHAMENTO_PARCIAL` | Some: uma proposta é um pedido | 📝 N16-02 | API-019 |
@@ -237,9 +237,9 @@ Tipos de tela ainda dizem "api-comercial" e `PARCIAL`/`FECHADA` (`lib/domain/com
 | Solicitação de custo com prazo fixo de 2 dias úteis no código | Prazo definido pelo negócio (parâmetro) | 📝 N16-06, 🔴 OQ-02 | SQL-017 (`sla_solicitacao_dias_uteis`) |
 | Catálogo de produtos é tela de Compras | O vendedor ganha tela de consulta (histórico, fornecedores, preços, média); matriz de preços nova | 📝 N16-07, 🔴 OQ-10 | LOG-60 |
 | Ofertas `PEDIDO_OMIE` vêm de sincronização própria que lê o Omie | Derivam das OCs do hub e do espelho `pedidos_compras` (a pipeline é a fonte) | 📝 N16-15 | SQL-017 (`fn_oferta_gerar_de_ocs`) |
-| Custo real do pedido não existe (só margem estimada com o custo cotado) | Custo real por evento e por item do pedido, com view `vw_pedido_item_custo` | 📝 N16-09 | LOG-61, [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] |
+| Custo real do pedido não existe (só margem estimada com o custo cotado) | Custo real por evento e por item do pedido, com view `vw_pedido_item_custo` | 📝 N16-09 | LOG-61, [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] |
 | Compras não tem papel sobre a proposta | Compras confere a parte de compras (C6) e usa o valor correto na OC (C7); não altera a proposta; o preço fechado com o cliente não muda | 📝 N16-08, N16-17 | LOG-61 |
-| Simulador de Comissões lê a proposta pelo `numero_pedido_omie` | Lê o pedido de venda do hub ligado à proposta (`pedido_venda.id_proposta`) | 📝 N16-11 | [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] §9 |
+| Simulador de Comissões lê a proposta pelo `numero_pedido_omie` | Lê o pedido de venda do hub ligado à proposta (`pedido_venda.id_proposta`) | 📝 N16-11 | [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] §9 |
 
 ### 8.3 Fica de fora da migração
 
@@ -257,7 +257,7 @@ Tipos de tela ainda dizem "api-comercial" e `PARCIAL`/`FECHADA` (`lib/domain/com
 
 ## 9. Defeitos do código de teste que a migração não pode herdar
 
-A auditoria de 15/10 (24 itens) está em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §10. Os que tocam as tabelas e regras da proposta, do Orçamento e da comissão: filtro por responsável que anula o escopo `proprios` (item 1), `vinculados` que não restringe (item 2), CNPJ alfanumérico rejeitado (item 4), cliente criado na proposta que sobrescreve o cadastro de outro vendedor (item 6), custo e margem apagados por `PUT` sem `veCusto` (item 8), `normalizarIpi` na oferta digitada (item 16), sem FK nem `CHECK` (item 17). Os DDL de [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] e [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]] já trazem FK, `CHECK` e CNPJ de 14 posições alfanuméricas.
+A auditoria de 15/10 (24 itens) está em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §10. Os que tocam as tabelas e regras da proposta, do Orçamento e da comissão: filtro por responsável que anula o escopo `proprios` (item 1), `vinculados` que não restringe (item 2), CNPJ alfanumérico rejeitado (item 4), cliente criado na proposta que sobrescreve o cadastro de outro vendedor (item 6), custo e margem apagados por `PUT` sem `veCusto` (item 8), `normalizarIpi` na oferta digitada (item 16), sem FK nem `CHECK` (item 17). Os DDL de [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] e [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]] já trazem FK, `CHECK` e CNPJ de 14 posições alfanuméricas.
 
 ## 10. Perguntas que nascem deste mapa
 

@@ -3,7 +3,7 @@ id: LOG-42
 aliases: ["Contrato 42", "42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio"]
 tags: [contrato, contrato-logica, contrato-api, comissoes, orcamento, av-hub, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-19
+atualizado: 2026-10-28
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Nathan"
@@ -178,7 +178,7 @@ A API cobre o que o front precisa, com a ressalva do item 4.3.2. **Nenhum DDL no
 | # | Pergunta | Dono |
 |---|---|---|
 | P1 | **Data de corte** da tela antiga de orçamento no av-hub. | 🔴 Nathan |
-| P2 | Há dado nos JSON que precise migrar para o módulo novo (Comercial & Suprimentos)? O módulo tem `Fornecedor` e `Produto` próprios em `core_comercial`; se o módulo novo reaproveitar `orc_*` ou carregar de outra fonte, não está no vault. (A API antiga já tem os mesmos dados em `orc_*`.) | 🔴 Nathan (com o Pablo, que atua no Comercial) |
+| P2 | Há dado nos JSON que precise migrar para o módulo novo (Comercial & Suprimentos)? O módulo tem `Fornecedor` e `Produto` próprios em `core_comercial` (que vai para `core_vendas_faturamento`, N16-116, e deve reusar `core.parceiros` e os produtos do Hub, N16-111); se o módulo novo reaproveitar `orc_*` ou carregar de outra fonte, não está no vault. (A API antiga já tem os mesmos dados em `orc_*`.) | 🔴 Nathan (com o Pablo, que atua no Comercial) |
 | P3 | Quem fornece fornecedores/produtos/famílias ao simulador de comissão e ao cadastro de produtos depois da remoção? | 🔴 Nathan |
 | P4 | Mostrar a DDL de `comissao_coordenadores` (colunas, vigência, `ordem_desempate`) e quem edita os parâmetros (tela, rota de escrita ou DBA). | 🔴 Gustavo |
 | P-C2 | A página usa `vendedores[].pedidos` no modal; o swagger diz que não. `incluir_pedidos=true` é aceitável por mês, ou o front busca sob demanda? Mapear `GET /dashboard/comissoes` em `auth.rotas_telas` para `dash-comissoes`. | 🔴 Gustavo |

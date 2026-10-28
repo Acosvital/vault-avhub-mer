@@ -252,7 +252,7 @@ Selo ✅ `integracao-avhub.service.ts:160-192`. 🟡 `compras.fechamento` ainda 
 
 ## 13. Proposta (`core_comercial.propostas.status`, 🟡)
 
-O enum de hoje, no módulo do Pablo, é `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76` ✅). O desenho abaixo é o da migração do [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] (`ck_propostas_status`), pelas N16-02 e N16-03: sem fechamento parcial, ajuste só até aprovar, proposta incompleta não aprova, cancelada não reabre.
+O enum de hoje, no módulo do Pablo, é `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76` ✅). O desenho abaixo é o da migração do [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] (`ck_propostas_status`), pelas N16-02 e N16-03: sem fechamento parcial, ajuste só até aprovar, proposta incompleta não aprova, cancelada não reabre.
 
 ```mermaid
 stateDiagram-v2
@@ -301,7 +301,7 @@ stateDiagram-v2
     CANCELADA --> [*]
 ```
 
-Selo ✅ valores em `enums.prisma:188-195`; transições conforme `custos.routes.ts:406-510` ❓ não relidas linha a linha. O prazo obrigatório (`prazo_resposta`, 2 dias úteis por padrão, `custos.routes.ts:378`) **sai**: o [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]] deixa a coluna nula, e o tempo é só cronometrado (N16-58). O setor de Orçamento é novo; o Moisés é uma das pessoas (N16-104). Regras: [[12-Orcamento-Base-de-Preco]].
+Selo ✅ valores em `enums.prisma:188-195`; transições conforme `custos.routes.ts:406-510` ❓ não relidas linha a linha. O prazo obrigatório (`prazo_resposta`, 2 dias úteis por padrão, `custos.routes.ts:378`) **sai**: o [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]] deixa a coluna nula, e o tempo é só cronometrado (N16-58). O setor de Orçamento é novo; o Moisés é uma das pessoas (N16-104). Regras: [[12-Orcamento-Base-de-Preco]].
 
 ## 16. Comissão nova (`core_comissao`, 🟡)
 

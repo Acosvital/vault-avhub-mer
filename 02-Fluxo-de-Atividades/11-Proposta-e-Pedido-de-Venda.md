@@ -79,7 +79,7 @@ Origem: [[Registro-de-Decisoes]].
 
 ### Proposta (`status`) 🟡
 
-O enum de hoje, no módulo do Pablo, é `StatusProposta`: `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76`). Valores novos, no `CHECK` da migração ([[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]], `ck_propostas_status`):
+O enum de hoje, no módulo do Pablo, é `StatusProposta`: `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76`). Valores novos, no `CHECK` da migração ([[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], `ck_propostas_status`):
 
 | Valor 🟡 | De onde vem | Significado | Quem vê |
 |---|---|---|---|

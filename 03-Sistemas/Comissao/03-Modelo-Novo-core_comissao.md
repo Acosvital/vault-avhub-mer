@@ -87,7 +87,7 @@ erDiagram
     exclusoes }o--o{ comissoes_nf : "zera (cliente/vendedor)"
 ```
 
-Fora do schema, ligadas por chave: `core_comercial.propostas` e `proposta_item`, `core_comercial.pedidos` e `pedidos_itens`, `core_comercial.custos_eventos` e a view `core_comercial.vw_pedido_item_custo` (todas do SQL-016, nomes **no singular**, conferidos em 16/10), `core_vendas_faturamento.notas_fiscais` e `produto_vendas` (NF e itens faturados), `core.unidades`, `core.funcionarios`, `auth.usuarios`. As chaves de `core_comercial` entram no bloco 9 do DDL, depois do SQL-016. As colunas que o motor precisa em `core_comercial` e que o SQL-016 ainda não tem estão em `SQL-018-anexos/0003-entradas-do-motor-em-core_comercial.sql`.
+Fora do schema, ligadas por chave: `core_comercial.propostas` e `proposta_item`, `core_comercial.pedidos` e `pedidos_itens`, `core_comercial.custos_eventos` e a view `core_comercial.vw_pedido_item_custo` (todas do SQL-016, nomes **no singular**, conferidos em 16/10), `core_vendas_faturamento.notas_fiscais` e `produto_vendas` (NF e itens faturados), `core.unidades`, `core.funcionarios`, `auth.usuarios`. As chaves de `core_comercial` entram no bloco 9 do DDL, depois do SQL-016. As colunas que o motor precisa em `core_comercial` e que o SQL-016 ainda não tem estão em `SQL-018-anexos/0003-entradas-do-motor-em-core_vendas_faturamento.sql`.
 
 ## Em camadas
 
@@ -136,7 +136,7 @@ A tela da proposta e a tela da Controladoria usam o **mesmo motor e as mesmas re
 | Rodapé: MARK-UP S/ COMPRA | total | `markup_bruto_pct` (o "AC8", `motor.ts:464-465`) | `markup_bruto` |
 | Rodapé: MARGEM e letra do pedido | total | `margem_liquida_pct`, `letra_equivalente` | `margem_liquida`, `letra_equivalente` |
 
-Colunas que o modelo da rodada anterior **não tinha** e que foram acrescentadas: `comissao_calculos.icms_destino_pct`, `encargo_pagamento_pct`, `frete_compra_total`, `markup_projetado`, `markup_real`; `comissao_calculo_itens.codigo_produto`, `preco_total_sugerido`. A origem dessas entradas no lado da proposta (`core_comercial`) é o anexo `0003-entradas-do-motor-em-core_comercial.sql`: o SQL-016 de 16/10 ainda não tem a origem da compra, a quantidade e a unidade de compra, o IPI, a ST e o frete da compra por item, o destino do ICMS, a condição com encargo e o DIFAL.
+Colunas que o modelo da rodada anterior **não tinha** e que foram acrescentadas: `comissao_calculos.icms_destino_pct`, `encargo_pagamento_pct`, `frete_compra_total`, `markup_projetado`, `markup_real`; `comissao_calculo_itens.codigo_produto`, `preco_total_sugerido`. A origem dessas entradas no lado da proposta (`core_comercial`) é o anexo `0003-entradas-do-motor-em-core_vendas_faturamento.sql`: o SQL-016 de 16/10 ainda não tem a origem da compra, a quantidade e a unidade de compra, o IPI, a ST e o frete da compra por item, o destino do ICMS, a condição com encargo e o DIFAL.
 
 ## Valores fixos (`CHECK`)
 

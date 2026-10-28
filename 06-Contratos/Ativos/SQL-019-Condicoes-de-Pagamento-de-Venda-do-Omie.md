@@ -134,4 +134,4 @@ Criar condição por API, cadastrar o encargo de cada condição (Controladoria)
 
 ## Ver também
 
-[[Mapa-IncluirPedido-Omie]] · [[14-Telas-e-Experiencia-do-Usuario]] · [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[03-Modelo-Novo-core_comissao]]
+[[Mapa-IncluirPedido-Omie]] · [[14-Telas-e-Experiencia-do-Usuario]] · [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[03-Modelo-Novo-core_comissao]]

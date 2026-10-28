@@ -9,7 +9,7 @@ fontes: [Registro-de-Decisoes (N16-09 a N16-11, N16-17 a N16-23, N16-34 a N16-51
 
 # Custo real e comissão no fluxo (K1 a K6)
 
-**Só o fluxo.** Esta nota mostra por onde o custo real e a comissão atravessam o fluxo mestre. Os **modelos de dados** estão nos contratos: o custo realizado por item em `core_comercial` ([[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]]) e a comissão nova em `core_comissao` ([[SQL-018-Schema-core_comissao-Comissao-da-Proposta]], testado em Postgres 18 com as respostas da Controladoria). O modelo está explicado em [[03-Modelo-Novo-core_comissao]]. Decisões: [[Registro-de-Decisoes]]. Selos em [[Regras-do-Vault]].
+**Só o fluxo.** Esta nota mostra por onde o custo real e a comissão atravessam o fluxo mestre. Os **modelos de dados** estão nos contratos: o custo realizado por item em `core_comercial` ([[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]]) e a comissão nova em `core_comissao` ([[SQL-018-Schema-core_comissao-Comissao-da-Proposta]], testado em Postgres 18 com as respostas da Controladoria). O modelo está explicado em [[03-Modelo-Novo-core_comissao]]. Decisões: [[Registro-de-Decisoes]]. Selos em [[Regras-do-Vault]].
 
 ## Nós
 

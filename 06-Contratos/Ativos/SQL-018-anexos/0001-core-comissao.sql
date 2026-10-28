@@ -12,11 +12,11 @@
 --   6. Linha do tempo, fila de recálculo, auditoria
 --   7. Funções (parâmetros, gravar cálculo, fechar NF, decidir, cancelar)
 --   8. Views (vendedor, fila da Controladoria, visão geral, resumo mensal)
---   9. Dependências de core_comercial (aplicar DEPOIS do SQL-016/SQL-017)
+--   9. Dependências de core_vendas_faturamento (aplicar DEPOIS do SQL-016/SQL-017)
 --
 -- Não toca em core_comissionamento. Aditivo e idempotente onde possível.
 -- Revisado em 16/10/2026 (N16-18, N16-19, N16-20): colunas da tela do simulador, custo real POR EVENTO com as
--- condições do próprio evento, conferência de Compras, nomes singulares de core_comercial no bloco 9.
+-- condições do próprio evento, conferência de Compras, nomes singulares de core_vendas_faturamento no bloco 9.
 -- Percentuais em PONTOS PERCENTUAIS (2 = 2%), como no módulo atual.
 -- ============================================================================
 
@@ -558,7 +558,7 @@ COMMENT ON TABLE core_comissao.comissao_calculo_itens IS 'Item de um cálculo, c
 COMMENT ON COLUMN core_comissao.comissao_calculo_itens.preco_unit_compra_cotado IS 'Preço unitário de compra que o vendedor pôs na proposta (na unidade de compra). No cálculo REAL o custo líquido do item é a SOMA do custo líquido de cada evento (comissao_calculo_eventos, com as condições do próprio evento, N16-20) mais a parte ainda não coberta, calculada com o preço e as condições cotados.';
 COMMENT ON COLUMN core_comissao.comissao_calculo_itens.custo_liquido_descoberto IS 'REAL: custo líquido da quantidade ainda não coberta por evento = custo líquido cotado x qtd_descoberta / qtd. Zero quando o item está completo.';
 COMMENT ON COLUMN core_comissao.comissao_calculo_itens.qtd_eventos IS 'REAL: quantidade de eventos de custo (OC, lote) somados no item.';
-COMMENT ON COLUMN core_comissao.comissao_calculo_itens.custo_real_total IS 'custo_total de core_comercial.vw_pedido_item_custo, lido pelo item do pedido = empresa + número do pedido + produto do Omie (N16-102; soma das linhas de OC ou lote, sem impostos no Ciclo 1). Nulo no cálculo COTADO.';
+COMMENT ON COLUMN core_comissao.comissao_calculo_itens.custo_real_total IS 'custo_total de core_vendas_faturamento.vw_pedido_item_custo, lido pelo item do pedido = empresa + número do pedido + produto do Omie (N16-102; soma das linhas de OC ou lote, sem impostos no Ciclo 1). Nulo no cálculo COTADO.';
 COMMENT ON COLUMN core_comissao.comissao_calculo_itens.comissao_letra_pct IS 'Percentual da letra (ou 0 no prejuízo, ou o fixo da fabricação interna) ANTES do teto da regra fixa.';
 COMMENT ON COLUMN core_comissao.comissao_calculo_itens.comissao_pct IS 'Percentual do item neste cálculo, já com o teto da regra fixa. É o "percentual do vendedor" (COTADO) ou "percentual de compras" (REAL) do módulo atual.';
 COMMENT ON COLUMN core_comissao.comissao_calculo_itens.valor_comissao_estimado IS 'venda_item x comissao_pct / 100, sobre o valor do pedido. O pagamento real usa o faturado da NF (comissoes_nf_itens).';
@@ -631,7 +631,7 @@ CREATE INDEX ix_calc_eventos_custo ON core_comissao.comissao_calculo_eventos (id
 CREATE TRIGGER trg_calc_eventos_imutavel BEFORE UPDATE OR DELETE ON core_comissao.comissao_calculo_eventos
   FOR EACH ROW EXECUTE FUNCTION core_comissao.fn_log_imutavel();
 COMMENT ON TABLE core_comissao.comissao_calculo_eventos IS 'Detalhe por evento do custo líquido de um item REAL (N16-20): condições do próprio evento (condição de pagamento, encargo, origem do ICMS, IPI, ST, DIFAL, frete, fornecedor) e o custo líquido pela fórmula do motor. Só INSERT. A soma de custo_liquido dos eventos mais custo_liquido_descoberto do item é o custo_liquido do item.';
-COMMENT ON COLUMN core_comissao.comissao_calculo_eventos.id_custo_evento IS 'core_comercial.custos_eventos.id (SQL-016). FK entra no bloco 9, depois do SQL-016.';
+COMMENT ON COLUMN core_comissao.comissao_calculo_eventos.id_custo_evento IS 'core_vendas_faturamento.custos_eventos.id (SQL-016). FK entra no bloco 9, depois do SQL-016.';
 COMMENT ON COLUMN core_comissao.comissao_calculo_eventos.encargo_pagamento_pct IS 'Encargo da condição de pagamento da OC (OQ-12). Guardado para auditoria; a fórmula atual do custo líquido não o usa (o encargo só entra no preço sugerido).';
 COMMENT ON COLUMN core_comissao.comissao_calculo_eventos.imposto_real IS 'true quando IPI, ST, ICMS e DIFAL vieram do documento (OQ-11). false = herdados da proposta (cálculo parcial por imposto): hoje a OC do hub não guarda imposto por item (N14-23).';
 COMMENT ON COLUMN core_comissao.comissao_calculo_eventos.frete_tipo IS 'VALOR quando a OC traz o frete do evento; RATEIO usa parametros.rateio_logistica_pct sobre compra + IPI + ST, como motor.ts:307-310.';
@@ -1784,22 +1784,22 @@ COMMENT ON VIEW core_comissao.vw_comissao_faturamento_x_compras IS 'Faturamento 
 COMMIT;
 
 -- ----------------------------------------------------------------------------
--- 9. Dependências de core_comercial. APLICAR DEPOIS do SQL-016 e do SQL-017.
+-- 9. Dependências de core_vendas_faturamento. APLICAR DEPOIS do SQL-016 e do SQL-017.
 --    Nomes conferidos contra a migração do SQL-016 de 26/10 (propostas, propostas_itens, pedidos, pedidos_itens, custos_eventos).
 --    N16-102: o custo real vale também para o pedido digitado direto no Omie (custos_eventos é por empresa + pedido + produto),
 --    mas a comissão NOVA exige proposta (comissoes.id_proposta NOT NULL): o pedido sem proposta segue no motor atual.
 -- ----------------------------------------------------------------------------
 -- BEGIN;
 -- ALTER TABLE core_comissao.comissoes
---   ADD CONSTRAINT fk_comissoes_proposta FOREIGN KEY (id_proposta) REFERENCES core_comercial.propostas(id),
---   ADD CONSTRAINT fk_comissoes_pedido   FOREIGN KEY (id_pedido_venda) REFERENCES core_comercial.pedidos(id);
+--   ADD CONSTRAINT fk_comissoes_proposta FOREIGN KEY (id_proposta) REFERENCES core_vendas_faturamento.propostas(id),
+--   ADD CONSTRAINT fk_comissoes_pedido   FOREIGN KEY (id_pedido_venda) REFERENCES core_vendas_faturamento.pedidos(id);
 -- ALTER TABLE core_comissao.comissao_calculo_itens
---   ADD CONSTRAINT fk_calc_itens_proposta FOREIGN KEY (id_item_proposta) REFERENCES core_comercial.propostas_itens(id),
---   ADD CONSTRAINT fk_calc_itens_pedido   FOREIGN KEY (id_item_pedido) REFERENCES core_comercial.pedidos_itens(id);
+--   ADD CONSTRAINT fk_calc_itens_proposta FOREIGN KEY (id_item_proposta) REFERENCES core_vendas_faturamento.propostas_itens(id),
+--   ADD CONSTRAINT fk_calc_itens_pedido   FOREIGN KEY (id_item_pedido) REFERENCES core_vendas_faturamento.pedidos_itens(id);
 -- ALTER TABLE core_comissao.comissao_calculo_eventos
---   ADD CONSTRAINT fk_calc_eventos_custo FOREIGN KEY (id_custo_evento) REFERENCES core_comercial.custos_eventos(id);
+--   ADD CONSTRAINT fk_calc_eventos_custo FOREIGN KEY (id_custo_evento) REFERENCES core_vendas_faturamento.custos_eventos(id);
 -- ALTER TABLE core_comissao.comissoes_nf_itens
---   ADD CONSTRAINT fk_nf_itens_pedido FOREIGN KEY (id_item_pedido) REFERENCES core_comercial.pedidos_itens(id);
+--   ADD CONSTRAINT fk_nf_itens_pedido FOREIGN KEY (id_item_pedido) REFERENCES core_vendas_faturamento.pedidos_itens(id);
 --
 -- -- Evento de custo novo enfileira o recálculo da comissão do pedido (um registro pendente por comissão e motivo).
 -- CREATE OR REPLACE FUNCTION core_comissao.fn_custo_evento_enfileirar() RETURNS trigger LANGUAGE plpgsql AS $$
@@ -1810,18 +1810,18 @@ COMMIT;
 --   ON CONFLICT (id_comissao, motivo) WHERE processado_em IS NULL DO NOTHING;
 --   RETURN NULL;
 -- END $$;
--- CREATE TRIGGER trg_custo_evento_enfileirar AFTER INSERT ON core_comercial.custos_eventos
+-- CREATE TRIGGER trg_custo_evento_enfileirar AFTER INSERT ON core_vendas_faturamento.custos_eventos
 --   FOR EACH ROW EXECUTE FUNCTION core_comissao.fn_custo_evento_enfileirar();
 --
 -- -- Rede de segurança: comissões EM_ACOMPANHAMENTO cujo custo real mudou desde o último cálculo REAL
--- -- (colunas de core_comercial.vw_pedido_item_custo: id_item_pedido, quantidade_coberta, custo_total, eventos).
+-- -- (colunas de core_vendas_faturamento.vw_pedido_item_custo: id_item_pedido, quantidade_coberta, custo_total, eventos).
 -- CREATE OR REPLACE VIEW core_comissao.vw_comissao_custo_divergente AS
 -- SELECT c.id AS id_comissao
 --   FROM core_comissao.comissoes c
 --  WHERE c.estado = 'EM_ACOMPANHAMENTO'
 --    AND EXISTS (
 --      SELECT 1
---        FROM core_comercial.vw_pedido_item_custo v
+--        FROM core_vendas_faturamento.vw_pedido_item_custo v
 --        LEFT JOIN core_comissao.comissao_calculo_itens ir
 --               ON ir.id_calculo = c.id_calculo_real AND ir.id_item_pedido = v.id_item_pedido
 --       WHERE v.id_pedido = c.id_pedido_venda

@@ -3,10 +3,10 @@ id: LOG-56
 aliases: ["Contrato 56", "56-Fluxo-da-Proposta-ao-Pedido"]
 tags: [contrato, contrato-logica, contrato-api, proposta, pedido-de-venda, compras, comissao, av-hub, fluxo, cancelamento, devolucao]
 criado: 2026-10-16
-atualizado: 2026-10-21
+atualizado: 2026-10-28
 status: proposta
 sistemas: [hub-banco, hub-api, hub-front, pipeline]
-dono: "Nathan e Pablo"
+dono: "Nathan e Robert"
 etapa_0b: [V0.1, V0.2, V0.3, V0.4, V0.5, V0C, V0.6, V0.7, V1, C6, C7, C8, K1, K2, K3, K4, K5, K6]
 fontes: ["Registro-de-Decisoes (N16-01 a N16-74)", "Estudo-Omie-API (documentação do Omie lida em 21/10/2026)", "Proposta-Orcamento-Comissao/01-Decisoes/Respostas-da-Controladoria-2026-10-19 (fora do vault)", "Proposta-Orcamento-Comissao/01-Decisoes/Respostas-de-Compras-2026-10-19 (fora do vault)", "09-Diagramas/fontes/tela-simulador-comissao.png", "09-Diagramas/fontes/email-divergencia-margem-pv27824.jpg e pv28204.jpg", "av-hub app/(protected)/comissoes/simulador/page.tsx, lib/simulador/motor.ts", "03-Sistemas/Comissao/01-Motor-Atual-Como-Calcula", "11-Proposta-e-Pedido-de-Venda", "api-comercial 5aa5311: prisma/models/vendas.prisma, enums.prisma, src/modules/propostas/propostas.service.ts, propostas.routes.ts, src/modules/custos/custos.routes.ts, src/domain/permissoes/capacidades.ts, src/domain/numeracao/numeroProposta.ts", "Dump Avhub (Esqueleto).sql: contadores_documento (16552), fn_proximo_numero_documento (8110), pedidos_vendas_liberacao (18285)", "omie-elt-pipeline envioOrdensCompra.ts:18-40", "Proposta-Orcamento-Comissao/08-Reuniao/Proposta-Orcamento-Pedido-Comissao.docx (fora do vault)"]
 criado_original: 2026-10-16
@@ -16,9 +16,12 @@ criado_original: 2026-10-16
 
 > **Onde atua:** av-hub: banco, API, front · pipeline Omie
 
-> [!info] Situação em 21/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** `V0.1` a `V0.7`, `V0C`, `V1`, `C6`, `C7`, `C8` e `K1` a `K6` · **Dono:** Nathan (regra e front) e Pablo (módulo)
+> [!info] Situação em 28/10/2026
+> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** `V0.1` a `V0.7`, `V0C`, `V1`, `C6`, `C7`, `C8` e `K1` a `K6` · **Dono:** Nathan (regra, front e começo da comissão) e Robert (rotas, N16-117; o Pablo acompanha)
 >
+> - 📝 **28/10/2026, quem faz o quê (N16-115, N16-117, N16-118):** a primeira entrega é a **proposta**. O **Nathan** faz a criação e a revisão da proposta (`V0.1`, `V0.2`) e o começo da comissão (`K1`); o **Robert**, as rotas na `api-acos-vital`; o **Gustavo**, o banco. O Pablo acompanha. As telas que o Pablo já fez ficam e trocam de backend (N16-119).
+> - 📝 **N16-116:** não existirá `core_comercial`; proposta, itens, revisões e pedido do Hub ficam em `core_vendas_faturamento`.
+> - 📝 **N16-113:** e-mail e notificações do Hub ficam para o futuro; a proposta vai ao cliente fora do sistema e o sino não ganha backend agora.
 > - 📝 As **regras** vêm das decisões N16-01 a N16-74 do Nathan (16 a 21/10/2026), registradas em [[Registro-de-Decisoes]]. Rotas, nomes de estado e códigos de erro são **propostas 🟡**.
 > - ✅ O que existe hoje está só no `api-comercial` (módulo de teste do Pablo, N14-15), não na `api-acos-vital`: proposta, revisão, versões, cálculo, duplicar, custo por item, pedido de custo e média de preços ([[11-Proposta-e-Pedido-de-Venda]]).
 > - 🔴 **Nada** de aprovada, incompleta, cancelar com histórico, numeração só numérica, pedido por API, fila, liberação na criação, `C6`, `C7`, `C8`, cancelamento de pedido e devolução existe em código.
@@ -88,7 +91,7 @@ Cada regra tem a decisão de origem. 🟡 = proposta deste contrato (default de 
 | R21 | O pedido do hub guarda `status_sincronizacao_omie` com `pendente`, `sincronizado`, `erro`. Com `erro` (o Omie recusou), o vendedor vê o **motivo** e o botão **"Tentar novamente"**; a proposta continua `APROVADA` e a marcação da Qualidade não se perde | 📝 N16-36 |
 | R22 | Criado o pedido, a proposta passa a `TRANSFORMADA` e fica travada. Um pedido por proposta (vínculo único) | 📝 N16-02; 🟡 estado |
 | R23 | O pedido **nasce liberado**, sem `V3`. O histórico de liberação (`liberado`) é gravado **na resposta do `IncluirPedido`**, com a marcação da proposta e `liberado_por` = quem transformou ([[LOG-58-Liberacao-do-Pedido-Origem-Proposta]]) | 📝 N16-05; ✅ OQ-15 pelo [[Estudo-Omie-API]] |
-| R24 | O `V1` tem duas origens: a proposta, ou o pedido digitado direto no Omie. Os dois ficam em `core_comercial.pedidos` (origem `PROPOSTA` ou `OMIE`) e seguem o mesmo fluxo; o do Omie ainda passa pelo portão `V2`/`V3` (R38) | 📝 N16-05, N16-106 |
+| R24 | O `V1` tem duas origens: a proposta, ou o pedido digitado direto no Omie. Os dois ficam em `core_vendas_faturamento.pedidos` (N16-116) (origem `PROPOSTA` ou `OMIE`) e seguem o mesmo fluxo; o do Omie ainda passa pelo portão `V2`/`V3` (R38) | 📝 N16-05, N16-106 |
 | R25 | A proposta com produto pendente (`PEND-xxxx`, sem cadastro no Omie) **não vira pedido** até o cadastro; o Fiscal cria o produto | 📝 N16-28 |
 | R26 | O pedido vai ao Omie com o **código de integração** do pedido (`codigo_pedido_integracao`) e o de cada item (`codigo_item_integracao`); a pipeline passa a **gravar** esses códigos no hub. O número do Omie continua a chave do pedido no MES e na liberação. 🟡 Mandar o nosso `numero_pedido` no `IncluirPedido` e a etapa `"10"`: testar | 📝 N16-26; 🟡 [[Estudo-Omie-API]] |
 | R26a | O pedido criado por API pode nascer **bloqueado** na tela do Omie; se o Fiscal não conseguir faturar, a pipeline manda `AlterarPedidoVenda` com `bloqueado = "N"` 🟡 | ❓ teste no Omie |
@@ -320,7 +323,7 @@ Escopo: `proprios`, `vinculados` e `todos` do perfil (como em LOG-40); o signifi
 
 ## 8. Rotas (propostas 🟡)
 
-Prefixo `/comercial` como no desenho do LOG-52; nomes finais são do Gustavo e do Pablo.
+O prefixo `/comercial` do desenho do LOG-52 **sai** (N16-116): as tabelas ficam em `core_vendas_faturamento` e, como no resto desse schema, a rota tende a usar só o nome do recurso. Nomes finais são do Robert e do Gustavo (N16-117).
 
 | Método e rota | Efeito | Permissão | Nó |
 |---|---|---|---|

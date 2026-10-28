@@ -3,12 +3,12 @@ id: API-021
 aliases: ["Contrato API 021", "021-Custo-Real-por-Evento-e-Conferencia-de-Compras"]
 tags: [contrato, contrato-api, custo-real, compras, oc, nf-de-entrada, omie, impostos, api-acos-vital, pipeline]
 criado: 2026-10-21
-atualizado: 2026-10-21
+atualizado: 2026-10-28
 status: proposta
 sistemas: [hub-api, pipeline, mes-api]
 dono: "Nathan, Gustavo e Robert"
 etapa_0b: [C6, C7, R0, R4, K2]
-fontes: ["13-Custo-Real-e-Comissao-no-Fluxo", "SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda (custo_evento, fn_custo_evento_*)", "LOG-56-Fluxo-da-Proposta-ao-Pedido (R27 a R34, R47 a R49)", "Estudo-Omie-API (pedido de compra, RecebimentoNFe, ListarNF)", "Registro-de-Decisoes (N16-09, N16-20, N16-22, N16-23, N16-37, N16-38, N16-40, N16-53, N16-57)", "LOG-47-Custo-Real-por-Item-no-Hub"]
+fontes: ["13-Custo-Real-e-Comissao-no-Fluxo", "SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento (custo_evento, fn_custo_evento_*)", "LOG-56-Fluxo-da-Proposta-ao-Pedido (R27 a R34, R47 a R49)", "Estudo-Omie-API (pedido de compra, RecebimentoNFe, ListarNF)", "Registro-de-Decisoes (N16-09, N16-20, N16-22, N16-23, N16-37, N16-38, N16-40, N16-53, N16-57)", "LOG-47-Custo-Real-por-Item-no-Hub"]
 criado_original: 2026-10-21
 ---
 
@@ -16,9 +16,10 @@ criado_original: 2026-10-21
 
 > **Onde atua:** av-hub: API · pipeline Omie · MES (requisição e recebimento)
 
-> [!info] Situação em 21/10/2026
-> **Status:** `proposta` · **Donos:** Nathan (pipeline e telas), Gustavo (banco e revisão), Robert (requisição e lote) · Banco: [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]]
+> [!info] Situação em 28/10/2026
+> **Status:** `proposta` · **Donos:** Nathan (pipeline e telas), Gustavo (banco e revisão), Robert (requisição e lote) · Banco: [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]]
 >
+> - 📝 **28/10/2026, N16-116:** não existirá `core_comercial`; as tabelas ficam em **`core_vendas_faturamento`** ([[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], bloco A0). O prefixo `/comercial/` das rotas **sai** (N16-116, efeito 3). No Hub, as rotas de `core_vendas_faturamento` são montadas pelo nome do recurso (`/pedidos_vendas`, `/pedidos_liberacao`), então `/comercial/propostas` tende a virar `/propostas`; o nome final é do Robert com o Gustavo ❓. Nesta nota, leia `/comercial/...` como o recurso sem o prefixo. Os eventos de custo (`custos_eventos`) e a divergência (`divergencias_compra`) ficam no mesmo schema da OC e do pedido.
 > - ✅ Existe hoje: `custo-itens` e LOG-47 (custo por item). 🔴 Não existe: eventos por OC e NF de entrada, campos de imposto na OC, vínculo da NF ao item.
 
 ## 1. Por quê
@@ -69,4 +70,4 @@ OQ-11 (respondida: vem do Omie), OQ-34 e OQ-39 (vínculo e unidade), OQ-32, OQ-4
 
 ## Ver também
 
-[[13-Custo-Real-e-Comissao-no-Fluxo]] · [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[API-022-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria]] · [[LOG-47-Custo-Real-por-Item-no-Hub]] · [[Estudo-Omie-API]]
+[[13-Custo-Real-e-Comissao-no-Fluxo]] · [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[API-022-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria]] · [[LOG-47-Custo-Real-por-Item-no-Hub]] · [[Estudo-Omie-API]]

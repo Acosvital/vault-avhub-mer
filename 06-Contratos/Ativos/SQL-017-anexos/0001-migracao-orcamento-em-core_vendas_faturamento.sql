@@ -1,5 +1,5 @@
--- SQL-017 · MIGRAÇÃO do orçamento sobre o core_comercial REAL (PROPOSTA, 26/10/2026) · dono: Gustavo (DBA)
--- Substitui o desenho antigo (schema novo core_orcamento): o banco real JÁ TEM, em core_comercial, as ofertas (imutáveis, com
+-- SQL-017 · MIGRAÇÃO do orçamento em core_vendas_faturamento (PROPOSTA, 26/10/2026; schema trocado em 28/10/2026, N16-116) · dono: Gustavo (DBA)
+-- Substitui o desenho antigo (schema novo core_orcamento): o banco real JÁ TEM (vindas do core_comercial do Contrato 52, movidas pelo SQL-016 bloco A0), as ofertas (imutáveis, com
 -- histórico), categorias de suprimento, fornecedores (perfil, categorias, certificados, apelidos), produtos (perfil e pendentes),
 -- parâmetros de custo e tabela da telha com vigência, e as solicitações de custo (Contrato 52). Aqui entra só o que FALTA:
 -- ofertas que nascem das OCs, base e estatística de preço (a "bolsa de valores" do vendedor, N16-07, N16-52, N16-55) e o fim do prazo
@@ -9,18 +9,18 @@
 BEGIN;
 
 -- ───────────────────────── A) ofertas: novas fontes (a OC do Hub e o pedido de compra feito direto no Omie)
-ALTER TABLE core_comercial.ofertas DROP CONSTRAINT ck_ofertas_fonte;
-ALTER TABLE core_comercial.ofertas ADD CONSTRAINT ck_ofertas_fonte
+ALTER TABLE core_vendas_faturamento.ofertas DROP CONSTRAINT ck_ofertas_fonte;
+ALTER TABLE core_vendas_faturamento.ofertas ADD CONSTRAINT ck_ofertas_fonte
   CHECK (fonte IN ('MANUAL','MAPA_COTACAO','MIGRACAO','OC_HUB','OC_OMIE'));
 
 -- ───────────────────────── B) pedido de custo sem prazo fixo (N16-58): o tempo é cronometrado por created_at
-ALTER TABLE core_comercial.solicitacoes_custo ALTER COLUMN prazo_resposta DROP NOT NULL;
-COMMENT ON COLUMN core_comercial.solicitacoes_custo.prazo_resposta IS 'N16-58: SEM prazo obrigatório; nulo = sem prazo. O tempo parado é cronometrado desde created_at (ou atribuida_em). O vendedor nunca fica bloqueado.';
+ALTER TABLE core_vendas_faturamento.solicitacoes_custo ALTER COLUMN prazo_resposta DROP NOT NULL;
+COMMENT ON COLUMN core_vendas_faturamento.solicitacoes_custo.prazo_resposta IS 'N16-58: SEM prazo obrigatório; nulo = sem prazo. O tempo parado é cronometrado desde created_at (ou atribuida_em). O vendedor nunca fica bloqueado.';
 
 -- ───────────────────────── C) base e estatística de preço (derivadas das ofertas)
 
 -- Estado atual por produto × fornecedor × unidade de preço: a oferta vigente, a última, e a janela do histórico.
-CREATE TABLE core_comercial.produtos_precos_fornecedor (
+CREATE TABLE core_vendas_faturamento.produtos_precos_fornecedor (
     id_produto         uuid NOT NULL,
     id_parceiro        uuid NOT NULL,
     unidade_preco      varchar(4) NOT NULL,
@@ -41,12 +41,12 @@ CREATE TABLE core_comercial.produtos_precos_fornecedor (
     CONSTRAINT ck_produtos_precos_fornecedor_media CHECK (tipo_media IS NULL OR tipo_media IN ('PONDERADA','SIMPLES')),
     CONSTRAINT fk_produtos_precos_fornecedor_produto FOREIGN KEY (id_produto) REFERENCES core.produtos(id) ON DELETE CASCADE,
     CONSTRAINT fk_produtos_precos_fornecedor_parceiro FOREIGN KEY (id_parceiro) REFERENCES core.parceiros(id) ON DELETE CASCADE,
-    CONSTRAINT fk_produtos_precos_fornecedor_ultima FOREIGN KEY (id_ultima_oferta) REFERENCES core_comercial.ofertas(id)
+    CONSTRAINT fk_produtos_precos_fornecedor_ultima FOREIGN KEY (id_ultima_oferta) REFERENCES core_vendas_faturamento.ofertas(id)
 );
-CREATE INDEX ix_produtos_precos_fornecedor_parceiro ON core_comercial.produtos_precos_fornecedor (id_parceiro);
+CREATE INDEX ix_produtos_precos_fornecedor_parceiro ON core_vendas_faturamento.produtos_precos_fornecedor (id_parceiro);
 
 -- Consulta do vendedor: um quadro por produto × unidade, todos os fornecedores juntos. Volatilidade pelo coeficiente de variação (OQ-46).
-CREATE TABLE core_comercial.produtos_estatisticas_preco (
+CREATE TABLE core_vendas_faturamento.produtos_estatisticas_preco (
     id_produto             uuid NOT NULL,
     unidade_preco          varchar(4) NOT NULL,
     janela_dias            integer NOT NULL,
@@ -65,27 +65,27 @@ CREATE TABLE core_comercial.produtos_estatisticas_preco (
     CONSTRAINT ck_produtos_estatisticas_preco_media CHECK (tipo_media IS NULL OR tipo_media IN ('PONDERADA','SIMPLES')),
     CONSTRAINT fk_produtos_estatisticas_preco_produto FOREIGN KEY (id_produto) REFERENCES core.produtos(id) ON DELETE CASCADE
 );
-COMMENT ON COLUMN core_comercial.produtos_estatisticas_preco.coeficiente_variacao IS 'Desvio padrão / média, em %. É a volatilidade da página do produto; os limites (alta, média, baixa) e o "dado recente" de 7 dias são PARÂMETRO com vigência (Proposta-Score-e-Volatilidade-OQ-46), não ficam no banco.';
+COMMENT ON COLUMN core_vendas_faturamento.produtos_estatisticas_preco.coeficiente_variacao IS 'Desvio padrão / média, em %. É a volatilidade da página do produto; os limites (alta, média, baixa) e o "dado recente" de 7 dias são PARÂMETRO com vigência (Proposta-Score-e-Volatilidade-OQ-46), não ficam no banco.';
 
 -- Janela do histórico: dias_historico da vigência atual de parametros_custo (padrão 90).
-CREATE FUNCTION core_comercial.fn_janela_historico_dias() RETURNS integer LANGUAGE sql STABLE AS $$
-  SELECT coalesce((SELECT dias_historico FROM core_comercial.parametros_custo
+CREATE FUNCTION core_vendas_faturamento.fn_janela_historico_dias() RETURNS integer LANGUAGE sql STABLE AS $$
+  SELECT coalesce((SELECT dias_historico FROM core_vendas_faturamento.parametros_custo
                     WHERE vigencia_inicio <= current_date AND (vigencia_fim IS NULL OR vigencia_fim >= current_date)
                     ORDER BY vigencia_inicio DESC LIMIT 1), 90)
 $$;
 
 -- Recalcula a base e a estatística de um produto (trigger da oferta e job diário). Oferta INVALIDADA e "verificar escala" não entram.
-CREATE FUNCTION core_comercial.fn_produtos_recalcular_precos(p_produto uuid) RETURNS void LANGUAGE plpgsql AS $$
-DECLARE v_janela integer := core_comercial.fn_janela_historico_dias();
+CREATE FUNCTION core_vendas_faturamento.fn_produtos_recalcular_precos(p_produto uuid) RETURNS void LANGUAGE plpgsql AS $$
+DECLARE v_janela integer := core_vendas_faturamento.fn_janela_historico_dias();
 BEGIN
-  DELETE FROM core_comercial.produtos_precos_fornecedor WHERE id_produto = p_produto;
-  DELETE FROM core_comercial.produtos_estatisticas_preco WHERE id_produto = p_produto;
+  DELETE FROM core_vendas_faturamento.produtos_precos_fornecedor WHERE id_produto = p_produto;
+  DELETE FROM core_vendas_faturamento.produtos_estatisticas_preco WHERE id_produto = p_produto;
 
-  INSERT INTO core_comercial.produtos_precos_fornecedor
+  INSERT INTO core_vendas_faturamento.produtos_precos_fornecedor
     (id_produto, id_parceiro, unidade_preco, id_oferta_vigente, custo_vigente, vigente_ate, id_ultima_oferta, ultimo_custo, ultimo_em,
      registros_janela, media_janela, tipo_media, minimo_janela, maximo_janela, janela_dias)
   WITH valida AS (
-    SELECT * FROM core_comercial.ofertas
+    SELECT * FROM core_vendas_faturamento.ofertas
      WHERE id_produto = p_produto AND status <> 'INVALIDADA' AND NOT verificar_escala AND custo_liquido_unit > 0
   ), ultima AS (
     SELECT DISTINCT ON (id_parceiro, unidade_preco) id_parceiro, unidade_preco, id AS id_ultima, custo_liquido_unit AS ultimo_custo, data_cotacao AS ultimo_em
@@ -104,10 +104,10 @@ BEGIN
          coalesce(j.n, 0), round(j.media, 4), j.tipo, j.mn, j.mx, v_janela
     FROM ultima u LEFT JOIN vigente v USING (id_parceiro, unidade_preco) LEFT JOIN janela j USING (id_parceiro, unidade_preco);
 
-  INSERT INTO core_comercial.produtos_estatisticas_preco
+  INSERT INTO core_vendas_faturamento.produtos_estatisticas_preco
     (id_produto, unidade_preco, janela_dias, registros, fornecedores, media, tipo_media, minimo, maximo, desvio_padrao, coeficiente_variacao, ultimo, ultimo_em)
   WITH valida AS (
-    SELECT * FROM core_comercial.ofertas
+    SELECT * FROM core_vendas_faturamento.ofertas
      WHERE id_produto = p_produto AND status <> 'INVALIDADA' AND NOT verificar_escala AND custo_liquido_unit > 0
   ), ultimo AS (
     SELECT DISTINCT ON (unidade_preco) unidade_preco, custo_liquido_unit AS ultimo, data_cotacao AS ultimo_em
@@ -124,45 +124,45 @@ BEGIN
     FROM ultimo u LEFT JOIN janela j USING (unidade_preco);
 END $$;
 
-CREATE FUNCTION core_comercial.fn_ofertas_recalcular_trg() RETURNS trigger LANGUAGE plpgsql AS $$
+CREATE FUNCTION core_vendas_faturamento.fn_ofertas_recalcular_trg() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
-  IF NEW.id_produto IS NOT NULL THEN PERFORM core_comercial.fn_produtos_recalcular_precos(NEW.id_produto); END IF;
+  IF NEW.id_produto IS NOT NULL THEN PERFORM core_vendas_faturamento.fn_produtos_recalcular_precos(NEW.id_produto); END IF;
   RETURN NULL;
 END $$;
-CREATE TRIGGER trg_ofertas_recalcular AFTER INSERT OR UPDATE OF status, id_produto ON core_comercial.ofertas
-  FOR EACH ROW EXECUTE FUNCTION core_comercial.fn_ofertas_recalcular_trg();
+CREATE TRIGGER trg_ofertas_recalcular AFTER INSERT OR UPDATE OF status, id_produto ON core_vendas_faturamento.ofertas
+  FOR EACH ROW EXECUTE FUNCTION core_vendas_faturamento.fn_ofertas_recalcular_trg();
 
 -- Status efetivo: VIGENTE vence sozinha depois de valida_ate.
-CREATE VIEW core_comercial.vw_ofertas AS
+CREATE VIEW core_vendas_faturamento.vw_ofertas AS
 SELECT o.*, CASE WHEN o.status = 'VIGENTE' AND o.valida_ate < current_date THEN 'VENCIDA' ELSE o.status END AS status_efetivo
-  FROM core_comercial.ofertas o;
+  FROM core_vendas_faturamento.ofertas o;
 
 -- Série para o gráfico "bolsa de valores" do vendedor: um ponto por preço visto, sem as invalidadas.
-CREATE VIEW core_comercial.vw_produtos_serie_preco AS
+CREATE VIEW core_vendas_faturamento.vw_produtos_serie_preco AS
 SELECT o.id_produto, o.data_cotacao, o.unidade_preco, o.custo_liquido_unit, o.id_parceiro, o.fonte, o.quantidade
-  FROM core_comercial.ofertas o
+  FROM core_vendas_faturamento.ofertas o
  WHERE o.id_produto IS NOT NULL AND o.status <> 'INVALIDADA' AND NOT o.verificar_escala AND o.custo_liquido_unit > 0;
 
 -- Matriz de preços v1: produto × fornecedor, derivada da base (as dimensões extras entram com a OQ-10).
-CREATE VIEW core_comercial.vw_matriz_precos AS
+CREATE VIEW core_vendas_faturamento.vw_matriz_precos AS
 SELECT b.id_produto, b.id_parceiro, pa.nome_fantasia AS fornecedor, b.unidade_preco, b.custo_vigente, b.vigente_ate,
        b.ultimo_custo, b.ultimo_em, b.registros_janela, b.media_janela, b.minimo_janela, b.maximo_janela
-  FROM core_comercial.produtos_precos_fornecedor b
+  FROM core_vendas_faturamento.produtos_precos_fornecedor b
   JOIN core.parceiros pa ON pa.id = b.id_parceiro;
 
 -- ───────────────────────── D) ofertas que vêm das OCs (o setor não digita)
 -- OC do Hub aprovada vira oferta OC_HUB; pedido de compra do Omie que NÃO nasceu no Hub vira OC_OMIE; OC cancelada invalida a oferta.
 -- O preço é líquido de desconto e sem imposto (a OC ainda não traz ICMS, IPI e ST por item: PS-014, N14-23) e a oferta nasce HISTORICA
 -- (preço visto, não cotação a vencer). Idempotente. Chamada pelo job a cada 15 minutos.
-CREATE FUNCTION core_comercial.fn_ofertas_gerar_de_ocs() RETURNS integer LANGUAGE plpgsql AS $$
+CREATE FUNCTION core_vendas_faturamento.fn_ofertas_gerar_de_ocs() RETURNS integer LANGUAGE plpgsql AS $$
 DECLARE v_n integer := 0; v_lin integer; v_validade integer;
 BEGIN
-  SELECT validade_padrao_dias INTO v_validade FROM core_comercial.parametros_custo
+  SELECT validade_padrao_dias INTO v_validade FROM core_vendas_faturamento.parametros_custo
    WHERE vigencia_inicio <= current_date AND (vigencia_fim IS NULL OR vigencia_fim >= current_date)
    ORDER BY vigencia_inicio DESC LIMIT 1;
   v_validade := coalesce(v_validade, 30);
 
-  INSERT INTO core_comercial.ofertas
+  INSERT INTO core_vendas_faturamento.ofertas
     (id_produto, id_parceiro, fonte, id_documento_fonte, preco, unidade_preco, quantidade, condicoes_desconhecidas, tipo_frete,
      data_cotacao, valida_ate, status, custo_liquido_unit)
   SELECT p.id, pa.id, 'OC_HUB', i.id::text, i.valor_unitario,
@@ -181,7 +181,7 @@ BEGIN
   ON CONFLICT (fonte, id_documento_fonte, (COALESCE(id_produto, id_produto_pendente)), id_parceiro) DO NOTHING;
   GET DIAGNOSTICS v_lin = ROW_COUNT; v_n := v_n + v_lin;
 
-  INSERT INTO core_comercial.ofertas
+  INSERT INTO core_vendas_faturamento.ofertas
     (id_produto, id_parceiro, fonte, id_documento_fonte, preco, unidade_preco, quantidade, condicoes_desconhecidas,
      data_cotacao, valida_ate, status, custo_liquido_unit)
   SELECT p.id, pa.id, 'OC_OMIE', ci.id::text, ci.valor_unitario,
@@ -201,7 +201,7 @@ BEGIN
   ON CONFLICT (fonte, id_documento_fonte, (COALESCE(id_produto, id_produto_pendente)), id_parceiro) DO NOTHING;
   GET DIAGNOSTICS v_lin = ROW_COUNT; v_n := v_n + v_lin;
 
-  UPDATE core_comercial.ofertas o
+  UPDATE core_vendas_faturamento.ofertas o
      SET status = 'INVALIDADA', motivo_invalidacao = 'OC cancelada', invalidada_em = now()
     FROM core_vendas_faturamento.ordens_compra_itens i
     JOIN core_vendas_faturamento.ordens_compra oc ON oc.id = i.id_ordem_compra

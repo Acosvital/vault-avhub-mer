@@ -199,4 +199,4 @@ O que isso resolve e o que não resolve:
 
 ## Ver também
 
-[[Estudo-Omie-API]] · [[11-Proposta-e-Pedido-de-Venda]] · [[14-Telas-e-Experiencia-do-Usuario]] · [[LOG-58-Liberacao-do-Pedido-Origem-Proposta]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]]
+[[Estudo-Omie-API]] · [[11-Proposta-e-Pedido-de-Venda]] · [[14-Telas-e-Experiencia-do-Usuario]] · [[LOG-58-Liberacao-do-Pedido-Origem-Proposta]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]]

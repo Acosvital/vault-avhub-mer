@@ -1,7 +1,7 @@
 ---
 tags: [decisoes, registro, dec, en, ec, n14, n16]
 criado: 2026-10-14
-atualizado: 2026-10-27
+atualizado: 2026-10-28
 status: vigente
 dono: Nathan
 fontes: [v1 00-Indice/Registro-de-Decisoes-2026-10-07 (#1 a #99), v1 Decisoes-Chave-ERP e Perguntas-em-Aberto-Consolidadas (DEC-1 a DEC-12), v1 Encaixe-Estoque-Revenda-no-PCP (EN-01 a EN-07, EC-01 a EC-08), decisões do Nathan de 14/10/2026, decisões N16 de 16 a 26/10/2026 (pasta Proposta-Orcamento-Comissao, histórico), código de 14/10]
@@ -9,13 +9,13 @@ fontes: [v1 00-Indice/Registro-de-Decisoes-2026-10-07 (#1 a #99), v1 Decisoes-Ch
 
 # Registro de decisões
 
-Lista única de decisões do projeto: **N16-01 a N16-110** (16 a 26/10), **N14-01 a N14-33** (14 e 15/10), **DEC-1 a DEC-12**, **EN-01 a EN-07**, **EC-01 a EC-08** e **#1 a #99** do registro de 07/10. Cada linha tem data, dono, selo e o texto completo da decisão. Decisões superadas ou ajustadas trazem a nota na coluna "Superada". Prefixos: DEC = decisão com prazo; EN = encaixe do Estoque e da Revenda no PCP; EC = encaixe do circuito de compra, da Qualidade e da baixa; `#n` = item do registro de 07/10. Selos: 📝 decidido, 🟡 proposta adotada, 🔴 aberto, ✅ conferido no código, ❓ não conferido em produção ([[Regras-do-Vault]]). Tarefas: [[Backlog-por-Frente]]. Contradições do v1: [[Contradicoes-Resolvidas]].
+Lista única de decisões do projeto: **N16-01 a N16-119** (16 a 28/10), **N14-01 a N14-33** (14 e 15/10), **DEC-1 a DEC-12**, **EN-01 a EN-07**, **EC-01 a EC-08** e **#1 a #99** do registro de 07/10. Cada linha tem data, dono, selo e o texto completo da decisão. Decisões superadas ou ajustadas trazem a nota na coluna "Superada". Prefixos: DEC = decisão com prazo; EN = encaixe do Estoque e da Revenda no PCP; EC = encaixe do circuito de compra, da Qualidade e da baixa; `#n` = item do registro de 07/10. Selos: 📝 decidido, 🟡 proposta adotada, 🔴 aberto, ✅ conferido no código, ❓ não conferido em produção ([[Regras-do-Vault]]). Tarefas: [[Backlog-por-Frente]]. Contradições do v1: [[Contradicoes-Resolvidas]].
 
 **Precedência:** código, dumps, este registro, [[00-Fluxo-Mestre-0b]], v1. Em conflito entre dois itens, vale o de data mais recente.
 
 ## Decisões de 16 a 26/10/2026 (proposta, orçamento, pedido de venda, custo real e comissão)
 
-Tomadas pelo Nathan entre 16 e 26/10/2026, com respostas da Controladoria (Michele), de Compras e da Gerência. Desenham a proposta (`V0`), o Orçamento (`B1` a `B4`), o pedido de venda do Hub, as datas, o faturamento em partes, o custo real por evento e a comissão nova (`K1` a `K6`). O fluxo foi aprovado em 26/10/2026 ([[11-Proposta-e-Pedido-de-Venda]] e `09-Diagramas/artifact-proposta-pedido.html`). Contratos: [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]], [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]], [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]], [[SQL-019-Condicoes-de-Pagamento-de-Venda-do-Omie]], API-019 a API-022 e LOG-56 a LOG-61 (todos `proposta`, no [[Painel-de-Contratos]]).
+Tomadas pelo Nathan entre 16 e 26/10/2026, com respostas da Controladoria (Michele), de Compras e da Gerência. Desenham a proposta (`V0`), o Orçamento (`B1` a `B4`), o pedido de venda do Hub, as datas, o faturamento em partes, o custo real por evento e a comissão nova (`K1` a `K6`). O fluxo foi aprovado em 26/10/2026 ([[11-Proposta-e-Pedido-de-Venda]] e `09-Diagramas/artifact-proposta-pedido.html`). Contratos: [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]], [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]], [[SQL-019-Condicoes-de-Pagamento-de-Venda-do-Omie]], API-019 a API-022 e LOG-56 a LOG-61 (todos `proposta`, no [[Painel-de-Contratos]]).
 
 | ID | Decisão | Data | Dono | Selo | Superada |
 |---|---|---|---|---|---|

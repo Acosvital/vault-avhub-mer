@@ -120,7 +120,7 @@ Rotas do `api-comercial` (módulo de teste) que serão migradas ([[LOG-52-Migrac
 | `POST /custos/sugerir` | sugestão de custo | `B2` | ✅ `custos.routes.ts:30` |
 | Matriz de preços | 🟡 | `B1`, `B2` | 🔴 |
 
-Contratos: [[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]] (o Orçamento sobre o `core_comercial` real) e [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]]. Dependências: [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] (fases 4 e 5).
+Contratos: [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]] (o Orçamento sobre o `core_comercial` real) e [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]]. Dependências: [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] (fases 4 e 5).
 
 ## Como está no código (✅)
 

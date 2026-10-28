@@ -3,10 +3,10 @@ id: LOG-62
 aliases: ["Contrato 62", "62-Reescopo-Menu-Enxuto-e-Limpeza-do-Modulo-do-Pablo"]
 tags: [contrato, contrato-logica, hub-front, hub-api, menu, telas, vendas, orcamento, compras, limpeza, api-comercial, reescopo]
 criado: 2026-10-27
-atualizado: 2026-10-27
+atualizado: 2026-10-28
 status: proposta
 sistemas: [hub-front, hub-api, hub-banco]
-dono: "Nathan (telas e menu) e Pablo (o que migra e o que não migra)"
+dono: "Nathan (telas e menu) e Robert (o que migra e o que não migra; o Pablo acompanha)"
 etapa_0b: [V0.1, V0.2, B1, B2, B3, B4, C6, C7]
 fontes: ["pedido do Nathan de 27/10/2026 (enxugar, unir telas, separar por área, 'Histórico de compras nem deveria ter')", "preview do av-hub na porta 3000, logado, em 27/10/2026 (Compras carregou; Vendas e Orçamento deram 500 porque a api-comercial estava fora do ar)", "GET /api/menu do Hub em 27/10/2026 (árvore de Vendas, Orçamento, Compras, Comissões e Dashboards)", "av-hub develop (arquivos de app/(protected)/vendas, orcamento e compras; components/Suprimentos, Propostas, PainelComprador, CustoItens, Relatorios, Configuracoes, DashboardComercial)", "av-hub/api-comercial (src/modules, src/domain, prisma/migrations, scripts)", "git log --author=Pablo do av-hub (504 caminhos tocados, 335 ainda existem)", "LOG-52, LOG-57, 14-Telas-e-Experiencia-do-Usuario, Mapa-do-Modulo-do-Pablo, Registro-de-Decisoes (N16-02, N16-13, N16-27, N16-58)"]
 criado_original: 2026-10-27
@@ -16,9 +16,11 @@ criado_original: 2026-10-27
 
 > **Onde atua:** av-hub: front (menu e telas), API (o que o Pablo porta para a `api-acos-vital`) e banco (`auth.telas`)
 
-> [!info] Situação em 27/10/2026
+> [!info] Situação em 28/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** `V0.1`, `V0.2`, `B1` a `B4`, `C6`, `C7` · **Decisões:** N16-107 a N16-110 em [[Registro-de-Decisoes]]
 >
+> - 📝 **28/10/2026, N16-117 a N16-119:** o **Robert** conduz a migração (o Pablo acompanha) e começa pela **proposta** (N16-118). As telas do Pablo **ficam** e trocam de backend; o agrupamento em abas deste contrato vale para elas. A `api-comercial` fica no repositório só para leitura.
+> - 📝 **N16-116:** não existirá `core_comercial`; o que for portado vai para `core_vendas_faturamento`. **N16-112:** um conceito, uma tabela, uma rota, uma tela (cliente no Acompanhamento de Clientes, fornecedor e categoria no Orçamento do Hub). **N16-113:** e-mail e notificações ficam para o futuro.
 > - 📝 **Decidido pelo Nathan (27/10):** o menu fica mais curto, com telas unidas por área de operação; o **Histórico de compras sai** (a tela Ordens de compra já mostra o histórico); o que o Pablo criou **é só ambiente de teste e não tem dado**, então a limpeza é escolher o que **não portar** para a `api-acos-vital`, sem migrar dado.
 > - 🟡 **Proposta, a validar na tela:** o agrupamento em abas (seção 3), a lista de reaproveitar e não portar (seção 5) e as fases (seção 6).
 > - ❓ **Não conferido:** nenhuma tela de Vendas ou de Orçamento foi vista com dado (a `api-comercial` estava fora do ar e responde 500 fora do ambiente de teste); o comportamento foi lido no código. O Relatório Gerencial não foi comparado com o Dashboard da Equipe nem com o Dashboard Comercial.
@@ -31,7 +33,7 @@ O menu de 16/10 ([[LOG-57-Menu-Vendas-Orcamento-Compras]]) reagrupou as telas do
 
 1. **Telas de permissão aparecem como tela.** O `GET /api/menu` devolve `propostas-delegacao`, `propostas-valores`, `solicitacoes-custo` (Vendas) e `custo-item` (Orçamento) como entradas comuns, apesar de o LOG-57 §3 tratá-las como ocultas.
 2. **O mesmo dado em várias telas.** Preço de produto e fornecedor aparece em Catálogo, Pesquisa de materiais e Ofertas; a fila de pedidos de custo está em Painel do Comprador (e a lista de solicitações do vendedor é outra rota do mesmo dado); os dois relatórios de Vendas repetem totais.
-3. **Histórico de compras duplica Ordens de compra.** O Histórico lê uma **cópia** das ordens do Omie que o Pablo grava em `core_comercial.ordens_compra` e `itens_ordem_compra`; Ordens de compra lê as ordens reais do Hub e do Omie (24.324 em 27/10) e já mostra o histórico (decisão do Nathan).
+3. **Histórico de compras duplica Ordens de compra.** O Histórico lê uma **cópia** das ordens do Omie que o Pablo grava em `core_comercial.ordens_compra` e `itens_ordem_compra` (não portadas, N16-109; o schema sai, N16-116); Ordens de compra lê as ordens reais do Hub e do Omie (24.324 em 27/10) e já mostra o histórico (decisão do Nathan).
 
 ## 2. Como foi levantado
 
@@ -104,7 +106,7 @@ Fato (Nathan, 27/10/2026): **tudo é ambiente de teste e não tem dado**; a `api
 
 | O que | Tamanho e onde | Motivo |
 |---|---|---|
-| **Sincronização própria do Omie** | `src/modules/omie/*` (1.028 linhas), `scripts/sincronizar-omie.ts`; tabelas `produtos_contas_omie`, `fornecedores_contas_omie`, `ordens_compra`, `itens_ordem_compra`, `omie_registros_brutos`, `sincronizacoes_omie`, `travas_tarefa` (migrations `20261005120000` e `20261006120642`) | O Hub já tem `core.produtos`, `core.parceiros` e `core_compras`, alimentados pela pipeline (LOG-52 §2 e §3.4: a pipeline é a fonte do Omie, e a sincronização própria "some"). A cópia só existe para alimentar o Histórico e as ofertas `PEDIDO_OMIE`; estas passam a vir das OCs da pipeline ([[SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo]]) |
+| **Sincronização própria do Omie** | `src/modules/omie/*` (1.028 linhas), `scripts/sincronizar-omie.ts`; tabelas `produtos_contas_omie`, `fornecedores_contas_omie`, `ordens_compra`, `itens_ordem_compra`, `omie_registros_brutos`, `sincronizacoes_omie`, `travas_tarefa` (migrations `20261005120000` e `20261006120642`) | O Hub já tem `core.produtos`, `core.parceiros` e `core_compras`, alimentados pela pipeline (LOG-52 §2 e §3.4: a pipeline é a fonte do Omie, e a sincronização própria "some"). A cópia só existe para alimentar o Histórico e as ofertas `PEDIDO_OMIE`; estas passam a vir das OCs da pipeline ([[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]]) |
 | **Histórico de compras** | `src/modules/suprimentos/historicoCompras.ts` (160), rota `/historico-compras`, `components/Suprimentos/HistoricoCompras.tsx` (278), `GraficoComprasMes.tsx` | Lê a cópia acima; sai por §3.3 |
 | **Planilha "pedido a digitar no Omie"** | `src/modules/propostas/pedidoOmie.ts` (388), rotas `GET/PUT /propostas/:id/pedido_omie`, `PedidoOmieModal` | O pedido vai por API e fila (N16-02) |
 | **Migração do ERP antigo** | `scripts/migrar-erp-antigo.ts`, `src/domain/migracao/erpAntigo.ts` (323), `src/modules/propostas/migracao.ts` (192) | Não há migração de propostas antigas (N16-13, N16-27) |
@@ -133,12 +135,12 @@ Proposta do Nathan e minha, de 27/10, **ainda sem confirmação de cada fase**.
 
 | Fase | Entra | Depende de |
 |---|---|---|
-| **1. Núcleo** | Proposta nova (aprovar, transformar em pedido pela fila do Omie); tabelas `pedidos`, `pedidos_itens`, `pedidos_envios` ([[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]]); condições de pagamento e cenários da conta ([[SQL-019-Condicoes-de-Pagamento-de-Venda-do-Omie]]); liberação ([[LOG-58-Liberacao-do-Pedido-Origem-Proposta]]); imposto por item na OC (`C6`, `C7`); **comissão estimada** na proposta, com o motor da §5.2; o menu enxuto desta nota | Pablo e Gustavo (migração e API), Nathan (telas e pipeline) |
+| **1. Núcleo** | Proposta nova (aprovar, transformar em pedido pela fila do Omie); tabelas `pedidos`, `pedidos_itens`, `pedidos_envios` ([[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]]); condições de pagamento e cenários da conta ([[SQL-019-Condicoes-de-Pagamento-de-Venda-do-Omie]]); liberação ([[LOG-58-Liberacao-do-Pedido-Origem-Proposta]]); imposto por item na OC (`C6`, `C7`); **comissão estimada** na proposta, com o motor da §5.2; o menu enxuto desta nota | Pablo e Gustavo (migração e API), Nathan (telas e pipeline) |
 | **2. Depois** | Pendências `C8` em Meus Pedidos (`divergencias_compra`); cancelamento com tarja; custo real por evento (`custos_eventos`, [[API-021-Custo-Real-por-Evento-e-Conferencia-de-Compras]]) | Núcleo no ar |
 | **3. Adiar** | Comissão real (decisão, devolução parcial, drill-down, coordenadores, relatórios; [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]], [[LOG-59-Telas-da-Comissao-Nova]]); faturamento em partes (três tabelas de sequenciais); datas vigentes e calendário (`pedidos_previsoes`, `calendario_excecoes`); Fila do Fiscal; score, volatilidade e matriz de preços ([[LOG-60-Matriz-de-Precos-e-Consulta-do-Vendedor]]); reescrever os guias do fluxo do custo | Cada frente tem dono e resposta pendente |
 
 > [!warning] O corte das tabelas é por leitura dos contratos
-> Não conferi se as funções da transformação em pedido do SQL-016 (`fn_propostas_transformar_em_pedido` e as 22 funções do anexo `0001`) dependem de `pedidos_previsoes` ou dos sequenciais. É provável que dependam. Se sim, separar as fases pede **ajuste e novo teste da migração** (os anexos `0001` e `0002` de [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]]). A fase 3 **não** tira a regra de que a comissão começa no orçamento ([[11-Proposta-e-Pedido-de-Venda]], regra 13): fica a estimada.
+> Não conferi se as funções da transformação em pedido do SQL-016 (`fn_propostas_transformar_em_pedido` e as 22 funções do anexo `0001`) dependem de `pedidos_previsoes` ou dos sequenciais. É provável que dependam. Se sim, separar as fases pede **ajuste e novo teste da migração** (os anexos `0001` e `0002` de [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]]). A fase 3 **não** tira a regra de que a comissão começa no orçamento ([[11-Proposta-e-Pedido-de-Venda]], regra 13): fica a estimada.
 
 ## 7. Cadastro das telas (`auth.telas`) 🟡
 

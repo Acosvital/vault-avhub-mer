@@ -30,26 +30,26 @@ VALUES ('80000000-0000-0000-0000-000000000001','70000000-0000-0000-0000-00000000
        ('80000000-0000-0000-0000-000000000002','70000000-0000-0000-0000-000000000002',1,'9001','Flange 1',10,'UN',120,0,'759979bd-2b2d-41f2-b1b7-db6fae89ee59');
 
 -- novas fontes e sem prazo
-SELECT pg_temp.confere(core_comercial.fn_ofertas_gerar_de_ocs() = 2, 'duas ofertas nasceram das duas OCs aprovadas');
-SELECT pg_temp.confere(core_comercial.fn_ofertas_gerar_de_ocs() = 0, 'rodar de novo não duplica (idempotente)');
-SELECT pg_temp.confere((SELECT custo_liquido_unit = 90 FROM core_comercial.ofertas WHERE fonte='OC_HUB' AND id_documento_fonte='80000000-0000-0000-0000-000000000001'), 'custo líquido da oferta = preço menos desconto (R$ 90)');
+SELECT pg_temp.confere(core_vendas_faturamento.fn_ofertas_gerar_de_ocs() = 2, 'duas ofertas nasceram das duas OCs aprovadas');
+SELECT pg_temp.confere(core_vendas_faturamento.fn_ofertas_gerar_de_ocs() = 0, 'rodar de novo não duplica (idempotente)');
+SELECT pg_temp.confere((SELECT custo_liquido_unit = 90 FROM core_vendas_faturamento.ofertas WHERE fonte='OC_HUB' AND id_documento_fonte='80000000-0000-0000-0000-000000000001'), 'custo líquido da oferta = preço menos desconto (R$ 90)');
 -- base e estatística (o trigger recalcula)
-SELECT pg_temp.confere((SELECT count(*) = 2 FROM core_comercial.produtos_precos_fornecedor WHERE id_produto='60000000-0000-0000-0000-000000000001'), 'base de preço com os dois fornecedores');
-SELECT pg_temp.confere((SELECT fornecedores = 2 AND registros = 2 AND minimo = 90 AND maximo = 120 AND ultimo > 0 FROM core_comercial.produtos_estatisticas_preco WHERE id_produto='60000000-0000-0000-0000-000000000001'), 'estatística: 2 fornecedores, mínimo 90, máximo 120');
-SELECT pg_temp.confere((SELECT count(*) = 2 FROM core_comercial.vw_produtos_serie_preco WHERE id_produto='60000000-0000-0000-0000-000000000001'), 'série de preço com 2 pontos');
-SELECT pg_temp.confere((SELECT count(*) = 2 FROM core_comercial.vw_matriz_precos WHERE id_produto='60000000-0000-0000-0000-000000000001'), 'matriz de preços v1 com 2 linhas');
+SELECT pg_temp.confere((SELECT count(*) = 2 FROM core_vendas_faturamento.produtos_precos_fornecedor WHERE id_produto='60000000-0000-0000-0000-000000000001'), 'base de preço com os dois fornecedores');
+SELECT pg_temp.confere((SELECT fornecedores = 2 AND registros = 2 AND minimo = 90 AND maximo = 120 AND ultimo > 0 FROM core_vendas_faturamento.produtos_estatisticas_preco WHERE id_produto='60000000-0000-0000-0000-000000000001'), 'estatística: 2 fornecedores, mínimo 90, máximo 120');
+SELECT pg_temp.confere((SELECT count(*) = 2 FROM core_vendas_faturamento.vw_produtos_serie_preco WHERE id_produto='60000000-0000-0000-0000-000000000001'), 'série de preço com 2 pontos');
+SELECT pg_temp.confere((SELECT count(*) = 2 FROM core_vendas_faturamento.vw_matriz_precos WHERE id_produto='60000000-0000-0000-0000-000000000001'), 'matriz de preços v1 com 2 linhas');
 -- oferta é imutável (regra que já existe); OC cancelada invalida
-SELECT pg_temp.espera($$UPDATE core_comercial.ofertas SET preco = 1$$, 'Oferta é imutável');
+SELECT pg_temp.espera($$UPDATE core_vendas_faturamento.ofertas SET preco = 1$$, 'Oferta é imutável');
 UPDATE core_vendas_faturamento.ordens_compra SET status='cancelado' WHERE id='70000000-0000-0000-0000-000000000002';
-SELECT pg_temp.confere(core_comercial.fn_ofertas_gerar_de_ocs() = 1, 'OC cancelada invalidou a oferta dela');
-SELECT pg_temp.confere((SELECT status='INVALIDADA' AND motivo_invalidacao='OC cancelada' FROM core_comercial.ofertas WHERE id_documento_fonte='80000000-0000-0000-0000-000000000002'), 'oferta INVALIDADA com motivo, sem apagar');
-SELECT pg_temp.confere((SELECT count(*) = 1 FROM core_comercial.produtos_precos_fornecedor WHERE id_produto='60000000-0000-0000-0000-000000000001'), 'a base recalculou sem a oferta invalidada');
-SELECT pg_temp.espera($$DELETE FROM core_comercial.ofertas$$, 'Oferta não pode ser apagada');
+SELECT pg_temp.confere(core_vendas_faturamento.fn_ofertas_gerar_de_ocs() = 1, 'OC cancelada invalidou a oferta dela');
+SELECT pg_temp.confere((SELECT status='INVALIDADA' AND motivo_invalidacao='OC cancelada' FROM core_vendas_faturamento.ofertas WHERE id_documento_fonte='80000000-0000-0000-0000-000000000002'), 'oferta INVALIDADA com motivo, sem apagar');
+SELECT pg_temp.confere((SELECT count(*) = 1 FROM core_vendas_faturamento.produtos_precos_fornecedor WHERE id_produto='60000000-0000-0000-0000-000000000001'), 'a base recalculou sem a oferta invalidada');
+SELECT pg_temp.espera($$DELETE FROM core_vendas_faturamento.ofertas$$, 'Oferta não pode ser apagada');
 -- pedido de custo sem prazo
 INSERT INTO auth.usuarios (id, email, username) VALUES ('00000000-0000-0000-0000-0000000000a1','v@x.com','v');
-INSERT INTO core_comercial.solicitacoes_custo (numero, descricao, quantidade, unidade_medida, id_solicitante)
+INSERT INTO core_vendas_faturamento.solicitacoes_custo (numero, descricao, quantidade, unidade_medida, id_solicitante)
 VALUES ('SC-2026-0001','Flange especial',5,'UN','00000000-0000-0000-0000-0000000000a1');
-SELECT pg_temp.confere((SELECT prazo_resposta IS NULL FROM core_comercial.solicitacoes_custo WHERE numero='SC-2026-0001'), 'pedido de custo nasce sem prazo (N16-58)');
-SELECT pg_temp.espera($$INSERT INTO core_comercial.ofertas (id_produto, id_parceiro, fonte, preco, unidade_preco, data_cotacao, valida_ate, custo_liquido_unit) VALUES ('60000000-0000-0000-0000-000000000001','50000000-0000-0000-0000-000000000001','XX',1,'UN',current_date,current_date,1)$$, 'new row for relation');
+SELECT pg_temp.confere((SELECT prazo_resposta IS NULL FROM core_vendas_faturamento.solicitacoes_custo WHERE numero='SC-2026-0001'), 'pedido de custo nasce sem prazo (N16-58)');
+SELECT pg_temp.espera($$INSERT INTO core_vendas_faturamento.ofertas (id_produto, id_parceiro, fonte, preco, unidade_preco, data_cotacao, valida_ate, custo_liquido_unit) VALUES ('60000000-0000-0000-0000-000000000001','50000000-0000-0000-0000-000000000001','XX',1,'UN',current_date,current_date,1)$$, 'new row for relation');
 \echo 'TESTE DA MIGRACAO DO SQL-017: TUDO OK'
 ROLLBACK;

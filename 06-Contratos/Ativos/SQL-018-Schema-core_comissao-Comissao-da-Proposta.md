@@ -3,12 +3,12 @@ id: SQL-018
 aliases: ["Contrato SQL 018", "018-Schema-core_comissao-Comissao-da-Proposta"]
 tags: [contrato, contrato-sql, dba, comissao, controladoria, devolucao, core_comissao]
 criado: 2026-10-21
-atualizado: 2026-10-21
+atualizado: 2026-10-28
 status: proposta
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: [K1, K2, K3, K4, K5, K6]
-fontes: ["Registro-de-Decisoes (N16-10, N16-11, N16-19 a N16-22, N16-39, N16-42 a N16-51, N16-74)", "SQL-018-anexos/0000-stubs-de-teste.sql, 0001-core-comissao.sql (1.831 linhas), 0002-teste-funcional.sql, 0003-entradas-do-motor-em-core_comercial.sql, 0004-devolucao-parcial-pendencia.sql, 0005-teste-devolucao-parcial.sql", "03-Sistemas/Comissao/03-Modelo-Novo-core_comissao", "av-hub lib/simulador/motor.ts", "Proposta-Orcamento-Comissao/01-Decisoes/Respostas-da-Controladoria-2026-10-19 (fora do vault)"]
+fontes: ["Registro-de-Decisoes (N16-10, N16-11, N16-19 a N16-22, N16-39, N16-42 a N16-51, N16-74, N16-116)", "SQL-018-anexos/0000-stubs-de-teste.sql, 0001-core-comissao.sql (1.831 linhas), 0002-teste-funcional.sql, 0003-entradas-do-motor-em-core_vendas_faturamento.sql, 0004-devolucao-parcial-pendencia.sql, 0005-teste-devolucao-parcial.sql", "03-Sistemas/Comissao/03-Modelo-Novo-core_comissao", "av-hub lib/simulador/motor.ts", "Proposta-Orcamento-Comissao/01-Decisoes/Respostas-da-Controladoria-2026-10-19 (fora do vault)"]
 criado_original: 2026-10-16
 ---
 
@@ -16,13 +16,15 @@ criado_original: 2026-10-16
 
 > **Onde atua:** av-hub: banco
 
-> [!info] Situação em 21/10/2026
+> [!info] Situação em 28/10/2026
 > **Status:** `proposta` · **Nós do 0b:** `K1` a `K6` · **Dono:** Gustavo · Desenho em [[03-Modelo-Novo-core_comissao]]
 >
 > - 🧪 **Testado em Postgres 18 com stubs (21/10):** `0001` aplica sem erro; `0002` (teste funcional) dá **14 erros esperados**; `0004` aplica; `0005` dá **7 erros esperados**, todos conferidos. Não rodou no banco do Hub ❓.
 > - 🧪 **26/10: anexo `0006`** (comissão nova também para o pedido digitado direto no Omie, N16-103, com a simulação do vendedor, N16-104) e teste **`0007`** com **25 verificações**, todas ok. Com o `0006` aplicado, `0002` e `0005` dão a mesma saída de antes (14 e 7 erros esperados).
+> - 📝 **28/10/2026, N16-116:** não existirá `core_comercial`; a proposta e o pedido ficam em `core_vendas_faturamento`. Os anexos `0001`, `0003` e `0006` passaram a nomear `core_vendas_faturamento` (o `0003` foi renomeado para `0003-entradas-do-motor-em-core_vendas_faturamento.sql`). **O nome do schema da comissão continua a decidir** (a N16-116 deixa em aberto): este contrato segue com `core_comissao` até o Nathan e o Gustavo decidirem ❓.
+> - 🧪 **Reteste de 28/10:** com stubs, `0001`, `0002`, `0004`, `0005`, `0006` e `0007` dão a mesma saída de 26/10; no dump de referência, depois do SQL-016 (com o bloco A0) e do SQL-017, `0003`, `0001`, `0004` e `0006` aplicam sem erro.
 > - 📝 **O `core_comissionamento` atual não muda** (N16-11). Este schema é novo, isolado.
-> - Depende do [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] (proposta, pedido, eventos de custo). O anexo `0003` lista as colunas que o motor precisa em `core_comercial` (na proposta e, desde a N16-106, também no pedido) e as views `vw_proposta_item_motor` e `vw_pedido_item_motor`; **o dono do SQL-016 as incorpora ou recusa** ❓.
+> - Depende do [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] (proposta, pedido, eventos de custo). O anexo `0003` lista as colunas que o motor precisa em `core_vendas_faturamento` (na proposta e, desde a N16-106, também no pedido) e as views `vw_proposta_item_motor` e `vw_pedido_item_motor`; **o dono do SQL-016 as incorpora ou recusa** ❓.
 
 ## 1. Por quê
 
@@ -108,4 +110,4 @@ OQ-41 a OQ-45 (apuração, descontos, Projeto e recompra, CBS, validações prov
 
 ## Ver também
 
-[[03-Modelo-Novo-core_comissao]] · [[01-Motor-Atual-Como-Calcula]] · [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] · [[API-022-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria]] · [[LOG-59-Telas-da-Comissao-Nova]] · [[LOG-56-Fluxo-da-Proposta-ao-Pedido]] · [[Registro-de-Decisoes|respostas da Controladoria de 19/10 (N16-42 a N16-51)]]
+[[03-Modelo-Novo-core_comissao]] · [[01-Motor-Atual-Como-Calcula]] · [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] · [[API-022-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria]] · [[LOG-59-Telas-da-Comissao-Nova]] · [[LOG-56-Fluxo-da-Proposta-ao-Pedido]] · [[Registro-de-Decisoes|respostas da Controladoria de 19/10 (N16-42 a N16-51)]]

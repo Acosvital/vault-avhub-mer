@@ -3,10 +3,10 @@ id: LOG-52
 aliases: ["Contrato 52", "52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub"]
 tags: [contrato, contrato-logica, contrato-api, contrato-sql, comercial, suprimentos, api-acos-vital, api-comercial, migracao]
 criado: 2026-10-15
-atualizado: 2026-10-26
+atualizado: 2026-10-28
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
-dono: "Pablo"
+dono: "Robert (o Pablo acompanha)"
 etapa_0b: []
 fontes: ["api-comercial (HUB b55ac55, pasta 00 - HUB/api-comercial: README, prisma/models/*.prisma, prisma/migrations, src/**, test/**)", "api-acos-vital 276dab8 (schemas/**, middlewares/**, utils/**)", "Dump Avhub (Esqueleto).sql", "HUB app/api/comercial/[...rota]/route.ts, lib/api/comercialApi.ts, services/comercial/*", "Registro-de-Decisoes N14-15", "auditoria de 15/10/2026"]
 criado_original: 2026-10-15
@@ -16,10 +16,13 @@ criado_original: 2026-10-15
 
 > **Onde atua:** av-hub: banco, API, front
 
-> [!info] Situação em 26/10/2026
-> **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Pablo (módulo) · **Banco e API:** Gustavo (DBA), dono da `api-acos-vital`
+> [!info] Situação em 28/10/2026
+> **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Robert (módulo, N16-117; o Pablo acompanha) · **Banco e API:** Gustavo (DBA), dono da `api-acos-vital`
 >
-> - ✅ **Fase 1 do banco feita, informado pelo Gustavo (26/10/2026):** schema `core_comercial` (migration `052`) aplicado no teste em 16/10 e **em produção em 20/10**. Não conferi no banco. O resto (rotas na `api-acos-vital`, módulo, corte do HUB) segue aberto e é com o Pablo.
+> - 📝 **28/10/2026, N16-117 a N16-119:** o **Robert** conduz o módulo na `api-acos-vital` e começa pela **proposta** (N16-118); o Pablo acompanha. A `api-comercial` **não é removida do repositório**: volta ao av-hub como legado só para leitura (com `LEIA-ME-LEGADO.md`, fora da CI, do lint e do `tsc`); a remoção de **produção** segue valendo (corrige a N16-111). As telas do Pablo **ficam** e o BFF passa a chamar a `api-acos-vital` (N16-119). Onde esta nota diz "Pablo" como quem faz, leia Robert.
+> - 📝 **28/10/2026, N16-116:** não existirá `core_comercial`. O que migra entra em `core_vendas_faturamento`; o prefixo `/comercial/` das rotas sai. As seções 3 a 9 que falam em "criar em `core_comercial`" valem com esse schema.
+> - 📝 **N16-112:** o Hub é um sistema só: cada conceito tem uma tabela, uma rota e uma tela ([[Conexao-das-Telas-do-Pablo-com-a-API-do-Hub]]). **N16-113:** serviço de e-mail e notificações fica para o futuro.
+> - ✅ **Fase 1 do banco feita, informado pelo Gustavo (26/10/2026):** schema `core_comercial` (migration `052`) aplicado no teste em 16/10 e **em produção em 20/10**. Não conferi no banco. O resto (rotas na `api-acos-vital`, módulo, corte do HUB) segue aberto e passou ao Robert (N16-117). Pela N16-116 esse schema **sai**: o SQL-016 (bloco A0) move as tabelas para `core_vendas_faturamento`.
 > - 📝 **A decisão já existe:** [[Registro-de-Decisoes]] N14-15 (14/10/2026): a `api-comercial` é uma API de teste do Pablo, **não será publicada**, e ele migra tudo para a `api-acos-vital`. Este contrato não decide *se* migra; propõe **como**, separando o que a API do hub já tem, o que precisa ser criado e o que deve ser descartado.
 > - ✅ **Inventário feito em 15/10/2026** nos dois lados, por leitura de código: `api-comercial` (30 tabelas, 24 enums, 13 migrations, ~91 handlers, cerca de 300 testes) e `api-acos-vital` `276dab8` (124 tabelas, rotas por schema).
 > - 🕓 Registro de 15/10 (parte superada): nada migrado; hoje só a fase 1 do banco existe (item acima).
@@ -28,13 +31,13 @@ criado_original: 2026-10-15
 >
 > - 📝 **O que não migra (Nathan, 27/10/2026, N16-109):** o módulo do Pablo é só ambiente de teste e **não tem dado**, então a migração é escolher o que entra na `api-acos-vital`. **Não portar:** a sincronização própria do Omie e suas tabelas de cópia (`ordens_compra`, `itens_ordem_compra`, `produtos_contas_omie`, `fornecedores_contas_omie`, `omie_registros_brutos`, `sincronizacoes_omie`, `travas_tarefa`), o Histórico de compras, a planilha do pedido a digitar no Omie, a migração do ERP antigo, o fechamento parcial, a autenticação e os perfis próprios. **Reaproveitar** o motor na API (uma fonte), as ofertas, fornecedores, parâmetros e o pedido de custo. Lista completa, com tamanhos e motivos, em [[LOG-62-Reescopo-Menu-Enxuto-e-Limpeza-do-Modulo-do-Pablo]] §5. Isso **confirma e amplia** o corte que a seção 3.4 desta nota já fazia para a sincronização de pedidos de compra ("Some. A pipeline é a fonte"): agora vale também para o Histórico de compras que a lia, para a planilha do pedido e para a migração do ERP antigo.
 >
-> - 🟡 **Desenho aprovado em 26/10/2026 muda o ciclo da proposta** (N16-02, N16-03, N16-84, N16-106): sem fechamento parcial, cancelada no lugar de perdida, sem reabrir, pedido criado pelo Hub e pedido do Omie no mesmo fluxo. A migração proposta está em [[SQL-016-Schema-core_comercial-Proposta-e-Pedido-de-Venda]] e as rotas em [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]]; o domínio de preço, margem e custo continua portado como está. Combinar antes da fase 3 (PS-035).
+> - 🟡 **Desenho aprovado em 26/10/2026 muda o ciclo da proposta** (N16-02, N16-03, N16-84, N16-106): sem fechamento parcial, cancelada no lugar de perdida, sem reabrir, pedido criado pelo Hub e pedido do Omie no mesmo fluxo. A migração proposta está em [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] e as rotas em [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]]; o domínio de preço, margem e custo continua portado como está. Combinar antes da fase 3 (PS-035).
 >
 > **Não confundir** com [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]]: aquele corrige a API que já existe; este traz o módulo novo para dentro dela. O módulo **tem de entrar já seguindo o LOG-51**, para não herdar o problema.
 
 ## 0. Reusar o Hub antes de criar (N16-111, 27/10/2026)
 
-> [!warning] Decisão do Nathan, 27/10: toda rota do módulo nasce na `api-acos-vital` e **nada que o Hub já tem é recriado** em `core_comercial`. A `api-comercial` sai, inclusive de produção. Vale antes das seções 3 a 9: onde elas propõem extensão ou tabela própria para um conceito abaixo, prevalece esta tabela.
+> [!warning] Decisão do Nathan, 27/10: toda rota do módulo nasce na `api-acos-vital` e **nada que o Hub já tem é recriado** (nem em `core_comercial`, que deixa de existir pela N16-116, nem em `core_vendas_faturamento`). A `api-comercial` sai de produção; no repositório fica só para leitura (N16-117). Vale antes das seções 3 a 9: onde elas propõem extensão ou tabela própria para um conceito abaixo, prevalece esta tabela.
 
 | O que o módulo do Pablo criou (`api-comercial` e fase 1 em `core_comercial`) | O que o Hub já tem e deve ser usado |
 |---|---|
@@ -196,7 +199,7 @@ Estes itens beneficiam a API toda, não só o módulo. Eles entram **antes** das
 
 ### 8.1 Como uma rota nova nasce na API do hub
 
-1. Montar o router em `src/schemas/core_comercial/index.js` (e o import em `schemas/index.js`, o `CREATE SCHEMA` por migration, e a linha em `docs/grupos.js`).
+1. Montar as rotas em `src/schemas/core_vendas_faturamento/` (N16-116; não há schema `core_comercial` nem `CREATE SCHEMA` novo) e a linha em `docs/grupos.js`.
 2. O DBA insere linhas em `auth.rotas_telas` (`metodo`, `rota`, `slug_tela`, `acao`, `escopo_vendedor`).
 3. Cadastrar o slug em `auth.telas` e conceder em `auth.permissoes` aos perfis certos.
 4. Sem linha em `auth.rotas_telas`, a rota dá **403** `ROTA_SEM_PERMISSAO_MAPEADA` (a API nega por padrão): é a rede de segurança contra esquecer uma guarda.
@@ -263,7 +266,7 @@ Como a `api-comercial` é API de teste (sem dado de produção), **não há migr
 | Fase | O que entra | Quem | Pronto quando |
 |---|---|---|---|
 | **0** | Responder as perguntas da seção 13, **em especial Q1 (pedidos de compra na pipeline), Q2 (rotas e telas em produção) e Q3 (significado de `vinculados`)**. Corrigir o que o módulo herdaria ([[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] S1 a S6: chave de serviço, Azure, senha, mass assignment, limite, erro) | Gustavo, Nathan | Respostas registradas nesta nota |
-| **1** | Base: schema `core_comercial` por migration com `GRANT`; os 11 itens transversais da seção 7 (T1 a T11); `alterado_desde` corrigido (seção 12) | Gustavo (banco e API), Pablo (revisão) | `npm test` verde na API; o módulo cadastros de exemplo responde com token e `403` sem linha em `auth.rotas_telas` |
+| **1** | Base: tabelas em `core_vendas_faturamento` por migration com `GRANT` (N16-116; era schema `core_comercial`); os 11 itens transversais da seção 7 (T1 a T11); `alterado_desde` corrigido (seção 12) | Gustavo (banco e API), Pablo (revisão) | `npm test` verde na API; o módulo cadastros de exemplo responde com token e `403` sem linha em `auth.rotas_telas` |
 | **2** | Domínio portado (seção 6) com os 137 testes unitários; `unidades_emissoras`, `parametros_custo`, `tabelas_custo_telha`, rotas de cadastros e de telha | Pablo | Os testes dourados de cálculo passam; o PDF de uma proposta de teste sai igual ao do `api-comercial` |
 | **3** | Clientes, propostas (com `If-Match` e idempotência), eventos, versões, e-mail, importar itens, pedido Omie | Pablo | Critérios 1, 2, 4, 6 a 10, 14, 15, 19 a 21 e 24 da seção 10 com teste; ciclo completo no HUB de homologação |
 | **4** | Suprimentos: extensões de produto e fornecedor, ofertas, mapa de cotação, certificados, apelidos, pesquisa, painel do comprador, pedido de cotação, solicitações de custo, pendentes | Pablo | Critérios 3, 5, 12, 16, 17, 18 e 23 com teste |
@@ -322,7 +325,7 @@ Achado durante este inventário (✅ relido em 15/10/2026): em `src/schemas/core
 
 ## 16. O que não foi conferido
 
-- `auth.rotas_telas` e `auth.telas` em produção; o schema `core_comercial` publicado (não existe no dump, a migration inicial faz `CREATE SCHEMA IF NOT EXISTS`).
+- `auth.rotas_telas` e `auth.telas` em produção; o schema `core_comercial` publicado (está no dump de 26/10, vazio; a N16-116 o tira e o SQL-016 bloco A0 move as tabelas).
 - O que a pipeline carrega de `pedidos_compras` (conferi o vault, não o código dela).
 - O corpo completo de `relatorios.service.ts`, `dashboards.routes.ts` e `pedidoOmie.ts` do `api-comercial` (li guardas e assinaturas); as fixtures "dourados" de cálculo citadas no código; o upload de certificado; as constantes da telha.
 - Se `empresas_emissoras`, `notificacoes` e `clientes` duplicam algo que já exista no hub além do que está nesta nota.

@@ -3,10 +3,10 @@ id: API-022
 aliases: ["Contrato API 022", "022-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria"]
 tags: [contrato, contrato-api, comissao, motor, controladoria, devolucao, api-acos-vital]
 criado: 2026-10-21
-atualizado: 2026-10-21
+atualizado: 2026-10-28
 status: proposta
 sistemas: [hub-api, hub-banco]
-dono: "Pablo (módulo) e Gustavo (revisão)"
+dono: "Nathan (começo da comissão), Robert (rotas) e Gustavo (revisão)"
 etapa_0b: [K1, K2, K3, K4, K5, K6]
 fontes: ["SQL-018-Schema-core_comissao-Comissao-da-Proposta", "03-Sistemas/Comissao/03-Modelo-Novo-core_comissao, 01-Motor-Atual-Como-Calcula", "av-hub lib/simulador/motor.ts (calcularSimulacao em app/(protected)/comissoes/simulador/page.tsx:1053)", "Registro-de-Decisoes (N16-10, N16-11, N16-19 a N16-22, N16-39, N16-42 a N16-51, N16-74)", "Proposta-Orcamento-Comissao/01-Decisoes/Respostas-da-Controladoria-2026-10-19 (fora do vault)"]
 criado_original: 2026-10-16
@@ -16,9 +16,11 @@ criado_original: 2026-10-16
 
 > **Onde atua:** av-hub: API (`api-acos-vital`)
 
-> [!info] Situação em 21/10/2026
-> **Status:** `proposta` · **Dono:** Pablo; Gustavo revisa · Banco: [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]] · Telas: [[LOG-59-Telas-da-Comissao-Nova]]
+> [!info] Situação em 28/10/2026
+> **Status:** `proposta` · **Dono:** Nathan cuida do começo da comissão (`K1`, estimada na proposta, N16-115); Robert as rotas (N16-117; o Pablo acompanha); Gustavo revisa · Banco: [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]] · Telas: [[LOG-59-Telas-da-Comissao-Nova]]
 >
+> - 📝 **28/10/2026, N16-117 a N16-119:** quem faz as rotas na `api-acos-vital` é o **Robert**; o Pablo acompanha. A `api-comercial` fica no repositório do av-hub **só para leitura** (legado de consulta, não roda nem publica; sai de produção). As telas do Pablo **ficam**: o Robert troca o backend delas (o BFF passa a chamar a `api-acos-vital`) e adapta onde divergem do vault, sem refazer do zero.
+> - 📝 **28/10/2026, N16-116:** proposta e pedido ficam em `core_vendas_faturamento`; o **schema da comissão continua a decidir** (este contrato segue com `core_comissao`, [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]) ❓. O prefixo `/comissao/` não é afetado pela troca de schema.
 > - 📝 Módulo **isolado**: não toca em Comissões atual nem em `core_comissionamento` (N16-11).
 
 ## 1. Por quê
