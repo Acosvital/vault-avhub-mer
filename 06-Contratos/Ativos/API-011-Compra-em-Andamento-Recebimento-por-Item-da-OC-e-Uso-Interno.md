@@ -3,7 +3,7 @@ id: API-011
 aliases: ["Contrato 011", "011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno"]
 tags: [contrato, contrato-api, mes, integracao-av-hub-mes, compras, recebimento, estoque, sql, prisma]
 criado: 2026-10-15
-atualizado: 2026-10-19
+atualizado: 2026-10-29
 status: parcial
 sistemas: [mes-banco, mes-api, mes-front]
 dono: "Robert"
@@ -19,14 +19,17 @@ criado_original: 2026-10-15
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Define como o MES (sistema de produção) sabe o que o Compras já está comprando para cada pedido e como dá entrada na mercadoria por item da Ordem de Compra (OC), com ou sem requisição, inclusive uso interno.
 > **Quem é afetado:** PCP (aviso ao requisitar, evitando compra duplicada), Recebimento (recebe por NF e por item de OC) e Estoque (saldo futuro e entradas de uso interno).
-> **Situação:** Proposta, dono Robert. A leitura da OC (K4) já está na `develop` (✅); o cruzamento, o recebimento por NF e o uso interno não existem (🔴). Nomes de rotas são propostas.
+> **Situação:** Parcial, dono Robert. A parte do hub (Gustavo) está pronta. No MES já estão na `develop` a leitura da OC (K4), o aviso e o vínculo da OC ao requisitar, o recebimento por OC e por NF, o uso interno e as requisições do hub na Triagem. Faltam o teste em homologação, o rateio da chegada, o saldo futuro e a OC visível ao PCP.
 > **Exemplo:** Pedido que precisa de 8 unidades, com 3 já em OC aprovada: 3 ficam vinculadas à OC e 5 são requisitadas ao hub.
 
-> [!info] Situação em 15/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** P1, P2, P3, E1, R0, R1, R4 · **Dono:** Robert (MES). O Gustavo entrega as leituras do hub ([[API-009-Referencia-Requisicao-Hub-Integracao-MES]] e [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto]]).
+> [!info] Situação em 29/10/2026
+> **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** P1, P2, P3, E1, R0, R1, R4 · **Dono:** Robert (MES). O Gustavo entrega as leituras do hub ([[API-009-Referencia-Requisicao-Hub-Integracao-MES]] e [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto]]).
 >
+> - ✅ **Parte do hub terminada pelo Gustavo (informado pelo Nathan em 29/10/2026):** as leituras de que o MES precisa estão em produção: referência da OC ([[API-007-Referencia-OC-Valores-no-MES|API-007]], com fornecedor desde a `api007b`), referência da requisição (`GET /compras/requisicoes/referencia`, [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]], migration `api009`) e finalidade e pedido de venda da requisição ([[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]], testado na api-test em 29/10).
+> - ✅ **Feito pelo Robert no MES (conferido no código em 29/10/2026, `develop` do `api-pcp`):** recebimento por OC (R3 `oc-esperadas`) e por NF (R4) e uso interno (19/10, `97b9adc`, `665bb98`); compra em andamento e vínculo da parcial à OC do hub, com o aviso ao requisitar (R1 e R2, 20/10, `c269aa7`, `4b2d6d9`); requisições do hub na Triagem (23/10, `9e75df5`); Fila do Compras · CCP agrupada por pedido (26/10, `5c671f2`).
+> - 🔴 **Falta (Robert):** testar em homologação; rateio da chegada (Q2); saldo futuro no Atendimento e no Saldo (BL-050); OC do pedido visível ao PCP na Triagem e na Destinação (BL-049). Tudo isso só vai à `main` com o merge do MES (BL-035).
 > - ✅ **K4 na `develop`** do `api-pcp` (PR #59, `6914fe9`, 15/10): o MES lê `GET /ordens-compra/referencia` e grava `OcReferencia` e `OcReferenciaItem` (`id` do item = `id_item_oc`, `destino` JSON, `idOrigem`, `finalidade`, valores). É a base deste contrato. (O checkout local de `develop` pode estar atrás do `origin/develop`: conferir com `git fetch`.)
-> - 🔴 **Falta o resto:** o cruzamento e o abate, o aviso ao requisitar, a leitura da requisição do hub, o saldo futuro, o recebimento por item da OC e por NF, e o uso interno.
+> - 🕓 Registro de 15/10 (superado pelos itens acima): **faltava o resto:** o cruzamento e o abate, o aviso ao requisitar, a leitura da requisição do hub, o saldo futuro, o recebimento por item da OC e por NF, e o uso interno.
 > - 📝 Decisões do Nathan que ele implementa: **N14-29** (proposta do Robert aceita), **N14-30** (uso interno aprovado), **N14-31** (tudo da mesma unidade). Estimativas do Robert (±30%): BL-051 4,0 pd, API-009 no MES 1,0, recebimento por NF 4,0, uso interno 0,5 (**dentro** da conta do Ciclo 1); BL-049 1,5 e BL-050 1,5 (**fora** da conta, aguardando decisão).
 > - ✅ **SQL escrito e validado** em banco descartável (PostgreSQL 18, com tabelas-esqueleto das que a migration referencia): [[0001-compra-em-andamento.sql]] em `API-011-anexos/`. Validado: a migration aplica sem erro e os `CHECK` se comportam (recebimento com requisição **ou** com OC, nunca com as duas nem sem nenhuma; item de recebimento de requisição **ou** de OC; uso interno com quantidade positiva). **Não validado:** contra o schema real do MES (o checkout do Prisma gera o SQL final; esta é a proposta de desenho) e nenhum código de rota ou serviço existe ainda.
 >
@@ -38,12 +41,12 @@ Quando o Compras compra antes de o PCP movimentar o pedido, o MES não sabe e po
 
 ## 1. O que o MES enxerga de compra
 
-| Fonte | O que é | Chega por | Estado |
-|---|---|---|---|
-| OC aprovada (e cancelada depois de aprovada) | `OcReferencia` e itens, com `destino[]` e `finalidade` | `GET /ordens-compra/referencia` (K4) | ✅ na `develop` |
-| Requisição do hub com pedido de venda, sem OC ou com OC ainda em aprovação | `RequisicaoHubReferencia` | `GET /compras/requisicoes/referencia` (API-009) | 🔴 |
-| Requisição do MES ainda aberta | `RequisicaoCompra` (origem `MES`) | tabela do MES | ✅ |
-| Parcela já coberta por OC | `RequisicaoCompra` de origem `HUB` | criada pelo MES (seção 5, R2) | 🔴 |
+| Fonte                                                                      | O que é                                                | Chega por                                       | Estado         |
+| -------------------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------- | -------------- |
+| OC aprovada (e cancelada depois de aprovada)                               | `OcReferencia` e itens, com `destino[]` e `finalidade` | `GET /ordens-compra/referencia` (K4)            | ✅ na `develop` |
+| Requisição do hub com pedido de venda, sem OC ou com OC ainda em aprovação | `RequisicaoHubReferencia`                              | `GET /compras/requisicoes/referencia` (API-009) | 🔴             |
+| Requisição do MES ainda aberta                                             | `RequisicaoCompra` (origem `MES`)                      | tabela do MES                                   | ✅              |
+| Parcela já coberta por OC                                                  | `RequisicaoCompra` de origem `HUB`                     | criada pelo MES (seção 5, R2)                   | 🔴             |
 
 A OC em `aguardando_aprovacao` **não** vem pela referência da OC; a requisição `atendida` do API-009 cobre esse intervalo, com `situacao_ordem_compra`.
 
