@@ -3,12 +3,12 @@ id: LOG-26
 aliases: ["Contrato 26", "26-Vendas-Liberacao-Pedido"]
 tags: [contrato, contrato-logica, contrato-sql, contrato-api, vendas, integracao-mes]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco, hub-api, hub-front, mes-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [V2, V3, P1, P2]
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/aggregates/pedidos_liberacao/pedidos_liberacao.route.js:88,164", "api-acos-vital/src/schemas/core_vendas_faturamento/aggregates/pedidos_liberados/pedidos_liberados.route.js:57,115,143", "api-pcp/src/pedidos/omie-integracao.ts:141,338,405"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/aggregates/pedidos_liberacao/pedidos_liberacao.route.js:89,165", "api-acos-vital/src/schemas/core_vendas_faturamento/aggregates/pedidos_liberados/pedidos_liberados.route.js:57,115,143", "api-pcp/src/pedidos/omie-integracao.ts:105,284,349"]
 criado_original: 2026-09-28
 ---
 
@@ -19,15 +19,16 @@ criado_original: 2026-09-28
 > [!abstract] Resumo em linguagem natural
 > **O que é:** O pedido chega do Omie travado numa tela do vendedor, que marca se a Qualidade acompanha o pedido desde o início. Só pedido marcado segue para o MES (sistema de produção). É o Fluxo 4.
 > **Quem é afetado:** Vendedores (tela Liberar Pedidos), gerência (Liberação da Equipe, só leitura) e o MES/PCP (planejamento e controle da produção), que lê só os pedidos liberados.
-> **Situação:** ✅ Entregue em 01/10: telas e rotas no ar; o MES lê `/pedidos_liberados`. 🟡 A Triagem do Pedido ainda usa nomes antigos (`/carteira`). ❓ Front não conferido.
+> **Situação:** ✅ Entregue em 01/10: telas e rotas no ar; o MES lê `/pedidos_liberados`. 🟡 A Triagem do Pedido ainda usa nomes antigos (`/carteira`). ✅ A tela Liberar Pedidos existe no av-hub (conferido em 29/10/2026); ❓ o uso em produção não foi conferido.
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** V2, V3, P1, P2 · **Dono:** Gustavo (DBA)
 >
-> - ✅ **V2 e V3 no av-hub:** `GET /pedidos_liberacao` (`pedidos_liberacao.route.js:88`) e `PUT /pedidos_liberacao/:codigo_empresa/:numero_pedido` (`:164`), que marca "Qualidade acompanha" e libera numa ação só; histórico em `pedidos_vendas_liberacao_historico`.
-> - ✅ **Fluxo 4 (P1 e P2):** o MES lê `GET /pedidos_liberados` (`api-pcp/src/pedidos/omie-integracao.ts:338`), `GET /pedidos_liberados/:numero/itens` (`:141`) e confirma com `POST /pedidos_liberados/:numero/importado` (`:405`); rotas do av-hub em `pedidos_liberados.route.js:57,115,143`. L4 do Robert fechado em 29/09 (`901f9bb`).
+> - ✅ **V2 e V3 no av-hub:** `GET /pedidos_liberacao` (`pedidos_liberacao.route.js:89`) e `PUT /pedidos_liberacao/:codigo_empresa/:numero_pedido` (`:165`), que marca "Qualidade acompanha" e libera numa ação só; histórico em `pedidos_vendas_liberacao_historico`.
+> - ✅ **Fluxo 4 (P1 e P2):** o MES lê `GET /pedidos_liberados` (`api-pcp/src/pedidos/omie-integracao.ts:284`), `GET /pedidos_liberados/:numero/itens` (`:105`) e confirma com `POST /pedidos_liberados/:numero/importado` (`:349`); rotas do av-hub em `pedidos_liberados.route.js:57,115,143`. L4 do Robert fechado em 29/09 (`901f9bb`).
 > - 🟡 Nomes técnicos antigos: a Triagem do Pedido ainda usa `/carteira` e `GET /pedidos/carteira` no MES (ver [[00-Fluxo-Mestre-0b]], nó P1).
-> - ❓ Front (tela Liberar Pedidos, `/liberar-pedidos`) no HUB: não conferido. Anexo: `LOG-26-anexos/` (patch).
+> - ✅ Front: a tela Liberar Pedidos existe no av-hub em `app/(protected)/vendas/liberar-pedidos/page.tsx`, com o BFF `app/api/liberar-pedidos` e o serviço `services/vendas/liberacaoPedidos.ts` (conferido em 29/10/2026). ❓ Uso em produção não conferido.
+> - Anexo: `LOG-26-anexos/` guarda o patch original de 28/09 (histórico: os caminhos `src/routes/*.js` dele não existem mais; o código atual mora em `src/schemas/core_vendas_faturamento/aggregates/`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
@@ -60,7 +61,7 @@ de 25/09 + esta feature no container `api-acos-vital-vendas`; av-hub na branch
 |---|---|---|
 | Banco — estrutura | [Apêndice A](#apêndice-a--estrutura) | DBA |
 | Banco — telas e permissões | [Apêndice B](#apêndice-b--telas-e-permissões) | DBA |
-| API | `26-anexos/0001-feat-vendas-liberacao-...patch` (sobre a `develop` em `04de3fe`, aplica limpo; branch local `feat/vendas-liberacao-pedidos` do clone `Desktop/api-acos-vital`) | backend |
+| API | `LOG-26-anexos/0001-feat-vendas-liberacao-...patch` (sobre a `develop` em `04de3fe`, aplica limpo; branch local `feat/vendas-liberacao-pedidos` do clone `Desktop/api-acos-vital`) | backend |
 | Tela | av-hub, mergeada na `develop` ([av-hub#103](https://github.com/Acosvital/av-hub/pull/103), 28/09/2026) | ✅ feito |
 
 ---

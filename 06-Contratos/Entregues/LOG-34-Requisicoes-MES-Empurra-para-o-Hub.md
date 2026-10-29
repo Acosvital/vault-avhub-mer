@@ -3,12 +3,12 @@ id: LOG-34
 aliases: ["Contrato 34", "34-Requisicoes-MES-Empurra-para-o-Hub"]
 tags: [contrato, contrato-api, contrato-sql, compras, integracao-mes, seguranca]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco, hub-api, mes-api]
 dono: "Robert"
 etapa_0b: [P3, E4]
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/requisicoes_compra/requisicoes_compra.route.js:221", "api-pcp/src/integracao-avhub/envio-avhub.service.ts:9,46,130", "Dump Avhub (Esqueleto).sql:8680", "api-pcp/prisma/migrations/20261002120000_envio_requisicoes_avhub"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/requisicoes_compra/requisicoes_compra.route.js:314", "api-pcp/src/integracao-avhub/envio-avhub.service.ts:9,40-42,127", "Dump Avhub (Esqueleto).sql:8680", "api-pcp/prisma/migrations/20261002120000_envio_requisicoes_avhub"]
 criado_original: 2026-10-01
 ---
 
@@ -24,10 +24,11 @@ criado_original: 2026-10-01
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** P3, E4 · **Dono:** Robert
 >
-> - ✅ **MES:** cada item da requisição entra na fila `integracao_avhub_envios` na mesma transação; `EnvioAvhubService` faz `PUT {API_URL}/compras/requisicoes/origem/{id_origem}` (`api-pcp/src/integracao-avhub/envio-avhub.service.ts:130`), `id_origem` = id do item; dispara após criar ou cancelar e repete a cada `AVHUB_ENVIO_INTERVALO_SEG` (padrão 60 s, `:46`), backoff 1, 2, 5, 10, 30, 60 min. Chave `AVHUB_MES_INTEGRACAO_KEY`, só vale para esse PUT.
-> - ✅ **av-hub:** `PUT /compras/requisicoes/origem/:id_origem` (`api-acos-vital/src/schemas/core_vendas_faturamento/tables/requisicoes_compra/requisicoes_compra.route.js:221`) chama `fn_requisicao_mes_aplicar` (`Dump Avhub (Esqueleto).sql:8680`): cria, atualiza, cancela ou ignora. Cada requisição do av-hub tem 1 material; `409 REQUISICAO_COM_OC` ao cancelar requisição que já tem OC.
+> - ✅ **MES:** cada item da requisição entra na fila `integracao_avhub_envios` na mesma transação; `EnvioAvhubService` faz `PUT {API_URL}/compras/requisicoes/origem/{id_origem}` (`api-pcp/src/integracao-avhub/envio-avhub.service.ts:127`), `id_origem` = id do item; dispara após criar ou cancelar e repete a cada `AVHUB_ENVIO_INTERVALO_SEG` (padrão 60 s, `:40-42`), backoff 1, 2, 5, 10, 30, 60 min. Chave `AVHUB_MES_INTEGRACAO_KEY`, só vale para esse PUT.
+> - ✅ **av-hub:** `PUT /compras/requisicoes/origem/:id_origem` (`api-acos-vital/src/schemas/core_vendas_faturamento/tables/requisicoes_compra/requisicoes_compra.route.js:314`) chama `fn_requisicao_mes_aplicar` (`Dump Avhub (Esqueleto).sql:8680`): cria, atualiza, cancela ou ignora. Cada requisição do av-hub tem 1 material; `409 REQUISICAO_COM_OC` ao cancelar requisição que já tem OC.
 > - 📝 Requisição criada pelo Compras no av-hub (nó C0, "Nova requisição") não tem `id_origem` e **não chega ao MES**, e não precisa chegar: o MES lê a **OC** dela pela referência (N14-20, [[Integracao-AvHub-MES]]); 🔴 o MES ainda não lê.
 > - Anexo SQL em `LOG-34-anexos/` (`0001-requisicoes-pedido-omie.sql`).
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89` e `api-pcp` `develop` `befd973`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.

@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Nathan
-fontes: [HUB b55ac55 app/api/**/route.ts (extração por script em 14/10), api-acos-vital f322dcd middlewares/identidadeUsuario.js e utils/acessoConfig.js, Dump Avhub 14/10 (auth.rotas_telas), v1 Mapa-Rotas-BFF-API-para-Bearer e anexo mapa-rotas.js]
+fontes: [av-hub develop 758d5f0 em 29/10 (lib/api/comercialApi.ts, lib/api/escopoUnidade.ts, app/api/**/route.ts, conferência em 29/10), HUB b55ac55 app/api/**/route.ts (extração por script em 14/10), api-acos-vital f322dcd middlewares/identidadeUsuario.js e utils/acessoConfig.js, Dump Avhub 14/10 (auth.rotas_telas), v1 Mapa-Rotas-BFF-API-para-Bearer e anexo mapa-rotas.js]
 ---
 
 # Mapa de rotas do BFF para a API: quem chama com Bearer
@@ -13,7 +13,7 @@ fontes: [HUB b55ac55 app/api/**/route.ts (extração por script em 14/10), api-a
 
 **Quando consultar:** quando um usuário comum recebe 403 numa tela, ou antes de mexer nas permissões de rota. Fica fora do fluxo 0b. Siglas: **BFF** é a camada do HUB que fala com a API; **Bearer** é o token de login do usuário; **403** é "sem permissão". Regras de chave e token: [[Chaves-e-Autenticacao]]; permissões: [[RBAC-e-Permissoes]].
 
-> **Correção (reauditoria de 14/10/2026):** a contagem "Sem Bearer (`headersCompras`, `headersApi` ou `x-api-key` inline)" abaixo classifica errado: `headersCompras` (`lib/compras/api.ts:31`) e `headersApi` (`lib/api/pedidosVenda.ts:96`) são apelidos de `headersComIdentidade` e **mandam o Bearer**. Na leitura arquivo a arquivo, só `app/api/auth/[...nextauth]/route.ts` (3 funções do login) chama a API sem o token do usuário ✅. **Em 15/10 (PR #206):** restou só `fetchMenu`; perfis e tela inicial passaram a usar `GET /me/permissoes` com o Bearer. Veja BL-042 em [[Backlog-por-Frente]] e PS-018 em [[Pontas-Soltas]].
+> **Situação conferida em 29/10/2026 (`av-hub` develop `758d5f0`):** `headersCompras` (`lib/compras/api.ts`) e `headersApi` (`lib/api/pedidosVenda.ts`) são apelidos de `headersComIdentidade` e **mandam o Bearer** (a contagem de 14/10 de "70 sem Bearer" classificava errado). Só `app/api/auth/[...nextauth]/route.ts` chama a API sem o token do usuário, e é o esperado: as chamadas do login (`/autenticacao/azure`, `/autenticacao/login`, `/autenticacao/renovar`) e o `fetchMenu`. Desde a PR #206 (15/10) perfis e tela inicial usam `GET /me/permissoes` com o Bearer, e a API já isenta o `fetchMenu` (`rotaDispensaToken`). Veja BL-042 em [[Backlog-por-Frente]] e PS-018 em [[Pontas-Soltas]].
 
 ## A regra em poucas palavras
 
@@ -25,15 +25,16 @@ fontes: [HUB b55ac55 app/api/**/route.ts (extração por script em 14/10), api-a
 ## Onde está hoje
 
 - ✅ A regra na API está conferida.
-- ✅ Quase todas as chamadas do HUB já levam o Bearer. Pela reauditoria de 14/10, só o login e, até 15/10, o `fetchMenu` ficavam de fora.
-- 🟡 Ainda falta cobrir em `auth.rotas_telas` os grupos de rotas de Compras, os cadastros usados por Compras e o acompanhamento de clientes (listas abaixo). O Gustavo faz isso ❓.
+- ✅ Todas as chamadas do HUB à API (fora o login) já levam o Bearer quando a sessão tem token. Conferido em 29/10: nenhum helper manda só a chave.
+- ✅ O BFF do módulo comercial (`app/api/comercial/[...rota]`) também fala com a **API do Hub** (`api-acos-vital`, rotas `/comercial/*`), com Bearer e `requirePermission`; a `api-comercial` saiu do BFF (N16-111, `3bccfce`). Das 72 rotas da lista, 21 já existem no Hub (`api: 'hub'`); as outras respondem 503 `RECURSO_NAO_MIGRADO` até serem criadas lá (N16-117, Robert).
+- 🟡 Cobertura em `auth.rotas_telas` dos grupos de rotas de Compras, dos cadastros usados por Compras e do acompanhamento de clientes (listas abaixo): ❓ não conferida em produção (o dump é só o esqueleto, sem as linhas). O Gustavo confirma.
 - Risco principal: o BFF confere uma tela e a API mapeia outra para a mesma rota (exemplos em "Detalhe técnico"). Resultado possível: todo comprador comum leva 403.
 
 ## Ordem para trocar o BFF para Bearer
 
 1. O Gustavo cobre a lista em `auth.rotas_telas`, aceitando todas as telas que o BFF confere para a mesma rota, e confirma o escopo de vendedores de cada perfil ❓.
 2. O front troca os helpers por área e testa na `api-test` com um usuário de cada perfil (admin, gerente, vendedor, PCP, comprador).
-3. A troca de 09/10 (PR #178) já ligou o Bearer em parte de Compras e dos pedidos; sobram os 70 handlers contados abaixo 🟡.
+3. A troca de 09/10 (PR #178) e o que veio depois ligaram o Bearer em todos os helpers; o que resta é a **cobertura em `auth.rotas_telas`** (passo 1) e o teste por perfil (passo 2) 🟡.
 
 ## Detalhe técnico
 
@@ -46,9 +47,11 @@ fontes: [HUB b55ac55 app/api/**/route.ts (extração por script em 14/10), api-a
 - O `backendToken` dura 15 minutos. O BFF o renova quando faltam menos de 5 min (a sessão é relida a cada 4 min com a aba aberta); quem fica ocioso além da validade não renova (a API recusa token vencido): a sessão é marcada como expirada e a tela leva ao login. Rota com `requirePermission` responde 401 sem token, em vez de seguir só com a chave ✅ HUB `d0ef359` (`app/api/auth/[...nextauth]/route.ts`, `lib/api/requirePermission.ts`, `providers/SessaoExpiradaGuard.tsx`); ❓ não testado na homologação.
 - A tabela `auth.rotas_telas` existe no dump, com `acao` entre `pode_visualizar`, `pode_criar`, `pode_editar`, `pode_deletar`, `pode_aprovar` ✅ (`CREATE TABLE auth.rotas_telas`). Quais linhas existem em produção ❓ Gustavo.
 
-### Números no HUB `b55ac55`
+### Números no HUB
 
-Extração por script (regex sobre `app/api/**/route.ts`), refeita em 14/10:
+**Contagem de 29/10/2026** (`av-hub` develop `758d5f0`, busca por texto, sem o script antigo): **202** arquivos `route.ts` e **264** handlers (métodos exportados). Todos os ajudantes de header (`headersComIdentidade` 311 usos, `headersCompras` 73, `headersApi` 25, `headersDaApi` 9) mandam o Bearer; `x-api-key` escrita à mão só existe em `app/api/auth/[...nextauth]/route.ts` e em `lib/api/mePermissoesApi.ts` (este com Bearer). 35 arquivos `route.ts` não chamam a API por helper (respondem no BFF ou usam serviço próprio). A tabela abaixo é a extração por script de 14/10 e fica como histórico:
+
+Extração por script (regex sobre `app/api/**/route.ts`, HUB `b55ac55`), refeita em 14/10:
 
 | Medida | Valor |
 |---|---|
@@ -56,17 +59,17 @@ Extração por script (regex sobre `app/api/**/route.ts`), refeita em 14/10:
 | Handlers (método por rota) | 275 |
 | Handlers que chamam uma API | 237 |
 | Com Bearer (`headersComIdentidade`, que cai para só `x-api-key` quando a sessão não tem token) | 167 |
-| Sem Bearer (`headersCompras`, `headersApi` ou `x-api-key` inline) | 70 |
+| "Sem Bearer" na contagem de 14/10 (`headersCompras`, `headersApi` ou `x-api-key` inline); **errada**: os dois helpers mandam o Bearer | 70 |
 | Handlers que não chamam a API (respondem no BFF ou usam helper não resolvido) | 38 |
 | Rotas únicas da API a mapear em `auth.rotas_telas` (seção A do script) | 48 |
 
-Em 09/10 eram 189 rotas, 265 handlers, 168 com Bearer e 64 sem. O aumento inclui rotas novas como grupos de clientes e acompanhamento de clientes (não foi feita a comparação rota a rota). As chamadas ao `api-comercial` ficam fora da conta: ele tem controle próprio (`UsuarioComercial`) e não passa por `auth.rotas_telas` ([[Comercial-Suprimentos]]).
+Em 09/10 eram 189 rotas, 265 handlers, 168 com Bearer e 64 sem. O aumento inclui rotas novas como grupos de clientes e acompanhamento de clientes (não foi feita a comparação rota a rota). Na época, as chamadas à `api-comercial` ficavam fora da conta (controle próprio, `UsuarioComercial`). Hoje o BFF do comercial chama a API do Hub e passa por `auth.rotas_telas` como as demais ([[Comercial-Suprimentos]]).
 
 Limites: o script erra o método quando o `fetch` está em helper e não resolve caminho montado por função (aparece como `via helper`). Conferir cada linha no arquivo antes de agir.
 
-### Rotas ainda sem Bearer que precisam de linha no mapa
+### Rotas que precisam de linha no mapa
 
-Grupos (a lista completa sai do script):
+O título antigo dizia "sem Bearer", o que não vale mais (todas mandam o Bearer). O que importa é a **linha em `auth.rotas_telas`**. Grupos da extração de 14/10 (a lista completa sai do script):
 
 | Grupo | Rotas da API (exemplos) | Tela exigida no BFF |
 |---|---|---|
@@ -74,7 +77,7 @@ Grupos (a lista completa sai do script):
 | Cadastros usados por Compras | `/categorias`, `/produtos`, `/contas_correntes`, `/projetos`, `/cotacoes_moeda/atual` | `compras (visualizar)` |
 | Acompanhamento de clientes | `/acompanhamento_clientes`, `/acompanhamento_clientes/movimento` | sem tela definida no BFF |
 
-Pares de risco (a tela natural da API difere da do BFF), todos **ainda presentes** na extração de 14/10:
+Pares de risco (a tela natural da API difere da do BFF), todos **ainda presentes** no código de 29/10 (conferir com o Gustavo se a API aceita as duas telas):
 
 - `GET /usuarios/{x}` é chamado por `/api/compras/comprador-sessao` e `/api/compras/minhas-unidades` com a tela `compras`. Se a API mapear `/usuarios/*` só para a tela `usuarios`, todo comprador comum leva 403.
 - `GET /produtos`, `/categorias`, `/contas_correntes`, `/projetos` e `/cotacoes_moeda/atual` são chamados com a tela `compras`.
@@ -85,7 +88,7 @@ Pares de risco (a tela natural da API difere da do BFF), todos **ainda presentes
 
 1. O Gustavo cobre a lista acima em `auth.rotas_telas`, aceitando **todas** as telas que o BFF confere para a mesma rota, e confirma o `escopo_vendedores` de cada perfil (20 dos 21 perfis eram `vinculados` no v1: listas de gerente e PCP podem encolher) ❓.
 2. O front troca os helpers por área e testa na `api-test` com um usuário de cada perfil (admin, gerente, vendedor, PCP, comprador).
-3. A troca de helpers do v1 de 09/10 (PR #178) já ligou o Bearer em parte de Compras e dos pedidos por fonte; o que sobra são os 70 handlers acima 🟡.
+3. A troca de helpers de 09/10 (PR #178) e as seguintes ligaram o Bearer em todo o BFF; o que sobra é a linha em `auth.rotas_telas` de cada grupo acima 🟡.
 
 ### Como refazer
 

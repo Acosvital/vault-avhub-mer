@@ -3,7 +3,7 @@ id: LOG-42
 aliases: ["Contrato 42", "42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio"]
 tags: [contrato, contrato-logica, contrato-api, comissoes, orcamento, av-hub, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-28
+atualizado: 2026-10-29
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Nathan"
@@ -22,8 +22,13 @@ criado_original: 2026-10-07
 > **Situação:** Parcial, dono Nathan. A API está pronta (✅) e o JSON do orçamento já saiu do repo; os arquivos de coordenadores continuam lá (🔴), com várias perguntas abertas.
 > **Exemplo:** A comissão de cada coordenador vem da API como percentual dividido por 100, vezes o faturamento total do mês.
 
-> [!info] Situação em 21/10/2026
+> [!info] Situação em 29/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Nathan
+>
+> - ✅ **Conferido em 29/10/2026 no `av-hub` (`develop`):** `lib/orcamento/` não existe mais (módulo Orçamento antigo removido em 16/10, `c851cda`); os três JSON continuam só no histórico do git, e o Nathan decidiu em 29/10 não limpar o histórico (repositório privado, restrito ao time; BL-077).
+> - 🔴 **Resíduo dos coordenadores:** `lib/comissoes/coordenadores.json` e `coordenadores.ts` seguem no repositório, com a marca em `coordenadores.ts:10` (C1) e o cálculo no navegador em `dash-comissoes/page.tsx:26` (C2 e C3). O arquivo `coordenadores.json` não deve ser apagado por ora.
+>
+> **Registro de 21/10/2026, mantido:** `parcial` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Nathan
 >
 > - ✅ **API pronta:** `GET /orcamento/*` (`api-acos-vital/src/schemas/core_compras/aggregates/orcamento/orcamento.route.js`, montada em `core_compras/index.js:37`; tabelas `core_compras.orc_*` no dump) e `GET /dashboard/comissoes` com os coordenadores vindos de `core_comissionamento.comissao_coordenadores` (`Dump Avhub (Esqueleto).sql:12228`).
 > - ✅ **Orçamento:** `lib/orcamento/data/` não existe mais no `av-hub` (`develop`, 21/10/2026).

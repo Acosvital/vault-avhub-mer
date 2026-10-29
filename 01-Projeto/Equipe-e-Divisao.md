@@ -4,12 +4,12 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Nathan
-fontes: [v1 05-Pessoas-e-Equipe/Equipe-Projeto, v1 Cronograma-2-Meses §3.2 e §3.4, v1 Registro-de-Decisoes #32 #33 #33b, git log dos repositórios em 14/10/2026, Registro-de-Decisoes N16-09 e N16-15]
+fontes: [v1 05-Pessoas-e-Equipe/Equipe-Projeto, v1 Cronograma-2-Meses §3.2 e §3.4, v1 Registro-de-Decisoes #32 #33 #33b, git log dos repositórios em 14/10/2026 e em 29/10/2026, Registro-de-Decisoes N16-09, N16-15, N16-117, N16-118 e N16-119]
 ---
 
 # Equipe e divisão
 
-**Em uma frase:** são quatro pessoas de TI, cada uma dona de uma parte do sistema: Nathan (telas do Hub), Gustavo (banco e API do Hub), Robert (MES) e Pablo (Comercial & Suprimentos).
+**Em uma frase:** são quatro pessoas de TI, cada uma dona de uma parte do sistema: Nathan (telas do Hub), Gustavo (banco e API do Hub), Robert (MES e, desde 28/10, o módulo comercial na API do Hub) e Pablo (acompanha o comercial e cuida do Orçamento).
 
 **Quando consultar esta nota:** quando você precisar saber quem decide, quem constrói e a quem perguntar sobre cada parte.
 
@@ -19,12 +19,12 @@ Os nomes completos vêm do `git log`.
 
 | Pessoa | Papel | O que toca |
 |---|---|---|
-| **Nathan** | Coordenador de TI e arquiteto do ERP. É o dono deste vault, das decisões e do pipeline Omie 📝 | Telas do av-hub (o front e o BFF, a camada que liga o front à API), o `omie-elt-pipeline`, os contratos e a coordenação. Faz as telas de Vendas, Orçamento, Compras e da Comissão nova, e o pipeline do pedido de venda (N16-15) |
-| **Gustavo M. de Farias** | Colega, DBA (administrador de banco de dados) | Banco e API do av-hub (`api-acos-vital`): migrations, `auth.*`, funções, envio fixo da OC, chave do MES (L6) e `exclusionSync`. Revisa e aplica no banco o módulo do Pablo (`core_comercial`, com o Orçamento) e a comissão nova (`core_comissao`) (N16-15) |
-| **Robert Wilson** | Colega, fullstack sênior | O MES inteiro (`api-pcp` e `app-pcp`): Recebimento, carga inicial em lote (G1), baixa no despacho, D11 (leitor 2D e posto de recebimento) e I1/J2/J5. Também o custo obrigatório em todo lote e o `GET /itens/custo` (N16-09) |
-| **Pablo Cruz** | Colega, fullstack | Comercial & Suprimentos: o módulo de proposta, pedido de venda e Orçamento, que migra para a `api-acos-vital` (N16-15). O `api-comercial` é só de teste. Ele saiu do MES em 07/10 |
+| **Nathan** | Coordenador de TI e arquiteto do ERP. É o dono deste vault, das decisões e do pipeline Omie 📝 | Telas do av-hub (o front e o BFF, a camada que liga o front à API), o `omie-elt-pipeline`, os contratos e a coordenação. Faz as telas de Compras, da Comissão nova e do restante do HUB, e o pipeline do pedido de venda (N16-15). **As telas de proposta são do Robert e as de Orçamento são do Pablo com o Robert** (conferido no git em 29/10) |
+| **Gustavo M. de Farias** | Colega, DBA (administrador de banco de dados) | Banco e API do av-hub (`api-acos-vital`): migrations, `auth.*`, funções, envio fixo da OC, chaves de serviço do MES e da pipeline (L6) e `exclusionSync`. Revisa e aplica no banco o módulo comercial e o Orçamento e a comissão nova (`core_comissao`, N16-143) (N16-15) |
+| **Robert Wilson** | Colega, fullstack sênior | O MES inteiro (`api-pcp` e `app-pcp`): Recebimento, carga inicial em lote (G1), baixa no despacho, D11 (leitor 2D e posto de recebimento) e I1/J2/J5. Também o custo obrigatório em todo lote e o `GET /itens/custo` (N16-09, feito na `develop` em 27/10). **Desde 28/10 conduz o módulo comercial na `api-acos-vital`** (N16-117) e troca o backend das telas de proposta (N16-118, N16-119); já criou as rotas `/comercial/*` de cadastros, clientes, parceiros e propostas |
+| **Pablo Cruz** | Colega, fullstack | Criou o módulo Comercial & Suprimentos (a `api-comercial`, hoje só legado de leitura, N16-117). **Desde 28/10 acompanha** o módulo comercial, que o Robert conduz, e cuida do Orçamento, com a supervisão do Robert. Ele saiu do MES em 07/10 |
 
-Atribuições decididas: Pablo no Comercial & Suprimentos e Robert no MES 📝 (decisões #32 e #33 do Registro do v1). As decisões do Nathan de 14/10 reafirmam a divisão ([[Registro-de-Decisoes]]). O detalhe de repositórios está em [[Sistemas-e-Responsabilidades]].
+Atribuições decididas: Pablo no Comercial & Suprimentos e Robert no MES 📝 (decisões #32 e #33 do Registro do v1), reafirmadas em 14/10. Em 28/10 o Nathan passou a condução do módulo comercial para o Robert, com o Pablo acompanhando (N16-117) ([[Registro-de-Decisoes]]). O detalhe de repositórios está em [[Sistemas-e-Responsabilidades]].
 
 ## O que cada pessoa decide e entrega
 
@@ -32,8 +32,8 @@ Atribuições decididas: Pablo no Comercial & Suprimentos e Robert no MES 📝 (
 |---|---|---|
 | Nathan | Regras de negócio e fluxo; nomes de tela; escopo; prioridade | Telas do HUB, BFF, [[Backlog-por-Frente]] da frente front, aprovação dos contratos |
 | Gustavo | Modelo de banco, funções e rotas da API do av-hub; chaves de serviço | Migrations (`047b`, `046b`, `035b`), mapa de `auth.rotas_telas`, SQL dos contratos |
-| Robert | Modelo e regras do MES; telas do `app-pcp` | Documento de retirada, `lote_custo`, feed `/fluxo/eventos`, job do contrato 004 |
-| Pablo | Desenho do Comercial & Suprimentos | Publicação do `api-comercial`, telas e perfis do módulo |
+| Robert | Modelo e regras do MES; telas do `app-pcp`; rotas do módulo comercial na `api-acos-vital` e telas de proposta | Documento de retirada, `lote_custo`, feed `/fluxo/eventos`, job do contrato 004 (feito, K4), rotas e telas da proposta |
+| Pablo | Acompanha o módulo comercial; Orçamento (com o Robert) | Regras do legado a portar ([[Mapa-do-Modulo-do-Pablo]]) e as telas de Orçamento |
 
 ## Risco: capacidade do Robert
 
@@ -60,7 +60,7 @@ O plano pede mais trabalho do Robert do que ele consegue entregar no prazo. O Ci
 Nathan e Gustavo fazem em breve, sem bloquear o desenho 📝 N14-24:
 
 - o **perfil CCP** (BL-017);
-- o **vínculo de usuários à Gerência de Compras** (hoje sem usuários, dump de 07/10 ❓ conferir no de 14/10);
+- o **vínculo de usuários à Gerência de Compras** (hoje sem usuários, dump de 07/10 ❓ conferir no de 29/10);
 - o vínculo de compradores a funcionários (BL-045);
 - o perfil **orçamentista**, que também precisa existir (N16-59).
 
@@ -81,7 +81,7 @@ Foco e capacidade são premissa do plano de 21/09, não alocação registrada em
 
 ### Evidência no git
 
-Desde 15/09/2026, em 14/10: os commits do MES são do Robert (28 no `api-pcp`, 37 no `app-pcp`). Os do Pablo no MES (9 e 17) são anteriores à reatribuição. Os do Comercial & Suprimentos no HUB são do Pablo (258) ✅. Detalhe em [[Sistemas-e-Responsabilidades]].
+Desde 15/09/2026, em 14/10: os commits do MES são do Robert (28 no `api-pcp`, 37 no `app-pcp`). Os do Pablo no MES (9 e 17) são anteriores à reatribuição. Os do Comercial & Suprimentos no HUB são do Pablo (258 em 14/10, 348 em 29/10) ✅. Desde 28/10 os commits das telas de proposta no HUB e das rotas `/comercial/*` na API são do Robert ✅ (git, 29/10). Detalhe em [[Sistemas-e-Responsabilidades]].
 
 ### Conta da capacidade do Robert
 

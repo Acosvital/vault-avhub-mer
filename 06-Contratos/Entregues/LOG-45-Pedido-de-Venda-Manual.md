@@ -20,8 +20,9 @@ criado_original: 2026-10-09
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** V1 · **Dono:** Gustavo (DBA)
 >
 > - ✅ `POST /pedidos_vendas/manual` (`pedidos_vendas.route.js:443`), `PUT`/`PATCH /manual/:codigo` (`:517-518`), `GET /manual/:codigo/historico` (`:559`) e a regra em `api-acos-vital/src/utils/pedidoVendaManual.js`.
-> - ✅ **Numeração (29/10/2026):** os comentários e o swagger do pedido manual passaram a citar "Contrato 45" (commit `e705797` na `develop` local da `api-acos-vital`, ainda sem push). O "Contrato 30" do código ficou só no PDF do pedido de compra do Omie (LOG-30). A migration 030 não foi alterada.
+> - ✅ **Numeração (29/10/2026):** os comentários e o swagger do pedido manual passaram a citar "Contrato 45" (commit `0384e89` na `develop` local da `api-acos-vital`; em 29/10/2026 estava 1 commit à frente de `origin/develop`, sem push). O "Contrato 30" do código ficou só no PDF do pedido de compra do Omie (LOG-30). A migration 030 não foi alterada.
 > - Pedido manual nunca participa do custo do item (decisão D6 do [[API-008-Custo-do-Lote-no-MES]]) nem do fluxo de Atividades. Assunto no anexo `10-Anexo-Fora-do-Fluxo` (Pedido-Manual). Produção não verificada (❓).
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
@@ -164,7 +165,7 @@ Em homologação (`api-test`), com a API em `develop` e **uma unidade de teste**
 | 2 | Aplicar `AND NOT manual AND codigo_pedido_omie > 0` no `exclusionSync` (SELECT e DELETE). | 🔴 Gustavo |
 | 3 | Construir a tela `pedidos-vendas-manuais` ou limpar a tela de `auth.telas`? | 🔴 Nathan |
 | 4 | Quais perfis têm a permissão em produção (só o admin)? As rotas `/pedidos_vendas/manual*` estão em `auth.rotas_telas`? | 🔴 DBA |
-| 5 | Trocar os comentários "Contrato 30" do pedido manual por "contrato 45 do vault" (código, swagger, migration 030). ✅ Feito em 29/10/2026 no código e no swagger (commit `e705797`, falta o push); a migration 030 não foi alterada. | ✅ Gustavo / DBA confirmam o push |
+| 5 | Trocar os comentários "Contrato 30" do pedido manual por "contrato 45 do vault" (código, swagger, migration 030). ✅ Feito em 29/10/2026 no código e no swagger (commit `0384e89` (antes `e705797`; o commit foi reescrito), falta o push); a migration 030 não foi alterada. | ✅ Gustavo / DBA confirmam o push |
 | 6 | O histórico (`GET …/historico`) deve exigir `pode_visualizar`? | 🔴 Nathan |
 | 7 | Remover o código morto do caminho sem trava (`ajustarEdicaoManual` e os `if` de `:689-692,707-710,732-733`). | 🟡 Gustavo |
 

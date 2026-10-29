@@ -8,7 +8,7 @@ status: aplicado-em-producao
 sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
-fontes: ["Dump Avhub (Esqueleto).sql: fn_pedidos_venda (:7373), fn_pedidos_venda_linhas (:7534), fn_pedido_dias_para_prazo (:7282), fn_pedido_prazo (:7311), fn_pedidos_venda_resumo (:7666), pedidos_vendas (:2328)", "api-acos-vital/src/schemas/core_vendas_faturamento/aggregates/pedidos_venda/pedidos_venda.route.js", "av-hub/components/Painel/PainelPcp.tsx, usePainelPcp.ts", "SQL-014 (campos por pedido e regra de encerrado)"]
+fontes: ["Dump Avhub (Esqueleto).sql: fn_pedidos_venda (:7373), fn_pedidos_venda_linhas (:7534), fn_pedido_dias_para_prazo (:7282), fn_pedido_prazo (:7311), fn_pedidos_venda_resumo (:7666), pedidos_vendas (:2328)", "api-acos-vital/src/schemas/core_vendas_faturamento/aggregates/pedidos_venda/pedidos_venda.route.js", "av-hub/components/Painel/PainelPcp.tsx, CarteiraPrevisao.tsx, useCarteiraPcp.ts", "SQL-014 (campos por pedido e regra de encerrado)"]
 criado_original: 2026-10-21
 ---
 

@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Gustavo (DBA)
-fontes: [api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, HUB b55ac55, Dump MES e Dump Avhub de 14/10, v1 AV-Hub-RBAC, Achado-Duplicacao-RBAC]
+fontes: [api-pcp befd973 (develop), app-pcp 93f96de (develop), api-acos-vital 0384e89 (develop), av-hub 758d5f0 (develop), Dump MES de 14/10, Dump Avhub de 14/10 e de 29/10, v1 AV-Hub-RBAC, Achado-Duplicacao-RBAC]
 ---
 
 # RBAC e permissões
@@ -20,10 +20,10 @@ fontes: [api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, HUB b55ac55, 
 
 ## Como se encaixa no fluxo
 
-- **MES:** permissão por tela e por setor. O Estoque ainda separa por depósito.
+- **MES:** permissão por tela e por setor. O Estoque ainda separa por depósito. Telas só de permissão: custo do lote, liberar recebimento sem OC e programar a fila.
 - **av-hub:** permissão por tela e por rota. A liberação, a Torre de Fluxo e o custo por item têm a sua.
 - **Compras:** a aprovação da OC acima de R$ 30 mil depende da permissão "aprovar" do av-hub (N14-21).
-- **Comercial:** a API Comercial usa as permissões do av-hub ([[API-Comercial]]).
+- **Comercial:** as rotas `/comercial/*` da API do Hub usam as permissões do av-hub e sempre exigem o token do usuário. A `api-comercial` antiga virou legado ([[API-Comercial]]).
 - Um perfil do MES não existe no av-hub e vice-versa. O usuário tem um cadastro em cada um ([[Schemas-Postgres]]).
 
 ## Regras que valem
@@ -45,6 +45,7 @@ fontes: [api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, HUB b55ac55, 
 - 🟡 Perfil CCP no MES (N14-24): hoje é só leitura, sem perfil próprio. Criar é tarefa de cadastro.
 - 🟡 Alinhar os perfis das duas permissões de custo: `estoque-custo` (MES) e `custo-itens` (av-hub).
 - 🔴 Permissão do documento de retirada (`E6`): a tela e a rota também não existem.
+- ✅ Chaves de serviço do banco podem ser presas às rotas que usam (migration 051, `modo_rotas` `livre`, `registrar` ou `exigir`, tabelas `auth.chaves_servico_rotas` e `chaves_servico_uso`). O modo de cada chave em produção ❓ Gustavo.
 - 🔴 Chave do MES com acesso mínimo ao av-hub (hoje lê e escreve). Gustavo.
 - ❓ As linhas de `auth.rotas_telas` das rotas novas e o que existe em produção. Gustavo.
 - ❓ O cadastro das telas `movimentacao` e `movimentacoes` e o do `compras-liberar` (a seed não está nos repositórios).
@@ -86,7 +87,9 @@ Dump MES `:1046-1113`, `:1396-1440` ✅.
 | `estoque-custo` | `pode_editar` | `POST /estoque/lotes/carga-inicial` aceita `custoUnitario` (sem a flag, 403 "Sem permissão para informar o custo do lote") | ✅ `estoque-operacao.service.ts:406-411`; `EntradaLoteModal.tsx:36` |
 | `compras-liberar` | `pode_editar` | `POST /compras/requisicoes/:id/liberar-recebimento` (rede de segurança: esperados do Recebimento sem OC aprovada, com motivo obrigatório) | ✅ `compras.service.ts:404-409`; `FilaSetor.tsx:304` |
 
-Seeds: `estoque-custo` nasce "default-deny, só o Administrador" ✅ `common/constants/estoque-custo.constants.ts:1-5`; `compras-liberar` entra por `01-base.sql`, que **não está nos repositórios** ❓ Robert. A lista de telas só de permissão: `app-pcp/lib/telasSoPermissao.ts:8`.
+Terceira tela só de permissão, desde 26/10: `programar-fila` (`editar` muda a ordem de qualquer fila de fabricação, inclusive nos setores travados para o PCP; o líder com "pode atuar" só muda onde o setor não é travado; vale só para setor produtivo) ✅ `api-pcp/src/setores/fila-ordem.service.ts:13,84`.
+
+Seeds: `estoque-custo` nasce "default-deny, só o Administrador" ✅ `common/constants/estoque-custo.constants.ts:1-5`; `compras-liberar` entra por `01-base.sql`, que **não está nos repositórios** ❓ Robert. A lista de telas só de permissão: `app-pcp/lib/telasSoPermissao.ts:10`.
 
 #### Slugs do MES (extraídos dos controllers) ✅
 
@@ -94,7 +97,9 @@ Seeds: `estoque-custo` nasce "default-deny, só o Administrador" ✅ `common/con
 |---|---|---|
 | `dashboard` | `/dashboard`, `/auth/dashboard-check` | visualizar |
 | `carteira` | Triagem do Pedido | visualizar |
-| `ordens-producao` | Destinação, Acompanhamento, itens, anexos, embalagens, paletes, roteiro-item, histórico | criar (Destinação), editar, visualizar, deletar (cancelar parcial, excluir) |
+| `ordens-producao` | Destinação, Acompanhamento, itens, anexos, embalagens, paletes, roteiro-item, histórico, PDF da OP | criar (Destinação), editar, visualizar, deletar (cancelar parcial, excluir) |
+| `montagem-roteiro` | Montagem do Roteiro (`/pedidos/roteiros`, `/pedidos/:id/roteiro`, `devolver-destinacao`) | visualizar, editar |
+| `produtos-em-producao` | Produtos em Produção (`/pedidos/produtos-em-producao`) | visualizar |
 | `pedidos-excluidos` | pedidos excluídos | visualizar |
 | `movimentacoes` (virtual) | parciais, entregas, divergências, anexos e observações de parcial, `/compras/requisicoes/*`, `/compras/recebimentos` (ler, conferir, recontar), `/estoque/saldo/disponivel-parcial/:id` | visualizar, editar |
 | `atendimento`, `requisicoes`, `pedidos-compra`, `logistica-entrada`, `expedicao`, `inspecao-saida` | telas de módulo (fila de setor) | as quatro flags, via `movimentacoes` |
@@ -104,7 +109,7 @@ Seeds: `estoque-custo` nasce "default-deny, só o Administrador" ✅ `common/con
 | `fabricas`, `maquinas`, `operadores`, `roteiros`, `setores` | cadastros de produção | criar, editar, visualizar, deletar |
 | `usuarios`, `perfis`, `telas`, `usuarios-perfis` | acessos | idem |
 | `relatorios` | relatórios | visualizar |
-| `estoque-custo`, `compras-liberar` | só permissão | ver acima |
+| `estoque-custo`, `compras-liberar`, `programar-fila` | só permissão | ver acima |
 
 `movimentacao` (singular, ajuste e carga inicial) e `movimentacoes` (plural, fila) são telas distintas ✅ `estoque-operacao.controller.ts:55-85` e `itens-parciais.controller.ts:57`; conferir o cadastro de ambas em produção ❓.
 
@@ -131,12 +136,12 @@ Seeds: `estoque-custo` nasce "default-deny, só o Administrador" ✅ `common/con
 
 #### Como a API decide ✅
 
-1. **Chave de serviço** (`x-api-key`): `API_KEYS` do `.env` (admin), chaves de `auth.chaves_servico`, ou `MES_INTEGRACAO_KEYS` (só `PUT /compras/requisicoes/origem/:id`; qualquer outra rota dá 403 `CHAVE_MES_ROTA_NAO_PERMITIDA`) ✅ `api-acos-vital/src/middlewares/apiKeyAuth.js:1-76`.
+1. **Chave de serviço** (`x-api-key`): `API_KEYS` do `.env` (admin), chaves de `auth.chaves_servico` (com `modo_rotas`, migration 051), ou `MES_INTEGRACAO_KEYS` (só `PUT /compras/requisicoes/origem/:id`; qualquer outra rota dá 403 `CHAVE_MES_ROTA_NAO_PERMITIDA`) ✅ `api-acos-vital/src/middlewares/apiKeyAuth.js:1-76`. O limite geral é de 5 000 requisições por minuto por chave.
 2. **Token de usuário** (`Authorization: Bearer`): `identidadeUsuario` valida o token e chama `auth.fn_autorizar(usuario, versão, método, caminho)` ✅ `middlewares/identidadeUsuario.js:40-100`. A função devolve 401 `usuario_invalido` ou `token_revogado`; 403 `rota_sem_mapa` (rota sem linha em `auth.rotas_telas`: **fail-closed**) ou 403 `sem_permissao` (com a lista `exige_uma_de`); 200 com o escopo de vendedores. A permissão é **OR entre perfis** do usuário ✅ dump `fn_autorizar` `:357` (join `usuarios_perfis → perfis → permissoes → telas`).
 3. **Identidade passa a ser a do token.** `id_usuario_sessao` na query e os campos `created_by`, `updated_by`, `deleted_by`, `aprovado_por`, `decidido_por`, `cancelado_por` do corpo são **sobrescritos** pelo id do token ✅ `identidadeUsuario.js:29-37`.
 4. **Sem token:** chave de `.env` e chave do MES seguem sem identidade (o MES e a pipeline não são usuários). Chave com `exige_usuario` recebe 401 `TOKEN_USUARIO_AUSENTE` ✅ `:63-69`.
 5. **Escopo de vendedor** (contrato 40): perfil que não é `todos` só vê pedidos e notas dos vendedores do usuário (`escopoVendedor.js`); **escopo de unidade** (`auth.usuarios_unidades`) e de setor (`escopoUnidade.js`, `escopoSetor.js`) ✅.
-6. **BFF.** `requirePermission(slug, ação)` do HUB lê `GET /me/permissoes` (ao vivo, cache 5 s) e responde 401 sem o token do usuário, 503 se `/me/permissoes` falhar e 403 se a tela não estiver em `auth.telas`: o menu do JWT é só apresentação e não autoriza nada ✅ `HUB/lib/api/requirePermission.ts` (`d0ef359`). Por isso o BFF nega **antes** de chegar à API, e a API nega de novo pelo mapa.
+6. **BFF.** `requirePermission(slug, ação)` do HUB lê `GET /me/permissoes` (ao vivo, cache 5 s) e responde 401 sem o token do usuário, 503 se `/me/permissoes` falhar e 403 se a tela não estiver em `auth.telas`: o menu do JWT é só apresentação e não autoriza nada ✅ `av-hub/lib/api/requirePermission.ts`. Por isso o BFF nega **antes** de chegar à API, e a API nega de novo pelo mapa.
 7. Rotas fora do mapa de permissão: `ROTAS_SEM_PERMISSAO_DE_TELA` em `utils/acessoConfig.js` ✅.
 
 Dados em `auth.rotas_telas` e `auth.telas`: **o dump é só esqueleto** (sem `COPY`/`INSERT`), então quais linhas existem em produção ❓ Gustavo (`auth.vw_rotas_telas_conferencia` ajuda a conferir).
@@ -153,15 +158,15 @@ Dados em `auth.rotas_telas` e `auth.telas`: **o dump é só esqueleto** (sem `CO
 | `compras` | `pode_visualizar` | BFF | listas, detalhes, catálogos de apoio | ✅ `app/api/compras/**` |
 | `followup` | `pode_visualizar`, `pode_editar`, `pode_aprovar` | BFF e API | ler a fila do CCP; gravar confirmação, previsão, despacho, contato, ocorrência; **decidir ocorrência** (precisa também ser o comprador da OC ou admin) | ✅ `HUB app/api/compras/ocorrencias/[id]/route.ts:13`, `api-acos-vital …/ordens_compra_acompanhamento.route.js:154`, `utils/acessoConfig.js` |
 | `compradores` | `pode_visualizar`, `pode_editar` | BFF e API | vínculo comprador × funcionário; só quem é comprador vinculado na unidade emite OC (regra fixa, `BLOQUEAR_SEM_COMPRADOR = true`) | ✅ `compradores.route.js:210`, `ordens_compra.route.js:35` |
-| **`custo-itens`** | `pode_visualizar` | **API, sempre** (também sem token) | `GET /itens_pedido_custo`; **nasce sem permissão para nenhum perfil** (decisão de 13/10) | ✅ `itens_pedido_custo.route.js:41-48,76-85` |
-| **`torre-fluxo`** | visualizar | mapa (migration 046/046b) | `GET /fluxo/torre`, `/fluxo/sla-etapas`, `/fluxo/itens/:id/tempo` | ✅ `item_estado_projetado.route.js:16-25` |
-| **`torre-fluxo-trilha`** | visualizar | mapa | `GET /fluxo/itens/:id` (mostra nomes de pessoas); 046b concede só ao perfil de testes do time de TI (nenhum perfil de negócio) | ✅ idem |
+| **`custo-itens`** | `pode_visualizar` | **API, sempre** (também sem token) e BFF | `GET /itens_pedido_custo` e a tela `/orcamento/custo-itens`; **nasce sem permissão para nenhum perfil** (decisão de 13/10) | ✅ `itens_pedido_custo.route.js:41-48,76-85`; `av-hub app/api/custo-itens/route.ts:10` |
+| **`torre-fluxo`** | visualizar | mapa (migration 046/046b) e BFF | `GET /fluxo/torre`, `/fluxo/sla-etapas`, `/fluxo/itens/:id/tempo`; telas `/torre-fluxo` | ✅ `item_estado_projetado.route.js:16-25`; `av-hub app/api/fluxo/torre/route.ts:18` |
+| **`torre-fluxo-trilha`** | visualizar | mapa e BFF | `GET /fluxo/itens/:id` (mostra nomes de pessoas); 046b concede só ao perfil de testes do time de TI (nenhum perfil de negócio) | ✅ idem; `av-hub app/api/fluxo/itens/[id]/route.ts:13` |
 | `pcp-pedidos`, `pcp-notas`, `pcp-dashboard` | visualizar (+criar e deletar nas observações) | BFF | portal PCP do av-hub (leitura) | ✅ `HUB app/api/pcp/**` |
 | `meus-pedidos`, `pedidos-equipe` | visualizar | BFF | card "Etapa dos itens" | ✅ `HUB lib/api/pedidosVenda.ts` |
 
 #### Slugs do Comercial
 
-`propostas`, `propostas-delegacao`, `propostas-valores`, `custo-item` (singular, ≠ `custo-itens`), `relatorio-gerencial`, `painel-comprador`, `clientes` ✅ `api-comercial/src/domain/permissoes/capacidades.ts:44-52`. A API Comercial lê `GET /me/permissoes` do av-hub e não tem tabela de perfil própria ([[API-Comercial]]).
+As 21 telas do módulo (`propostas`, `propostas-delegacao`, `propostas-valores`, `custo-item` (singular, ≠ `custo-itens`), `relatorio-gerencial`, `painel-comprador`, `clientes`, `solicitacoes-custo`, `ofertas-fornecedor`, `pedido-cotacao`, `catalogo-produtos`, `fornecedores`, `historico-compras`, `parametros-custo`, `tabela-telha`, `sincronizacao-omie`, `matriz-precos`, `pesquisa-materiais`, `relatorio-cotacoes`, `dash-comercial`, `empresas-emissoras`) ✅ `api-acos-vital/src/schemas/core_comercial/capacidades.js:20-26`. As capacidades (`escopo` por `escopo_vendedores` do perfil, `ve_valores`, `ve_custo`, `pode_delegar`, `comprador`…) saem das telas do usuário em `auth.fn_me_permissoes`, não do cargo comercial; `GET /comercial/me` devolve esse mapa. A antiga `api-comercial` lia `GET /me/permissoes` do av-hub; ela virou legado ([[API-Comercial]]). Toda rota `/comercial/*` e `/suprimentos/*` exige o token do usuário (401 `TOKEN_USUARIO_AUSENTE` mesmo com `x-api-key` válida) ✅ `middlewares/exigirTokenUsuario.js`. No BFF do av-hub cada rota da lista tem tela e ação ✅ `app/api/comercial/[...rota]/route.ts`.
 
 ### 3. Lacunas e decisões abertas
 
@@ -172,5 +177,5 @@ Dados em `auth.rotas_telas` e `auth.telas`: **o dump é só esqueleto** (sem `CO
 | Permissão do documento de retirada (E6) | 🔴 não existe (a tela e a rota também não) |
 | Quem vê custo no MES e no av-hub | duas permissões distintas: `estoque-custo` (MES, custo do lote) e `custo-itens` (av-hub, custo do pedido) 🟡 alinhar perfis |
 | Chave própria do MES com escopo mínimo para ler o av-hub (hoje `API_KEY` de leitura e escrita) | 🔴 Gustavo ([[Chaves-e-Autenticacao]]) |
-| Linhas de `auth.rotas_telas` das rotas novas (`/fluxo/*`, `/itens_pedido_custo`, `/compras/requisicoes/eventos`) | ❓ Gustavo |
+| Linhas de `auth.rotas_telas` das rotas novas (`/fluxo/*`, `/itens_pedido_custo`, `/compras/requisicoes/eventos`, `/compras/requisicoes/referencia`, `/comercial/*`) e as 21 telas do módulo comercial em `auth.telas` | ❓ Gustavo |
 | Duplicação de RBAC entre MES e av-hub (achado antigo) | por decisão cada sistema mantém o seu; o av-hub é a fonte dos perfis comerciais ([[Registro-de-Decisoes]]) |

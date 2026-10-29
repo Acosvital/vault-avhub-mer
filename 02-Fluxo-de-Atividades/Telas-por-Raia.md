@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Nathan
-fontes: [app-pcp 1fca8d3 (app/(protected)/**/page.tsx, títulos dos PageHeader), HUB b55ac55 em disco (app/(protected), components), v1 Fluxograma-Telas-por-Bloco, 00-Fluxo-Mestre-0b, Regras-do-Vault]
+fontes: [app-pcp 1fca8d3 (app/(protected)/**/page.tsx, títulos dos PageHeader), HUB b55ac55 em disco (app/(protected), components), v1 Fluxograma-Telas-por-Bloco, 00-Fluxo-Mestre-0b, Regras-do-Vault, app-pcp develop 93f96de e av-hub develop 758d5f0 de 29/10/2026]
 ---
 
 # Telas por raia
@@ -20,24 +20,26 @@ Esta nota lista cada tela do fluxo de Atividades ([[00-Fluxo-Mestre-0b]]), setor
 
 Os nomes novos já estão nos títulos do `app-pcp`; rotas, slugs e permissões seguem com os nomes antigos (ver "Detalhe técnico"). Convenção de nomes: [[Regras-do-Vault]].
 
+Conferido em 29/10/2026 contra a `develop` do `av-hub` (`758d5f0`) e do `app-pcp` (`93f96de`). As telas do MES marcadas "develop" não estão na `main` do MES, que parou em 08/10 (merge BL-035).
+
 Selos: ✅ existe · 🟡 parcial · 🔴 não existe · ❓ não conferido.
 
 ## Mapa rápido por setor
 
 | Setor (nós) | O que as telas fazem | Situação |
 |---|---|---|
-| Vendas · V1 a V3 | Liberar e acompanhar pedido e etapa dos itens | ✅ 🟡 |
-| PCP · P1, P2, P6 | Triar e destinar. Faltam Novo norte, OC do pedido, Ordem de Produção | ✅ 🔴 |
+| Vendas · V1 a V3 | Liberar e acompanhar pedido e etapa dos itens; clientes e relatório gerencial | ✅ 🟡 |
+| PCP · P1, P2, P6 | Triar, destinar, montar o roteiro, ver os produtos em produção e imprimir a Ordem de Produção (develop). Faltam Novo norte e OC do pedido | ✅ 🔴 |
 | Estoque · E1 a E6 | Atender, consultar, movimentar. Faltam retirada e saldo futuro | ✅ 🟡 🔴 |
 | Compras · P3, C0 a C5 | Da requisição à OC | ✅ |
 | Recebimento · R0 a R6 | Receber, conferir, decidir divergência | ✅ |
 | Qualidade de entrada · Q1 a Q4 | Inspecionar o que chegou | ✅ |
 | Produção · F1 | Tocar a fábrica. Falta o Painel TV | ✅ 🔴 |
-| Qualidade de saída · Q7, Q8 | Aprovar o fabricado | ✅ |
+| Qualidade de saída · Q7, Q8 | Aprovar o fabricado (develop) | ✅ |
 | Expedição · X1 a X4 | Pallets e entrega. Faltam carga e transporte | ✅ 🔴 |
 | Fiscal · O1, O2 | Ver notas depois do fato. Falta a sinalização | ✅ 🔴 |
-| Proposta, Orçamento, comissão | Telas novas de 26/10/2026 | 🔴 |
-| Todos | Login, Acessos, Inicial. Falta a Torre de Fluxo | ✅ 🔴 |
+| Proposta, Orçamento, comissão | Telas novas de 26/10/2026: proposta e Orçamento em andamento; comissão nova sem tela | 🟡 🔴 |
+| Todos | Login, Acessos, Inicial. Torre de Fluxo existe sobre dados de exemplo | ✅ 🟡 |
 
 ## Vendas (V1 a V3) · [[01-Vendas-Liberacao]]
 
@@ -48,6 +50,10 @@ Selos: ✅ existe · 🟡 parcial · 🔴 não existe · ❓ não conferido.
 | Meus Pedidos, detalhe (V1 a O2) | Cartão Etapa dos itens. 🟡 Falta linha do tempo, SLA e filtro | Vendedor | ✅ |
 | Pedidos da Equipe, detalhe | Mesmo cartão de etapa, para a equipe | Gerente | ✅ |
 | Pedidos do PCP | Acompanhamento comercial por diligenciador. **Não é o `app-pcp`** | Diligenciador | ✅ |
+| Propostas, lista, nova e detalhe (V0.1 a V0.7) | Ver [[11-Proposta-e-Pedido-de-Venda]] | Vendedor | 🟡 |
+| Acompanhamento de Clientes | Clientes e grupos de empresa (a antiga tela Clientes, N16-112) | Vendedor | ✅ |
+| Relatório Gerencial | Resumo por responsável, empresa e unidade | Gerência | ✅ |
+| Pedidos de Venda e Notas Fiscais de Saída | Páginas existem, inativas no menu (N16-33) | — | ✅ |
 
 ## PCP (P1, P2, P6) · [[02-PCP-Triagem-e-Destinacao]]
 
@@ -58,9 +64,11 @@ Selos: ✅ existe · 🟡 parcial · 🔴 não existe · ❓ não conferido.
 | Acompanhamento dos Pedidos | Lista dos pedidos em andamento | PCP | ✅ |
 | Acompanhamento dos Pedidos, detalhe | Mini-roteiro, histórico, anexos, embalagens. 🟡 Falta a parte atendida pelo estoque e a reserva | PCP | ✅ |
 | Pedidos excluídos | Guarda uma cópia do pedido excluído | PCP | ✅ |
+| Montagem do Roteiro (P2) | Monta o roteiro base e os alternativos por item das OPs já destinadas e as libera. Só na develop (22/10) | PCP | ✅ |
+| Produtos em Produção | Uma linha por split: onde cada produto está no roteiro. Só na develop (20/10) | PCP | ✅ |
 | Novo norte (P6) | Retrabalho ou reabrir compra; a tela de decisões só trata recebimento | PCP | 🔴 |
-| OC do pedido (P1, P2) | Mostrar na Triagem e na Destinação que já há OC (N14-20, BL-049) | PCP | 🔴 |
-| Ordem de Produção (P2) | Documento imprimível do que será fabricado (N14-22, BL-052) | PCP | 🔴 |
+| OC do pedido (P1, P2) | Mostrar na Triagem e na Destinação que já há OC (N14-20, BL-049). Hoje a Triagem mostra só as requisições do Compras com pedido de venda (develop, 23/10) | PCP | 🟡 🔴 |
+| Ordem de Produção (P2) | Documento imprimível do que será fabricado (N14-22, BL-052): botão "Imprimir OP" e 2ª via no detalhe da ordem. Só na develop (27/10) | PCP | ✅ |
 
 ## Estoque (E1 a E6) · [[03-Estoque-Atendimento-e-Despacho]]
 
@@ -145,14 +153,14 @@ Selos: ✅ existe · 🟡 parcial · 🔴 não existe · ❓ não conferido.
 
 ## Proposta, Orçamento e comissão nova (`V0`, `B1` a `B4`, `C6` a `C8`, `K1` a `K6`) · [[11-Proposta-e-Pedido-de-Venda]]
 
-Desenho aprovado em 26/10/2026, ainda **sem código** 🔴. Auditoria, conexões e menu: [[14-Telas-e-Experiencia-do-Usuario]].
+Desenho aprovado em 26/10/2026. Em 29/10/2026 a proposta já tem API na `api-acos-vital` e telas em andamento no `av-hub`; o resto segue sem código 🔴. As telas de proposta são do Robert e o Orçamento é do Pablo, com o Robert. Auditoria, conexões e menu: [[14-Telas-e-Experiencia-do-Usuario]].
 
 | Tela | Para que serve | Quem usa | Situação |
 |---|---|---|---|
-| Proposta (`V0.1` a `V0.7`, `V0C`) | Cinco blocos e um botão principal por estado | Vendedor | 🔴 (`api-comercial` de teste ✅) |
+| Proposta (`V0.1` a `V0.7`, `V0C`) | Cinco blocos e um botão principal por estado | Vendedor | 🟡 criar, listar e abrir ✅; aprovar, cancelar e transformar têm API mas não têm tela; `V0.7` 🔴 |
 | Meus Pedidos (`V1` a `V3`, `C8`, datas) | Pedido das duas origens, parte de compras, respostas, pendências de compra acima do valor, histórico de datas | Vendedor | 🔴 |
 | Página do produto (`B2`) | Consulta de preço e fornecedores | Vendedor, Orçamento, Compras | 🔴 |
-| Orçamento · Pedidos de custo (`B3`, `B4`) | Fila de pedidos de custo | Setor de Orçamento | 🔴 (`api-comercial` de teste ✅) |
+| Orçamento · Pedidos de custo (`B3`, `B4`) | Fila de pedidos de custo | Setor de Orçamento | 🟡 tela ✅ (aba da página Pedidos de custo); API na `api-acos-vital` 🔴 |
 | Emitir OC (`C6`, `C7`) | Com os dados do vendedor e imposto por item | Comprador | 🔴 |
 | Compras · Reprovados (`C8`) | Casos reprovados pelo vendedor | Comprador | 🔴 |
 | Faturamento em partes (`O1`) | Bloco do pedido | Fiscal | 🔴 |
@@ -165,7 +173,7 @@ Desenho aprovado em 26/10/2026, ainda **sem código** 🔴. Auditoria, conexões
 |---|---|---|---|
 | Login (T.1) | Azure AD e usuário e senha | Todos | ✅ |
 | Cadastros › Acessos (T.2) | Usuários, Perfis, Permissões, Telas e vínculos ([[RBAC-e-Permissoes]]). 🔴 `PerfilSetor` sem filial | Administrador | ✅ |
-| Torre de Fluxo (T.3 a T.6) | Mapa, trilha, tempo, auditoria. Sem tela; API existe ([[Rastreabilidade-e-Torre-de-Fluxo]], [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas]]) | Gestão | 🔴 |
+| Torre de Fluxo (T.3 a T.6) | Mapa, ranking, tempo e trilha por item. As telas existem no HUB sobre dados de exemplo (BL-022, 15/10, `3cd55de`); o MES ainda não publica o feed ([[Rastreabilidade-e-Torre-de-Fluxo]], [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas]]) | Gestão | 🟡 |
 | Inicial, Blank | Páginas básicas | Todos | ✅ |
 
 ## Detalhe técnico
@@ -185,6 +193,9 @@ Os nomes novos já estão nos **títulos** do `app-pcp` (`9bb47e4`, #39: só ró
 | V1 a O2 | Meus Pedidos, detalhe com cartão Etapa dos itens | Meus Pedidos por etapa (1.2) | HUB | `/meus-pedidos`, `/meus-pedidos/pedido/[codigoEmpresa]/[pedidoVenda]` | `meus-pedidos` | Cartão `components/Pedidos/EtapaDosItens.tsx`, usado em `PedidoDetalhe.tsx:812` |
 | idem | Pedidos da Equipe, detalhe | idem | HUB | `/pedidos-equipe`, `/pedidos-equipe/pedido/...` | `pedidos-equipe` | Mesmo cartão |
 | — | Pedidos do PCP | Portal PCP | HUB | `/pcp-pedidos`, `/pcp-pedidos/pedido/...` | `pcp-pedidos` | Não é o `app-pcp` |
+| V0.1 a V0.7 | Propostas (lista, nova, detalhe) | — | HUB | `/vendas/propostas`, `/vendas/propostas/nova`, `/vendas/propostas/[id]` | `propostas` | BFF `app/api/comercial/[...rota]/route.ts`; lê e grava na `api-acos-vital` (`/comercial/propostas`) |
+| — | Acompanhamento de Clientes | Clientes | HUB | `/vendas/acompanhamento-clientes` (e ficha `cliente/...`, `grupo/[id]`) | `acompanhamento-clientes` | N16-112 |
+| — | Relatório Gerencial, Meu Dashboard, Minhas Notas | — | HUB | `/vendas/relatorio-gerencial`, `/vendas/meu-dashboard`, `/vendas/minhas-notas` | ❓ |  |
 
 ### PCP
 
@@ -197,7 +208,9 @@ Os nomes novos já estão nos **títulos** do `app-pcp` (`9bb47e4`, #39: só ró
 | — | Pedidos excluídos | — | app-pcp | `/pedidos-excluidos` | ❓ | Snapshot de pedido excluído |
 | P6 | Novo norte (retrabalho ou reabrir compra) | Fila "Novo norte" (2.5) | app-pcp | — | — | 🔴 Sem tela; `/decisoes-pcp` só trata recebimento |
 | P1, P2 | OC do pedido (coluna ou cartão na Triagem e na Destinação) | — | app-pcp | `/carteira`, `/ordens-producao/novo` | — | 🔴 N14-20, BL-049 |
-| P2 | Ordem de Produção (entidade e documento imprimível, só do que será fabricado) | — | app-pcp | — | — | 🔴 N14-22, BL-052 |
+| P2 | Montagem do Roteiro | — | app-pcp | `/montagem-roteiro`, `/montagem-roteiro/[id]` | `montagem-roteiro` | Só na develop (22/10); `GET /pedidos/roteiros`, `PUT /pedidos/:id/roteiro` |
+| — | Produtos em Produção | — | app-pcp | `/produtos-em-producao` | `produtos-em-producao` | Só na develop (20/10); `GET /pedidos/produtos-em-producao` |
+| P2 | Ordem de Produção (entidade e documento imprimível, só do que será fabricado) | — | app-pcp | `/ordens-producao/[id]` (botão "Imprimir OP") | `ordens-producao` | ✅ só na develop (27/10, `ab3318d`, BL-052); `GET /pedidos/:id/op` |
 
 ### Estoque
 
@@ -278,7 +291,7 @@ Os nomes novos já estão nos **títulos** do `app-pcp` (`9bb47e4`, #39: só ró
 |---|---|---|---|---|---|---|
 | O1 | Fila de sinalização de faturamento | (11.1) | app-pcp | — | — | 🔴 |
 | O2 | Notas Fiscais de Saída | — | HUB | `/vendas/notas-fiscais-saida` | ❓ | Título `page.tsx:98` |
-| O2 | Minhas Notas, Notas da Equipe, Notas do PCP | — | HUB | `/minhas-notas`, `/notas-equipe`, `/pcp-notas` | ❓ | Pós-fato |
+| O2 | Minhas Notas, Notas da Equipe, Notas do PCP | — | HUB | `/vendas/minhas-notas`, `/notas-equipe`, `/pcp-notas` | ❓ | Pós-fato |
 
 ### Telas que servem a todos
 
@@ -286,7 +299,7 @@ Os nomes novos já estão nos **títulos** do `app-pcp` (`9bb47e4`, #39: só ró
 |---|---|---|---|---|
 | Login (Azure AD e usuário e senha) | T.1 | app-pcp | `/login` | `(public)/login/page.tsx` |
 | Cadastros › Acessos: Usuários, Perfis, Permissões, Telas, Usuários por Perfil, Setores por Perfil, Depósitos por Perfil | T.2 | app-pcp | `/cadastros/acessos/usuarios`, `perfis`, `permissoes`, `telas`, `usuarios-perfis`, `setores-perfil`, `depositos-perfil` | `PerfilSetor` sem filial 🔴 |
-| Torre de Fluxo (mapa, trilha, tempo por etapa, auditoria) | T.3 a T.6 | HUB | — | Nenhuma ocorrência de "torre" em `app`, `components` ou `lib` do HUB |
+| Torre de Fluxo (mapa, ranking, tempo por etapa, item) | T.3 a T.6 | HUB | `/torre-fluxo`, `/torre-fluxo/ranking`, `/torre-fluxo/tempo`, `/torre-fluxo/item/[id]` | Telas e BFF `/api/fluxo` sobre dados de exemplo (BL-022, `3cd55de`, 15/10); registro de 14/10 (superado): nenhuma ocorrência de "torre" no HUB |
 | Inicial, Blank | — | app-pcp | `/`, `/blank` |  |
 
 ### Nomes novos que ainda não chegaram ao código

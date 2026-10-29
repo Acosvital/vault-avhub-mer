@@ -25,10 +25,10 @@ fontes: [plano de 14/10/2026]
 
 | Quem | Vá para |
 |---|---|
-| Robert (MES, o sistema de chão de fábrica) | [[Backlog-por-Frente]] (frente MES), [[MES-Backend]], [[MES-Front]], [[Estados-e-Status]] |
+| Robert (MES, o sistema de chão de fábrica, e o módulo comercial na API do Hub desde 28/10) | [[Backlog-por-Frente]] (frente MES), [[MES-Backend]], [[MES-Front]], [[Estados-e-Status]], [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]], [[Mapa-do-Modulo-do-Pablo]] |
 | Gustavo (DBA, cuida do banco e da API do av-hub) | [[Backlog-por-Frente]] (frente DBA), [[AV-Hub-API]], [[Banco-AvHub]], [[Diferencas-Codigo-x-Banco]] |
 | Nathan (front do av-hub) | [[AV-Hub-Front]], [[Telas-por-Raia]], [[Mapa-Rotas-BFF-Bearer]] |
-| Pablo (Comercial & Suprimentos) | [[Mapa-do-Modulo-do-Pablo]], [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]], [[API-Comercial]], [[Comercial-Suprimentos]] |
+| Pablo (acompanha o módulo comercial e cuida do Orçamento) | [[Mapa-do-Modulo-do-Pablo]], [[12-Orcamento-Base-de-Preco]], [[API-Comercial]] (legado de leitura), [[Comercial-Suprimentos]] |
 | Controladoria (Michele) | [[13-Custo-Real-e-Comissao-no-Fluxo]], [[04-Regras-e-Estados-da-Comissao-Nova]] |
 | Compras e Orçamento | [[04-Circuito-de-Compra]], [[12-Orcamento-Base-de-Preco]], [[11-Proposta-e-Pedido-de-Venda]] (nós `C6` a `C8`) |
 

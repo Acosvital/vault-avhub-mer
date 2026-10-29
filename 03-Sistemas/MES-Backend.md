@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Robert
-fontes: [api-pcp 579a625 (develop), Dump MES (Esqueleto).sql de 14/10, v1 App-PCP-Backend-Producao, App-PCP-Visao-Geral, MES-Arquitetura-Decisoes]
+fontes: [api-pcp befd973 (develop, 27/10; a main parou em 08/10 e está em 8e2bf56), prisma/migrations até 20261028120100, Dump MES (Esqueleto).sql de 14/10 (defasado), v1 App-PCP-Backend-Producao, App-PCP-Visao-Geral, MES-Arquitetura-Decisoes]
 ---
 
 # MES Backend (`api-pcp`)
@@ -24,7 +24,10 @@ fontes: [api-pcp 579a625 (develop), Dump MES (Esqueleto).sql de 14/10, v1 App-PC
 - **Compras e Recebimento:** registra a requisição de compra (`P3`), a chegada com nota fiscal e a conferência (`R0` a `R6`).
 - **Qualidade:** inspeciona o lote que chegou (`Q1` a `Q4`).
 - **Produção e Expedição:** controla a fila de cada setor, a embalagem em pallets e a entrega (`F1`, `X1`, `X4`).
-- **Troca com o av-hub:** três rotinas automáticas enviam a requisição de compra, leem o andamento da compra e reenviam o aviso de pedido importado.
+- **Troca com o av-hub:** cinco rotinas automáticas enviam a requisição de compra, leem o andamento da compra, leem as OCs aprovadas, leem as requisições que o Compras abriu no av-hub e reenviam o aviso de pedido importado. Três rotas de serviço respondem ao av-hub: requisições, etapa do item e custo por item.
+- **Fabricação:** a OP (ordem de produção) é emitida na Destinação, o PCP monta o roteiro, e o fabricado aprovado na inspeção de saída entra no Estoque como lote de produção (LOG-53).
+
+> Tudo o que é de 15 a 28/10 (OP, lote do fabricado, custo por item, referência da OC) está **só na `develop`** do `api-pcp`. A `main` parou em 08/10.
 
 ## Regras que valem
 
@@ -39,14 +42,16 @@ fontes: [api-pcp 579a625 (develop), Dump MES (Esqueleto).sql de 14/10, v1 App-PC
 
 - ✅ Pedidos, parciais, Estoque, Compras · CCP, Recebimento, Qualidade, Expedição e entregas.
 - ✅ Envio da requisição ao av-hub e leitura dos 14 marcos da compra.
-- 🔴 Torre de Fluxo e custo por item não existem aqui. Os jobs do av-hub recebem erro 404.
-- 🔴 Fabricado aprovado não vira lote nem saldo.
+- ✅ O MES lê a referência da OC do av-hub (`GET /ordens-compra/referencia`), a cada 5 minutos, desde 15/10 (commit `114ba89`, K4). Na `develop`.
+- ✅ O MES lê as requisições que o Compras abriu no av-hub com pedido de venda (API-009, `9e75df5`, 23/10). Na `develop`.
+- ✅ O custo da OC é gravado no lote (`origem = OC`, `97b9adc`, 16/10), há rota de custo manual (`PUT /estoque/lotes/:id/custo`), snapshot do custo na saída e `GET /itens/custo` para o av-hub (`6c11147`, 27/10). Na `develop`.
+- ✅ Fabricado aprovado vira lote `PRODUCAO` e saldo no Estoque (LOG-53, `ab3318d`, 27/10). A OP é emitida na criação. Na `develop`.
+- ✅ O fornecedor da OC chega ao MES (api007b, 26/10) e preenche o fornecedor da requisição.
+- 🔴 Torre de Fluxo não existe aqui (`/fluxo/*`). O job da Torre do av-hub recebe erro 404.
 - 🔴 Não há documento de retirada. A baixa do saldo acontece quando a Embalagem recebe.
-- 🔴 O custo da OC (ordem de compra) nunca é gravado no lote.
-- 🔴 O MES não lê a referência da OC no av-hub.
 - 🟡 A tabela de fornecedores existe, mas nada a preenche nem lê.
 - 🟡 A rota antiga `GET /requisicoes-compra` não tem consumidor.
-- 🟡 Os três intervalos automáticos ainda ficam em variável de ambiente.
+- 🟡 Os intervalos automáticos ainda ficam em variável de ambiente.
 - ❓ Conferir se as telas `movimentacao` e `movimentacoes` existem em produção.
 
 ## Detalhe técnico
@@ -63,9 +68,9 @@ API NestJS do MES: pedidos liberados, produção por setor, Estoque, circuito de
 | Filtro global | `PrismaExceptionFilter` traduz P2002/P2003/P2039/P2025 em HTTP amigável | ✅ `src/app.module.ts:88` |
 | Saúde | `GET /health` público (`@Public()`) | ✅ `src/app.controller.ts:11-12` |
 | Docs | `/docs` (Scalar) e `/api-docs-json` com Basic Auth `DOCS_USER`/`DOCS_PASSWORD`; sem senha em produção responde 404 | ✅ `src/main.ts:56-83` |
-| Migrations | 55 pastas em `prisma/migrations` (de `20260818164425_init` a `20261014120000_compras_ccp`); schema em 7 arquivos `prisma/models/*.prisma` | ✅ `api-pcp/prisma/` |
+| Migrations | 66 pastas em `prisma/migrations` (de `20260818164425_init` a `20261028120100_op_e_lote_fabricado`); schema em 7 arquivos `prisma/models/*.prisma` (54 models, 22 enums) | ✅ `api-pcp/prisma/` |
 
-192 rotas em 33 módulos (contagem dos decorators `@Get/@Post/@Put/@Patch/@Delete` dos controllers, 14/10). A tabela rota a rota está na seção seguinte.
+215 rotas (contagem dos decorators `@Get/@Post/@Put/@Patch/@Delete` dos controllers na `develop`, 29/10; eram 192 em 14/10). A tabela rota a rota está na seção seguinte; as rotas novas de 15 a 28/10 têm a sua própria subseção.
 
 ### Módulos (`src/app.module.ts:36-72`)
 
@@ -82,7 +87,7 @@ API NestJS do MES: pedidos liberados, produção por setor, Estoque, circuito de
 | Qualidade | `qualidade/` | inspeção de entrada por lote (aprovar, reprovar, RNC) | Q1 a Q4 |
 | Expedição | `entregas/`, `pedido-embalagens/`, `pedido-embalagem-pallets/`, `pedido-anexos/` | entrega, embalagem, paletes, anexos (canhoto, NF) | X1, X4 |
 | Divergências | `divergencias/` | divergência de produção (abrir, analisar, resolver) | R6 (produção) |
-| Integração av-hub | `integracao-avhub/` | rotas de serviço para o av-hub (`/requisicoes-compra`, `/itens/status`), envio da requisição (LOG-34), leitura dos marcos (LOG-35) | P3, C1 a C5 |
+| Integração av-hub | `integracao-avhub/` | rotas de serviço para o av-hub (`/requisicoes-compra`, `/itens/status`, `/itens/custo`), envio da requisição (LOG-34), leitura dos marcos (LOG-35), da referência da OC (API-004/007) e da referência da requisição do Hub (API-009) | P3, C1 a C5, R4 |
 | Painéis | `dashboard/`, `relatorios/`, `pedidos-excluidos/` | início, TV, relatórios de tempo por setor e de compras, pedidos excluídos | — |
 
 ### Rotas por módulo e permissão
@@ -195,8 +200,30 @@ A Inspeção de saída (Q7) não tem controller próprio: é uma fila de setor t
 |---|---|---|---|
 | `GET /requisicoes-compra` | `x-api-key` = `MES_API_KEY` (`AvhubApiKeyGuard`, fail-closed) | contrato 003 (legado, sem consumidor) | ✅ `integracao-avhub.controller.ts:20`, `avhub-api-key.guard.ts:14` |
 | `GET /itens/status` | idem | contratos 005/006: job de 90 s do av-hub | ✅ `:26`; `integracao-avhub.service.ts:114-165` |
+| `GET /itens/custo?alterado_desde=&apos_id=&codigo_empresa=&limit=` | idem | API-008 / LOG-47: custo real por filial + pedido + produto, sem impostos; só pedido do Omie e item que tem ou teve reserva no Estoque (fabricado fica de fora); janela de segurança de 180 s; só na `develop` (27/10, `6c11147`) | ✅ `integracao-avhub.controller.ts:29`, `itens-custo.ts:1-30` |
 
-**Não existem no MES** ✅ (grep em `api-pcp/src` sem ocorrência de `fluxo` nem `itens/custo`): `GET /fluxo/eventos`, `GET /fluxo/itens/:id/(tempo)`, `GET /fluxo/sla-etapas` (Torre de Fluxo, LOG-46) e `GET /itens/custo` (API-008/LOG-47). Os jobs do av-hub recebem 404 e esperam 10 min ([[AV-Hub-API]], [[Rastreabilidade-e-Torre-de-Fluxo]]). Dono: Robert 🔴.
+**Não existem no MES** ✅ (grep em `api-pcp/src` sem ocorrência de `fluxo/`): `GET /fluxo/eventos`, `GET /fluxo/itens/:id/(tempo)`, `GET /fluxo/sla-etapas` (Torre de Fluxo, LOG-46). O job da Torre do av-hub recebe 404 e espera 10 min ([[AV-Hub-API]], [[Rastreabilidade-e-Torre-de-Fluxo]]). Dono: Robert 🔴. O `GET /itens/custo` passou a existir em 27/10 (acima).
+
+#### Rotas novas de 15 a 28/10 (só na `develop`) ✅
+
+| Rota | Permissão | O que faz | Código |
+|---|---|---|---|
+| `GET /compras/em-andamento` | `movimentacoes`, visualizar | compras em andamento por pedido (API-011 R1/R2) | ✅ `compra-em-andamento.controller.ts:16-17` |
+| `GET /compras/requisicoes/:id/ocs` | `movimentacoes`, visualizar | OCs ligadas à requisição | ✅ `compras.controller.ts:66-67` |
+| `POST /compras/requisicoes/op` | `movimentacoes`, editar | requisita a OP inteira | ✅ `:87-88` |
+| `GET /compras/recebimentos/oc-esperadas` | `movimentacoes`, visualizar | itens de OC esperados no Recebimento, sem requisição | ✅ `recebimento.controller.ts:39-40` |
+| `POST /compras/recebimentos/nf` | `movimentacoes`, editar | recebe com NF (várias OCs) | ✅ `:59-60` |
+| `GET /estoque/saldo/disponivel-setor/:idSetor`, `GET /estoque/saldo/materia-prima/:idItemParcial` | `movimentacoes`, visualizar | saldo por setor; matéria-prima que cobre a parcial | ✅ `estoque-operacao.controller.ts:50-58` |
+| `PUT /estoque/lotes/:id/custo` | `estoque-custo`, editar | custo manual do lote, com motivo e histórico (`lote_custo_historico`) | ✅ `:94-95` |
+| `POST /itens-parciais/atender-estoque/lote` | `movimentacoes`, editar | atende a OP inteira pelo Estoque | ✅ `itens-parciais.controller.ts:88-89` |
+| `PATCH /itens-parciais/:id/finalizar`, `/:id/reabrir` | `movimentacoes`, editar | status novo `FINALIZADO` (produção acabou, a peça espera no setor) | ✅ `:149-161` |
+| `PATCH /itens-parciais/:id/aprovar-saida`, `/:id/receber-fabricado` | `movimentacoes`, editar | a inspeção de saída aprova o fabricado; o Estoque recebe e cria o lote `PRODUCAO` (LOG-53) | ✅ `:235-248`; `itens-parciais.service.ts:1267,1403` |
+| `GET /pedidos/produtos-em-producao` | `produtos-em-producao`, visualizar | uma linha por split, com a etapa no roteiro | ✅ `pedidos.controller.ts:96-97` |
+| `GET /pedidos/roteiros` | `montagem-roteiro`, visualizar | OPs destinadas esperando roteiro | ✅ `:102-103` |
+| `GET /pedidos/:id/roteiro`, `PUT /pedidos/:id/roteiro`, `POST /pedidos/:id/devolver-destinacao` | `montagem-roteiro`, visualizar ou editar | montagem do roteiro, separada da Triagem (22/10); liberar o roteiro grava `roteiro_liberado_em` | ✅ `:176-196` |
+| `GET /pedidos/requisicoes-hub/:pedidoVenda` | `ordens-producao`, criar | requisições do Compras (av-hub) para o pedido, vistas na Destinação (API-009) | ✅ `:117-118` |
+| `GET /pedidos/:id/op` | `ordens-producao`, visualizar | PDF da OP (`ordem-producao-pdf.ts`) | ✅ `:162-163` |
+| `GET /setores/:id/ordem-fila`, `PUT /setores/:id/ordem-fila` | `movimentacoes`, visualizar ou editar | ordem manual da fila do setor (`fila_setor_ordem`) | ✅ `setores.controller.ts:58-65` |
 
 ### Serviços que fazem a regra
 
@@ -213,20 +240,26 @@ A Inspeção de saída (Q7) não tem controller próprio: é uma fila de setor t
 | `QualidadeService` | aprova (lote → `LIBERADO`, devolve parciais prontas ao Estoque) e reprova (cisão do lote, RNC, devolve a parte reprovada a Compras) | `qualidade.service.ts:83-102` |
 | `EntregasService` | registra a entrega, decrementa `quantidadePendente`, consome reserva por garantia, fecha o pedido (`ENTREGUE`) | `entregas.service.ts:25-135` |
 | `EnvioAvhubService` | fila de saída da requisição (LOG-34) | ver Jobs |
+| `OcReferenciaAvhubService` + `compra-oc.ts` | lê `GET /ordens-compra/referencia` e grava `oc_referencia` e `oc_referencia_itens`; calcula o custo do lote a partir da OC (`origem = OC`) e o fornecedor | `oc-referencia-avhub.service.ts`; `compra-oc.ts:114` |
+| `RequisicaoHubReferenciaAvhubService` | lê `GET /compras/requisicoes/referencia` (API-009) e grava `requisicoes_hub_referencia` | `requisicao-hub-referencia-avhub.service.ts` |
+| `itens-custo.ts` | monta o `GET /itens/custo` | `integracao-avhub/itens-custo.ts` |
+| `PedidosRoteiroService`, `PedidosProdutosProducaoService`, `FilaOrdemService` | roteiro da OP, tela Produtos em Produção, ordem da fila | `pedidos/`, `setores/` |
 | `EventosAvhubService` + `requisicao-avhub.eventos.ts` | leitura dos marcos (LOG-35) e reação por tipo | ver Jobs |
-| `IntegracaoAvhubService` | responde `/requisicoes-compra` e `/itens/status`; `etapaDoItem` gera as 11 etapas | `integracao-avhub.service.ts:167-192` |
+| `IntegracaoAvhubService` | responde `/requisicoes-compra`, `/itens/status` e `/itens/custo`; `etapaDoItem` gera as 11 etapas | `integracao-avhub.service.ts:167-192` |
 | `AuthService` | login com `bcrypt`, rate limit de 5 falhas por usuário e 20 por IP em 15 min, token por `JWT_EXPIRES_IN` (padrão `8h`) | `auth.service.ts:8-15`, `auth.module.ts:19` |
 | `PerfisService` | permissão por tela (OR entre perfis), `ensurePodeAtuar` por setor, `ensurePodeAtuarDepositos`, `depositosVisiveis`, `temPermissao` | `perfis.service.ts:349-364` |
 
 ### Jobs e timers (todos dentro do processo da API, sem `@nestjs/schedule`)
 
-Não há `@Cron`; os três timers usam `setInterval` com `unref()` ✅ (grep em `src`).
+Não há `@Cron`; os cinco timers usam `setInterval` ✅ (grep em `src`).
 
 | Job | Arquivo:linha | Intervalo | Faz | Variável |
 |---|---|---|---|---|
 | Envio da requisição ao av-hub (LOG-34) | `envio-avhub.service.ts:44-53` | 60 s (`0` desliga); primeira rodada 5 s depois da subida; backoff 1, 2, 5, 10, 30, 60 min (`:23`) | `PUT {API_URL}/compras/requisicoes/origem/{id_origem}`, lote de 100, timeout 15 s | `AVHUB_ENVIO_INTERVALO_SEG` |
 | Leitura dos marcos (LOG-35) | `eventos-avhub.service.ts:58-66` | 5 min (`0` desliga); primeira rodada 10 s depois; sob demanda via `POST /compras/requisicoes/sincronizar`, pulada se a última leitura boa tem menos de 30 s (`:25,81-90`) | `GET {API_URL}/compras/requisicoes/eventos`, página de 200, até 50 páginas, relê 2 min para trás; cursor `integracao_avhub_cursores.chave = 'requisicoes-eventos'` | `AVHUB_EVENTOS_INTERVALO_MIN` |
 | Reenvio de `importado` (LOG-26) | `pedidos.service.ts:81-83` | 10 min (`0` desliga) | `POST /pedidos_liberados/:numero/importado` para pedidos dos últimos 7 dias, 20 por rodada | `AVHUB_REENVIO_IMPORTADO_MIN` |
+| Referência da OC (API-004/007) | `oc-referencia-avhub.service.ts:105-107` | 5 min (`0` desliga) e na subida | `GET {API_URL}/ordens-compra/referencia`, até 500 por página e 40 páginas, relê 5 min para trás; cursor `ordens-compra-referencia`; chave `API_KEY` | `AVHUB_OC_INTERVALO_MIN` |
+| Referência da requisição do Hub (API-009) | `requisicao-hub-referencia-avhub.service.ts:87-89` | 5 min (`0` desliga) | `GET {API_URL}/compras/requisicoes/referencia`; linha com `visivel_ao_pcp = false` some da projeção | `AVHUB_REQ_HUB_INTERVALO_MIN` |
 
 Reação por marco (`requisicao-avhub.eventos.ts:234-246`): `requisicao_recebida`, `requisicao_reaberta`, `oc_cancelada` → `AGUARDANDO_COMPRADOR`; `em_cotacao`, `oc_removida` → `EM_COTACAO`; `oc_criada`, `oc_enviada_aprovacao` → `EM_APROVACAO`; `oc_aprovada` → `COM_FORNECEDOR`; `despachada` → `EM_TRANSITO`; `requisicao_cancelada` → `CANCELADA` ✅. `fornecedor_confirmou`, `previsao_alterada`, `ocorrencia` e `oc_no_omie` só atualizam campos da situação (previsão, ocorrência aberta) sem mudar a etapa ❓ (conferir ramo a ramo em `:107-230`).
 
@@ -240,24 +273,24 @@ Reação por marco (`requisicao-avhub.eventos.ts:234-246`): `requisicao_recebida
 | `JWT_SECRET` | assina e valida o JWT | — | ✅ `auth.module.ts:15`, `strategies/jwt.strategy.ts:15` |
 | `JWT_EXPIRES_IN` | validade do token | `8h` | ✅ `auth.module.ts:19` |
 | `MES_INTERNAL_API_KEY` | chave do BFF app-pcp para `POST /auth/azure` | — (sem ela a rota fica fechada) | ✅ `auth/guards/api-key.guard.ts:15` |
-| `MES_API_KEY` | chave que o av-hub usa para ler `/itens/status` e `/requisicoes-compra` | — (sem ela fecha) | ✅ `integracao-avhub/avhub-api-key.guard.ts:14` |
+| `MES_API_KEY` | chave que o av-hub usa para ler `/itens/status`, `/itens/custo` e `/requisicoes-compra` | — (sem ela fecha) | ✅ `integracao-avhub/avhub-api-key.guard.ts:14` |
 | `API_URL` | base do av-hub (`api-acos-vital`) | `https://api.acosvital.com.br` | ✅ `envio-avhub.service.ts:17`, `eventos-avhub.service.ts:23`, `omie-integracao.ts:10`, `produtos-avhub.client.ts:24` |
 | `API_KEY` | chave de leitura/escrita que o MES usa no av-hub (marcos, Triagem, Destinação, produtos, unidades) | — | ✅ `eventos-avhub.service.ts:192`, `omie-integracao.ts:149,241,349,411`, `produtos-avhub.client.ts:60` |
 | `AVHUB_MES_INTEGRACAO_KEY` | chave só do PUT da requisição (um valor de `MES_INTEGRACAO_KEYS` do av-hub, mínimo 32 caracteres) | — (sem ela a fila espera) | ✅ `envio-avhub.service.ts:98` |
-| `AVHUB_ENVIO_INTERVALO_SEG`, `AVHUB_EVENTOS_INTERVALO_MIN`, `AVHUB_REENVIO_IMPORTADO_MIN` | intervalos dos três timers | 60, 5, 10 | ✅ acima |
+| `AVHUB_ENVIO_INTERVALO_SEG`, `AVHUB_EVENTOS_INTERVALO_MIN`, `AVHUB_REENVIO_IMPORTADO_MIN`, `AVHUB_OC_INTERVALO_MIN`, `AVHUB_REQ_HUB_INTERVALO_MIN` | intervalos dos cinco timers | 60, 5, 10, 5, 5 | ✅ acima |
 | `DOCS_USER`, `DOCS_PASSWORD`, `DOCS_ENABLED` | Basic Auth do `/docs` e liga/desliga | `docs`, vazio, ligado | ✅ `main.ts:56-58` |
 
-As três variáveis `AVHUB_*_INTERVALO_*`/`_MIN` são regra em ambiente. A regra do Nathan ("nenhuma regra em variável de ambiente para jobs novos") vale para os jobs do av-hub; no MES esses três timers são anteriores à regra 🟡. Chaves e escopos: [[Chaves-e-Autenticacao]].
+As cinco variáveis `AVHUB_*_INTERVALO_*`/`_MIN` são regra em ambiente. A regra do Nathan ("nenhuma regra em variável de ambiente para jobs novos") vale para os jobs do av-hub; no MES os cinco timers leem ambiente 🟡. Chaves e escopos: [[Chaves-e-Autenticacao]].
 
 ### O que o MES chama no av-hub
 
-`GET /pedidos_liberados`, `GET /pedidos_liberados/:numero/itens`, `POST /pedidos_liberados/:numero/importado` (LOG-26); `PUT /compras/requisicoes/origem/:id` (LOG-34); `GET /compras/requisicoes/eventos` (LOG-35); `GET /produtos`, `GET /produtos/:id` (snapshot do material); `GET /unidades` (nome da filial, cache de 10 min, `estoque-operacao.service.ts:36`) ✅. **Nunca chama** `GET /ordens-compra/referencia` (API-004/007): o MES não consome a referência da OC 🔴.
+`GET /pedidos_liberados`, `GET /pedidos_liberados/:numero/itens`, `POST /pedidos_liberados/:numero/importado` (LOG-26); `PUT /compras/requisicoes/origem/:id` (LOG-34); `GET /compras/requisicoes/eventos` (LOG-35); `GET /ordens-compra/referencia` (API-004/007, desde 15/10); `GET /compras/requisicoes/referencia` (API-009, desde 23/10); `GET /produtos`, `GET /produtos/:id` (snapshot do material); `GET /unidades` (nome da filial, cache de 10 min, `estoque-operacao.service.ts:36`) ✅.
 
 ### O que falta ou diverge (resumo; detalhe em [[Pontas-Soltas]] e [[Diferencas-Codigo-x-Banco]])
 
-- 🔴 Módulo `fluxo` (Torre) e `GET /itens/custo` não existem.
-- 🔴 Fabricado aprovado não vira lote (`OrigemLote` só tem `RECEBIMENTO` e `CARGA_INICIAL`, `lotes` dump `:155-158`).
-- 🔴 `lote_custo` só é gravado na carga inicial e na cisão do lote (`estoque-operacao.service.ts:440`, `helpers.ts:434`); o custo da OC nunca é gravado (`OrigemCusto` `OC` e `MANUAL` sem escritor).
-- 🔴 Não há documento de retirada; a baixa de saldo acontece quando a Embalagem/Expedição recebe a parcial (`itens-parciais.service.ts:279`) e de novo, por garantia, na entrega (`entregas.service.ts:88`).
-- 🟡 Tabela `fornecedores` (projeção de `core.parceiros`) existe e nenhum código a popula nem lê.
+- 🔴 Módulo `fluxo` (Torre) não existe; o `GET /itens/custo` existe desde 27/10 (só na `develop`).
+- ✅ Fabricado aprovado vira lote `PRODUCAO` (LOG-53, `OrigemLote.PRODUCAO`, `prisma/models/estoque.prisma:11-17`). O fabricado entra **sem custo** (`itens-parciais.service.ts:1403-1410`); o custo da matéria-prima do fabricado ainda não existe ❓.
+- ✅ `lote_custo` é gravado na carga inicial, na cisão, pela OC no Recebimento (`compras.service.ts:1045`, `recebimento.service.ts:1135`, `compra-oc.ts:114`) e pela rota manual (`estoque-operacao.service.ts:715`).
+- 🔴 Não há documento de retirada; a baixa de saldo acontece quando a Embalagem/Expedição recebe a parcial (`itens-parciais.service.ts:318`) e de novo, por garantia, na entrega (`entregas.service.ts:72`).
+- 🟡 Tabela `fornecedores` (projeção de `core.parceiros`) existe e nenhum código a popula nem lê; o fornecedor da OC vem de `oc_referencia`.
 - 🟡 `GET /requisicoes-compra` (contrato 003) sem consumidor.

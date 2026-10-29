@@ -3,8 +3,8 @@ tags: [fluxo, raia, vendas, proposta, pedido-de-venda, compras, v0, v1, v2, v3, 
 criado: 2026-10-16
 atualizado: 2026-10-29
 status: proposta
-dono: Nathan (regra e front) · Pablo (módulo comercial) · Gustavo (banco e API) · Compras (C6, C7, C8)
-fontes: [Registro-de-Decisoes (N16-01 a N16-106), Estudo-Omie-API, 09-Diagramas/fontes/tela-simulador-comissao.png, 09-Diagramas/fontes/email-divergencia-margem-pv27824.jpg e pv28204.jpg, av-hub comissoes/simulador/page.tsx, 00-Fluxo-Mestre-0b, 01-Vendas-Liberacao, 04-Circuito-de-Compra, Proposta-Orcamento-Comissao/08-Reuniao/Proposta-Orcamento-Pedido-Comissao.docx (fora do vault), 09-Diagramas/artifact-proposta-pedido.html, api-comercial 5aa5311 (propostas.routes.ts, propostas.service.ts, vendas.prisma, enums.prisma, custos.routes.ts, numeroProposta.ts), Dump Avhub 14/10]
+dono: Nathan (regra) · Robert (rotas e telas de proposta) · Pablo (acompanha) · Gustavo (banco) · Compras (C6, C7, C8)
+fontes: [Registro-de-Decisoes (N16-01 a N16-144), api-acos-vital develop cc30c85 e 0384e89 de 29/10/2026 (core_comercial/aggregates/propostas/propostas.route.js, clientes, cadastros, parceiros), Dump Avhub 29/10/2026 (fn_proposta_criar, core_comercial.propostas), av-hub develop 758d5f0 (app/api/comercial/[...rota]/route.ts, lib/domain/andamento-proposta.ts), Estudo-Omie-API, 09-Diagramas/fontes/tela-simulador-comissao.png, 09-Diagramas/fontes/email-divergencia-margem-pv27824.jpg e pv28204.jpg, av-hub comissoes/simulador/page.tsx, 00-Fluxo-Mestre-0b, 01-Vendas-Liberacao, 04-Circuito-de-Compra, Proposta-Orcamento-Comissao/08-Reuniao/Proposta-Orcamento-Pedido-Comissao.docx (fora do vault), 09-Diagramas/artifact-proposta-pedido.html, api-comercial 5aa5311 (propostas.routes.ts, propostas.service.ts, vendas.prisma, enums.prisma, custos.routes.ts, numeroProposta.ts), Dump Avhub 14/10]
 ---
 
 # Proposta e pedido de venda
@@ -12,6 +12,13 @@ fontes: [Registro-de-Decisoes (N16-01 a N16-106), Estudo-Omie-API, 09-Diagramas/
 **Em uma frase:** o vendedor monta a proposta, a Gerência aprova, e a proposta aprovada vira pedido de venda (PV) no Omie, já liberado para o PCP (planejamento e controle da produção) começar.
 
 Nesta etapa o vendedor também acompanha o pedido, aprova compras mais caras e pode cancelar. A nota é uma proposta: o fluxo foi aprovado em 26/10/2026.
+
+> [!info] Situação em 29/10/2026
+> - As telas de proposta são do Robert; o Orçamento é do Pablo, com o Robert (N16-117 a N16-119). O Robert faz as rotas na `api-acos-vital` e o Nathan cuida da comissão estimada (`K1`, N16-115, N16-118).
+> - ✅ A `api-acos-vital` (`develop`, `cc30c85`, 28 e 29/10) já tem as rotas da proposta em `/comercial/propostas`: criar, listar, resumo, detalhe, linha do tempo, revisar (`PUT`, com `If-Match`), aprovar, cancelar com motivo, copiar e **transformar em pedido do Hub**. O pedido nasce com `status_sincronizacao_omie = pendente`; a API **não escreve no Omie** nesse passo (a pipeline é a 2ª etapa) 🔴. Também existem `POST /comercial/clientes` (cadastra o cliente no Omie da unidade), `GET /comercial/parceiros`, `/me`, `/empresas_emissoras`, `/responsaveis` e `/parametros_custo`.
+> - ✅ No banco, o dump de 29/10 traz `core_comercial.propostas`, os itens, as versões, os eventos e a função `fn_proposta_criar`. As funções de revisar, aprovar, cancelar, copiar, transformar e expirar são chamadas pela API, mas a migration delas não está no repositório nem no dump ❓ (Gustavo).
+> - 🟡 O front (`av-hub` `develop`, 758d5f0) lista, cria e abre a proposta pela API do Hub; o BFF ainda não tem `aprovar`, `cancelar` nem `transformar`, e o cartão de andamento diz que a etapa do pedido fica pendente enquanto a rota não existe.
+> - O contrato do menu e os 15 contratos de proposta, orçamento, custo real e comissão nova foram removidos em 29/10; o Robert cria os novos.
 
 ## Como funciona, passo a passo
 
@@ -69,18 +76,18 @@ Depois, Compras acha o flange mais caro que o previsto. O aviso mostra a margem 
 
 ## O que já existe e o que falta
 
-- ✅ Lista de propostas, nova proposta, detalhe da proposta e clientes.
+- ✅ Lista de propostas, nova proposta e detalhe da proposta no front, lendo a API do Hub; clientes pelo Acompanhamento de Clientes (N16-112).
 - ✅ Telas Liberar Pedidos e Liberação da Equipe.
 - ✅ Meus Pedidos, com a etapa dos itens.
-- ✅ Módulo de propostas do Pablo, só em ambiente de teste.
+- ✅ API da proposta na `api-acos-vital` (`develop`, 29/10): criar, listar, revisar, aprovar, cancelar, copiar e transformar em pedido do Hub.
 - 📝 Todas as regras acima estão decididas.
-- 🔴 Aprovar a proposta e transformar em pedido.
-- 🔴 Criar o pedido no Omie por fila e pipeline.
+- 🟡 Aprovar e transformar em pedido: a API existe; falta ligar o BFF e a tela.
+- 🔴 Criar o pedido no Omie por fila e pipeline (`V0.7`): o pedido do Hub fica `pendente` e nada o envia.
 - 🔴 Tela da proposta no formato do Simulador de Comissão, com comissão estimada.
 - 🔴 `C6` e `C7` na tela da OC.
 - 🔴 Aviso e aprovação da compra mais cara em Meus Pedidos (`C8`).
 - 🔴 Cancelamento do pedido, com tarja na requisição e na OC.
-- 🟡 Nomes de rota: o Gustavo e o Pablo fecham.
+- 🟡 Nomes de rota das partes que faltam: o Gustavo e o Robert fecham.
 - ❓ Testes no Omie: número próprio do pedido, pedido bloqueado e `ExcluirPedido`.
 
 ## Detalhe técnico
@@ -108,9 +115,10 @@ Depois do pedido, o PCP abre as requisições (`P3`). Compras recebe e o sistema
 | Compras (compradores, Gerente de Compras) | `C6`, `C7`, `C8`, OC (`C1` a `C4`); **lista dos casos reprovados pelo vendedor** e registro da solução (N16-73) | HUB, `/compras/*` |
 | Fiscal | Cria o produto novo no Omie; separa o pedido em sequenciais para faturar em partes (N16-92); informa a **devolução parcial** (N16-74). **Não cancela o pedido**: quem cancela é o vendedor (N16-84) | Omie |
 | Controladoria (Michele) | Decide a comissão ao fim, numa tela igual à da proposta, com o custo real ([[13-Custo-Real-e-Comissao-no-Fluxo]]); também informa a devolução parcial | HUB, Operações |
-| Pablo | Módulo comercial na `api-acos-vital` | `api-acos-vital` |
-| Gustavo (DBA) | Revisa e cria o banco e as rotas (`core_comercial`) | `api-acos-vital` |
-| Nathan | Telas de Vendas, BFF, pipeline do pedido de venda, carga do imposto da OC do Omie | HUB, `omie-elt-pipeline` |
+| Robert | Conduz o módulo comercial: rotas da proposta na `api-acos-vital` e telas de proposta (N16-117 a N16-119) | `api-acos-vital`, HUB |
+| Pablo | Acompanha o Robert; Orçamento (N16-117) | `api-acos-vital` |
+| Gustavo (DBA) | Banco (migrations e funções da proposta) | `api-acos-vital` |
+| Nathan | Comissão estimada (`K1`), BFF, pipeline do pedido de venda, carga do imposto da OC do Omie | HUB, `omie-elt-pipeline` |
 
 `Admin (Dev)` não é ator ([[Regras-do-Vault]]).
 
@@ -157,20 +165,21 @@ Origem: [[Registro-de-Decisoes]].
 
 #### Proposta (`status`) 🟡
 
-O enum de hoje, no módulo do Pablo, é `StatusProposta`: `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76`). Valores novos, no `CHECK` da migração (`ck_propostas_status`):
+O enum antigo, no `api-comercial` do Pablo (legado só para leitura), era `StatusProposta`: `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76`). Na `api-acos-vital` (`develop`, 29/10) a rota aceita `ABERTA`, `APROVADA`, `TRANSFORMADA`, `CANCELADA` e `EXPIRADA` (`propostas.route.js`, `STATUS`); o `CHECK` `ck_propostas_status` do dump de 29/10 tem só os quatro primeiros ❓ (`EXPIRADA`: a validade vencida passa de `ABERTA` a `EXPIRADA` por um agendador diário do banco, `fn_propostas_expirar`, e a API a expira na hora quando alguém esbarra nela; a validade não consta nas decisões N16 lidas: confirmar com o Nathan). Valores, como estão no banco e na API:
 
-| Valor 🟡 | De onde vem | Significado | Quem vê |
+| Valor | De onde vem | Significado | Quem vê |
 |---|---|---|---|
 | `ABERTA` | `ABERTA` | Em elaboração. Ajusta e revisa. Se algum item está sem custo e sem fornecedor, a tela marca **incompleta** (campo calculado, não é estado) | vendedor, equipe |
 | `APROVADA` | `FECHADA` (sem fechamento parcial) | O vendedor marcou a aprovação da Gerência. Travada. Libera o botão `V0.6` | vendedor, equipe |
 | `TRANSFORMADA` | novo | O pedido foi criado a partir dela (`V0.6`, `V0.7`); grava `transformada_em`. Travada | vendedor, equipe |
 | `CANCELADA` | `PERDIDA` | Estado único, não reabre (duplica). A comissão estimada vira histórico | vendedor, equipe |
+| `EXPIRADA` | novo | Validade vencida sem aprovação (ver acima) | vendedor, equipe |
 
-`PARCIAL` deixa de existir (N16-02). Eventos da linha do tempo: `TipoEventoProposta` tem `CRIADA`, `REVISADA`, `PERDIDA`, `REABERTA`, `FECHAMENTO_PARCIAL`, `FECHAMENTO_TOTAL`, `DUPLICADA`, `COPIADA`, `PDF_GERADO`, `EMAIL_ENVIADO`, `EXCLUIDA`, `CUSTO_ALTERADO`, `MIGRADA`, `PEDIDO_OMIE_ATUALIZADO` (`enums.prisma:119-136`); na migração saem `PERDIDA`, `REABERTA` e `FECHAMENTO_*` e entram 🟡 `CUSTO_SOLICITADO`, `CUSTO_RESPONDIDO`, `APROVADA`, `CANCELADA`, `TRANSFORMADA_EM_PEDIDO`, `PEDIDO_ENVIADO_OMIE`, `PEDIDO_RECUSADO_OMIE`, `PEDIDO_NUMERO_OMIE` e `REATRIBUIDA` (`ck_propostas_eventos_tipo`).
+`PARCIAL` deixou de existir (N16-02). Eventos da linha do tempo no dump de 29/10 (`ck_propostas_eventos_tipo`, 15 tipos): `CRIADA`, `REVISADA`, `DUPLICADA`, `COPIADA`, `PDF_GERADO`, `EXCLUIDA`, `CUSTO_ALTERADO`, `MIGRADA`, `EMAIL_ENVIADO`, `REATRIBUIDA`, `APROVADA`, `CANCELADA`, `TRANSFORMADA`, `PEDIDO_ENVIADO`, `PEDIDO_ERRO` (os dois últimos para o envio ao Omie, `V0.7`). Saíram `PERDIDA`, `REABERTA`, `FECHAMENTO_PARCIAL` e `FECHAMENTO_TOTAL`. Registro anterior (módulo de teste, `enums.prisma:119-136`): `TipoEventoProposta` tinha 14 valores, com `PERDIDA`, `REABERTA`, `FECHAMENTO_*` e `PEDIDO_OMIE_ATUALIZADO`.
 
-#### Pedido de venda do hub (`status_sincronizacao_omie`) 🟡
+#### Pedido de venda do hub (`status_sincronizacao_omie`)
 
-Mesmo vocabulário da OC (`pendente`, `sincronizado`, `erro`; Dump Avhub 17315-17320): `pendente` (na fila), `sincronizado` (Omie criou; guarda o número do Omie), `erro` (Omie recusou; texto do erro; botão "Tentar novamente", N16-36).
+Mesmo vocabulário da OC (`pendente`, `sincronizado`, `erro`; Dump Avhub 17315-17320): `pendente` (na fila), `sincronizado` (Omie criou; guarda o número do Omie), `erro` (Omie recusou; texto do erro; botão "Tentar novamente", N16-36). ✅ `POST /comercial/propostas/:id/transformar` já grava o pedido do Hub `pendente` (`develop`, 29/10); 🔴 nada o envia ao Omie ainda.
 
 #### Pedido de aprovação do vendedor (`C8`) 🟡
 
@@ -184,54 +193,63 @@ O pedido da proposta nasce em `status_liberacao = liberado` (valores em [[01-Ven
 
 | Nome atual | Rota | App | Quem | Nó | Estado |
 |---|---|---|---|---|---|
-| Propostas (lista) | `/vendas/propostas` | HUB | Vendedor, equipe | `V0.1` | ✅ `app/(protected)/vendas/propostas/page.tsx` (movida em 16/10, `200e860`) |
+| Propostas (lista) | `/vendas/propostas` | HUB | Vendedor, equipe | `V0.1` | ✅ `app/(protected)/vendas/propostas/page.tsx` (movida em 16/10, `200e860`); lê `GET /comercial/propostas` da API do Hub |
 | Nova proposta | `/vendas/propostas/nova` | HUB | Vendedor | `V0.1`, `V0.2` | ✅ `vendas/propostas/nova/page.tsx`, formulário `components/Propostas/PropostaForm/PropostaForm.tsx` |
-| Proposta (detalhe, revisões, linha do tempo) | `/vendas/propostas/[id]` | HUB | Vendedor, equipe | `V0.1` a `V0.7` | ✅ `vendas/propostas/[id]/page.tsx`; 🔴 aprovar e transformar em pedido |
+| Proposta (detalhe, revisões, linha do tempo) | `/vendas/propostas/[id]` | HUB | Vendedor, equipe | `V0.1` a `V0.7` | ✅ `vendas/propostas/[id]/page.tsx` (abas e análise de margem, 29/10, `88fbafe`); 🟡 aprovar e transformar: API pronta, BFF e botão não |
 | **Página do produto** (histórico, top fornecedores com score, flutuação, volatilidade, média) | a definir 🟡 | HUB | Vendedor | `V0.2`, `B2` | 🔴 ([[12-Orcamento-Base-de-Preco]]) |
 | **Meus Pedidos**, com o andamento da venda e **o que está aberto para o vendedor** (aprovar ou reprovar compra acima do valor) | `/meus-pedidos` 🟡 | HUB | Vendedor | `C8` | 🔴 a tela existe e outra frente a evolui (encerramento por saldo zerado, SQL-014); a área de pendências é nova |
 | **Lista de casos reprovados pelo vendedor** (sem solução) | `/compras/...` 🟡 | HUB | Comprador | `C8` | 🔴 |
-| Clientes | `/vendas/clientes` | HUB | Vendedor | `V0.1` | ✅ |
-| Relatório de Cotações, Relatório Gerencial | `/vendas/relatorio-cotacoes`, `/vendas/relatorio-gerencial` | HUB | Gerência | — | ✅ |
+| Acompanhamento de Clientes (a tela Clientes passou a ser esta, N16-112) | `/vendas/acompanhamento-clientes` | HUB | Vendedor | `V0.1` | ✅ (`av-hub` `1a48140`, 27/10); o cliente da proposta sai do cadastro do Hub e `POST /comercial/clientes` cadastra no Omie |
+| Relatório Gerencial | `/vendas/relatorio-gerencial` | HUB | Gerência | — | ✅; o Relatório de Cotações não existe mais como página na `develop` (conferido em 29/10) |
 | Pedidos de Venda (lista do Omie) | `/vendas/pedidos-de-venda` | HUB | Vendedor | `V1` | ✅ página no código; **inativada também em produção** (N16-33) |
 | Notas Fiscais de Saída | `/vendas/notas-fiscais-saida` | HUB | — | — | ✅ página no código; **inativada também em produção** (N16-33) |
-| Tela da proposta no formato do Simulador (pedido, condições, itens, totais) | dentro de `/vendas/propostas/[id]` e `/vendas/propostas/nova` | HUB | Vendedor | `V0.2`, `V0.3` | 🔴 hoje o formulário é `components/Propostas/PropostaForm/PropostaForm.tsx` sem comissão |
+| Tela da proposta no formato do Simulador (pedido, condições, itens, totais) | dentro de `/vendas/propostas/[id]` e `/vendas/propostas/nova` | HUB | Vendedor | `V0.2`, `V0.3` | 🟡 itens em grade e condições no layout do Simulador desde 27/10 (`37c9cf2`); a análise de margem é gravada com a proposta (29/10); 🔴 sem a comissão estimada |
 | Visão de Compras da mesma tela (leitura) | dentro de `/compras/nova/[requisicaoId]` 🟡 | HUB | Comprador | `C6`, `C7` | 🔴 |
 | Visão da Controladoria da mesma tela, com custo real | Operações 🟡 | HUB | Controladoria | `K4` | 🔴 ([[13-Custo-Real-e-Comissao-no-Fluxo]]) |
-| Botão "Transformar em pedido de venda" e marcação da Qualidade | dentro de `/vendas/propostas/[id]` | HUB | Vendedor | `V0.6` | 🔴 |
-| Marcar "aprovada" (registro da aprovação física) | idem | HUB | Vendedor | `V0.4`, `V0.5` | 🔴 |
+| Botão "Transformar em pedido de venda" e marcação da Qualidade | dentro de `/vendas/propostas/[id]` | HUB | Vendedor | `V0.6` | 🔴 tela (a API `transformar` existe) |
+| Marcar "aprovada" (registro da aprovação física) | idem | HUB | Vendedor | `V0.4`, `V0.5` | 🔴 tela (a API `aprovar` existe) |
 | **Tarja de pedido cancelado** na requisição e na OC | nas telas da requisição e da OC | HUB, MES | Compras, PCP | cancelamento | 🔴 |
 | Liberar Pedidos, Liberação da Equipe | `/liberar-pedidos`, `/liberacao-equipe` | HUB | Vendedor, gerente | `V2`, `V3` | ✅ hoje; a resposta passa para a tela do pedido (N16-106) 🟡 |
 | Conferência de Compras (parte de compras da proposta) | dentro de `/compras/nova/[requisicaoId]` 🟡 | HUB | Comprador | `C6`, `C7` | 🔴 |
 
-O contrato do menu de Vendas, Orçamento e Compras foi removido em 29/10/2026; o Robert cria o novo.
+O contrato do menu de Vendas, Orçamento e Compras foi removido em 29/10/2026; o Robert cria o novo. O menu já foi enxugado no front em 27/10 (N16-107, `av-hub` `a1493a8`): Vendas tem hoje Propostas, Acompanhamento de Clientes, Meus Pedidos, Relatório Gerencial e as telas de pedido e nota.
 
 ### Endpoints e contratos
 
+Em 29/10/2026 a `api-acos-vital` (`develop`, `cc30c85`) monta estas rotas sob `/comercial` (`propostas.route.js`); o `api-comercial` de teste (legado só para leitura) tinha as mesmas sem prefixo:
+
 | Método e rota | Uso | Nó | Estado |
 |---|---|---|---|
-| `GET /propostas`, `/resumo`, `/:id`, `/:id/eventos`, `/:id/versoes`, `/:id/versoes/:revisao` | listar e ler | `V0.1` | ✅ `propostas.routes.ts:17-23`, `:76`, `:118-142` (módulo de teste) |
-| `POST /propostas` | criar (idempotente) | `V0.1` | ✅ `:82` |
-| `PUT /propostas/:id` | revisar (só `ABERTA`, `If-Match`) | `V0.1`, `V0.2` | ✅ `:87`; trava em `propostas.service.ts:478-481` |
-| `POST /propostas/calcular`, `/itens/importar`, `GET /itens/modelo` | pré-visualizar, planilha de itens | `V0.1` | ✅ `:27`, `:55`, `:68` |
-| `POST /propostas/:id/duplicar` | nova proposta a partir de outra (também para refazer a cancelada) | `V0.1` | ✅ `:125` |
+| `POST /comercial/propostas` | criar (idempotente; valida cliente em `core.parceiros`, validade, número) | `V0.1` | ✅ `api-acos-vital` |
+| `GET /comercial/propostas`, `/resumo`, `/:id`, `/:id/eventos` | listar e ler | `V0.1` | ✅ `api-acos-vital` |
+| `PUT /comercial/propostas/:id` | revisar (só `ABERTA`, `If-Match`) | `V0.1`, `V0.2` | ✅ `api-acos-vital` |
+| `POST /comercial/propostas/:id/aprovar` | `ABERTA` para `APROVADA` | `V0.4`, `V0.5` | ✅ `api-acos-vital` |
+| `POST /comercial/propostas/:id/cancelar` `{ motivo }` | cancelar (`ABERTA` ou `APROVADA`) | `V0C` | ✅ `api-acos-vital` |
+| `POST /comercial/propostas/:id/copiar` | nova `ABERTA` a partir desta | `V0.1` | ✅ `api-acos-vital` |
+| `POST /comercial/propostas/:id/transformar` | pedido do Hub (`pendente`) e simulação v1, numa transação; não escreve no Omie | `V0.6` | ✅ `api-acos-vital`; 🔴 envio ao Omie (`V0.7`) |
+| `POST /comercial/clientes`, `GET /comercial/parceiros` | cadastrar cliente no Omie da unidade; listar parceiros | `V0.1` | ✅ `api-acos-vital` (28 e 29/10) |
+
+Rotas do `api-comercial` de teste (legado) ainda sem equivalente na `api-acos-vital`, e rotas novas ainda por fazer:
+
+| Método e rota | Uso | Nó | Estado |
+|---|---|---|---|
+| `GET /propostas/:id/versoes`, `/:id/versoes/:revisao` | listar versões | `V0.1` | ✅ `propostas.routes.ts` (módulo de teste); 🔴 na `api-acos-vital` |
+| `POST /propostas/calcular`, `/itens/importar`, `GET /itens/modelo` | pré-visualizar, planilha de itens | `V0.1` | ✅ `:27`, `:55`, `:68` (módulo de teste); 🔴 na `api-acos-vital` |
 | `POST /custos/sugerir` | sugestão de custo para o item | `V0.2` | ✅ `custos.routes.ts:30` |
 | `GET /produtos/:id/precos` | histórico, média e fornecedores | `B2` | ✅ `suprimentos.routes.ts:823` |
 | `POST /solicitacoes_custo` e `responder`, `assumir`, `liberar`, `cancelar` | pedido de custo (o prazo obrigatório de 2 dias úteis **sai**: N16-58) | `B3`, `B4` | ✅ `custos.routes.ts:304-510`; 🔴 ajuste |
-| `POST /propostas/:id/aprovar` | marcar aprovada | `V0.4`, `V0.5` | 🔴 proposta |
-| `POST /propostas/:id/cancelar` | cancelar com motivo (substitui `perder`) | `V0C` | 🔴 proposta |
-| `POST /propostas/:id/pedido_venda` `{ acompanhamento_qualidade }` | transformar em pedido: grava na fila | `V0.6`, `V0.7` | 🔴 proposta |
-| `GET /pedidos_venda_hub/fila-omie`, `PATCH /pedidos_venda_hub/:id/sincronizacao`, `POST /:id/reenviar` | fila e retorno da pipeline, espelho de `/compras/ordens/fila-omie` | `V0.7` | 🔴 proposta |
+| `GET /pedidos_venda_hub/fila-omie`, `PATCH /pedidos_venda_hub/:id/sincronizacao`, `POST /:id/reenviar` | fila e retorno da pipeline, espelho de `/compras/ordens/fila-omie` | `V0.7` | 🔴 (nome em aberto; o pedido já nasce `pendente` em `transformar`) |
 | `POST /pedidos_venda_hub/:id/cancelar` | registrar o cancelamento do pedido no hub; avisa OC e PCP, cancela requisição e OC não emitida, manda o comprado ao Estoque | cancelamento | 🔴 🟡 nome |
 | `GET /divergencias_compra`, `POST /:id/aprovar`, `/:id/reprovar`, `/:id/resolver` | aviso ao vendedor, decisão dele e solução de Compras | `C8` | 🔴 🟡 nomes |
 | `GET /propostas/:id/pedido_omie`, `PUT` (digitar o número à mão) | **substituídas**: o pedido deixa de ser digitado | `V0.7` | ✅ `propostas.routes.ts:146-164`, saem |
 
 Auditoria das telas e a nova página de proposta: [[14-Telas-e-Experiencia-do-Usuario]]; mapa do pedido no Omie: [[Mapa-IncluirPedido-Omie]].
 
-Contratos: os desta parte foram removidos em 29/10/2026 e o Robert cria os novos. Nomes de rota 🟡: o Gustavo e o Pablo fecham.
+Contratos: os desta parte foram removidos em 29/10/2026 e o Robert cria os novos. Nomes de rota 🟡: o Gustavo e o Robert fecham.
 
 ### Como está no código (✅ do módulo do Pablo)
 
-Tudo abaixo é do `api-comercial` (pasta `av-hub/api-comercial`), serviço **só de teste** (N14-15). Nada disto existe na `api-acos-vital` 🔴.
+Tudo abaixo é do `api-comercial` (pasta `av-hub/api-comercial`), serviço **só de teste** (N14-15), hoje **legado só para leitura** (N16-117). Parte disto já foi refeita na `api-acos-vital` (rotas da proposta, `develop`, 29/10; ver o quadro de endpoints); o que não foi segue 🔴 lá. As regras antigas de fechamento parcial, perda, reabrir e pedido digitado no Omie saíram do front em 28/10 (`av-hub` `2008344`).
 
 - ✅ **Proposta completa:** modelo `Proposta` (`prisma/models/vendas.prisma:45-109`) com cliente, empresa emissora, itens, moeda, incoterm, frete, condição, totais, `valorFechado`, `acompanhamentoQualidade`, `numeroPedidoOmie`; itens com snapshot de custo (`PropostaItem`, `:111-166`: `custo`, `margemPct`, `origemCusto`, `idOferta`, `fornecedor`, `custoLiquidoUnit`, `margemRealPct`).
 - ✅ **Revisão:** `atualizar` só roda em `ABERTA` (`propostas.service.ts:478-481`); se o conteúdo comercial muda, `revisao + 1` e uma linha em `propostas_versoes` com o snapshot (`:483-515`); evento `REVISADA`.
@@ -257,7 +275,7 @@ No av-hub (API do hub), o que serve de padrão: contador por `(unidade, tipo)` (
 
 ### Dados 🟡
 
-Schema `core_comercial` (proposta, pedido de venda do hub, numeração, custo realizado por item): modelo no banco (contrato removido em 29/10/2026). Aqui só o que o fluxo exige:
+Schema (proposta, pedido de venda do hub, numeração, custo realizado por item): o modelo está no banco (contratos removidos em 29/10/2026). ⚠️ A N16-116 (27/10) decidiu que não existirá `core_comercial` e que a proposta fica em `core_vendas_faturamento`; o dump e o código de 29/10 criam e usam `core_comercial.propostas` e `core_comercial.fn_proposta_*`. Divergência a fechar com o Nathan e o Gustavo ❓. Aqui só o que o fluxo exige:
 
 | Dado | Regra |
 |---|---|
@@ -297,21 +315,21 @@ As colunas e as condições **vêm das mesmas entradas do motor atual** (`simula
 
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
-| 1 | Migrar o módulo de propostas para a `api-acos-vital` (schema `core_comercial`) e trocar a numeração, o enum e os comandos de status | Pablo, Gustavo | `V0.1` | 🔴 |
-| 2 | Estado `APROVADA`, trava de ajuste, "incompleta" e aprovar com a revisão | Pablo | `V0.4`, `V0.5` | 🔴 |
-| 3 | Cancelar com motivo e histórico da comissão estimada | Pablo | `V0C` | 🔴 |
-| 4 | Botão "Transformar em pedido", marcação da Qualidade obrigatória, fila do pedido e retorno da pipeline | Pablo (API), Nathan (tela e pipeline), Gustavo (banco) | `V0.6`, `V0.7` | 🔴 |
+| 1 | Migrar o módulo de propostas para a `api-acos-vital`: feito para criar, listar, revisar, aprovar, cancelar, copiar e transformar (29/10). Falta a numeração só de dígitos (hoje `CO-{AV\|AU\|HRM}{AAAA}-{NNNN}-R{RR}`, formato final em aberto, PS-038; diverge da N16-04 e da N16-26), versões, importação de itens e o cálculo no servidor | Robert, Gustavo | `V0.1` | ✅ rotas; 🔴 numeração e o resto |
+| 2 | Estado `APROVADA`, trava de ajuste e aprovar com a revisão: rotas feitas (29/10). Falta ligar o BFF e a tela, e conferir no banco a regra "incompleta" | Robert, Nathan | `V0.4`, `V0.5` | ✅ API; 🔴 tela |
+| 3 | Cancelar com motivo: rota feita (29/10). Falta o histórico da comissão estimada | Robert | `V0C` | ✅ API; 🔴 histórico |
+| 4 | Botão "Transformar em pedido" e marcação da Qualidade obrigatória: rota `transformar` feita (grava o pedido do Hub `pendente`). Faltam a tela, a fila do pedido e o retorno da pipeline | Robert (API), Nathan (tela e pipeline), Gustavo (banco) | `V0.6`, `V0.7` | ✅ API; 🔴 tela e envio |
 | 5 | Pipeline: `IncluirPedido` por fila, espelho do `envioOrdensCompra.ts`, com `codigo_pedido_integracao` e `codigo_item_integracao`; gravar esses códigos no hub | Nathan | `V0.7` | 🔴 |
 | 6 | Liberação gravada na resposta do `IncluirPedido`, com histórico | Gustavo | `V1` | 🔴 |
 | 7 | `C6` e `C7` na tela de emissão da OC: mostrar a parte de compras da proposta, puxar fornecedor e impostos, editar, gravar o valor correto sem tocar a proposta | Nathan, Gustavo | `C6`, `C7` | 🔴 |
-| 8 | Trocar a AwesomeAPI pela PTAX do hub | Pablo | `V0.1` | 🔴 |
+| 8 | Trocar a AwesomeAPI pela PTAX do hub: o front já lê o câmbio do Hub (`GET /cambio` para `/cotacoes_moeda/atual`, 27/10) | Robert | `V0.1` | ✅ front; ❓ API |
 | 9 | Aprovar com perfil da Gerência no sistema | — | `V0.4` | próximo ciclo (N16-12) |
-| 10 | Tela da proposta no formato do Simulador, com o motor na API (porta de `lib/simulador/motor.ts`) e a comissão estimada | Nathan (tela), Pablo e Gustavo (API) | `V0.2`, `V0.3`, `K1` | 🔴 |
+| 10 | Tela da proposta no formato do Simulador, com o motor na API (porta de `lib/simulador/motor.ts`) e a comissão estimada | Robert (tela de proposta e API), Nathan (`K1`), Gustavo | `V0.2`, `V0.3`, `K1` | 🟡 |
 | 11 | Visão de Compras (leitura) e visão da Controladoria (custo real, drill-down por evento) da mesma tela | Nathan | `C6`, `C7`, `K4` | 🔴 |
-| 12 | **`C8`:** aviso e aprovação em Meus Pedidos, tabela `divergencias_compra`, lista de Compras dos reprovados e registro da solução | Nathan, Pablo, Gustavo | `C8` | 🔴 |
+| 12 | **`C8`:** aviso e aprovação em Meus Pedidos, tabela `divergencias_compra`, lista de Compras dos reprovados e registro da solução | Nathan, Robert, Gustavo | `C8` | 🔴 |
 | 13 | **Cancelamento:** registro no hub, requisição e OC não emitida canceladas com tarja, aviso à OC e ao PCP, comprado ao Estoque, ajuste do `exclusionSync` | Nathan, Gustavo, Robert (Estoque) | cancelamento | 🔴 |
 | 14 | **Pipeline do Omie:** gravar os códigos de integração, ampliar o espelho e o envio da OC com os impostos, recurso novo de recebimento de NF-e, cancelamento e devolução da NF | Nathan, Gustavo | vários | 🔴 ([[Estudo-Omie-API]]) |
-| 15 | Página do produto e regras do score | Nathan, Pablo | `V0.2`, `B2` | 🔴 ([[12-Orcamento-Base-de-Preco]]) |
+| 15 | Página do produto e regras do score | Nathan, Robert, Pablo | `V0.2`, `B2` | 🔴 ([[12-Orcamento-Base-de-Preco]]) |
 
 ### Pendências
 

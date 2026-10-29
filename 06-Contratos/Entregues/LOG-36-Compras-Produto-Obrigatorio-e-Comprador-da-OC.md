@@ -3,12 +3,12 @@ id: LOG-36
 aliases: ["Contrato 36", "36-Compras-Produto-Obrigatorio-e-Comprador-da-OC"]
 tags: [contrato, contrato-sql, contrato-api, compras, omie]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4]
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:1058", "omie-elt-pipeline/src/omie/ordemCompraOmie.ts:242-300"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:1060", "omie-elt-pipeline/src/omie/ordemCompraOmie.ts:242-300"]
 criado_original: 2026-10-05
 ---
 
@@ -24,9 +24,10 @@ criado_original: 2026-10-05
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
 >
-> - ✅ Produto do cadastro da unidade obrigatório em todo item da OC, regra fixa (`api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:1058`, mensagem "escolha um produto do cadastro da unidade"); a chave `COMPRAS_EXIGIR_PRODUTO_CADASTRO` saiu (patch em `LOG-36-anexos/`).
+> - ✅ Produto do cadastro da unidade obrigatório em todo item da OC, regra fixa (`api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:1060`, mensagem "escolha um produto do cadastro da unidade"); a chave `COMPRAS_EXIGIR_PRODUTO_CADASTRO` saiu (patch em `LOG-36-anexos/`).
 > - ✅ A pipeline marca erro na OC sem comprador vinculado (`omie-elt-pipeline/src/omie/ordemCompraOmie.ts:242-251`) ou com item sem produto do cadastro (`:293-300`) antes de chamar o Omie.
 > - ❓ Emissão de OC em produção não testada (v1: só leitura em produção).
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.

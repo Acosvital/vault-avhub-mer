@@ -3,12 +3,12 @@ id: LOG-13a
 aliases: ["13-Compras-Backend-Consolidado", "Contrato 22 (numeração antiga)"]
 tags: [contrato, contrato-logica, compras, backend]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C0, C1, C4]
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:190-197", "Dump Avhub (Esqueleto).sql (schema core_vendas_faturamento)"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:204-217", "Dump Avhub (Esqueleto).sql (schema core_vendas_faturamento)"]
 ---
 
 # Contrato — Compras: tudo o que falta no BACKEND (banco + API)
@@ -23,7 +23,7 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:190-197", 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C0, C1, C4 · **Dono:** Gustavo (DBA)
 >
-> - ✅ Tabelas `ordens_compra*`, `requisicoes_compra`, `compradores`, `parametros_compras` e rotas `/compras/*` existem (`api-acos-vital/src/schemas/core_vendas_faturamento/index.js:190-197`).
+> - ✅ Tabelas `ordens_compra*`, `requisicoes_compra`, `compradores`, `parametros_compras` e rotas `/compras/*` existem (`api-acos-vital/src/schemas/core_vendas_faturamento/index.js:204-217`).
 > - 🟡 O B0 (schema em produção) ficou superado: as tabelas de Compras existem em produção desde 02/10 segundo o dump de 07/10 do vault v1 (❓ não reconferido hoje).
 > - O texto tem apêndices A a C ainda a conferir (histórico).
 >

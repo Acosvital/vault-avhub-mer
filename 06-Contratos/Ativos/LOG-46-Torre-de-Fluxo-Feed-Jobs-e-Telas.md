@@ -3,7 +3,7 @@ id: LOG-46
 aliases: ["Contrato 46", "46-Torre-de-Fluxo-Feed-Jobs-e-Telas"]
 tags: [contrato, contrato-api, torre-de-fluxo, rastreabilidade, integracao-av-hub-mes, bff, front]
 criado: 2026-10-14
-atualizado: 2026-10-26
+atualizado: 2026-10-29
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front, mes-api]
 dono: "Robert"
@@ -19,15 +19,20 @@ criado_original: 2026-10-09
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Define a Torre de Fluxo: o MES (sistema da produção) publica um feed de eventos dos itens, o Hub grava o estado atual de cada um e quatro telas mostram setores, tempo por etapa e trilha.
 > **Quem é afetado:** Quem acompanha onde cada item está parado e há quanto tempo. No time: Robert (MES), Gustavo (banco e API) e Nathan (BFF, a camada do Next que serve o front, e telas).
-> **Situação:** Parcial. Banco, job de projeção e rotas do Hub estão entregues. O MES ainda não publica o feed, então a Torre responde vazia (Robert). BFF e telas (Nathan) não foram conferidos.
+> **Situação:** Parcial. Banco, job de projeção e rotas do Hub estão entregues, e o BFF e as telas do Nathan estão prontos sobre dados de teste (✅, 15/10; dado como ok em 29/10). O MES ainda não publica o feed `GET /fluxo/eventos` (conferido em 29/10), então a Torre responde vazia (Robert, 🔴).
 
-> [!info] Situação em 26/10/2026
+> [!info] Situação em 29/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** F1, X1, Q7 · **Dono:** Robert
+>
+> - ✅ **BFF e telas do Nathan prontas (HUB `3cd55de`, 15/10, BL-022):** `app/api/fluxo/torre`, `sla-etapas` e `itens/[id]` e as telas `torre-fluxo`, `torre-fluxo/tempo` e `torre-fluxo/ranking` (mais a trilha por item), ainda sobre dados de teste (fixtures). O Nathan deu o BL-022 como ok em 29/10; slugs e perfis (BL-021) e o formato real do feed ficam para quando o MES publicar.
+> - 🔴 **Conferido em 29/10/2026:** o `api-pcp` (`develop`) segue sem `GET /fluxo/eventos` nem módulo `fluxo` (grep em `src` e `prisma/models` sem resultado). O módulo da Torre no MES é o BL-003 (Robert).
+>
+> **Registro de 26/10/2026, mantido:** `parcial` · **Nós do 0b:** F1, X1, Q7 · **Dono:** Robert
 >
 > - ✅ **Respostas do Gustavo (16/10/2026), registradas em 26/10:** **Q1**, o id é o da projeção do hub; **Q5**, a trilha fica sob demanda no MES; **Q12** está feita; **Q3**, proposta dele: gravar os eventos do hub por **trigger no banco** (aguarda decisão).
 > - ✅ **API e banco do av-hub entregues:** tabelas `core_fluxo.item_estado_projetado` e `core_fluxo.feed_cursor` no dump; job de projeção a cada 90 s (`item_estado_projetado.job.js`, constantes `INTERVALO_MS`, `LIMITE_PAGINA` 1000, janela de sobreposição 200; iniciado em `app.js:208`) e rotas `GET /fluxo/torre` (`item_estado_projetado.route.js:185`), `/fluxo/sla-etapas` (`:262`), `/fluxo/itens/:id/tempo` (`:281`), `/fluxo/itens/:id` (`:302`), montadas em `core_fluxo/index.js:20`. Migrations 046 e 046b (`77223e9`, `7c3f57a`).
 > - 🔴 **MES não publica o feed:** `GET /fluxo/eventos?apos_seq=&limite=` não existe no `api-pcp` (grep sem resultado). O job do av-hub recebe 404, avisa uma vez e tenta de novo a cada 10 min (`INTERVALO_SEM_FEED_MS`), sem mexer no cursor. Por isso `GET /fluxo/torre` responde vazio. Tarefas I2 e I3 (instrumentação) são do Robert.
-> - 🔴 **Front:** BFF `GET /api/fluxo/torre` e as 4 telas (T.3, T.4, T.5, T.5b) são do Nathan e não foram conferidas (❓ HUB fora da pasta de repos).
+> - 🕓 **(26/10, superado em 29/10) Front:** BFF `GET /api/fluxo/torre` e as 4 telas (T.3, T.4, T.5, T.5b) eram do Nathan e não tinham sido conferidas; hoje estão conferidas (ver o bloco de 29/10).
 > - Janela do cronograma: S5, 19/11 a 18/12/2026 (ver [[Cronograma]]).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).

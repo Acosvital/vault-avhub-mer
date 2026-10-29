@@ -3,12 +3,12 @@ id: LOG-31
 aliases: ["Contrato 31", "31-Compras-Dashboard"]
 tags: [contrato, contrato-logica, contrato-api, compras, dashboards]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4]
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:810"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:812"]
 criado_original: 2026-09-30
 ---
 
@@ -24,7 +24,8 @@ criado_original: 2026-09-30
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
 >
-> - ✅ `GET /compras/ordens/dashboard?origem=todas` (`ordens_compra.route.js:810`).
+> - ✅ `GET /compras/ordens/dashboard?origem=todas` (`ordens_compra.route.js:812`).
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.

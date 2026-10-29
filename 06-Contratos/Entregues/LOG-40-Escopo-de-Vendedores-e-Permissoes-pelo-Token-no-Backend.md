@@ -3,12 +3,12 @@ id: LOG-40
 aliases: ["Contrato 40", "40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend"]
 tags: [contrato, contrato-logica, contrato-api, seguranca, escopo, permissoes, rbac]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
-fontes: ["api-acos-vital/src/middlewares/escopoVendedor.js:165", "api-acos-vital/src/middlewares/identidadeUsuario.js"]
+fontes: ["api-acos-vital/src/middlewares/escopoVendedor.js:175", "api-acos-vital/src/middlewares/identidadeUsuario.js"]
 criado_original: 2026-10-07
 ---
 
@@ -19,9 +19,10 @@ criado_original: 2026-10-07
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - ✅ A API aplica o escopo de vendedores pelo token (`api-acos-vital/src/middlewares/escopoVendedor.js:165`, `aplicarEscopoVendedor`) e a identidade do usuário (`identidadeUsuario.js`). Fecha as marcas S1, S2 e S3 do lado da API.
+> - ✅ A API aplica o escopo de vendedores pelo token (`api-acos-vital/src/middlewares/escopoVendedor.js:175`, `aplicarEscopoVendedor`) e a identidade do usuário (`identidadeUsuario.js`). Fecha as marcas S1, S2 e S3 do lado da API.
 > - 🟡 Testes da seção 5 rodados em 15/10 só para vendedor, diligenciador PCP e Gerência PCP (resultado no LOG-50); faltam gerente de equipe, auxiliar e vendedor sem vínculo.
 > - ✅ As marcas do front saíram ([[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]], 15/10); a API devolve os vínculos completos em `GET /me/permissoes` ([[LOG-49-Vinculos-do-Usuario-no-Me-Permissoes-Completos]]). Testado na `api-test` com vendedor, diligenciador PCP e Gerência PCP (15/10).
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.

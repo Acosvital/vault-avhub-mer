@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Gustavo (DBA)
-fontes: [api-acos-vital f322dcd (develop), Dump Avhub (Esqueleto).sql de 14/10, v1 AV-Hub-API-Estado-Atual, AV-Hub-RBAC, Integracao-AvHub-MES-Especificacao-F1]
+fontes: [api-acos-vital 0384e89 (develop, 29/10), Dump do Avhub para referência (29.10).sql (guardado em api-acos-vital/), Dump Avhub (Esqueleto).sql de 14/10, v1 AV-Hub-API-Estado-Atual, AV-Hub-RBAC, Integracao-AvHub-MES-Especificacao-F1]
 ---
 
 # AV-Hub API (`api-acos-vital`)
@@ -16,14 +16,14 @@ fontes: [api-acos-vital f322dcd (develop), Dump Avhub (Esqueleto).sql de 14/10, 
 - **HUB (as telas):** lê e grava pedidos, requisições, ordens de compra e permissões.
 - **MES:** lê os pedidos liberados, avisa que importou, envia a requisição de compra e lê o andamento dela ([[MES-Backend]]).
 - **Pipeline do Omie:** pega a fila de OCs (ordens de compra) a enviar e devolve o resultado ([[Pipeline-Omie]]).
-- **API Comercial:** consulta as permissões do usuário ([[API-Comercial]]).
+- **Módulo comercial (`/comercial/*`):** desde 28/10 a API do Hub guarda as rotas de proposta, cadastros e cliente, no lugar da `api-comercial` do Pablo (N16-111, LOG-52). A `api-comercial` virou legado só de leitura ([[API-Comercial]]).
 
 ## Como se encaixa no fluxo
 
 - **Vendas (`V1` a `V3`):** guarda a caixa de liberação do vendedor. O MES só enxerga o que está liberado.
 - **Compras (`C0` a `C5`):** recebe a requisição e controla cotação, OC, aprovação, envio ao Omie e follow-up do CCP.
 - **Etapa dos itens:** a cada 90 segundos lê no MES onde cada item está e mostra ao vendedor.
-- **Torre de Fluxo e custo por item:** o código está pronto aqui, mas o MES ainda não envia os dados.
+- **Torre de Fluxo e custo por item:** o código está pronto aqui. O MES já publica o custo por item (`GET /itens/custo`, 27/10, só na `develop` do MES); a Torre ainda não, porque o MES não publica `/fluxo/*`.
 
 ## Regras que valem
 
@@ -33,17 +33,20 @@ fontes: [api-acos-vital f322dcd (develop), Dump Avhub (Esqueleto).sql de 14/10, 
 - Cancelar requisição exige motivo de 3 a 500 caracteres.
 - Quem age vem sempre do token de login, nunca do corpo do pedido.
 - Rota sem mapa de permissão é negada por padrão.
-- Marco de compra só nasce para requisição que veio do MES. A requisição criada no Compras não chega ao MES.
+- Marco de compra só nasce para requisição que veio do MES. A requisição criada no Compras não gera marco; o MES a vê pela referência da requisição (API-009) e depois pela referência da OC.
 - Jobs novos não guardam regra em variável de ambiente. Só o job de status por item ainda faz isso.
 
 ## O que já existe e o que falta
 
 - ✅ Liberação, requisições, OC com aprovação, follow-up e status por item.
-- ✅ Torre de Fluxo e custo por item, só no código. 🔴 O MES não publica os dados e o HUB não tem a tela.
-- 🔴 O MES não consome a referência da OC (N14-20, BL-049 e BL-050).
-- 🔴 O banco de 14/10 está sem a migration 047b: a rota de custo responde erro 500.
+- ✅ Custo por item: a rota, o job e o banco estão alinhados (a migration 047b está no dump de 29/10) e o MES publica `GET /itens/custo` na `develop`. O HUB tem a tela de custo por item.
+- ✅ Torre de Fluxo: a rota, o job e a tela do HUB existem. 🔴 O MES não publica `/fluxo/*`, então a Torre fica vazia.
+- ✅ O MES consome a referência da OC (`GET /ordens-compra/referencia`, desde 15/10, `develop` do MES) e agora a referência da requisição do Compras (API-009).
+- ✅ Requisição de compra pode ser excluída (exclusão lógica, 23/10, contrato 55).
+- ✅ Rotas do módulo comercial (`/comercial/*`): `me`, empresas emissoras, responsáveis, parâmetros de custo, propostas, clientes e parceiros (28 e 29/10).
 - 🟡 O limite de R$ 30 mil é provisório. Endurece depois da conversa com Compras.
-- ✅ Defeitos conhecidos: o filtro `alterado_desde` não roda em produtos e parceiros; `pessoa_vendedor` não tem tabela.
+- ✅ O filtro `alterado_desde` de produtos e parceiros foi corrigido em 16/10 (`38d2f74`).
+- 🔴 `pessoa_vendedor` continua sem tabela (conferido no dump de 29/10).
 - ❓ A rota de favoritos já falhou em setembro; não reproduzido em 14/10.
 - ❓ Valor do início da liberação em produção e quais perfis abrem a Torre.
 
@@ -53,22 +56,26 @@ API do av-hub: Node (ESM) + Express 4 + Sequelize 6 + PostgreSQL (`pg`), sessão
 
 ### Como a requisição é tratada (ordem do `app.js`)
 
-1. `express.json` (limite `JSON_BODY_LIMIT`, padrão 10 mb), cache HTTP, CORS (`CORS_ORIGINS`, padrão `*`), rate limit global de 10 000 req/min por chave e 20 logins/min por IP ✅ `app.js:46-96` (`express.json` `:46`, rate limit `:74-92`).
-2. Sessão no Postgres (`auth.sessions`) só em `/auth`, `/docs`, `/api-docs-json` ✅ `app.js:94-122`.
-3. `requestLogger`, `/docs`, `ipFilter` (regras em `auth.ip_regras`), **`apiKeyAuth`** ✅ `app.js:122-134`.
-4. `registrarAuditoria`, **`identidadeUsuario`** (valida o token do usuário e chama `auth.fn_autorizar`), **`aplicarEscopoVendedor`** ✅ `app.js:139-141`.
-5. Routers de todos os schemas na ordem de `schemas/index.js` ✅ `app.js:161-163`.
-6. Na subida: cria os schemas `auth`, `core`, `core_aprovacao_de_vagas`, `core_mapas`, `core_organograma`, `core_vendas_faturamento` se faltarem e inicia **3 jobs** do MES (status, Torre, custo) ✅ `app.js:197-210`.
+1. `helmet` (CSP fechada na API, aberta só nas páginas de docs), cache HTTP e CORS por lista (`CORS_ORIGINS`; o curinga `*` só vale fora de produção) ✅ `app.js:56-95`.
+2. Sessão no Postgres (`auth.sessions`) só em `/auth`, `/docs`, `/api-docs-json`; limite de 20 logins/min por IP em `/auth/login` ✅ `app.js:107-130`.
+3. `requestLogger`, `/docs` (`rotasDocs`), `ipFilter` (regras em `auth.ip_regras`), **`apiKeyAuth`** ✅ `app.js:135-147`.
+4. Limite geral de 5 000 requisições por minuto **por chave de serviço**, contado depois da chave validada (LOG-51 S5) ✅ `app.js:155-165`.
+5. `express.json` só **depois** da chave (limite `JSON_BODY_LIMIT`, padrão 10 mb; corpo acima de 1 MB vai para o log) ✅ `app.js:171-181`.
+6. `registrarAuditoria`, **`identidadeUsuario`** (valida o token do usuário e chama `auth.fn_autorizar`), **`aplicarEscopoVendedor`** ✅ `app.js:187-189`.
+7. Routers de todos os schemas na ordem de `schemas/index.js` ✅ `app.js:204-206`. As rotas de `/comercial` e `/suprimentos` passam ainda por `exigirTokenUsuario` (sem Bearer válido, 401 `TOKEN_USUARIO_AUSENTE`, mesmo com `x-api-key` válida) ✅ `core_comercial/index.js`.
+8. Na subida a API **não cria** schema nem tabela (roda sem DDL, LOG-51 S8): só confere que os schemas `auth`, `core`, `core_aprovacao_de_vagas`, `core_mapas`, `core_organograma` e `core_vendas_faturamento` existem e inicia **3 jobs** do MES (status, Torre, custo) mais a limpeza das chaves de idempotência ✅ `app.js:236-264`.
 
 Autenticação e permissão em detalhe: [[RBAC-e-Permissoes]] e [[Chaves-e-Autenticacao]].
 
 ### Organização do código
 
-`src/schemas/<schema>/{tables,views,aggregates,functions}/<entidade>/<entidade>.{model,route}.js` + `.swagger.json`; `src/schemas/<schema>/index.js` registra models e a lista `rotas` (caminho, router, middlewares); `src/schemas/index.js` junta tudo ✅. Schemas com rotas: `auth`, `core`, `core_aprovacao_de_vagas`, `core_mapas`, `core_organograma`, `core_comissionamento`, `core_compras`, `core_fluxo`, `core_vendas_faturamento`. `core_fluxo` não tem model Sequelize: usa SQL direto sobre funções do banco ✅ `core_fluxo/index.js:1-6`.
+`src/schemas/<schema>/{tables,views,aggregates,functions}/<entidade>/<entidade>.{model,route}.js` + `.swagger.json`; `src/schemas/<schema>/index.js` registra models e a lista `rotas` (caminho, router, middlewares); `src/schemas/index.js` junta tudo ✅. Schemas com rotas: `auth`, `core`, `core_aprovacao_de_vagas`, `core_mapas`, `core_organograma`, `core_comissionamento`, `core_compras`, `core_fluxo`, `core_vendas_faturamento` e, desde 28/10, `core_comercial` (rotas `/comercial/*`, sem model Sequelize: SQL direto e funções `fn_*` do banco; ver "Módulo comercial" abaixo). `core_fluxo` não tem model Sequelize: usa SQL direto sobre funções do banco ✅ `core_fluxo/index.js:1-6`.
 
 ### Rotas do fluxo de Atividades
 
 #### Liberação do pedido (LOG-26) — V1 a V3, P1, P2
+
+Os números de linha desta seção são de 14/10 (`f322dcd`); só os da requisição de compra foram refeitos em 29/10. Nos demais arquivos podem ter deslocado poucas linhas.
 
 | Rota | Quem chama | O que faz | Código |
 |---|---|---|---|
@@ -84,17 +91,19 @@ Trava no banco: `trg_pedidos_vendas_liberacao_regras` e `_historico` (função n
 
 | Rota | Quem chama | O que faz | Código |
 |---|---|---|---|
-| `GET /compras/requisicoes` (`status`, `codigo_empresa`, `q`, `page`, `limit` até 200) | HUB | lista; fila ordenada por prazo | ✅ `tables/requisicoes_compra/requisicoes_compra.route.js:148` |
-| `GET /compras/requisicoes/resumo` | HUB | contadores `abertas`, `em_cotacao`, `atendidas`, `canceladas` | ✅ `:199` |
-| `PUT /compras/requisicoes/origem/:id_origem` | **MES** (chave `MES_INTEGRACAO_KEYS`, a única rota que ela abre) | `fn_requisicao_mes_aplicar`: `criada` (201), `atualizada`, `cancelada`, `ignorada_com_oc`, `ignorada_cancelada`, `nao_existe`; 409 `REQUISICAO_COM_OC` ao cancelar com OC | ✅ `:221-265`; `middlewares/apiKeyAuth.js:59-76` |
-| `GET /compras/requisicoes/eventos?alterado_desde=&apos_id=&codigo_empresa=&limit=` (até 500) | **MES** (chave `API_KEYS`) | marcos com `autor` e `comprador` (view `vw_requisicoes_compra_eventos`, migration 035b; sem a view devolve `null`); cursor `(registrado_em, id)` | ✅ `:289-369` |
-| `GET /compras/requisicoes/:id` | HUB | detalhe | ✅ `:371` |
-| `POST /compras/requisicoes` | HUB (permissão `compras.pode_criar` no BFF) | cria requisição própria do Compras (sem `id_origem`); `status` e `id_ordem_compra` nunca vêm do cliente | ✅ `:384-411` |
-| `PATCH /compras/requisicoes/:id` corpo `{status, motivo?}` | HUB | `aberta` ↔ `em_cotacao` ↔ `cancelada` (cancelar exige `motivo` de 3 a 500 caracteres e grava `cancelada_por_origem = 'compras'`); `atendida` nunca por aqui | ✅ `:413-466` |
+| `GET /compras/requisicoes` (`status`, `codigo_empresa`, `q`, `page`, `limit` até 200) | HUB | lista; fila ordenada por prazo | ✅ `tables/requisicoes_compra/requisicoes_compra.route.js:236` |
+| `GET /compras/requisicoes/resumo` | HUB | contadores `abertas`, `em_cotacao`, `atendidas`, `canceladas` | ✅ `:292` |
+| `PUT /compras/requisicoes/origem/:id_origem` | **MES** (chave `MES_INTEGRACAO_KEYS`, a única rota que ela abre) | `fn_requisicao_mes_aplicar`: `criada` (201), `atualizada`, `cancelada`, `ignorada_com_oc`, `ignorada_cancelada`, `nao_existe`; 409 `REQUISICAO_COM_OC` ao cancelar com OC | ✅ `:314`; `middlewares/apiKeyAuth.js:59-76` |
+| `GET /compras/requisicoes/eventos?alterado_desde=&apos_id=&codigo_empresa=&limit=` (até 500) | **MES** (chave `API_KEYS`) | marcos com `autor` e `comprador` (view `vw_requisicoes_compra_eventos`, migration 035b; sem a view devolve `null`); cursor `(registrado_em, id)` | ✅ `:382` |
+| `GET /compras/requisicoes/referencia?alterado_desde=&codigo_empresa=&apos_id=&page=&limit=` | **MES** (chave de serviço, sem token) | API-009: requisição do Compras com pedido de venda, para o PCP saber que o item já está em compra antes da OC aprovada; `visivel_ao_pcp = false` manda o MES apagar a linha; montada **antes** de `/compras/requisicoes/:id` | ✅ `views/vw_requisicoes_compra_referencia_mes/…route.js:59`; `core_vendas_faturamento/index.js:208` |
+| `GET /compras/requisicoes/:id` | HUB | detalhe | ✅ `:466` |
+| `POST /compras/requisicoes` | HUB (permissão `compras.pode_criar` no BFF) | cria requisição própria do Compras (sem `id_origem`); `status` e `id_ordem_compra` nunca vêm do cliente | ✅ `:479` |
+| `PATCH /compras/requisicoes/:id` corpo `{status, motivo?}` | HUB | `aberta` ↔ `em_cotacao` ↔ `cancelada` (cancelar exige `motivo` de 3 a 500 caracteres e grava `cancelada_por_origem = 'compras'`); `atendida` nunca por aqui | ✅ `:586` |
+| `DELETE /compras/requisicoes/:id` (contrato 55, 23/10) | HUB | exclusão lógica (`deleted_at`, `deleted_by`) de requisição do Compras; 409 `REQUISICAO_COM_OC` (já tem OC) e 409 `REQUISICAO_DO_MES` (veio do MES); 403 `SEM_PERMISSAO_EXCLUIR`; não gera marco | ✅ `:696-760` |
 
 Estados da requisição no av-hub: `aberta`, `em_cotacao`, `atendida`, `cancelada` (CHECK `ck_requisicoes_compra_status`, dump `:18541`). `atendida` só pela trigger da OC (`trg_ordens_compra_requisicao`: OC que nasce com `id_requisicao` marca atendida; OC cancelada devolve todas as requisições a `aberta`) ✅ dump `fn_ordens_compra_requisicao` (dump `:6810`). O banco impõe `atendida ⇔ id_ordem_compra IS NOT NULL` (`ck_requisicoes_compra_atendida`).
 
-**Marcos (14 tipos)** gravados por trigger em `requisicoes_compra_eventos`, só quando a requisição tem `id_origem`, ou seja, veio do MES ✅ `fn_req_evento` (dump `:8580`): `requisicao_recebida`, `em_cotacao`, `oc_criada`, `oc_removida`, `oc_enviada_aprovacao`, `oc_aprovada`, `oc_no_omie`, `fornecedor_confirmou`, `previsao_alterada`, `despachada`, `ocorrencia`, `oc_cancelada`, `requisicao_cancelada`, `requisicao_reaberta` (CHECK `requisicoes_compra_eventos_tipo_check`). Requisição criada pelo Compras não gera marco: **não chega ao MES** 🔴.
+**Marcos (14 tipos)** gravados por trigger em `requisicoes_compra_eventos`, só quando a requisição tem `id_origem`, ou seja, veio do MES ✅ `fn_req_evento` (dump `:8580`): `requisicao_recebida`, `em_cotacao`, `oc_criada`, `oc_removida`, `oc_enviada_aprovacao`, `oc_aprovada`, `oc_no_omie`, `fornecedor_confirmou`, `previsao_alterada`, `despachada`, `ocorrencia`, `oc_cancelada`, `requisicao_cancelada`, `requisicao_reaberta` (CHECK `requisicoes_compra_eventos_tipo_check`). Requisição criada pelo Compras não gera marco e não chega ao MES por esse caminho. O MES a enxerga pela referência da requisição (API-009, acima) e, depois da aprovação, pela referência da OC ✅.
 
 #### Ordem de compra e aprovação — C2 a C4
 
@@ -112,7 +121,7 @@ Estados da requisição no av-hub: `aberta`, `em_cotacao`, `atendida`, `cancelad
 | `GET /compras/pedidos-venda/:numero` e `/:numero/compras` | itens do PV com saldo a comprar | ✅ `views/vw_pedido_venda_compras/…route.js:52,92` |
 | `GET /compras/condicoes-pagamento`, `/compras/parametros` | catálogos e `limite_aprovacao` | ✅ `tables/condicoes_pagamento_compras/…route.js:19,24` |
 | `GET /compras/fornecedores`, `/compras/transportadoras` | projeções de `core.parceiros` | ✅ `core/aggregates/compras_parceiros/…route.js:84-85` |
-| `GET /ordens-compra/referencia?alterado_desde=&codigo_empresa=&page=&limit=` | referência da OC para o MES (API-004/007), limite 100 padrão e 500 máximo; item com `destino[]` (`pedido_venda` ou `estoque`) e OC com `finalidade`; **o MES não consome** (precisa consumir: OC do pedido e saldo futuro, N14-20, BL-049 e BL-050) | ✅ `views/vw_ordens_compra_referencia_mes/…route.js:70`, `:38-39` |
+| `GET /ordens-compra/referencia?alterado_desde=&codigo_empresa=&page=&limit=` | referência da OC para o MES (API-004/007), limite 100 padrão e 500 máximo; item com `destino[]` (`pedido_venda` ou `estoque`) e OC com `finalidade`; desde 26/10 traz o fornecedor (`codigo_fornecedor`, `nome_fornecedor`, `cnpj_fornecedor`, api007b, `a7fda49`). **O MES consome** a cada 5 min (desde 15/10, `develop` do MES) | ✅ `views/vw_ordens_compra_referencia_mes/…route.js:70`, `:38-39` |
 
 **Regra de aprovação conferida no banco** (a que de fato roda):
 
@@ -142,17 +151,17 @@ Isto **é** a regra decidida em 14/10 (N14-21): a OC que excede R$ 30 mil é apr
 - **Projeção:** `core_fluxo.item_estado_projetado`, uma linha por `(codigo_empresa, numero_pedido, codigo_item_omie)`, escrita **só** por `core_fluxo.fn_feed_aplicar` ✅ dump `:2169`. Também existem `core_fluxo.evento` (eventos do hub, append-only, nasce vazia) e `core_fluxo.feed_cursor` (`fonte = 'mes'`).
 - **Job:** `item_estado_projetado.job.js` a cada 90 s (`INTERVALO_MS`), primeira rodada aos 5 s, `GET {MES_API_URL}/fluxo/eventos?apos_seq=<cursor - 200>&limite=1000`, até 50 páginas por rodada, trava `avhub.fluxo_feed`; 404 do MES = "feed ainda não publicado": avisa uma vez e espera 10 min ✅ `:46-60`.
 - **Escopo:** por unidade (`auth.usuarios_unidades`); fora do escopo, 403 na lista e 404 no item; MES fora do ar devolve 200 com `mes_indisponivel = true` ✅ `:16-33`.
-- **Estado hoje:** o MES **não publica** `/fluxo/*` 🔴 (Robert); o job está dando 404. O HUB não tem a tela 🔴 (Nathan). A 046b concede as duas telas só ao perfil de testes do time de TI ✅ comentário `:22-25`, então nenhum perfil de negócio abre a Torre; a concessão real ❓ Gustavo.
+- **Estado hoje:** o MES **não publica** `/fluxo/*` 🔴 (Robert); o job está dando 404. O HUB já tem a tela da Torre (15/10, BL-022; ver [[AV-Hub-Front]]). A 046b concede as duas telas só ao perfil de testes do time de TI ✅ comentário `:22-25`, então nenhum perfil de negócio abre a Torre; a concessão real ❓ Gustavo.
 
 #### Custo real por item (LOG-47 §1, API-008) — E3, R4
 
 | Rota | Permissão | Faz | Código |
 |---|---|---|---|
 | `GET /itens_pedido_custo?codigo_empresa=&numero_pedido=` | `custo-itens.pode_visualizar`, **sempre** (também sem token, via `id_usuario_sessao`); 403 `USUARIO_NAO_INFORMADO`/`SEM_PERMISSAO`; `PEDIDO_FORA_DO_ESCOPO` para vendedor sem escopo | custo por produto do pedido: `quantidade`, `quantidade_com_custo`, `custo_total`, `custo_medio`, `completo`, `cotacao_a_conferir`, `lotes`; pedido manual devolve `pedido_manual: true` e itens vazios | ✅ `tables/itens_pedido_custo/itens_pedido_custo.route.js:66-154` |
-| Job | a cada 90 s por unidade ativa: `GET {MES_API_URL}/itens/custo?alterado_desde=<cursor>&apos_id=&codigo_empresa=&limit=1000`; grava com `fn_itens_pedido_custo_gravar`; 1ª leitura desde 1970; MES 404 = espera 10 min; trava `avhub.mes_custo_itens` | ✅ `itens_pedido_custo.job.js:51-60` |
+| Job | chave `MES_API_KEY` | a cada 90 s por unidade ativa: `GET {MES_API_URL}/itens/custo?alterado_desde=<cursor>&apos_id=&codigo_empresa=&limit=1000`; grava com `fn_itens_pedido_custo_gravar`; 1ª leitura desde 1970; MES 404 = espera 10 min; trava `avhub.mes_custo_itens` | ✅ `itens_pedido_custo.job.js:51-60` |
 
-- A migration **047b** troca a chave de `(unidade, pedido, item)` para `(unidade, pedido, codigo_produto_omie)` (o item é o produto) ✅ cabeçalho do job. **O dump de 14/10 ainda está na 047**: a tabela `itens_pedido_custo` tem `item integer` e o `UNIQUE uq_itens_pedido_custo (codigo_empresa, numero_pedido, item)` e `fn_itens_pedido_custo_do_pedido` devolve `item` (dump `:4393`, `:23010`). Contra esse banco a rota daria 500 "exige a migration 047b" 🔴 ([[Diferencas-Codigo-x-Banco]]).
-- O MES **não** tem `GET /itens/custo` 🔴 (o job recebe 404). O custo do lote existe no MES ([[Modelo-Estoque-e-Custo-do-Lote]]).
+- A migration **047b** troca a chave de `(unidade, pedido, item)` para `(unidade, pedido, codigo_produto_omie)` (o item é o produto) ✅ cabeçalho do job. O dump de 14/10 estava na 047 (rota daria 500); **o dump de 29/10 já está na 047b**: `UNIQUE uq_itens_pedido_custo (codigo_empresa, numero_pedido, codigo_produto_omie)` e `fn_itens_pedido_custo_do_pedido` devolve `codigo_produto_omie` ✅ (dump de 29/10, `:6290`, `:27722`). Ver [[Diferencas-Codigo-x-Banco]].
+- O MES tem `GET /itens/custo` desde 27/10 (`6c11147`), só na `develop` do `api-pcp` ✅ ([[Modelo-Estoque-e-Custo-do-Lote]]). Enquanto a `develop` do MES não chega à produção, o job recebe 404.
 - Etapas 2 (simulador pré-preenchido) e 3 (comissão por NF) do LOG-47 são Ciclo 2 e não leem a tabela ✅ comentário do job.
 
 ### Funções e triggers que carregam a regra
@@ -169,9 +178,31 @@ Isto **é** a regra decidida em 14/10 (N14-21): a OC que excede R$ 30 mil é apr
 | `fn_oc_referencia_mes_marcar` | mantém `ordens_compra_referencia_mes.alterado_em` (cursor da API-004) | triggers `:25877,25901,25909` |
 | `fn_pedidos_vendas_liberacao_regras`, `_historico` | trava a marcação depois do `importado` e grava `pedidos_vendas_liberacao_historico` (`liberado`, `alterado`, `importado_mes`) | `:18285` |
 | `fn_itens_pedido_status_gravar`, `_do_pedido` | grava página do `/itens/status` e lê por pedido | `:4657` |
-| `fn_itens_pedido_custo_gravar`, `_do_pedido` | idem para o custo (versão 047 no dump) | `:4393`, `:4421` |
+| `fn_itens_pedido_custo_gravar`, `_do_pedido` | idem para o custo (versão 047b no dump de 29/10) | dump de 29/10 `:6290`, `:6317` |
 | `core_fluxo.fn_feed_aplicar`, `fn_torre_setores`, `fn_torre_itens`, `fn_evento_imutavel` | projeção da Torre | `:1914` |
 | `auth.fn_autorizar`, `fn_me_permissoes`, `fn_escopo_vendedores_usuario`, `fn_validar_chave_servico` | permissão por rota, `/me/permissoes`, escopo, chaves de serviço | `:357` |
+
+### Módulo comercial (`core_comercial`, `/comercial/*`) — contrato LOG-52, desde 28/10
+
+Rotas montadas em `core_comercial/index.js`, todas com `exigirTokenUsuario` (token do usuário sempre), `asyncHandler`, `Idempotency-Key` nas escritas e `If-Match`/ETag na revisão da proposta. O código foi feito a pedido do Robert (28 e 29/10; N16-117). A permissão de cada rota sai de `auth.rotas_telas`; as capacidades (`escopo`, `ve_valores`, `ve_custo`…) saem de `core_comercial/capacidades.js` ✅.
+
+| Rota | Faz | Código |
+|---|---|---|
+| `GET /comercial/me` | capacidades do usuário no módulo | ✅ `aggregates/cadastros/cadastros.route.js:39` |
+| `GET /comercial/empresas_emissoras`, `GET /comercial/responsaveis` | empresa que emite a proposta; quem pode emitir em nome de quem | ✅ `:66`, `:107` |
+| `GET`/`PUT /comercial/parametros_custo` | parâmetros de custo, com vigência | ✅ `:144`, `:170` |
+| `POST /comercial/clientes` | cadastra o cliente no Omie da unidade e grava em `core.parceiros` (upsert por CNPJ) | ✅ `aggregates/clientes/clientes.route.js:120` |
+| `GET /comercial/parceiros?tipo=&empresa=` | cadastro de parceiros para a proposta | ✅ `aggregates/parceiros/parceiros.route.js:33` |
+| `POST`/`GET /comercial/propostas`, `GET …/resumo`, `GET …/:id`, `GET …/:id/eventos` | cria (status `ABERTA`), lista, KPIs, abre, linha do tempo | ✅ `aggregates/propostas/propostas.route.js:328-478` |
+| `PUT …/:id`, `POST …/:id/aprovar`, `…/cancelar`, `…/copiar`, `…/transformar` | revisão na negociação, ciclo de vida até o pedido | ✅ `:495-548` |
+
+⚠️ O código e o dump de 29/10 ainda guardam proposta, itens e eventos em `core_comercial.*` (23 tabelas, herdadas da `api-comercial`), enquanto a decisão N16-116 manda a proposta para `core_vendas_faturamento` e diz que `core_comercial` não existirá. Ver [[Banco-AvHub]] e a dúvida registrada no relatório do dia.
+
+Rotas do `core_vendas_faturamento` acrescentadas depois de 14/10 (resumo):
+
+- Setor do cliente e do grupo (API-014): `GET/POST/PUT /setores_clientes`, `PUT /clientes_setor` (vários setores por cliente desde 23/10) ✅ `tables/setores_clientes`, `tables/clientes_setor`.
+- Portal PCP (API-016/017): `GET /pedido_item_observacao_pcp`, `/contagem`, `POST`, `DELETE /:id`; carteira com período e previsão (`GET /pedidos_venda/carteira`, `/carteira/vendedores`, `/carteira/previsao`) ✅. `/pedido_observacao_pcp` (por parcial) continua montada, sem uso na tela.
+- Duplicatas prováveis de produto (21/10) em `core/tables/produtos` e `utils/produtosDuplicatas.js` ✅.
 
 ### Outros módulos (resumo; detalhe nos anexos)
 
@@ -197,7 +228,7 @@ Os jobs de Torre e custo seguem a regra do Nathan: nada de regra em ambiente, s�
 
 Resumo; lista com severidade em [[Bugs-Conhecidos]].
 
-- ✅ `alterado_desde` é código morto em `GET /produtos` e `GET /parceiros` (escrito depois do `return where`): `core/tables/produtos/produtos.route.js:51-62`, `core/tables/parceiros/parceiros.route.js:95-109`.
-- ✅ `pessoa_vendedor` tem model e rota (`/pessoa_vendedor`) e a tabela não existe no dump de 14/10 (`schemas/core_vendas_faturamento/index.js` monta o router).
-- 🟡 A tabela `itens_pedido_custo` do dump ainda está na versão 047 (sem 047b).
-- ❓ `usuarios_favoritos.model.js:13` declara `id` sem `defaultValue` nem `allowNull`; o POST de favoritos já deu `400 "Campo obrigatório não informado: id"` em setembro; não reproduzido em 14/10.
+- ✅ Corrigido em 16/10 (`38d2f74`): `alterado_desde` em `GET /produtos` e `GET /parceiros` agora roda antes do `return where` (`core/tables/produtos/produtos.route.js:51-70`, `core/tables/parceiros/parceiros.route.js:97-110`).
+- 🔴 `pessoa_vendedor` tem model e rota (`/pessoa_vendedor`) e a tabela não existe nos dumps de 14/10 e de 29/10 (`schemas/core_vendas_faturamento/index.js` monta o router).
+- ✅ A tabela `itens_pedido_custo` do dump de 29/10 já está na versão 047b.
+- ❓ `usuarios_favoritos.model.js:13` declara `id` sem `defaultValue` (de propósito, o banco tem `DEFAULT uuidv7()`); o POST de favoritos já deu `400 "Campo obrigatório não informado: id"` em setembro; não reproduzido em 14/10 e não reconferido em 29/10.

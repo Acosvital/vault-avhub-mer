@@ -3,7 +3,7 @@ id: SQL-010
 aliases: ["Contrato SQL 010", "010-Itens-Pedido-Status"]
 tags: [contrato, contrato-sql, dba, integracao-av-hub-mes, rastreabilidade]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
@@ -19,8 +19,9 @@ criado_original: 2026-10-08
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** F1, X1, Q7 · **Dono:** Gustavo (DBA)
 >
-> - ✅ A tabela `core_vendas_faturamento.itens_pedido_status` existe no dump de 14/10 e o job e a rota a usam (`itens_pedido_status.job.js`, `.route.js:54`). Contrato de API irmão: [[API-006-Status-por-Item-Leitura-no-Hub]].
+> - ✅ A tabela `core_vendas_faturamento.itens_pedido_status` existe no dump de 14/10 e o job e a rota a usam (`itens_pedido_status.job.js`, `.route.js:55`). Contrato de API irmão: [[API-006-Status-por-Item-Leitura-no-Hub]].
 > - ❓ Produção: aplicação no banco de produção não verificada.
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.

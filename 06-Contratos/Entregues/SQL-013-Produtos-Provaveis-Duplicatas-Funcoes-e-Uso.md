@@ -3,7 +3,7 @@ id: SQL-013
 aliases: ["Contrato SQL 013", "013-Produtos-Provaveis-Duplicatas"]
 tags: [contrato, contrato-sql, dba, produtos, duplicatas, catalogo, leitura]
 criado: 2026-10-19
-atualizado: 2026-10-21
+atualizado: 2026-10-29
 status: aplicado-em-producao
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
@@ -19,7 +19,7 @@ criado_original: 2026-10-19
 > [!info] Situação em 21/10/2026
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - ✅ A tela **Produtos — Prováveis Duplicatas** existe e é só leitura. Hoje baixa o catálogo inteiro da unidade pela API e agrupa **no navegador** por descrição normalizada **igual** + família + unidade (`produtosDuplicados.ts:21-29, 94-115`).
+> - ✅ A tela **Produtos — Prováveis Duplicatas** existe e é só leitura. Em 29/10/2026 o front (`av-hub/services/cadastros/auxiliares/produtosDuplicados.ts`) já faz **uma chamada** a `/api/produtos/duplicatas` (contrato [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela]]); só cai em dados de exemplo se a rota não existir. 🕓 Registro anterior (19/10): a tela baixava o catálogo inteiro da unidade e agrupava **no navegador** por descrição normalizada **igual** + família + unidade.
 > - 📝 **Decisão do Nathan, 19/10/2026:** melhorar a tela; cálculo no banco e na API; **só leitura** (a rejeição do alias, [[API-002-Material-Alias-Omie-MES]], de 21/09/2026, continua valendo: quem resolve a duplicata é o Omie); escopo **por unidade**; mostrar uso em venda, OC, estoque e fornecedores.
 > - ✅ `pg_trgm` e `unaccent` já estão instaladas no schema `public` do banco (`Dump Avhub (Esqueleto).sql:275-321`).
 > - ✅ **Aplicado e funcionando (21/10/2026).** A rota `GET /produtos/duplicatas` da `api-acos-vital` (commit `c685571`, `develop`) chama `core.fn_produtos_duplicatas_pares` e `core.fn_produtos_uso`. O Nathan chamou a rota pela API de `api.acosvital.com.br` e ela respondeu **200 com dado real** nas 3 unidades (Aços Vital 7.079 grupos em 53.515 produtos; Hrm 5.218 em 35.988; Uberaba 5.336 em 36.076). Tempo: 0,9 a 9,6 s sem cache e cerca de 0,45 s com o cache de 60 s. 🟡 A consulta em `pg_proc` feita antes, em `avhub_prd_db`, voltou vazia; as funções foram aplicadas depois disso. Os ajustes do Gustavo em relação ao script abaixo não foram informados, então o script é o desenho proposto, não necessariamente o texto aplicado.

@@ -3,8 +3,8 @@ id: API-004
 aliases: ["Contrato 004", "004-Referencia-OC-Integracao-MES"]
 tags: [contrato, contrato-api, mes, integracao-av-hub-mes, compras]
 criado: 2026-10-14
-atualizado: 2026-10-15
-status: parcial
+atualizado: 2026-10-29
+status: implementado-no-codigo
 sistemas: [hub-banco, hub-api, mes-api]
 dono: "Robert"
 etapa_0b: [C4, R0, R4]
@@ -19,11 +19,15 @@ criado_original: 2026-09-22
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Define a rota pela qual o av-hub entrega ao MES (sistema de produção) as Ordens de Compra (OC) aprovadas ou canceladas, para o Recebimento conferir o que chega na doca.
 > **Quem é afetado:** Recebimento e Compras. O Recebimento passa a ver as OCs emitidas no av-hub; hoje confere só contra a nota fiscal (NF).
-> **Situação:** Parcial. O lado do av-hub está entregue (✅). O job de leitura no MES existe desde 15/10 (Robert); faltam itens do backlog (BL-049, BL-050, BL-051) e o custo da OC no lote.
+> **Situação:** Feito no código, sugerido para Entregues. A rota do av-hub está entregue (✅) e o MES já lê a OC desde 15/10 (K4), grava o custo da OC no lote (19/10) e recebe por OC (✅, `develop` do `api-pcp`). O que sobra (OC do pedido visível ao PCP, saldo futuro, rateio da chegada) é do [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno]]. O MES novo só chega à `main` com o merge do BL-035.
 > **Exemplo:** Uma OC aprovada aparece na leitura seguinte com itens, tipo de material e destino (pedido de venda ou estoque).
 
-> [!info] Situação em 14/10/2026
-> **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** C4, R0, R4 · **Dono:** Robert
+> [!info] Situação em 29/10/2026
+> **Status:** `implementado-no-codigo` · **Pasta:** `Ativos` (sugerida: `Entregues`) · **Nós do 0b:** C4, R0, R4 · **Dono:** Robert
+>
+> - ✅ **Conferido em 29/10/2026:** a rota existe na `develop` do `api-acos-vital` (`index.js:217`), agora com fornecedor da OC (`api007b`, pedido do Robert de 26/10); o MES lê e projeta a OC (K4, `api-pcp` `6914fe9`), grava o custo da OC no lote (BL-005, `97b9adc`) e recebe por OC e por NF (`src/compras/compra-oc.ts`, `oc-referencia-avhub.service.ts`). Os itens BL-049 (OC do pedido ao PCP) e BL-050 (saldo futuro) passaram a ser acompanhados no API-011; BL-051 está em boa parte pronto. Nada disso está na `main` do MES até o BL-035.
+>
+> **Registro anterior (14/10/2026), mantido:** `parcial` · **Nós do 0b:** C4, R0, R4
 >
 > - ✅ **Lado do av-hub entregue:** `GET /ordens-compra/referencia?alterado_desde=&codigo_empresa=&page=&limit=&apos_id=` (`api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_ordens_compra_referencia_mes/vw_ordens_compra_referencia_mes.route.js:70`, montada em `index.js:199`). `alterado_desde` obrigatório (ISO 8601), `limit` padrão 100 e máximo 500; a regra mora na view `vw_ordens_compra_referencia_mes` (`Dump Avhub (Esqueleto).sql:20237`) e a marca `alterado_em` na tabela `ordens_compra_referencia_mes` (trigger).
 > - ✅ Chave: rota de serviço sem token de usuário; a chave `MES_INTEGRACAO_KEYS` do LOG-34 responde `403 CHAVE_MES_ROTA_NAO_PERMITIDA` aqui (`vw_ordens_compra_referencia_mes.route.js:26-30`); o MES lê com chave de leitura de `auth.chaves_servico` ou de `API_KEYS`.

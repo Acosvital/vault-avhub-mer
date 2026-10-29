@@ -3,12 +3,12 @@ id: LOG-33
 aliases: ["Contrato 33", "33-Dashboards-Unidade-de-Origem-do-Vendedor"]
 tags: [contrato, contrato-logica, contrato-sql, contrato-api, dashboards, vendedores, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js:53-54"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js:54-55"]
 criado_original: 2026-09-30
 ---
 
@@ -24,7 +24,8 @@ criado_original: 2026-09-30
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - ✅ `GET /vendedores` devolve `unidade_origem` e `nome_unidade_origem` (`vendedores.route.js:53-54`). Anexos SQL e patch junto desta nota (`LOG-33-anexos/`).
+> - ✅ `GET /vendedores` devolve `unidade_origem` e `nome_unidade_origem` (`vendedores.route.js:54-55`). Anexos SQL e patch junto desta nota (`LOG-33-anexos/`).
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.

@@ -3,7 +3,7 @@ id: LOG-38
 aliases: ["Contrato 38", "38-Regras-Sem-Chave-de-Ambiente"]
 tags: [contrato, contrato-api, configuracao, seguranca, regra-nathan]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-api]
 dono: "Gustavo (DBA)"
@@ -19,13 +19,14 @@ criado_original: 2026-10-06
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Registra a regra do Nathan de 06/10: regra decidida fica fixa no código, sem variável de ambiente que ligue ou desligue. O contrato removeu as chaves que mantinham regras desligadas.
 > **Quem é afetado:** Backend e quem faz o deploy. Para os usuários, passam a valer sempre: produto obrigatório na OC, notas manuais só do admin e histórico unificado.
-> **Situação:** ✅ Concluído no código em 06/10: saíram 13 chaves. Ficam 6 de segurança e paginação, de propósito, até cumprirem seus pré-requisitos.
+> **Situação:** ✅ Concluído no código em 06/10: saíram 13 chaves. Das 6 que ficaram de propósito, em 29/10/2026 restam 3 como variável (`IDENTIDADE_EXIGIR_TOKEN`, `ESCOPO_UNIDADE_EXIGIR_SESSAO` e `VENDAS_PLANILHA_PAGINAR_POR_PEDIDO`); `PERMISSOES_ROTA_MODO`, `ESCOPO_VENDEDORES_EXIGIR` e `AUTENTICACAO_AZURE_VALIDAR_ID_TOKEN` foram fixadas no código depois (conferido no código).
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - ✅ Regras fixas no código, sem chave: permissão por rota (`acessoConfig.js:10`, antes `PERMISSOES_ROTA_MODO`), notas manuais (`notas_fiscais.route.js:115`), produto obrigatório na OC (`ordens_compra.route.js:1058`), histórico unificado de Compras. Anexos (2 patches) em `LOG-38-anexos/`.
+> - ✅ Regras fixas no código, sem chave: permissão por rota (`acessoConfig.js:10`, antes `PERMISSOES_ROTA_MODO`), notas manuais (`notas_fiscais.route.js:115`), produto obrigatório na OC (`ordens_compra.route.js:1060`), histórico unificado de Compras. Anexos (2 patches) em `LOG-38-anexos/`.
 > - Regra do Nathan vigente em todos os contratos novos: nenhuma regra em variável de ambiente nem chave de liga/desliga.
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.

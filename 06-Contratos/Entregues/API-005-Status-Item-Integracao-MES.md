@@ -3,12 +3,12 @@ id: API-005
 aliases: ["Contrato 005", "005-Status-Item-Integracao-MES"]
 tags: [contrato, contrato-api, mes, integracao-av-hub-mes, rastreabilidade]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-api, mes-api]
 dono: "Robert"
 etapa_0b: [F1, X1, Q7]
-fontes: ["api-pcp/src/integracao-avhub/integracao-avhub.controller.ts:26", "api-pcp/src/integracao-avhub/integracao-avhub.service.ts:108", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_status/itens_pedido_status.job.js:217"]
+fontes: ["api-pcp/src/integracao-avhub/integracao-avhub.controller.ts:23", "api-pcp/src/integracao-avhub/integracao-avhub.service.ts:106", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_status/itens_pedido_status.job.js:217"]
 criado_original: 2026-09-22
 ---
 
@@ -19,8 +19,8 @@ criado_original: 2026-09-22
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** F1, X1, Q7 · **Dono:** Robert
 >
-> - ✅ **MES:** `GET /itens/status` existe (`api-pcp/src/integracao-avhub/integracao-avhub.controller.ts:26`; serviço em `integracao-avhub.service.ts:108`), protegida por `x-api-key` (`AvhubApiKeyGuard`). Devolve a foto atual de cada parcial alterada desde o cursor.
-> - ✅ **Consumidor no av-hub:** o job `itens_pedido_status.job.js` lê a rota a cada 90 s (`MES_STATUS_INTERVALO_SEG`, `api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_status/itens_pedido_status.job.js:217`), iniciado em `api-acos-vital/src/app.js:207`. Detalhe no [[API-006-Status-por-Item-Leitura-no-Hub]].
+> - ✅ **MES:** `GET /itens/status` existe (`api-pcp/src/integracao-avhub/integracao-avhub.controller.ts:23`; serviço em `integracao-avhub.service.ts:106`), protegida por `x-api-key` (`AvhubApiKeyGuard`). Devolve a foto atual de cada parcial alterada desde o cursor.
+> - ✅ **Consumidor no av-hub:** o job `itens_pedido_status.job.js` lê a rota a cada 90 s (`MES_STATUS_INTERVALO_SEG`, `api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_status/itens_pedido_status.job.js:217`), iniciado em `api-acos-vital/src/app.js:261`. Detalhe no [[API-006-Status-por-Item-Leitura-no-Hub]].
 > - ✅ As 3 diferenças em relação ao rascunho (foto atual em vez de log; `pedido_venda` + `ordem_producao`; etapas a mais e a menos) foram aceitas pelo Nathan em 08/10. As 11 etapas estão em [[Estados-e-Status]].
 > - ❓ Produção: não conferida.
 >

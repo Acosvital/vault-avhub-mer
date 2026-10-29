@@ -22,6 +22,16 @@ Substitui a versão de 23/10: **todas as páginas foram lidas**. Marcado ❓ o q
 
 Selos: ✅ existe e foi lido · 🔴 não existe · 🟡 proposta · ❓ não conferido.
 
+> [!info] Situação do front em 29/10/2026
+> A leitura das 47 páginas é de 23/10. Conferido em 29/10 na `develop` do `av-hub` (`758d5f0`, `app/(protected)`), já mudou:
+> - O menu enxuto (N16-107 e N16-108) está no código desde 27/10 (`a1493a8`, `d5fa9a6`): o Portal do Vendedor foi para dentro de Vendas; Orçamento tem Pedidos de custo, Produtos, Fornecedores e Parâmetros, com as telas antigas em abas, mais Custo por item.
+> - A tela Clientes passou a ser o Acompanhamento de Clientes (N16-112, `1a48140`). Não há mais Relatório de Cotações como página; sobra o Relatório Gerencial.
+> - O Histórico de compras saiu (N16-108); não há mais `/compras/historico-compras`.
+> - O "Pedido no Omie" digitado à mão, o fechamento parcial e a perda saíram do front em 28/10 (`2008344`); a proposta foi refeita em 27 e 29/10 (grade de itens, condições no layout do Simulador, abas e análise de margem; `37c9cf2`, `88fbafe`).
+> - Aprovar, cancelar e transformar em pedido já existem na API (`api-acos-vital`, 29/10), mas o BFF e a tela ainda não os usam.
+> - Os nomes dos itens do menu moram no banco (`telas`): não conferi se "Aprovar OC" e "Reprovados" já foram criados ❓.
+> - As linhas das tabelas abaixo são o registro da leitura de 23/10; onde isto muda o texto, a linha diz.
+
 ## Mapa rápido por setor
 
 | Setor | Telas | Situação |
@@ -39,12 +49,12 @@ Selos: ✅ existe e foi lido · 🔴 não existe · 🟡 proposta · ❓ não co
 
 | Tela | Para que serve | Quem usa | Situação |
 |---|---|---|---|
-| Propostas, lista | Resumo e filtros; abre a nova proposta | Vendedor, gerente | ✅ Muda: estados e rótulos (seção 4) |
-| Proposta, formulário | Emissão, cliente, itens, condições, margem | Vendedor | 🔴 Será reescrita (seção 5) |
-| Proposta, "Pedido no Omie" | Dados para digitar no Omie à mão | Vendedor | 🔴 **Sai**: o pedido vai por API |
-| Clientes, lista | Cards, propostas de 90 dias, contatos atrasados | Vendedor | ✅ Mantém |
-| Cliente, ficha | Dados, compradores, estatísticas | Vendedor | ✅ Mantém; "Total fechado" e "Conversão" contam **propostas aprovadas** |
-| Relatório de Cotações | Totais e conversão, com Excel | Gerência | ✅ Mantém, com os novos estados |
+| Propostas, lista | Resumo e filtros; abre a nova proposta | Vendedor, gerente | ✅ Muda: estados e rótulos (seção 4); já lê a API do Hub |
+| Proposta, formulário | Emissão, cliente, itens, condições, margem | Vendedor | 🟡 Reescrita em andamento (27 e 29/10, seção 5) |
+| Proposta, "Pedido no Omie" | Dados para digitar no Omie à mão | Vendedor | ✅ **Saiu** do front em 28/10 (`2008344`): o pedido vai por API |
+| Clientes, lista | Cards, propostas de 90 dias, contatos atrasados | Vendedor | ✅ Virou o Acompanhamento de Clientes (`/vendas/acompanhamento-clientes`, N16-112) |
+| Cliente, ficha | Dados, compradores, estatísticas | Vendedor | ✅ Mantém na ficha do Acompanhamento; "Total fechado" e "Conversão" contam **propostas aprovadas** |
+| Relatório de Cotações | Totais e conversão, com Excel | Gerência | Não existe mais como página na `develop` (conferido em 29/10) ❓ decisão de manter ou não |
 | Relatório Gerencial | Resumo por responsável, empresa, unidade | Gerência | ✅ Mantém; "Perdidas" vira **Canceladas** |
 | Pedidos de Venda (inativa no menu, N16-33) | Pedidos sincronizados do Omie | Vendedor; Fiscal (futuro) | ✅ Continua inativa, mas **valiosa**: base da fila do Fiscal (seção 4) |
 | Notas Fiscais de Saída (inativa) | Notas de saída | — | ✅ Continua inativa |
@@ -53,7 +63,7 @@ Selos: ✅ existe e foi lido · 🔴 não existe · 🟡 proposta · ❓ não co
 
 | Tela | Para que serve | Quem usa | Situação |
 |---|---|---|---|
-| Painel do Comprador | Fila de pedidos de custo | Comprador | ✅ Mantém; **tira "Vencem hoje" e "Atrasadas"** (N16-58), fica o tempo cronometrado |
+| Painel do Comprador | Fila de pedidos de custo | Comprador | ✅ Mantém, agora em **Pedidos de custo** com o Pedido de cotação em aba; **tira "Vencem hoje" e "Atrasadas"** (N16-58), fica o tempo cronometrado |
 | Responder solicitação | Escolhe a oferta vigente que vira o custo | Comprador | ✅ Mantém |
 | Pedido de cotação | E-mail por fornecedor da categoria | Comprador | ✅ Mantém |
 | Ofertas de fornecedor | Lança, importa, invalida e exporta ofertas | Orçamento | ✅ Mantém; ofertas das OCs entram sozinhas |
@@ -80,7 +90,7 @@ Selos: ✅ existe e foi lido · 🔴 não existe · 🟡 proposta · ❓ não co
 | Aprovações | OCs acima do limite da unidade | Aprovador | ✅ Mantém. ⚠️ **Nome igual a outra coisa**: não é a aprovação do vendedor (`C8`) |
 | Follow-up (CCP) | Acompanha as OCs aprovadas | CCP (PCP) | ✅ Mantém. 📝 **CCP é parte do PCP** (N14-24) |
 | Pedido Omie (detalhe) | Pedido feito direto no Omie, só leitura | Comprador | ✅ Mantém |
-| Histórico de compras | Compras por conta, período, produto | Comprador | ✅ Mantém; vira aba da página do produto |
+| Histórico de compras | Compras por conta, período, produto | Comprador | **Saiu** (N16-108): a tela Ordens de compra mostra o histórico, com filtro por produto |
 | Compradores | Liga comprador do Omie ao funcionário | Administrador | ✅ Mantém (Cadastros/Acessos) |
 
 ### 1.4 Painéis que a proposta deve respeitar
@@ -162,9 +172,9 @@ flowchart LR
 
 A tela de hoje é pesada (ordem confusa, item com cerca de 25 campos, botões do modelo antigo). O desenho novo 🟡 tem **uma ação principal por estado**, cinco blocos (quem e para quem, o que se vende, condições, custo de compra, resultado) e um resumo fixo com pendências clicáveis e o botão do estado: `Salvar`, `Marcar como aprovada`, `Transformar em pedido` (pede previsão de faturamento, Qualidade e faturar em partes; N16-88, N16-89). Pedido em partes ganha o bloco **Sequenciais**. Texto completo (5.1 a 5.4) em "Detalhe técnico".
 
-## 6. Organização do menu 🟡
+## 6. Organização do menu
 
-Menus de Vendas e Orçamento revistos em 27/10/2026 (N16-107, N16-108); o texto está em "Detalhe técnico".
+Menus de Vendas e Orçamento revistos em 27/10/2026 (N16-107, N16-108) e já aplicados no front (`av-hub` `a1493a8`, conferido em 29/10); o texto está em "Detalhe técnico". A tabela abaixo é a proposta original de 23/10 🟡: a de Vendas e Orçamento está feita, o resto (Compras, Comissões, Fiscal) segue como proposta.
 
 | Menu | Entradas | Observação |
 |---|---|---|

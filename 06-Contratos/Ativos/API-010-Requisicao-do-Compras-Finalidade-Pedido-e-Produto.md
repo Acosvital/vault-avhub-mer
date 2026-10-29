@@ -22,8 +22,10 @@ criado_original: 2026-10-15
 > **Situação:** Parcial. Banco e API em produção desde 20/10, segundo o Gustavo (não conferido); front do Nathan pronto e API testada ponta a ponta na api-test em 29/10 (✅). Perguntas sobre a HRM e o setor do uso interno seguem abertas (🟡 🔴).
 > **Exemplo:** Finalidade "pedidos_venda" sem número de pedido de venda é recusada com erro 400.
 
-> [!info] Situação em 26/10/2026
+> [!info] Situação em 29/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nó do 0b:** C0 · **Dono:** Gustavo (banco e API); Nathan (front, já pronto)
+>
+> - ✅ Banco, API e front estão feitos e testados (itens abaixo). O que mantém o contrato em `parcial` são só as perguntas Q1 (exceção da HRM) e Q3 (setor que pediu o uso interno), do Nathan, na seção 10; se elas forem respondidas sem mudança de código, o contrato pode ir para `Entregues`.
 >
 > - ✅ **Migration `api010` em produção desde 20/10/2026** (entrou na MEGA de 19/10), informado pelo Gustavo em 26/10; não conferi no banco.
 > - ✅ **Front pronto (HUB PR #209):** a "Nova requisição" é uma tela própria (`/compras/requisicoes/nova`) e já envia `finalidade`, `numero_pedido_venda` e `material` = `codigo_produto` do cadastro.

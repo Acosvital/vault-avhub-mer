@@ -3,8 +3,8 @@ tags: [fluxo, raia, orcamento, base-de-preco, matriz-de-precos, pedido-de-custo,
 criado: 2026-10-16
 atualizado: 2026-10-29
 status: proposta
-dono: Pablo (módulo) · Gustavo (banco e API) · Nathan (front)
-fontes: [Registro-de-Decisoes (N16-06, N16-07, N16-14, N16-16, N16-41, N16-52, N16-54, N16-55, N16-56, N16-58, N16-59, N16-72), Proposta-Score-e-Volatilidade-OQ-46, Proposta-Orcamento-Comissao/01-Decisoes/Respostas-de-Compras-2026-10-19 (fora do vault), Estudo-Omie-API, 10-Anexo-Fora-do-Fluxo/Orcamento (antigo, substituído), LOG-42, LOG-52, api-comercial 5aa5311 (suprimentos.prisma, suprimentos.routes.ts, custos.routes.ts), HUB branch feat/menu-orcamento-vendas-compras (ededeea, 200e860, 5aa5311), telas-vendas-orcamento-compras.sql, Dump Avhub 14/10]
+dono: Pablo e Robert (módulo; o Robert conduz as rotas desde 28/10, N16-117) · Gustavo (banco e API) · Nathan (front)
+fontes: [Registro-de-Decisoes (N16-06, N16-07, N16-14, N16-16, N16-41, N16-52, N16-54, N16-55, N16-56, N16-58, N16-59, N16-72), Proposta-Score-e-Volatilidade-OQ-46, Proposta-Orcamento-Comissao/01-Decisoes/Respostas-de-Compras-2026-10-19 (fora do vault), Estudo-Omie-API, 10-Anexo-Fora-do-Fluxo/Orcamento (antigo, substituído), LOG-42, LOG-52, api-comercial 5aa5311 (suprimentos.prisma, suprimentos.routes.ts, custos.routes.ts), HUB branch feat/menu-orcamento-vendas-compras (ededeea, 200e860, 5aa5311), telas-vendas-orcamento-compras.sql, Dump Avhub 14/10, av-hub develop 758d5f0 (app/(protected)/orcamento), N16-107, N16-108, N16-117, N16-119]
 ---
 
 # Orçamento e base de preço de compra
@@ -12,6 +12,9 @@ fontes: [Registro-de-Decisoes (N16-06, N16-07, N16-14, N16-16, N16-41, N16-52, N
 **Em uma frase:** o Orçamento é o setor novo que mantém o preço de compra de cada produto, sempre com histórico, para o vendedor consultar ou pedir cotação quando não tem o custo.
 
 Esta nota substitui o anexo [[Orcamento]], arquivado em 26/10/2026. Os nós são `B1` a `B4` do [[00-Fluxo-Mestre-0b]].
+
+> [!info] Situação em 29/10/2026
+> O Orçamento é do Pablo, com o Robert (N16-117, N16-119). A `api-comercial` de teste não roda mais: fica no repositório só para leitura (N16-117) e o front de Fornecedores, Produtos, Cotação e a análise da proposta lê a API do Hub desde 27/10 (`av-hub` `d6dc1a6`). Na `api-acos-vital` (`develop`) o router `/suprimentos` existe mas ainda não tem rota: nasce fechado (`core_comercial/index.js`, "fase 4") 🔴.
 
 ## Como funciona, passo a passo
 
@@ -54,8 +57,8 @@ Depois, Compras emite a OC dos 100 flanges. O preço pago passa a ser a última 
 
 ## O que já existe e o que falta
 
-- ✅ Painel do Comprador, Pedido de cotação, Ofertas, Fornecedores, Catálogo, Pesquisa de materiais, Parâmetros de custo e Tabela da telha.
-- ✅ Oferta imutável com histórico, média por período e pedido de custo, no módulo de teste do Pablo.
+- ✅ Telas no `av-hub` (`develop`, menu enxuto de 27/10, N16-107 e N16-108): Pedidos de custo (Painel do Comprador e Pedido de cotação, em abas), Produtos (Catálogo, Pesquisa de materiais e Ofertas, em abas), Fornecedores, Parâmetros (custo e Telha, em abas) e Custo por item.
+- ✅ Oferta imutável com histórico, média por período e pedido de custo, no `api-comercial` de teste (legado de consulta, N16-117); falta portar para a `api-acos-vital`.
 - 📝 As regras acima estão decididas.
 - 🟡 Valor correto da OC (`C7`) entrando no histórico de compras.
 - 🟡 Cadastro das telas em produção.
@@ -95,7 +98,8 @@ Os nós (numeração 🟡: o desenho do Nathan fixou só o intervalo `B1` a `B4`
 | Orçamento (setor orçamentário, novo; o Moisés é uma das pessoas) | Cota com fornecedores, atualiza ofertas, responde pedidos de custo | Orçamento (`/orcamento/*`) |
 | Vendedor | Consulta a página do produto, pede cotação; **decide o valor que põe na proposta** | Vendas e Orçamento (só consulta) |
 | Compras | Dona do dado de compra; o valor das OC efetivadas alimenta a base; o valor correto da OC (`C7`) entra no histórico | Compras |
-| Pablo | Escreve o módulo na `api-acos-vital` | `api-acos-vital` |
+| Robert | Conduz o módulo e faz as rotas na `api-acos-vital` (N16-117) | `api-acos-vital` |
+| Pablo | Dono do Orçamento; acompanha o Robert (N16-117) | `api-acos-vital` |
 | Gustavo (DBA) | Revisa e aplica a migração do Orçamento no `core_comercial` | `api-acos-vital` |
 | Nathan | Telas | HUB |
 
@@ -131,7 +135,7 @@ Os nós (numeração 🟡: o desenho do Nathan fixou só o intervalo `B1` a `B4`
 
 ### Estados
 
-Valores reais do módulo do Pablo (`api-comercial/prisma/models/enums.prisma`):
+Valores reais do módulo do Pablo (`api-comercial/prisma/models/enums.prisma`, hoje só para leitura):
 
 | Campo | Valores | Fonte |
 |---|---|---|
@@ -145,27 +149,24 @@ A oferta é **imutável** (RN-130): corrigir é invalidar com motivo e lançar o
 
 ### Telas
 
-Menu **Orçamento** desde 16/10/2026. Telas movidas de `suprimentos/*` para `orcamento/*` (`200e860`):
+Menu **Orçamento** desde 16/10/2026; enxugado em 27/10/2026 (N16-107 e N16-108, `av-hub` `a1493a8`): as telas antigas viraram abas dentro de 4 entradas. Conferido em `app/(protected)/orcamento/*` da `develop` em 29/10/2026:
 
-| Nome atual | Rota | Slug (`auth.telas`) | Nó | Estado |
+| Nome atual | Rota | Abas (conferidas no código) | Nó | Estado |
 |---|---|---|---|---|
-| Painel do Comprador | `/orcamento/painel-comprador` | `painel-comprador` | `B3`, `B4` | ✅ fila de solicitações de custo; responde com oferta (PR #201) |
-| Pedido de cotação | `/orcamento/pedido-cotacao` | `pedido-cotacao` | `B4` | ✅ envia pedido de cotação a fornecedores |
-| Ofertas de fornecedor | `/orcamento/ofertas-fornecedor` | `ofertas-fornecedor` | `B1`, `B4` | ✅ |
-| Fornecedores (e ficha) | `/orcamento/fornecedores`, `/[id]` | `fornecedores` | `B1` | ✅ |
-| Catálogo (e produto) | `/orcamento/catalogo-produtos`, `/[id]` | `catalogo-produtos` | `B2` | ✅ o detalhe do produto mostra os preços (`components/Suprimentos/ProdutoDetalhe.tsx`); é a base da página do produto |
-| Pesquisa de materiais | `/orcamento/pesquisa-materiais` | `pesquisa-materiais` | `B2` | ✅ |
-| Parâmetros de custo | `/orcamento/parametros-custo` | `parametros-custo` | `B1` | ✅ ICMS a recuperar, densidades, validade; 🟡 recebe também os pesos do score e os limites |
-| Tabela da telha | `/orcamento/tabela-telha` | `tabela-telha` | `B1` | ✅ |
-| Custo do item (oculta) | — | `custo-item` | `B2` | ✅ libera ver custo, margem e sugestão |
-| Solicitações de custo (oculta, em Vendas) | — | `solicitacoes-custo` | `B3` | ✅ o vendedor pede custo pela proposta |
-| Histórico de compras | `/compras/historico-compras` | `historico-compras` | `B1` | ✅ está em **Compras** |
+| Pedidos de custo (Painel do Comprador) | `/orcamento/painel-comprador` | fila do Painel do Comprador e Pedido de cotação (`PaginaComAbas`) | `B3`, `B4` | ✅ fila de solicitações de custo; responde com oferta (PR #201) |
+| Produtos (Catálogo) | `/orcamento/catalogo-produtos`, `/[id]` | Catálogo, Pesquisa de materiais e Ofertas | `B1`, `B2` | ✅ o detalhe do produto mostra os preços (`components/Suprimentos/ProdutoDetalhe.tsx`); é a base da página do produto |
+| Fornecedores (e ficha) | `/orcamento/fornecedores`, `/[id]` | lista e ficha | `B1` | ✅ |
+| Parâmetros de custo | `/orcamento/parametros-custo` | Custo (ICMS a recuperar, densidades, validade) e Telha (tabela da telha) | `B1` | ✅; 🟡 recebe também os pesos do score e os limites |
+| Custo por item | `/orcamento/custo-itens` | — | `B2` | ✅ itens, lotes e custo médio do pedido |
+| Custo do item (oculta) | — | — | `B2` | ✅ slug `custo-item`: libera ver custo, margem e sugestão |
+| Solicitações de custo (oculta, em Vendas) | — | — | `B3` | ✅ slug `solicitacoes-custo`: o vendedor pede custo pela proposta |
+| Histórico de compras | — | — | `B1` | Sai (N16-108): `/compras/historico-compras` não existe mais na `develop`; o histórico está em Ordens de compra, com filtro por produto |
 | **Página do produto para o vendedor**: histórico, top fornecedores com score, flutuação anual, mensal e total, volatilidade, média | 🟡 | 🟡 | `B2` | 🔴 hoje só quem tem `custo-item` ou `painel-comprador` vê custo (`capacidades.ts:77`) |
 | Matriz de preços | 🟡 | 🟡 (o BFF já cita o slug `matriz-precos`, `app/api/comercial/[...rota]/route.ts:89,104`) | `B1`, `B2` | 🔴 tela ainda não construída |
 
 ### Endpoints e contratos
 
-Rotas do `api-comercial` (módulo de teste) que serão migradas ([[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]]):
+Rotas do `api-comercial` (legado só para leitura, N16-117) que o Robert recria na `api-acos-vital` ([[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]]; nenhuma delas existe ainda na `api-acos-vital`, conferido em 29/10/2026):
 
 | Método e rota | Uso | Nó | Código |
 |---|---|---|---|
@@ -212,7 +213,7 @@ Hoje a regra do código é mais restrita: `veCusto` vem de `custo-item` ou de se
 
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
-| 1 | Migrar suprimentos e custos para a `api-acos-vital` (LOG-52 fases 4 e 5) | Pablo, Gustavo | `B1` a `B4` | 🔴 |
+| 1 | Migrar suprimentos e custos para a `api-acos-vital` (LOG-52 fases 4 e 5) | Robert (rotas), Pablo (acompanha), Gustavo (banco) | `B1` a `B4` | 🔴 |
 | 2 | Página do produto para o vendedor, sem dar acesso ao que o Orçamento edita | Nathan, Pablo | `B2` | 🔴 |
 | 3 | Score, ranking por categoria, volatilidade e dado recente, com parâmetros e vigência | Pablo, Gustavo | `B2` | 🔴 |
 | 4 | Prazo de entrega em dias na oferta e na OC; data real de recebimento (recurso novo da pipeline) | Gustavo, Nathan | `B1`, `B2` | 🔴 ([[Estudo-Omie-API]]) |

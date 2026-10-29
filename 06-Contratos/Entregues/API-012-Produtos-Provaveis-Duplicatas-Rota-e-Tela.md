@@ -3,7 +3,7 @@ id: API-012
 aliases: ["Contrato 012", "012-Produtos-Provaveis-Duplicatas"]
 tags: [contrato, contrato-api, produtos, duplicatas, catalogo, av-hub, leitura, sql]
 criado: 2026-10-19
-atualizado: 2026-10-21
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
@@ -19,8 +19,8 @@ criado_original: 2026-10-19
 > [!info] Situação em 21/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
 >
-> - ✅ **Tela atual** (`/cadastros/auxiliares/produtos-duplicados`): só leitura, cálculo no navegador, agrupa por descrição normalizada **igual** + família + unidade; mostra código, código Omie, família e status; o botão "Vincular como alias" está desabilitado (`page.tsx:181-189`).
-> - ✅ **Não existe** rota de duplicatas na `api-acos-vital`; a rota `/produtos` só lista e filtra por texto (`produtos.route.js:44-60`).
+> - 🕓 **Antes da entrega (19/10/2026)** a tela só lia, calculava no navegador (descrição normalizada igual + família + unidade) e a `api-acos-vital` não tinha rota de duplicatas. Superado pelos itens abaixo.
+> - ✅ **Tela atual** (`/cadastros/auxiliares/produtos-duplicados`): só leitura e sem alias; o botão "Vincular como alias" não existe mais no `page.tsx` (conferido em 29/10/2026). A rota `GET /produtos/duplicatas` está em `produtos.route.js:164`, registrada antes de `/:id` (`:317`).
 > - 📝 **Decisão do Nathan, 19/10/2026:** cálculo no banco e na API; **só leitura, sem alias** (mantém a rejeição de 21/09/2026, [[API-002-Material-Alias-Omie-MES]]); **por unidade**; mostrar uso em venda, OC, estoque e fornecedores.
 > - ✅ **Rota na `develop` da `api-acos-vital`** (commit `c685571`, 21/10/2026): `GET /produtos/duplicatas` registrada antes de `/:id`, com escopo de unidade (403), 404 para unidade inexistente, cache de 60 s dos pares, swagger e testes unitários (`test/unit/produtosDuplicatas.test.js`). Devolve também `motivo_sugestao` no item sugerido (`unico_ativo`, `mais_usado`, `maior_estoque`, `mais_antigo`, `menor_id`), além do contrato.
 > - ✅ **Tela no `av-hub`** (`develop`, PR #223): consome a rota por BFF `GET /api/produtos/duplicatas`, com uma chamada só. Testado em 21/10/2026 contra a API real: 200 nas 3 unidades (Aços Vital 7.079 grupos em 53.515 produtos), 0,9 a 9,6 s sem cache e cerca de 0,45 s com cache.

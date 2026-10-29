@@ -87,7 +87,7 @@ flowchart LR
     ALM --> CAR
     RET --> E6U
 ```
-**Em resumo:** ✅ saldo, atendimento, compra do restante, produção do restante e carga inicial funcionam. 🔴 Falta o custo do item, a baixa de matéria-prima e a entrada do fabricado aprovado. O documento de retirada (`E6`) está decidido 📝, sem código 🔴.
+**Em resumo:** ✅ saldo, atendimento, compra do restante, produção do restante e carga inicial funcionam. O custo do item (`GET /itens/custo`) e a entrada do fabricado aprovado (lote `PRODUCAO`) existem na `develop` do MES ✅. 🔴 Falta a baixa de matéria-prima. O documento de retirada (`E6`) está decidido 📝, sem código 🔴.
 
 ## 4. Compras e fornecedor (C0 a C5, FN1)
 
@@ -115,7 +115,7 @@ flowchart LR
     FOR --> C5U
     CCP --> CLM
 ```
-**Em resumo:** ✅ requisição, cotação, OC, aprovação e leitura no MES funcionam. 🔴 O MES ainda não lê a OC das requisições criadas no Compras, e o perfil CCP no HUB falta.
+**Em resumo:** ✅ requisição, cotação, OC, aprovação e leitura no MES funcionam. O MES já lê a OC das requisições criadas no Compras (K4, `develop`), mas ainda não a mostra ao PCP e ao Estoque 🔴; o perfil CCP no HUB falta 🔴.
 
 ## 5. Recebimento e Qualidade de entrada (R0 a R6, Q1 a Q4)
 
@@ -209,11 +209,11 @@ As duas opções do nó `E4` (compra ou produção) são alternativas para o res
 
 | Caso | Estado | Selo |
 |---|---|---|
-| E1 a E3 | `/estoque-operacao/atendimento` | ✅ custo do item 🔴 |
+| E1 a E3 | `/estoque-operacao/atendimento` | ✅ custo do item ✅ (`develop`) |
 | E4 compra | `destinoRestante` igual a `COMPRA` | ✅ |
 | E4 produção | `destinoRestante` igual a `ROTEIRO` | ✅ sem baixa de matéria-prima 🔴 |
 | E5 compra aprovada | `devolverAoEstoqueParciaisProntas` | ✅ |
-| E5 fabricado aprovado | não vira lote | 🔴 |
+| E5 fabricado aprovado | vira lote `PRODUCAO` na `develop` (LOG-53, 27/10); na `main` não | ✅ `develop` |
 | E6 retirada | decidido 14/10, sem código | 📝 🔴 |
 | Carga inicial | `POST /estoque/lotes/carga-inicial` | ✅ |
 
@@ -221,7 +221,7 @@ As duas opções do nó `E4` (compra ou produção) são alternativas para o res
 
 | Caso | Estado | Selo |
 |---|---|---|
-| C0 | `POST /compras/requisicoes` no HUB; a requisição não chega ao MES, a OC dela deve chegar pela referência (N14-20) | ✅ 🔴 MES não lê a OC |
+| C0 | `POST /compras/requisicoes` no HUB; a requisição não chega ao MES, a OC dela deve chegar pela referência (N14-20) | ✅ MES lê a OC (K4, `develop`); uso na tela 🔴 |
 | C1, C4 | Requisições e Ordens no HUB; OC até R$ 30 mil sai livre | ✅ |
 | C3 | Aprovações: Gerente de Compras aprova a OC acima de R$ 30 mil | ✅ (N14-21) |
 | C5 | Follow-up no HUB | ✅ perfil CCP 🔴 |

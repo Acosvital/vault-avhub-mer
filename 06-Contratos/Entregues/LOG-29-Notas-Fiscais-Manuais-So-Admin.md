@@ -3,12 +3,12 @@ id: LOG-29
 aliases: ["Contrato 29", "contrato 28 (nos comentários do código)", "29-Notas-Fiscais-Manuais-So-Admin"]
 tags: [contrato, contrato-logica, contrato-api, faturamento, permissoes, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/notas_fiscais/notas_fiscais.route.js:115,297,306"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/notas_fiscais/notas_fiscais.route.js:115,297,305"]
 criado_original: 2026-09-29
 ---
 
@@ -24,7 +24,7 @@ criado_original: 2026-09-29
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - ✅ A trava virou regra fixa (era `NOTAS_MANUAIS_EXIGIR_PERMISSAO`, removida pelo [[LOG-38-Regras-Sem-Chave-de-Ambiente]]): `notas_fiscais.route.js:115,297`; sem usuário responde `403 USUARIO_NAO_INFORMADO` (`:306`).
+> - ✅ A trava virou regra fixa (era `NOTAS_MANUAIS_EXIGIR_PERMISSAO`, removida pelo [[LOG-38-Regras-Sem-Chave-de-Ambiente]]): `notas_fiscais.route.js:115,297`; sem usuário responde `403 USUARIO_NAO_INFORMADO` (`:305-311`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.

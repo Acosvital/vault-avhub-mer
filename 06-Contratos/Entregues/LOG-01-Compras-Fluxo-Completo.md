@@ -3,12 +3,12 @@ id: LOG-01
 aliases: ["Contrato 01", "01-Compras-Fluxo-Completo"]
 tags: [contrato, contrato-logica, compras]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C0, C1, C4]
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:190-197", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:857"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:204-213", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:859"]
 ---
 # Contrato — Módulo de Compras: requisição → ordem de compra → sincronização com o Omie
 
@@ -17,10 +17,10 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:190-197", 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C0, C1, C4 · **Dono:** Gustavo (DBA)
 >
-> - ✅ Backend de Compras no ar: `/compras/requisicoes`, `/compras/ordens`, `/compras/compradores`, `/compras/acompanhamento` (`api-acos-vital/src/schemas/core_vendas_faturamento/index.js:190-197`).
-> - ✅ O envio da OC ao Omie é feito pela pipeline a partir de `GET /compras/ordens/fila-omie` (`ordens_compra.route.js:857`; `omie-elt-pipeline/src/jobs/envioOrdensCompra.ts`).
+> - ✅ Backend de Compras no ar: `/compras/requisicoes`, `/compras/ordens`, `/compras/compradores`, `/compras/acompanhamento` (`api-acos-vital/src/schemas/core_vendas_faturamento/index.js:204-213`).
+> - ✅ O envio da OC ao Omie é feito pela pipeline a partir de `GET /compras/ordens/fila-omie` (`ordens_compra.route.js:859`; `omie-elt-pipeline/src/jobs/envioOrdensCompra.ts`).
 > - 🟡 As seções "O que existe hoje" e o pedido original são histórico; o que sobrou foi consolidado em [[LOG-13a-Compras-Backend-Consolidado]] e [[LOG-23-Compras-Pipeline-Consolidado]].
-> - ❓ Front (HUB b55ac55): ligado ao backend em 23/09 segundo o vault v1; não conferido aqui.
+> - ✅ Front: as telas de Compras (`components/Compras/`, BFF `app/api/compras/`) existem no av-hub (conferido em 29/10/2026). ❓ O uso em produção não foi conferido.
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
@@ -28,7 +28,7 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:190-197", 
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Definiu o fluxo de Compras no av-hub: requisição, ordem de compra (OC) e envio ao Omie. OC acima de R$ 30.000,00 precisa de aprovação.
 > **Quem é afetado:** O PCP (Planejamento e Controle da Produção) gera requisições; compradores emitem OCs; aprovadores e diretoria decidem as de valor alto.
-> **Situação:** ✅ Backend no ar (entregue em 22/09/2026); o envio ao Omie sai pela pipeline. 🟡 Parte do texto é histórico. ❓ O front não foi conferido.
+> **Situação:** ✅ Backend no ar (entregue em 22/09/2026); o envio ao Omie sai pela pipeline. 🟡 Parte do texto é histórico. ✅ O front de Compras existe no av-hub. ❓ Produção não conferida.
 
 
 > **✅ Implementado — backend entregue em 22/09/2026** (`api-acos-vital` commit `ec2a42b`, PR #273).

@@ -4,7 +4,7 @@ criado: 2026-10-16
 atualizado: 2026-10-29
 status: proposta
 dono: Nathan (fluxo) · Gustavo (banco e API) · Robert (custo no MES) · Michele (decisão da comissão)
-fontes: [Registro-de-Decisoes (N16-09 a N16-11, N16-17 a N16-23, N16-34 a N16-51, N16-57, N16-71, N16-74), Proposta-Orcamento-Comissao/01-Decisoes/Respostas-da-Controladoria-2026-10-19 (fora do vault), Proposta-Orcamento-Comissao/01-Decisoes/Respostas-de-Compras-2026-10-19 (fora do vault), Estudo-Omie-API, 09-Diagramas/fontes/tela-simulador-comissao.png, av-hub comissoes/simulador/page.tsx e lib/simulador/motor.ts, 03-Sistemas/Comissao/01-Motor-Atual-Como-Calcula, 00-Fluxo-Mestre-0b, 03-Estoque-Atendimento-e-Despacho, 04-Circuito-de-Compra, Modelo-Estoque-e-Custo-do-Lote, API-008, LOG-47, 10-Anexo-Fora-do-Fluxo/Comissoes, api-pcp (estoque.prisma, compras.service.ts), 09-Diagramas/artifact-proposta-pedido.html]
+fontes: [Registro-de-Decisoes (N16-09 a N16-11, N16-17 a N16-23, N16-34 a N16-51, N16-57, N16-71, N16-74), Proposta-Orcamento-Comissao/01-Decisoes/Respostas-da-Controladoria-2026-10-19 (fora do vault), Proposta-Orcamento-Comissao/01-Decisoes/Respostas-de-Compras-2026-10-19 (fora do vault), Estudo-Omie-API, 09-Diagramas/fontes/tela-simulador-comissao.png, av-hub comissoes/simulador/page.tsx e lib/simulador/motor.ts, 03-Sistemas/Comissao/01-Motor-Atual-Como-Calcula, 00-Fluxo-Mestre-0b, 03-Estoque-Atendimento-e-Despacho, 04-Circuito-de-Compra, Modelo-Estoque-e-Custo-do-Lote, API-008, LOG-47, 10-Anexo-Fora-do-Fluxo/Comissoes, api-pcp (estoque.prisma, compras.service.ts), 09-Diagramas/artifact-proposta-pedido.html, api-pcp develop de 27/10/2026 (GET /itens/custo, custo da OC), N16-143, N16-144]
 ---
 
 # Custo real e comissão no fluxo (K1 a K6)
@@ -15,7 +15,8 @@ Tudo aqui ainda é proposta: não há API nem tela. Esta nota mostra só o fluxo
 
 > [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
 > - N16-143: a comissão nova fica em `core_comissao`, schema próprio, já modelado e testado.
-> - Proposta, pedido e custo realizado vão para `core_vendas_faturamento`. O `core_comercial` não existe (N16-116).
+> - Proposta, pedido e custo realizado vão para `core_vendas_faturamento`: a N16-116 decide que não existirá `core_comercial`. ⚠️ O código e o dump de 29/10 da `api-acos-vital` já usam `core_comercial.propostas` e `core_comercial.fn_proposta_*`; a divergência está aberta com o Nathan e o Gustavo ❓.
+> - N16-144: o imposto por item da OC vem da parte de compras do pedido (finalidade `pedidos_venda` ou `recompra`) ou é digitado (`estoque`, `uso_interno`); uma linha por pedido, sem média; frete rateado pelo valor; a fórmula do custo com imposto segue o motor do comissionamento. O contrato só será escrito quando o desenvolvimento começar.
 > - A pendência de devolução parcial já está no banco.
 
 ## Como funciona, passo a passo
@@ -107,13 +108,13 @@ Regra (N16-09, N16-40): o custo real de um item do pedido é a **soma das linhas
 | `C4` | O valor da OC, por item, vinculado ao pedido de venda (`ordens_compra_itens_vinculos`); inclui a **OC de mão de obra** (categoria "Despesas com Industrialização", ou "Serviços Tomados" com o Nº do Pedido do Fornecedor apontando um PV) | `OC` | 🔴 linha por evento; vínculo ✅ ([[LOG-14b-Compras-Vinculo-Pedido-Venda]]) |
 | `C7` | Compras usa o valor correto; a proposta **não muda**; se for maior que o da proposta, o vendedor aprova ou reprova (`C8`) | `OC` | 📝 N16-08, N16-17, N16-60 |
 | NF de entrada | No recebimento, o valor da NF substitui o da OC. **O CCP vincula a NF de entrada à OC**, na tela de Follow-up, e o item do pedido vem do vínculo da OC (a ligação automática do Omie não existe na prática; N16-57, N16-86), inclusive com várias NFs por OC e KG contra PC. A NF traz **imposto real** e a **data real de recebimento** | `NF_ENTRADA` | 🔴 recurso novo na pipeline ([[Estudo-Omie-API]]) |
-| `R4` | O lote nasce com custo, **obrigatório**: valor total e valor por item; no fim, o valor unitário | `OC` (ou `CARGA_INICIAL`, `MANUAL`) | 🔴 hoje o lote do Recebimento nasce sem custo (`compras.service.ts:545`); custo obrigatório N16-09. ❓ o dado de estoque hoje não é confiável (aviso de Compras) |
-| `E3` | Item atendido pelo Estoque usa o **custo real do lote** (o da OC que o originou) | lote | 🔴 `GET /itens/custo` ainda não existe (BL-004) |
-| `E5` | O fabricado aprovado vira lote; o custo do lote fabricado é **só a matéria-prima** | `PRODUCAO` 🟡 | 🔴 ([[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]]) |
-| `F1` | A matéria-prima enviada à produção para o item fabricado (J2, J3) | lote da matéria-prima | 🔴 BL-010 |
+| `R4` | O lote nasce com custo, **obrigatório**: valor total e valor por item; no fim, o valor unitário | `OC` (ou `CARGA_INICIAL`, `MANUAL`) | ✅ o lote do Recebimento nasce com o custo da OC na `develop` do MES (19/10, `97b9adc`); 🔴 custo obrigatório (N16-09, BL-066). ❓ o dado de estoque hoje não é confiável (aviso de Compras) |
+| `E3` | Item atendido pelo Estoque usa o **custo real do lote** (o da OC que o originou) | lote | ✅ `GET /itens/custo` existe na `develop` do MES (27/10, `6c11147`); 🔴 teste junto com o job do hub e merge do MES para a `main` (BL-035) |
+| `E5` | O fabricado aprovado vira lote; o custo do lote fabricado é **só a matéria-prima** | `PRODUCAO` | ✅ o lote `PRODUCAO` existe na `develop` (27/10); 🔴 o custo do fabricado (BL-067) ([[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]]) |
+| `F1` | A matéria-prima enviada à produção para o item fabricado (J2, J3) | lote da matéria-prima | 🟡 a `develop` baixa a matéria-prima no "Atender pelo estoque" (19/10); a baixa na retirada (N16-140) e o custo da matéria-prima no fabricado são 🔴 (BL-010) |
 | `O1` | Fecha a comissão sobre a NF | NF | ✅ lado Omie; `K3` 🔴 |
 
-Hoje o código tem a base: `lote_custo` (`api-pcp/prisma/models/estoque.prisma:394-423`, opcional), `OrigemCusto` `CARGA_INICIAL`, `OC`, `MANUAL` (`:378-382`), a tabela `itens_pedido_custo` no hub com o job que lê `GET /itens/custo` do MES (`itens_pedido_custo.job.js:78`) ([[API-008-Custo-do-Lote-no-MES]], [[LOG-47-Custo-Real-por-Item-no-Hub]]). O que as decisões acrescentam: custo **obrigatório**, linhas **por evento**, a **NF de entrada como verdade** do valor, e a soma por item do pedido.
+Hoje o código tem a base: `lote_custo` (`api-pcp/prisma/models/estoque.prisma`, opcional hoje), `OrigemCusto` `CARGA_INICIAL`, `OC`, `MANUAL` (as três já gravadas na `develop` do MES), `GET /itens/custo` publicado pelo MES na `develop` (27/10) e a tabela `itens_pedido_custo` no hub com o job que o lê (`itens_pedido_custo.job.js:78`) ([[API-008-Custo-do-Lote-no-MES]], [[LOG-47-Custo-Real-por-Item-no-Hub]]). O que as decisões acrescentam: custo **obrigatório**, linhas **por evento**, a **NF de entrada como verdade** do valor, e a soma por item do pedido.
 
 #### Sobras de chapa ❓
 
@@ -163,7 +164,7 @@ Um item de 50 unidades pode ter 50 OCs diferentes: cada uma com a sua condição
 | **Custo real** | **Um conjunto por evento**: fornecedor, condição de pagamento, IPI, ICMS, ST, DIFAL, frete, origem do fornecedor (por exemplo, optante pelo Simples) | a OC (`C4`, `C7`) ou a **NF de entrada** (imposto real), o lote (`R4`, `E3`) ou a matéria-prima (`F1`) |
 
 - O **custo líquido de cada evento** é calculado com as condições do próprio evento, pela **mesma fórmula do motor** (compra, IPI e crédito de ICMS em `lib/simulador/motor.ts:277-283`; frete e custo líquido em `:307-312`, ver [[01-Motor-Atual-Como-Calcula]]). Depois **soma**: o custo líquido do item é a soma dos eventos e o unitário médio é o total dividido pela quantidade coberta. O custo do pedido é a soma dos itens. **O encargo da condição de pagamento NÃO entra no custo**: entra no **preço sugerido**, como no motor atual (N16-22).
-- **Imposto da compra.** O vendedor registra os impostos na proposta; ao chegar a requisição, o sistema os **puxa para a OC**, Compras os confere e edita **no hub**, e o que edita **volta ao Omie pela mesma sincronização da OC** (N16-38, N16-53). O hub **não** guarda hoje IPI, ICMS, ST nem DIFAL por item; **o Omie guarda** ICMS, ST, IPI, PIS e COFINS por item do pedido de compra, **em valor e sem DIFAL**, e a **NF de entrada** traz base, alíquota e valor ([[Estudo-Omie-API]]). **O Nathan traz esses dados do Omie para o hub.** O **DIFAL da compra** fica fora do custo líquido (provisório, Compras valida).
+- **Imposto da compra.** O vendedor registra os impostos na proposta; ao chegar a requisição, o sistema os **puxa para a OC**, Compras os confere e edita **no hub**, e o que edita **volta ao Omie pela mesma sincronização da OC** (N16-38, N16-53). O hub **não** guarda hoje IPI, ICMS, ST nem DIFAL por item; **o Omie guarda** ICMS, ST, IPI, PIS e COFINS por item do pedido de compra, **em valor e sem DIFAL**, e a **NF de entrada** traz base, alíquota e valor ([[Estudo-Omie-API]]). **O Nathan traz esses dados do Omie para o hub.** O **DIFAL da compra** fica fora do custo líquido (provisório, Compras valida). Conferido em 29/10/2026 no dump: `ordens_compra_itens` ainda não tem coluna de imposto. Pela N16-144 (29/10), o imposto da linha da OC vem da **parte de compras do pedido** (o que o vendedor preencheu, N16-38 e N16-106) quando a OC é de pedido ou de recompra; nas OCs de estoque ou uso interno o Comprador digita; a edição na OC não volta ao pedido.
 - Até os campos existirem, o evento calcula **sem imposto** (como o Ciclo 1) e a linha mostra "sem imposto" 🟡; a Controladoria vê que o custo está sem o imposto real. O impacto no cronograma está na proposta de cronograma (`Proposta-Orcamento-Comissao/07-Cronograma/Proposta-de-Cronograma.md`, fora do vault, a validar).
 - No exemplo do Nathan (item A), cada requisição vira uma OC com o seu fornecedor, a sua condição e o seu imposto. O custo líquido de A é a soma das três, cada uma com as suas condições. Impostos e encargos de cada uma são "a definir": **não há valor inventado aqui** 🟡.
 
@@ -210,7 +211,7 @@ No fluxo novo (N16-51, OQ-28 em parte): o **percentual de Compras** deixa de ser
 | Item do menu na imagem | O que é hoje | Alinhamento 🟡 |
 |---|---|---|
 | Comissões › Simulador, Análise de Simuladores, Minhas Comissões, Visão Geral, Parâmetros, Bloqueio de Comissões | Módulo atual (`app/(protected)/comissoes/*`), **não muda** (N16-11) | O módulo novo fica em Operações |
-| Operações › "Custo real por item" | `app/(protected)/custo-itens/page.tsx` (`CustoItens`): custo real por pedido, KPIs, lotes e simulador de margem **sem imposto**, sobre dados de teste (BL-023, `544ee0b`; [[LOG-47-Custo-Real-por-Item-no-Hub]]) | Pode ser a entrada do drill-down por evento da Controladoria; precisa ligar ao custo por evento e ao imposto |
+| Operações › "Custo real por item" | `app/(protected)/orcamento/custo-itens/page.tsx` (`CustoItens`; a rota antiga `custo-itens` foi para o menu Orçamento em 27/10): custo real por pedido, KPIs, lotes e simulador de margem **sem imposto**, sobre dados de teste (BL-023, `544ee0b`; [[LOG-47-Custo-Real-por-Item-no-Hub]]) | Pode ser a entrada do drill-down por evento da Controladoria; precisa ligar ao custo por evento e ao imposto |
 | Dashboards › "Matriz de preços" | O BFF cita o slug `matriz-precos`; a tela ainda não existe | É a matriz de preços do Orçamento ([[12-Orcamento-Base-de-Preco]]) |
 
 Os contratos com o detalhe das telas e das regras foram removidos em 29/10/2026; o Robert cria os novos.
@@ -269,13 +270,13 @@ A decisão tem seis ações (`aprovar`, `desaprovar`, `bloquear`, `desbloquear`,
 | Motor atual (menor entre o percentual do vendedor e o de compras, regras fixas, bloqueios, blacklists) | existe em `core_comissionamento`, só leitura aqui ([[Comissoes]]) | ✅ |
 | Módulo novo em `core_comissao`, em Operações | rascunhado e **testado num Postgres 18 em 19/10**; sem API nem tela | 🔴 Gustavo (banco), Nathan (telas) |
 | Comissão estimada na proposta (`K1`) | não existe; o simulador do Hub só pré-preenche o lado da compra | 🔴 |
-| Custo real por evento, com a NF de entrada como verdade (`K2`) | não existe | 🔴 Pablo, Gustavo, Robert |
+| Custo real por evento, com a NF de entrada como verdade (`K2`) | não existe | 🔴 Robert, Gustavo |
 | Recurso novo da pipeline: recebimento de NF-e (imposto real, data de recebimento) | não existe | 🔴 Nathan ([[Estudo-Omie-API]]) |
-| Custo obrigatório em todo lote e `GET /itens/custo` | não existe | 🔴 Robert (OQ-07) |
+| Custo obrigatório em todo lote e `GET /itens/custo` | `GET /itens/custo` e o custo da OC no lote existem na `develop` do MES (27/10 e 19/10); o custo obrigatório (BL-066) não | ✅ rota; 🔴 obrigatório, Robert (OQ-07) |
 | Tela da Controladoria igual à do Simulador, com custo real, e visão geral (`K4`, N16-19) | não existe; o Simulador atual é a referência | 🔴 Nathan |
 | Aprovação do vendedor na compra acima do valor, lista de Compras e cancelamento | não existe; o modelo atual **ainda não conhece** | 🔴 |
 | Abatimento por devolução, pendência de devolução parcial e apuração do vendedor | o abatimento está no modelo; a pendência de devolução parcial e a apuração (OQ-42) **não** | 🔴 |
-| Tela da proposta no formato do Simulador | não existe; o Simulador atual calcula no navegador | 🔴 Nathan (tela), Pablo (proposta) |
+| Tela da proposta no formato do Simulador | não existe; o Simulador atual calcula no navegador | 🔴 Robert (tela de proposta), Nathan (`K1`) |
 
 ### Diagrama do subfluxo
 

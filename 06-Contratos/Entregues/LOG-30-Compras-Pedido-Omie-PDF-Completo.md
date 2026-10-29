@@ -3,7 +3,7 @@ id: LOG-30
 aliases: ["Contrato 30 (PDF; não confundir com o \"Contrato 30\" do código, que é o LOG-45)", "30-Compras-Pedido-Omie-PDF-Completo"]
 tags: [contrato, contrato-logica, contrato-api, contrato-pipeline, compras]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [pipeline-omie, hub-api]
 dono: "Gustavo (DBA)"
@@ -19,13 +19,14 @@ criado_original: 2026-09-30
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Completou o detalhe do pedido de compra do Omie com o que faltava no PDF enviado ao fornecedor: endereço, e-mail, telefone, inscrição estadual (IE) e código do produto por item.
 > **Quem é afetado:** Compradores que geram o PDF do pedido. Backend e pipeline entregam os dados.
-> **Situação:** ✅ API entregue em 01/10; a pipeline passou a gravar a IE e os dados fiscais dos parceiros. Em aberto no contrato: IPI e ICMS ST, e o PDF do av-hub exibir os campos novos.
+> **Situação:** ✅ API entregue em 01/10; a pipeline passou a gravar a IE e os dados fiscais dos parceiros. IPI e ICMS ST ficaram de fora por decisão de 07/10. Em aberto: o PDF do av-hub (`lib/compras/PedidoOmiePdf.tsx`) ainda não mostra endereço, IE, e-mail, telefone nem código do produto (conferido em 29/10/2026).
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
 >
 > - ✅ O detalhe do pedido de compra do Omie devolve fornecedor e código do produto (commit `119634a`, vault v1) e a pipeline grava os campos novos (`omie-elt-pipeline/src/omie/resources/pedidosCompras.ts`).
-> - 🟡 Número ambíguo: nos comentários do código "Contrato 30" é o [[LOG-45-Pedido-de-Venda-Manual]].
+> - 🔴 O `PedidoOmiePdf.tsx` do av-hub ainda não exibe os campos novos: o próprio arquivo diz que o espelho não traz endereço, IE, e-mail, telefone nem código do produto (conferido em 29/10/2026). IPI e ICMS ST não entram no PDF (decisão de 07/10).
+> - ✅ Numeração: o código passou a citar "Contrato 45" no pedido manual ([[LOG-45-Pedido-de-Venda-Manual]]) em 29/10/2026; o "Contrato 30" do código é só este contrato (`pedidos_compras.route.js`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.

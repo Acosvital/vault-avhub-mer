@@ -3,7 +3,7 @@ id: LOG-52
 aliases: ["Contrato 52", "52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub"]
 tags: [contrato, contrato-logica, contrato-api, contrato-sql, comercial, suprimentos, api-acos-vital, api-comercial, migracao]
 criado: 2026-10-15
-atualizado: 2026-10-28
+atualizado: 2026-10-29
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Robert (o Pablo acompanha)"
@@ -19,10 +19,15 @@ criado_original: 2026-10-15
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Define como levar o módulo Comercial & Suprimentos (a `api-comercial`, API de teste do Pablo) para a API do Hub, com um só banco e uma só permissão, sem recriar o que o Hub já tem.
 > **Quem é afetado:** Pablo mantém as telas, que passam a chamar a API do Hub. Robert conduz o módulo e Gustavo cuida do banco e da API.
-> **Situação:** Parcial. A fase 1 do banco foi aplicada em produção em 20/10, segundo o Gustavo. Rotas e corte do HUB seguem abertos, com o Robert começando pela proposta. O ciclo da proposta mudou e virá em contratos que ele vai criar.
+> **Situação:** Parcial. A fase 1 do banco foi aplicada em produção em 20/10, segundo o Gustavo. As primeiras rotas já estão na `develop` da `api-acos-vital` (cadastros, clientes, parceiros e propostas, 28 e 29/10, a pedido do Robert); o corte do HUB segue aberto. O ciclo da proposta mudou, e o contrato dessa parte só será escrito quando o desenvolvimento dela começar (N16-144).
 
-> [!info] Situação em 28/10/2026
+> [!info] Situação em 29/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Robert (módulo, N16-117; o Pablo acompanha) · **Banco e API:** Gustavo (DBA), dono da `api-acos-vital`
+>
+> - ✅ **Conferido em 29/10/2026 na `develop` da `api-acos-vital`:** existe `src/schemas/core_comercial/` montado em `/comercial` (`index.js`), com `GET /me`, `/empresas_emissoras`, `/responsaveis` e `/parametros_custo` (`cadastros.route.js`), `POST /clientes` (`clientes.route.js`, 28/10), `GET /parceiros` (`parceiros.route.js`, 29/10) e as propostas: criar, listar, `resumo`, ler, `eventos`, revisar (`PUT` com `If-Match`), `aprovar`, `cancelar`, `copiar` e `transformar` em pedido do Hub (`propostas.route.js`, commits `260e835`, `cc30c85`, `f2fa237`). Todas exigem o token do usuário (LOG-51). `/suprimentos` está montado, mas ainda sem rota.
+> - 🔴 **Atenção:** o código ainda usa o schema `core_comercial` e o prefixo `/comercial/`, que a N16-116 manda sair (tabelas em `core_vendas_faturamento`). O bloco A0 da migração (mover as tabelas) não foi conferido.
+>
+> **Registro de 28/10/2026, mantido:** `parcial` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Robert (módulo, N16-117; o Pablo acompanha) · **Banco e API:** Gustavo (DBA), dono da `api-acos-vital`
 >
 > - 📝 **28/10/2026, N16-117 a N16-119:** o **Robert** conduz o módulo na `api-acos-vital` e começa pela **proposta** (N16-118); o Pablo acompanha. A `api-comercial` **não é removida do repositório**: volta ao av-hub como legado só para leitura (com `LEIA-ME-LEGADO.md`, fora da CI, do lint e do `tsc`); a remoção de **produção** segue valendo (corrige a N16-111). As telas do Pablo **ficam** e o BFF passa a chamar a `api-acos-vital` (N16-119). Onde esta nota diz "Pablo" como quem faz, leia Robert.
 > - 📝 **28/10/2026, N16-116:** não existirá `core_comercial`. O que migra entra em `core_vendas_faturamento`; o prefixo `/comercial/` das rotas sai. As seções 3 a 9 que falam em "criar em `core_comercial`" valem com esse schema.
@@ -36,7 +41,7 @@ criado_original: 2026-10-15
 >
 > - 📝 **O que não migra (Nathan, 27/10/2026, N16-109):** o módulo do Pablo é só ambiente de teste e **não tem dado**, então a migração é escolher o que entra na `api-acos-vital`. **Não portar:** a sincronização própria do Omie e suas tabelas de cópia (`ordens_compra`, `itens_ordem_compra`, `produtos_contas_omie`, `fornecedores_contas_omie`, `omie_registros_brutos`, `sincronizacoes_omie`, `travas_tarefa`), o Histórico de compras, a planilha do pedido a digitar no Omie, a migração do ERP antigo, o fechamento parcial, a autenticação e os perfis próprios. **Reaproveitar** o motor na API (uma fonte), as ofertas, fornecedores, parâmetros e o pedido de custo. Lista completa, com tamanhos e motivos, em §5. Isso **confirma e amplia** o corte que a seção 3.4 desta nota já fazia para a sincronização de pedidos de compra ("Some. A pipeline é a fonte"): agora vale também para o Histórico de compras que a lia, para a planilha do pedido e para a migração do ERP antigo.
 >
-> - 🟡 **Desenho aprovado em 26/10/2026 muda o ciclo da proposta** (N16-02, N16-03, N16-84, N16-106): sem fechamento parcial, cancelada no lugar de perdida, sem reabrir, pedido criado pelo Hub e pedido do Omie no mesmo fluxo. A migração e as rotas dessa parte virão em contratos que o Robert vai criar; o domínio de preço, margem e custo continua portado como está. Combinar antes da fase 3 (PS-035).
+> - 🟡 **Desenho aprovado em 26/10/2026 muda o ciclo da proposta** (N16-02, N16-03, N16-84, N16-106): sem fechamento parcial, cancelada no lugar de perdida, sem reabrir, pedido criado pelo Hub e pedido do Omie no mesmo fluxo. O contrato dessa parte só será escrito quando o desenvolvimento dela começar (N16-144); o domínio de preço, margem e custo continua portado como está. Combinar antes da fase 3 (PS-035).
 >
 > **Não confundir** com [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]]: aquele corrige a API que já existe; este traz o módulo novo para dentro dela. O módulo **tem de entrar já seguindo o LOG-51**, para não herdar o problema.
 

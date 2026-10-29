@@ -3,7 +3,7 @@ id: LOG-12
 aliases: ["12-Compras-Projetos-Omie", "Contrato 21 (numeração antiga)"]
 tags: [contrato, contrato-logica, compras, projetos]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-api, pipeline-omie]
 dono: "Gustavo (DBA)"
@@ -18,7 +18,7 @@ fontes: ["api-acos-vital/src/schemas/core/tables/projetos/projetos.route.js:9", 
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Fez o campo Projeto da Ordem de Compra (OC) deixar de ser texto livre e virar uma lista com os projetos do Omie da unidade. Antes, o comprador teria de saber o código.
 > **Quem é afetado:** Compradores escolhem o projeto numa lista. O DBA e a pipeline (que copia dados do Omie) guardam e sincronizam os projetos.
-> **Situação:** ✅ Entregue no código: `GET /projetos` e `GET /projetos/:id`, e a pipeline sincroniza os projetos. ❓ O front só foi conferido pelo vault anterior.
+> **Situação:** ✅ Entregue no código: `GET /projetos` e `GET /projetos/:id`, e a pipeline sincroniza os projetos. ✅ O BFF `app/api/compras/projetos/route.ts` existe no av-hub (conferido em 29/10/2026); ❓ uso em produção não conferido.
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)

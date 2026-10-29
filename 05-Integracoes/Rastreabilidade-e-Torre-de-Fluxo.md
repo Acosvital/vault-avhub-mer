@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Nathan
-fontes: [LOG-46, v1 Rastreabilidade-e-SLA-de-Eventos, v1 Campos-e-API-para-Rastreabilidade, api-acos-vital f322dcd (77223e9, 7c3f57a), api-pcp 579a625, HUB b55ac55, Dump Avhub de 14/10, Registro-de-Decisoes #35 #89 #92]
+fontes: [LOG-46, v1 Rastreabilidade-e-SLA-de-Eventos, v1 Campos-e-API-para-Rastreabilidade, api-acos-vital f322dcd (77223e9, 7c3f57a), conferência de 29/10 em api-acos-vital develop 0384e89, api-pcp develop befd973 e av-hub develop 758d5f0 (3cd55de), api-pcp 579a625, HUB b55ac55, Dump Avhub de 14/10, Registro-de-Decisoes #35 #89 #92]
 ---
 
 # Rastreabilidade e Torre de Fluxo
@@ -33,7 +33,7 @@ fontes: [LOG-46, v1 Rastreabilidade-e-SLA-de-Eventos, v1 Campos-e-API-para-Rastr
 - ✅ Banco, job e rotas do av-hub.
 - 🔴 Módulo `fluxo` e eventos nas transições do MES (Robert, BL-003).
 - 🔴 Perfis de acesso às telas (BL-021) e eventos do lado do av-hub (BL-029).
-- 🔴 Telas T.3, T.4, T.5, T.5b no HUB (Nathan, BL-022).
+- ✅ Telas T.3, T.4, T.5, T.5b e o BFF `/api/fluxo/*` no HUB, sobre dados de teste (fixtures); o Nathan as considerou ok em 29/10 (BL-022). Falta trocar os dados de teste pelos reais quando o MES publicar o feed.
 
 **Regra de ouro:** API e banco antes das telas. Ordem de subida: o Robert publica o feed, o Gustavo liga perfis e job, o Nathan troca os dados de teste pelos reais.
 
@@ -82,22 +82,22 @@ Um **log de eventos imutável** (append-only, sem `UPDATE` nem `DELETE`) por sis
 
 Ações que exigem `autorizado_por` (provisório, R-13): compra acima do limite, reprovação com destino do lote, ajuste de saldo, cancelamento, reabertura.
 
-Idempotência: o hub só aplica o evento se for mais novo que o último aplicado ao item (compara `seq`); a janela de 200 `seq` relidos cobre confirmação fora de ordem entre transações ✅ (`item_estado_projetado.job.js:44-49`).
+Idempotência: o hub só aplica o evento se for mais novo que o último aplicado ao item (compara `seq`); a janela de 200 `seq` relidos cobre confirmação fora de ordem entre transações ✅ (`item_estado_projetado.job.js`).
 
-### Estado de cada peça (14/10)
+### Estado de cada peça (conferido em 29/10/2026)
 
 | Peça | Dono | Estado | Selo |
 |---|---|---|---|
 | `HistoricoItemParcial` (trilha do `ItemParcial`) | Robert | existe no MES, `idUsuario` pode ser nulo | ✅ |
-| Módulo `fluxo` do `api-pcp`: `fluxo.evento`, `/fluxo/eventos`, trilha, tempo, SLA | Robert | **não existe**: nenhuma pasta `fluxo` em `api-pcp/src` e nenhuma ocorrência de `fluxo/eventos` | 🔴 BL-003 |
+| Módulo `fluxo` do `api-pcp`: `fluxo.evento`, `/fluxo/eventos`, trilha, tempo, SLA | Robert | **não existe**: nenhuma pasta `fluxo` em `api-pcp/src` e nenhuma ocorrência de `fluxo/eventos` (conferido na `develop` em 29/10) | 🔴 BL-003 |
 | Instrumentação dos eventos nas transições (ItemParcial, Recebimento, Qualidade, Estoque, Compras·CCP) | Robert | não existe | 🔴 BL-003 |
 | Regra de autorização e SLA por etapa no MES | Robert | não existe | 🔴 BL-003 |
 | `core_fluxo.item_estado_projetado`, `evento`, `feed_cursor`, `vw_item_estado_atual`, `fn_feed_aplicar`, `fn_torre_*` | Gustavo | entregues (77223e9, 7c3f57a, migration 046b); a Torre está vazia: o MES responde 404 ❓ conferido na `api-test` em 13/10 | ✅ |
-| Job de projeção `item_estado_projetado.job.js`, iniciado em `app.js:208` | Gustavo | roda a cada 90 s; 404 do MES avisa e repete a cada 10 min; trava `pg_try_advisory_xact_lock` por fonte | ✅ |
-| Rotas do hub: `GET /fluxo/torre` (`item_estado_projetado.route.js:185`), `/fluxo/sla-etapas` (`:262`), `/fluxo/itens/:id/tempo` (`:281`), `/fluxo/itens/:id` (`:302`) | Gustavo | no ar; MES fora do ar devolve 200 com `mes_indisponivel: true` | ✅ |
+| Job de projeção `item_estado_projetado.job.js`, iniciado em `app.js` (`iniciarJobFluxoTorre`) | Gustavo | roda a cada 90 s; 404 do MES avisa e repete a cada 10 min; trava `pg_try_advisory_xact_lock` por fonte | ✅ |
+| Rotas do hub: `GET /fluxo/torre`, `/fluxo/sla-etapas`, `/fluxo/itens/:id/tempo`, `/fluxo/itens/:id` (`item_estado_projetado.route.js`) | Gustavo | no ar; MES fora do ar devolve 200 com `mes_indisponivel: true` | ✅ |
 | Perfis com `torre-fluxo` e `torre-fluxo-trilha` | Gustavo e Nathan | só o perfil de testes do time de TI recebeu (046b); sem perfil de negócio, ninguém abre a Torre com login | 🔴 BL-021 |
 | Eventos do **lado do hub** (liberação, aprovação, fechamento de compra) em `core_fluxo.evento` | Gustavo | nada instrumenta; a Torre começaria no PCP | 🔴 BL-029 |
-| BFF `/api/fluxo/*` e as telas T.3, T.4, T.5, T.5b no HUB | Nathan | **não existem**: nenhuma ocorrência de `fluxo/torre` ou `torre-fluxo` em `app`, `lib`, `components`, `services` do HUB b55ac55 | 🔴 BL-022 |
+| BFF `/api/fluxo/*` e as telas T.3, T.4, T.5, T.5b no HUB | Nathan | **existem** sobre fixtures: `app/(protected)/torre-fluxo` (mapa, item, tempo, ranking), `app/api/fluxo/{torre,sla-etapas,itens}`, `lib/fluxo/fixtures.ts` e `lib/domain/fluxo-torre.ts` (`3cd55de`, 15/10); dados de teste nunca em produção | ✅ BL-022 (ok pelo Nathan em 29/10) |
 | `GET /itens/status` (005) e cartão "Etapa dos itens" | Robert, Gustavo, Nathan | no ar; HUB `components/Pedidos/EtapaDosItens.tsx`, `PedidoDetalhe.tsx` | ✅ |
 
 ### Telas (numeração reconciliada)
@@ -114,7 +114,7 @@ Estados comuns das telas: carregando (esqueleto), vazio ("Nenhum item acompanhad
 
 ### Como o front avança sem esperar o MES
 
-Tipos em `lib/domain/fluxo-torre.ts` (modelo `lib/domain/etapas-item.ts`), interface `FonteTorre { listar(filtros); item(id) }`, fixtures com os casos de borda, fonte HTTP começando em `disponivel: false`, BFF com `requirePermission`, `headersDaApi()` (Bearer) e filtros em lista fechada (`HUB lib/api/escopoUnidade.ts:45`). A fonte é escolhida por constante no código, nunca por variável de ambiente. Plano completo na seção 8 do [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas]].
+Tipos em `lib/domain/fluxo-torre.ts` (modelo `lib/domain/etapas-item.ts`), interface `FonteTorre { listar(filtros); item(id) }`, fixtures com os casos de borda, fonte HTTP começando em `disponivel: false`, BFF com `requirePermission`, `headersDaApi()` (Bearer) e filtros em lista fechada (`HUB lib/api/escopoUnidade.ts`). A fonte é escolhida por constante no código, nunca por variável de ambiente. Plano completo na seção 8 do [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas]].
 
 ### Ordem de subida
 

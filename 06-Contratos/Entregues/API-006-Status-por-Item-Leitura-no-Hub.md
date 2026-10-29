@@ -3,12 +3,12 @@ id: API-006
 aliases: ["Contrato 006", "006-Status-por-Item-Leitura-no-Hub"]
 tags: [contrato, contrato-api, mes, integracao-av-hub-mes, rastreabilidade, portal-vendedor]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-api, hub-front, mes-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [F1, X1, Q7]
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_status/itens_pedido_status.job.js:217", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_status/itens_pedido_status.route.js:54", "api-acos-vital/src/schemas/core_vendas_faturamento/index.js:183", "Dump Avhub (Esqueleto).sql (tabela itens_pedido_status)"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_status/itens_pedido_status.job.js:217", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/itens_pedido_status/itens_pedido_status.route.js:55", "api-acos-vital/src/schemas/core_vendas_faturamento/index.js:197", "Dump Avhub (Esqueleto).sql (tabela itens_pedido_status)"]
 criado_original: 2026-10-08
 ---
 
@@ -19,9 +19,9 @@ criado_original: 2026-10-08
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** F1, X1, Q7 · **Dono:** Gustavo (DBA)
 >
-> - ✅ Job de 90 s no processo da API (`itens_pedido_status.job.js:217`, iniciado em `app.js:207`) e rota `GET /itens_pedido_status` (`itens_pedido_status.route.js:54`, montada em `index.js:183`). A tabela `core_vendas_faturamento.itens_pedido_status` existe no dump de 14/10.
+> - ✅ Job de 90 s no processo da API (`itens_pedido_status.job.js:217`, iniciado em `app.js:261`) e rota `GET /itens_pedido_status` (`itens_pedido_status.route.js:55`, montada em `index.js:197`). A tabela `core_vendas_faturamento.itens_pedido_status` existe no dump de 14/10.
 > - ✅ O texto é a especificação de 08/10; o que dizia "não existe" já foi implementado (`dee35b0`). Contrato SQL irmão: [[SQL-010-Itens-Pedido-Status]].
-> - ❓ Front: o cartão "Etapa dos itens" no HUB (PR av-hub#172, `4869810`) é citado pelo vault v1 e pelo [[00-Fluxo-Mestre-0b]]; não conferido aqui (HUB fora da pasta de repos).
+> - ✅ Front (conferido em 29/10/2026): o cartão "Etapa dos itens" existe em `av-hub/components/Pedidos/EtapaDosItens.tsx`, usado no `PedidoDetalhe.tsx`, e o BFF `app/api/pedidos-venda/[fonte]/[codigoEmpresa]/[pedidoVenda]/etapas/route.ts` lê `GET /itens_pedido_status`. O PR #172 vem do vault v1 (🟡 não reconferido). Ver também [[00-Fluxo-Mestre-0b]].
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
@@ -29,7 +29,7 @@ criado_original: 2026-10-08
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Definiu o lado do av-hub: um job que lê o status dos itens no MES a cada 90 segundos e uma rota para a tela do pedido mostrar a etapa de cada item.
 > **Quem é afetado:** Vendedores e PCP (Planejamento e Controle da Produção), que veem a etapa dos itens; o Gustavo (DBA) entregou job e rota.
-> **Situação:** ✅ Job, rota e tabela no código e no dump de 14/10. ❓ O cartão "Etapa dos itens" no front não foi conferido; produção também não.
+> **Situação:** ✅ Job, rota e tabela no código e no dump de 14/10. ✅ O cartão "Etapa dos itens" existe no front (conferido em 29/10/2026). ❓ Produção não conferida.
 
 
 > **(atualizado em 09/10/2026)** Este texto é a **especificação de 08/10** que o DBA recebeu; o que ela descrevia como "não existe" **já foi implementado** (`dee35b0`, 08/10, `api-acos-vital`; `fe55923` para a rota da referência da OC). A seção **Implementação conferida no código (09/10/2026)**, ao final, descreve o que o código faz hoje, com arquivo e linha. Produção não verificada.
@@ -131,7 +131,7 @@ MES  GET /itens/status  <──(job, a cada ~90 s)──  api-acos-vital  ──
 
 ### `GET /itens_pedido_status?codigo_empresa=&pedido_venda=&historico=`
 
-Montada em `/itens_pedido_status` (`core_vendas_faturamento/index.js`, no commit `dee35b0`). Handler: `itens_pedido_status.route.js:54-104`.
+Montada em `/itens_pedido_status` (`core_vendas_faturamento/index.js`, no commit `dee35b0`). Handler: `itens_pedido_status.route.js:55` em diante (as linhas internas abaixo são do commit `dee35b0` e andaram).
 
 | Parâmetro | Obrigatório | Validação (linha) | Erro |
 |---|---|---|---|
@@ -220,7 +220,7 @@ Sem `historico`, a resposta traz só a primeira linha e sem os campos `atual` e 
 
 ## 3. O job de leitura
 
-Arquivo: `itens_pedido_status.job.js`. Roda **no mesmo processo da API** (decisão do Gustavo, 08/10/2026, `job.js:8`), iniciado em `app.js` depois do `listen` (`iniciarJobStatusItensMes()`, `app.js:203`).
+Arquivo: `itens_pedido_status.job.js`. Roda **no mesmo processo da API** (decisão do Gustavo, 08/10/2026, `job.js:8`), iniciado em `app.js` depois do `listen` (`iniciarJobStatusItensMes()`, `app.js:261`).
 
 | Item | Valor (linha) |
 |---|---|

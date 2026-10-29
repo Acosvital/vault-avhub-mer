@@ -3,12 +3,12 @@ id: LOG-15
 aliases: ["15-Compras-Historico-Unificado", "Contrato 25 (numeração antiga)"]
 tags: [contrato, contrato-logica, compras, historico]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4]
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:62-66", "api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_ordens_compra_historico"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra/ordens_compra.route.js:62-74", "api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_ordens_compra_historico"]
 ---
 # Contrato — Compras: histórico único (OC do av-hub + pedido de compra antigo do Omie)
 
@@ -22,7 +22,7 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compr
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
 >
-> - ✅ `vw_ordens_compra_historico` existe e `GET /compras/ordens?origem=av-hub|omie|todas` está no ar (`ordens_compra.route.js:62-66`); a chave `COMPRAS_HISTORICO_UNIFICADO` saiu (regra fixa, [[LOG-38-Regras-Sem-Chave-de-Ambiente]]).
+> - ✅ `vw_ordens_compra_historico` existe e `GET /compras/ordens?origem=av-hub|omie|todas` está no ar (`ordens_compra.route.js:62-74`); a chave `COMPRAS_HISTORICO_UNIFICADO` saiu (regra fixa, [[LOG-38-Regras-Sem-Chave-de-Ambiente]]).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.

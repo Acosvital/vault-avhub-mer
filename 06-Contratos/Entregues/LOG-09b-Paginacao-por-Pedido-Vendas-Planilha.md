@@ -3,12 +3,12 @@ id: LOG-09b
 aliases: ["Contrato 09 (paginação)", "09-Paginacao-por-Pedido-Vendas-Planilha"]
 tags: [contrato, contrato-api, vendas, paginacao, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_vendas_planilha/vw_vendas_planilha.route.js:71,323"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_vendas_planilha/vw_vendas_planilha.route.js:72,327"]
 ---
 # Contrato — paginar /vendas_planilha por pedido, não por linha crua
 
@@ -17,7 +17,7 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_vendas_pla
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - ✅ `?agrupar_por=pedido_venda` (Opção B) devolve 1 registro por pedido com `parciais[]` (`vw_vendas_planilha.route.js:71,323`).
+> - ✅ `?agrupar_por=pedido_venda` (Opção B) devolve 1 registro por pedido com `parciais[]` (`vw_vendas_planilha.route.js:72,327`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.

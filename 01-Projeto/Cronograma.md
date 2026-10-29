@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Nathan
-fontes: [v1 07-Cronograma/Cronograma-2-Meses seções 1, 3.2, 3.3, 3.4, 6, 9, v1 Registro-de-Decisoes #27 #33b #34 #36 #75 #77 #96, código de 14/10 (api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, HUB b55ac55), proposta de cronograma de 16/10 (Proposta-Orcamento-Comissao, fora do vault), Registro-de-Decisoes N16-09 e N16-15]
+fontes: [v1 07-Cronograma/Cronograma-2-Meses seções 1, 3.2, 3.3, 3.4, 6, 9, v1 Registro-de-Decisoes #27 #33b #34 #36 #75 #77 #96, código de 14/10 (api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, HUB b55ac55) e de 29/10 (api-pcp befd973, app-pcp 93f96de, api-acos-vital f2fa237, av-hub 758d5f0), proposta de cronograma de 16/10 (Proposta-Orcamento-Comissao, fora do vault), Registro-de-Decisoes N16-09, N16-15, N16-117, N16-118 e N16-119]
 ---
 
 # Cronograma
@@ -21,20 +21,20 @@ fontes: [v1 07-Cronograma/Cronograma-2-Meses seções 1, 3.2, 3.3, 3.4, 6, 9, v1
 |---|---|---|
 | Até 05/10/2026 | Decisões e contratos fechados (M1, 28/09) e fundação no ar (M2, 05/10) | ✅ Cumprido |
 | 16/10/2026 | Sistema da Fase 0: cadastros, permissões por setor, Triagem e caixa de requisições (M3) | 🟡 Em curso |
-| 30/10/2026 | Compra, recebimento com pesagem, quarentena, inspeção e RNC em homologação (M4) | 🟡 O recebimento e a inspeção estão no código; falta o MES ler a OC do hub 🔴 |
-| 13/11/2026 | **Marco zero do saldo**: carga inicial conferida em dupla; saldo, movimento e reserva em homologação (M5) | 🟡 Saldo e reserva no código ✅; falta a carga em lote (G1) 🔴 |
+| 30/10/2026 | Compra, recebimento com pesagem, quarentena, inspeção e RNC em homologação (M4) | 🟡 O recebimento e a inspeção estão no código; o MES já lê a OC do hub (K4, 15/10) e grava o custo da OC no lote (19/10), ambos só na `develop` ✅; falta usar a OC na Triagem e no Estoque (BL-049, BL-050) 🔴 |
+| 13/11/2026 | **Marco zero do saldo**: carga inicial conferida em dupla; saldo, movimento e reserva em homologação (M5) | 🟡 Saldo e reserva no código ✅; existe `POST /estoque/lotes/carga-inicial` (um lote por chamada); a carga em lote (G1) não foi encontrada na `develop` de 29/10 🔴 |
 | 15/11/2026 | Protótipo | 📝 |
 | 18/11/2026 | Decisão de seguir ou não com o piloto de recebimento (M6) | 🟡 |
 | 18/12/2026 | Rastreabilidade completa: Torre de Fluxo e log de eventos (M7) | 🔴 O MES ainda não envia os eventos |
 | 18/02/2027 | **Fim do Ciclo 1**: o déficit do Robert zerado. Começa o Ciclo 2 em 19/02/2027 | 🟡 Deslocado de 21/01 pelo N14-30 |
 | 11/05/2027 a 18/11/2027 | PCP antigo migrado para o MES, em quatro marcos: Flange alta (M8), Flange completa (M9), Caldeiraria (M10) e Análise e gestão (M11) | 🟡 |
 
-As novas frentes de 16/10 (proposta, Orçamento, custo real e comissão nova) ainda não mexem nesses marcos. Elas estão em "Novas frentes" no Detalhe técnico e só valem depois que cada pessoa validar seus pd 🟡.
+As novas frentes de 16/10 (proposta, Orçamento, custo real e comissão nova) ainda não mexem nesses marcos. Elas estão em "Novas frentes" no Detalhe técnico e só valem depois que cada pessoa validar seus pd 🟡. **Os donos mudaram em 28/10** (o Robert conduz o módulo comercial na API do Hub, N16-117 a N16-119) e os contratos dessa parte foram removidos em 29/10 para o Robert recriar; a distribuição por pessoa abaixo é só o histórico da proposta de 16/10 e precisa ser refeita.
 
 ## Gargalos
 
-- **Robert:** o plano pede mais do que ele entrega. O déficit é de **29,6 pd** no Ciclo 1 (era 16,1 pd; 32,6 antes do crédito do K4) 🔴. A cobertura decidida é dobrar o esforço e fazer horas extras, se preciso 📝 (Nathan, 14/10).
-- **Nathan:** nas novas frentes, as telas dele terminam só em 06/07/2027. Ele é o gargalo 🟡. Há três alternativas (A, B e C), listadas no Detalhe técnico.
+- **Robert:** o plano pede mais do que ele entrega. O déficit é de **29,6 pd** no Ciclo 1 (era 16,1 pd; 32,6 antes do crédito do K4) 🔴. A cobertura decidida é dobrar o esforço e fazer horas extras, se preciso 📝 (Nathan, 14/10). Desde então o Robert também entregou, na `develop`, o custo da OC no lote (K5, 19/10) e o `GET /itens/custo` (27/10) e assumiu o módulo comercial (28/10); o déficit **não foi recalculado** ❓.
+- **Nathan:** na proposta de 16/10 as telas dele terminavam só em 06/07/2027, e ele era o gargalo 🟡. Em 28/10 as telas de proposta passaram ao Robert e as de Orçamento ao Pablo com o Robert, o que tira trabalho do Nathan; a conta não foi refeita ❓. As alternativas A, B e C ficam no Detalhe técnico como histórico.
 - **Gustavo:** tem folga (11,9 pd na S1–FC e 9,8 pd na S5) e pode receber parte do backend do MES 🟡.
 
 ## Ordem de corte (para manter a data fixa) 🟡
@@ -59,7 +59,7 @@ A ordem de corte alivia no máximo ~4,0 pd do Robert. O déficit restante será 
 - 🔴 Pablo, Gustavo, Robert e Nathan validam as estimativas das novas frentes de 16/10 (P1 a P7, G1 a G8, N1 a N8, R1 a R5). O Nathan escolhe a alternativa para o gargalo dele (A, B ou C). Só depois os marcos e a W0 mudam.
 - 🔴 OQ-11 e OQ-12 (imposto real e encargo de cada evento de custo) até 04/12/2026, para o custo real não sair sem imposto ([[Perguntas-Proposta-Pedido-Comissao]]).
 - 📝 Déficit de 16,1 pd: coberto com esforço dobrado e horas extras (Nathan, 14/10). M3 a M7 confirmados. Protótipo por volta de 15/11.
-- 📝 Merge `develop` → `main`: o Nathan diz que pode ser feito a qualquer momento, porque tudo o que está na `develop` foi testado e funciona. Em 14/10 a `develop` está à frente da `main` em 13 commits no `api-pcp`, 10 no `app-pcp`, 11 no `api-acos-vital` e 284 no HUB ✅ (`git fetch`). Falta só alguém fazer o merge 🔴 Robert (MES), Gustavo (API), Nathan (HUB).
+- 📝 Merge `develop` → `main`: o Nathan diz que pode ser feito a qualquer momento, porque tudo o que está na `develop` foi testado e funciona. Em 14/10 a `develop` estava à frente da `main` em 13 commits no `api-pcp`, 10 no `app-pcp`, 11 no `api-acos-vital` e 284 no HUB. **Em 29/10** (`git fetch`): a `api-acos-vital` já está com a `main` igual à `develop` (PR #305) ✅; o HUB tem 29 commits à frente; o `api-pcp` 53 e o `app-pcp` 51, com a `main` do MES parada em 08/10 🔴 (BL-035). Falta o merge do MES (Robert) e do HUB (Nathan).
 - 📝 Dono do pipeline: Nathan.
 - 🔴 Itens 28 (valores por mês e por vendedor) e 29 (faturamento mensal) do levantamento do PCP legado: são relatórios que hoje rodam em planilha fora do controle da TI e vão para o av-hub (6 pd cada). Seguem sem dono e sem data.
 - 🔴 Itens 18 (rastreabilidade por material: número no padrão óleo e gás e Data Book) e 20 (ciclo do Book com o cliente: preparação, inspeção pelo cliente, postagem no portal, aprovação): o Robert não conhece a regra de negócio. O Nathan descreve os campos 🔴 Nathan. O Robert responde as demais perguntas da Caldeiraria em 15/10. Ver [[Pontas-Soltas]].
@@ -78,16 +78,16 @@ Equipe em [[Equipe-e-Divisao]]. Itens do levantamento em [[Backlog-por-Frente]].
 
 ### Marcos
 
-| Marco | Data | O que precisa estar pronto | Situação em 14/10 |
+| Marco | Data | O que precisa estar pronto | Situação (14/10; M4, M5 e Ciclo 1 conferidos em 29/10) |
 |---|---|---|---|
 | **M1** Decisões e contratos destravados | 28/09 | DEC-1 a DEC-12 decididas; contratos 001, 002, 004 e 005 fechados | ✅ cumprido |
 | **M2** Fundação no ar | 05/10 | Homologação do MES no ar; `PUT` do contrato 34 funcionando; login duplo | ✅ cumprido |
 | **M3** Fase 0 (sistema) pronta | 16/10 | Cadastros, RBAC por setor, Triagem e caixa de requisições prontos | 🟡 em curso: `develop` do MES e do av-hub entregaram Compras · CCP e esperados em 14/10 (PRs #55 a #57 do `api-pcp`, #42 e #43 do `app-pcp`) |
-| **M4** Fases A + B em homologação | 30/10 | Requisição, OC, referência no MES, recebimento com pesagem, quarentena, inspeção e RNC; levantamento físico (26 a 30/10) | 🟡 recebimento e inspeção no código; referência da OC no MES 🔴 (job do contrato 004 não existe) |
-| **M5** Fase 0 fechada + Fase C | 13/11 | Marco zero carregado e conferido em dupla; saldo, movimento e reserva em homologação; status por item no HUB | 🟡 saldo e reserva no código ✅; carga em lote (G1) 🔴 Robert até 23/10 |
+| **M4** Fases A + B em homologação | 30/10 | Requisição, OC, referência no MES, recebimento com pesagem, quarentena, inspeção e RNC; levantamento físico (26 a 30/10) | 🟡 recebimento e inspeção no código; referência da OC no MES ✅ (job K4 na `develop` desde 15/10, `114ba89`; fornecedor da OC desde 26/10); recebimento por item da OC e custo da OC no lote na `develop` (BL-051, BL-005) |
+| **M5** Fase 0 fechada + Fase C | 13/11 | Marco zero carregado e conferido em dupla; saldo, movimento e reserva em homologação; status por item no HUB | 🟡 saldo e reserva no código ✅; carga em lote (G1) 🔴 Robert (prazo era 23/10; só há a carga de um lote por chamada) |
 | **M6** Go/no-go do piloto de recebimento | 18/11 | Piloto de 11/11 a 18/11 em 1 posto, em paralelo ao processo manual | 🟡 |
 | **M7** Rastreabilidade completa | 18/12 | Log de eventos e Torre de Fluxo (mapa, trilha, tempo por etapa) em homologação | 🔴 o MES não publica `/fluxo/eventos` (LOG-46) |
-| **Fim do Ciclo 1** | 18/02/2027 (era 21/01/2027; 24/02 antes do crédito do K4) | Déficit do Robert (Onda 0, agora 29,6 pd) zerado | 🟡 deslocado pelo N14-30, abatido em 3,0 pd pelo K4 na `develop` (N14-32) |
+| **Fim do Ciclo 1** | 18/02/2027 (era 21/01/2027; 24/02 antes do crédito do K4) | Déficit do Robert (Onda 0, agora 29,6 pd) zerado | 🟡 deslocado pelo N14-30, abatido em 3,0 pd pelo K4 na `develop` (N14-32); K5 e `GET /itens/custo` também já na `develop`, conta não refeita ❓ |
 | **M8** Flange alta no MES | 11/05/2027 (era 14/04) | Itens 1, 2, 4, 5, 6, 7 e 11 do levantamento do PCP legado | 🟡 |
 | **M9** Flange completa no MES | 30/06/2027 (era 04/06) | Itens 3, 8, 9, 10, 12, 13 e 14; só depois dele se desliga a linha Flange do PCP legado | 🟡 |
 | **M10** Caldeiraria HRM no MES | 05/10/2027 (era 09/09) | Itens 15 a 22, a Caldeiraria como mais uma fábrica `FABRICACAO` | 🟡 depende de decisões abertas (itens 18 a 20) |
@@ -131,19 +131,21 @@ Com 100% de foco as ondas terminam em 02/02 (W0), 06/04, 13/05, 26/07 e 25/08/20
 
 Custo do lote (09/10) somou ao Robert K3 1,0 + K4 3,0 + K5 1,5 + K6 0,5 pd; ao Gustavo K1, K2 e K7 (1,5 pd); K8 (`GET /itens/custo`) e K9 a K11 iam ao Ciclo 2; com a N16-09 (custo obrigatório e custo real por evento) a proposta de 16/10 os traz de volta como R3 e R5 (seção "Novas frentes de 16/10") 🟡. Detalhe em [[Modelo-Estoque-e-Custo-do-Lote]] e [[API-008-Custo-do-Lote-no-MES]].
 
-### Comercial & Suprimentos (Pablo, fora do plano original)
+### Comercial & Suprimentos (Pablo criou; Robert conduz desde 28/10; fora do plano original)
 
 | ID | Entrega | Estado |
 |---|---|---|
-| CS1 | `api-comercial` e Propostas (CRUD, fechar, perder, reabrir, versões, PDF) | ✅ na `develop` |
-| CS2 | Suprimentos: catálogo, fornecedores, ofertas, mapa de cotação, solicitações de custo | ✅ na `develop` |
-| CS3 | Painel do Comprador, histórico de compras, produtos pendentes | ✅ na `develop` |
-| CS4 | E2E Playwright e CI | ✅ na `develop` |
-| CS5 | **Migrar o módulo para a `api-acos-vital`** (no lugar de publicar o `api-comercial`; LOG-52 fases 1 a 5; o `api-comercial` fica só de teste, N16-15), cadastrar telas em `auth.telas`, claim `perfis` no token | 🔴 Pablo; pd e datas em "Novas frentes de 16/10" (P1 a P7) 🟡. Ver [[Comercial-Suprimentos]] e [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] |
+| CS1 | `api-comercial` e Propostas (CRUD, fechar, perder, reabrir, versões, PDF) | ✅ feito no legado (hoje só leitura, N16-117); fechar parcial, perder e reabrir saíram do desenho |
+| CS2 | Suprimentos: catálogo, fornecedores, ofertas, mapa de cotação, solicitações de custo | ✅ feito no legado; telas de catálogo, fornecedores, painel do comprador e parâmetros de custo seguem em `orcamento/` |
+| CS3 | Painel do Comprador, histórico de compras, produtos pendentes | ✅ feito no legado; a tela Histórico de compras saiu (N16-108) |
+| CS4 | E2E Playwright e CI | ✅ feito no legado; o Playwright saiu do HUB em 29/10 |
+| CS5 | **Migrar o módulo para a `api-acos-vital`** (no lugar de publicar o `api-comercial`; LOG-52 fases 1 a 5; o `api-comercial` virou legado de leitura, N16-117), cadastrar telas em `auth.telas`, claim `perfis` no token | 🟡 **Robert conduz desde 28/10** (Pablo acompanha). Na `api-acos-vital`, `develop` de 29/10: cadastros, `POST /clientes`, `/parceiros` e `/propostas` (criar, listar, resumo, eventos, `PUT`, aprovar, cancelar, copiar, transformar); `/suprimentos` sem rota. Pd e datas dos blocos P1 a P7 estão superados ❓. Ver [[Comercial-Suprimentos]] e [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] |
 
-### Novas frentes de 16/10: proposta, Orçamento, custo real e comissão nova (🟡 a validar)
+### Novas frentes de 16/10: proposta, Orçamento, custo real e comissão nova (🟡 a validar; histórico)
 
-Estimativas da proposta de cronograma de 16/10/2026 (`Proposta-Orcamento-Comissao/07-Cronograma/Proposta-de-Cronograma.md`, fora do vault), com o mesmo método desta nota (pd por complexidade, ±30%, dias úteis = pd ÷ foco, mesmos feriados, crédito só do que está na `develop`). **Nada aqui vale como compromisso:** cada pessoa confirma os seus pd e o seu foco livre. **Os marcos M1 a M11, o fim do Ciclo 1 e as trilhas W0 a W4 não mudam** até essa validação. Os itens estão no [[Backlog-por-Frente]] (BL-066 a BL-078) e as regras em [[11-Proposta-e-Pedido-de-Venda]], [[12-Orcamento-Base-de-Preco]] e [[13-Custo-Real-e-Comissao-no-Fluxo]].
+> **Superado em parte (29/10/2026):** os blocos do Pablo (P1 a P4, P6, P7) e as telas da proposta do Nathan (N1, N2) mudaram de dono em 28/10: o Robert faz as rotas e as telas da proposta (N16-117 a N16-119). Os 15 contratos de proposta, orçamento, custo real e comissão nova foram removidos em 29/10; o Robert os recria. A tabela fica como registro da estimativa de 16/10; os pd por pessoa precisam ser refeitos.
+
+Estimativas da proposta de cronograma de 16/10/2026 (`Proposta-Orcamento-Comissao/07-Cronograma/Proposta-de-Cronograma.md`, pasta de histórico fora do vault), com o mesmo método desta nota (pd por complexidade, ±30%, dias úteis = pd ÷ foco, mesmos feriados, crédito só do que está na `develop`). **Nada aqui vale como compromisso:** cada pessoa confirma os seus pd e o seu foco livre. **Os marcos M1 a M11, o fim do Ciclo 1 e as trilhas W0 a W4 não mudam** até essa validação. Os itens estão no [[Backlog-por-Frente]] (BL-066 a BL-078) e as regras em [[11-Proposta-e-Pedido-de-Venda]], [[12-Orcamento-Base-de-Preco]] e [[13-Custo-Real-e-Comissao-no-Fluxo]].
 
 | Pessoa | Blocos | pd (faixa) | Foco | Início | Fim proposto |
 |---|---|---|---|---|---|
@@ -216,8 +218,8 @@ gantt
     M11 Analise e gestao no MES :milestone, m11, 2027-11-18, 0d
     section Janelas do plano
     S1 Destravar e fundacao :done, s1, 2026-09-22, 2026-10-05
-    S2 Fase 0 e nucleo do Estoque :active, s2, 2026-10-05, 2026-10-16
-    S3 Fases A e B :s3, 2026-10-19, 2026-10-30
+    S2 Fase 0 e nucleo do Estoque :done, s2, 2026-10-05, 2026-10-16
+    S3 Fases A e B :active, s3, 2026-10-19, 2026-10-30
     S4 Fase C e marco zero :s4, 2026-11-02, 2026-11-13
     FC Homologacao e go ou no-go :fc, 2026-11-16, 2026-11-18
     S5 Rastreabilidade completa :s5, 2026-11-19, 2026-12-18
@@ -229,7 +231,7 @@ gantt
     H4 Piloto de Recebimento em 1 posto :h4, 2026-11-11, 2026-11-18
     section Integracao e custo
     K1 K2 SQL 012 e rota 004 com valores :k12, 2026-10-19, 2026-10-30
-    K4 K5 Job da referencia da OC e custo no recebimento :k45, 2026-12-21, 2027-01-21
+    K4 K5 Job da referencia da OC e custo no recebimento (develop) :done, k45, 2026-10-15, 2026-10-19
     section Ondas do Robert PCP legado
     W0 Deficit do Ciclo 1 :w0, 2026-12-21, 2027-02-18
     W1 Flange prioridade alta :w1, 2027-02-19, 2027-05-11
@@ -238,7 +240,7 @@ gantt
     W4 Analise e gestao no MES :w4, 2027-10-06, 2027-11-18
 ```
 
-### Entregas já no código (14/10)
+### Entregas já no código (14/10 e 15 a 29/10)
 
 | Frente | Entrega | Evidência |
 |---|---|---|
@@ -247,3 +249,6 @@ gantt
 | av-hub | `itens_pedido_custo` por produto (047b), feed da Torre (046b), autor e comprador nos eventos (035b) | `api-acos-vital` `f322dcd`, `7c3f57a`, `2aee636` |
 | HUB | Acompanhamento de clientes v2 | `b55ac55` (PR #194) |
 | Pipeline | Envio da OC fixo, sem flags `SYNC_ENVIO_OC` e `ENVIO_OC_DRY_RUN` | `omie-elt-pipeline` `0f739f0` (PR #3) |
+| MES (`develop`, fora da `main`) | K4 projeção da OC do hub (15/10); custo da OC no lote, K5 (19/10); compra em andamento e vínculo da parcial à OC (API-011 R1 e R2, 20/10); referência das requisições do Compras (API-009, 23/10); `GET /itens/custo` e custo do lote à mão (27/10); OP e lote do fabricado (27/10) | `api-pcp` `114ba89`, `97b9adc`, `c269aa7`, `9e75df5`, `6c11147`, `ab3318d` |
+| av-hub (API) | Chaves de serviço presas a rotas (15/10); referência da OC com fornecedor (26/10); setor do cliente (22 e 23/10); módulo `/comercial/*` (28 e 29/10) | `api-acos-vital` `b02d6c5`, `a7fda49`, `fd69145`, `43dbec3`, `260e835`, `f2fa237` |
+| HUB | Telas da Torre de Fluxo sobre dados de teste (15/10); menu enxuto de Vendas, Orçamento e Compras (27/10); BFF do comercial só na API do Hub (27/10); propostas sem fechamento parcial (28/10) | `av-hub` `3cd55de`, `a1493a8`, `3bccfce`, `2008344` |
