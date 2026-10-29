@@ -43,7 +43,7 @@ fontes: [HUB d0ef359 (PR #206, sobre b55ac55) em C:\Users\nathan.silva\Desktop\T
 - 🔴 Tela ou coluna de custo por item (LOG-47).
 - 🟡 Nenhuma tela lista os marcos da requisição. Quem os lê é o MES.
 - 🟡 O MES ainda não lê a OC da "Nova requisição" (N14-20, BL-006, BL-041). O trabalho é do Robert.
-- 📝 Imposto por item decidido em 29/10 (N16-144); falta a tela: campos de imposto e selo de origem na emissão da OC ([[SQL-020-Imposto-por-Item-da-OC|SQL-020]]).
+- 📝 Imposto por item decidido em 29/10 (N16-144); falta a tela: campos de imposto e selo de origem na emissão da OC, quando o desenvolvimento começar.
 - 🟡 Endurecer a regra de aprovação quando Compras definir.
 - ✅ Orçamento roda sobre JSON local, não sobre as tabelas da API ([[12-Orcamento-Base-de-Preco]]).
 
@@ -117,4 +117,4 @@ Resumo; a tabela completa está em [[RBAC-e-Permissoes]].
 2. Tela/coluna de custo por item (`custo-itens`) sobre `GET /itens_pedido_custo` 🔴.
 3. A aprovação da OC já funciona (N14-21); quando Compras definir a regra mais rígida 🟡, ajustar `ComprasAprovacoes.tsx` e a API junto com o Gustavo. Nada a construir agora.
 4. O MES enxergar a OC de "Nova requisição" (N14-20): o trabalho é do Robert (MES) e, se a API precisar expor por produto ou pedido, do Gustavo; o Nathan só faz tela no HUB se o MES precisar (BL-041) 🟡.
-5. Imposto por item: desenho decidido em 29/10 (N16-144). Falta pôr os campos de imposto e o selo de origem na emissão da OC, depois que o Gustavo criar as colunas ([[SQL-020-Imposto-por-Item-da-OC|SQL-020]]) 🔴.
+5. Imposto por item: desenho decidido em 29/10 (N16-144). Falta pôr os campos de imposto e o selo de origem na emissão da OC, quando o desenvolvimento começar 🔴.
