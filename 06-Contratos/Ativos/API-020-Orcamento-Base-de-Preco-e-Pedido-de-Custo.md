@@ -52,16 +52,19 @@ O vendedor consulta a página do produto e pede custo sem bloquear a proposta; o
 - **Compras do Omie:** `pedidos_compras_itens` de pedido não cancelado (`etapa <> 'CA'`), com o valor unitário já sem o desconto e a data em que o pedido entrou no Omie.
 - **Cotações do Hub:** `core.parceiros_produtos`.
 - **Fora por enquanto:** `orc_cotacoes`. O fornecedor dessas cotações está com código legado, então a ligação depende da revisão do Orçamento antigo.
-- **Sem imposto por item:** nenhuma das duas fontes traz o imposto de cada item, então o valor é **preço**, não custo líquido.
+- **Custo líquido:** na compra, o preço com o frete, o seguro e as despesas do pedido rateados pelo valor da mercadoria de cada item (OQ-46 §2); na cotação, igual ao preço. Cada ponto traz o preço (`valor`) e o custo (`custo`).
+- **Sem imposto por item:** nenhuma das duas fontes traz o imposto de cada item, então o custo líquido **não desconta imposto** (PS-014).
+- **Unidade:** só entram preços na unidade do produto. Os de outra unidade ficam fora das contas e são contados em `unidade.fora` (OQ-46 §2). A cotação não tem unidade e conta como a do produto.
 
 **Score como está (29/10/2026):**
-- **Nota de preço:** o menor último preço entre os fornecedores ÷ o último preço deste fornecedor.
+- **Nota de preço:** o menor último **custo líquido** entre os fornecedores ÷ o último custo líquido deste fornecedor.
 - **Nota de prazo:** o menor prazo médio ÷ o prazo médio deste fornecedor. O prazo de cada compra é a previsão de entrega menos a data do pedido.
 - **Nota de histórico:** fica **neutra (50)**, porque não há data real de recebimento.
 - **Sem dado:** a nota fica neutra e aparece um aviso.
 - **Desempate:** pelo número de compras.
-- **Ranking:** entre os fornecedores **do produto**. O ranking por categoria espera a lista única de categorias da revisão do Orçamento antigo.
-- **Parâmetros:** os pesos, o limite de 15% e os 7 dias são constantes no código até existir a tabela de parâmetros com vigência (regra 3).
+- **Ranking do produto:** entre os fornecedores do produto.
+- **Ranking da categoria:** quando o produto tem categoria de suprimento (`produtos_perfil.id_categoria`), a resposta traz também os 10 melhores **da categoria**, na mesma empresa e no mesmo período. Em cada produto da categoria o fornecedor recebe as notas de preço e de prazo; na categoria vale a média delas. Quem fornece um produto só leva o aviso "um produto só". 🟡 O `produtos_perfil` está **vazio** em produção: o ranking da categoria só aparece quando o perfil dos produtos for preenchido.
+- **Parâmetros (regra 3):** lidos da vigência atual de `parametros_custo`. A janela padrão é `dias_historico`; pesos, limite de volatilidade, mínimo de pontos e dias do dado recente (geral e por categoria) ficam na coluna nova `parametros_preco`, proposta no [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]] anexo `0003`. Sem a coluna, ou com valor inválido, valem os de partida (90 dias, 7 dias, 15%, 3 pontos, 50/30/20) e a resposta avisa em `parametros.avisos`. A resposta traz os parâmetros usados em `parametros`.
 
 ## 3. Regras
 
