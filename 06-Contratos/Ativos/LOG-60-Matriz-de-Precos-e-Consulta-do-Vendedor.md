@@ -19,7 +19,7 @@ criado_original: 2026-10-21
 > [!info] Situação em 21/10/2026
 > **Status:** `proposta` · **Dono:** Nathan · Rotas: [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] · Menu: [[LOG-57-Menu-Vendas-Orcamento-Compras]]. O setor orçamentário é novo; o Moisés é uma das pessoas (N16-104).
 >
-> 🟡 **29/10/2026:** a **página do produto** e a **matriz de preços v1** estão desenhadas e construídas no av-hub, na branch local `feat/produto-pagina-precos` do Pablo (a partir da `develop`, sem merge). As duas telas leem as rotas da [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] (branch da `api-acos-vital`, também sem merge). Desenho na §2.1. 🔴 **A alinhar:** o Pablo propõe ficar com produtos e o Robert com o comercial ([[Roteiro-da-Proposta-em-Diante]] §5.2).
+> 🟡 **29/10/2026:** a **página do produto** e a **matriz de preços v1** estão desenhadas e construídas no av-hub, na branch local `feat/produtos-precos-vendas` do Pablo (a partir da `develop`, sem merge). As duas telas leem as rotas da [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] (branch da `api-acos-vital`, também sem merge). Desenho na §2.1. 🔴 **A alinhar:** o Pablo propõe ficar com produtos e o Robert com o comercial ([[Roteiro-da-Proposta-em-Diante]] §5.2).
 
 ## 1. Por quê
 
@@ -44,11 +44,13 @@ Segue o guia de interface do av-hub (`docs/design/guia-de-interface.md`): resumo
 | Bloco | O que mostra | Regra |
 |---|---|---|
 | Período | 30, 90, 180 ou 365 dias (padrão 90), guardado na URL (`?dias=`) | Valor fora da lista volta a 90 |
-| Dado recente | pílula verde "Preço recente: R$ x há N dias" ou âmbar "Sem preço nos últimos 7 dias" | N16-72 |
-| Resumo (4 KPIs) | **Último preço** (data, origem e fornecedor); **Média** (de mínimo a máximo, nº de preços; "ponderada" quando todos os pontos têm quantidade); **Volatilidade** (% com "estável, até 15%", "alta, acima de 15%" ou "poucos dados"); **Variação no mês** (com a do ano e a desde o 1º preço) | Para quem compra, preço subindo pede atenção (âmbar) e caindo é bom (verde) |
+| Dado recente | pílula verde "Preço recente: R$ x há N dias" ou âmbar "Sem preço nos últimos N dias" | N16-72: N é o parâmetro da vigência (o da categoria do produto, quando houver; 7 de partida) |
+| Unidade | pílula cinza "N preços em KG fora das contas" quando há preço em outra unidade | Só se compara preço na unidade do produto (OQ-46 §2) |
+| Resumo (4 KPIs) | **Último preço** (data, origem e fornecedor); **Média** (de mínimo a máximo, nº de preços; "ponderada" quando todos os pontos têm quantidade); **Volatilidade** (% com "estável, até 15%", "alta, acima de 15%" ou "poucos dados"); **Flutuação no mês** (com a do ano e a total) | Para quem compra, preço subindo pede atenção (âmbar) e caindo é bom (verde) |
 | Preço no período | gráfico com eixo de **tempo real**: compras do Omie em linha reta, cotações só como pontos | Sem curva suavizada, que inventaria picos; sem linha entre cotações espaçadas, que sugeriria preços que não existiram |
-| Melhores fornecedores | posição, fornecedor, score com barra e as três notas, último preço, média, prazo médio e nº de compras; avisos ("sem histórico de entrega no prazo") | Rodapé explica a nota de histórico neutra e o desempate |
-| Últimos preços | os 10 mais recentes: data, fornecedor, origem (Compra com o nº do pedido, ou Cotação), quantidade e preço | Rodapé diz o que é compra e o que é cotação e que o preço é sem imposto |
+| Melhores fornecedores | posição, fornecedor, score com barra e as três notas, **custo líquido**, média, prazo médio e nº de compras; avisos ("sem histórico de entrega no prazo"); a legenda diz os pesos e a vigência ("vigência desde 01/10/2026" ou "valores de partida") | Rodapé explica a nota de preço pelo custo líquido sem imposto, a nota de histórico neutra e o desempate; sem categoria, diz que o ranking é só do produto |
+| Melhores fornecedores em <categoria> | só quando o produto tem categoria de suprimento: posição, fornecedor, score com as notas, nº de produtos da categoria que ele fornece e nº de compras | Média das notas do fornecedor nos produtos da categoria, na mesma empresa e período (LOG-60 §2: "score por categoria") |
+| Últimos preços | os 10 mais recentes: data, fornecedor, origem (Compra com o nº do pedido, ou Cotação), quantidade, preço e custo líquido | Rodapé diz o que é compra, o que é cotação, como sai o custo líquido (sem imposto) e quantos preços ficaram fora por unidade |
 
 Só leitura: não há botão de edição (aceite 1). Enquanto a rota não existe no Hub publicado, a aba mostra "O histórico de preço ainda não está disponível na API do Hub" e o resto da página funciona.
 
