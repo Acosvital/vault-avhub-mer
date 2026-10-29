@@ -2,7 +2,7 @@
 id: roteiro-proposta-em-diante
 tags: [roteiro, proposta, pedido-de-venda, compras, custo-real, comissao, api-acos-vital]
 criado: 2026-10-27
-atualizado: 2026-10-27
+atualizado: 2026-10-29
 status: rascunho
 fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status em 27/10/2026)", "Registro-de-Decisoes N16-110 a N16-112", "Perguntas-Proposta-Pedido-Comissao (OQ-16, OQ-21, OQ-48)", "Dump do Avhub para referência (completo), 26/10/2026", "av-hub branch refactor/menu-enxuto-vendas-orcamento-compras (11844de)", "[[Conexao-das-Telas-do-Pablo-com-a-API-do-Hub]]"]
 ---
@@ -37,7 +37,7 @@ fontes: ["LOG-52, LOG-56 a LOG-61, API-019 a API-022, SQL-016 a SQL-019 (status 
 | **V0.3–V0.5 · Incompleta e aprovar** | 🔴 | 🔴 | 🔴 | Aprovar com a revisão atual, travar a aprovada, selo "incompleta" (item sem custo e sem fornecedor) | LOG-56 R9–R14, API-019 | **Robert** (API), Gustavo (banco), Nathan (tela) |
 | **V0C · Cancelar a proposta** | 🔴 | 🔴 | 🔴 | Cancelar com motivo, duplicar, comissão estimada virando histórico | LOG-56 R15–R16 | **Robert** (API), Gustavo (banco), Nathan (tela) |
 | **B3/B4 · Pedido de custo** | 🔴 | 🔴 | 🔴 | Fila do Orçamento, cronometrada e sem prazo (N16-58). A tela atual é a do Pablo, com SLA | API-020, SQL-017 | **Robert** (API), Gustavo (banco), Nathan (tela) |
-| **B2 · Página do produto e matriz de preços** | 🟡 | 🟡 | 🟡 | Os dados existem (compras do Omie e cotações do Orçamento antigo). Faltam estatística de 90 dias, score e volatilidade do fornecedor e a matriz | LOG-60, API-020 | **Robert** (API), Nathan (tela) |
+| **B2 · Página do produto e matriz de preços** | 🟡 | 🟡 | 🟡 | Os dados existem (compras do Omie e cotações do Orçamento antigo). Estatística, score, volatilidade, série e matriz **feitos em branch local do Pablo** (29/10, §5.2), sem merge. Faltam a tabela de parâmetros com vigência, as cotações do Orçamento antigo e a publicação | LOG-60, API-020 | **Robert** (API), Nathan (tela). 🔴 A alinhar: o Pablo propõe ficar com produtos (§5.2) |
 | **Ofertas e cotação a fornecedor** | 🟡 | 🔴 | 🟡 | Uma tabela de oferta (`parceiros_produtos` está vazia), importar mapa, envio do pedido de cotação por e-mail | API-020, SQL-017 | **Robert** (API), Gustavo (banco), Nathan (tela) |
 | **V0.6–V0.7 · Transformar em pedido** | 🔴 | 🔴 | 🔴 | **Pedido:** `pedidos`, `pedidos_itens` e as 3 respostas obrigatórias (Qualidade, faturar em partes ou inteiro, data de previsão). **Omie:** fila e pipeline com `IncluirPedido`, erro com "Tentar novamente" | LOG-56 R18–R26, API-019, SQL-016 | **Robert** (API), Gustavo (banco), Nathan (pipeline e tela) |
 | **V1–V3 · Liberação** | 🟡 | 🟡 | ✅ | A liberação do pedido do Omie existe (LOG-26). Falta gravar a liberação na resposta do `IncluirPedido` | LOG-58 | Gustavo (banco e API), Nathan |
@@ -87,6 +87,19 @@ Entrega depois da proposta, na `api-acos-vital`, sobre o que o Hub já tem (N16-
 | 6 | 🟡 **Perfil técnico do produto** (norma, material, kg/m, dimensões), se couber nesta etapa: o `especificacoes` do Omie não tem esses dados | extensão de `core.produtos` | LOG-52 §3.2 |
 
 **Depois, na mesma linha:** matriz de preços v1 e ofertas (uma tabela só, N16-112). **Tela (Nathan):** Produtos e Página do produto já leem o Hub; ganham o histórico, a série e o score quando as rotas existirem.
+
+> [!warning] 🔴 A alinhar (Pablo, 29/10/2026): divisão entre produto e comercial
+> O Pablo propõe ficar com **produtos** (esta seção 5.2, a página do produto e a matriz) e o Robert com o **comercial** (a proposta, §5.1, e o que vem dela). Produto alimenta a proposta com preço, mas as duas partes andam separadas. Hoje a N16-117 diz que o Robert conduz todas as rotas do módulo e o Pablo acompanha: **não é decisão até o Robert e o Nathan confirmarem**. Se confirmada, vira N16 e muda o "Quem faz" da linha B2 (§2) e a API-020.
+
+**Andamento em 29/10/2026 (Pablo, branches locais, sem merge e sem push).** Feito sobre o que o Hub já tem; serve de base para quem ficar com a parte (Robert ou Pablo):
+
+| # | Entrega | Onde | Diferença do contrato |
+|---|---|---|---|
+| 3 a 5 | Histórico de preço, página do produto com score, volatilidade, flutuação e dado recente, e a série | `api-acos-vital` `feat/orcamento-historico-preco`: `GET /produtos/:id/precos` e `GET /produtos/:id/precos/serie` (8 testes de integração e 14 unitários) | Caminho em `/produtos/:id/...`, não `/orcamento/produtos/:id`: o `/orcamento/produtos` já é do Orçamento antigo (`core_compras`). Fontes: compras do Omie não canceladas (sem desconto) e `core.parceiros_produtos`; **`orc_cotacoes` fora** até a revisão do Orçamento antigo (o fornecedor lá tem código legado). Nota de histórico sempre neutra (não há data real de recebimento). Pesos e limites são constantes nomeadas, ainda sem a tabela com vigência |
+| matriz | Matriz de preços v1 | mesma branch: `GET /orcamento/matriz_precos` | Último preço de cada fornecedor na janela; filtros busca, família, empresa e período |
+| telas | Aba **Preços** na página do produto e aba **Matriz de preços** em Produtos | av-hub `feat/produto-pagina-precos` (a partir da `develop`), BFF já apontando para as rotas acima; 12 testes de tela | Desenho em [[LOG-60-Matriz-de-Precos-e-Consulta-do-Vendedor]] §2.1. Enquanto a rota não estiver no Hub publicado, a tela avisa "ainda não disponível" |
+
+Para publicar a API: linhas em `auth.rotas_telas` (`GET /produtos/*/precos` → `catalogo-produtos`, `propostas`; `GET /orcamento/matriz_precos` → `matriz-precos`, `catalogo-produtos`) e o push (o Pablo não tem permissão de push na `Acosvital/api-acos-vital`).
 
 ## 6. Ordem que o vault sugere (N16-110, sem confirmação)
 
