@@ -23,7 +23,7 @@ Este vault é o **manual para desenvolver o fluxo de Atividades** do ERP Aços V
 - Valores de enum, rotas e nomes de tela vão exatos, em `código`.
 - Ligue as notas com `[[links]]` do Obsidian. Todo link tem de resolver.
 - Faça os diagramas em mermaid. Cada diagrama de fluxo usa os mesmos IDs de nó do [[00-Fluxo-Mestre-0b]].
-- Em nota longa, o resumo vem no topo. Caminhos de código, colunas, rotas e contas ficam numa seção "Detalhe técnico" no fim.
+- Em nota longa, o resumo vem no topo. Caminhos de código, colunas, rotas e contas ficam numa seção "Detalhe técnico" no fim (pedido do Nathan, 29/10/2026).
 
 ## Selos de confiança
 
@@ -57,15 +57,15 @@ Use o nome novo. O código ainda usa o antigo em alguns pontos, então registre 
 
 - **Gustavo (DBA):** banco e API do av-hub (`api-acos-vital`).
 - **Nathan:** front do av-hub (telas e BFF, a camada que liga o front à API).
-- **Robert:** MES (`api-pcp` e `app-pcp`).
-- **Pablo:** Comercial & Suprimentos (`api-comercial`).
+- **Robert:** MES (`api-pcp` e `app-pcp`) e, desde 28/10/2026, as rotas do módulo comercial na `api-acos-vital` (N16-117).
+- **Pablo:** acompanha o módulo comercial e cuida do Orçamento, com a supervisão do Robert. A `api-comercial` dele é só legado de consulta.
 
 ## Contratos
 
 Contrato é o combinado por escrito entre dois sistemas ou entre duas pessoas sobre uma entrega.
 
 - Todo contrato novo ou seção nova entra **completo** em `06-Contratos/` e no [[Painel-de-Contratos]].
-- O texto do contrato é copiado inteiro. Só o frontmatter e um bloco "Situação em 14/10" no topo são acrescentados.
+- O texto do contrato é copiado inteiro. Só o frontmatter, um bloco "Resumo em linguagem natural" (o que é, quem é afetado, situação) e um bloco "Situação em DD/MM" no topo são acrescentados.
 - Os IDs são únicos: `SQL-007`, `API-004`, `LOG-34`. O número original é preservado. Os duplicados ganham letra (`LOG-04a`, `LOG-04b`).
 - Os contratos de **Consulta** (`CON-NN`) pedem uma **resposta**, não uma mudança. Dão o contexto e um cenário, fazem perguntas numeradas e trazem uma mensagem pronta para o WhatsApp. As respostas voltam pelo WhatsApp do Nathan e são registradas na própria nota. Modelo e regras em [[Modelo-de-Consulta]].
 
@@ -73,7 +73,7 @@ Contrato é o combinado por escrito entre dois sistemas ou entre duas pessoas so
 
 ### Fontes da verdade, em ordem
 
-1. **Código** nos branches atuais: `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, HUB b55ac55 (front av-hub), `omie-elt-pipeline` 0f739f0 (todos de 14/10/2026).
+1. **Código** nos branches atuais. Os commits da auditoria de 14/10/2026 foram: `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, HUB b55ac55 (front av-hub), `omie-elt-pipeline` 0f739f0. Na dúvida, vale o branch atual, não esses commits.
 2. **Dumps de esquema** de 14/10/2026 (MES e av-hub).
 3. **Decisões** em [[Registro-de-Decisoes]].
 4. **O fluxo mestre** em [[00-Fluxo-Mestre-0b]].

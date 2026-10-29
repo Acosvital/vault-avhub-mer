@@ -57,7 +57,7 @@ O Cliente Exemplo S.A. pede 100 flanges, e o pedido é digitado no Omie. Ele che
 - ✅ Telas Liberar Pedidos e Liberação da Equipe, e as rotas da API.
 - ✅ O MES lê os liberados, recusa pedido não liberado e confirma a importação, com reenvio automático.
 - ✅ Cartão "Etapa dos itens" no detalhe do pedido.
-- 🟡 Os 8 estados macro do vendedor não existem no código. Hoje ele vê a situação da liberação e 11 etapas por item.
+- 🟡 Os 9 estados macro do vendedor não existem no código. Hoje ele vê a situação da liberação e 11 etapas por item.
 - 🔴 Chave própria do MES, mapa de rotas por tela e teste do escopo do vendedor.
 - 🔴 Renovar o token expirado, reabrir marcação depois da importação e alertar pedido parado.
 - 🔴 Fila de inspeção de processo da Qualidade e refinos do cartão Etapa dos itens.
@@ -122,7 +122,7 @@ Campo `acompanhamento_qualidade`: `true` (a Qualidade acompanha desde o início)
 
 #### Estados do vendedor (visão macro do pedido)
 
-O desenho do v1 (estados do item visto pelo vendedor) tem 8 valores: `AGUARDANDO_LIBERACAO`, `PENDENTE_PCP`, `EM_ESTOQUE`, `EM_COMPRA`, `EM_PRODUCAO`, `EM_RECEBIMENTO`, `EM_INSPECAO`, `PRONTO_EXPEDICAO`, `FATURADO` (nove nomes, oito transições de negócio). 🟡 **Não existe no código**: nenhuma ocorrência desses nomes em HUB, `api-acos-vital` ou `api-pcp` (busca em 14/10). Hoje o vendedor vê dois níveis: `status_liberacao` (acima) e as 11 etapas por item. O mapeamento etapa para estado macro existe como coluna `estado_macro` em `core_fluxo.item_estado_projetado` (Dump Avhub, linha 2176), preenchida pelo feed do MES, que o MES ainda não publica (ver [[Rastreabilidade-e-Torre-de-Fluxo]]). Decidir se o vendedor ganha esses 8 estados ou fica com as 11 etapas é pendência do Nathan.
+O desenho do v1 (estados do item visto pelo vendedor) tem 9 valores: `AGUARDANDO_LIBERACAO`, `PENDENTE_PCP`, `EM_ESTOQUE`, `EM_COMPRA`, `EM_PRODUCAO`, `EM_RECEBIMENTO`, `EM_INSPECAO`, `PRONTO_EXPEDICAO`, `FATURADO` (nove nomes, oito transições de negócio). 🟡 **Não existe no código**: nenhuma ocorrência desses nomes em HUB, `api-acos-vital` ou `api-pcp` (busca em 14/10). Hoje o vendedor vê dois níveis: `status_liberacao` (acima) e as 11 etapas por item. O mapeamento etapa para estado macro existe como coluna `estado_macro` em `core_fluxo.item_estado_projetado` (Dump Avhub, linha 2176), preenchida pelo feed do MES, que o MES ainda não publica (ver [[Rastreabilidade-e-Torre-de-Fluxo]]). Decidir se o vendedor ganha esses 8 estados ou fica com as 11 etapas é pendência do Nathan.
 
 ### Telas
 

@@ -23,7 +23,7 @@ Cada chave serve a uma ligação específica. Todas viajam no cabeçalho `x-api-
 - **Chave D: av-hub para MES.** Serve para ler etapa e custo dos itens e a Torre de Fluxo.
 - **Chave E: tela do MES para a API do MES.** É interna ao MES.
 - **Chave F: página de documentação** `/docs` da API.
-- **Chave G: HUB para a API comercial.** É outra integração ❓ ([[API-Comercial]]).
+- **Chave G: HUB para a API comercial.** Não é mais usada: o código do Hub não lê a `COMERCIAL_API_KEY` (conferido em 29/10/2026) e a `api-comercial` ficou só para leitura (N16-117). Os dados do comercial vêm da API do Hub; sobre o legado, veja [[API-Comercial]]. ✅
 
 ## O que ainda não está bom
 
@@ -52,7 +52,7 @@ A tabela de regras que já viraram fixas, o mapa completo das chaves e as rotas 
 | D, av-hub lê o MES | av-hub para MES | `api-acos-vital`: `MES_API_URL`, `MES_API_KEY` ✅ `app.js:25-29`, `item_estado_projetado.job.js:38` | `api-pcp`: `MES_API_KEY` (guard fail-closed, 401 sem a variável) ✅ `avhub-api-key.guard.ts:11-23` | `GET /itens/status` (005), `GET /requisicoes-compra` (003, legado), `GET /itens/custo` (008, sem rota 🔴), `GET /fluxo/*` (46, sem módulo 🔴) | ✅ |
 | E, BFF do MES | app-pcp para api-pcp | `app-pcp`: `MES_INTERNAL_API_KEY` ✅ `app/api/auth/[...nextauth]/route.ts:58` | `api-pcp`: `MES_INTERNAL_API_KEY` ✅ `auth/guards/api-key.guard.ts:15-20` | `/auth/azure` e rotas do BFF | ✅ |
 | F, documentação | navegador | `api-acos-vital`: `DOCS_API_KEY` (pré-preenche a chave no `/docs`) ✅ `docs/pagina.js:94` | | só a página `/docs` | ✅ |
-| G, Comercial | HUB para `api-comercial` | `COMERCIAL_API_KEY` | `api-comercial` | outra integração: [[API-Comercial]] | ❓ |
+| G, Comercial | HUB para `api-comercial` | `COMERCIAL_API_KEY` | `api-comercial` | em desuso: o Hub não lê esta chave e a `api-comercial` é só leitura (N16-117), ver [[API-Comercial]] | ✅ |
 
 O nome do lado do MES na chave A é `AVHUB_MES_INTEGRACAO_KEY` (singular), e o valor é **um** dos valores da lista `MES_INTEGRACAO_KEYS` do hub ✅ (#11). Qualquer nota que diga `...KEYS` no lado do MES está errada.
 

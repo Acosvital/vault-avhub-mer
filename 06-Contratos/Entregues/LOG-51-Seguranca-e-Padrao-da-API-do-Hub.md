@@ -3,12 +3,12 @@ id: LOG-51
 aliases: ["Contrato 51", "51-Seguranca-e-Padrao-da-API-do-Hub"]
 tags: [contrato, contrato-logica, contrato-api, contrato-sql, seguranca, api-acos-vital, dba]
 criado: 2026-10-15
-atualizado: 2026-10-19
-status: aplicado-em-producao
+atualizado: 2026-10-29
+status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo (DBA)"
 etapa_0b: []
-fontes: ["api-acos-vital 276dab8 (app.js, middlewares/apiKeyAuth.js, middlewares/identidadeUsuario.js, utils/acessoConfig.js, utils/azureIdToken.js, utils/crudFactory.js, schemas/auth/**, schemas/core_organograma/tables/node/node.route.js)", "Dump Avhub (Esqueleto).sql:19-23, :519, :2498, :10198-10214, :12465, :12483, :13650", "auditoria de segurança de 15/10/2026 (leitura de código, sem teste dinâmico)"]
+fontes: ["api-acos-vital 276dab8 (app.js, middlewares/apiKeyAuth.js, middlewares/identidadeUsuario.js, utils/acessoConfig.js, utils/azureIdToken.js, utils/crudFactory.js, schemas/auth/**, schemas/core_organograma/tables/node/node.route.js)", "Dump Avhub (Esqueleto).sql:19-23, :519, :2498, :10198-10214, :12465, :12483, :13650", "auditoria de segurança de 15/10/2026 (leitura de código, sem teste dinâmico)", "verificação de 29/10/2026: api-acos-vital develop (e705797; src/, test/, .github/, eslint.config.js, Dump do Avhub para referência.sql de 28/10) e av-hub develop (app/api/auth/[...nextauth]/route.ts, lib/api/requirePermission.ts, lib/auth/backendToken.ts)"]
 criado_original: 2026-10-15
 ---
 
@@ -16,8 +16,20 @@ criado_original: 2026-10-15
 
 > **Onde atua:** av-hub: banco, API, front
 
-> [!info] Situação em 15/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** — (transversal, fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
+> [!info] Situação em 29/10/2026
+> **Status:** `parcial` · **Pasta:** `Ativos` (o arquivo ainda está em `Entregues` e deve voltar para `Ativos` enquanto houver item aberto) · **Nós do 0b:** — (transversal, fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
+>
+> Verificado em 29/10/2026 contra o código da `api-acos-vital` (`develop`, `e705797`) e do `av-hub` (`develop`), mais o dump de esquema de 28/10. Rodei hoje o Vitest (74 testes ok, 12 pulados), o ESLint (sem erro) e o `npm audit --omit=dev` (sem alta nem crítica). Não rodei os testes de aceite T1 a T12 (precisam de banco de teste) e não vi produção.
+>
+> - ✅ **Feito no código da API (19 dos 27 itens):** S2, S3, S4, S5, S6, S7, S10, S11, S12, S13, S14, S16, S19, S20, S21, S22, S23, S24 e S27. Boa parte entrou no commit `f76424b` (19/10/2026), que também trouxe o CI.
+> - 🟡 **Parcial (7 itens):** S1 (chave presa a rotas feita, mas `IDENTIDADE_EXIGIR_TOKEN` ainda é variável e vale `false` por padrão), S8 (a API não faz mais DDL e o role `avhub_api` existe, mas faltam GRANT, SQL versionado e saber o `DB_USER` de produção), S9 (CI e 74 testes unitários prontos; os 12 de aceite ficam fora do CI), S15 (corpo só depois da chave, mas o limite padrão segue 10 MB), S17 (antes e depois e auditoria imutável prontos, sem gatilho em preço e aprovação), S18 (colunas e índices citados feitos, restam tabelas e chaves estrangeiras) e S26 (peças unificadas e `no-console` ligado; arquivos grandes sem dividir).
+> - 🔴 **Não feito (1 item):** S25 (`double precision` em quantidades, 4 colunas no dump).
+> - ✅ **Lado do HUB (seção 7):** H1 a H7 feitos. O `fetchMenu` ainda manda só a chave, mas a API já isenta essa rota (`acessoConfig.js:98-102`). Testado em homologação em 28/10 (Nathan).
+> - ❓ **Não deu para confirmar:** valores de produção (`.env` e Coolify), conteúdo de `auth.chaves_servico` (quais chaves estão em modo `exigir`), qual `DB_USER` a API usa, e se os testes T1 a T12 já rodaram contra o banco de teste.
+> - 🟡 **Próximos passos:** ligar e fixar `IDENTIDADE_EXIGIR_TOKEN` (S1 parte 2), S25, depois fechar S8, S17, S18, S15 e S26, e rodar T1 a T12 (seção 8). A seção 9 segue com as perguntas ao Gustavo.
+
+> [!note]- Histórico: situação em 15/10/2026 (auditoria; superada pela de 29/10/2026)
+> **Status então:** `proposta` · **Pasta então:** `Ativos` · **Nós do 0b:** — (transversal, fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
 > - 🔴 Nenhum item **da API** (S1 a S27) está feito. É o resultado de uma auditoria de **leitura de código** da `api-acos-vital` (commit `276dab8`) e do dump de esquema, pedida pelo Nathan para deixar o av-hub seguro e em padrão de ERP.
 > - 🟡 **Lado do HUB (seção 7):** H1, H3, H4, H5 e H6 estão no código, e o H2 em parte (resta `fetchMenu`), mesclados na PR #206 (`d0ef359`, 15/10/2026). O CI do HUB (lint, typecheck, madge, build e o e2e do Comercial) passou. H7 (troca da chave) feito em 28/10/2026. ✅ Testado na homologação com a API e o Azure em 28/10/2026 (login Azure, login por senha e sessão ociosa), tudo funcionou (Nathan).
@@ -30,7 +42,7 @@ criado_original: 2026-10-15
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Reúne a auditoria de segurança da `api-acos-vital` em 27 itens (S1 a S27). O risco central é uma chave de serviço de administrador compartilhada entre Hub, MES (sistema de chão de fábrica) e pipeline.
 > **Quem é afetado:** Gustavo (API e banco), Nathan (front) e Robert (MES).
-> **Situação:** 🔴 Nenhum item da API está feito. 🟡 No front (seção 7), os itens H1 a H7 foram feitos e testados em homologação em 28/10. ❓ Nada foi executado na auditoria.
+> **Situação em 29/10/2026:** 🟡 Parcial. A maior parte da API já foi feita: 19 dos 27 itens estão no código da `api-acos-vital` (erro sem texto do banco, `helmet` e CORS fechado, login Azure com `id_token` obrigatório, troca de senha com limite e revogação, limite de chaves inválidas por IP, `/docs` só para usuário com permissão, escritas em transação, auditoria com antes e depois, CI e testes). Faltam: ligar de vez a exigência do token do usuário para a chave do BFF (S1), mudar as quantidades de `double precision` para `numeric` (S25, o único item sem nada feito) e fechar os itens pela metade: role do banco e GRANT (S8), testes de aceite no CI (S9), limite do corpo JSON (S15), auditoria de preço e aprovação (S17), colunas e índices (S18) e arquivos grandes (S26). No front (seção 7), H1 a H7 estão feitos e foram testados em homologação em 28/10. ❓ Não deu para ver produção nem rodar os testes T1 a T12; isso o DBA confirma.
 
 ## 1. Por que este contrato existe
 
@@ -48,41 +60,44 @@ Os contratos [[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] 
 
 Prioridade: **P1** corrigir antes de qualquer expansão de uso; **P2** na sequência; **P3** padrão e manutenção.
 
-| ID | Item | Gravidade | Prioridade | Tipo |
-|---|---|---|---|---|
-| S1 | Chave de serviço admin sem token dispensa permissão, escopo e identidade | Crítico | P1 | API + ambiente |
-| S2 | `POST /autenticacao/azure` emite JWT só com o e-mail quando a validação do `id_token` está desligada (padrão) | Crítico | P1 | API + ambiente (+ BFF) |
-| S3 | Troca de senha sem limite de tentativas, sem revogar tokens e sem política de senha | Alto | P1 | API |
-| S4 | `PUT /organograma/node/:id` faz `node.update(req.body)` (mass assignment) | Alto | P1 | API |
-| S5 | Rate limit global contornável pelo header `x-api-key` e com limite incoerente | Alto | P1 | API |
-| S6 | Respostas 500 devolvem `err.message` do driver em dezenas de rotas | Alto | P1 | API |
-| S7 | Sem `helmet` e CORS `*` por padrão | Alto | P1 | API + ambiente |
-| S8 | Roles do banco todos `SUPERUSER` e a API precisa de DDL no boot | Alto | P1 | Banco |
-| S9 | Sem testes automatizados e sem CI | Alto | P2 | API |
-| S10 | Sessão renovável sem teto absoluto | Médio | P2 | API |
-| S11 | Enumeração de usuário e bloqueio induzido no login | Médio | P2 | API |
-| S12 | `/docs` entrega a `DOCS_API_KEY` a qualquer conta do tenant | Médio | P2 | API + ambiente |
-| S13 | Callback do Azure no `/auth` sem validar assinatura nem `nonce` | Médio | P2 | API |
-| S14 | Chaves do `.env` comparadas sem tempo constante | Baixo | P3 | API |
-| S15 | Corpo JSON de até 10 MB lido antes da autenticação | Médio | P2 | API |
-| S16 | Escritas em lote e multi-tabela sem transação | Médio | P2 | API |
-| S17 | Auditoria só com nomes de campos, sem antes e depois, e mutável | Médio | P2 | Banco + API |
-| S18 | Colunas de auditoria incompletas e chaves estrangeiras sem índice | Médio | P2 | Banco |
-| S19 | `/health` expõe banco e ambiente; 500 fora de produção devolve a mensagem | Baixo | P3 | API |
-| S20 | Prefixos públicos por `startsWith` sem fronteira e `/blog` ainda liberado | Baixo | P3 | API |
-| S21 | Prefixo da chave nos logs | Baixo | P3 | API |
-| S22 | Senha começando com `$2` é gravada em texto puro; `POST /usuarios` pode devolver o hash | Baixo | P3 | Banco + API |
-| S23 | `LIKE` sem escape de curinga e `limit` negativo | Baixo | P3 | API |
-| S24 | Listagens sem paginação | Baixo | P3 | API |
-| S25 | Quantidades em `double precision` | Baixo | P3 | Banco |
-| S26 | Duplicação, arquivos grandes e `no-console` desligado | Baixo | P3 | API |
-| S27 | Filtro `alterado_desde` de `/parceiros` e `/produtos` fica depois de `return where;` e nunca executa | Baixo | P3 | API |
+| ID | Item | Gravidade | Prioridade | Tipo | Selo (29/10/2026) | Evidência (29/10/2026) |
+|---|---|---|---|---|---|---|
+| S1 | Chave de serviço admin sem token dispensa permissão, escopo e identidade | Crítico | P1 | API + ambiente | 🟡 | api-acos-vital/src/middlewares/apiKeyAuth.js:272-284 (rotas por chave: livre, registrar, exigir); api-acos-vital/src/utils/acessoConfig.js:98-102 (menu do login isento); dump:12507 e :12554. Falta fixar `IDENTIDADE_EXIGIR_TOKEN` (acessoConfig.js:54, padrão `false`) e apagar o ramo `exigeUsuario` (apiKeyAuth.js:244) |
+| S2 | `POST /autenticacao/azure` emite JWT só com o e-mail quando a validação do `id_token` está desligada (padrão) | Crítico | P1 | API + ambiente (+ BFF) | ✅ | api-acos-vital/src/schemas/auth/aggregates/autenticacao/autenticacao.route.js:32-39 e :127-138; api-acos-vital/src/utils/azureIdToken.js:58-99; acessoConfig.js:43-45 (variável removida) |
+| S3 | Troca de senha sem limite de tentativas, sem revogar tokens e sem política de senha | Alto | P1 | API | ✅ | api-acos-vital/src/schemas/auth/tables/usuarios/usuarios.route.js:114-170; api-acos-vital/src/utils/senha.js:11-22 |
+| S4 | `PUT /organograma/node/:id` faz `node.update(req.body)` (mass assignment) | Alto | P1 | API | ✅ | api-acos-vital/src/schemas/core_organograma/tables/node/node.route.js:13-19 e :73-85 |
+| S5 | Rate limit global contornável pelo header `x-api-key` e com limite incoerente | Alto | P1 | API | ✅ | api-acos-vital/src/middlewares/apiKeyAuth.js:106-135 e :246-263 (30 falhas de chave por minuto por IP dão 429); api-acos-vital/src/app.js:155-165 (limite geral por id da chave, depois da validação) |
+| S6 | Respostas 500 devolvem `err.message` do driver em dezenas de rotas | Alto | P1 | API | ✅ | api-acos-vital/src/utils/errorHandler.js:28-45 e :180; api-acos-vital/eslint.config.js:62-71 (regra de lint); nenhum `err.message` em resposta 5xx no `src/` |
+| S7 | Sem `helmet` e CORS `*` por padrão | Alto | P1 | API + ambiente | ✅ | api-acos-vital/src/app.js:53-63 (helmet, sem `X-Powered-By`) e :71-94 (CORS só por lista; `*` ignorado em produção) |
+| S8 | Roles do banco todos `SUPERUSER` e a API precisa de DDL no boot | Alto | P1 | Banco | 🟡 | api-acos-vital/src/app.js:114-115 e :236-258 (sem DDL no boot); dump:18-19 (role `avhub_api` sem SUPERUSER); dump:12863 (`auth.sessions` por migration). Falta: `DB_USER` de produção ❓, GRANT (o dump não traz nenhum), SQL versionado no repositório |
+| S9 | Sem testes automatizados e sem CI | Alto | P2 | API | 🟡 | api-acos-vital/.github/workflows/ci.yml:1-31; api-acos-vital/test/unit/ (74 testes); api-acos-vital/test/integracao/seguranca.test.js:1-279 (T1 a T12, só com banco de teste, fora do CI). Falta integração no CI |
+| S10 | Sessão renovável sem teto absoluto | Médio | P2 | API | ✅ | api-acos-vital/src/utils/tokenUsuario.js:25-44, :62-73, :93-94; autenticacao.route.js:237-249 |
+| S11 | Enumeração de usuário e bloqueio induzido no login | Médio | P2 | API | ✅ | autenticacao.route.js:41-48, :145-146, :176-193 (401 `CREDENCIAIS_INVALIDAS` igual) |
+| S12 | `/docs` entrega a `DOCS_API_KEY` a qualquer conta do tenant | Médio | P2 | API + ambiente | ✅ | api-acos-vital/src/middlewares/docsAuth.js:18-57; api-acos-vital/src/docs/rotas.js:13-35; api-acos-vital/src/docs/pagina.js:94-113 |
+| S13 | Callback do Azure no `/auth` sem validar assinatura nem `nonce` | Médio | P2 | API | ✅ | api-acos-vital/src/schemas/auth/aggregates/auth/auth.route.js:19-27 e :74-90; azureIdToken.js:83-85 |
+| S14 | Chaves do `.env` comparadas sem tempo constante | Baixo | P3 | API | ✅ | api-acos-vital/src/middlewares/apiKeyAuth.js:69-83 (hash SHA-256 e `timingSafeEqual`) |
+| S15 | Corpo JSON de até 10 MB lido antes da autenticação | Médio | P2 | API | 🟡 | api-acos-vital/src/app.js:167-181 (corpo lido depois da chave). O limite padrão segue 10 MB (app.js:171), não 100 KB |
+| S16 | Escritas em lote e multi-tabela sem transação | Médio | P2 | API | ✅ | api-acos-vital/src/schemas/core_vendas_faturamento/tables/pedidos_vendas/pedidos_vendas.route.js:711-755; api-acos-vital/src/utils/upsertByKey.js:74-93; notas_fiscais.route.js:131-136; refaturamentos.route.js:91-111; produto_vendas.route.js:124-153 |
+| S17 | Auditoria só com nomes de campos, sem antes e depois, e mutável | Médio | P2 | Banco + API | 🟡 | dump:12427-12428 (`antes` e `depois`), dump:443-455 e :30268 (auditoria imutável), dump:435 (`fn_auditar_linha`, gatilho em 17 tabelas). Falta: preço e aprovação sem gatilho; `CHECK` de ações igual ao de antes (dump:12429) |
+| S18 | Colunas de auditoria incompletas e chaves estrangeiras sem índice | Médio | P2 | Banco | 🟡 | dump:13216-13220 (colunas de autoria nas 10 tabelas citadas); dump:29531, :29571, :29700, :29716, :28007, :27983, :28552, :28560, :28784 (índices citados). Falta: 68 de 154 tabelas ainda sem alguma das 4 colunas e cerca de 29 FKs de negócio sem índice (contagem por script no dump de 28/10) |
+| S19 | `/health` expõe banco e ambiente; 500 fora de produção devolve a mensagem | Baixo | P3 | API | ✅ | api-acos-vital/src/app.js:191-199 e :228-230; errorHandler.js:28-31 |
+| S20 | Prefixos públicos por `startsWith` sem fronteira e `/blog` ainda liberado | Baixo | P3 | API | ✅ | api-acos-vital/src/middlewares/_comum.js:27-37; apiKeyAuth.js:219; api-acos-vital/src/middlewares/ipFilter.js:21 (`/blog` saiu) |
+| S21 | Prefixo da chave nos logs | Baixo | P3 | API | ✅ | _comum.js:15-25; apiKeyAuth.js:222-225; api-acos-vital/src/middlewares/requestLogger.js:9 |
+| S22 | Senha começando com `$2` é gravada em texto puro; `POST /usuarios` pode devolver o hash | Baixo | P3 | Banco + API | ✅ | dump:725-751 (`fn_hash_senha`); api-acos-vital/src/schemas/auth/tables/usuarios/usuarios.model.js:99-104 (hash fora do JSON); usuarios.route.js:58-68. `fn_set_senha` segue como caminho paralelo (dump:1089) |
+| S23 | `LIKE` sem escape de curinga e `limit` negativo | Baixo | P3 | API | ✅ | api-acos-vital/src/utils/like.js:16-24; api-acos-vital/src/utils/crudFactory.js:246-258; api-acos-vital/src/utils/pagination.js:6-11 (limit de 1 a 200) |
+| S24 | Listagens sem paginação | Baixo | P3 | API | ✅ | api-acos-vital/src/utils/tetoLista.js:22-60; crudFactory.js:262-272; itens_pedido_status.route.js:78-84; pedidos_vendas_status_historico.route.js:56-61. Teto de 1000, não 200 |
+| S25 | Quantidades em `double precision` | Baixo | P3 | Banco | 🔴 | dump:3537, :15877, :15895 e :17082 ainda são `double precision` |
+| S26 | Duplicação, arquivos grandes e `no-console` desligado | Baixo | P3 | API | 🟡 | Feito: _comum.js (peças unificadas), acessoConfig.js:39-41 (stubs saíram), eslint.config.js:56 (`no-console`), package.json:2, .dockerignore. Falta: `ordens_compra.route.js` (1368 linhas) e `funcionarios.route.js` (658) sem dividir, sem `eslint-plugin-security` |
+| S27 | Filtro `alterado_desde` de `/parceiros` e `/produtos` fica depois de `return where;` e nunca executa | Baixo | P3 | API | ✅ | api-acos-vital/src/schemas/core/tables/parceiros/parceiros.route.js:97-113 e api-acos-vital/src/schemas/core/tables/produtos/produtos.route.js:57-73 (filtro antes do `return where`) |
 
 ---
 
 ## 4. Fase 1 (P1): o que fecha o risco de controle total
 
 ### S1 — Chave de serviço admin sem token dispensa permissão, escopo e identidade
+
+> [!warning] Situação em 29/10/2026: 🟡
+> Feito: chave do banco presa a rotas (`modo_rotas` livre, registrar ou exigir, e a lista em `auth.chaves_servico_rotas`; 403 `CHAVE_ROTA_NAO_PERMITIDA` em `apiKeyAuth.js:272-284`, commit `b02d6c5` de 15/10; `fn_chave_rota_decidir` no dump:604). A API já isenta `GET /permissoes_usuario/menu/{id}` (`acessoConfig.js:98-102`, `identidadeUsuario.js:73`), o que resolve o que restava do `fetchMenu`. O H7 está feito. **Falta:** `IDENTIDADE_EXIGIR_TOKEN` continua variável de ambiente com padrão `false` (`acessoConfig.js:54`) e o ramo `exigeUsuario: exigirToken()` das chaves de `API_KEYS` continua (`apiKeyAuth.js:244`). ❓ Não deu para confirmar em produção: se a variável está ligada, se `mes-integracao` e `pipeline-omie` estão em modo `exigir` e se `API_KEYS` tem só a chave do BFF (são dados do banco e do Coolify, não do código).
 
 - **Onde (✅ relido em 15/10):** `src/middlewares/apiKeyAuth.js:160-161` monta `{ origem: "env", acesso: "admin", exigeUsuario: exigirToken() }`; `src/utils/acessoConfig.js:71` define `exigirToken = () => bool("IDENTIDADE_EXIGIR_TOKEN", false)`; `src/middlewares/identidadeUsuario.js:67-75` só devolve 401 `TOKEN_USUARIO_AUSENTE` se `exigeUsuario` for verdadeiro.
 - **O que acontece.** Quem tem uma chave de `API_KEYS` e não manda `Authorization` nunca passa por `auth.fn_autorizar`. Pode chamar qualquer rota (inclusive `/usuarios`, `/perfis`, `/permissoes`, `/pedidos_vendas/lote`, que apaga de verdade). Pode se passar por qualquer usuário informando `id_usuario_sessao` e os campos `created_by`/`updated_by`; a auditoria grava isso como `identidade_origem = 'informada'`. A mesma chave é usada pelo BFF, pelo MES (chave B) e pelo pipeline (chave C) ([[Chaves-e-Autenticacao]]). Vazar uma é vazar as três.
@@ -95,6 +110,9 @@ Prioridade: **P1** corrigir antes de qualquer expansão de uso; **P2** na sequê
 
 ### S2 — `POST /autenticacao/azure` emite JWT só com o e-mail
 
+> [!success] Situação em 29/10/2026: ✅
+> A validação do `id_token` é regra fixa, sem variável (`autenticacao.route.js:127-138`, `azureIdToken.js:58-99`), e só a chave do BFF (`API_KEYS`) faz login (`autenticacao.route.js:32-39`, 403 `CHAVE_SEM_ACESSO_AO_LOGIN`). Testado no login Azure da homologação em 28/10 (Nathan).
+
 - **Onde (✅ relido):** `src/utils/azureIdToken.js:27-28` (`validarIdTokenLigado()` devolve `false` quando `AUTENTICACAO_AZURE_VALIDAR_ID_TOKEN` não existe); `src/schemas/auth/aggregates/autenticacao/autenticacao.route.js:99-135` só valida o `id_token` se a função der `true`, senão usa `req.body.email` e chama `respostaLogin(res, usuario.id, "informada")`.
 - **O que acontece.** Com a validação desligada, qualquer chamador com a chave de serviço obtém um JWT válido de **qualquer usuário ativo**, inclusive de um administrador, informando só o e-mail. Junto com S1, o controle da API fica em um segredo só.
 - **O que fazer (Gustavo, com o Nathan).**
@@ -105,12 +123,18 @@ Prioridade: **P1** corrigir antes de qualquer expansão de uso; **P2** na sequê
 
 ### S3 — Troca de senha sem limite, sem revogação e sem política
 
+> [!success] Situação em 29/10/2026: ✅
+> Troca só da própria senha (403 `SENHA_DE_OUTRO_USUARIO`), limite de 5 erros em 900 s com 429, senha de 8 a 72 bytes, e revogação dos tokens na mesma transação (`usuarios.route.js:114-170`, `senha.js:11-22`).
+
 - **Onde (✅ relido):** `src/schemas/auth/tables/usuarios/usuarios.route.js:71-95`. `bcrypt.compare(senha_atual, usuario.senha)` seguido de `usuario.update({ senha: senha_nova })`. `auth.fn_revogar_tokens_usuario` só é chamada no logout (`autenticacao.route.js:237`).
 - **O que acontece.** (1) A rota não passa por `limiteExcedido`/`loginFalhou`, que só existem no `/autenticacao/login`: quem tem a chave e o `id` de um usuário testa senhas sem limite pelo campo `senha_atual`. (2) Trocar a senha não revoga os tokens já emitidos: um token roubado continua valendo. O comentário da função no dump (linha 790) diz que ela serve para "troca de senha". (3) Não há tamanho mínimo; o bcrypt também corta a senha em 72 bytes.
 - **O que fazer.** Aplicar o mesmo limite de falhas do login a essa rota; chamar `auth.fn_revogar_tokens_usuario` depois do `update`; validar de 8 a 72 bytes; exigir que `req.usuario.id === req.params.id` (a troca é do próprio usuário; redefinição por administrador é outra rota, com permissão própria e auditoria).
 - **Aceite:** teste T3.
 
 ### S4 — Mass assignment em `PUT /organograma/node/:id`
+
+> [!success] Situação em 29/10/2026: ✅
+> `PUT` só aceita `parent_id` e `id_ent`, com leitura travada e escrita na mesma transação (`node.route.js:13-19`, `node.route.js:73-85`). A rota está montada em `/organograma_nodes` (`src/schemas/core_organograma/index.js:41`).
 
 - **Onde (✅ relido):** `src/schemas/core_organograma/tables/node/node.route.js:63` — `await node.update(req.body);`.
 - **O que acontece.** O cliente envia qualquer coluna do model (`id`, `deleted_at`, `created_by`, chaves estrangeiras). Todas as outras rotas usam lista de campos permitidos (`pick`); esta é a exceção. As três escritas desse arquivo também não usam transação nem validação.
@@ -119,12 +143,18 @@ Prioridade: **P1** corrigir antes de qualquer expansão de uso; **P2** na sequê
 
 ### S5 — Rate limit global contornável
 
+> [!success] Situação em 29/10/2026: ✅
+> O limite geral agora vem depois da chave validada e usa o id da chave (`app.js:155-165`, 5000 por minuto), e quem erra a chave é contido por IP (30 falhas por minuto, `apiKeyAuth.js:106-135`, contagem em memória de cada réplica). O desenho mudou do que o contrato pedia (IP antes da autenticação), mas o contorno por `x-api-key` variável acabou. `trust proxy 1` em `app.js:47`.
+
 - **Onde (✅ relido):** `src/app.js:73-82` — `max: 10000` com o comentário "200 req/min" e `keyGenerator: (req) => req.headers["x-api-key"] || ipKeyGenerator(req)`.
 - **O que acontece.** O limiter roda antes do `apiKeyAuth` e usa o valor bruto do header como chave: um atacante manda uma `x-api-key` diferente a cada requisição e nunca bate o limite, e cada valor distinto ocupa memória do store. Com 10000/min mesmo a chave legítima tem pouca proteção. O comentário diverge do código.
 - **O que fazer.** Chavear por **IP** (`ipKeyGenerator`) antes da autenticação, com um teto apertado, e por chave **depois** que ela for validada. Alinhar valor e comentário. Para atrás de proxy, conferir `trust proxy` (ver Q4 da seção 9).
 - **Aceite:** teste T5.
 
 ### S6 — `err.message` do driver nas respostas 500
+
+> [!success] Situação em 29/10/2026: ✅
+> `handleError` e `handleSequelizeError` são o ponto único (`errorHandler.js:28-45`, `errorHandler.js:180`) e o lint barra `err.message` em `res.json` (`eslint.config.js:62-71`). Ainda saem de propósito, em 4xx ou 409, as mensagens de trigger do banco (ex.: `funcionarios.route.js:132`, `vaga.route.js:141`) e a de tipo inválido do Postgres (`errorHandler.js:163-167`).
 
 - **Onde (✅ relido):** `autenticacao.route.js:137,184,229,244`; `usuarios.route.js:94`; `permissoes.route.js:84`; `vw_permissoes_usuario.route.js:99,120,145,156`; `mapa_unidades.route.js:27,37`; `vw_todos_os_clientes.route.js:26,36`; `vw_historico_precos.route.js:27`; `vw_todos_os_fornecedores.route.js:24,34`; `vw_catalogo_de_produtos.route.js:65,83`; `vw_fornecedores_com_produtos.route.js:35,55`; `item_estado_projetado.route.js:276` (devolve `mes_motivo: err.message`).
 - **O que acontece.** Mensagens do Postgres e do Sequelize (nome de tabela, coluna, constraint, trecho de SQL) vão ao cliente sem passar por `handleError`/`handleSequelizeError`, que já mascaram em produção. Em `item_estado_projetado.route.js:276` vazam até falhas de conexão com o MES.
@@ -133,12 +163,18 @@ Prioridade: **P1** corrigir antes de qualquer expansão de uso; **P2** na sequê
 
 ### S7 — Sem `helmet` e CORS `*` por padrão
 
+> [!success] Situação em 29/10/2026: ✅
+> `helmet` e `x-powered-by` desligado (`app.js:53-63`); `/docs` e `/auth` ficam sem CSP de propósito. CORS só para as origens de `CORS_ORIGINS`; vazio ou `*` em produção = sem CORS (`app.js:71-94`). Não derruba o boot se a variável faltar, o que o contrato aceitava ("lista vazia").
+
 - **Onde (✅ relido):** `app.js:49-70`; `package.json` não tem `helmet`; não existe `app.disable("x-powered-by")`; `CORS_ORIGINS` vazio vira `"*"`.
 - **O que acontece.** Sem HSTS, `X-Content-Type-Options`, CSP e afins; `x-powered-by: Express` exposto. Com `CORS_ORIGINS` indefinido, a API responde `Access-Control-Allow-Origin: *` aceitando `Authorization` e `x-api-key`: qualquer site pode chamá-la a partir do navegador de quem tiver uma chave. `/docs` e a sessão ficam sem CSP.
 - **O que fazer.** Adicionar `helmet()` e `app.disable("x-powered-by")`. Tornar `CORS_ORIGINS` **obrigatório em produção**, sem fallback para `*` (o `utils/env.js` já derruba o processo se faltar variável; incluir esta). O BFF chama servidor a servidor, então a lista de origens pode ficar vazia (sem CORS) para a API.
 - **Aceite:** teste T7.
 
 ### S8 — Roles do banco todos `SUPERUSER`
+
+> [!warning] Situação em 29/10/2026: 🟡
+> No código: a API não cria schema nem tabela e para com mensagem clara se faltar estrutura (`app.js:114-115`, `app.js:236-258`). No dump de 28/10 existe o role `avhub_api` com `NOSUPERUSER` (dump:18-19) e `auth.sessions` criada por migration (dump:12863). **Falta/❓:** qual `DB_USER` a API usa em produção; o dump não tem nenhum `GRANT` nem `REVOKE`; as migrations (051c, 051f) não estão no repositório da API (não há pasta `sql/`; BL-024 segue aberto).
 
 - **Onde (✅ relido no dump):** `Dump Avhub (Esqueleto).sql:19-23` — `avhub_prd_admin` e `postgres` com `SUPERUSER ... LOGIN`; `avhub_tst_admin` com `SUPERUSER ... REPLICATION BYPASSRLS` (sem login). No código: `app.js:199-204` faz `CREATE SCHEMA IF NOT EXISTS` no boot e `app.js:102` usa `createTableIfMissing: true` para a tabela de sessões, o que exige DDL e empurra a conexão da API para um role privilegiado.
 - **O que acontece.** Se a aplicação roda como `avhub_prd_admin` (❓ não sei qual `DB_USER` a API usa em produção), qualquer falha na API, como S1 ou S4, vira acesso total ao banco (`COPY ... TO PROGRAM`, leitura de qualquer schema).
@@ -155,37 +191,64 @@ Prioridade: **P1** corrigir antes de qualquer expansão de uso; **P2** na sequê
 
 ### S9 — Sem testes e sem CI
 
+> [!warning] Situação em 29/10/2026: 🟡
+> CI no GitHub Actions com lint, `npm test` e `npm audit --omit=dev --audit-level=high` (`.github/workflows/ci.yml:1-31`, commit `f76424b` de 19/10). Em 29/10 rodei: Vitest 74 testes ok e 12 pulados, ESLint sem erro, `npm audit` sem alta ou crítica (2 moderadas em `sequelize` e `uuid`). Os testes T1 a T12 existem em `test/integracao/seguranca.test.js` mas só rodam com banco de teste e ficam fora do CI. **Falta:** integração no CI (hoje sem `supertest`), cobertura de 403 por rota sem mapa, escopo de vendedor e paginação; o volume é bem menor que os cerca de 300 testes do módulo comercial.
+
 `package.json` só tem `start`, `dev`, `lint` e `lint:fix`; não existe `*.test.*`/`*.spec.*` nem `.github/`; o README é só um diagrama. Toda a lógica de autorização, escopo e escrita multi-tabela (~75 mil linhas) é validada só em produção. **Fazer:** testes de integração (supertest e um Postgres de teste) cobrindo os testes da seção 8 e mais: token expirado e revogado, 403 por rota sem mapa, escopo de vendedor, mass assignment, paginação com limite. CI com `npm run lint`, os testes e `npm audit`. O módulo comercial que vai entrar na API ([[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]]) já traz cerca de 300 testes escritos em Vitest que podem servir de modelo.
 
 ### S10 — Sessão renovável sem teto
+
+> [!success] Situação em 29/10/2026: ✅
+> O token leva `auth_time`; `/renovar` mantém e responde 401 `SESSAO_EXPIRADA` depois de 12 h (`tokenUsuario.js:25-44`, `autenticacao.route.js:237-249`). Sem `jti`; o logout continua derrubando todos os aparelhos (`token_versao` único).
 
 `autenticacao.route.js:223-229` e `utils/tokenUsuario.js:47-57`: `/renovar` aceita qualquer token ainda válido (TTL de 15 min) e emite outro, sem vida máxima e sem `jti`. Um token roubado vive enquanto for renovado a cada 15 min, até um logout. `token_versao` é um só por usuário: o logout em um aparelho derruba todos. **Fazer:** claim `auth_time` e vida máxima da sessão (8 a 12 h; o BFF usa 12 h), recusando a renovação acima disso.
 
 ### S11 — Enumeração de usuário e bloqueio induzido
 
+> [!success] Situação em 29/10/2026: ✅
+> Toda recusa vira 401 `CREDENCIAIS_INVALIDAS`, com o motivo só no log (`autenticacao.route.js:41-48`, `autenticacao.route.js:145-193`). A chave `email:<e-mail>` do limite segue global (`autenticacao.route.js:70-77`); o "bloqueio progressivo" era só "avaliar" e não foi feito.
+
 `autenticacao.route.js:127-129,167-173`: `/azure` responde 404 "Usuário não encontrado" e `/login` diz "Usuário inativo ou desligado" e "não possui login interno", mensagens diferentes da de credencial inválida. Quem tem a chave descobre quais e-mails existem e quais estão inativos, sem custo no contador. A chave `email:<e-mail>` do limite é global (sem IP), então quem tem a chave também trava o login de qualquer e-mail com 5 senhas erradas (o contrato 41 aceitou esse custo). **Fazer:** resposta uniforme 401 "Credenciais inválidas" nos dois endpoints, com o motivo só no log; avaliar bloqueio progressivo em vez de duro.
 
 ### S12 — `/docs` entrega a `DOCS_API_KEY`
+
+> [!success] Situação em 29/10/2026: ✅
+> Só entra no `/docs` quem é usuário ativo com a tela `api-docs` (`docsAuth.js:18-57`); a `DOCS_API_KEY` só vai pré-preenchida se for chave de leitura do banco (`docs/rotas.js:13-35`); a página sai com o Bearer de 15 min do próprio usuário (`docs/pagina.js:94-113`). O critério é a tela `api-docs` (migration 051f), e não literalmente o perfil de testes do TI.
 
 `middlewares/docsAuth.js:1-4` só confere `req.session?.user`; `auth.route.js:62-76` cria sessão para **qualquer conta do Azure AD** do tenant sem consultar `auth.usuarios`; `docs/pagina.js:94-98` embute `apiKey: { token: process.env.DOCS_API_KEY }` na página (✅ relido). Qualquer funcionário ou convidado do tenant abre `/docs` com a chave pré-preenchida; se for uma chave admin, o acesso é total (❓ não sei o nível nem o valor em produção). **Fazer:** exigir que o e-mail exista ativo em `auth.usuarios` e tenha o perfil de testes do time de TI; a `DOCS_API_KEY` de produção deve ser de nível `leitura` ou não existir, e a página de produção não deve trazer chave pré-preenchida.
 
 ### S13 — Callback do Azure sem validar assinatura e sem `nonce`
 
+> [!success] Situação em 29/10/2026: ✅
+> O callback usa `nonce` e a mesma validação completa do `id_token` (`auth.route.js:19-27`, `auth.route.js:74-90`). `GET /auth/logout` segue sem proteção contra CSRF (efeito mínimo).
+
 `schemas/auth/aggregates/auth/auth.route.js:62-76` lê o payload do `id_token` por `Buffer.from(...split(".")[1], "base64url")`, sem verificar assinatura (comentário: "seguro pois obtido via HTTPS"). Sem `nonce` e sem checar `aud`/`iss`/`tid`. O risco é baixo enquanto o token vier direto do endpoint do Azure, mas o código de validação já existe em `utils/azureIdToken.js`. **Fazer:** reaproveitar `emailDoIdToken` no callback e acrescentar `nonce`. O `GET /auth/logout` também aceita CSRF (efeito mínimo).
 
 ### S15 — Corpo JSON de 10 MB antes da autenticação
+
+> [!warning] Situação em 29/10/2026: 🟡
+> O corpo só é lido depois do `apiKeyAuth` (`app.js:167-181`) e corpo acima de 1 MB vai para o log. **Falta:** o limite padrão continua 10 MB (`JSON_BODY_LIMIT`, `app.js:171`); a redução para 100 KB ficou para depois de medir o log.
 
 `app.js:46` (✅ relido) — `express.json({ limit: process.env.JSON_BODY_LIMIT || "10mb" })` roda antes do `ipFilter`/`apiKeyAuth` e o limiter é contornável (S5). Um anônimo faz o servidor processar 10 MB por requisição. **Fazer:** manter um limite pequeno por padrão (100 KB), subir só nas rotas de lote que precisam, e processar o corpo depois da chave validada.
 
 ### S16 — Escritas em lote sem transação
 
+> [!success] Situação em 29/10/2026: ✅
+> `DELETE /pedidos_vendas/lote` roda em uma transação com `FOR UPDATE` (`pedidos_vendas.route.js:711-755`); `upsertByKey` e as escritas de notas, refaturamentos e produto_vendas também (`upsertByKey.js:74-93`, `notas_fiscais.route.js:131-136`, `refaturamentos.route.js:91-111`, `produto_vendas.route.js:124-153`).
+
 `pedidos_vendas.route.js` (17 pontos de escrita, nenhuma transação): upsert com `find`, `create` e nova tentativa, e `DELETE /lote` (linhas 599-668) com `findAll` seguido de `destroy({ force: true })` de até 500 pedidos. O mesmo em `notas_fiscais.route.js`, `utils/upsertByKey.js`, `refaturamentos.route.js` e `produto_vendas.route.js`. Uma queda entre as duas operações, ou uma corrida entre dois upserts, deixa estado parcial. **Fazer:** `sequelize.transaction` ou `INSERT ... ON CONFLICT DO UPDATE ... RETURNING (xmax = 0)`. `ordens_compra`, `simulacoes`, `funcionarios` e `vaga` já usam transação: seguir esse padrão.
 
 ### S17 — Auditoria sem antes e depois, e mutável
 
+> [!warning] Situação em 29/10/2026: 🟡
+> No dump de 28/10: `auth.auditoria` tem `antes` e `depois` (dump:12427-12428), é só inserção por gatilho (dump:443-455, :30268) e a `fn_auditar_linha` grava antes e depois por gatilho em 17 tabelas (usuários, perfis, permissões, telas, rotas, chaves, regras de comissão, parâmetros de compra e outras; dump:435). **Falta:** preço e aprovação (ex.: `vagas_decisoes`, pedidos) sem gatilho; o `CHECK` de ações segue com as 7 de antes (dump:12429); a API não grava `avhub.usuario_id` (`set_config` não existe no `src/`), então o autor no gatilho vem de `created_by` e `updated_by`; ❓ GRANT/REVOKE do T10 (o dump não traz).
+
 `middlewares/auditoria.js:92-99` grava `campos: Object.keys(b)` (só os **nomes**); a tabela `auth.auditoria` (dump:10198-10214) não guarda valor anterior nem posterior e não tem gatilho de imutabilidade (só existe `fn_req_eventos_imutavel`, para eventos de requisição). Sem token, a autoria vem do corpo (`origem = 'informada'`). **Fazer:** gravar `antes` e `depois` (jsonb) nas tabelas sensíveis (usuários, perfis, permissões, preço, aprovação) por gatilho ou na rota; bloquear `UPDATE`/`DELETE` em `auth.auditoria` por gatilho e `GRANT`; ações novas exigem `ALTER` do `CHECK` (hoje: `criar`, `editar`, `excluir`, `decidir`, `ler_documento`, `login`, `logout`). O módulo comercial vai precisar de mais ações ([[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]]).
 
 ### S18 — Colunas de auditoria e índices de chave estrangeira
+
+> [!warning] Situação em 29/10/2026: 🟡
+> Feito no dump de 28/10: as 10 tabelas citadas agora têm as 4 colunas (ex.: dump:13216-13220), há `fn_updated_at_se_mudou` (dump:12390) e os índices citados existem (dump:29531, :29571, :29700, :29716, :28007, :27983, :28552, :28560, :28784). **Falta:** por um script que passei no dump, 68 de 154 tabelas ainda não têm alguma das 4 colunas (várias de histórico, que são só inserção) e 97 de 261 chaves estrangeiras não têm índice líder, 68 delas de autoria (sem índice de propósito, comentado no dump) e cerca de 29 de negócio ou usuário (ex.: `parceiros(id_origem)`, `ordens_compra(cancelado_por)`). Não confirmado no banco vivo.
 
 Do dump, por script de leitura (estimativa; confirmar no banco): de 124 tabelas, cerca de 60 não têm algum entre `created_at`, `updated_at`, `created_by`, `updated_by`. Sem nenhuma das quatro: `core_vendas_faturamento.refaturamentos`, `itens_pedido_custo`, `itens_pedido_status`, `pedidos_vendas_status_historico`, `core_comissionamento.simulacao_itens`, `core_organograma.nivel_hierarquico`. Sem `created_by`/`updated_by`: `core.contas_correntes`, `core.projetos`, `core_aprovacao_de_vagas.vaga`, `core_comissionamento.regras_comissoes_fixas`. Cerca de 77 de 175 chaves estrangeiras sem índice líder; as relevantes: `ordens_compra(codigo_comprador)` e `(id_comprador)`, `requisicoes_compra(id_ordem_compra)`, `requisicoes_compra_eventos(id_ordem_compra)` (o índice `ix_req_eventos_req_oc` começa por `id_requisicao`), `core.setores(parent_id)`, `core.produtos(codigo_empresa, familias_produtos)`, `core_comissionamento.simulacoes(id_parametros)` e `(id_simulacao_contestada)`, `core_organograma.welcome_settings(active_preset_id)`, e as `created_by`/`updated_by`/`deleted_by` para `auth.usuarios`. Há 33 `ON DELETE CASCADE`, então apagar em `auth.usuarios` ou `core.unidades` varre as filhas. **Fazer:** `CREATE INDEX CONCURRENTLY` nas chaves de negócio; indexar as de autoria só onde há exclusão de usuário ou consulta por autor; padronizar as quatro colunas e o gatilho `set_updated_at` (hoje em 50 tabelas) nas tabelas operacionais.
 
@@ -193,32 +256,32 @@ Do dump, por script de leitura (estimativa; confirmar no banco): de 124 tabelas,
 
 ## 6. Fase 3 (P3): padrão e manutenção
 
-| ID | O que fazer |
-|---|---|
-| S14 | Guardar o `sha256` das chaves de `API_KEYS` e comparar com `crypto.timingSafeEqual`, como já se faz com a chave do MES (`apiKeyAuth.js:52-54,160`). Hoje é `VALID_KEYS.has(...)`. Ataque de timing na rede é impraticável; o ponto é uniformizar. |
-| S19 | `app.js:142-152`: `/health` devolve `database: process.env.DB_NAME` e `env`. Devolver só `{ status: "ok" }`. Em `NODE_ENV` diferente de `production`, o 500 devolve `err.message` (`app.js:188`): mascarar sempre, salvo flag explícita de depuração. |
-| S20 | `apiKeyAuth.js:49,133` e `ipFilter.js:22` (✅ relido): `url.startsWith("/health" \| "/docs" \| "/auth" \| "/blog")`. Nenhuma rota atual começa com esses prefixos, mas uma futura `/authors` nasceria sem chave e sem filtro de IP. Comparar `url === p \|\| url.startsWith(p + "/")` e **remover `/blog`** (o blog saiu da API, e o comentário do arquivo ainda o libera). |
-| S21 | `apiKeyAuth.js:139,167`, `requestLogger.js:19-31`, `auth.logs.identificador`: gravam 8 caracteres da chave, 32 bits do segredo se for UUID. Logar o `id` da chave (hash truncado), não o prefixo. |
-| S22 | Dump `:519` (`fn_hash_senha`): `IF NEW.senha NOT LIKE '$2%' THEN crypt(...)`. Quem grava uma senha começando com `$2` por `POST/PUT /usuarios` grava o valor **sem hash**; dá para injetar um hash conhecido. Validar o formato completo de hash bcrypt (`^\$2[aby]\$\d{2}\$.{53}$`) e aceitá-lo só do role de migração. Há também `fn_set_senha` (dump:868 em diante) como caminho paralelo: consolidar em um. Além disso, `POST /usuarios` (`utils/crudFactory.js`, ✅ por leitura) devolve o registro criado e o `RETURNING` do Sequelize traz todas as colunas: o hash gerado pelo gatilho provavelmente volta no 201 (❓ não testei). Remover `senha` do JSON de resposta. |
-| S23 | Dezenas de `Op.iLike: %${query.x}%` (ex.: `parceiros.route.js:86-89`) não escapam `%` e `_`: consulta cara com `%%%%`. O padrão correto está em `pedidos_liberacao.route.js:101-104`. `crudFactory.js:246` — `Math.min(200, parseInt(req.query.limit, 10) \|\| 50)` (✅ relido) — não tem piso: `limit=-5` vira `LIMIT` negativo e dá 500. Usar `parsePagination` (`utils/pagination.js`), que já faz certo. |
-| S24 | 16 arquivos de rota sem `limit`/`usePaginate`, 4 dos 33 `list()` sem paginar (`itens_pedido_status`, `pedidos_vendas_status_historico`, `contas_correntes`, `projetos`, `ip_regras`). As de itens e de histórico crescem. Teto de 200 em todas. |
-| S25 | `double precision` em quantidades: `core_vendas_faturamento.produto_vendas.quantidade` (dump:2498), `historico.hst_produto_vendas.quantidade` (:13650), `core_comissionamento.simulacao_itens.qtd` (:12465) e `qtd_compra` (:12483). Multiplicar por preço perde precisão. Trocar por `numeric(15,4)` (convenção do vault). Migration com cuidado: as views dependentes (por exemplo `quantidade_vendida`, dump:20621) precisam ser recriadas. |
-| S27 | ✅ relido em 15/10 (já listado como B10 em [[Bugs-Conhecidos]]): `parceiros.route.js:96` e `produtos.route.js:51` têm `return where;` **antes** do bloco `alterado_desde` (`:97-105` e `:52-60`). O filtro nunca executa, embora o contrato [[API-001-Produtos-Parceiros-Filtro-Incremental]] esteja como entregue. Mover o bloco para antes do `return` e criar teste; ou rebaixar o status do API-001. |
-| S26 | `maskKey` duplicada (`apiKeyAuth.js:88`, `requestLogger.js:19`); `CAMPOS_AUTORIA` duplicada (`apiKeyAuth.js:72`, `identidadeUsuario.js:35`); três implementações de paginação; `ordens_compra.route.js` com 1359 linhas e `funcionarios.route.js` com 657, misturando SQL, regra e HTTP; stubs "regra fixa, devolve sempre true" em `acessoConfig.js:75-83`; `no-console` desligado (15 `console.log` fora de `docs/`); sem `eslint-plugin-security`; `package.json` com nome `empresa-api`; `Dockerfile` copia o código inteiro (`COPY . .`) sem `.dockerignore` para `docs`/`public` desnecessários. Extrair `middlewares/_comum.js`, dividir os arquivos grandes em rota, serviço e repositório, apagar os stubs, ligar `no-console`. |
+| ID | O que fazer | Selo e evidência (29/10/2026) |
+|---|---|---|
+| S14 | Guardar o `sha256` das chaves de `API_KEYS` e comparar com `crypto.timingSafeEqual`, como já se faz com a chave do MES (`apiKeyAuth.js:52-54,160`). Hoje é `VALID_KEYS.has(...)`. Ataque de timing na rede é impraticável; o ponto é uniformizar. | ✅ api-acos-vital/src/middlewares/apiKeyAuth.js:69-83 (hash SHA-256 e `timingSafeEqual`) |
+| S19 | `app.js:142-152`: `/health` devolve `database: process.env.DB_NAME` e `env`. Devolver só `{ status: "ok" }`. Em `NODE_ENV` diferente de `production`, o 500 devolve `err.message` (`app.js:188`): mascarar sempre, salvo flag explícita de depuração. | ✅ api-acos-vital/src/app.js:191-199 e :228-230; errorHandler.js:28-31 |
+| S20 | `apiKeyAuth.js:49,133` e `ipFilter.js:22` (✅ relido): `url.startsWith("/health" \| "/docs" \| "/auth" \| "/blog")`. Nenhuma rota atual começa com esses prefixos, mas uma futura `/authors` nasceria sem chave e sem filtro de IP. Comparar `url === p \|\| url.startsWith(p + "/")` e **remover `/blog`** (o blog saiu da API, e o comentário do arquivo ainda o libera). | ✅ api-acos-vital/src/middlewares/_comum.js:27-37; apiKeyAuth.js:219; api-acos-vital/src/middlewares/ipFilter.js:21 (`/blog` saiu) |
+| S21 | `apiKeyAuth.js:139,167`, `requestLogger.js:19-31`, `auth.logs.identificador`: gravam 8 caracteres da chave, 32 bits do segredo se for UUID. Logar o `id` da chave (hash truncado), não o prefixo. | ✅ _comum.js:15-25; apiKeyAuth.js:222-225; api-acos-vital/src/middlewares/requestLogger.js:9 |
+| S22 | Dump `:519` (`fn_hash_senha`): `IF NEW.senha NOT LIKE '$2%' THEN crypt(...)`. Quem grava uma senha começando com `$2` por `POST/PUT /usuarios` grava o valor **sem hash**; dá para injetar um hash conhecido. Validar o formato completo de hash bcrypt (`^\$2[aby]\$\d{2}\$.{53}$`) e aceitá-lo só do role de migração. Há também `fn_set_senha` (dump:868 em diante) como caminho paralelo: consolidar em um. Além disso, `POST /usuarios` (`utils/crudFactory.js`, ✅ por leitura) devolve o registro criado e o `RETURNING` do Sequelize traz todas as colunas: o hash gerado pelo gatilho provavelmente volta no 201 (❓ não testei). Remover `senha` do JSON de resposta. | ✅ dump:725-751 (`fn_hash_senha`); api-acos-vital/src/schemas/auth/tables/usuarios/usuarios.model.js:99-104 (hash fora do JSON); usuarios.route.js:58-68. `fn_set_senha` segue como caminho paralelo (dump:1089) |
+| S23 | Dezenas de `Op.iLike: %${query.x}%` (ex.: `parceiros.route.js:86-89`) não escapam `%` e `_`: consulta cara com `%%%%`. O padrão correto está em `pedidos_liberacao.route.js:101-104`. `crudFactory.js:246` — `Math.min(200, parseInt(req.query.limit, 10) \|\| 50)` (✅ relido) — não tem piso: `limit=-5` vira `LIMIT` negativo e dá 500. Usar `parsePagination` (`utils/pagination.js`), que já faz certo. | ✅ api-acos-vital/src/utils/like.js:16-24; api-acos-vital/src/utils/crudFactory.js:246-258; api-acos-vital/src/utils/pagination.js:6-11 (limit de 1 a 200) |
+| S24 | 16 arquivos de rota sem `limit`/`usePaginate`, 4 dos 33 `list()` sem paginar (`itens_pedido_status`, `pedidos_vendas_status_historico`, `contas_correntes`, `projetos`, `ip_regras`). As de itens e de histórico crescem. Teto de 200 em todas. | ✅ api-acos-vital/src/utils/tetoLista.js:22-60; crudFactory.js:262-272; itens_pedido_status.route.js:78-84; pedidos_vendas_status_historico.route.js:56-61. Teto de 1000, não 200 |
+| S25 | `double precision` em quantidades: `core_vendas_faturamento.produto_vendas.quantidade` (dump:2498), `historico.hst_produto_vendas.quantidade` (:13650), `core_comissionamento.simulacao_itens.qtd` (:12465) e `qtd_compra` (:12483). Multiplicar por preço perde precisão. Trocar por `numeric(15,4)` (convenção do vault). Migration com cuidado: as views dependentes (por exemplo `quantidade_vendida`, dump:20621) precisam ser recriadas. | 🔴 dump:3537, :15877, :15895 e :17082 ainda são `double precision` |
+| S27 | ✅ relido em 15/10 (já listado como B10 em [[Bugs-Conhecidos]]): `parceiros.route.js:96` e `produtos.route.js:51` têm `return where;` **antes** do bloco `alterado_desde` (`:97-105` e `:52-60`). O filtro nunca executa, embora o contrato [[API-001-Produtos-Parceiros-Filtro-Incremental]] esteja como entregue. Mover o bloco para antes do `return` e criar teste; ou rebaixar o status do API-001. | ✅ api-acos-vital/src/schemas/core/tables/parceiros/parceiros.route.js:97-113 e api-acos-vital/src/schemas/core/tables/produtos/produtos.route.js:57-73 (filtro antes do `return where`) |
+| S26 | `maskKey` duplicada (`apiKeyAuth.js:88`, `requestLogger.js:19`); `CAMPOS_AUTORIA` duplicada (`apiKeyAuth.js:72`, `identidadeUsuario.js:35`); três implementações de paginação; `ordens_compra.route.js` com 1359 linhas e `funcionarios.route.js` com 657, misturando SQL, regra e HTTP; stubs "regra fixa, devolve sempre true" em `acessoConfig.js:75-83`; `no-console` desligado (15 `console.log` fora de `docs/`); sem `eslint-plugin-security`; `package.json` com nome `empresa-api`; `Dockerfile` copia o código inteiro (`COPY . .`) sem `.dockerignore` para `docs`/`public` desnecessários. Extrair `middlewares/_comum.js`, dividir os arquivos grandes em rota, serviço e repositório, apagar os stubs, ligar `no-console`. | 🟡 Feito: _comum.js (peças unificadas), acessoConfig.js:39-41 (stubs saíram), eslint.config.js:56 (`no-console`), package.json:2, .dockerignore. Falta: `ordens_compra.route.js` (1368 linhas) e `funcionarios.route.js` (658) sem dividir, sem `eslint-plugin-security` |
 
 ## 7. O que o Nathan (front/BFF do HUB) precisa fazer para destravar
 
 Itens do lado do HUB, que **não** são do DBA. Eles definem a ordem da seção 10.
 
-| # | O quê | Destrava | Estado em 15/10 |
-|---|---|---|---|
-| H1 | Mandar o `id_token` do Azure no `POST /autenticacao/azure` | S2 (ligar a validação) | ✅ `findUserByEmail` manda `id_token` (PR #206) |
-| H2 | As três chamadas pré-login (`fetchMenu`, `fetchSlugDaTela`, `fetchInfoPerfisDoUsuario`) passarem a levar o token do usuário, **ou** combinar com o DBA a lista exata de rotas isentas | S1 (ligar `IDENTIDADE_EXIGIR_TOKEN`) | 🟡 Perfis e tela inicial vêm de `GET /me/permissoes` com o Bearer do próprio usuário; `fetchSlugDaTela` e `/usuarios_perfis` e `/perfis` saíram. **Resta `fetchMenu`**, só com a chave: a API isenta `GET /permissoes_usuario/menu/:id_usuario` |
-| H3 | Falhar fechado quando a sessão estiver sem `backendToken` (401 "entre novamente"), em vez de seguir só com a chave de serviço; renovar o token por expiração, não só a cada 5 min | S1, S10 | ✅ `requirePermission`: 401 sem token, 503 se `/me/permissoes` falhar, 403 fora de `auth.telas`, sem fallback para o menu do JWT; renova com menos de 5 min para vencer; sessão relida a cada 4 min; `SessaoExpiradaGuard` leva ao login |
-| H4 | Tirar `backendToken` e `backendTokenExpiraEm` da `session` devolvida ao navegador | defesa em profundidade | ✅ O servidor lê do cookie (`lib/auth/backendToken.ts`); a sessão só traz `sessaoExpirada` |
-| H5 | Parar de aceitar `codigo_vendedor` do navegador em `comissoes/minhas-comissoes` | escopo | ✅ O escopo vem do token, aplicado pela API (`faturamento_planilha` está no mapa de escopo). `vendedor` segue como filtro de texto que só estreita |
-| H6 | Rotas do BFF com `..` no parâmetro (`grupos-clientes`, `blacklist_*`, `comissoes/*`, `compras/pedidos-venda`) passarem por validação | traversal | ✅ `parametrosSeguros` para ids e códigos, `segmentoSeguro` para texto livre, e trava única no `repassar` de `grupos-clientes` |
-| H7 | Rotacionar a chave de produção que está em texto no `.env.local` e apagar a linha comentada | S1 | ✅ **Feito (Nathan, 28/10/2026):** chave trocada no HUB, chave antiga fora de `API_KEYS`, MES e pipeline atualizados, linha comentada apagada, produção conferida. Era manual (Nathan e Gustavo); o assistente não mexe em segredo |
+| # | O quê | Destrava | Estado em 15/10 | Evidência (29/10/2026) |
+|---|---|---|---|---|
+| H1 | Mandar o `id_token` do Azure no `POST /autenticacao/azure` | S2 (ligar a validação) | ✅ `findUserByEmail` manda `id_token` (PR #206) | ✅ `av-hub/app/api/auth/[...nextauth]/route.ts:37-47` (`id_token` no corpo) e `:225` (passa o `account.id_token`) |
+| H2 | As três chamadas pré-login (`fetchMenu`, `fetchSlugDaTela`, `fetchInfoPerfisDoUsuario`) passarem a levar o token do usuário, **ou** combinar com o DBA a lista exata de rotas isentas | S1 (ligar `IDENTIDADE_EXIGIR_TOKEN`) | 🟡 Perfis e tela inicial vêm de `GET /me/permissoes` com o Bearer do próprio usuário; `fetchSlugDaTela` e `/usuarios_perfis` e `/perfis` saíram. **Resta `fetchMenu`**, só com a chave: a API isenta `GET /permissoes_usuario/menu/:id_usuario` | ✅ pela opção da lista de rotas isentas: perfis e tela inicial por `/me/permissoes` com o Bearer (`route.ts:99-115`); `fetchMenu` ainda só com a chave (`route.ts:81-87`), e a API isenta essa rota (`api-acos-vital/src/utils/acessoConfig.js:98-102`). Se o BFF passar a mandar o Bearer, a lista de isentas pode esvaziar |
+| H3 | Falhar fechado quando a sessão estiver sem `backendToken` (401 "entre novamente"), em vez de seguir só com a chave de serviço; renovar o token por expiração, não só a cada 5 min | S1, S10 | ✅ `requirePermission`: 401 sem token, 503 se `/me/permissoes` falhar, 403 fora de `auth.telas`, sem fallback para o menu do JWT; renova com menos de 5 min para vencer; sessão relida a cada 4 min; `SessaoExpiradaGuard` leva ao login | ✅ `av-hub/lib/api/requirePermission.ts:27-52` (401, 503 e 403, sem fallback) e `av-hub/providers/SessaoExpiradaGuard.tsx` |
+| H4 | Tirar `backendToken` e `backendTokenExpiraEm` da `session` devolvida ao navegador | defesa em profundidade | ✅ O servidor lê do cookie (`lib/auth/backendToken.ts`); a sessão só traz `sessaoExpirada` | ✅ `av-hub/lib/auth/backendToken.ts:1-24` (lido do cookie no servidor) e `av-hub/types/next-auth.d.ts:18-22` (a sessão só traz `sessaoExpirada`) |
+| H5 | Parar de aceitar `codigo_vendedor` do navegador em `comissoes/minhas-comissoes` | escopo | ✅ O escopo vem do token, aplicado pela API (`faturamento_planilha` está no mapa de escopo). `vendedor` segue como filtro de texto que só estreita | ✅ `av-hub/app/api/comissoes/minhas-comissoes/route.ts:103-131`: não lê `codigo_vendedor` do navegador; `vendedor` só estreita |
+| H6 | Rotas do BFF com `..` no parâmetro (`grupos-clientes`, `blacklist_*`, `comissoes/*`, `compras/pedidos-venda`) passarem por validação | traversal | ✅ `parametrosSeguros` para ids e códigos, `segmentoSeguro` para texto livre, e trava única no `repassar` de `grupos-clientes` | ✅ `av-hub/lib/api/parametrosSeguros.ts`, usado em 59 rotas de `app/api` (ex.: `app/api/comissoes/blacklist-clientes/[codigoCliente]/route.ts:22`) |
+| H7 | Rotacionar a chave de produção que está em texto no `.env.local` e apagar a linha comentada | S1 | ✅ **Feito (Nathan, 28/10/2026):** chave trocada no HUB, chave antiga fora de `API_KEYS`, MES e pipeline atualizados, linha comentada apagada, produção conferida. Era manual (Nathan e Gustavo); o assistente não mexe em segredo | ✅ declarado feito por Nathan em 28/10; é manual (segredo) e não dá para conferir no código ❓ |
 
 ### 7b. O que o Robert (MES) precisa fazer no S1
 
@@ -231,20 +294,20 @@ Os demais achados de segurança do BFF (IDOR na observação do PCP, e-mail de p
 
 Todos rodam contra a API de homologação, com a `develop` publicada e o BFF no ar.
 
-| # | Teste | Resultado esperado |
-|---|---|---|
-| T1 | Chamar `GET /usuarios` só com a chave do **BFF** e sem `Authorization` | 401 `TOKEN_USUARIO_AUSENTE`. Com a chave do **MES** em rota fora da lista dela: 403 |
-| T2 | `POST /autenticacao/azure` com `{"email":"<administrador>"}` e sem `id_token` | 401 `ID_TOKEN_INVALIDO`. Com `id_token` de outro e-mail: 401 `ID_TOKEN_EMAIL_DIVERGENTE`. Com a chave do MES: 403 |
-| T3 | `PATCH /usuarios/:id/senha` com 6 senhas atuais erradas; depois com senha nova de 5 caracteres; depois uma troca válida | 6ª tentativa 429; senha curta 400; troca válida revoga o token anterior (o token velho passa a dar 401 `token_revogado`) |
-| T4 | `PUT /organograma/node/:id` com `{"id":"<outro uuid>","deleted_at":"2026-01-01","created_by":"<outro>"}` | os campos fora da lista são ignorados; o registro mantém `id`, `deleted_at` e `created_by` |
-| T5 | 20.000 requisições com `x-api-key` diferente a cada uma | passa a retornar 429 pelo IP; a memória do limiter não cresce por valor distinto |
-| T6 | Forçar um erro de SQL (por exemplo, `GET` com id malformado em `/vw_permissoes_usuario/...`) | corpo `{ "detail": "Erro interno do servidor." }`, sem nome de tabela, coluna ou SQL |
-| T7 | `OPTIONS` e `GET` com `Origin: https://qualquer.site` | sem `Access-Control-Allow-Origin`; resposta traz `Strict-Transport-Security`, `X-Content-Type-Options` e **não** traz `X-Powered-By` |
-| T8 | `SELECT rolsuper FROM pg_roles WHERE rolname = '<DB_USER da API>'` e subir a API num banco sem os schemas | `false`; a API **não** cria schema nem tabela no boot (falha com mensagem clara se faltarem) |
-| T9 | Sessão: renovar um token por mais de 12 h seguidas | 401 `SESSAO_EXPIRADA` |
-| T10 | `UPDATE auth.auditoria SET acao = 'x'` com o role da aplicação | permissão negada; `INSERT` continua funcionando |
-| T11 | `POST /usuarios` com `senha: "$2a$12$abc"` e depois `POST /usuarios` válido | o primeiro 400; o segundo devolve 201 **sem** o campo `senha` |
-| T12 | `GET /produtos?limit=-5` | 400 (ou o limite mínimo aplicado), nunca 500 |
+| # | Teste | Resultado esperado | Teste automatizado (29/10/2026) |
+|---|---|---|---|
+| T1 | Chamar `GET /usuarios` só com a chave do **BFF** e sem `Authorization` | 401 `TOKEN_USUARIO_AUSENTE`. Com a chave do **MES** em rota fora da lista dela: 403 | 🟡 escrito em `api-acos-vital/test/integracao/seguranca.test.js:137`; execução ❓ (só roda com banco de teste, fora do CI) |
+| T2 | `POST /autenticacao/azure` com `{"email":"<administrador>"}` e sem `id_token` | 401 `ID_TOKEN_INVALIDO`. Com `id_token` de outro e-mail: 401 `ID_TOKEN_EMAIL_DIVERGENTE`. Com a chave do MES: 403 | 🟡 escrito em `api-acos-vital/test/integracao/seguranca.test.js:147`; execução ❓ (só roda com banco de teste, fora do CI) |
+| T3 | `PATCH /usuarios/:id/senha` com 6 senhas atuais erradas; depois com senha nova de 5 caracteres; depois uma troca válida | 6ª tentativa 429; senha curta 400; troca válida revoga o token anterior (o token velho passa a dar 401 `token_revogado`) | 🟡 escrito em `api-acos-vital/test/integracao/seguranca.test.js:166`; execução ❓ (só roda com banco de teste, fora do CI) |
+| T4 | `PUT /organograma/node/:id` com `{"id":"<outro uuid>","deleted_at":"2026-01-01","created_by":"<outro>"}` | os campos fora da lista são ignorados; o registro mantém `id`, `deleted_at` e `created_by` | 🟡 escrito em `api-acos-vital/test/integracao/seguranca.test.js:191`; execução ❓ (só roda com banco de teste, fora do CI) |
+| T5 | 20.000 requisições com `x-api-key` diferente a cada uma | passa a retornar 429 pelo IP; a memória do limiter não cresce por valor distinto | 🟡 escrito em `api-acos-vital/test/integracao/seguranca.test.js:271`; execução ❓ (só roda com banco de teste, fora do CI) |
+| T6 | Forçar um erro de SQL (por exemplo, `GET` com id malformado em `/vw_permissoes_usuario/...`) | corpo `{ "detail": "Erro interno do servidor." }`, sem nome de tabela, coluna ou SQL | 🟡 escrito em `api-acos-vital/test/integracao/seguranca.test.js:207`; execução ❓ (só roda com banco de teste, fora do CI) |
+| T7 | `OPTIONS` e `GET` com `Origin: https://qualquer.site` | sem `Access-Control-Allow-Origin`; resposta traz `Strict-Transport-Security`, `X-Content-Type-Options` e **não** traz `X-Powered-By` | 🟡 escrito em `api-acos-vital/test/integracao/seguranca.test.js:213`; execução ❓ (só roda com banco de teste, fora do CI) |
+| T8 | `SELECT rolsuper FROM pg_roles WHERE rolname = '<DB_USER da API>'` e subir a API num banco sem os schemas | `false`; a API **não** cria schema nem tabela no boot (falha com mensagem clara se faltarem) | 🟡 escrito em `api-acos-vital/test/integracao/seguranca.test.js:225`; execução ❓ (só roda com banco de teste, fora do CI) |
+| T9 | Sessão: renovar um token por mais de 12 h seguidas | 401 `SESSAO_EXPIRADA` | 🟡 escrito em `api-acos-vital/test/integracao/seguranca.test.js:231`; execução ❓ (só roda com banco de teste, fora do CI) |
+| T10 | `UPDATE auth.auditoria SET acao = 'x'` com o role da aplicação | permissão negada; `INSERT` continua funcionando | 🟡 escrito em `api-acos-vital/test/integracao/seguranca.test.js:242`; execução ❓ (só roda com banco de teste, fora do CI) |
+| T11 | `POST /usuarios` com `senha: "$2a$12$abc"` e depois `POST /usuarios` válido | o primeiro 400; o segundo devolve 201 **sem** o campo `senha` | 🟡 escrito em `api-acos-vital/test/integracao/seguranca.test.js:256`; execução ❓ (só roda com banco de teste, fora do CI) |
+| T12 | `GET /produtos?limit=-5` | 400 (ou o limite mínimo aplicado), nunca 500 | 🟡 escrito em `api-acos-vital/test/integracao/seguranca.test.js:266`; execução ❓ (só roda com banco de teste, fora do CI) |
 
 ## 9. Perguntas para o Gustavo (confirmar em produção)
 
@@ -264,18 +327,18 @@ Todos rodam contra a API de homologação, com a `develop` publicada e o BFF no 
 
 A ordem respeita as dependências: o que não depende do HUB vai primeiro, e a chave de serviço só aperta depois que o HUB estiver pronto.
 
-| # | Quem | Passo |
-|---|---|---|
-| 1 | Gustavo | Responder Q1 a Q5 (só leitura em produção). Define o tamanho real de S1, S8 e S12 |
-| 2 | Gustavo | **Sem dependência do HUB:** S4, S6, S7 (com `CORS_ORIGINS` combinado), S5, S15, S3, S10, S19, S20, S21, S22, S23 |
-| 3 | Nathan | H1 a H7 no HUB. ✅ H1, H3 a H6 e parte do H2 na PR #206 (`d0ef359`, 15/10/2026); resta `fetchMenu` (com a API) e H7 (manual) |
-| 4 | Gustavo | S2: tornar a validação do `id_token` fixa **depois** de H1 em produção |
-| 5 | Gustavo (com o Robert) | S1 parte 1: criar chaves em `auth.chaves_servico` para MES e pipeline, com `rotas_permitidas`; trocar nos dois lados (o Robert atualiza a variável da chave no MES); rotacionar a chave antiga |
-| 6 | Gustavo | S1 parte 2: ligar `IDENTIDADE_EXIGIR_TOKEN` para o BFF, depois de H2 e H3; tornar a regra fixa e apagar o ramo antigo |
-| 7 | Gustavo | S8: novo role `avhub_api`, migrations fora do boot, `GRANT` mínimo. Trocar o `DB_USER` da API numa janela combinada |
-| 8 | Gustavo | S17, S18 e S25: auditoria com antes e depois, colunas e índices, `numeric` nas quantidades |
-| 9 | Gustavo | S9 e S26: testes, CI e refatoração, em paralelo aos passos acima |
-| 10 | Nathan | Rodar os testes T1 a T12 e registrar o resultado nesta nota |
+| # | Quem | Passo | Estado em 29/10/2026 |
+|---|---|---|---|
+| 1 | Gustavo | Responder Q1 a Q5 (só leitura em produção). Define o tamanho real de S1, S8 e S12 | ❓ respostas de produção não vistas |
+| 2 | Gustavo | **Sem dependência do HUB:** S4, S6, S7 (com `CORS_ORIGINS` combinado), S5, S15, S3, S10, S19, S20, S21, S22, S23 | ✅ no código (S15 só em parte: limite padrão ainda 10 MB) |
+| 3 | Nathan | H1 a H7 no HUB. ✅ H1, H3 a H6 e parte do H2 na PR #206 (`d0ef359`, 15/10/2026); resta `fetchMenu` (com a API) e H7 (manual) | ✅ (o `fetchMenu` ficou com a chave e a API o isenta) |
+| 4 | Gustavo | S2: tornar a validação do `id_token` fixa **depois** de H1 em produção | ✅ no código (regra fixa desde 16/10); testado na homologação em 28/10 |
+| 5 | Gustavo (com o Robert) | S1 parte 1: criar chaves em `auth.chaves_servico` para MES e pipeline, com `rotas_permitidas`; trocar nos dois lados (o Robert atualiza a variável da chave no MES); rotacionar a chave antiga | 🟡 `rotas_permitidas` existe (`modo_rotas` + `auth.chaves_servico_rotas`); ❓ quais chaves estão em `exigir` e se `API_KEYS` só tem a do BFF |
+| 6 | Gustavo | S1 parte 2: ligar `IDENTIDADE_EXIGIR_TOKEN` para o BFF, depois de H2 e H3; tornar a regra fixa e apagar o ramo antigo | 🔴 a variável ainda existe e vale `false` por padrão |
+| 7 | Gustavo | S8: novo role `avhub_api`, migrations fora do boot, `GRANT` mínimo. Trocar o `DB_USER` da API numa janela combinada | 🟡 código sem DDL e role criado no dump; faltam GRANT, SQL versionado e ❓ o `DB_USER` de produção |
+| 8 | Gustavo | S17, S18 e S25: auditoria com antes e depois, colunas e índices, `numeric` nas quantidades | 🟡 S17 e S18 em parte; 🔴 S25 |
+| 9 | Gustavo | S9 e S26: testes, CI e refatoração, em paralelo aos passos acima | 🟡 CI e testes unitários feitos; S26 em parte |
+| 10 | Nathan | Rodar os testes T1 a T12 e registrar o resultado nesta nota | ❓ não confirmado |
 
 ## 11. Riscos e rollback
 
@@ -309,3 +372,11 @@ Para o DBA saber o que **não** mexer:
 ## 14. Ligações
 
 [[Chaves-e-Autenticacao]] · [[RBAC-e-Permissoes]] · [[AV-Hub-API]] · [[Banco-AvHub]] · [[Riscos]] (RS-003, RS-020) · [[Backlog-por-Frente]] (BL-018, BL-024, BL-056 a BL-061) · [[LOG-40-Escopo-de-Vendedores-e-Permissoes-pelo-Token-no-Backend]] · [[LOG-41-Login-Rate-Limit-no-Backend]] · [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]]
+
+## 15. Verificação de 29/10/2026 (código contra o contrato)
+
+- **O que foi lido:** `api-acos-vital` (`develop`, `e705797`): `src/app.js`, `src/middlewares/`, `src/utils/`, as rotas de autenticação, usuários, organograma, pedidos, notas, `docs/`, `.github/workflows/ci.yml`, `test/`, `eslint.config.js`, `Dockerfile`, `.dockerignore`; o `Dump do Avhub para referência.sql` (gerado em 28/10/2026); e, no `av-hub` (`develop`), `app/api/auth/[...nextauth]/route.ts`, `lib/api/requirePermission.ts`, `lib/auth/backendToken.ts`, `lib/api/parametrosSeguros.ts`.
+- **O que foi rodado (só leitura):** `vitest run` (74 ok, 12 pulados), `eslint .` (0 erros, 4 avisos de estilo), `npm audit --omit=dev --audit-level=high` (sem alta nem crítica; 2 moderadas em `sequelize` e `uuid`) e dois scripts de contagem no dump (colunas de autoria por tabela e chaves estrangeiras sem índice).
+- **O que não foi possível ver:** produção e homologação (variáveis do Coolify, `auth.chaves_servico` e `auth.chaves_servico_rotas` com dados, `auth.rotas_telas`, `DB_USER` da API), os GRANTs (o dump não traz), as migrations 051 (não estão no repositório da API) e o resultado dos testes T1 a T12 contra um banco.
+- **Lembrete:** o dump de referência mostra o esquema do banco em que foi gerado em 28/10, e não necessariamente o de produção.
+- **Pasta recomendada:** `Ativos`. Há itens de segurança relevantes abertos (S1 parte 2, S8, S25 e os parciais S9, S15, S17, S18, S26), então o contrato não está entregue. Mover para `Entregues` só quando S1 a S27 estiverem ✅ ou o que sobrar for explicitamente aceito pelo Nathan e pelo Gustavo.

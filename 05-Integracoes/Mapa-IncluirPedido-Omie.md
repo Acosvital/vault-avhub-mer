@@ -203,8 +203,8 @@ O que isso resolve e o que não resolve:
 9. **Parcelas:** com `codigo_parcela` cadastrado, o Omie calcula o vencimento a partir do **faturamento**? `quantidade_dias` conta a partir de quê (inclusão ou faturamento)? `"999"` com `lista_parcelas` × condição cadastrada. O `IncluirParcela` interpreta a descrição ("28/45") ou só a guarda? O código de uma mesma condição é diferente em Mogi e em Uberaba?
 10. **Moeda:** ver abaixo.
 11. **Cancelamento:** `CancelarPedidoVenda` (serviço `pedidovendafat`) e `ExcluirPedido`: o que cada um faz num pedido não faturado e o que o `ListarEtapasPedido` devolve (`cCancelado`, data, usuário).
-13. **Sequencial:** criar um sequencial (faturar em partes) por `IncluirPedido` com `cabecalho.sequencial`, com itens e quantidades parciais; ver se o valor sai do original e volta ao cancelar. Testar quando a tela de "Faturamento em partes" existir (N16-92, N16-93).
 12. **Reenvio:** repetir o `IncluirPedido` com o mesmo `codigo_pedido_integracao` devolve erro ou o pedido existente?
+13. **Sequencial:** criar um sequencial (faturar em partes) por `IncluirPedido` com `cabecalho.sequencial`, com itens e quantidades parciais; ver se o valor sai do original e volta ao cancelar. Testar quando a tela de "Faturamento em partes" existir (N16-92, N16-93).
 
 ### 7. Dois achados que mudam o desenho
 

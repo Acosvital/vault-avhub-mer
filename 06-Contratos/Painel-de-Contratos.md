@@ -1,7 +1,7 @@
 ---
 tags: [contratos, painel, indice]
 criado: 2026-10-14
-atualizado: 2026-10-28
+atualizado: 2026-10-29
 status: vigente
 dono: Nathan
 fontes: [LOG-51 e LOG-52 (auditoria de 15/10/2026), 06-Contratos/Ativos, 06-Contratos/Entregues, 06-Contratos/Arquivados, plano de 14/10/2026, código de 14/10 (api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, omie-elt-pipeline 0f739f0)]
@@ -17,14 +17,14 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 31 | 20 | 51 |
+| `Ativos` (a fazer ou parcial) | 32 | 20 | 52 |
 | `Entregues` (feito no código ou aplicado) | 63 | 12 | 75 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
-| **Total** | **105** | **32** | **137** |
+| **Total** | **106** | **32** | **138** |
 
 | Status | Contratos |
 |---|---|
-| `proposta` | 15 |
+| `proposta` | 16 |
 | `para-implementar` | 0 |
 | `parcial` | 15 |
 | `implementado-no-codigo` | 46 |
@@ -63,6 +63,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | SQL-013 | Contrato SQL 013 | [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso\|Produtos: prováveis duplicatas (normalização, pares por semelhança e uso)]] | `aplicado-em-producao` | av-hub: banco | Entregues | — | — | Gustavo: informar os ajustes feitos no script | — | — |
 | SQL-014 | Contrato SQL 014 | [[SQL-014-Pedido-Encerrado-por-Saldo-Zerado\|Pedido encerrado por saldo zerado ("Faturado, encerrado") e encerrado em atraso]] | `aplicado-em-producao` | av-hub: banco | Entregues | — | — | — | — | — |
 | SQL-015 | Contrato SQL 015 | [[SQL-015-Carteira-do-PCP-Totais-por-Vendedor-e-Desvio\|Carteira do PCP: totais, por vendedor e desvio de previsão]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | — (G1 a G3 decididos; `desvio=true` conferido 26/10) | Nathan: testar `PUT .../marcacao` (marcar e desmarcar) | — |
+| SQL-020 | Contrato SQL 020 | [[SQL-020-Imposto-por-Item-da-OC\|Imposto por item da OC (IPI, ICMS, ST, DIFAL, origem e frete rateado)]] | `proposta` | av-hub: banco, API, front · MES: API | Ativos | C4, R4, E3 | — | N1 (Michele), G1 a G4 (Gustavo) | Gustavo: colunas e pré-preenchimento; Robert: `difal_unit` e cópia no Recebimento; Nathan: campos na emissão da OC | depende da parte de compras do pedido |
 | API-001 | — | [[API-001-Produtos-Parceiros-Filtro-Incremental\|Filtro incremental `alterado_desde` em produtos e parceiros]] | `implementado-no-codigo` | av-hub: API · pipeline Omie | Entregues | — | — | — (`alterado_desde` corrigido, informado 26/10) | — | — |
 | API-002 | — | [[API-002-Material-Alias-Omie-MES\|Alias de material Omie no MES (rejeitado)]] | `arquivado` | MES: API | Arquivados | — | — | — | — | — |
 | API-003 | — | [[API-003-Requisicao-Compra-Integracao-MES\|Requisição de compra MES → av-hub (versão polling)]] | `arquivado` | av-hub: API · MES: API | Arquivados | P3 | — | — | — | — |
@@ -70,7 +71,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | API-005 | Contrato 005 | [[API-005-Status-Item-Integracao-MES\|Status por item (MES → av-hub), lado do MES]] | `implementado-no-codigo` | av-hub: API · MES: API | Entregues | F1, X1, Q7 | — | — | — | — |
 | API-006 | Contrato 006 | [[API-006-Status-por-Item-Leitura-no-Hub\|Status por item: leitura no hub (job e rota)]] | `implementado-no-codigo` | av-hub: API, front · MES: API | Entregues | F1, X1, Q7 | — | — | — | — |
 | API-007 | Contrato 007 (API) | [[API-007-Referencia-OC-Valores-no-MES\|Valores da OC na referência (hub → MES) e projeção no MES]] | `parcial` | av-hub: banco, API · MES: API | Ativos | C4, R4 | Job e projeção com valores já no K4 (PR #59); falta gravar o custo da OC no lote (K5, R4) | — | — | — |
-| API-008 | Contrato 008 | [[API-008-Custo-do-Lote-no-MES\|Custo do lote no MES (`lote_custo`, G1, recebimento, consumo, `GET /itens/custo`)]] | `parcial` | av-hub: API · MES: API | Ativos | R4, E3, E5 | §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`; modelo do imposto por item para os cenários com e sem imposto (PS-014, BL-053; contrato não editado) | — | — | — |
+| API-008 | Contrato 008 | [[API-008-Custo-do-Lote-no-MES\|Custo do lote no MES (`lote_custo`, G1, recebimento, consumo, `GET /itens/custo`)]] | `parcial` | av-hub: API · MES: API | Ativos | R4, E3, E5 | §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`; cenários com e sem imposto: desenho decidido em 29/10 (N16-144), execução no [[SQL-020-Imposto-por-Item-da-OC|SQL-020]] (contrato não editado) | — | — | — |
 | API-009 | Contrato 009 | [[API-009-Referencia-Requisicao-Hub-Integracao-MES\|Referência da requisição do Compras com pedido de venda (av-hub → MES)]] | `parcial` | av-hub: banco, API · MES: API, front | Ativos | C0, P1, P2, P3, E1 | Job de leitura junto do da referência da OC, projeção, tela do PCP e aviso de compra duplicada (BL-065) | Gustavo: responder Q1 a Q4 (migration `api009` em produção desde 20/10) | Nathan: campo "Pedido de venda" na "Nova requisição" (BL-041); decidir Q5 | — |
 | API-010 | Contrato 010 | [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto\|Requisição do Compras: finalidade, pedido de venda e produto do cadastro]] | `parcial` | av-hub: banco, API, front | Ativos | C0 | — | Gustavo: responder Q1 e Q4 (migration `api010` em produção desde 20/10) | Nathan: tela nova pronta (PR #209); a OC herda a finalidade; decidir Q2 e Q3 | — |
 | API-011 | Contrato 011 | [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno\|Compra em andamento, recebimento por item da OC e uso interno (MES)]] | `proposta` | MES: banco, API, front | Ativos | P1, P2, P3, E1, R0, R1, R4 | Cruzamento e abate, aviso ao requisitar, requisição interna "origem hub", saldo futuro, recebimento por item da OC e por NF, uso interno (BL-049, BL-050, BL-051, BL-065) | Gustavo: API-009 e API-010 | Nathan: Q3 (contabilidade e EPI) e Q5 (BL-049 e BL-050 no Ciclo 1) | — |
@@ -168,6 +169,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Robert (MES: `api-pcp` e `app-pcp`)
 
+- [[SQL-020-Imposto-por-Item-da-OC|SQL-020]]: `difal_unit` em `lote_custo`, copiar o imposto da linha da OC no Recebimento e os dois cenários em `GET /itens/custo`
 
 - [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno|API-011]]: cruzamento e abate, aviso ao requisitar, requisição interna "origem hub", saldo futuro, recebimento por item da OC e por NF, uso interno
 - [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado|LOG-53]]: entidade e PDF da OP, lote `PRODUCAO` por OP e produto, aprovado volta ao Estoque
@@ -175,13 +177,14 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 - [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: job e projeção da requisição do Compras com pedido de venda, tela do PCP e aviso de compra duplicada (BL-065)
 - [[API-004-Referencia-OC-Integracao-MES|API-004]]: o job de leitura e a projeção da OC já são o K4 (`develop`, PR #59); falta OC do pedido para o PCP (BL-049), saldo futuro do Estoque (BL-050, N14-20) e entrada no Recebimento da OC sem requisição do MES (BL-051)
 - [[API-007-Referencia-OC-Valores-no-MES|API-007]]: job e projeção já feitos no K4 (PR #59); falta gravar o custo da OC no lote (K5, `lote_custo` origem OC no Recebimento, R4)
-- [[API-008-Custo-do-Lote-no-MES|API-008]]: §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`; modelo do imposto por item (PS-014, BL-053; Nathan e Gustavo desenham, o contrato não é editado)
+- [[API-008-Custo-do-Lote-no-MES|API-008]]: §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`; imposto por item: desenho decidido em 29/10 (N16-144), a execução está no [[SQL-020-Imposto-por-Item-da-OC|SQL-020]] (contrato não editado)
 - [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas|LOG-46]]: I2/I3: publicar `GET /fluxo/eventos` e instrumentar os eventos no MES
 - [[LOG-47-Custo-Real-por-Item-no-Hub|LOG-47]]: Publicar `GET /itens/custo` (API-008 §5)
 - [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub|LOG-51]]: S1 vale nos dois lados: quando o Gustavo trocar a chave de serviço, atualizar no MES a variável de ambiente da chave; as rotas que o MES chama (referência da OC, `PUT` de requisições, eventos do LOG-35 e, depois, a referência de requisições do API-009) têm de estar nas `rotas_permitidas` da chave nova, senão o MES recebe 403
 
 ### Gustavo (DBA: banco e API do av-hub)
 
+- [[SQL-020-Imposto-por-Item-da-OC|SQL-020]]: Gustavo: colunas de imposto em `ordens_compra_itens`, pré-preenchimento pela parte de compras do pedido, valores por unidade e frete rateado na referência da OC; responder G1 a G4
 - [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela|API-012]]: Gustavo: rota publicada; falta melhorar a nota (medidas em ordem, unidade, coesão) e informar os ajustes do script do [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso|SQL-013]]
 - [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Gustavo: responder Q1 e Q4 (junto do API-009, BL-064); a migration `api010` está em produção desde 20/10
 - [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Gustavo: responder Q1 a Q4 (BL-064); a migration `api009` está em produção desde 20/10
@@ -196,6 +199,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 ### Nathan (front do av-hub)
 
+- [[SQL-020-Imposto-por-Item-da-OC|SQL-020]]: Nathan: campos de imposto e selo de origem na emissão da OC; levar a pergunta N1 (fórmula do custo com imposto) à Michele
 - [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes|API-014]]: Nathan: testar salvar 2 setores, o filtro e o Excel na tela (o front de vários setores está na `develop`); definir perfis `pode_editar`/`pode_criar` e o lote
 - [[SQL-015-Carteira-do-PCP-Totais-por-Vendedor-e-Desvio|SQL-015]]: Nathan: testar `PUT .../marcacao` (marcar e desmarcar, escopo, histórico) e conferir o cartão "Em avanço" do Dashboard
 - [[LOG-55-Compras-Excluir-Requisicao|LOG-55]]: Nathan: Q2, dar `pode_deletar` em `compras` ao perfil Comprador (ajuste de perfil no banco)

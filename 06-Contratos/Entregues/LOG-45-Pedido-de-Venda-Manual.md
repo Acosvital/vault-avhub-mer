@@ -3,12 +3,12 @@ id: LOG-45
 aliases: ["Contrato 45", "Contrato 30 (no código)", "45-Pedido-de-Venda-Manual"]
 tags: [contrato, contrato-logica, contrato-api, vendas, permissoes, pipeline]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [V1]
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/pedidos_vendas/pedidos_vendas.route.js:391,454,491", "api-acos-vital/src/utils/pedidoVendaManual.js"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/pedidos_vendas/pedidos_vendas.route.js:443,517,559", "api-acos-vital/src/utils/pedidoVendaManual.js"]
 criado_original: 2026-10-09
 ---
 
@@ -19,8 +19,8 @@ criado_original: 2026-10-09
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** V1 · **Dono:** Gustavo (DBA)
 >
-> - ✅ `POST /pedidos_vendas/manual` (`pedidos_vendas.route.js:391`), `PUT`/`PATCH /manual/:codigo` (`:454`), `GET /manual/:codigo/historico` (`:491`) e a regra em `api-acos-vital/src/utils/pedidoVendaManual.js`.
-> - 🟡 **Alias:** os comentários do código chamam este assunto de "Contrato 30" (o LOG-30 de verdade é o PDF do pedido de compra do Omie).
+> - ✅ `POST /pedidos_vendas/manual` (`pedidos_vendas.route.js:443`), `PUT`/`PATCH /manual/:codigo` (`:517-518`), `GET /manual/:codigo/historico` (`:559`) e a regra em `api-acos-vital/src/utils/pedidoVendaManual.js`.
+> - ✅ **Numeração (29/10/2026):** os comentários e o swagger do pedido manual passaram a citar "Contrato 45" (commit `e705797` na `develop` local da `api-acos-vital`, ainda sem push). O "Contrato 30" do código ficou só no PDF do pedido de compra do Omie (LOG-30). A migration 030 não foi alterada.
 > - Pedido manual nunca participa do custo do item (decisão D6 do [[API-008-Custo-do-Lote-no-MES]]) nem do fluxo de Atividades. Assunto no anexo `10-Anexo-Fora-do-Fluxo` (Pedido-Manual). Produção não verificada (❓).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
@@ -29,14 +29,14 @@ criado_original: 2026-10-09
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Define o pedido de venda manual: criado e editado direto no Hub, só por administrador, convivendo com os pedidos que o pipeline traz do Omie (ERP). Existia no código sem contrato.
 > **Quem é afetado:** Administradores. O pedido manual não entra no custo do item nem no fluxo de Atividades.
-> **Situação:** ✅ Rotas e regra existem no código da API. ❓ Produção não verificada. 🟡 O código chama este assunto de "Contrato 30", numeração que diverge do vault.
+> **Situação:** ✅ Rotas e regra existem no código da API. ❓ Produção não verificada. ✅ Em 29/10/2026 o código passou a chamar este assunto de "Contrato 45", como no vault (commit local, falta o push).
 
 
 > **Status: `implementada-no-codigo`. Produção NÃO verificada.** Lido em 09/10/2026 na `develop` da `api-acos-vital` (`origin/develop` = `dee35b0`; a cópia local está 2 commits atrás, por isso tudo abaixo vem de `git show origin/develop:…`), no pipeline `omie-elt-pipeline` (`master` `d2886bf`) e no front `00 - HUB` (`996e320`). Produção só pelo dump de 07/10 ([[Mapa-v1-para-v2|Auditoria-Dump-Producao-2026-10-07]]), que **não** traz o corpo de triggers nem o mapa de rotas deste assunto. Decisões da rodada: [[Registro-de-Decisoes|Registro-de-Decisoes-2026-10-07]]. Origem deste contrato: item "Contrato novo para pedido de venda manual" da [[Mapa-v1-para-v2|Auditoria-Pente-Fino-2026-10-08]].
 >
 > **Por que existe.** O pedido de venda manual está no código da API e na tabela de telas, mas **não tinha contrato no vault**. É o contrato irmão do [[LOG-29-Notas-Fiscais-Manuais-So-Admin|29-Notas-Fiscais-Manuais-So-Admin]] (mesmo desenho) e da regra "sem chave de ambiente" do [[LOG-38-Regras-Sem-Chave-de-Ambiente|38-Regras-Sem-Chave-de-Ambiente]].
 >
-> **🔴 Divergência de numeração.** Os comentários do código chamam este assunto de "**Contrato 30**" (`pedidos_vendas.route.js:29,135,237,245,345,576,642,730`; `pedidoVendaManual.js:5`; `pedidos_vendas.model.js:4,181`; `acessoConfig.js:33`; swagger de pedidos_vendas e de notas_fiscais; `notas_fiscais.route.js:262`). **O 30 do vault é outro**: [[LOG-30-Compras-Pedido-Omie-PDF-Completo|30-Compras-Pedido-Omie-PDF-Completo]] (PDF do pedido de compra do Omie), que o próprio código também chama de "Contrato 30" em `pedidos_compras.route.js:97,185,305`. O mesmo número tem dois assuntos no código. A auditoria do dump já avisava que a numeração do DBA nos DDL não coincide com a do vault. **Proposta (🟡, Gustavo/DBA aplicam):** os comentários, o swagger e a migration 030 passam a citar "contrato 45 do vault" para o pedido manual e deixam o "contrato 30" só para o PDF do pedido de compra. Esta nota registra o vínculo para quem cruzar código e vault.
+> **✅ Divergência de numeração (corrigida em 29/10/2026).** Antes, os comentários do código chamavam este assunto de "**Contrato 30**" (`pedidos_vendas.route.js:29,135,237,245,345,576,642,730`; `pedidoVendaManual.js:5`; `pedidos_vendas.model.js:4,181`; `acessoConfig.js:33`; swagger de pedidos_vendas e de notas_fiscais; `notas_fiscais.route.js:262`). **O 30 do vault é outro**: [[LOG-30-Compras-Pedido-Omie-PDF-Completo|30-Compras-Pedido-Omie-PDF-Completo]] (PDF do pedido de compra do Omie), que o próprio código também chama de "Contrato 30" em `pedidos_compras.route.js:97,185,305`. O mesmo número tem dois assuntos no código. A auditoria do dump já avisava que a numeração do DBA nos DDL não coincide com a do vault. **Proposta (🟡, Gustavo/DBA aplicam):** os comentários, o swagger e a migration 030 passam a citar "contrato 45 do vault" para o pedido manual e deixam o "contrato 30" só para o PDF do pedido de compra. Esta nota registra o vínculo para quem cruzar código e vault.
 
 ## 1. Finalidade e quem pode usar
 
@@ -65,7 +65,7 @@ No banco existem (dump de 07/10, [[Mapa-v1-para-v2|Auditoria-Dump-Producao-2026-
 
 Todas em `pedidos_vendas.route.js` (`origin/develop`). A validação de formato é de `validarPedidoManual` (`pedidoVendaManual.js:81-194`); as regras de negócio ficam no trigger `trg_pedidos_vendas_manual_validar` (`pedidoVendaManual.js:12-15`).
 
-### 3.1 `POST /pedidos_vendas/manual` (`:391-424`)
+### 3.1 `POST /pedidos_vendas/manual` (`:443`)
 
 - **Permissão:** `pode_criar` (`:393`).
 - **Campos aceitos** (`pedidoVendaManual.js:20-24`): `codigo_empresa`, `data_inclusao`, `hora_inclusao`, `data_previsao`, `codigo_cliente`, `codigo_vendedor_omie`, `codigo_categoria`, `codigo_projeto`, `numero_contrato`, `obs_venda`, `valor_total_pedido`, `etapa`, `created_by`.
@@ -99,7 +99,7 @@ Todas em `pedidos_vendas.route.js` (`origin/develop`). A validação de formato 
 
 ## 4. Histórico
 
-`GET /pedidos_vendas/manual/{codigo}/historico` (`:491-515`) lê `core_vendas_faturamento.pedidos_vendas_manuais_historico`, **uma linha por operação, da mais antiga para a mais nova**, com `id`, `operacao`, `numero_pedido`, `alteracoes`, `alterado_por`, `nome_alterado_por`, `created_at`. `alteracoes` traz cada campo que mudou como `{ "de": …, "para": … }` (no cadastro, `de` é `null`). Funciona também para pedido excluído (`paranoid: false`). **Quem grava é o banco** (migration 030, swagger `:936`), não a API. Resposta: `{ codigo_pedido_omie, numero_pedido, codigo_empresa, historico }`.
+`GET /pedidos_vendas/manual/{codigo}/historico` (`:559`) lê `core_vendas_faturamento.pedidos_vendas_manuais_historico`, **uma linha por operação, da mais antiga para a mais nova**, com `id`, `operacao`, `numero_pedido`, `alteracoes`, `alterado_por`, `nome_alterado_por`, `created_at`. `alteracoes` traz cada campo que mudou como `{ "de": …, "para": … }` (no cadastro, `de` é `null`). Funciona também para pedido excluído (`paranoid: false`). **Quem grava é o banco** (migration 030, swagger `:936`), não a API. Resposta: `{ codigo_pedido_omie, numero_pedido, codigo_empresa, historico }`.
 
 - 🟡 Esta rota **não chama** `barrarSemPermissaoPedidoManual`: leitura só depende do mapa `auth.rotas_telas` (se existir) e da `x-api-key`. Decisão pendente (§8, Nathan): ler histórico exige `pode_visualizar`?
 - Existência da tabela em produção: **sim** (dump de 07/10, §9). Conteúdo e triggers que a alimentam: **não verificados**.
@@ -164,7 +164,7 @@ Em homologação (`api-test`), com a API em `develop` e **uma unidade de teste**
 | 2 | Aplicar `AND NOT manual AND codigo_pedido_omie > 0` no `exclusionSync` (SELECT e DELETE). | 🔴 Gustavo |
 | 3 | Construir a tela `pedidos-vendas-manuais` ou limpar a tela de `auth.telas`? | 🔴 Nathan |
 | 4 | Quais perfis têm a permissão em produção (só o admin)? As rotas `/pedidos_vendas/manual*` estão em `auth.rotas_telas`? | 🔴 DBA |
-| 5 | Trocar os comentários "Contrato 30" do pedido manual por "contrato 45 do vault" (código, swagger, migration 030). | 🔴 Gustavo / DBA |
+| 5 | Trocar os comentários "Contrato 30" do pedido manual por "contrato 45 do vault" (código, swagger, migration 030). ✅ Feito em 29/10/2026 no código e no swagger (commit `e705797`, falta o push); a migration 030 não foi alterada. | ✅ Gustavo / DBA confirmam o push |
 | 6 | O histórico (`GET …/historico`) deve exigir `pode_visualizar`? | 🔴 Nathan |
 | 7 | Remover o código morto do caminho sem trava (`ajustarEdicaoManual` e os `if` de `:689-692,707-710,732-733`). | 🟡 Gustavo |
 

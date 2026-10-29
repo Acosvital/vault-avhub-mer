@@ -3,7 +3,7 @@ id: API-014
 aliases: ["Contrato 014", "014-Setor-do-Cliente-e-do-Grupo"]
 tags: [contrato, contrato-api, acompanhamento-clientes, clientes, setor, categorizacao, grupos-de-empresa, av-hub]
 criado: 2026-10-21
-atualizado: 2026-10-28
+atualizado: 2026-10-29
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
@@ -19,7 +19,7 @@ criado_original: 2026-10-21
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Permite classificar clientes (CNPJ) ou grupos de empresa por setor de atuação (Mineração, Óleo & Gás etc.), com lista que a equipe pode ampliar, e olhar a carteira por setor no Acompanhamento de clientes.
 > **Quem é afetado:** Quem cuida dos clientes classifica e filtra por setor; o vendedor só vê. O MES não tem trabalho.
-> **Situação:** Parcial. Vários setores por cliente está feito no banco e na API (Gustavo, informado em 26/10) e no front (Nathan); o checklist ainda tem itens abertos e salvar 2 setores não foi conferido (🟡).
+> **Situação:** Parcial. Vários setores por cliente está feito no banco, na API e no front (conferido no código em 29/10/2026). Faltam confirmar no banco as linhas de permissão (❓) e definir os perfis (❓). Salvar 2 ou mais setores em um cliente real não foi visto (🟡).
 > **Exemplo:** Grupo com os setores Mineração e Energia: seus CNPJs herdam os dois, e um CNPJ com Siderurgia própria usa só ela.
 
 > [!info] Situação em 26/10/2026
@@ -195,17 +195,17 @@ Corpo (revisado em 23/10/2026: **`id_setores`**, uma lista; o `id_setor` único 
 - [x] Migration: `setores_clientes` (com os 12 setores iniciais) e `clientes_setor`, com os `CHECK` e os índices únicos (entregue em 22/10, **um setor por alvo**).
 - [x] **Migration nova (23/10): vários setores por alvo**: derrubar os índices únicos por alvo e criar os únicos por `(alvo, id_setor)`.
 - [x] `fn_acompanhamento_clientes` (ou a rota) devolvendo `setores` (lista) e `setor_origem` pela regra de herança, mantendo `id_setor`/`setor` do primeiro.
-- [ ] Rotas `GET`/`POST`/`PUT /setores_clientes` e `PUT /clientes_setor`, com a transação e os erros da seção 2 (**`id_setores`** em lista; `id_setor` ainda aceito).
-- [ ] Filtros `id_setor` e `sem_setor`, `sort=setor` e `kpis.por_setor` em `GET /acompanhamento_clientes` (cliente conta em cada setor).
-- [ ] Linhas de `auth.rotas_telas` (`acompanhamento-clientes`): `GET /setores_clientes` (`pode_visualizar`), `POST /setores_clientes` (`pode_criar`), `PUT /setores_clientes/*` e `PUT /clientes_setor` (`pode_editar`).
-- [ ] Swagger das rotas novas.
+- [x] Rotas `GET`/`POST`/`PUT /setores_clientes` e `PUT /clientes_setor`, com a transação e os erros da seção 2 (**`id_setores`** em lista; `id_setor` ainda aceito). ✅ Conferido em 29/10/2026 no código: `setores_clientes.route.js` (GET, POST, PUT /:id) e `clientes_setor.route.js` (PUT com `id_setores`; `id_setor` ainda aceito).
+- [x] Filtros `id_setor` e `sem_setor`, `sort=setor` e `kpis.por_setor` em `GET /acompanhamento_clientes` (cliente conta em cada setor). ✅ Conferido em 29/10/2026 no código de `fn_acompanhamento_clientes.route.js` (filtros, `sort=setor`, `kpis.por_setor` com o cliente contado em cada setor).
+- [ ] Linhas de `auth.rotas_telas` (`acompanhamento-clientes`): `GET /setores_clientes` (`pode_visualizar`), `POST /setores_clientes` (`pode_criar`), `PUT /setores_clientes/*` e `PUT /clientes_setor` (`pode_editar`). ❓ Em 29/10/2026 `GET /setores_clientes` e `GET /acompanhamento_clientes` responderam 200 na `api-test` para o perfil admin. As linhas de `pode_criar` e `pode_editar` não dá para ver pelo código; o Gustavo confirma no banco.
+- [x] Swagger das rotas novas. ✅ Existem `setores_clientes.swagger.json` e `clientes_setor.swagger.json` (29/10/2026; não li o conteúdo linha a linha).
 
 **Nathan (front)**
-- [ ] BFF: rotas `/api/setores-clientes` e `/api/clientes-setor` e os parâmetros novos da lista.
+- [x] BFF: rotas `/api/setores-clientes` e `/api/clientes-setor` e os parâmetros novos da lista. ✅ Existem `app/api/setores-clientes`, `app/api/clientes-setor` e `app/api/setores` no Hub (29/10/2026).
 - [x] Coluna, filtro e quadro por setor; campo Setor na página do cliente e do grupo; "Adicionar setor…" (um setor, PR #235).
-- [ ] **Vários setores (23/10):** selos múltiplos na lista, campo com caixas de seleção, `id_setores` ao salvar, Excel com os nomes juntos e o aviso no quadro "Por setor". Lê `setores` e cai para `id_setor`/`setor` enquanto a API não entrega.
-- [ ] Excel com a coluna e o quadro por setor.
-- [ ] Definir os perfis com `pode_editar`/`pode_criar` e se o lote entra na 1ª etapa.
+- [x] **Vários setores (23/10):** selos múltiplos na lista, campo com caixas de seleção, `id_setores` ao salvar, Excel com os nomes juntos e o aviso no quadro "Por setor". Lê `setores` e cai para `id_setor`/`setor` enquanto a API não entrega. ✅ Caixas de seleção e `id_setores` ao salvar estão no código (`SetorCampo.tsx`, `services/acompanhamentoClientes.ts`, commit `a24d187`). O Excel com os nomes juntos também existe (item do Excel abaixo).
+- [x] Excel com a coluna e o quadro por setor. ✅ Conferido em 29/10/2026 em `lib/api/acompanhamentoClientesPlanilha.ts`: colunas "Setor" (vários setores separados por `;`) e "Setor vem de", e o quadro "Clientes por setor" (linha 1475).
+- [ ] Definir os perfis com `pode_editar`/`pode_criar` e se o lote entra na 1ª etapa. ❓ Decisão do Nathan, ainda sem registro.
 
 **Robert (MES):** nada.
 

@@ -135,7 +135,7 @@ Todos os valores das tabelas novas estão no Detalhe técnico.
 ## O que já existe e o que falta
 
 - ✅ Os valores do MES e do av-hub acima existem e foram conferidos.
-- 🟡 Os 8 estados macro do desenho do vendedor não existem no código (detalhe abaixo).
+- 🟡 Os 9 estados macro do desenho do vendedor não existem no código (detalhe abaixo).
 - 🟡 Os estados da proposta, do pedido do Hub, do custo real e da comissão nova estão só em proposta.
 - 🔴 O vocabulário de `estado_macro` não foi definido. O MES ainda não publica `/fluxo/eventos`.
 
@@ -316,7 +316,7 @@ Aprovação (`C3`, N14-21): OC acima do limite da unidade (`parametros_compras.l
 | `item_estado_projetado.encerramento` | `cancelado`, `concluido` (preenchido junto com `encerrado_em`) | linha 2169 ✅ |
 | `item_estado_projetado.estado_macro` | `varchar(40)`, vocabulário não definido 🔴 | linha 2176 |
 
-Os 8 estados macro do desenho do vendedor (`AGUARDANDO_LIBERACAO`, `PENDENTE_PCP`, `EM_ESTOQUE`, `EM_COMPRA`, `EM_PRODUCAO`, `EM_RECEBIMENTO`, `EM_INSPECAO`, `PRONTO_EXPEDICAO`, `FATURADO`) não existem no código 🟡 ([[01-Vendas-Liberacao]]). O MES ainda não publica `/fluxo/eventos` 🔴 ([[Rastreabilidade-e-Torre-de-Fluxo]]).
+Os 9 estados macro do desenho do vendedor (`AGUARDANDO_LIBERACAO`, `PENDENTE_PCP`, `EM_ESTOQUE`, `EM_COMPRA`, `EM_PRODUCAO`, `EM_RECEBIMENTO`, `EM_INSPECAO`, `PRONTO_EXPEDICAO`, `FATURADO`) não existem no código 🟡 ([[01-Vendas-Liberacao]]). O MES ainda não publica `/fluxo/eventos` 🔴 ([[Rastreabilidade-e-Torre-de-Fluxo]]).
 
 #### Proposta, pedido de venda do Hub, custo real e comissão nova (proposta 🟡)
 
