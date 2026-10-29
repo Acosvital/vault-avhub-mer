@@ -3,7 +3,7 @@ id: SQL-017
 aliases: ["Contrato SQL 017", "017-Orcamento-em-core_comercial", "SQL-017-Orcamento-em-core_comercial-Base-de-Preco-e-Pedido-de-Custo"]
 tags: [contrato, contrato-sql, dba, migracao, orcamento, base-de-preco, ofertas, pedido-de-custo, core_vendas_faturamento]
 criado: 2026-10-21
-atualizado: 2026-10-28
+atualizado: 2026-10-29
 status: proposta
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
@@ -20,6 +20,7 @@ criado_original: 2026-10-16
 > **Status:** `proposta` · **Dono:** Gustavo · Regra: [[12-Orcamento-Base-de-Preco]] · Rotas: [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] (Robert, N16-117)
 >
 > - 📝 **28/10/2026, N16-116: não existirá `core_comercial`.** A proposta, o pedido do Hub e o resto do módulo ficam em **`core_vendas_faturamento`**, junto de `pedidos_vendas`, da OC e da liberação. As tabelas do Orçamento que hoje estão em `core_comercial` chegam lá pelo **bloco A0 do SQL-016** (aplicar antes); este anexo passou a nomear `core_vendas_faturamento` (arquivo `0001-migracao-orcamento-em-core_vendas_faturamento.sql`).
+> - 📝 **29/10/2026, anexo `0003`:** coluna `parametros_preco` (jsonb) em `parametros_custo`, para os pesos do score, o limite de volatilidade, o mínimo de pontos e os dias do dado recente com vigência (OQ-46 §4, [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]] regra 3). 🧪 Aplicado em Postgres 18 sobre o dump de referência (no `core_comercial`, antes do bloco A0): aplica sem erro, a verificação recusa valor que não é objeto e a API da branch `feat/orcamento-historico-preco` leu a vigência nova. Nunca rodou em produção.
 > - 🧪 **Reteste de 28/10 em Postgres 18**, depois do SQL-016 com o bloco A0: aplica sem erro e o `0002` dá a mesma saída de 26/10 (14 verificações: 3 erros esperados e 11 conferências).
 > - 📝 **Mudou de natureza em 26/10.** O desenho de 16 a 21/10 propunha um schema novo `core_orcamento`. O banco real **já tem**, em `core_comercial` (que a N16-116 move para `core_vendas_faturamento`), as ofertas (imutáveis, com histórico), as categorias de suprimento, os fornecedores (perfil, categorias, certificados, apelidos), os produtos (perfil e pendentes), os parâmetros de custo e a tabela da telha com vigência, e as solicitações de custo. O contrato agora é só o que **falta**. O desenho antigo está em `Proposta-Orcamento-Comissao/05-Contratos/SQL-016-anexos/_desenho-antigo-nao-usar` (fora do vault).
 > - 🧪 **Testado em Postgres 18** sobre o dump de referência, depois do SQL-016: a migração aplica sem erro e o teste `0002` passa (14 verificações). Nunca rodou em produção.
