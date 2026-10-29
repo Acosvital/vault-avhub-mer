@@ -170,21 +170,21 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 
 
 - [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno|API-011]]: cruzamento e abate, aviso ao requisitar, requisição interna "origem hub", saldo futuro, recebimento por item da OC e por NF, uso interno
-- [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado|LOG-53]]: entidade e PDF da OP, lote `PRODUCAO` por OP e produto, aprovado volta ao Estoque
+- [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado|LOG-53]]: ✅ OP emitida e impressa e lote `PRODUCAO` por OP e produto feitos em 27/10 (`ab3318d`, na `develop`); falta o custo do fabricado (BL-067) e subir para a `main` (BL-035)
 - [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada|LOG-54]]: documento de retirada e baixa na retirada (tirar a baixa da Embalagem e da entrega)
-- [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: job e projeção da requisição do Compras com pedido de venda, tela do PCP e aviso de compra duplicada (BL-065)
+- [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: ✅ job, projeção e requisições na Triagem feitos em 23/10 (`9e75df5`); falta conferir na tela o aviso de compra duplicada (BL-065)
 - [[API-004-Referencia-OC-Integracao-MES|API-004]]: o job de leitura e a projeção da OC já são o K4 (`develop`, PR #59); falta OC do pedido para o PCP (BL-049), saldo futuro do Estoque (BL-050, N14-20) e entrada no Recebimento da OC sem requisição do MES (BL-051)
 - [[API-007-Referencia-OC-Valores-no-MES|API-007]]: job e projeção já feitos no K4 (PR #59); falta gravar o custo da OC no lote (K5, `lote_custo` origem OC no Recebimento, R4)
-- [[API-008-Custo-do-Lote-no-MES|API-008]]: §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`; imposto por item: desenho decidido em 29/10 (N16-144); o contrato só nasce quando o desenvolvimento começar (contrato não editado)
+- [[API-008-Custo-do-Lote-no-MES|API-008]]: ✅ §3 custo da OC no Recebimento (19/10), rota MANUAL e §5 `GET /itens/custo` (27/10, `6c11147`, na `develop`); falta conferir §4 snapshot na SAIDA; imposto por item: desenho decidido em 29/10 (N16-144); o contrato só nasce quando o desenvolvimento começar (contrato não editado)
 - [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas|LOG-46]]: I2/I3: publicar `GET /fluxo/eventos` e instrumentar os eventos no MES
-- [[LOG-47-Custo-Real-por-Item-no-Hub|LOG-47]]: Publicar `GET /itens/custo` (API-008 §5)
+- [[LOG-47-Custo-Real-por-Item-no-Hub|LOG-47]]: ✅ `GET /itens/custo` publicada na `develop` (27/10); falta subir para a `main` (BL-035)
 - [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub|LOG-51]]: S1 vale nos dois lados: quando o Gustavo trocar a chave de serviço, atualizar no MES a variável de ambiente da chave; as rotas que o MES chama (referência da OC, `PUT` de requisições, eventos do LOG-35 e, depois, a referência de requisições do API-009) têm de estar nas `rotas_permitidas` da chave nova, senão o MES recebe 403
 
 ### Gustavo (DBA: banco e API do av-hub)
 
 - [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela|API-012]]: Gustavo: rota publicada; falta melhorar a nota (medidas em ordem, unidade, coesão) e informar os ajustes do script do [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso|SQL-013]]
 - [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Gustavo: responder Q1 e Q4 (junto do API-009, BL-064); a migration `api010` está em produção desde 20/10
-- [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Gustavo: responder Q1 a Q4 (BL-064); a migration `api009` está em produção desde 20/10
+- [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Gustavo: ✅ rota `GET /compras/requisicoes/referencia` na `main` (BL-064); responder Q1 a Q4; a migration `api009` está em produção desde 20/10
 - [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front|LOG-50]]: Gustavo: `GET /itens_pedido_status` e `GET /pedido_venda_itens/{numero}` respondem `SEM_VENDEDOR_VINCULADO` (e não `PEDIDO_FORA_DO_ESCOPO`) para pedido de outro vendedor; conferir o `notas/resumo` do PCP com foco alheio (200 vazio)
 - [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio|LOG-42]]: Gustavo: responder as perguntas do §10
 - [[LOG-43-Ordem-das-Etapas-de-Faturamento-no-Cadastro|LOG-43]]: Gustavo: protectedColumns no pipeline, conferir seed e versionar a view
@@ -203,7 +203,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 - [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto|API-010]]: Nathan: tela nova pronta (PR #209); a OC herda a finalidade da requisição; decidir Q2 e Q3
 - [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno|API-011]]: Nathan: contabilidade do uso interno e EPI (Q3); BL-049 e BL-050 no Ciclo 1 (Q5)
 - [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada|LOG-54]]: Nathan: quem gera o documento, o que imprime, reserva depois da retirada (Q1, Q2) e se entra no Ciclo 1 (Q3)
-- [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Nathan: campo "Pedido de venda" na "Nova requisição" (BL-041); decidir Q5 (avisa ou bloqueia)
+- [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: Nathan: ✅ campo "Pedido de venda" na "Nova requisição" feito e testado (BL-041); decidir Q5 (avisa ou bloqueia)
 - [[LOG-04b-Pedidos-Notas-Dashboards-Agregacao-no-Banco|LOG-04b]]: Nathan: P6 no front (ver LOG-43)
 - [[LOG-41-Login-Rate-Limit-no-Backend|LOG-41]]: Nathan: confirmar a remoção do limitador do front (HUB)
 - [[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio|LOG-42]]: Nathan: §6 coordenadores no front e decidir corte do orçamento
@@ -213,7 +213,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 - [[LOG-48-Acompanhamento-de-Clientes-Grupos-de-Empresa|LOG-48]]: Nathan: marcas `GAMBIARRA` do detalhe e §12.5 na tela
 - [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front|LOG-50]]: Nathan: testes de aceite que faltaram (gerente de equipe, auxiliar, vendedor sem vínculo, token expirado)
 - [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub|LOG-51]]: Nathan: H1, H3 a H6 feitos na PR #206 (`d0ef359`); resta H2 (`fetchMenu`: a API isenta a rota do menu) e H7 (rotacionar a chave, manual) para a API ligar `IDENTIDADE_EXIGIR_TOKEN`
-- [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub|LOG-52]]: Nathan: corte do HUB para a API única (BL-063); decidir Q3, Q4, Q7, Q8, Q10 e Q11
+- [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub|LOG-52]]: Nathan: ✅ corte do HUB para a API única feito em 27/10 (BL-063); decidir Q3, Q4, Q7, Q8, Q10 e Q11
 
 ### Robert (módulo comercial na `api-acos-vital`, desde 28/10/2026)
 

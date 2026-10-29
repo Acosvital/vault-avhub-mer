@@ -324,7 +324,7 @@ Compras cria requisição de necessidade própria no HUB (nó C0, `POST /compras
 |---|---|---|
 | av-hub (`api-acos-vital`) | Triagem e Destinação do Pedido falham com mensagem; a fila de requisição acumula; o polling de marcos reagenda; o "importado" é reenviado a cada 10 min por 7 dias | automática ao voltar; depois de 7 dias o "importado" não é mais reenviado, sem alerta 🔴 BL-034 |
 | MES (`api-pcp`) | O vendedor segue liberando; os jobs de status, custo e Torre falham e repetem (90 s; 10 min em 404); o HUB mostra "dado velho" após 10 min | automática ao voltar; cursores não andam em falha |
-| Banco do MES vazio ou sem migrations | o `main` do MES parou em 28/08 e o banco de produção não tem as migrations da `develop` | merge `develop`→`main` antes do piloto 📝 ([[Riscos]], RS-002) |
+| Banco do MES vazio ou sem migrations | o `main` do MES parou em 08/10 e o banco de produção não tem as migrations da `develop` | merge `develop`→`main` antes do piloto 📝 ([[Riscos]], RS-002) |
 
 ### O que falta desenvolver
 

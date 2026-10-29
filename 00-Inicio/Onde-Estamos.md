@@ -22,7 +22,7 @@ O estado do código é o de 14/10/2026. A proposta, o Orçamento, a conferência
 | [[11-Proposta-e-Pedido-de-Venda]] | 🔴 Desenhado e aprovado, sem código | Pablo, Gustavo, Nathan | Levar o módulo do Pablo para a API do Hub; criar a tela da proposta; o botão "Transformar em pedido"; enviar o pedido ao Omie por fila |
 | [[12-Orcamento-Base-de-Preco]] | 🔴 Desenhado e aprovado, sem código | Pablo, Gustavo, Nathan | Base de preço gerada das compras; página do produto com score e volatilidade; pedido de custo ao Orçamento |
 | [[01-Vendas-Liberacao]] | ✅ Liberação funciona · 🔴 pedido no Hub | Nathan, Gustavo | Pedido do Omie no mesmo fluxo do pedido da proposta; compras e faturamento em partes na tela do pedido |
-| [[02-PCP-Triagem-e-Destinacao]] | ✅ Triagem e Destinação · 🔴 volta de reprovado | Robert | Caminho para o item reprovado (retrabalho ou nova compra); mostrar a OC do pedido ao PCP; criar a Ordem de Produção (entidade e documento impresso) |
+| [[02-PCP-Triagem-e-Destinacao]] | ✅ Triagem e Destinação · 🔴 volta de reprovado | Robert | Caminho para o item reprovado (retrabalho ou nova compra); mostrar a OC do pedido ao PCP. A Ordem de Produção já é emitida e impressa (27/10, na `develop`) |
 | [[03-Estoque-Atendimento-e-Despacho]] | ✅ Atendimento · 🔴 despacho | Robert | Documento de retirada com baixa na retirada; custo do item; fabricado virar lote; saldo futuro |
 | [[04-Circuito-de-Compra]] | ✅ Compra, aprovação e envio ao Omie · 🔴 MES ler a OC | Robert, Gustavo | O MES ler as OCs do Hub; regra de aprovação definitiva com Compras |
 | Conferência de Compras (`C6` a `C8`) | 🔴 Desenhada e aprovada, sem código | Nathan, Gustavo | Conferir a parte do vendedor ao emitir a OC; avisar o vendedor se a compra sair mais cara |
@@ -41,7 +41,7 @@ O estado do código é o de 14/10/2026. A proposta, o Orçamento, a conferência
 | Requisição MES ↔ av-hub | ✅ Funciona nos dois sentidos, por pedido imediato e por consulta a cada 5 minutos |
 | Status por item | ✅ Pronto |
 | Torre de Fluxo (painel de acompanhamento) | 🟡 API e rotinas prontas no av-hub; o MES não envia os eventos e o HUB não tem a tela |
-| Custo por item | 🟡 O custo do lote existe, mas faltam o custo da OC e a consulta `GET /itens/custo`. O Ciclo 1 segue sem imposto; o modelo com impostos precisa ser desenhado já |
+| Custo por item | 🟡 O lote nasce com o custo da OC e o MES publica `GET /itens/custo` (27/10, na `develop`); falta o hub ler. O Ciclo 1 segue sem imposto; o modelo com impostos foi desenhado em 29/10 (N16-144) |
 | Cadastros TESTE no Omie | 🟡 O Omie não tem ambiente de teste. Os cadastros TESTE do Nathan entram nos relatórios: filtre ao conferir |
 | Pendências de cadastro | O perfil CCP e o vínculo de usuários à Gerência de Compras saem em breve. É cadastro simples e não trava o desenho |
 
@@ -58,8 +58,8 @@ Versão completa da tabela por setor, com os nós do [[00-Fluxo-Mestre-0b]] e o 
 | [[11-Proposta-e-Pedido-de-Venda]] | V0.1–V0.7, V0C | 🔴 (desenho aprovado em 26/10) | Migrar o módulo do Pablo para a `api-acos-vital` (LOG-52), **sem a cópia do Omie, o fechamento parcial e o Histórico de compras** e com o menu enxuto (27/10); migração do `core_comercial`; tela da proposta no formato do Simulador; "Transformar em pedido"; pedido por API no Omie, por fila e pipeline | Pablo, Gustavo, Nathan |
 | [[12-Orcamento-Base-de-Preco]] | B1–B4 | 🔴 (desenho aprovado em 26/10) | Base de preço gerada das OCs; página do produto com score e volatilidade; pedido de custo sem prazo, com o tempo cronometrado | Pablo, Gustavo, Nathan |
 | [[01-Vendas-Liberacao]] | V1–V3 | ✅ liberação · 🔴 pedido no Hub | Pedido do Omie no mesmo fluxo do pedido da proposta (`core_comercial.pedidos`, N16-106); parte de compras e faturamento em partes na tela do pedido | Nathan, Gustavo |
-| [[02-PCP-Triagem-e-Destinacao]] | P1, P2, P6 | ✅ P1/P2 · 🔴 P6 | Novo norte (retrabalho ou reabre compra): `RoteiroItem` tem CRUD, mas nenhuma movimentação o lê; renomear rotas antigas; **OC do pedido** visível ao PCP; **Ordem de Produção** como entidade e documento imprimível (só para o que será fabricado) | Robert |
-| [[03-Estoque-Atendimento-e-Despacho]] | E1–E6 | ✅ E1–E5 · 🔴 E6 | **Documento de retirada com baixa na retirada** (hoje baixa em `receber()`); custo do item (`GET /itens/custo`); fabricado virar lote; **saldo futuro** (saldo atual + OCs em andamento de estoque) | Robert |
+| [[02-PCP-Triagem-e-Destinacao]] | P1, P2, P6 | ✅ P1/P2 · 🔴 P6 | Novo norte (retrabalho ou reabre compra): `RoteiroItem` tem CRUD, mas nenhuma movimentação o lê; renomear rotas antigas; **OC do pedido** visível ao PCP. ✅ **Ordem de Produção** emitida na criação e imprimível (27/10, `develop`) | Robert |
+| [[03-Estoque-Atendimento-e-Despacho]] | E1–E6 | ✅ E1–E5 · 🔴 E6 | **Documento de retirada com baixa na retirada** (hoje baixa em `receber()`); ✅ custo do item (`GET /itens/custo`) e fabricado virando lote `PRODUCAO` (27/10, `develop`); **saldo futuro** (saldo atual + OCs em andamento de estoque) | Robert |
 | [[04-Circuito-de-Compra]] | P3, C0–C5, FN1 | ✅ ida e volta e aprovação (C3) · 🔴 MES ler a OC do hub (C0) | Aprovação já funciona (OC acima de R$ 30 mil: Gerente de Compras; até R$ 30 mil: compradores livres) e endurece depois com Compras 🟡; **o MES precisa ler as OCs do hub** (PCP vê a OC do pedido; Estoque vê o saldo futuro): job do contrato 004/007, telas e caminho de entrada no Recebimento; envio real da OC ao Omie testado em 14/10, produção ❓ | Robert, Gustavo |
 | [[04-Circuito-de-Compra]] e [[11-Proposta-e-Pedido-de-Venda]] | C6–C8 | 🔴 (desenho aprovado em 26/10) | Conferência da parte de compras na emissão da OC; aviso de compra acima do custo do vendedor em Meus Pedidos e lista de reprovados de Compras (`divergencias_compra`) | Nathan, Gustavo |
 | [[05-Recebimento]] | R0–R6 | ✅ | Gravar custo da OC no lote (`lote_custo`); cruzar com a OC quando existir o job do contrato 004 | Robert |
@@ -77,6 +77,6 @@ Transversais, na versão técnica:
 | Integração requisição MES ↔ av-hub (LOG-34, LOG-35) | ✅ ida e volta; sob demanda e polling de 5 min ([[Integracao-AvHub-MES]]) |
 | Status por item (API-005, API-006) | ✅ |
 | Torre de Fluxo (LOG-46) | 🟡 API e jobs no av-hub; o MES não publica `/fluxo/eventos`; o HUB não tem tela |
-| Custo por item (API-008, LOG-47) | 🟡 `lote_custo` existe; faltam `GET /itens/custo` e custo da OC; a migration 047b não está no dump. O Ciclo 1 segue sem imposto; o modelo com impostos foi desenhado em 29/10 (N16-144); falta código; a fórmula do custo com imposto segue o motor do comissionamento, e cada setor confere as mudanças na implementação |
+| Custo por item (API-008, LOG-47) | 🟡 `lote_custo` nasce com o custo da OC (19/10) e `GET /itens/custo` está publicada na `develop` do MES (27/10); falta o hub ler e subir para a `main`. O Ciclo 1 segue sem imposto; o modelo com impostos foi desenhado em 29/10 (N16-144); falta código; a fórmula do custo com imposto segue o motor do comissionamento, e cada setor confere as mudanças na implementação |
 | Cadastros TESTE no Omie | 🟡 O Omie não tem ambiente de teste; os cadastros TESTE do Nathan entram na pipeline e nos relatórios: filtrar ao conferir (BL-055) |
 | Pendências cadastrais | Perfil CCP e vínculo de usuários à Gerência de Compras: serão criados em breve, assunto cadastral simples (Nathan e Gustavo), sem bloqueio de desenho |
