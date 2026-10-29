@@ -9,10 +9,10 @@ fontes: [LOG-26 (contrato de liberação), LOG-40 (escopo do vendedor), API-005,
 
 # Raia Vendas: liberação do pedido (V1 a V3)
 
-**Em uma frase:** o pedido de venda só segue para a produção depois que o vendedor o libera. É o portão do fluxo: sem liberação, o PCP (planejamento e controle da produção) não enxerga o pedido.
+**Em uma frase:** o pedido de venda só segue para a produção depois que o vendedor o libera. É o portão do fluxo e a única entrada de pedido de venda no MES: sem liberação, o PCP (planejamento e controle da produção) não enxerga o pedido.
 
-> [!info] Proposta ao pedido (decisões de 16 a 26/10/2026)
-> Esta nota descreve a liberação que **existe hoje** ✅. O desenho aprovado põe a proposta antes do `V1`. O pedido que nasce da proposta já vem liberado. O pedido digitado no Omie continua chegando travado. Esse desenho ainda não está pronto 📝 🔴. Detalhe em [[11-Proposta-e-Pedido-de-Venda]].
+> [!info] Proposta ao pedido (decisões de 16 a 26/10/2026, fluxo aprovado em 26/10)
+> Esta nota descreve a liberação que **existe hoje** ✅. O desenho aprovado põe a proposta antes do `V1`, com duas origens no mesmo fluxo. O pedido que nasce da proposta já vem liberado (a Qualidade é respondida no "Transformar em pedido"). O pedido digitado no Omie continua chegando travado, mas o vendedor responde a Qualidade e o faturamento em partes na tela do pedido e preenche ali a parte de compras, sem travar o fluxo. A liberação gravada é a mesma desta nota, que o MES lê. Esse desenho ainda não está pronto 📝 (N16-05, N16-91, N16-106) 🔴. Detalhe em [[11-Proposta-e-Pedido-de-Venda]].
 
 ## Como funciona, passo a passo
 
@@ -68,27 +68,17 @@ Raia seguinte: [[02-PCP-Triagem-e-Destinacao]].
 
 ## Detalhe técnico
 
-Tudo abaixo é o conteúdo completo da nota anterior: regras numeradas, estados, telas, rotas, código, tabelas, pendências e o diagrama.
-
 Nós do [[00-Fluxo-Mestre-0b]]: `V1` pedido chega do Omie travado, `V2` vendedor marca se a Qualidade acompanha, `V3` vendedor libera. Selos e convenções em [[Regras-do-Vault]].
-
-> [!info] Proposta ao pedido (decisões de 16 a 26/10/2026, fluxo aprovado em 26/10)
-> Esta nota descreve a liberação que **existe hoje** ✅. O desenho aprovado põe a **proposta** antes do `V1` e dá ao `V1` **duas origens no mesmo fluxo**: o pedido da proposta nasce liberado (a Qualidade é respondida no "Transformar em pedido"); o pedido digitado no Omie continua chegando travado, mas o vendedor responde a Qualidade e o faturamento em partes **na tela do pedido** e preenche ali a parte de compras, sem travar o fluxo 📝 (N16-05, N16-91, N16-106) 🔴. A liberação gravada é a mesma desta nota, que o MES lê. Detalhe em [[11-Proposta-e-Pedido-de-Venda]] e.
-
-### Objetivo
-
-O pedido de venda nasce no Omie e chega ao av-hub **travado**. O vendedor decide se a Qualidade acompanha o pedido desde o início e **libera numa ação só**. Só o pedido liberado atravessa para o MES: sem liberação, a Triagem do PCP não o enxerga. É o portão do fluxo inteiro e a única entrada de pedido de venda no MES.
 
 Depois da liberação, esta raia continua como leitura: o vendedor acompanha o item pelo cartão **Etapa dos itens** (status por item que o MES informa, [[API-005-Status-Item-Integracao-MES]] e [[API-006-Status-por-Item-Leitura-no-Hub]]).
 
-### Quem atua
+### Quem atua (onde)
 
 | Quem | Papel | Onde |
 |---|---|---|
 | Vendedor | Marca Sim ou Não e libera os pedidos dele | Portal do Vendedor, `/liberar-pedidos` |
 | Auxiliar do titular | Libera pelos titulares que auxilia (mesmo escopo de Meus Pedidos) | idem |
 | Gerente (perfis que já veem Pedidos da Equipe) | Vê todos os pedidos da liberação, só leitura; descobre quem está segurando pedido | Portal do Gerente, `/liberacao-equipe` |
-| Admin (Dev) | Vê e libera | as duas telas |
 | PCP | Consome os liberados (não marca nada) | MES, ver [[02-PCP-Triagem-e-Destinacao]] |
 | Gustavo (DBA) | Banco e API desta raia | `api-acos-vital` |
 | Nathan | Front do av-hub (telas e BFF) | HUB |
@@ -267,5 +257,3 @@ flowchart TD
     P2 -->|"POST importado<br/>status_liberacao importado, marcação trava"| V3
     P2 -.->|"GET itens status a cada 90 s"| V1
 ```
-
-Raia seguinte: [[02-PCP-Triagem-e-Destinacao]].

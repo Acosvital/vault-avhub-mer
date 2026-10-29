@@ -23,6 +23,11 @@ fontes: ["api-acos-vital/src/schemas/core/tables/funcionarios/funcionarios.route
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Passou para o banco e a API a busca, os filtros, a ordenação, a paginação e o resumo da lista de Funcionários, que antes rodavam no navegador.
+> **Quem é afetado:** O RH, que ganha uma tela mais leve e com números iguais aos da lista; quem só visualiza vê CPF e RG mascarados.
+> **Situação:** ✅ Entregue e confirmado ao vivo na `api-test` em 25/09/2026, com 197 funcionários. O front foi adaptado e testado localmente na época.
+
 
 > **✅ Implementado e confirmado ao vivo contra `api-test.acosvital.com.br` em 25/09/2026.** Todos os
 > itens do "5. Aceite" testados com dado real (197 funcionários): busca `q` sem acento/caixa em

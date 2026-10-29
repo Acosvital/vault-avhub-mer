@@ -71,13 +71,13 @@ O PCP monta a rota das 100 flanges de aço carbono. O Estoque vem primeiro e a i
 
 ## Detalhe técnico
 
-### Objetivo (original)
+### Motor e escrita condicional
 
-Levar cada parcial do item pelos setores do roteiro do pedido, na ordem, até o último setor. O motor é o `ItemParcial` (fração de um item) com histórico imutável em `HistoricoItemParcial`. Toda transição usa escrita condicional (`updateMany` com o status esperado e `count === 0` vira 409), sem leitura seguida de escrita (`itens-parciais.service.ts:245-257`, `:324-337`). É o único subfluxo com motor completo no código desde o início do projeto ✅.
+O motor é o `ItemParcial` (fração de um item) com histórico imutável em `HistoricoItemParcial`. Toda transição usa escrita condicional (`updateMany` com o status esperado e `count === 0` vira 409), sem leitura seguida de escrita (`itens-parciais.service.ts:245-257`, `:324-337`).
 
 Produção só recebe o que o Estoque não atendeu e que não foi para compra. Revenda não produz: a fábrica `REVENDA` só envia o restante para compra (`itens-parciais.service.ts:722-730`).
 
-### Quem atua (com telas)
+### Quem atua (onde)
 
 | Quem | Papel | Onde |
 |---|---|---|
@@ -250,5 +250,3 @@ flowchart TD
     P6 -->|reabre compra| P3["P3 · Requisicao de compra"]
     F1 -.->|"consumo de materia-prima (sem codigo)"| E1["E1 · Estoque"]
 ```
-
-Raias vizinhas: [[03-Estoque-Atendimento-e-Despacho]], [[08-Qualidade-Saida]].

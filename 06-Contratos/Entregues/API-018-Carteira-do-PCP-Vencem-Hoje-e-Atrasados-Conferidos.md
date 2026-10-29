@@ -28,6 +28,11 @@ criado_original: 2026-10-22
 >
 > Selos em [[Regras-do-Vault]].
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** O cartão "Vencem hoje" da Carteira do PCP (Planejamento e Controle da Produção) passou a mostrar valor, e a conta de atrasados foi alinhada com a lista.
+> **Quem é afetado:** O PCP e quem acompanha o Dashboard: o cartão e a lista agora dão o mesmo número de pedidos atrasados.
+> **Situação:** ✅ Aplicado em produção em 26/10/2026; os números foram conferidos na API. 🟡 O cartão "Vencem hoje" na tela do Dashboard não foi conferido.
+
 ## Por quê
 
 O Dashboard PCP mostra a carteira inteira ([[API-017-Carteira-do-PCP-por-Periodo-e-Previsao-de-Faturamento-por-Mes]]) e cada cartão leva à lista que o explica. Dois pontos quebram a leitura: "Vencem hoje" não tem valor (só quantidade), e a quantidade de atrasados do cartão (353) não é a que a lista mostra ao clicar (358).

@@ -16,6 +16,11 @@ criado_original: 2026-09-28
 
 > **Onde atua:** av-hub: banco, API, front · MES: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** O pedido chega do Omie travado numa tela do vendedor, que marca se a Qualidade acompanha o pedido desde o início. Só pedido marcado segue para o MES (sistema de produção). É o Fluxo 4.
+> **Quem é afetado:** Vendedores (tela Liberar Pedidos), gerência (Liberação da Equipe, só leitura) e o MES/PCP (planejamento e controle da produção), que lê só os pedidos liberados.
+> **Situação:** ✅ Entregue em 01/10: telas e rotas no ar; o MES lê `/pedidos_liberados`. 🟡 A Triagem do Pedido ainda usa nomes antigos (`/carteira`). ❓ Front não conferido.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** V2, V3, P1, P2 · **Dono:** Gustavo (DBA)
 >

@@ -28,6 +28,11 @@ criado_original: 2026-09-17
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Definiu o filtro `alterado_desde` nas listas de produtos e parceiros, para quem consome (Estoque e MES, o sistema de produção) buscar só o que mudou desde a última leitura, sem baixar tudo.
+> **Quem é afetado:** Estoque e MES, que passam a ler só as mudanças; o Gustavo (DBA) mantém as rotas.
+> **Situação:** ✅ No código. A correção do filtro foi informada pelo Gustavo em 26/10/2026. ❓ Produção não foi reconferida.
+
 
 > **Atualização de 07/10/2026 — conferido no código (`main` = `develop` da `api-acos-vital`):** os caminhos `src/routes/*.js` citados abaixo **não existem mais**; desde o PR #276 o código mora em `src/schemas/<schema>/…`. O `apiKeyAuth.js` hoje tem 3 tipos de chave (`API_KEYS` do ambiente = admin; `auth.chaves_servico` no banco com nível leitura/escrita/admin; `MES_INTEGRACAO_KEYS`, só para o PUT do 34), então a "Pergunta 3" abaixo (chave por consumidor) já tem mecanismo no banco, sem restrição por rota. A **pipeline não usa `alterado_desde`**: produtos e parceiros usam `filtrar_por_data_de/ate` com janela fixa (este contrato é de API, consumido pelo Estoque/MES). Ver [[Chaves-e-Autenticacao|Chaves-de-Integracao-AvHub-MES-Pipeline]].
 

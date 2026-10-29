@@ -14,6 +14,11 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compr
 
 > **Onde atua:** av-hub: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Juntou numa lista única as OCs criadas no av-hub e os pedidos de compra feitos direto no Omie, para ninguém perder o histórico. Vale para Ordens de compra, dashboard e requisições.
+> **Quem é afetado:** Compradores e gestão de Compras passam a ver as duas origens na mesma tela, com filtro Origem (av-hub, Omie ou todas).
+> **Situação:** ✅ A view `vw_ordens_compra_historico` e `GET /compras/ordens?origem=` estão no ar; a regra é fixa, sem chave. O contrato registra o front mergeado na `develop` em 28/09.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
 >

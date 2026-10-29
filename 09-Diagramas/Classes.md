@@ -1,7 +1,7 @@
 ---
 tags: [diagramas, classes, uml, mes, estoque, comercial]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Robert
 fontes: [v1 Diagramas-UML (1, 2, 3, 23, 25), api-pcp 579a625 prisma/models/*.prisma, HUB b55ac55 api-comercial/prisma/models/*.prisma]
@@ -9,9 +9,19 @@ fontes: [v1 Diagramas-UML (1, 2, 3, 23, 25), api-pcp 579a625 prisma/models/*.pri
 
 # Diagramas de classes
 
-Redesenhados a partir do Prisma do `api-pcp` (`prisma/models/`) e do Prisma do `api-comercial` (HUB `b55ac55`), ambos de 14/10/2026. Mostram o que importa para o fluxo [[00-Fluxo-Mestre-0b]]: nem todos os campos aparecem. Colunas e tipos exatos: [[Modelo-de-Dados]] e [[Banco-MES]]. Destino de cada diagrama do v1: [[Indice-de-Diagramas]].
+**Em uma frase:** quatro desenhos mostram as "coisas" que o sistema guarda (lote, pedido, requisição…) e como elas se ligam.
+
+**Como ler estes diagramas**
+
+- Cada caixa é uma coisa que o sistema guarda; as linhas dentro dela são os dados mais importantes dessa coisa.
+- Cada linha entre caixas é uma ligação. `1` e `0..*` dizem quantos de cada lado: `1` é exatamente um; `0..*` é nenhum ou vários.
+- Uma caixa marcada `<<proposta>>` ainda não existe no código.
+- Comece pela caixa central de cada desenho (o Lote no 1, o Pedido no 2, a Requisição no 3, a Proposta no 4) e siga as setas.
+- Só aparecem os campos que importam para o fluxo [[00-Fluxo-Mestre-0b]]. Colunas e tipos exatos estão em [[Modelo-de-Dados]] e [[Banco-MES]]. Os campos vêm do Prisma (descrição das tabelas) de 14/10/2026.
 
 ## 1. Estoque e compras no MES (E1 a E5, R0 a R4, Q1 a Q4)
+
+Cada material origina lotes. Cada lote tem saldo, movimentos, custo opcional e, se reprovado, uma RNC. A reserva liga o lote ao item que vai atendê-lo.
 
 ```mermaid
 classDiagram
@@ -108,16 +118,11 @@ classDiagram
     ItemParcial "0..*" --> "0..1" Lote : espera a inspecao
     RetiradaEstoque "0..*" --> "1" Reserva : baixa na retirada E6
 ```
-
-Selo ✅ para todas as classes exceto `RetiradaEstoque` (📝 decidida em 14/10, 🔴 sem código). Fontes: `estoque.prisma:61-423`. Mudanças em relação ao v1:
-
-- `Deposito` ganhou `codigoEmpresa` e `nomeUnidade` (filial do depósito) ✅ `estoque.prisma:69-70`; o v1 dizia que não tinha.
-- `LoteCusto` existe e tem `OrigemCusto` (`CARGA_INICIAL`, `OC`, `MANUAL`); só a carga inicial grava 🔴 (o Recebimento não grava custo).
-- `Pesagem` não é classe: peso teórico, real e recontado ficam em `RecebimentoItem` (diagrama 3). Etiqueta é geração sob demanda (`src/estoque/etiquetas`), sem tabela. `OrdemSeparacao`, `ItemSeparacao`, `DevolucaoCliente` e `ContagemCiclica` não existem no schema e saíram deste vault (fora do fluxo 0b).
-- `Fornecedor` é projeção local (`fornecedores`) sem ligação com o lote; o lote guarda `numeroNf` e o recebimento guarda o nome do fornecedor.
-- `RetiradaEstoque` entra como proposta do nó E6: a baixa sai do recebimento da parcial na Embalagem e passa para a retirada. Nome e campos 🟡 a definir com o Robert.
+✅ Todas as caixas existem, menos `RetiradaEstoque` (📝 decidida em 14/10, 🔴 sem código).
 
 ## 2. Produção no MES (P1, P2, F1, Q7, X1 a X4)
+
+Um pedido tem itens; cada item passa pelos setores do roteiro em partes chamadas parciais. O desenho também mostra embalagem, paletes, anexos e divergências.
 
 ```mermaid
 classDiagram
@@ -222,16 +227,11 @@ classDiagram
     Pedidos "1" --> "0..*" Divergencia
     ItemParcial "0..1" --> "0..*" Divergencia
 ```
-
-Selo ✅ `producao.prisma:88-620`, `fabricas.prisma:36-170`. Observações conferidas:
-
-- O roteiro existe em dois níveis: `Roteiros` (por pedido) e `RoteiroItem` (por item) ✅ `producao.prisma:262-292`.
-- O setor Estoque é inserido pelo backend como etapa 1 de todo roteiro (`GET /pedidos/setor-estoque-fixo` ✅ `pedidos.controller.ts:92`).
-- `Pedidos.importadoAvhubEm` é a marca do `POST /pedidos_liberados/:n/importado` ✅ `pedidos.service.ts:133`.
-- Também existem `PedidoExcluido` (snapshot de exclusão), `ItemParcialAnexo`, `ItemParcialObservacao` e `PerfilSetor`; não aparecem para não poluir.
-- Tipo de pedido no av-hub: pedido manual (`LOG-45`) não participa deste modelo ([[Pedido-Manual]]).
+✅ Conferido no código. O roteiro existe em dois níveis (por pedido e por item). O pedido manual do av-hub não participa deste modelo ([[Pedido-Manual]]).
 
 ## 3. Compras, recebimento e integração com o av-hub (P3, R0 a R6)
+
+A requisição de compra tem itens e gera recebimentos. Três caixas à direita guardam a conversa com o av-hub: a fila de envio, os eventos recebidos e o ponto onde a leitura parou.
 
 ```mermaid
 classDiagram
@@ -324,16 +324,11 @@ classDiagram
     RequisicaoCompraItem ..> RequisicaoCompraEventoAvhub : eventos LOG-35 por idOrigem
     RequisicaoCompraEventoAvhub ..> IntegracaoAvhubCursor : cursor requisicoes-eventos
 ```
-
-Selo ✅ `compras.prisma:51-262`, `integracao.prisma:33-120`. Enums: `StatusRequisicaoCompra` (`ABERTA`, `EM_COMPRA`, `RECEBIDA_PARCIAL`, `RECEBIDA`, `CANCELADA`), `TipoItemRequisicao` (`PRODUTO_FINAL`, `MATERIA_PRIMA`), `TipoDivergenciaRecebimento` (`QUANTIDADE`, `DESCRICAO`, `PESO`, `AVARIA`), `StatusEnvioAvhub` (`PENDENTE`, `ENVIADO`, `RECUSADO`, `FALHOU`), `TipoEnvioAvhub` (`REQUISICAO_COMPRA`). Mudanças em relação ao v1 (08/10):
-
-- Entraram os campos de **Compras · CCP** (14/10): `etapaCompra`, `numeroOc`, `numeroPedidoOmie`, `previsaoChegada`, `ocAprovadaEm`, `despachadaEm`, `nfFornecedor`, `transportadora`, `ocorrenciaAberta` no item; `pedidoCompra`, `previsaoEntrega`, `compradoEm`, `liberadaRecebimento*`, `nfChegada`, `chaveNfChegada`, `chegadaEm`, `canceladaPor` na requisição.
-- O registro manual da compra (`PATCH :id/compra`) saiu; `pedidoCompra`, `fornecedor` e `previsaoEntrega` agora são espelho do av-hub, nunca digitados ✅ `compras.prisma` (comentário do bloco CCP).
-- `idLocalizacao` e `idLote` de `RecebimentoItem` não têm FK no schema; o lote só nasce em `CONCLUIDO` ou `ACEITO`.
+✅ Conferido no código. O registro manual da compra saiu: `pedidoCompra`, `fornecedor` e `previsaoEntrega` vêm do av-hub, nunca digitados.
 
 ## 4. api-comercial (schema `core_comercial`, Comercial e Suprimentos)
 
-Fora do fluxo 0b; ver [[Comercial-Suprimentos]].
+Fora do fluxo 0b; ver [[Comercial-Suprimentos]]. Mostra clientes, propostas, fornecedores, ofertas de preço e ordens de compra do módulo do Pablo. As caixas sem campos só entram para mostrar a ligação.
 
 ```mermaid
 classDiagram
@@ -392,9 +387,44 @@ classDiagram
     OrdemCompra "1" --> "0..*" ItemOrdemCompra
     Produto "1" --> "0..*" ItemOrdemCompra
 ```
-
-Selo ✅ `api-comercial/prisma/models/*.prisma` (HUB `b55ac55`). Mudança: `PerfilComercial` (v1) virou `UsuarioComercial`, mapeada para a tabela `perfis_comerciais`, sem coluna de cargo (migration `20261013140000_usuarios_comerciais_diretorio`) ✅ `empresas.prisma:61-78`. `StatusProposta` (`ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA`), `StatusSolicitacao` (`ABERTA`, `RESPONDIDA`, `SEM_FORNECEDOR`, `CANCELADA`), `StatusOferta` (`VIGENTE`, `VENCIDA`, `INVALIDADA`, `HISTORICA`), `FonteOferta` (`MANUAL`, `MAPA_COTACAO`, `PEDIDO_OMIE`, `MIGRACAO`). O enum `CargoComercial` do v1 não existe mais.
+✅ Conferido no código do HUB (`b55ac55`). `PerfilComercial` virou `UsuarioComercial`, e o cargo deixou de existir.
 
 ## O que não foi redesenhado
 
-O diagrama 3 do v1 (RBAC e comercial do av-hub: `Usuario`, `Perfil`, `Tela`, `Funcionario`, `Unidade`, `PedidoVenda`…) não foi refeito aqui: pertence ao banco do av-hub e vive em [[Banco-AvHub]] e [[RBAC-e-Permissoes]]. Ver [[Indice-de-Diagramas]].
+O diagrama 3 do v1 (RBAC e comercial do av-hub: `Usuario`, `Perfil`, `Tela`, `Funcionario`, `Unidade`, `PedidoVenda`…) não foi refeito aqui. Ele pertence ao banco do av-hub e vive em [[Banco-AvHub]] e [[RBAC-e-Permissoes]]. Destino de cada diagrama do v1: [[Indice-de-Diagramas]].
+
+## Detalhe técnico
+
+Redesenhados a partir do Prisma do `api-pcp` (`prisma/models/`) e do Prisma do `api-comercial` (HUB `b55ac55`), ambos de 14/10/2026. Nem todos os campos aparecem.
+
+### Diagrama 1: Estoque e compras no MES
+
+Selo ✅ para todas as classes exceto `RetiradaEstoque` (📝 decidida em 14/10, 🔴 sem código). Fontes: `estoque.prisma:61-423`. Mudanças em relação ao v1:
+
+- `Deposito` ganhou `codigoEmpresa` e `nomeUnidade` (filial do depósito) ✅ `estoque.prisma:69-70`; o v1 dizia que não tinha.
+- `LoteCusto` existe e tem `OrigemCusto` (`CARGA_INICIAL`, `OC`, `MANUAL`); só a carga inicial grava 🔴 (o Recebimento não grava custo).
+- `Pesagem` não é classe: peso teórico, real e recontado ficam em `RecebimentoItem` (diagrama 3). Etiqueta é geração sob demanda (`src/estoque/etiquetas`), sem tabela. `OrdemSeparacao`, `ItemSeparacao`, `DevolucaoCliente` e `ContagemCiclica` não existem no schema e saíram deste vault (fora do fluxo 0b).
+- `Fornecedor` é projeção local (`fornecedores`) sem ligação com o lote; o lote guarda `numeroNf` e o recebimento guarda o nome do fornecedor.
+- `RetiradaEstoque` entra como proposta do nó E6: a baixa sai do recebimento da parcial na Embalagem e passa para a retirada. Nome e campos 🟡 a definir com o Robert.
+
+### Diagrama 2: Produção no MES
+
+Selo ✅ `producao.prisma:88-620`, `fabricas.prisma:36-170`. Observações conferidas:
+
+- O roteiro existe em dois níveis: `Roteiros` (por pedido) e `RoteiroItem` (por item) ✅ `producao.prisma:262-292`.
+- O setor Estoque é inserido pelo backend como etapa 1 de todo roteiro (`GET /pedidos/setor-estoque-fixo` ✅ `pedidos.controller.ts:92`).
+- `Pedidos.importadoAvhubEm` é a marca do `POST /pedidos_liberados/:n/importado` ✅ `pedidos.service.ts:133`.
+- Também existem `PedidoExcluido` (snapshot de exclusão), `ItemParcialAnexo`, `ItemParcialObservacao` e `PerfilSetor`; não aparecem para não poluir.
+- Tipo de pedido no av-hub: pedido manual (`LOG-45`) não participa deste modelo ([[Pedido-Manual]]).
+
+### Diagrama 3: Compras, recebimento e integração
+
+Selo ✅ `compras.prisma:51-262`, `integracao.prisma:33-120`. Enums: `StatusRequisicaoCompra` (`ABERTA`, `EM_COMPRA`, `RECEBIDA_PARCIAL`, `RECEBIDA`, `CANCELADA`), `TipoItemRequisicao` (`PRODUTO_FINAL`, `MATERIA_PRIMA`), `TipoDivergenciaRecebimento` (`QUANTIDADE`, `DESCRICAO`, `PESO`, `AVARIA`), `StatusEnvioAvhub` (`PENDENTE`, `ENVIADO`, `RECUSADO`, `FALHOU`), `TipoEnvioAvhub` (`REQUISICAO_COMPRA`). Mudanças em relação ao v1 (08/10):
+
+- Entraram os campos de **Compras · CCP** (14/10): `etapaCompra`, `numeroOc`, `numeroPedidoOmie`, `previsaoChegada`, `ocAprovadaEm`, `despachadaEm`, `nfFornecedor`, `transportadora`, `ocorrenciaAberta` no item; `pedidoCompra`, `previsaoEntrega`, `compradoEm`, `liberadaRecebimento*`, `nfChegada`, `chaveNfChegada`, `chegadaEm`, `canceladaPor` na requisição.
+- O registro manual da compra (`PATCH :id/compra`) saiu; `pedidoCompra`, `fornecedor` e `previsaoEntrega` agora são espelho do av-hub, nunca digitados ✅ `compras.prisma` (comentário do bloco CCP).
+- `idLocalizacao` e `idLote` de `RecebimentoItem` não têm FK no schema; o lote só nasce em `CONCLUIDO` ou `ACEITO`.
+
+### Diagrama 4: api-comercial
+
+Selo ✅ `api-comercial/prisma/models/*.prisma` (HUB `b55ac55`). Mudança: `PerfilComercial` (v1) virou `UsuarioComercial`, mapeada para a tabela `perfis_comerciais`, sem coluna de cargo (migration `20261013140000_usuarios_comerciais_diretorio`) ✅ `empresas.prisma:61-78`. `StatusProposta` (`ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA`), `StatusSolicitacao` (`ABERTA`, `RESPONDIDA`, `SEM_FORNECEDOR`, `CANCELADA`), `StatusOferta` (`VIGENTE`, `VENCIDA`, `INVALIDADA`, `HISTORICA`), `FonteOferta` (`MANUAL`, `MAPA_COTACAO`, `PEDIDO_OMIE`, `MIGRACAO`). O enum `CargoComercial` do v1 não existe mais.

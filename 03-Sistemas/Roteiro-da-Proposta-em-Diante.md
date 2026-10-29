@@ -2,12 +2,73 @@
 id: roteiro-proposta-em-diante
 tags: [roteiro, proposta, pedido-de-venda, compras, custo-real, comissao, api-acos-vital]
 criado: 2026-10-27
-atualizado: 2026-10-27
+atualizado: 2026-10-29
 status: rascunho
 fontes: ["LOG-52 (status em 27/10/2026)", "Registro-de-Decisoes N16-110 a N16-112", "Perguntas-Proposta-Pedido-Comissao (OQ-16, OQ-21, OQ-48)", "Dump do Avhub para referência (completo), 26/10/2026", "av-hub branch refactor/menu-enxuto-vendas-orcamento-compras (11844de)", "[[Conexao-das-Telas-do-Pablo-com-a-API-do-Hub]]"]
 ---
 
 # Roteiro: o que falta para o sistema ficar redondo, da proposta em diante
+
+**Em uma frase:** as regras da proposta ao custo real estão decididas, mas nada disso está construído; esta nota lista o que falta, etapa por etapa, e quem faz.
+
+**Quando consultar esta nota:** para saber o que vem a seguir e quem responde por cada parte.
+
+Legenda: ✅ existe · 🟡 existe em parte · 🔴 não existe. Os contratos desta parte foram removidos em 29/10/2026; o Robert cria os novos.
+
+## Quem faz o quê
+
+| Quem | Faz | Decisão |
+|---|---|---|
+| Robert | Rotas do módulo na `api-acos-vital` e o lote do MES. O Pablo acompanha | N16-117 |
+| Nathan | Telas, pipeline, criação da proposta e começo da comissão | N16-115 |
+| Gustavo | Banco e revisão | LOG-52 |
+
+Não existirá `core_comercial`: a proposta fica em `core_vendas_faturamento` (N16-116).
+
+## Primeira entrega: a proposta (N16-118)
+
+O Robert começa pela proposta. Produtos e histórico de preço vêm depois. As telas do Pablo ficam e o Robert troca só o backend delas (N16-119).
+
+## Etapas
+
+Banco, API e tela aparecem nessa ordem.
+
+| Etapa | Situação | O que falta | Quem faz |
+|---|---|---|---|
+| `V0` Criar e revisar a proposta | 🔴 🔴 🟡 | Banco e API. A tela tem o layout novo, mas usa o modelo antigo e não salva | Robert, Nathan, Gustavo |
+| Escolher cliente | 🟡 🟡 🔴 | Busca na carteira. Decidir prospect, Receita e compradores | Robert, Nathan |
+| Condições de venda | 🔴 🔴 🟡 | Condição de pagamento do Omie, CFOP e cenário de imposto | Gustavo, Nathan, Robert |
+| `V0.3`–`V0.5` Aprovar | 🔴 🔴 🔴 | Aprovar com a revisão, travar e marcar "incompleta" | Robert, Gustavo, Nathan |
+| `V0C` Cancelar proposta | 🔴 🔴 🔴 | Cancelar com motivo e duplicar | Robert, Gustavo, Nathan |
+| `B3`/`B4` Pedido de custo | 🔴 🔴 🔴 | Fila do Orçamento, sem prazo e cronometrada | Robert, Gustavo, Nathan |
+| `B2` Página do produto | 🟡 🟡 🟡 | Estatística de 90 dias, score, volatilidade e matriz de preços | Robert, Nathan |
+| Ofertas e cotação | 🟡 🔴 🟡 | Tabela de oferta, importar mapa e enviar cotação por e-mail | Robert, Gustavo, Nathan |
+| `V0.6`–`V0.7` Transformar em pedido | 🔴 🔴 🔴 | Pedido, 3 respostas obrigatórias e fila para o Omie | Robert, Gustavo, Nathan |
+| `V1`–`V3` Liberação | 🟡 🟡 ✅ | Gravar a liberação na resposta do `IncluirPedido` | Gustavo, Nathan |
+| Pedido digitado no Omie | 🔴 🔴 🟡 | Trazer o pedido e o vendedor preencher a parte de compras (N16-106) | Robert, Gustavo, Nathan |
+| `C6`/`C7` Compras usa a proposta | 🔴 🔴 🔴 | A OC puxar impostos, frete e fornecedor. Nenhuma OC emitida em produção | Robert, Nathan |
+| `C8` Compra acima do valor | 🔴 🔴 🔴 | Aviso, aprovar ou reprovar e lista de reprovados | Robert, Gustavo, Nathan |
+| `K1`–`K6` Custo real e comissão | 🔴 🔴 🔴 | Custo por evento, comissão estimada e real, decisão da Controladoria | Nathan (`K1`), Robert, Gustavo |
+| Cancelar pedido | 🔴 🔴 🔴 | Cancelar no Omie, requisição e OC, tarja e comprado ao Estoque | Robert, Gustavo, Nathan |
+| Datas e previsão de faturamento | 🔴 🔴 🔴 | Previsões, +1 dia útil e calendário com exceções | Gustavo, Robert, Nathan |
+| Faturar em partes | 🔴 🔴 🔴 | Criar, mostrar e cancelar sequenciais | Gustavo, Robert, Nathan |
+
+## O que vale para tudo e pendências
+
+E-mail, notificações, perfis, testes no Omie e as pendências de 27/10 estão em "Detalhe técnico", seções 3 e 4.
+
+## Ordem sugerida (N16-110, sem confirmação)
+
+1. Fase 1: proposta nova, pedido pela fila do Omie, condições de pagamento, liberação, imposto por item na OC e comissão estimada.
+2. Fase 2: compra acima do valor (`C8`), cancelamento com tarja e custo real por evento.
+3. Fase 3: comissão real, faturar em partes, datas, fila do Fiscal, score e matriz de preços.
+
+Em seguida à proposta vêm produtos e histórico de preço (seção 5.2 abaixo). A regra do score está em [[Proposta-Score-e-Volatilidade-OQ-46]].
+
+## Detalhe técnico
+
+Tudo abaixo é o conteúdo completo da nota original, sem cortes.
+
 
 > [!info] Situação em 27/10/2026
 > Levantamento pedido pelo Nathan. As **regras** estão decididas nas N16; **nada** desta parte está construído. Os contratos desta parte foram removidos em 29/10/2026 (o Robert cria os novos).
@@ -18,14 +79,14 @@ fontes: ["LOG-52 (status em 27/10/2026)", "Registro-de-Decisoes N16-110 a N16-11
 >
 > **Nathan cuida da criação da proposta e do começo da comissão** (N16-115, 27/10/2026); fora isso, **Quem faz** segue os donos dos contratos: **Robert** faz as rotas do módulo na `api-acos-vital` (LOG-52) e o lote do MES, com o Pablo acompanhando; Gustavo o banco e a revisão; Nathan as telas e a pipeline.
 
-## 1. Antes de construir: realinhar os contratos à N16-111, N16-112 e N16-116
+### 1. Antes de construir: realinhar os contratos à N16-111, N16-112 e N16-116
 
 - **Os contratos SQL e de API desta parte foram removidos em 29/10/2026.** O Robert cria os novos já sobre `core_vendas_faturamento` e a API do Hub (N16-111, N16-112, N16-116), com o Gustavo revisando o banco.
   - Mapa do que reusar: [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §0 e a tabela de unificação em [[Conexao-das-Telas-do-Pablo-com-a-API-do-Hub]].
 - **Não existirá `core_comercial` (N16-116, 27/10/2026): a proposta fica em `core_vendas_faturamento`.** Os contratos novos nomeiam esse schema, e as rotas `/comercial/*` da fase 1 mudam de prefixo.
 - **O `core_comercial` está em produção, vazio** (dump de 26/10: só `categorias_suprimento` 17, `parametros_custo` 1 e `unidades_emissoras` 3). Quem faz: Gustavo e **Robert**. Pela N16-116 ele **sai**: o que for útil (parâmetros de custo, emissoras) migra para o lugar certo.
 
-## 2. O fluxo, etapa por etapa
+### 2. O fluxo, etapa por etapa
 
 | Etapa | Banco | API do Hub | Tela | O que falta | Contratos | Quem faz |
 |---|---|---|---|---|---|---|
@@ -47,7 +108,7 @@ fontes: ["LOG-52 (status em 27/10/2026)", "Registro-de-Decisoes N16-110 a N16-11
 | **Datas e previsão de faturamento** | 🔴 | 🔴 | 🔴 | Previsão inicial, entrega de Compras e do CCP, +1 dia útil, calendário com exceções do marketing | | Gustavo (banco), **Robert** (API), Nathan (tela) |
 | **Faturar em partes (sequenciais)** | 🔴 | 🔴 | 🔴 | Criar, mostrar e cancelar sequenciais. A terceira tabela já tem os dados ligados | | Gustavo (banco), **Robert** (API), Nathan (tela) |
 
-## 3. O que vale para tudo
+### 3. O que vale para tudo
 
 - **Serviço de e-mail do Hub:** ⏸ **último plano, para o futuro** (Nathan, 27/10/2026, N16-113). A API não envia e-mail; até lá, a proposta vai ao cliente e o pedido de cotação ao fornecedor fora do sistema.
 - **Notificações do Hub:** ⏸ **último plano, para o futuro** (N16-113). O sino existe na tela, mas não há nada no Hub.
@@ -56,14 +117,14 @@ fontes: ["LOG-52 (status em 27/10/2026)", "Registro-de-Decisoes N16-110 a N16-11
 - **Testes no Omie** (OQ-16, OQ-48; Nathan, depois das telas, N16-82): pedido que nasce bloqueado, cancelar ou excluir, e como criar sequencial.
 - **Revisão completa do Orçamento antigo** do Hub (`/orcamento/*`, `orc_*`), pedida pelo Nathan em 27/10 (**Robert**, com o Pablo acompanhando, e o Gustavo).
 
-## 4. Pendências do que já foi feito (27/10/2026)
+### 4. Pendências do que já foi feito (27/10/2026)
 
 - **PR da branch** `refactor/menu-enxuto-vendas-orcamento-compras` do av-hub, que o Nathan ainda vai revisar (Nathan).
 - **Telas que hoje mostram "ainda não existe na API do Hub":** propostas, relatórios, Dashboard Comercial, ofertas, pedidos de custo, telha e o sino. Decidir se ficam no menu até existirem (Nathan).
 - **Tirar a `api-comercial` de produção** (**Pablo**, com a infraestrutura).
 - **Família do produto aparece como código:** o Hub nega `/familias_produtos` ao perfil Admin (Dev), por permissão no Hub (Gustavo).
 
-## 5. Primeiro do Robert: a proposta (N16-118)
+### 5. Primeiro do Robert: a proposta (N16-118)
 
 > [!important] Nathan, 28/10/2026: "Robert começará por proposta". Passa a ser a **primeira entrega** do projeto, **antes** de produtos e histórico de preço (que era a N16-114 e vira a seção 5.2). O Pablo acompanha (N16-117).
 
@@ -86,12 +147,12 @@ Entrega depois da proposta, na `api-acos-vital`, sobre o que o Hub já tem (N16-
 
 **Depois, na mesma linha:** matriz de preços v1 e ofertas (uma tabela só, N16-112). **Tela (Nathan):** Produtos e Página do produto já leem o Hub; ganham o histórico, a série e o score quando as rotas existirem.
 
-## 6. Ordem que o vault sugere (N16-110, sem confirmação)
+### 6. Ordem que o vault sugere (N16-110, sem confirmação)
 
 1. **Fase 1:** proposta nova, pedido pela fila do Omie, condições de pagamento, liberação, imposto por item na OC e comissão estimada.
 2. **Fase 2:** compra acima do valor (C8), cancelamento com tarja e custo real por evento.
 3. **Fase 3:** comissão real, faturar em partes, datas e calendário, fila do Fiscal, score e matriz de preços.
 
-## Ver também
+### Ver também
 
 [[Conexao-das-Telas-do-Pablo-com-a-API-do-Hub]] · [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] · · · · [[Registro-de-Decisoes]] · [[Perguntas-Proposta-Pedido-Comissao]]

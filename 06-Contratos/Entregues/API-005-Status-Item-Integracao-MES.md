@@ -27,6 +27,11 @@ criado_original: 2026-09-22
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Criou a rota do MES que informa a etapa atual de cada item de pedido, para o av-hub saber em que ponto da produção cada produto está.
+> **Quem é afetado:** Robert (MES) mantém a rota; vendedores e PCP (Planejamento e Controle da Produção) passam a ver a etapa dos itens.
+> **Situação:** ✅ Rota no MES e leitura no av-hub a cada 90 segundos, ambas no código. As 3 diferenças do rascunho foram aceitas pelo Nathan. ❓ Produção não conferida.
+
 
 > Status: decidido | no código | em produção (verificado em 07/10/2026). Fonte: [[Registro-de-Decisoes|Registro-de-Decisoes-2026-10-07]] (#42 e #43).
 > - **Aceite das 3 diferenças** (foto atual em vez de log; `pedido_venda` + `ordem_producao`; etapas a mais e a menos): ✅ **aceitas pelo Nathan em 08/10/2026** (o Robert já tinha aprovado em 30/09).

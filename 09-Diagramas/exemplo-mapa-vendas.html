@@ -1,0 +1,438 @@
+<title>Mapa Aços Vital</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: mapa em fases no topo, ficha do setor embaixo; passo a passo com o pedido-exemplo ao lado do texto. */
+:root {
+  --bg: #EDEFF1;
+  --surface: #F8F9FA;
+  --ink: #18212B;
+  --muted: #566170;
+  --line: #CBD1D8;
+  --vendas: #2B5F85;
+  --on-vendas: #FFFFFF;
+  --vendas-soft: #D9E6F0;
+  --signal: #B84A17;
+  --ok: #2B6E47;
+  --ok-soft: #DAEADF;
+  --part: #8A5A00;
+  --part-soft: #F4E7C8;
+  --gap: #A3392E;
+  --gap-soft: #F3DEDB;
+  --f-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11171D; --surface: #1A222B; --ink: #E6EAEE; --muted: #9AA6B2; --line: #2E3944;
+    --vendas: #74ACD6; --on-vendas: #0E1A24; --vendas-soft: #1F3446; --signal: #F08A55;
+    --ok: #74C698; --ok-soft: #1B3326; --part: #E3B95A; --part-soft: #3A2F14;
+    --gap: #EE8E84; --gap-soft: #3A2220; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11171D; --surface: #1A222B; --ink: #E6EAEE; --muted: #9AA6B2; --line: #2E3944;
+  --vendas: #74ACD6; --on-vendas: #0E1A24; --vendas-soft: #1F3446; --signal: #F08A55;
+  --ok: #74C698; --ok-soft: #1B3326; --part: #E3B95A; --part-soft: #3A2F14;
+  --gap: #EE8E84; --gap-soft: #3A2220; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 400 15px/1.55 var(--f-body);
+  padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; margin: 0; text-wrap: balance; line-height: 1.05; }
+h1 { font-size: clamp(38px, 7vw, 60px); font-weight: 700; letter-spacing: .01em; }
+h2 { font-size: 30px; }
+h3 { font-size: 20px; letter-spacing: .02em; }
+p { margin: 0; }
+.mono { font-family: var(--f-mono); font-size: .86em; }
+.label { font: 500 12px/1 var(--f-body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+/* topo */
+.top { display: flex; flex-direction: column; gap: 14px; }
+.lead { font-size: 18px; max-width: 62ch; color: var(--muted); }
+.lead b { color: var(--ink); font-weight: 500; }
+.example-tag { align-self: flex-start; font: 500 12px/1 var(--f-body); letter-spacing: .06em; text-transform: uppercase; padding: 7px 10px; border: 1px dashed var(--signal); color: var(--signal); }
+
+.trail { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 0; margin: 4px 0 0; list-style: none; }
+.trail li { display: flex; align-items: baseline; gap: 8px; font-weight: 500; }
+.trail a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+.trail a:hover { border-color: var(--vendas); }
+.trail .n { font: 600 22px/1 var(--f-display); color: var(--vendas); }
+
+section { display: flex; flex-direction: column; gap: 18px; scroll-margin-top: 20px; }
+.sec-head { display: flex; flex-direction: column; gap: 6px; }
+.sec-head p { color: var(--muted); max-width: 64ch; }
+
+/* mapa em fases */
+.phases { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; }
+.phase { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 0 22px 0 0; }
+.phase:not(:last-child)::after { content: "\2192"; position: absolute; right: 2px; top: 6px; color: var(--muted); font-size: 18px; }
+.phase h3 { font-size: 15px; font-family: var(--f-body); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding-bottom: 8px; border-bottom: 2px solid var(--line); }
+.chip { text-align: left; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.chip b { font: 600 18px/1.1 var(--f-display); letter-spacing: .02em; }
+.chip span { font-size: 13px; color: var(--muted); line-height: 1.35; }
+.chip[disabled] { opacity: .55; cursor: default; border-style: dashed; }
+.chip.live { cursor: pointer; background: var(--vendas); border-color: var(--vendas); color: var(--on-vendas); box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--signal); }
+.chip.live span { color: var(--on-vendas); opacity: .9; }
+.chip.live em { font: normal 500 11px/1 var(--f-body); letter-spacing: .08em; text-transform: uppercase; margin-top: 6px; }
+.legend { font-size: 13px; color: var(--muted); }
+
+/* ficha */
+.ficha { background: var(--surface); border: 1px solid var(--line); border-top: 6px solid var(--vendas); padding: 26px; display: flex; flex-direction: column; gap: 30px; }
+.ficha-head { display: flex; flex-direction: column; gap: 10px; }
+.ficha-head p { font-size: 18px; max-width: 60ch; }
+.ficha-head .sector { font: 700 14px/1 var(--f-body); letter-spacing: .12em; text-transform: uppercase; color: var(--vendas); }
+
+.between { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch; }
+.between .box { border: 1px solid var(--line); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.between .box.me { background: var(--vendas-soft); border-color: var(--vendas); }
+.between .arrow { align-self: center; font-size: 22px; color: var(--muted); }
+.between ul { margin: 0; padding-left: 18px; }
+.between li { margin: 2px 0; }
+
+.who { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.who div { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; }
+.who b { display: block; font-weight: 600; }
+.who span { color: var(--muted); font-size: 14px; }
+
+/* passo a passo */
+.tour { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 22px; }
+.rail { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.rail button { width: 100%; text-align: left; font: inherit; color: var(--ink); background: none; border: 0; border-left: 3px solid var(--line); padding: 10px 12px 10px 14px; cursor: pointer; display: grid; grid-template-columns: 48px 1fr auto; gap: 8px; align-items: baseline; }
+.rail button:hover { background: var(--bg); }
+.rail button[aria-current="step"] { border-left-color: var(--signal); background: var(--vendas-soft); font-weight: 500; }
+.rail .id { font: 500 12px/1 var(--f-mono); color: var(--muted); }
+.dot { width: 9px; height: 9px; border-radius: 50%; align-self: center; }
+.dot.ok { background: var(--ok); } .dot.part { background: var(--part); } .dot.gap { background: var(--gap); }
+.rail-title { line-height: 1.3; }
+
+.stage { border: 1px solid var(--line); background: var(--bg); padding: 22px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.stage-head { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; justify-content: space-between; }
+.stage-head h3 { font-size: 28px; }
+.pill { font: 500 12px/1 var(--f-body); letter-spacing: .04em; padding: 6px 9px; display: inline-block; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.part { background: var(--part-soft); color: var(--part); }
+.pill.gap { background: var(--gap-soft); color: var(--gap); }
+.states { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font: 500 12px/1 var(--f-mono); }
+.states span { padding: 5px 8px; border: 1px solid var(--line); color: var(--muted); }
+.states span.on { border-color: var(--signal); color: var(--signal); background: var(--surface); }
+.stage dl { display: grid; grid-template-columns: 100px 1fr; gap: 10px 14px; margin: 0; }
+.stage dt { font: 500 12px/1.6 var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.stage dd { margin: 0; min-width: 0; }
+.example { border-left: 4px solid var(--signal); background: var(--surface); padding: 12px 14px; }
+.example .label { color: var(--signal); display: block; margin-bottom: 6px; }
+.nav { display: flex; gap: 10px; }
+.nav button { font: 500 14px/1 var(--f-body); padding: 10px 16px; background: var(--vendas); color: var(--on-vendas); border: 0; cursor: pointer; }
+.nav button.ghost { background: none; color: var(--ink); border: 1px solid var(--line); }
+.nav button:disabled { opacity: .4; cursor: default; }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--signal); outline-offset: 2px; }
+
+.other { border: 1px dashed var(--vendas); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.lane { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.lane .s { padding: 7px 10px; background: var(--surface); border: 1px solid var(--line); font-size: 14px; }
+.lane .s.hot { border-color: var(--vendas); background: var(--vendas-soft); }
+.lane .a { color: var(--muted); }
+
+/* regras */
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 12px; padding: 0; margin: 0; list-style: none; }
+.rules li { border: 1px solid var(--line); background: var(--bg); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.rules b { font: 600 18px/1.2 var(--f-display); letter-spacing: .02em; }
+.rules span { color: var(--muted); font-size: 14px; }
+
+.scroller { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+th { text-align: left; font: 500 12px/1 var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 0 10px 8px 0; border-bottom: 2px solid var(--line); }
+td { padding: 9px 10px 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+
+/* contrato */
+.contract { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; }
+.card { border: 1px solid var(--line); background: var(--bg); padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card dl { display: grid; grid-template-columns: 112px 1fr; gap: 8px 12px; margin: 0; }
+.card dt { font: 500 12px/1.6 var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.card dd { margin: 0; }
+.card .foot { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+.clist { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.clist li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.clist .mono { color: var(--muted); white-space: nowrap; }
+
+.note { font-size: 14px; color: var(--muted); max-width: 70ch; }
+
+@media (max-width: 860px) {
+  .phases { grid-template-columns: 1fr; gap: 18px; }
+  .phase { padding-right: 0; }
+  .phase:not(:last-child)::after { content: "\2193"; position: static; margin-top: -4px; }
+  .tour, .contract { grid-template-columns: 1fr; }
+  .between { grid-template-columns: 1fr; }
+  .between .arrow { transform: rotate(90deg); justify-self: center; }
+  .stage dl, .card dl { grid-template-columns: 1fr; gap: 2px; }
+  .stage dd, .card dd { margin-bottom: 8px; }
+  .ficha { padding: 18px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .stage { transition: border-color .2s; }
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="example-tag">Exemplo de formato: só a raia de Vendas</span>
+    <h1>Mapa da Aços Vital</h1>
+    <p class="lead">Do pedido do cliente até a nota e a comissão, <b>quem faz o quê, em que ordem</b>. Clique no setor para abrir a ficha dele.</p>
+    <ol class="trail" aria-label="Ordem de leitura">
+      <li><span class="n">1</span><a href="#mapa">Entenda o fluxo</a></li>
+      <li><span class="n">2</span><a href="#ficha">Veja o seu setor</a></li>
+      <li><span class="n">3</span><a href="#falta">Execute: o que falta</a></li>
+      <li><span class="n">4</span><a href="#contratos">Consulte os contratos</a></li>
+    </ol>
+  </header>
+
+  <section id="mapa">
+    <div class="sec-head">
+      <h2>O caminho de um pedido</h2>
+      <p>Um pedido passa por cinco fases. Dentro de cada fase os setores se ajudam; nem todo pedido passa por todos (um item que já está em estoque não vai à Produção).</p>
+    </div>
+    <div class="phases">
+      <div class="phase">
+        <h3>Vender</h3>
+        <button class="chip live" id="open-vendas" type="button"><b>Vendas</b><span>Monta a proposta e libera o pedido</span><em>Ficha pronta &darr;</em></button>
+        <button class="chip" disabled type="button"><b>Orçamento</b><span>Responde o preço de custo</span></button>
+      </div>
+      <div class="phase">
+        <h3>Planejar</h3>
+        <button class="chip" disabled type="button"><b>PCP</b><span>Decide o destino de cada item</span></button>
+      </div>
+      <div class="phase">
+        <h3>Abastecer</h3>
+        <button class="chip" disabled type="button"><b>Estoque</b><span>Atende pelo saldo e despacha</span></button>
+        <button class="chip" disabled type="button"><b>Compras</b><span>Cota e emite a ordem de compra</span></button>
+        <button class="chip" disabled type="button"><b>Recebimento</b><span>Confere o que chegou</span></button>
+        <button class="chip" disabled type="button"><b>Qualidade (entrada)</b><span>Libera ou barra o material</span></button>
+      </div>
+      <div class="phase">
+        <h3>Fabricar</h3>
+        <button class="chip" disabled type="button"><b>Produção</b><span>Fabrica pela rota do item</span></button>
+        <button class="chip" disabled type="button"><b>Qualidade (saída)</b><span>Aprova o que foi feito</span></button>
+      </div>
+      <div class="phase">
+        <h3>Entregar e fechar</h3>
+        <button class="chip" disabled type="button"><b>Expedição</b><span>Embala, monta a carga, entrega</span></button>
+        <button class="chip" disabled type="button"><b>Fiscal</b><span>Emite a nota no Omie</span></button>
+        <button class="chip" disabled type="button"><b>Controladoria</b><span>Decide a comissão</span></button>
+      </div>
+    </div>
+    <p class="legend">Setores tracejados ainda não têm ficha. Nesta versão de exemplo, só Vendas está escrita.</p>
+  </section>
+
+  <section id="ficha" class="ficha">
+    <div class="ficha-head">
+      <span class="sector">Ficha do setor · Vendas</span>
+      <h2>Vendas: da proposta ao pedido liberado</h2>
+      <p>O vendedor monta a proposta com o preço que conseguiu, a Gerência aprova, e a proposta vira pedido no Omie. Só um pedido <b>liberado</b> chega ao PCP.</p>
+    </div>
+
+    <div>
+      <p class="label" style="margin-bottom:10px">Com quem Vendas conversa</p>
+      <div class="between">
+        <div class="box">
+          <b>Recebe de</b>
+          <ul>
+            <li>Cliente (pedido de compra)</li>
+            <li>Orçamento (preço de custo, quando o vendedor pede)</li>
+            <li>Omie (pedidos digitados direto lá)</li>
+          </ul>
+        </div>
+        <div class="arrow" aria-hidden="true">&rarr;</div>
+        <div class="box me">
+          <b>Entrega ao PCP</b>
+          <ul>
+            <li>Pedido liberado, com a marcação "a Qualidade acompanha?"</li>
+            <li>O PCP lê a lista; ninguém empurra nada</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <p class="label" style="margin-bottom:10px">Quem atua nesta raia</p>
+      <div class="who">
+        <div><b>Vendedor</b><span>Cria a proposta, marca aprovada, transforma em pedido, libera, responde compras mais caras</span></div>
+        <div><b>Auxiliar do titular</b><span>Faz o mesmo pelos titulares que ajuda</span></div>
+        <div><b>Gerência</b><span>Aprova desconto e margem pessoalmente. Não tem tela</span></div>
+        <div><b>Orçamento</b><span>Responde pedidos de custo e mantém a base de preço</span></div>
+        <div><b>Compras</b><span>Confere a parte de compras do pedido</span></div>
+        <div><b>Gerente de Vendas</b><span>Só vê as propostas e a liberação da equipe</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-head" style="margin-bottom:14px">
+        <h2>Um pedido passando por aqui</h2>
+        <p>Pedido-exemplo (inventado): <b>100 flanges de aço carbono</b> para o <b>Cliente Exemplo S.A.</b> Clique nos passos ou use os botões.</p>
+      </div>
+      <div class="tour">
+        <ol class="rail" id="rail" aria-label="Passos do pedido"></ol>
+        <article class="stage" id="stage" aria-live="polite"></article>
+      </div>
+    </div>
+
+    <div class="other">
+      <b>E se o pedido for digitado direto no Omie?</b>
+      <p>Mesmo fluxo e mesma tela, só muda a entrada: o pedido chega <b>travado</b>, com a parte de vendas pronta, e o vendedor libera.</p>
+      <div class="lane" aria-label="Caminho do pedido digitado no Omie">
+        <span class="s">Digitado no Omie</span><span class="a">&rarr;</span>
+        <span class="s">Chega travado ("Aguardando você")</span><span class="a">&rarr;</span>
+        <span class="s hot">Vendedor marca se a Qualidade acompanha</span><span class="a">&rarr;</span>
+        <span class="s hot">Libera, na mesma ação</span><span class="a">&rarr;</span>
+        <span class="s">Liberado</span><span class="a">&rarr;</span>
+        <span class="s">PCP importa ("No PCP", marcação trava)</span>
+      </div>
+      <p class="note">Até o PCP importar, o vendedor ainda pode corrigir a marcação. Depois disso fica travada.</p>
+    </div>
+
+    <div>
+      <div class="sec-head" style="margin-bottom:14px"><h2>Sete regras que todo mundo precisa saber</h2></div>
+      <ul class="rules">
+        <li><b>Uma proposta, um pedido</b><span>Não existe fechamento parcial da proposta.</span></li>
+        <li><b>Aprovou, travou</b><span>A proposta só muda até ser aprovada. Cada ajuste vira uma revisão.</span></li>
+        <li><b>Sem custo, sem aprovação</b><span>Se um item não tem custo nem fornecedor, a proposta é incompleta e não pode ser aprovada.</span></li>
+        <li><b>O custo não é do vendedor</b><span>Ele digita o que conseguiu, mas o dono do dado é Compras e o Orçamento.</span></li>
+        <li><b>Só liberado vai ao PCP</b><span>Sem liberação, o pedido não aparece na Triagem.</span></li>
+        <li><b>Compra mais cara: o vendedor decide</b><span>Se Compras gastar mais que a proposta, o vendedor aprova ou reprova, produto por produto, sem prazo.</span></li>
+        <li><b>Cancelou, desfaz sozinho</b><span>Requisição e ordem de compra ainda não emitida cancelam. O que já foi comprado vai ao Estoque.</span></li>
+      </ul>
+    </div>
+
+    <div id="falta">
+      <div class="sec-head" style="margin-bottom:14px">
+        <h2>Telas e o que falta</h2>
+        <p>Só o que existe no código hoje está marcado como pronto.</p>
+      </div>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Tela</th><th>Rota</th><th>Quem usa</th><th>Situação</th></tr></thead>
+          <tbody>
+            <tr><td>Propostas (lista)</td><td class="mono">/vendas/propostas</td><td>Vendedor, equipe</td><td><span class="pill ok">Pronta</span></td></tr>
+            <tr><td>Nova proposta</td><td class="mono">/vendas/propostas/nova</td><td>Vendedor</td><td><span class="pill ok">Pronta</span> <span class="pill part">sem comissão</span></td></tr>
+            <tr><td>Proposta: aprovar e transformar em pedido</td><td class="mono">/vendas/propostas/[id]</td><td>Vendedor</td><td><span class="pill gap">Falta fazer</span></td></tr>
+            <tr><td>Proposta no formato do Simulador (itens, margem, letra)</td><td class="mono">dentro da proposta</td><td>Vendedor</td><td><span class="pill gap">Falta fazer</span></td></tr>
+            <tr><td>Página do produto (histórico de preço)</td><td class="mono">a definir</td><td>Vendedor</td><td><span class="pill gap">Falta fazer</span></td></tr>
+            <tr><td>Liberar Pedidos</td><td class="mono">/liberar-pedidos</td><td>Vendedor</td><td><span class="pill ok">Pronta</span></td></tr>
+            <tr><td>Liberação da Equipe</td><td class="mono">/liberacao-equipe</td><td>Gerente (leitura)</td><td><span class="pill ok">Pronta</span></td></tr>
+            <tr><td>Meus Pedidos: etapa dos itens</td><td class="mono">/meus-pedidos</td><td>Vendedor</td><td><span class="pill ok">Pronta</span></td></tr>
+            <tr><td>Meus Pedidos: aprovar ou reprovar compra mais cara</td><td class="mono">/meus-pedidos</td><td>Vendedor</td><td><span class="pill gap">Falta fazer</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="contratos">
+      <div class="sec-head" style="margin-bottom:14px">
+        <h2>Contratos desta raia</h2>
+        <p>Cada contrato ganha um cartão de cinco linhas no topo. O texto completo continua no vault, logo abaixo do cartão.</p>
+      </div>
+      <div class="contract">
+        <div class="card">
+          <span class="label">Cartão de exemplo</span>
+          <h3>LOG-26 · Liberação do pedido</h3>
+          <dl>
+            <dt>Para que serve</dt><dd>Define como o pedido do Omie chega travado, o vendedor libera e o PCP o enxerga.</dd>
+            <dt>Quem usa</dt><dd>Vendedor e Gerente (telas), PCP (leitura).</dd>
+            <dt>Nós do fluxo</dt><dd><span class="mono">V1 · V2 · V3</span></dd>
+            <dt>Situação</dt><dd><span class="pill ok">Feito no código</span></dd>
+            <dt>O que muda para mim</dt><dd><b>Front:</b> telas Liberar Pedidos e Liberação da Equipe. <b>MES:</b> o PCP consulta a lista de liberados e confirma a importação.</dd>
+          </dl>
+          <p class="foot">Texto integral, rotas e SQL: nota LOG-26 em 06-Contratos.</p>
+        </div>
+        <div class="card">
+          <span class="label">Outros contratos de Vendas, a ganhar cartão</span>
+          <ul class="clist">
+            <li><span>Fluxo da proposta ao pedido</span><span class="mono">LOG-56</span></li>
+            <li><span>Liberação do pedido de origem proposta</span><span class="mono">LOG-58</span></li>
+            <li><span>Escopo do vendedor pelo token</span><span class="mono">LOG-40</span></li>
+            <li><span>Status por item: MES informa</span><span class="mono">API-005</span></li>
+            <li><span>Status por item: Hub lê</span><span class="mono">API-006</span></li>
+            <li><span>Proposta e pedido na API do Hub</span><span class="mono">API-019</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <p class="note">Esta ficha cobre o que hoje exige ler cerca de 8.400 palavras em duas notas. O detalhe técnico (linhas de código, enums, decisões N16) continua nas notas "Raia Vendas" do vault, como camada de consulta.</p>
+  </section>
+</div>
+
+<script>
+(function () {
+  var steps = [
+    { id: "V0.1", t: "Cria a proposta", who: "Vendedor", tela: "Nova proposta (/vendas/propostas/nova)", st: "ok", stl: "Tela pronta", prop: "ABERTA",
+      o: "Escolhe o cliente, a unidade que emite e os itens. O sistema dá à proposta um número próprio, só com dígitos.",
+      ex: "O Cliente Exemplo S.A. pede 100 flanges. O vendedor lança o cliente e o item. A proposta nasce aberta." },
+    { id: "V0.2", t: "Preenche o custo", who: "Vendedor, e o Orçamento se ele pedir", tela: "Proposta (detalhe)", st: "gap", stl: "Falta fazer a base de preço", prop: "ABERTA",
+      o: "Digita o custo que conseguiu por telefone ou e-mail. Se não sabe, pede cotação ao Orçamento e continua trabalhando; nada fica bloqueado.",
+      ex: "Ele não tem o preço do flange. Pede ao Orçamento e, enquanto espera, vê o histórico das compras anteriores." },
+    { id: "V0.3", t: "Comissão estimada nasce", who: "Sistema", tela: "Rodapé da proposta", st: "gap", stl: "Falta fazer", prop: "ABERTA",
+      o: "O sistema calcula margem e comissão estimada. Só o vendedor vê. Se algum item está sem custo e sem fornecedor, a proposta fica incompleta e não pode ser aprovada.",
+      ex: "O item dos flanges já tem custo. A proposta está completa e a margem aparece no rodapé, com a letra de classificação." },
+    { id: "V0.4 · V0.5", t: "Gerência aprova, vendedor marca", who: "Gerência (fora do sistema) e vendedor", tela: "Proposta (detalhe)", st: "gap", stl: "Falta fazer", prop: "APROVADA",
+      o: "Desconto e margem são aprovados pessoalmente, neste ciclo. Depois o vendedor marca \"aprovada\" no sistema, que grava quem, quando e qual revisão. A proposta trava.",
+      ex: "A Gerência conversa com o vendedor e aceita o desconto. Ele marca a proposta como aprovada. Dali em diante ela não muda." },
+    { id: "V0.6", t: "Transforma em pedido", who: "Vendedor", tela: "Proposta (detalhe)", st: "gap", stl: "Falta fazer", prop: "TRANSFORMADA",
+      o: "O botão só aparece em proposta aprovada. É obrigatório responder: a Qualidade acompanha o pedido desde o início? Também informa a previsão e se o faturamento será em partes.",
+      ex: "Os flanges têm certificado de material. O vendedor marca que a Qualidade acompanha." },
+    { id: "V0.7", t: "Pedido vai ao Omie", who: "Sistema", tela: "Proposta (detalhe)", st: "gap", stl: "Falta fazer", prop: "TRANSFORMADA",
+      o: "O sistema grava o pedido numa fila e a integração o envia ao Omie. Se o Omie recusar, aparece \"erro de sincronia\" com o motivo e o botão \"Tentar novamente\". A proposta segue aprovada.",
+      ex: "O Omie recusa por um produto sem cadastro. A tela mostra o motivo. Depois do cadastro, o vendedor clica em Tentar novamente." },
+    { id: "V1", t: "Pedido nasce liberado", who: "Sistema", tela: "Liberar Pedidos (/liberar-pedidos)", st: "part", stl: "Liberação pronta; falta ligar à proposta", prop: "LIBERADO",
+      o: "O pedido que veio da proposta já nasce liberado, sem passo extra. Só pedido liberado atravessa para o MES; o PCP o enxerga na Triagem.",
+      ex: "O PCP abre a Triagem, vê os 100 flanges e decide o destino de cada item." },
+    { id: "C8", t: "Vendedor acompanha e responde", who: "Vendedor", tela: "Meus Pedidos (/meus-pedidos)", st: "part", stl: "Acompanhar pronto; aviso falta", prop: "EM ANDAMENTO",
+      o: "Acompanha a etapa de cada item. Se Compras comprar por mais que a proposta, ele recebe um aviso e aprova ou reprova, produto por produto, sem prazo.",
+      ex: "Compras achou o flange mais caro. O aviso mostra a margem atual, a nova margem e o motivo. Ele aprova e a comissão dele cai." }
+  ];
+  var cur = 0;
+  var rail = document.getElementById("rail");
+  var stage = document.getElementById("stage");
+  var props = ["ABERTA", "APROVADA", "TRANSFORMADA", "LIBERADO", "EM ANDAMENTO"];
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  function draw() {
+    rail.innerHTML = "";
+    steps.forEach(function (s, i) {
+      var li = document.createElement("li");
+      var b = document.createElement("button");
+      b.type = "button";
+      if (i === cur) b.setAttribute("aria-current", "step");
+      b.innerHTML = '<span class="id">' + esc(s.id) + '</span><span class="rail-title">' + esc(s.t) + '</span><span class="dot ' + s.st + '" title="' + esc(s.stl) + '"></span>';
+      b.addEventListener("click", function () { cur = i; draw(); });
+      li.appendChild(b);
+      rail.appendChild(li);
+    });
+    var s = steps[cur];
+    var states = props.map(function (p) { return '<span' + (p === s.prop ? ' class="on"' : '') + '>' + p + '</span>'; }).join("");
+    stage.innerHTML =
+      '<div class="stage-head"><h3>' + esc(s.t) + '</h3><span class="pill ' + s.st + '">' + esc(s.stl) + '</span></div>' +
+      '<div class="states" aria-label="Estado da proposta ou do pedido">' + states + '</div>' +
+      '<dl><dt>Quem</dt><dd>' + esc(s.who) + '</dd><dt>Onde</dt><dd>' + esc(s.tela) + '</dd><dt>O que acontece</dt><dd>' + esc(s.o) + '</dd></dl>' +
+      '<div class="example"><span class="label">No pedido-exemplo</span>' + esc(s.ex) + '</div>' +
+      '<div class="nav"><button type="button" class="ghost" id="prev"' + (cur === 0 ? " disabled" : "") + '>Anterior</button>' +
+      '<button type="button" id="next"' + (cur === steps.length - 1 ? " disabled" : "") + '>Próximo passo</button></div>';
+    document.getElementById("prev").addEventListener("click", function () { if (cur > 0) { cur--; draw(); } });
+    document.getElementById("next").addEventListener("click", function () { if (cur < steps.length - 1) { cur++; draw(); } });
+  }
+  draw();
+
+  document.getElementById("open-vendas").addEventListener("click", function () {
+    var el = document.getElementById("ficha");
+    if (el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+})();
+</script>

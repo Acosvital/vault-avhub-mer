@@ -16,6 +16,11 @@ criado_original: 2026-09-29
 
 > **Onde atua:** av-hub: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Só o administrador pode criar nota fiscal manual, e a regra é conferida no backend, não só no menu. A nota manual entra como faturamento do vendedor e poderia inflar números e comissão.
+> **Quem é afetado:** Perfis comuns perdem a criação. O administrador usa a tela Notas Fiscais Manuais, em Cadastros › Auxiliares.
+> **Situação:** ✅ Entregue em 02/10: sem usuário ou sem permissão, a API responde 403; hoje é regra fixa. 🔴 A chamada só com a chave de API ainda passa (L6, separar as chaves).
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >

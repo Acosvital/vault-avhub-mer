@@ -1,7 +1,7 @@
 ---
 tags: [omie, pipeline, integracao, estado]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Gustavo (DBA)
 fontes: [omie-elt-pipeline 0f739f0, v1 08-Integracao-Omie (Indice, Arquitetura-do-Pipeline, Contradicao-CFOP, Colunas-Protegidas), Registro-de-Decisoes #5 #7 #15 #16 #17 #18 #19 #20 #28 #29 #30 #31 #63, api-acos-vital f322dcd]
@@ -9,9 +9,36 @@ fontes: [omie-elt-pipeline 0f739f0, v1 08-Integracao-Omie (Indice, Arquitetura-d
 
 # Omie: estado da integração
 
+**Em uma frase:** retrato de como o Omie (o ERP, sistema fiscal e financeiro) conversa com o hub pela pipeline: o que ela lê, o que escreve (só a ordem de compra) e o que está pendente.
+
+**Quando consultar esta nota:** ao investigar um dado do Omie que não chegou ao hub, ao mexer na pipeline ou ao decidir um novo recurso. A pipeline é o programa `omie-elt-pipeline`: ela copia dados do Omie para o banco do hub, e a regra de negócio fica no banco.
+
+## Quem manda dado para quem, quando e por quê
+
+- **Omie para hub (leitura).** A pipeline copia clientes e fornecedores, produtos, famílias, vendedores, pedidos de venda, notas, etapas, pedidos de compra e compradores. Os pedidos do dia vêm a cada 3 minutos; os do mês, a cada 20; os dos últimos meses, a cada 3 horas; e uma carga completa roda uma vez por dia. Por quê: o hub mostra o pedido (V1) e a nota (O1, O2) sem digitar nada.
+- **Hub para Omie (escrita).** A única escrita é o envio da ordem de compra (OC), a cada 2 minutos. Reenviar altera a OC, não duplica. O Nathan testou o envio real em 14/10 ✅; produção ❓.
+- **O MES nunca fala com o Omie.** O que ele precisa chega pelo hub.
+- **O sistema nunca emite nota fiscal.** O Omie segue como sistema fiscal e financeiro, sem plano de desligar (decisão #30, DEC-11).
+- **O saldo de estoque do Omie é ignorado.** O MES é a referência do saldo físico (#28).
+
+## Cuidado com os cadastros de teste
+
+O Omie não tem ambiente de teste. Por isso o Nathan criou cadastros TESTE de verdade (fornecedor, cliente, transportadora), e a pipeline os lê. Reconheça-os pelo nome terminado em ` - dev` (vendedores e compradores) e pelo cliente "IGNORAR ESSE CLIENTE TESTE". Relatórios e conferências devem ignorá-los (BL-055, ainda a aplicar).
+
+## O que está aberto (os principais)
+
+- 🔴 A limpeza `exclusionSync` apaga pedido manual do hub (RS-001, BL-027).
+- 500 na limpeza curta, com 497 erros em Mogi (PS-020).
+- Filtro dos cadastros TESTE nos relatórios (BL-055).
+- Remoção das tabelas antigas `omie_raw` (BL-054).
+
+A lista completa, as tabelas de recursos e os horários dos jobs estão no detalhe. Dicionário de cada tabela: [[Pedidos-de-Venda]], [[Notas-Fiscais-e-Itens]], [[Parceiros-Clientes-Fornecedores]], [[Produtos-e-Familias]], [[Vendedores]], [[Etapas-Faturamento]].
+
+## Detalhe técnico
+
 O Omie é o sistema **fiscal e financeiro** e segue assim, sem plano de desligar 📝 ([[Registro-de-Decisoes]] #30, DEC-11). O sistema nunca emite nota fiscal. O MES nunca fala com o Omie. O pipeline (`omie-elt-pipeline`) é **EL, não ETL**: extrai do Omie e grava no Postgres do av-hub; a regra de negócio fica em views e triggers do banco. Dicionário campo a campo de cada tabela: [[Pedidos-de-Venda]], [[Notas-Fiscais-e-Itens]], [[Parceiros-Clientes-Fornecedores]], [[Produtos-e-Familias]], [[Vendedores]], [[Etapas-Faturamento]]. Detalhe técnico do código: [[Pipeline-Omie]]. Colunas que o pipeline não escreve: [[Colunas-Protegidas]].
 
-## Onde o Omie aparece no fluxo 0b
+### Onde o Omie aparece no fluxo 0b
 
 | Nó | O que | Direção | Estado |
 |---|---|---|---|
@@ -21,7 +48,7 @@ O Omie é o sistema **fiscal e financeiro** e segue assim, sem plano de desligar
 | O1 | Omie emite a NF | Omie para `notas_fiscais` | ✅ lado Omie; sinalização do MES ao Omie (tela 11.1) 🔴 |
 | O2 | Omie baixa o item no pedido | Omie para `pedidos_vendas`, `produto_vendas` | ✅ lado Omie |
 
-## Recursos de leitura (todos conferidos em `omie/resources/*.ts`, 0f739f0)
+### Recursos de leitura (todos conferidos em `omie/resources/*.ts`, 0f739f0)
 
 | Recurso | Método Omie | Destino | `enabled` |
 |---|---|---|---|
@@ -42,7 +69,7 @@ Não são Omie: PTAX (API do BCB, `core.cotacoes_moeda`, 13:30 e 17:30 seg a sex
 
 **Decisões que fecham escopo:** saldo do Omie não será habilitado, o estoque dele é ignorado e o MES é a referência do saldo físico 📝 #28; `lead_time` sai do pipeline 📝 #29; B6 segue só com **locais de estoque**, sem recurso no pipeline ainda 🔴 BL-030 (#63); remessa e devolução são do Ciclo 2 (22/01/2027) 📝 #27, #31; endereço de entrega e dados bancários de parceiro ficam fora 📝 #30.
 
-## Única escrita no Omie: envio da OC
+### Única escrita no Omie: envio da OC
 
 - `UpsertPedCompra` (reenvio altera, não duplica: `cCodIntPed` = número da OC) e `ExcluirPedCompra` ✅ `omie-elt-pipeline/src/jobs/envioOrdensCompra.ts:25-26,132`. Sem parcelas (só `cCodParc`/`nQtdeParc`).
 - Fixo no código, sem `SYNC_ENVIO_OC` nem `ENVIO_OC_DRY_RUN` ✅ (`src/config/index.ts:155-156`; PR #3, 0f739f0) 📝 #7. Cron `1-59/2 * * * *` (`config/index.ts:159`). Riscos L10.1, L10.6 (FOB) e L10.7 (b) a (d): aceitos 📝.
@@ -50,7 +77,7 @@ Não são Omie: PTAX (API do BCB, `core.cotacoes_moeda`, 13:30 e 17:30 seg a sex
 - ✅ **Testado pelo Nathan em 14/10: o envio real da OC ao Omie funciona em teste.** Produção ❓. O que resta é o checklist de subida ([[Pontas-Soltas]] PS-009): deploy da API com o contrato 36 e compradores vinculados (20 de 74 vinculados em 07/10; só importam os 32 ativos, BL-045).
 - 🟡 **Cadastros TESTE no Omie.** O Omie **não tem ambiente de teste**. Para ninguém se confundir, o Nathan criou cadastros **TESTE** de fornecedor, cliente e transportadora no Omie de verdade. Como são cadastros reais, a pipeline os lê (`parceiros`, `pedidosVendas`, `pedidosCompras`) e eles entram no av-hub e em listas, relatórios e conferências (por exemplo o CON-01). Cuidado: filtrar ou ignorar esses cadastros em relatórios e conferências, e nunca usá-los em OC ou pedido de verdade. **Como reconhecê-los (Nathan, 28/10/2026):** vendedor e comprador de teste (os desenvolvedores) têm o nome terminado em ` - dev` (exemplo: "Nathan Lucca - dev"); o cliente de teste é a empresa de razão social **TESTE DO TI DESENVOLVIMENTO** e nome fantasia **IGNORAR ESSE CLIENTE TESTE**. Relatórios e conferências ignoram esses registros por esses campos. O README do pipeline também cita um fornecedor de teste usado no teste real de 05/10 (`README.md:163-165`).
 
-## Processos e jobs
+### Processos e jobs
 
 6 processos PM2: `extract-worker`, `load-worker`, `scheduler`, `scraping-worker`, `envio-oc-worker`, `dashboard` (Bull Board, porta 3011). Roda na VPS 1; o banco, na VPS 2 📝 #4 ([[Infraestrutura]]). Cada filial é uma conta Omie (`FILIAL_<CHAVE>_OMIE_APP_KEY/SECRET/CODIGO_EMPRESA`, `FILIAIS_ATIVAS`).
 
@@ -71,7 +98,7 @@ Não são Omie: PTAX (API do BCB, `core.cotacoes_moeda`, 13:30 e 17:30 seg a sex
 
 Os crons dos jobs mais antigos ainda lêem variável de ambiente com padrão no código (`config/index.ts`). A regra do Nathan de nada em variável de ambiente vale para jobs novos.
 
-## O que está aberto
+### O que está aberto
 
 | Item | Dono | Ref |
 |---|---|---|
@@ -87,11 +114,11 @@ Os crons dos jobs mais antigos ainda lêem variável de ambiente com padrão no 
 | BENAFER (pedidos 44333 e 44568, R$ 82,7 mi) e nomes das etapas 10, 15, 20 de `pedidos_compras` | Nathan | #52, adiado |
 | Dump de 07/10: 22.808 pedidos de compra, etapas 10/15/20 = 1.186, 20.380 e 1.242 | | ❓ produção |
 
-## Contradição CFOP (resolvida)
+### Contradição CFOP (resolvida)
 
 A modelagem anterior afirmava que CFOP e ICMS-ST não eram capturados. O pipeline **captura CFOP por item** em `produto_vendas.cfop`, validado contra a whitelist `core_vendas_faturamento.cfop` (cache de 10 min) ✅ ([[Pedidos-de-Venda]]). Só o ICMS-ST segue sem captura. Não existe CFOP da nota inteira. Registro em [[Contradicoes-Resolvidas]] CR-19.
 
-## Dados que o MES recebe do Omie
+### Dados que o MES recebe do Omie
 
 O MES não lê o Omie. O que ele precisa do Omie chega pelo av-hub: pedido liberado, produtos e unidades ([[Integracao-AvHub-MES]]). `codigo_projeto` e `numero_contrato` do pedido estão no av-hub sem uso no MES.
 

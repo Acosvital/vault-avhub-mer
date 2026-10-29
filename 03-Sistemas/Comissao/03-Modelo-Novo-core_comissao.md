@@ -1,7 +1,7 @@
 ---
 tags: [comissao, banco, core_comissao, modelo, proposta, controladoria]
 criado: 2026-10-16
-atualizado: 2026-10-21
+atualizado: 2026-10-29
 status: proposta
 dono: Gustavo (DBA)
 fontes: [N16-02, N16-03, N16-09, N16-10, N16-11, N16-17, N16-18, N16-19, N16-20, OQ-06, OQ-11, OQ-12, OQ-28, dump core_comissionamento convertido, av-hub lib/simulador/motor.ts, tela-simulador-comissao.png]
@@ -9,9 +9,93 @@ fontes: [N16-02, N16-03, N16-09, N16-10, N16-11, N16-17, N16-18, N16-19, N16-20,
 
 # Modelo novo: schema `core_comissao`
 
+**Em uma frase:** o módulo novo de comissão (`core_comissao`) usa o mesmo motor de hoje, mas guarda cada cálculo, deixa a Controladoria decidir a comissão por nota fiscal e mostra ao vendedor só o que ele pode ver.
+
+**Quando consultar esta nota:** quando precisar entender o desenho do banco da comissão nova, quem escreve em cada tabela e o que muda em relação ao módulo atual. Vendedor e Controladoria leem só o resumo. O time de TI segue para o detalhe técnico.
+
+Tudo aqui é 🟡 proposta, salvo onde há decisão (📝) ou código (✅). O módulo novo fica em **Operações**, em schema novo, e **não toca em `core_comissionamento`** (N16-11). Os contratos do DDL, das rotas e das telas foram removidos em 29/10/2026. O Robert cria os novos. Motor atual: [[01-Motor-Atual-Como-Calcula]]. Tabelas atuais: [[02-Tabelas-Atuais-core_comissionamento]]. Estados: [[04-Regras-e-Estados-da-Comissao-Nova]]. Selos: [[Regras-do-Vault]].
+
+## O que o módulo faz, etapa por etapa
+
+1. **Proposta salva (V0.3):** o motor calcula a comissão **estimada**, por item e no total, com o custo que o vendedor pôs. 📝 N16-10
+2. **Proposta aprovada:** a estimativa **congela**. 📝 N16-03, N16-17
+3. **Custo real chega** (requisição, ordem de compra ou lote): o motor **recalcula sozinho**. O preço do cliente não muda. 📝 N16-09, N16-10
+4. **Nota fiscal (NF) faturada:** a comissão **fecha por NF** e chega à Controladoria já calculada. 📝 N16-10
+5. **Decisão:** Controladoria, Gerência ou Coordenação aprovam, desaprovam, bloqueiam, desbloqueiam, cortam ou alteram, sem teto e sempre com justificativa. Ninguém decide a própria comissão. 📝 N16-10, N16-44, N16-45
+6. **Vendedor:** vê a comissão que ele colocou até a decisão. Depois vê a real, com a justificativa. 📝 N16-10, N16-46
+7. **Compra acima do valor da proposta:** o vendedor aprova ou reprova a compra de cada produto (`C8`). Se aprova, a comissão real cai. 📝 N16-60 a N16-67, que superam N16-18
+8. **Proposta cancelada:** a estimativa vira histórico. 📝 N16-02
+9. **NF cancelada, devolvida ou recusada (`K6`):** a comissão é abatida na mesma proporção. Na devolução parcial, o Fiscal ou a Controladoria informam item, quantidade e valor, com pendência até lá. 📝 N16-47, N16-74
+10. **Pedido cancelado:** o comprado vai ao Estoque e deixa de ser custo do pedido. No faturado em parte, o faturado fica. 📝 N16-68 a N16-71
+
+## Exemplo
+
+No pedido de 5 itens usado como teste, a comissão **cotada** é R$ 513,10. Calculada com o custo real, ela cai para R$ 307,50. Esse número foi conferido contra `lib/simulador/motor.ts` e validado em banco descartável.
+
+Se um item sai em várias NFs, o banco guarda a quantidade já comissionada e nunca paga duas vezes a mesma peça (N16-49). Exemplo da Michele: venda de R$ 1.000 a 2%, com seis notas. Cada nota paga 2% sobre o seu valor.
+
+## Princípios, em poucas palavras
+
+- **Nada é sobrescrito.** Cada cálculo é uma linha nova e imutável. Proposta cancelada vira histórico sem esforço.
+- **O que o vendedor vê é decidido no banco e na API**, não na tela.
+- **Regra em tabela com tipo, não em JSON.** JSON só para log.
+- **Vigência em todo parâmetro.** Mudar valor é fechar a vigência e abrir outra.
+- **Justificativa obrigatória** em decisão, exclusão e cancelamento.
+- **Custo real só reduz o percentual.** Vale o menor entre cotado e real, como hoje (N16-11).
+- **Preço da proposta não muda** com o custo real. Só mudam margem e comissão (N16-17).
+- **Depois da decisão nada recalcula.** A NF decidida é uma foto.
+- **Cada evento de custo tem as suas condições** (fornecedor, pagamento, impostos, frete). O item soma os eventos. O encargo da condição de pagamento não entra no custo, só no preço sugerido (N16-22). 📝 N16-20
+- **Mesmas entradas do simulador** (N16-19): toda caixa e toda coluna da tela existe como coluna no modelo.
+
+## As camadas do schema
+
+| Camada | O que guarda | Quem escreve |
+|---|---|---|
+| Parâmetros | Percentuais, regra fixa por cliente, exclusões, coordenadores | Tela de parâmetros (Controladoria) |
+| Dossiê | Uma comissão por proposta | API, ao salvar a proposta |
+| Cálculo | Cada execução do motor, com itens e eventos de custo | Motor |
+| NF | Uma comissão por nota faturada | Job de faturamento |
+| Decisão | Conferência de Compras (🟡 OQ-28) e decisão da Controladoria | Compras e Controladoria |
+| Rastro | Linha do tempo, fila de recálculo, auditoria | Funções e gatilhos |
+
+## O que muda e o que não muda
+
+O motor (margem, letra, prejuízo, fabricação interna, teto da regra fixa e menor percentual) **não muda**. Muda só isto:
+
+1. O custo de compra do item vem dos eventos de custo, não de digitação. Sem imposto real, o evento herda o da proposta e o cálculo é marcado "custo parcial por imposto" (OQ-11).
+2. As chaves passam a ser códigos em vez de texto.
+3. O teto da regra fixa passa a ser aplicado dentro do motor, e não só na view.
+4. O arredondamento do valor em reais é feito no banco.
+5. O passo "Compras aprova o percentual" vira uma conferência por NF, **desligada** por padrão (N16-51, OQ-28).
+
+**Custo parcial (OQ-25, respondida em N16-48):** enquanto o custo não cobre a quantidade, só as peças com custo real entram na comissão. Quando o custo completa, a diferença vai para a apuração seguinte, para nova decisão.
+
+## Onde o cálculo roda
+
+Hoje o motor roda no navegador. Há três opções: tudo no banco, motor na API, ou híbrido. A sugestão 🟡 é o **híbrido**: o mesmo código do motor roda na API, e tudo que fecha dinheiro roda no banco, com restrições contra valor errado. A decisão é do Nathan e do Gustavo.
+
+## O que migra e o que não migra
+
+- **Migra:** os parâmetros (3 linhas), as regras fixas vivas (4), as exclusões (9: 1 cliente e 8 vendedores) e os coordenadores (6 pessoas e 6 regras). 🟡
+- **Não migra:** simulações e itens antigos (14 e 21), o bloqueio por NF (2 linhas, ambas desbloqueadas), o histórico dos coordenadores e as 4 views antigas. Ficam no módulo atual, intocados.
+- O pedido que chega do Omie **sem proposta** entra no módulo novo (N16-103). O vendedor preenche a simulação como hoje.
+
+## Principais riscos
+
+1. O custo real do Ciclo 1 vem sem impostos. A Controladoria vê "imposto estimado" até existir imposto por item (OQ-11).
+2. Muitos eventos por item geram muitas linhas, e o cálculo é imutável. O job agrupa eventos pendentes.
+3. O motor em JavaScript usa ponto flutuante e o banco usa `numeric`. Aceita-se até R$ 0,01 por NF, com explicação.
+4. A remuneração dos coordenadores é dado pessoal. A tela de parâmetros terá perfil restrito.
+
+## Perguntas em aberto
+
+A Michele respondeu em 19/10/2026 (N16-42 a N16-51). Respondidas: C01, C02, C03, C05, C06, C07, C09, C10 e C12. Seguem abertas: C04 (de onde sai a entrada do motor), C08 (data de vigência da carga), C11 (DIFAL da compra no custo), C13 e C14. A tabela completa está no detalhe técnico.
+
+## Detalhe técnico
+
 Desenho do módulo de comissão da proposta. **Motor igual ao atual, tabelas refeitas** (N16-11). O módulo novo fica em **Operações**, em **schema novo**, e **não toca em `core_comissionamento`**. Os contratos do DDL, das rotas e das telas foram removidos em 29/10/2026; o Robert cria os novos. O motor atual está explicado em [[01-Motor-Atual-Como-Calcula]], as tabelas atuais em [[02-Tabelas-Atuais-core_comissionamento]] e os estados em [[04-Regras-e-Estados-da-Comissao-Nova]]. Selos: [[Regras-do-Vault]]. Tudo aqui é 🟡 proposta, salvo onde há decisão (📝) ou código (✅).
 
-## O que o módulo faz, em uma frase por etapa
+### O que o módulo faz, em uma frase por etapa
 
 1. **Proposta salva (V0.3)**: o motor calcula a comissão **estimada** por item e no total, com o custo que o vendedor pôs. 📝 N16-10
 2. **Proposta aprovada**: a estimativa **congela** (a proposta não muda mais). 📝 N16-03, N16-17
@@ -23,7 +107,7 @@ Desenho do módulo de comissão da proposta. **Motor igual ao atual, tabelas ref
 8. **Nota cancelada, devolvida ou recusada** (`K6`): abate a comissão na mesma proporção (se paga, entra na próxima apuração). Devolução total vem do Omie; a **parcial** o Fiscal ou a Controladoria informam (item, quantidade, valor), com **pendência** até lá. 📝 N16-47, N16-74
 9. **Pedido cancelado** (N16-68 a N16-71): o comprado vai ao Estoque e deixa de ser custo do pedido; a comissão estimada vira histórico; no faturado em parte, o faturado fica e o saldo segue as regras. 📝
 
-## Princípios
+### Princípios
 
 1. **Nada é sobrescrito.** Cada cálculo é uma linha nova e imutável (`comissao_calculos`); recálculo por custo real não apaga o cotado. Cancelada vira histórico sem esforço.
 2. **O que o vendedor vê é decidido no banco e na API**, por view e por tela, não na interface.
@@ -38,7 +122,7 @@ Desenho do módulo de comissão da proposta. **Motor igual ao atual, tabelas ref
 11. **Cada evento de custo carrega as suas condições** (fornecedor, condição de pagamento, encargo, frete, origem do ICMS, IPI, ST, DIFAL). O custo líquido de cada evento sai da mesma fórmula do motor e o item soma os eventos. O encargo da condição de pagamento **não** entra no custo: entra no preço sugerido, como no motor atual (N16-22). Só a venda tem um conjunto de condições por pedido. 📝 N16-20
 12. **Mesmas entradas do simulador** (N16-19): toda entrada e toda saída da tela do simulador é coluna do modelo (tabela "Entradas do motor e a tela" abaixo). 📝 N16-19
 
-## Convenções de nome
+### Convenções de nome
 
 | Tema | Convenção | Exemplo |
 |---|---|---|
@@ -60,7 +144,7 @@ Desenho do módulo de comissão da proposta. **Motor igual ao atual, tabelas ref
 
 Mudança de nome em relação ao módulo atual: `margem` → `gatilho_markup_pct`; `pct_*` → `*_pct`; `blacklist_*` → `exclusoes`; `bloqueio_comissoes` → decisão `BLOQUEAR`; `simulacoes` → `comissao_calculos` (`COTADO`/`REAL`).
 
-## Visão geral
+### Visão geral
 
 ```mermaid
 erDiagram
@@ -89,7 +173,7 @@ erDiagram
 
 Fora do schema, ligadas por chave: `core_comercial.propostas` e `proposta_item`, `core_comercial.pedidos` e `pedidos_itens`, `core_comercial.custos_eventos` e a view `core_comercial.vw_pedido_item_custo` (nomes **no singular**, conferidos em 16/10), `core_vendas_faturamento.notas_fiscais` e `produto_vendas` (NF e itens faturados), `core.unidades`, `core.funcionarios`, `auth.usuarios`. As chaves de `core_comercial` entram no bloco 9 do DDL, depois do SQL de proposta e pedido.
 
-## Em camadas
+### Em camadas
 
 | Camada | Tabelas | Quem escreve |
 |---|---|---|
@@ -100,7 +184,7 @@ Fora do schema, ligadas por chave: `core_comercial.propostas` e `proposta_item`,
 | **Conferência e decisão** (imutáveis) | `comissao_conferencias_compras` (🟡 OQ-28), `comissao_decisoes` | Compras, por `fn_comissao_conferir_compras`; Controladoria, por `fn_comissao_decidir` |
 | **Rastro** | `comissao_eventos`, `comissao_fila_recalculo`, `auditoria`, `coordenadores_apuracoes` | Funções e triggers |
 
-## Entradas do motor e a tela do simulador (N16-19)
+### Entradas do motor e a tela do simulador (N16-19)
 
 A tela da proposta e a tela da Controladoria usam o **mesmo motor e as mesmas regras** do simulador atual, em **tabelas novas e isoladas** (N16-21: nada do `core_comissionamento` é tocado) (`tela-simulador-comissao.png`, `av-hub\app\(protected)\comissoes\simulador\page.tsx`). Toda caixa e toda coluna da tela existe como coluna. A coluna **"FAB."** da imagem é uma caixa de seleção (`simulador/page.tsx:2009-2014`): marca o item de **fabricação interna** (`tipo_item = FABRICACAO_INTERNA`), não é o nome do fabricante.
 
@@ -138,7 +222,7 @@ A tela da proposta e a tela da Controladoria usam o **mesmo motor e as mesmas re
 
 Colunas que o modelo da rodada anterior **não tinha** e que foram acrescentadas: `comissao_calculos.icms_destino_pct`, `encargo_pagamento_pct`, `frete_compra_total`, `markup_projetado`, `markup_real`; `comissao_calculo_itens.codigo_produto`, `preco_total_sugerido`. A origem dessas entradas no lado da proposta (`core_comercial`) é o anexo `0003-entradas-do-motor-em-core_vendas_faturamento.sql`; o modelo de 16/10 ainda não tinha a origem da compra, a quantidade e a unidade de compra, o IPI, a ST e o frete da compra por item, o destino do ICMS, a condição com encargo e o DIFAL.
 
-## Valores fixos (`CHECK`)
+### Valores fixos (`CHECK`)
 
 | Coluna | Valores |
 |---|---|
@@ -158,7 +242,7 @@ Colunas que o modelo da rodada anterior **não tinha** e que foram acrescentadas
 | `coordenadores_regras.tipo` | `GERENCIA`, `EXCECAO` |
 | `comissoes_nf.motivo_zerado` | `CLIENTE_EXCLUIDO`, `VENDEDOR_EXCLUIDO` |
 
-## Índices e chaves únicas principais
+### Índices e chaves únicas principais
 
 | Tabela | Chave ou índice | Para quê |
 |---|---|---|
@@ -175,13 +259,13 @@ Colunas que o modelo da rodada anterior **não tinha** e que foram acrescentadas
 | `parametros`, `regras_fixas_cliente`, `exclusoes`, `coordenadores_regras` | `EXCLUDE gist` por vigência | Sem sobreposição |
 | `auditoria` | `(tabela, id_registro, feito_em)` | Quem mudou o quê |
 
-## Tabelas e colunas
+### Tabelas e colunas
 
 Gerado do DDL aplicado em banco descartável (PostgreSQL 18, 16/10/2026, teste funcional); a coluna "Observação" vem dos `COMMENT ON` do DDL.
 
-### Grupo: Parâmetros e regras
+#### Grupo: Parâmetros e regras
 
-#### `core_comissao.parametros`
+##### `core_comissao.parametros`
 
 Parâmetros do motor por unidade e vigência (era simulador_parametros). Linha usada por um cálculo é IMUTÁVEL (só vigencia_fim muda): para mudar percentual, feche a vigência e abra outra. Detalhes em parametros_*.
 
@@ -210,7 +294,7 @@ Parâmetros do motor por unidade e vigência (era simulador_parametros). Linha u
 | `updated_at` | timestamptz | não | now() |  |
 | `updated_by` | uuid | sim |  |  |
 
-#### `core_comissao.parametros_despesas`
+##### `core_comissao.parametros_despesas`
 
 Detalhe das despesas operacionais (SEDES, PESSOAL, PRODUCAO, LOGISTICA, MARKETING, TERCEIROS, FINANCEIRAS, CONTRIBUICOES, ADMINISTRATIVAS). Só auditoria: o motor usa o agregado de parametros.
 
@@ -225,7 +309,7 @@ Detalhe das despesas operacionais (SEDES, PESSOAL, PRODUCAO, LOGISTICA, MARKETIN
 | `updated_at` | timestamptz | não | now() |  |
 | `updated_by` | uuid | sim |  |  |
 
-#### `core_comissao.parametros_icms_saida`
+##### `core_comissao.parametros_icms_saida`
 
 ICMS de saída por destino da venda. destino = UF (SP, MG, PR, RJ, SC, RS), DEMAIS (demais estados) ou IMPORTACAO (alíquota usada no mark-up de importação). Substitui o JSON icms_saida.
 
@@ -241,7 +325,7 @@ ICMS de saída por destino da venda. destino = UF (SP, MG, PR, RJ, SC, RS), DEMA
 | `updated_at` | timestamptz | não | now() |  |
 | `updated_by` | uuid | sim |  |  |
 
-#### `core_comissao.parametros_icms_entrada`
+##### `core_comissao.parametros_icms_entrada`
 
 ICMS recuperável na compra por origem. Códigos iguais aos de OrigemIcmsCompra do Comercial. Substitui o JSON icms_entrada (que casava por texto).
 
@@ -256,7 +340,7 @@ ICMS recuperável na compra por origem. Códigos iguais aos de OrigemIcmsCompra 
 | `updated_at` | timestamptz | não | now() |  |
 | `updated_by` | uuid | sim |  |  |
 
-#### `core_comissao.parametros_encargos_pagamento`
+##### `core_comissao.parametros_encargos_pagamento`
 
 Encargo financeiro somado ao preço sugerido por condição de pagamento. Substitui o JSON encargos_pagamento.
 
@@ -271,7 +355,7 @@ Encargo financeiro somado ao preço sugerido por condição de pagamento. Substi
 | `updated_at` | timestamptz | não | now() |  |
 | `updated_by` | uuid | sim |  |  |
 
-#### `core_comissao.parametros_faixas`
+##### `core_comissao.parametros_faixas`
 
 Faixas da letra: margem líquida mínima do item (semiaberto [min, próxima)) e percentual. Hoje A 15/2,0; B 12/1,3; C 9/0,7; D 0/0,5. Substitui o JSON faixas_comissao.
 
@@ -287,7 +371,7 @@ Faixas da letra: margem líquida mínima do item (semiaberto [min, próxima)) e 
 | `updated_at` | timestamptz | não | now() |  |
 | `updated_by` | uuid | sim |  |  |
 
-#### `core_comissao.regras_fixas_cliente`
+##### `core_comissao.regras_fixas_cliente`
 
 Teto de comissão por cliente e vigência (era regras_comissoes_fixas). Limita só item de REVENDA com regra LETRA. Gatilho: markup bruto do pedido >= gatilho_markup_pct usa a condicional, senão a padrão.
 
@@ -309,7 +393,7 @@ Teto de comissão por cliente e vigência (era regras_comissoes_fixas). Limita s
 | `deleted_at` | timestamptz | sim |  |  |
 | `deleted_by` | uuid | sim |  |  |
 
-#### `core_comissao.exclusoes`
+##### `core_comissao.exclusoes`
 
 Cliente ou vendedor fora do comissionamento, com vigência e motivo obrigatório (era blacklist_comissoes_destinatario e blacklist_comissoes_vendedores). A comissão excluída NÃO some: fica com valor 0 e motivo_zerado visível à Controladoria.
 
@@ -329,7 +413,7 @@ Cliente ou vendedor fora do comissionamento, com vigência e motivo obrigatório
 | `deleted_at` | timestamptz | sim |  |  |
 | `deleted_by` | uuid | sim |  |  |
 
-#### `core_comissao.coordenadores`
+##### `core_comissao.coordenadores`
 
 📝 Vale no módulo novo (N16-34, OQ-06). Pessoa que recebe ajuda de custo e comissão sobre o faturamento total do mês (não depende de proposta). Os valores ficam em coordenadores_regras, por vigência.
 
@@ -344,7 +428,7 @@ Cliente ou vendedor fora do comissionamento, com vigência e motivo obrigatório
 | `updated_at` | timestamptz | não | now() |  |
 | `updated_by` | uuid | sim |  |  |
 
-#### `core_comissao.coordenadores_regras`
+##### `core_comissao.coordenadores_regras`
 
 Ajuda de custo e percentual do coordenador por vigência. GERENCIA = ranking da gerência; EXCECAO = entra no ranking de vendedores com o mesmo cálculo. Mudar valor = fechar a vigência e abrir outra.
 
@@ -364,7 +448,7 @@ Ajuda de custo e percentual do coordenador por vigência. GERENCIA = ranking da 
 | `updated_at` | timestamptz | não | now() |  |
 | `updated_by` | uuid | sim |  |  |
 
-#### `core_comissao.coordenadores_apuracoes`
+##### `core_comissao.coordenadores_apuracoes`
 
 🟡 Foto mensal da comissão dos coordenadores: comissao = round(percentual/100 x faturamento_base, 2); total = ajuda_custo + comissao. O bloqueio/decisão por NF NÃO reduz (decisão do Nathan de 06/10/2026, contrato 38). Depois de fechada não muda.
 
@@ -386,9 +470,9 @@ Ajuda de custo e percentual do coordenador por vigência. GERENCIA = ranking da 
 | `fechada_em` | timestamptz | sim |  |  |
 | `fechada_por` | uuid | sim |  |  |
 
-### Grupo: Dossiê e cálculo
+#### Grupo: Dossiê e cálculo
 
-#### `core_comissao.comissoes`
+##### `core_comissao.comissoes`
 
 Dossiê da comissão de UMA proposta (uma proposta = um pedido, N16-02). Nasce estimada na V0.3 e acompanha a proposta até o encerramento ou o cancelamento. Cancelada vira histórico consultável.
 
@@ -416,7 +500,7 @@ Dossiê da comissão de UMA proposta (uma proposta = um pedido, N16-02). Nasce e
 | `updated_at` | timestamptz | não | now() |  |
 | `updated_by` | uuid | sim |  |  |
 
-#### `core_comissao.comissao_itens_vinculo`
+##### `core_comissao.comissao_itens_vinculo`
 
 Liga o item da proposta ao item do pedido e ao codigo_item_omie (chave do item faturado em produto_vendas). Preenchido por fn_comissao_vincular_itens quando o pedido é criado no Omie.
 
@@ -430,7 +514,7 @@ Liga o item da proposta ao item do pedido e ao codigo_item_omie (chave do item f
 | `created_at` | timestamptz | não | now() |  |
 | `created_by` | uuid | sim |  |  |
 
-#### `core_comissao.comissao_calculos`
+##### `core_comissao.comissao_calculos`
 
 Cada execução do motor sobre uma comissão. COTADO = com o custo que o vendedor pôs na proposta; REAL = com o custo real do pedido. Só INSERT: cada recálculo é uma linha nova, então o histórico (inclusive de proposta cancelada) nunca se perde.
 
@@ -474,7 +558,7 @@ Cada execução do motor sobre uma comissão. COTADO = com o custo que o vendedo
 | `calculado_em` | timestamptz | não | now() |  |
 | `calculado_por` | uuid | sim |  |  |
 
-#### `core_comissao.comissao_calculo_itens`
+##### `core_comissao.comissao_calculo_itens`
 
 Item de um cálculo, com TODAS as entradas e saídas do motor (reprodutível). A comissão é decidida item a item. Só INSERT.
 
@@ -529,7 +613,7 @@ Item de um cálculo, com TODAS as entradas e saídas do motor (reprodutível). A
 | `regra_aplicada` | varchar(20) | não |  |  |
 | `valor_comissao_estimado` | numeric(15,2) | não |  | venda_item x comissao_pct / 100, sobre o valor do pedido. O pagamento real usa o faturado da NF (comissoes_nf_itens). |
 
-#### `core_comissao.comissao_calculo_eventos`
+##### `core_comissao.comissao_calculo_eventos`
 
 Detalhe por evento do custo líquido de um item REAL (N16-20): condições do próprio evento (condição de pagamento, encargo, origem do ICMS, IPI, ST, DIFAL, frete, fornecedor) e o custo líquido pela fórmula do motor. Só INSERT. A soma de custo_liquido dos eventos mais custo_liquido_descoberto do item é o custo_liquido do item.
 
@@ -565,9 +649,9 @@ Detalhe por evento do custo líquido de um item REAL (N16-20): condições do pr
 | `frete_evento` | numeric(15,2) | não | 0 |  |
 | `custo_liquido` | numeric(15,2) | não |  | compra_bruta - icms_recuperar + valor_ipi + valor_st + frete_evento (motor.ts:312). icms_recuperar = 0 quando valor_st > 0 (motor.ts:280-283). |
 
-### Grupo: NF, conferência de Compras e decisão
+#### Grupo: NF, conferência de Compras e decisão
 
-#### `core_comissao.comissoes_nf`
+##### `core_comissao.comissoes_nf`
 
 Comissão fechada sobre UMA NF faturada. É o que chega à Controladoria já calculada. Enquanto AGUARDANDO_DECISAO o custo real que chegar recalcula; depois da decisão não muda mais.
 
@@ -603,7 +687,7 @@ Comissão fechada sobre UMA NF faturada. É o que chega à Controladoria já cal
 | `updated_at` | timestamptz | não | now() |  |
 | `updated_by` | uuid | sim |  |  |
 
-#### `core_comissao.comissoes_nf_itens`
+##### `core_comissao.comissoes_nf_itens`
 
 Quebra da comissão da NF por item faturado: valor faturado x menor percentual entre o cotado e o real. Regenerada enquanto a NF aguarda decisão.
 
@@ -624,7 +708,7 @@ Quebra da comissão da NF por item faturado: valor faturado x menor percentual e
 | `valor_se_cotado` | numeric(15,2) | não |  |  |
 | `valor_calculado` | numeric(15,2) | não |  |  |
 
-#### `core_comissao.comissao_conferencias_compras`
+##### `core_comissao.comissao_conferencias_compras`
 
 🟡 Conferência de Compras sobre o cálculo REAL da NF. CONFIRMAR = Compras concorda com o percentual de Compras; CONTESTAR (justificativa obrigatória) = custo, imposto ou classificação do item errado: Compras corrige na OC ou no lote e o motor recalcula. Compras NÃO altera a proposta (N16-08). Só INSERT.
 
@@ -639,7 +723,7 @@ Quebra da comissão da NF por item faturado: valor faturado x menor percentual e
 | `feito_por` | uuid | não |  |  |
 | `feito_em` | timestamptz | não | now() |  |
 
-#### `core_comissao.comissao_decisoes`
+##### `core_comissao.comissao_decisoes`
 
 Decisão da Controladoria sobre a comissão de uma NF: quem, quando, justificativa obrigatória (10+ caracteres), valor antes e depois. Só INSERT. A comissão da NF recebe uma decisão final; BLOQUEAR admite decisão posterior.
 
@@ -659,9 +743,9 @@ Decisão da Controladoria sobre a comissão de uma NF: quem, quando, justificati
 | `decidido_por` | uuid | não |  |  |
 | `decidido_em` | timestamptz | não | now() |  |
 
-### Grupo: Rastro
+#### Grupo: Rastro
 
-#### `core_comissao.comissao_eventos`
+##### `core_comissao.comissao_eventos`
 
 Linha do tempo de cada comissão (para a tela de detalhe). Só INSERT. visivel_vendedor marca o que a tela do vendedor pode listar (nunca valor real nem custo antes da decisão).
 
@@ -677,7 +761,7 @@ Linha do tempo de cada comissão (para a tela de detalhe). Só INSERT. visivel_v
 | `feito_por` | uuid | sim |  |  |
 | `feito_em` | timestamptz | não | now() |  |
 
-#### `core_comissao.comissao_fila_recalculo`
+##### `core_comissao.comissao_fila_recalculo`
 
 Caixa de saída de eventos: um custo real novo (ou NF nova) marca a comissão e o job do motor recalcula. Eventos repetidos enquanto pendentes viram um só.
 
@@ -692,7 +776,7 @@ Caixa de saída de eventos: um custo real novo (ou NF nova) marca a comissão e 
 | `tentativas` | integer | não | 0 |  |
 | `erro` | text | sim |  |  |
 
-#### `core_comissao.auditoria`
+##### `core_comissao.auditoria`
 
 Quem mudou parâmetro, regra, exclusão ou coordenador, quando, antes e depois. Só INSERT. Alimentada por core_comissao.fn_auditar().
 
@@ -709,7 +793,7 @@ Quem mudou parâmetro, regra, exclusão ou coordenador, quando, antes e depois. 
 | `usuario_banco` | text | não | CURRENT_USER |  |
 
 
-## Como as tabelas respondem ao que o Nathan pediu
+### Como as tabelas respondem ao que o Nathan pediu
 
 | Requisito (decisão) | Onde está |
 |---|---|
@@ -726,7 +810,7 @@ Quem mudou parâmetro, regra, exclusão ou coordenador, quando, antes e depois. 
 | Parâmetros, regras fixas, bloqueios, blacklists, coordenadores (N16-11) | `parametros*`, `regras_fixas_cliente`, `exclusoes`, `coordenadores*` |
 | Auditoria | `auditoria` (configuração), `comissao_eventos` (linha do tempo), `comissao_decisoes` (decisão) |
 
-## Views
+### Views
 
 | View | Quem usa | O que devolve |
 |---|---|---|
@@ -740,7 +824,7 @@ Quem mudou parâmetro, regra, exclusão ou coordenador, quando, antes e depois. 
 
 A API escolhe a view pelo perfil. O vendedor **nunca** recebe permissão nas views da Controladoria.
 
-## Funções do banco
+### Funções do banco
 
 | Função | Papel |
 |---|---|
@@ -757,7 +841,7 @@ A API escolhe a view pelo perfil. O vendedor **nunca** recebe permissão nas vie
 | `fn_coordenadores_vigentes(ini, fim)`, `fn_coordenadores_apurar(competencia, faturamento, usuario)` | Coordenadores (📝 N16-34) |
 | `fn_log_imutavel()`, `fn_auditar()`, `fn_parametros_travar()`, `fn_regra_fixa_travar()`, `fn_apuracao_travar()`, `fn_parametros_completo()` | Triggers |
 
-## O motor é o mesmo: a fórmula preservada
+### O motor é o mesmo: a fórmula preservada
 
 O cálculo de **margem, letra, prejuízo, fabricação interna, teto da regra fixa e menor percentual** é o de `lib/simulador/motor.ts` e `vw_simulacao_resolvida`, sem mudar fórmula. A tabela mostra cada regra e onde ela passa a morar.
 
@@ -790,7 +874,7 @@ O cálculo de **margem, letra, prejuízo, fabricação interna, teto da regra fi
 - Casos de borda: isento, importação com e sem SP, base reduzida, ST (destino SP e outro), frete `VALOR`, fabricação, prejuízo, teto padrão e condicional, margem exatamente 0, 9, 12 e 15.
 - Aceita-se diferença de até R$ 0,01 por NF, e cada diferença é explicada (ponto flutuante do motor atual contra o arredondamento do banco).
 
-## Onde o cálculo roda
+### Onde o cálculo roda
 
 | Opção | Como é | Prós | Contras |
 |---|---|---|---|
@@ -800,7 +884,7 @@ O cálculo de **margem, letra, prejuízo, fabricação interna, teto da regra fi
 
 **Sugestão 🟡 (Claude): opção C.** O motor continua sendo o **mesmo código** (porta de `motor.ts`, testes de ouro), rodando na API; tudo que fecha dinheiro (`fn_comissao_nf_fechar`, `fn_comissao_decidir`) roda no banco, com restrições que impedem valor errado. Motivos: (1) a regra do projeto é lógica no backend, e hoje o motor está no navegador (`simulador/page.tsx:1053`); (2) mantém a fórmula idêntica por reaproveitar o código; (3) as funções do banco são pequenas e testáveis (validadas em banco descartável); (4) o DBA (Gustavo) revisa o que grava dinheiro. Decisão do Nathan e do Gustavo; estimativa de esforço é do Claude, por complexidade.
 
-### Custo parcial (regra do cálculo `REAL`) 🟡
+#### Custo parcial (regra do cálculo `REAL`) 🟡
 
 O custo real chega aos poucos (N16-09, exemplo do Nathan). Para o recálculo não ficar "melhor do que é" enquanto a compra não terminou, o custo líquido do item é:
 
@@ -811,7 +895,7 @@ O custo real chega aos poucos (N16-09, exemplo do Nathan). Para o recálculo nã
 - Evento sem imposto real: herda IPI, ST e origem da proposta, proporcionais à quantidade coberta; `imposto_real = false` no evento e `imposto_completo = false` no item e no cálculo.
 - Os números por dia estão na nota [[04-Regras-e-Estados-da-Comissao-Nova]]. Alternativa: esperar a cobertura completa (a comissão ficaria só com o cotado até lá). Pergunta OQ-25.
 
-## Mapa de-para: tabela atual → tabela nova
+### Mapa de-para: tabela atual → tabela nova
 
 | Tabela atual | Tabela(s) nova(s) | O que acontece com as colunas | Dados |
 |---|---|---|---|
@@ -839,14 +923,14 @@ Conversão de chaves dos JSON de parâmetros (carga, 🟡):
 | `icms_entrada`: SÃO PAULO, SÃO PAULO - Base de ICMS Reduzida, DEMAIS ESTADOS, SÃO PAULO - IMPORTAÇÃO, DEMAIS ESTADOS - IMPORTAÇÃO, OPTANTE SIMPLES | `SP`, `SP_REDUZIDA`, `OUTRA_UF`, `IMPORTACAO_SP`, `IMPORTACAO_OUTRA_UF`, `SIMPLES` |
 | `encargos_pagamento`: 19 condições ("30 DDL", "À Vista", "30/60"…) | `condicao_pagamento` igual, texto |
 
-## O que NÃO migra
+### O que NÃO migra
 
 - `simulacoes`, `simulacao_itens` e os dados de pedido do módulo atual: continuam lá, **intocados**. O pedido que chega do Omie **sem proposta** entra no módulo **novo** (N16-103, anexo `0006`): dossiê `PEDIDO_OMIE`; o vendedor preenche a simulação como hoje no Simulador de Comissão (N16-104) e a comissão segue como a da proposta.
 - `bloqueio_comissoes`, `comissao_coordenadores_historico`, `comissoes_provisoria`, `fn_jsonb_numero`, as 4 views antigas.
 - A regra do protótipo `experimental/simulador-comissao` (letra por pedido inteiro) **não** é referência; o motor de referência é o por item.
 - Telas de Comissões atuais: seguem funcionando, sem mudança (N16-11).
 
-## Plano de carga de dados (para o Gustavo)
+### Plano de carga de dados (para o Gustavo)
 
 1. Aplicar `0001-core-comissao.sql` (blocos 0 a 8).
 2. Carga de parâmetros: 3 linhas de `simulador_parametros` → `parametros` e filhas, convertendo as chaves (tabela acima). Conferir: o agregado de despesas fica 11,451734 e o detalhe soma 11,451733 (diferença de 0,000001, esperada).
@@ -855,7 +939,7 @@ Conversão de chaves dos JSON de parâmetros (carga, 🟡):
 5. Aplicar o bloco 9 depois do SQL de proposta e pedido e do SQL do Orçamento.
 6. Rodar os testes de ouro do motor (API) contra as 14 simulações.
 
-## Riscos
+### Riscos
 
 | # | Risco | Mitigação |
 |---|---|---|
@@ -868,7 +952,7 @@ Conversão de chaves dos JSON de parâmetros (carga, 🟡):
 | 5 | A Michele pode discordar do significado de "desaprovar" e "bloquear" | Perguntas M10 e M11; os `CHECK` de `comissao_decisoes` mudam com uma linha |
 | 6 | Dado pessoal de remuneração em `coordenadores_regras` | Perfil da tela de parâmetros restrito; a `auditoria` guarda quem viu/mudou apenas escrita |
 
-## Perguntas em aberto
+### Perguntas em aberto
 
 Perguntas para a Michele estão em M01 a M16 na nota [[01-Motor-Atual-Como-Calcula]]; **ela respondeu em 19/10/2026 ([[Registro-de-Decisoes|respostas da Controladoria de 19/10 (N16-42 a N16-51)]]) e onde diverge dos padrões abaixo vale a resposta**: `C05`, `C07` e a `C03` mudaram (N16-44, N16-48, N16-49), e o DDL ainda precisa acompanhar. As demais:
 

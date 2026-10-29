@@ -1,7 +1,7 @@
 ---
 tags: [diagramas, componentes, implantacao, infraestrutura, integracao]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Nathan
 fontes: [v1 Diagramas-UML (9, 10, 11, 21, 22), 01-Projeto/Infraestrutura, Integracao-AvHub-MES, Dockerfiles dos repositórios, api-pcp 579a625, api-acos-vital f322dcd, omie-elt-pipeline 0f739f0, HUB b55ac55]
@@ -9,9 +9,20 @@ fontes: [v1 Diagramas-UML (9, 10, 11, 21, 22), 01-Projeto/Infraestrutura, Integr
 
 # Componentes, implantação e dados entre sistemas
 
-Redesenhado em 14/10/2026. Topologia: [[Infraestrutura]]. Integrações com rota, chave e cursor: [[Integracao-AvHub-MES]]. Responsáveis: [[Sistemas-e-Responsabilidades]]. Destino de cada diagrama do v1: [[Indice-de-Diagramas]].
+**Em uma frase:** quatro desenhos mostram quais programas existem, onde rodam, como os bancos se organizam e como a informação anda do Omie ao Estoque.
+
+**Como ler estes diagramas**
+
+- Cada caixa é um programa, um banco (cilindro) ou um serviço de fora, como o Omie. Uma caixa maior agrupa o que pertence ao mesmo sistema.
+- Seta cheia: a conversa existe. Seta tracejada: a conversa está prevista ou incompleta.
+- Os rótulos `INT-01` a `INT-07` são as sete conversas entre o av-hub e o MES. Cada uma está explicada em [[Integracao-AvHub-MES]].
+- Comece pelo diagrama 1 para ver quem fala com quem. O 4 mostra o caminho do dado de ponta a ponta.
+
+Topologia: [[Infraestrutura]]. Responsáveis: [[Sistemas-e-Responsabilidades]]. Destino de cada diagrama do v1: [[Indice-de-Diagramas]].
 
 ## 1. Componentes e integrações
+
+O HUB (o que o usuário vê) fala com duas APIs. O MES (fábrica) conversa com a API do av-hub por rotas. A pipeline do Omie lê e grava no banco do av-hub e envia a OC ao Omie.
 
 ```mermaid
 flowchart LR
@@ -57,18 +68,14 @@ flowchart LR
     COM --> PGA
     MESB --> PGM
 ```
-
-Selo ✅ para as setas cheias (rotas conferidas em [[Integracao-AvHub-MES]] e nos routers da `api-acos-vital`); as setas `INT-06` e `INT-07` têm o job no hub e o MES responde 404 🔴; `INT-04` existe só no hub, o MES não consome 🔴. Mudanças em relação ao v1:
-
-- Os jobs `itens_pedido_status.job.js`, `itens_pedido_custo.job.js` e `item_estado_projetado.job.js` (Torre) agora existem no hub; no v1 o hub "ainda não consumia" o status por item.
-- O MES lê **todos** os eventos do contrato 35, não só cancelada e reaberta.
-- A pipeline só escreve no Omie para enviar a OC (`omie-envio-oc-worker`); o `api-comercial` lê pedidos de compra do Omie, sem escrita ✅ [[Pipeline-Omie]].
-- `api-comercial` aponta para o banco do av-hub no schema `core_comercial`; cluster ❓ não confirmado.
-- A chave do MES para o PUT do contrato 34 só abre essa rota (`apiKeyAuth.js:94-100`); as leituras usam a `API_KEY` do MES ✅ [[Chaves-e-Autenticacao]].
+- ✅ Setas cheias conferidas. ✅ `INT-01` a `INT-03` e `INT-05` funcionam.
+- 🔴 `INT-06` (custo) e `INT-07` (eventos da Torre): o hub já tem o job, mas o MES responde 404 hoje.
+- 🔴 `INT-04` (referência da OC): existe só no hub, o MES ainda não consome.
+- ❓ O banco do `api-comercial` aponta para o schema `core_comercial` do av-hub; o cluster não foi confirmado.
 
 ## 2. Implantação
 
-Topologia decidida pelo Nathan (📝, 07/10); estado real dos containers ❓ não conferido.
+Mostra em qual servidor cada programa deve rodar. A topologia é decisão do Nathan (📝, 07/10); o estado real dos containers ❓ não foi conferido.
 
 ```mermaid
 flowchart TB
@@ -101,12 +108,13 @@ flowchart TB
     APIC -.-> MINIOD
     MESBC -.-> MINIOD
 ```
-
-Selo ✅ para imagens e portas (`Dockerfile` de cada repositório, linhas citadas em [[Infraestrutura]]); 📝 para VPS e Postgres; MinIO ❓: nenhuma referência a MinIO foi encontrada no código de `api-pcp` e `api-acos-vital` em 14/10, por isso as setas são tracejadas. `api-comercial` 🔴 sem ambiente de produção decidido (nada dele em `main` no vault v1; no HUB `b55ac55` a pasta existe em `api-comercial/`).
+- ✅ Imagens e portas conferidas nos `Dockerfile`. 📝 Servidores (VPS) e Postgres são decisão.
+- ❓ MinIO (guarda de arquivos): nenhuma referência no código em 14/10, por isso as setas são tracejadas.
+- 🔴 `api-comercial` ainda sem ambiente de produção decidido.
 
 ## 3. Pacotes: schemas por banco
 
-Não há dependência de schema entre os bancos do av-hub e do MES: a ligação é só por REST. O MES usa só `public`; o av-hub divide por domínio ([[Schemas-Postgres]]).
+Um schema é uma "gaveta" dentro do banco. O av-hub separa por assunto; o MES usa uma só. Os dois bancos não se ligam por tabela: só pela API (REST).
 
 ```mermaid
 flowchart TB
@@ -137,12 +145,14 @@ flowchart TB
     S_OMIE -.->|"audita"| S_VEN
     S_COMERCIAL -.->|"lê produtos e parceiros pela API"| S_CORE
 ```
-
-Selo ✅ para a lista de schemas (`CREATE SCHEMA` no Dump Avhub de 14/10: `auth`, `core`, `core_aprovacao_de_vagas`, `core_comissionamento`, `core_compras`, `core_estoque`, `core_fluxo`, `core_mapas`, `core_organograma`, `core_vendas_faturamento`, `historico`, `omie_ctl`, `omie_raw`). `core_comercial` não aparece no dump (o `api-comercial` cria o schema por Prisma) ❓. `core_estoque` não tem tabela no dump (o Estoque é do MES, decisão #21); 🟡 as dependências de FK entre schemas foram mantidas do v1 e não relidas no dump nesta rodada ❓ (`vendedores.id_funcionario`, `usuarios_unidades`). `core_compras` guarda o orçamento (`orc_*`) e as views de compras; ordens e requisições de compra vivem em `core_vendas_faturamento` ✅ (dump).
+- ✅ A lista de schemas confere com o Dump Avhub de 14/10.
+- ❓ `core_comercial` não aparece no dump (o `api-comercial` o cria sozinho).
+- 🟡 As ligações entre schemas vieram do v1 e não foram relidas no dump.
+- `core_estoque` não tem tabela: o Estoque é do MES.
 
 ## 4. Fluxo de dados de ponta a ponta
 
-Substitui o DFD do v1 (diagrama 22), que ainda dizia "o av-hub não consome o status por item".
+Do Omie ao Estoque e de volta. Substitui o diagrama 22 do v1, que dizia que o av-hub não consome o status por item.
 
 ```mermaid
 flowchart LR
@@ -167,5 +177,37 @@ flowchart LR
     API -->|"OC aprovada, fila-omie"| PIPE
     PIPE -->|"C4 envia a OC"| OMIE
 ```
+Hoje a informação anda em camadas de leitura periódica, sem aviso automático (webhook):
+
+- Triagem e Destinação leem na hora.
+- Marcos da requisição: a cada 5 minutos, ou sob demanda.
+- Status por item, custo e Torre: a cada 90 segundos.
+- Extração do Omie: conforme o agendador da pipeline.
+
+Tempo real continua fora do desenho 📝 (DEC-2). Ver [[Pipeline-Omie]].
+
+## Detalhe técnico
+
+### 1. Componentes e integrações
+
+Selo ✅ para as setas cheias (rotas conferidas em [[Integracao-AvHub-MES]] e nos routers da `api-acos-vital`); as setas `INT-06` e `INT-07` têm o job no hub e o MES responde 404 🔴; `INT-04` existe só no hub, o MES não consome 🔴. Mudanças em relação ao v1:
+
+- Os jobs `itens_pedido_status.job.js`, `itens_pedido_custo.job.js` e `item_estado_projetado.job.js` (Torre) agora existem no hub; no v1 o hub "ainda não consumia" o status por item.
+- O MES lê **todos** os eventos do contrato 35, não só cancelada e reaberta.
+- A pipeline só escreve no Omie para enviar a OC (`omie-envio-oc-worker`); o `api-comercial` lê pedidos de compra do Omie, sem escrita ✅ [[Pipeline-Omie]].
+- `api-comercial` aponta para o banco do av-hub no schema `core_comercial`; cluster ❓ não confirmado.
+- A chave do MES para o PUT do contrato 34 só abre essa rota (`apiKeyAuth.js:94-100`); as leituras usam a `API_KEY` do MES ✅ [[Chaves-e-Autenticacao]].
+
+### 2. Implantação
+
+Topologia decidida pelo Nathan (📝, 07/10); estado real dos containers ❓ não conferido. Selo ✅ para imagens e portas (`Dockerfile` de cada repositório, linhas citadas em [[Infraestrutura]]); 📝 para VPS e Postgres; MinIO ❓: nenhuma referência a MinIO foi encontrada no código de `api-pcp` e `api-acos-vital` em 14/10, por isso as setas são tracejadas. `api-comercial` 🔴 sem ambiente de produção decidido (nada dele em `main` no vault v1; no HUB `b55ac55` a pasta existe em `api-comercial/`).
+
+### 3. Pacotes: schemas por banco
+
+Não há dependência de schema entre os bancos do av-hub e do MES: a ligação é só por REST. O MES usa só `public`; o av-hub divide por domínio ([[Schemas-Postgres]]).
+
+Selo ✅ para a lista de schemas (`CREATE SCHEMA` no Dump Avhub de 14/10: `auth`, `core`, `core_aprovacao_de_vagas`, `core_comissionamento`, `core_compras`, `core_estoque`, `core_fluxo`, `core_mapas`, `core_organograma`, `core_vendas_faturamento`, `historico`, `omie_ctl`, `omie_raw`). `core_comercial` não aparece no dump (o `api-comercial` cria o schema por Prisma) ❓. `core_estoque` não tem tabela no dump (o Estoque é do MES, decisão #21); 🟡 as dependências de FK entre schemas foram mantidas do v1 e não relidas no dump nesta rodada ❓ (`vendedores.id_funcionario`, `usuarios_unidades`). `core_compras` guarda o orçamento (`orc_*`) e as views de compras; ordens e requisições de compra vivem em `core_vendas_faturamento` ✅ (dump).
+
+### 4. Fluxo de dados de ponta a ponta
 
 Velocidade hoje: polling em camadas, sem webhook. Triagem e Destinação leem na hora; marcos da requisição a cada 5 min (ou sob demanda); status por item, custo e Torre a cada 90 s; extração do Omie conforme o agendador da pipeline. Tempo real continua fora do desenho 📝 (DEC-2). Ver [[Pipeline-Omie]].

@@ -15,6 +15,11 @@ fontes: ["api-acos-vital/src/schemas/core/tables/projetos/projetos.route.js:9", 
 
 > **Onde atua:** av-hub: API · pipeline Omie
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Fez o campo Projeto da Ordem de Compra (OC) deixar de ser texto livre e virar uma lista com os projetos do Omie da unidade. Antes, o comprador teria de saber o código.
+> **Quem é afetado:** Compradores escolhem o projeto numa lista. O DBA e a pipeline (que copia dados do Omie) guardam e sincronizam os projetos.
+> **Situação:** ✅ Entregue no código: `GET /projetos` e `GET /projetos/:id`, e a pipeline sincroniza os projetos. ❓ O front só foi conferido pelo vault anterior.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
 >

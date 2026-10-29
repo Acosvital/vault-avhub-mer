@@ -15,6 +15,11 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/compradores/
 
 > **Onde atua:** av-hub: banco, API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Criou o cadastro de compradores do Omie no av-hub, cada um ligado a um funcionário do RH, no mesmo esquema do vendedor. Isso fornece o código de comprador que o Omie exige no pedido de compra.
+> **Quem é afetado:** Compras e quem administra Acessos: só emite OC quem é comprador vinculado a um funcionário.
+> **Situação:** ✅ Rotas `/compras/compradores` entregues, com a trava de emissão. 🟡 Em produção, só 20 de 74 compradores estavam vinculados em 07/10 (não reconferido).
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
 >

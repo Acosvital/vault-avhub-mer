@@ -16,6 +16,12 @@ criado_original: 2026-10-09
 
 > **Onde atua:** av-hub: banco, API, front · MES: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define como o Hub lê do MES o custo real de cada item (média dos lotes reservados) para usar no simulador de comissão, na comissão por faturamento e em Compras e Orçamento.
+> **Quem é afetado:** Compras e Comercial. O vendedor não vê o custo, só o resultado (letra e percentual). O DBA mantém o job e a rota.
+> **Situação:** Parcial. Só o job de leitura e a rota estão prontos, e o MES não publica a rota `GET /itens/custo`, então nada é gravado. As telas passam à comissão nova, em contratos que o Robert vai criar.
+> **Exemplo:** NF de 10 de 20 flanges com custo médio de 11,75 dá custo de faturamento de 117,50.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** E3, R4 · **Dono:** Gustavo (DBA)
 >

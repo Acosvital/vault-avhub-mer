@@ -25,6 +25,11 @@ criado_original: 2026-09-17
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Acrescentou o desconto no nível do pedido de venda e criou as tabelas de frete e de parcelas, com dados que o Omie (ERP) já devolve.
+> **Quem é afetado:** DBA, pipeline Omie, vendas e financeiro, que passam a ter frete e parcelamento do pedido no Hub.
+> **Situação:** ✅ Tabelas existem no dump de 14/10. ❓ Produção confirmada pelo dump de 21/09, não reconferida.
+
 
 **Status: aplicada.** Confirmado contra o dump de produção `dump-avhub_prd_db-202609210741.sql` (21/09/2026) — ver [[Mapa-v1-para-v2|Auditoria-Dump-Producao-2026-09-21]]. `core_vendas_faturamento.pedidos_vendas` já tem `tipo_desconto_pedido`/`perc_desconto_pedido`/`valor_desconto_pedido`; `pedidos_vendas_frete` (1:1) e `pedidos_vendas_parcelas` (1:N) já existem com os campos propostos abaixo. Seção original preservada como histórico de design.
 

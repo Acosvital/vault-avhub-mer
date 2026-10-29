@@ -2,12 +2,84 @@
 id: conexao-telas-pablo-api-hub
 tags: [comercial, suprimentos, api-acos-vital, analise, rascunho]
 criado: 2026-10-27
-atualizado: 2026-10-27
+atualizado: 2026-10-29
 status: rascunho
 fontes: ["Dump do Avhub para referência (completo).sql (avhub_prd_db, gerado em 26/10/2026 08:30)", "av-hub branch refactor/menu-enxuto-vendas-orcamento-compras (3bccfce): app/(protected)/vendas, orcamento, dashboards/dash-comercial, comissoes/simulador; app/api/comercial/**; services/comercial/*", "api-acos-vital origin/develop a7fda49: src/schemas/**", "LOG-52 §0, N16-109, N16-111"]
 ---
 
-# Conexão das telas do Pablo com a API do Hub — análise página a página
+# Conexão das telas do Pablo com a API do Hub (página a página)
+
+**Em uma frase:** a análise mostra, tela por tela do módulo do Pablo, o que o Hub já entrega, o que entrega em parte e o que ainda precisa de contrato.
+
+**Quando consultar esta nota:** para decidir o que ligar agora e o que esperar. É rascunho para o Nathan revisar (pedido de 27/10/2026).
+
+Legenda: ✅ o Hub já tem · 🟡 o Hub tem em parte · ❌ não existe · 🚫 sai pelo vault. Os contratos desta lista foram removidos em 29/10/2026; o Robert cria os novos.
+
+## Como funciona hoje
+
+Toda tela do módulo chama o BFF (camada intermediária do av-hub, `/api/comercial`), e ele só fala com a API do Hub. O que não existe lá responde erro 503 `RECURSO_NAO_MIGRADO`.
+
+## Regra de ouro: um Hub só (N16-112)
+
+Cada conceito tem uma tabela, uma rota e uma tela. O módulo do Pablo entra dentro do que já existe.
+
+| Conceito | Fica | Sai ou se funde |
+|---|---|---|
+| Empresa que emite | `core.unidades` | Cadastro próprio do módulo |
+| Cliente | `core.parceiros` e o Acompanhamento de Clientes | Clientes e contatos do módulo |
+| Fornecedor e categoria | `core.parceiros` e o Orçamento antigo | Perfil e categorias repetidas do módulo |
+| Cotação e oferta | Uma tabela só, a decidir | `core_comercial.ofertas` |
+| Câmbio e motor de margem | PTAX do Hub e um motor só na API | Cópias no front e no módulo |
+| E-mail e notificações | Serviço do Hub inteiro | Envio próprio do módulo |
+
+## O que já está ligado (27/10)
+
+| Tela | Ligada a | Observação |
+|---|---|---|
+| Fornecedores (lista e ficha) | Orçamento antigo do Hub | Perfil, categorias e certificados só leitura |
+| Produtos (lista e detalhe) | Rotas de produtos do Hub | A família aparece como código: o Hub nega a permissão ao Admin (Dev) |
+| Proposta: busca de produto e opções de margem | Produtos e parâmetros do simulador | Opções só com a tela `custo-item` |
+| Cotação: fornecedores da categoria | Vínculos do Orçamento antigo | — |
+| Clientes | Acompanhamento de Clientes | A tela Clientes do Pablo saiu do front |
+| Parâmetros de custo, câmbio, "emitir em nome de" | Hub | Falta gravar "emitir em nome de" na proposta |
+
+## O que falta, por tela
+
+| Tela | Situação | O que falta |
+|---|---|---|
+| Propostas (lista) | ❌ | Filtros, KPIs e excluir. Os status mudam |
+| Proposta (nova e detalhe) | 🟡 | Cálculo na API, salvar, revisões, aprovar, cancelar e transformar em pedido. Fechar, perder e reabrir saem 🚫 |
+| Clientes | ✅ | CRM próprio (potencial, próximo contato) ❌ ou sai |
+| Relatórios e Dashboard Comercial | ❌ | Dependem de propostas |
+| Produtos e página do produto | ✅ 🟡 | Dados técnicos e produtos pendentes ❌ |
+| Fornecedores | ✅ | Perfil de compras e certificados ❌ |
+| Ofertas | 🟡 | Decidir se estende a tabela existente ou cria outra |
+| Pedidos de custo | ❌ | Fila, respostas e painéis |
+| Parâmetros | ✅ | Tabela da telha ❌ |
+| Sino de notificações | ❌ | Esconder até existir |
+
+## Achados do banco (dump de 26/10/2026)
+
+- O schema do módulo do Pablo está em produção, vazio. Só 3 tabelas têm dado.
+- A tabela de cotação por produto está vazia. As cotações estão no Orçamento antigo (2.697) e o preço de compra real no histórico do Omie (47.125 itens).
+- O Hub não tem e-mail nem notificações. São infraestrutura, um contrato à parte.
+
+## Revisão do Orçamento antigo (Nathan, 27/10/2026)
+
+O que veio do Orçamento antigo passa por revisão completa, para atender só o que o vault precisa. As ligações acima usam essas rotas como estão hoje.
+
+## Perguntas para o Nathan
+
+- Clientes do Pablo e Acompanhamento de Clientes: unir numa tela só?
+- Oferta: estender `parceiros_produtos` ou criar tabela própria?
+- Receita, prospect e compradores: ficam?
+- Importar e exportar planilhas: ficam?
+- Telha: continua no escopo?
+
+## Detalhe técnico
+
+Tudo abaixo é o conteúdo completo da nota original, sem cortes.
+
 
 > [!info] Para quê
 > Rascunho para o Nathan revisar **página a página** antes de qualquer contrato (pedido de 27/10/2026). Depois da `api-comercial` removida (N16-111), toda tela do módulo chama o BFF `/api/comercial`, que só fala com a API do Hub; o que não existe lá responde 503 `RECURSO_NAO_MIGRADO`.
@@ -16,7 +88,7 @@ fontes: ["Dump do Avhub para referência (completo).sql (avhub_prd_db, gerado em
 >
 > Lido no código em 27/10/2026. **Não rodei** nenhuma rota do Hub listada como ✅ além das já ligadas (empresas, parâmetros de custo, câmbio, `/me/permissoes`); os campos vêm da leitura das rotas em `origin/develop`.
 
-## Andamento da conexão (27/10/2026)
+### Andamento da conexão (27/10/2026)
 
 **Ligado ao Hub e testado na API de teste** (av-hub, branch `refactor/menu-enxuto-vendas-orcamento-compras`):
 - **Fornecedores** (lista, filtro por categoria e ficha) → `/orcamento/fornecedores`, `/orcamento/vinculos`, `/orcamento/categorias`, `/orcamento/cotacoes`. Perfil de compras, categorias e certificados ficam **só leitura** até o Hub gravar.
@@ -28,7 +100,7 @@ fontes: ["Dump do Avhub para referência (completo).sql (avhub_prd_db, gerado em
 > [!warning] Revisão completa do Orçamento antigo (Nathan, 27/10/2026)
 > O que veio do Orçamento antigo do Hub (`core_compras` `/orcamento/*`, tabelas `orc_*`, contrato 07: fornecedores, categorias, vínculos, produtos e cotações) **passa por revisão completa** para atender **só o que o vault precisa**. As ligações acima usam essas rotas como estão hoje; a revisão decide o que fica, o que muda e o que sai, e pode trocar a fonte de alguma tela. Entra como item dos contratos de Fornecedor, Oferta e Pedido de cotação.
 
-## Princípio: um Hub só (Nathan, 27/10/2026, N16-112)
+### Princípio: um Hub só (Nathan, 27/10/2026, N16-112)
 
 > "O AVHUB precisa ser inteiramente acoplado e unidos." Cada conceito tem **uma** tabela, **uma** rota e **uma** tela no Hub; o módulo do Pablo entra **dentro** do que já existe, não ao lado. Onde a análise abaixo diz "ligar" ou "contrato", vale esta tabela de unificação.
 
@@ -47,7 +119,7 @@ fontes: ["Dump do Avhub para referência (completo).sql (avhub_prd_db, gerado em
 | Motor de margem e comissão | **um** motor na API, com `simulador_parametros` | cópias no front e no módulo |
 | E-mail e notificações | serviço **do Hub inteiro** (qualquer módulo usa) | `core_comercial.notificacoes` e envio próprio |
 
-## Conferência com o banco de produção (dump de 26/10/2026)
+### Conferência com o banco de produção (dump de 26/10/2026)
 
 Contagem de linhas por tabela no dump completo de `avhub_prd_db`. Muda dois pontos da análise (marcados ⚠️ abaixo).
 
@@ -72,7 +144,7 @@ Contagem de linhas por tabela no dump completo de `avhub_prd_db`. Muda dois pont
 - **Achado 2 e páginas 7b, 7c, 8 e 11b:** onde a análise diz "cotação por produto em `parceiros_produtos`", ler **`orc_cotacoes`** (2.697 cotações, via `/orcamento/cotacoes` e `/orcamento/produtos`) e o **histórico de compra do Omie** (`pedidos_compras_itens`, 47 mil itens). A decisão da oferta fica mais simples: `parceiros_produtos` está vazia e pode ganhar o formato que o contrato decidir, ou a oferta nasce de `orc_cotacoes`.
 - **Página 7a e 8:** dados técnicos do produto confirmados como inexistentes.
 
-## Achados que valem para várias páginas
+### Achados que valem para várias páginas
 
 1. **O Hub já tem um "Orçamento" antigo** (`core_compras /orcamento/*`, contrato 07): fornecedores com **categorias de fornecimento**, vínculos categoria × fornecedor (inclusive sem cadastro), produtos com cotação mais recente e preço médio, e histórico de cotações. É a base natural de Fornecedores, Produtos e Pedido de cotação, no lugar das tabelas do Pablo.
 2. **Cotação de fornecedor por produto já existe** em `core.parceiros_produtos` (`/parceiros_produtos`, com valor, IPI, ICMS e data) e há **histórico de preço** (`/historico_precos`, `/orcamento/cotacoes`) e **fornecedores do produto com última cotação e última compra** (`/produtos/:id/fornecedores`). A "oferta" do Pablo (preço com prazo, frete, validade, custo líquido) é uma cotação mais rica: decidir se **estende `parceiros_produtos`** ou cria tabela nova.
@@ -85,9 +157,9 @@ Contagem de linhas por tabela no dump completo de `avhub_prd_db`. Muda dois pont
 
 ---
 
-## Vendas
+### Vendas
 
-### 1. Propostas — lista (`/vendas/propostas`)
+#### 1. Propostas — lista (`/vendas/propostas`)
 **Hoje:** 5 KPIs (cotado, em aberto, fechadas, perdidas, conversão), busca e filtros (empresa, status, período, unidade, responsável), tabela, imprimir em lote (PDF comercial ou técnico), excluir, nova proposta.
 
 | Precisa | No Hub | |
@@ -98,7 +170,7 @@ Contagem de linhas por tabela no dump completo de `avhub_prd_db`. Muda dois pont
 | Empresa | `/unidades` | ✅ |
 | PDF em lote | o PDF é montado no BFF | 🟡 depende só da proposta existir no Hub |
 
-### 2. Proposta — nova e detalhe (`/vendas/propostas/nova`, `/vendas/propostas/[id]`)
+#### 2. Proposta — nova e detalhe (`/vendas/propostas/nova`, `/vendas/propostas/[id]`)
 **Hoje:** Emissão, Cliente, Condições comerciais, Análise de margem, grade de Itens (catálogo, sugerir custo, pedir custo, telha, planilha), solicitações de custo, totais e ações (salvar, fechar, perder, reabrir, pedido no Omie, PDFs, e-mail, duplicar, revisões, linha do tempo).
 
 | Precisa | No Hub | |
@@ -123,7 +195,7 @@ Contagem de linhas por tabela no dump completo de `avhub_prd_db`. Muda dois pont
 | PDFs comercial, técnico e de aprovação | montados no BFF | 🟡 dependem da proposta no Hub |
 | Enviar por e-mail | — | ❌ infraestrutura de e-mail (achado 4) |
 
-### 3. Clientes — lista (`/vendas/clientes`)
+#### 3. Clientes — lista (`/vendas/clientes`)
 **Hoje:** KPIs (clientes, com proposta em 90 d, próximo contato vencido), filtros (status, segmento, contato vencido), tabela, exportar, novo cliente.
 
 | Precisa | No Hub | |
@@ -135,7 +207,7 @@ Contagem de linhas por tabela no dump completo de `avhub_prd_db`. Muda dois pont
 | Exportar | — | ❌ |
 | **Pergunta para o Nathan** | Esta tela duplica o Acompanhamento de Clientes. Unir as duas? | ❓ |
 
-### 4. Cliente — ficha (`/vendas/clientes/[id]`, `/novo`)
+#### 4. Cliente — ficha (`/vendas/clientes/[id]`, `/novo`)
 **Hoje:** cadastro e relacionamento, compradores (contatos), propostas do cliente, estatísticas.
 
 | Precisa | No Hub | |
@@ -146,7 +218,7 @@ Contagem de linhas por tabela no dump completo de `avhub_prd_db`. Muda dois pont
 | Compras do cliente | `/pedido_venda_itens?codigo_cliente=`, `/acompanhamento_clientes/movimento` | ✅ |
 | Propostas do cliente e estatísticas de cotação | — | ❌ |
 
-### 5. Relatórios (`/vendas/relatorio-gerencial`, abas Gerencial e Cotações)
+#### 5. Relatórios (`/vendas/relatorio-gerencial`, abas Gerencial e Cotações)
 Ambas leem só propostas (cotado, conversão, motivos de perda, por responsável, empresa e unidade) e geram PDF e planilha.
 
 | Precisa | No Hub | |
@@ -155,14 +227,14 @@ Ambas leem só propostas (cotado, conversão, motivos de perda, por responsável
 | PDF | montado no BFF | 🟡 |
 | Planilha | — | ❌ |
 
-### 6. Dashboard Comercial (`/dashboards/dash-comercial`)
+#### 6. Dashboard Comercial (`/dashboards/dash-comercial`)
 KPIs cotado, fechado, em aberto, perdido e conversão; evolução diária; ranking de vendedores; status; motivos de perda; top clientes; propostas em risco. **Tudo de propostas: ❌** (contrato à parte ou uma rota de resumo).
 
 ---
 
-## Orçamento
+### Orçamento
 
-### 7. Produtos (`/orcamento/catalogo-produtos`)
+#### 7. Produtos (`/orcamento/catalogo-produtos`)
 **7a. Preços e fornecedores**
 
 | Precisa | No Hub | |
@@ -187,7 +259,7 @@ KPIs cotado, fechado, em aberto, perdido e conversão; evolução diária; ranki
 | Importar mapa de cotação (.xlsx) e histórico de importações | — | ❌ |
 | Exportar | — | ❌ |
 
-### 8. Produto — detalhe (`/orcamento/catalogo-produtos/[id]`)
+#### 8. Produto — detalhe (`/orcamento/catalogo-produtos/[id]`)
 
 | Precisa | No Hub | |
 |---|---|---|
@@ -198,7 +270,7 @@ KPIs cotado, fechado, em aberto, perdido e conversão; evolução diária; ranki
 | Dados técnicos | — | ❌ `produtos_perfil` |
 | É a página do produto `B2` do vault (: histórico, top fornecedores, flutuação) | | ❓ alinhar com o contrato do `B2` |
 
-### 9. Fornecedores — lista (`/orcamento/fornecedores`)
+#### 9. Fornecedores — lista (`/orcamento/fornecedores`)
 
 | Precisa | No Hub | |
 |---|---|---|
@@ -207,7 +279,7 @@ KPIs cotado, fechado, em aberto, perdido e conversão; evolução diária; ranki
 | Copiar e-mails | `email` do parceiro | ✅ |
 | Exportar | — | ❌ |
 
-### 10. Fornecedor — ficha (`/orcamento/fornecedores/[id]`)
+#### 10. Fornecedor — ficha (`/orcamento/fornecedores/[id]`)
 
 | Precisa | No Hub | |
 |---|---|---|
@@ -218,7 +290,7 @@ KPIs cotado, fechado, em aberto, perdido e conversão; evolução diária; ranki
 | Cotações recentes | `/parceiros_produtos?id_parceiro=` | ✅ |
 | Ordens de compra | `/compras/ordens?q=` | ✅ |
 
-### 11. Pedidos de custo (`/orcamento/painel-comprador`)
+#### 11. Pedidos de custo (`/orcamento/painel-comprador`)
 **11a. Fila**: KPIs, próximas ações (assumir, liberar, responder, cancelar), ofertas vencendo, ranking de fornecedores, certificados vencendo, pedidos sem preço, cobertura por família.
 
 | Precisa | No Hub | |
@@ -235,7 +307,7 @@ KPIs cotado, fechado, em aberto, perdido e conversão; evolução diária; ranki
 | Análise do item (última compra, cotações) | `/produtos/:id/fornecedores`, `/historico_precos` | ✅ |
 | Enviar o pedido por e-mail | — | ❌ infraestrutura de e-mail (achado 4) |
 
-### 12. Parâmetros (`/orcamento/parametros-custo`)
+#### 12. Parâmetros (`/orcamento/parametros-custo`)
 
 | Aba | No Hub | |
 |---|---|---|
@@ -244,9 +316,9 @@ KPIs cotado, fechado, em aberto, perdido e conversão; evolução diária; ranki
 
 ---
 
-## Outras
+### Outras
 
-### 13. Simulador de comissões (`/comissoes/simulador`)
+#### 13. Simulador de comissões (`/comissoes/simulador`)
 A base já é do Hub. Só dois enriquecimentos opcionais vinham do Pablo:
 
 | Precisa | No Hub | |
@@ -254,12 +326,12 @@ A base já é do Hub. Só dois enriquecimentos opcionais vinham do Pablo:
 | Proposta ligada ao pedido (pré-preencher a compra) | — | ❌ depende de `pedidos` ↔ proposta |
 | Sugerir compra | — | ❌ mesma regra do "Sugerir custo" da proposta |
 
-### 14. Sino de notificações (menu, todas as telas)
+#### 14. Sino de notificações (menu, todas as telas)
 ❌ Não existe no Hub (achado 5). Hoje recebe 503 e só guarda o último dado: **esconder até existir**.
 
 ---
 
-## Resumo: o que dá para ligar já e o que vira contrato
+### Resumo: o que dá para ligar já e o que vira contrato
 
 **Ligar já, sem contrato (o Hub tem a rota):** Fornecedores (lista e ficha, sem perfil e certificados), Produtos (lista, detalhe com fornecedores e histórico), Clientes (lista e ficha pelo Acompanhamento e `/parceiros`, se o Nathan aprovar unir), opções da análise de margem (`/simulador_parametros`), busca de produto na proposta, fornecedores por categoria e análise do item na Cotação.
 

@@ -68,7 +68,7 @@ Se faltassem flanges mesmo depois da recontagem, o PCP decidiria entre aceitar o
 - ✅ Telas de recebimento, recontagem e decisão do PCP; lote em quarentena com etiqueta em PDF.
 - ✅ Recebimento parcial com divisão da parcial.
 - 🔴 O custo da OC ainda não é gravado no lote.
-- 🔴 A conferência ainda não cruza com a OC; hoje só compara com a NF.
+- 🔴 A conferência ainda não cruza com a OC (preço, quantidade comprada, fornecedor); hoje só compara com a NF. O cruzamento entra com o job do contrato 004/007.
 - 🔴 Entrada de mercadoria de OC sem requisição do MES (OC criada só no av-hub): é proposta, o desenho é do Robert.
 - 🔴 Aviso ao av-hub quando o PCP reabre o recebimento; leitor de código de barras da NF; reabertura de divergência de produção.
 - 🟡 Aviso à doca quando uma OC esperada é cancelada.
@@ -77,17 +77,11 @@ Se faltassem flanges mesmo depois da recontagem, o PCP decidiria entre aceitar o
 
 ## Detalhe técnico
 
-Tudo abaixo é o conteúdo original da nota, mantido para consulta.
+### Nós
 
-### Objetivo (original)
+Nós do [[00-Fluxo-Mestre-0b]]: `R0` esperados e chegada com NF, `R1` conferência contra a NF, `R2` pesagem, `R3` bate com o esperado?, `R4` cria o lote em quarentena, `R6` divergência. (`R5` não existe no 0b.) `FN1` é o fornecedor entregando.
 
-Receber na doca o material comprado, conferi-lo **contra a nota fiscal** e transformar o que chegou em **lote em quarentena** (`PENDENTE`) com entrada no saldo, para a Qualidade inspecionar. Enquanto há divergência aberta, **nada entra** no estoque. O cruzamento com a **OC** (preço, quantidade comprada, fornecedor) entra quando existir o job do contrato 004/007 🔴; até lá a conferência não compara com a OC.
-
-### Nós (texto original)
-
-Nós do [[00-Fluxo-Mestre-0b]]: `R0` esperados e chegada com NF, `R1` conferência contra a NF, `R2` pesagem, `R3` bate com o esperado?, `R4` cria o lote em quarentena, `R6` divergência. (`R5` não existe no 0b.) Entrada: `FN1` fornecedor entrega ([[04-Circuito-de-Compra]]). Saída: `Q1` ([[06-Qualidade-Entrada]]) ou `P6` ([[02-PCP-Triagem-e-Destinacao]]).
-
-### Quem atua (completo)
+### Quem atua (onde)
 
 | Quem | Papel | Onde |
 |---|---|---|

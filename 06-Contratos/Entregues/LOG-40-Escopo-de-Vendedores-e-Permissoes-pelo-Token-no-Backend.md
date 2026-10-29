@@ -26,6 +26,11 @@ criado_original: 2026-10-07
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** A API passou a decidir, pelo login do usuário, quais vendedores e pedidos ele pode ver. Antes o front (tela) fazia isso com remendos, as marcas S1, S2 e S3.
+> **Quem é afetado:** Vendedores, diligenciadores e a gerência do PCP (Planejamento e Controle da Produção). Cada um só enxerga o que é seu; pedido alheio dá erro 403.
+> **Situação:** ✅ aplicado no código da API. 🟡 Testado só com vendedor, diligenciador PCP e Gerência PCP; faltam gerente de equipe, auxiliar e vendedor sem vínculo.
+
 
 > **(atualizado em 13/10/2026) ENTREGUE PELO DBA (relato do Nathan) e movido para `Realizados/`[^c2] a pedido dele.** O lado da API foi conferido só na **leitura do código**; nenhum teste da §5 foi rodado ainda. O código está na `develop` e na `main` da `api-acos-vital`: commit `fd8c29b` (09/10). O escopo de vendedores ficou **FIXO no código** (a chave `ESCOPO_VENDEDORES_EXIGIR` não é mais lida) e `/pedido_venda_itens/{numero}` passou a conferir o dono (`403 PEDIDO_FORA_DO_ESCOPO`; `409 PEDIDO_EM_VARIAS_UNIDADES` quando o número existe em mais de uma unidade do usuário). 🔴 **Segue aberto, mesmo em `Realizados/`:** conferir em produção/`api-test` (passo 4 da §4) e o **front**: tirar as marcas S1 a S3 no av-hub só depois de testar com mais de um usuário e com escrita; o PR #178 (Bearer) já está na `develop` do av-hub. As seções abaixo mantêm o texto da proposta.
 

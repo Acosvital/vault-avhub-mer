@@ -26,6 +26,11 @@ criado_original: 2026-09-22
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Criou a tabela de requisições de compra, o pedido interno que vira OC (Ordem de Compra). Os status são aberta, em cotação, atendida e cancelada.
+> **Quem é afetado:** PCP (Planejamento e Controle da Produção) e solicitantes, que pedem; compradores, que atendem. "Atendida" só vem pela OC.
+> **Situação:** ✅ Aplicado (PR #273). 🟡 Em 08/10 o model divergiu da tabela; só o banco resolve. ❓ Produção não reconferida.
+
 
 **Status: aplicada — confirmado em 23/09/2026.** Entregue em `api-acos-vital` (commit `ec2a42b`, PR #273, mergeado em `main` em 22/09) junto com o [[SQL-007-Ordens-Compra-Estruturada|007-Ordens-Compra-Estruturada]]. O av-hub já está ligado nele (branch `feat/compras-integracao-backend`), e as leituras e a validação de status foram confirmadas ao vivo em `api-test`. Produção não foi conferida.
 

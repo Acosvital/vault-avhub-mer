@@ -1,7 +1,7 @@
 ---
 tags: [sistemas, av-hub, hub, nextjs, frontend, bff]
 criado: 2026-10-14
-atualizado: 2026-10-15
+atualizado: 2026-10-29
 status: vigente
 dono: Nathan
 fontes: [HUB d0ef359 (PR #206, sobre b55ac55) em C:\Users\nathan.silva\Desktop\TI\NATHAN\00 - HUB (conferido no código em 14/10), api-acos-vital f322dcd, v1 AV-Hub-Arquitetura-BFF, AV-Hub-Modulos, AV-Hub-RBAC]
@@ -9,9 +9,49 @@ fontes: [HUB d0ef359 (PR #206, sobre b55ac55) em C:\Users\nathan.silva\Desktop\T
 
 # AV-Hub Front (HUB)
 
+**Em uma frase:** é o site do av-hub, com os portais do Vendedor, do Gerente, de Compras, do PCP (só leitura), de Comissões e de RH. Dono: Nathan.
+
+## Quem usa e para quê
+
+- **Vendedor e auxiliar:** liberam pedidos e acompanham a etapa de cada item.
+- **Gerente:** libera e acompanha os pedidos da equipe.
+- **Compras:** criam requisição, cotam, emitem a OC (ordem de compra) e fazem o follow-up do CCP.
+- **Gerência de Compras:** aprova a OC acima do limite.
+- **PCP:** consulta pedidos e notas, sem alterar.
+
+## Como se encaixa no fluxo
+
+- **Vendas (`V1` a `V3`):** a tela Liberar Pedidos é o portão do fluxo.
+- **Acompanhamento (`V1` a `O2`):** o card "Etapa dos itens" mostra onde cada item está na fábrica.
+- **Compras (`C0` a `C5`):** requisição, cotação, aprovação, OC e follow-up.
+- **Torre de Fluxo e custo por item:** a API já existe ([[AV-Hub-API]]), mas o front ainda não.
+
+## Regras que valem
+
+- O navegador só fala com o servidor do próprio site, que repassa à API.
+- O servidor confere a permissão antes de chamar a API. O menu da sessão só serve de apresentação.
+- Quem age (autor, aprovador) vem da sessão, nunca de um campo do formulário.
+- O front não deve guardar regra de negócio. Onde ainda há, o código leva a marca `GAMBIARRA(` (11 ocorrências).
+- A "Nova requisição" do Compras não chega ao MES. O que chega é a OC.
+- Aprovar OC exige a permissão de aprovar. Até R$ 30 mil a OC sai liberada sem aprovação (N14-21).
+
+## O que já existe e o que falta
+
+- ✅ Liberação (vendedor e equipe), requisições, cotação, aprovação, OC, follow-up e compradores.
+- ✅ Card "Etapa dos itens" com rótulo para as 11 etapas.
+- 🔴 Tela da Torre de Fluxo (LOG-46).
+- 🔴 Tela ou coluna de custo por item (LOG-47).
+- 🟡 Nenhuma tela lista os marcos da requisição. Quem os lê é o MES.
+- 🟡 O MES ainda não lê a OC da "Nova requisição" (N14-20, BL-006, BL-041). O trabalho é do Robert.
+- 🟡 Modelo do imposto por item, com o Gustavo (BL-053, PS-014).
+- 🟡 Endurecer a regra de aprovação quando Compras definir.
+- ✅ Orçamento roda sobre JSON local, não sobre as tabelas da API ([[12-Orcamento-Base-de-Preco]]).
+
+## Detalhe técnico
+
 Front do av-hub: Portal do Vendedor, Portal do Gerente, Compras, Comercial & Suprimentos, PCP (portal de leitura), Comissões, RH. Dono: Nathan. Next.js 16 (App Router), React, MUI 9, NextAuth 4, `@react-pdf/renderer`, S3 ✅ `00 - HUB/package.json`. Repositório: `00 - HUB` (HUB b55ac55, develop), que contém também a pasta `api-comercial/` ([[API-Comercial]]). Esta nota cobre o que o fluxo de Atividades usa; o resto vai em [[Comissoes]], [[Dashboards]] e afins (anexo fora do fluxo).
 
-## Como funciona
+### Como funciona
 
 - **BFF.** O navegador só fala com `app/api/**` (199 `route.ts`); o BFF chama a `api-acos-vital` com `process.env.API_URL` (251 usos) e `x-api-key` (`API_KEY`, 9 usos) ✅ grep em `app lib services`. O módulo Comercial & Suprimentos passa por `app/api/comercial/[...rota]/route.ts` com `COMERCIAL_API_URL` e `COMERCIAL_API_KEY` ✅. O mapa completo de rotas e do que cada uma exige: [[Mapa-Rotas-BFF-Bearer]].
 - **Identidade.** `headersComIdentidade()` (via `headersDaApi()`) soma `x-api-key` e `Authorization: Bearer <token do usuário>` emitido por `POST /autenticacao/*` da API `lib/api/escopoUnidade.ts`. O token do usuário é lido do cookie httpOnly no servidor (`lib/auth/backendToken.ts`) e **não** vai na `session` que o navegador lê: a sessão só informa `sessaoExpirada`, e `providers/SessaoExpiradaGuard.tsx` leva ao login ✅ HUB `d0ef359`. Com o token, a API aplica a permissão por rota (`auth.fn_autorizar`) e o escopo de vendedor ([[RBAC-e-Permissoes]]). Autoria (`created_by`, `aprovado_por`…) sai da sessão, nunca do corpo ✅ `lib/compras/api.ts:42-45`.
@@ -20,7 +60,7 @@ Front do av-hub: Portal do Vendedor, Portal do Gerente, Compras, Comercial & Sup
 - **Permissão na tela.** `can('pode_x', 'slug')` lê o menu da sessão; botões e abas dependem disso ✅ ex.: `components/Compras/ComprasRequisicoes.tsx:92,186`.
 - **Sem camada de dados no cliente.** Hooks por módulo (`components/Compras/useCompras.ts`, `Followup/useFollowup.ts`) chamam o BFF; sem regra de negócio no front ("GAMBIARRA(" marca onde ainda há: 11 ocorrências em `app`, `components`, `lib`, `services`) ✅ grep de 14/10.
 
-## Telas do fluxo de Atividades
+### Telas do fluxo de Atividades
 
 | Nó | Tela (nome atual · antigo) | Rota | Slug (`auth.telas`) | BFF → API | Código |
 |---|---|---|---|---|---|
@@ -38,7 +78,7 @@ Front do av-hub: Portal do Vendedor, Portal do Gerente, Compras, Comercial & Sup
 
 As rotas de apoio do BFF de Compras exigem `compras.pode_visualizar`: `condicoes-pagamento`, `contas-correntes`, `fornecedores`, `transportadoras`, `projetos`, `produtos`, `categorias`, `cotacao`, `parametros`, `minhas-unidades` (esta última também aceita `compradores`) ✅ `app/api/compras/*/route.ts`.
 
-## O que existe e o que falta, por nó
+### O que existe e o que falta, por nó
 
 | Nó | Estado no HUB | Selo |
 |---|---|---|
@@ -53,7 +93,7 @@ As rotas de apoio do BFF de Compras exigem `compras.pode_visualizar`: `condicoes
 | Status por item (API-005/006) | Card "Etapa dos itens" lê `GET /itens_pedido_status`; rótulos para as 11 etapas, o que não conhece aparece cru | ✅ `lib/domain/etapas-item.ts:34-47` |
 | Marcos da requisição (LOG-35) | Nenhuma tela do HUB lista os marcos (`requisicoes_compra_eventos`); quem os lê é o MES | 🟡 |
 
-## Permissões do HUB que o fluxo toca
+### Permissões do HUB que o fluxo toca
 
 Resumo; a tabela completa está em [[RBAC-e-Permissoes]].
 
@@ -65,13 +105,13 @@ Resumo; a tabela completa está em [[RBAC-e-Permissoes]].
 | `compradores` | visualizar, editar | `app/api/compras/compradores/**` |
 | `pcp-pedidos`, `pcp-notas`, `pcp-dashboard` | visualizar (criar e deletar nas observações do PCP) | `app/api/pcp/**` |
 
-## Pontas soltas conferidas no código
+### Pontas soltas conferidas no código
 
 - ✅ `app/api/orcamento/*` não chama mais as views antigas: lê `lib/orcamento/dados.ts`, que importa JSON local (`lib/orcamento/data/*.json`). Orçamento roda sobre dado estático, não sobre `core_compras.orc_*`. Em 16/10 as 5 telas antigas e as rotas BFF delas saíram; ficam `familias`, `produtos` e `todos-fornecedores` ([[12-Orcamento-Base-de-Preco]]).
 - ✅ A aprovação lê `limite_aprovacao` de `GET /compras/parametros` apenas para avisar na tela de OC ("Acima de R$… ela nasce Aguardando aprovação") ✅ `components/Compras/FecharCompra.tsx:604-605,1652`.
 - 🟡 `api-comercial` está dentro do mesmo repositório do HUB (pasta `api-comercial/`) e tem CI próprio ([[API-Comercial]]).
 
-## O que o Nathan precisa construir para o fluxo
+### O que o Nathan precisa construir para o fluxo
 
 1. Tela Torre de Fluxo (`/fluxo/torre`, trilha, tempo, SLA) sobre `GET /fluxo/*` da API 🔴.
 2. Tela/coluna de custo por item (`custo-itens`) sobre `GET /itens_pedido_custo` 🔴.

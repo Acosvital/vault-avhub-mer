@@ -16,6 +16,12 @@ criado_original: 2026-10-07
 
 > **Onde atua:** av-hub: banco, API, front
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Tira do repositório do front (av-hub) os arquivos JSON de coordenadores (comissões) e de orçamento, passando a usar os dados que já estão no banco e na API.
+> **Quem é afetado:** Quem desenvolve o front (Nathan) e a API (Gustavo). O dashboard de comissões passa a ler da API; a tela antiga de orçamento sai quando o módulo Comercial & Suprimentos a substituir.
+> **Situação:** Parcial, dono Nathan. A API está pronta (✅) e o JSON do orçamento já saiu do repo; os arquivos de coordenadores continuam lá (🔴), com várias perguntas abertas.
+> **Exemplo:** A comissão de cada coordenador vem da API como percentual dividido por 100, vezes o faturamento total do mês.
+
 > [!info] Situação em 21/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Nathan
 >

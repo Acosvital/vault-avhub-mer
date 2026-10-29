@@ -22,6 +22,11 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/vendedores/v
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Fez a coluna "Sistema" da tela de Vendedores ordenar pelo nome da unidade, e não pelo código bruto, que não segue a ordem alfabética.
+> **Quem é afetado:** Quem usa o cadastro de Vendedores: o cabeçalho "Sistema" volta a ordenar como aparece na tela.
+> **Situação:** ✅ Entregue: `sort=nome_unidade` ordena pelo nome da unidade.
+
 
 **Criado em:** 15/09/2026, horário de Brasília
 

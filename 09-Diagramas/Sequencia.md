@@ -1,7 +1,7 @@
 ---
 tags: [diagramas, sequencia, uml, mes, av-hub]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Nathan
 fontes: [v1 04-Arquitetura-Transversal/Diagramas-UML (0a, 12, 15), v1 02-PRD-Estoque/Fluxo-*-Completo, 00-Fluxo-Mestre-0b, api-pcp 579a625, api-acos-vital f322dcd, app-pcp 1fca8d3]
@@ -9,7 +9,16 @@ fontes: [v1 04-Arquitetura-Transversal/Diagramas-UML (0a, 12, 15), v1 02-PRD-Est
 
 # Diagramas de sequência
 
-Redesenhados a partir do [[00-Fluxo-Mestre-0b]] e conferidos no código de 14/10/2026. Cada mensagem começa com o ID do nó do Mestre quando existe. Visão geral e destino de cada diagrama do v1: [[Indice-de-Diagramas]]. Selos: [[Regras-do-Vault]].
+**Em uma frase:** sete desenhos mostram, passo a passo e na ordem, quem pede o quê a quem em cada etapa do fluxo, do pedido liberado ao despacho.
+
+**Como ler estes diagramas**
+
+- Cada coluna é uma pessoa ou um sistema (Vendedor, MES, av-hub…). O tempo corre de cima para baixo.
+- Seta cheia: um pedido ou uma ação. Seta tracejada: a resposta.
+- A caixa de nota (`Note`) é um aviso. `alt` e `else` mostram caminhos alternativos; `loop`, algo que se repete.
+- Cada mensagem começa com o código do passo no [[00-Fluxo-Mestre-0b]] (`P2`, `R0`…). Olhe primeiro as setas com código.
+
+Redesenhados do Mestre e conferidos no código de 14/10/2026. Selos: [[Regras-do-Vault]]. Destino de cada diagrama do v1: [[Indice-de-Diagramas]].
 
 Lista:
 
@@ -23,7 +32,7 @@ Lista:
 
 ## 1. Do pedido liberado à Destinação (V2 a P2)
 
-Fluxo 4 da integração ([[Integracao-AvHub-MES]], INT-01). Só pedido liberado atravessa para o MES.
+Só o pedido liberado pelo vendedor passa para o MES. O PCP o abre, decide o destino de cada item e o MES avisa o av-hub que importou. Detalhe da integração: [[Integracao-AvHub-MES]] (INT-01).
 
 ```mermaid
 sequenceDiagram
@@ -45,12 +54,11 @@ sequenceDiagram
     API-->>MES: 200 marcacao travada
     Note over MES,API: se o importado falhar o MES reenvia a cada 10 min por 7 dias
 ```
-
-Selo ✅: rotas em `api-pcp/src/pedidos/pedidos.controller.ts:58,102` e `omie-integracao.ts:331-425` (conferidas na nota de integração).
+✅ Conferido. Se o aviso de "importado" falhar, o MES tenta de novo a cada 10 minutos por 7 dias.
 
 ## 2. Atendimento do Estoque (E1 a E4)
 
-O almoxarife atende a parcial pelo saldo (split e reserva) e decide o destino do restante.
+O almoxarife atende a parte do item pelo saldo (separa a parte atendida e reserva o lote) e decide o destino do restante: comprar ou produzir.
 
 ```mermaid
 sequenceDiagram
@@ -69,14 +77,15 @@ sequenceDiagram
         MES->>DB: restante segue o roteiro de producao
     end
 ```
-
-Selo ✅: `itens-parciais.service.ts:607-700` (`atenderEstoque`, `destinoRestante` `'ROTEIRO' | 'COMPRA'`); saldo em `estoque-operacao.controller.ts:46`. 🔴 O custo do item (média dos lotes) não é calculado: não existe `GET /itens/custo` no MES.
+✅ Conferido. 🔴 O custo do item (média dos lotes) ainda não é calculado.
 
 ## 3. Requisição de compra: ida (P3) e volta (C1 a C5)
 
-Duas origens de requisição ([[00-Fluxo-Mestre-0b]], nós P3 e C0). Este diagrama é a origem PCP; a origem Compras (C0) nasce no av-hub e a requisição não chega ao MES; o MES lê a OC dela pela referência (N14-20, 🔴 ainda não lê; ver [[Integracao-AvHub-MES]]).
+Há duas origens de requisição ([[00-Fluxo-Mestre-0b]], nós P3 e C0). Estes diagramas mostram a origem PCP. A origem Compras (`C0`) nasce no av-hub e a requisição não chega ao MES; o MES lê a OC dela pela referência (N14-20), o que 🔴 ainda não faz (ver [[Integracao-AvHub-MES]]).
 
 ### 3.1 Ida (LOG-34)
+
+O PCP cria a requisição no MES; ela vai para a caixa do Compras no av-hub. Se a rede falhar, o MES tenta de novo com espera crescente.
 
 ```mermaid
 sequenceDiagram
@@ -97,10 +106,11 @@ sequenceDiagram
     MES->>FILA: envio RECUSADO sem repetir
     Note over MES,API: rede ou 5xx reagenda com espera 1, 2, 5, 10, 30, 60 min
 ```
-
-Selo ✅: `envio-avhub.service.ts:21,98-102,129-175`; resposta do hub `requisicoes_compra.route.js:221-265`.
+✅ Conferido. Se o Compras já fez a OC, o cancelamento é recusado e não se repete.
 
 ### 3.2 Volta (LOG-35)
+
+O Compras cota, emite e aprova a OC. O MES lê esses marcos a cada 5 minutos (ou ao abrir o Compras CCP) e atualiza a etapa da compra.
 
 ```mermaid
 sequenceDiagram
@@ -126,12 +136,11 @@ sequenceDiagram
     API->>API: eventos despachada, previsao_alterada, ocorrencia
     MES->>MES: etapaCompra EM_TRANSITO e previsaoChegada
 ```
-
-Selo ✅: `eventos-avhub.service.ts:25-27,31,80,150-181`, tratamento por tipo em `requisicao-avhub.eventos.ts:234-318`. 🔴 O MES não recebe fornecedor da OC: falta o job do contrato 004/007.
+✅ Conferido. 🔴 O MES ainda não recebe o fornecedor da OC: falta o job do contrato 004/007.
 
 ## 4. Chegada com NF e Recebimento (R0 a R6)
 
-A doca registra a chegada com a NF. A conferência é contra a NF, não contra a OC (decisão do Nathan de 14/10; cruzamento com a OC entra com o job do contrato 004).
+A doca registra a chegada com a nota fiscal (NF). A conferência é contra a NF, não contra a OC (decisão do Nathan de 14/10; o cruzamento com a OC entra com o job do contrato 004). Se a contagem diverge, outra pessoa reconta; se continua divergindo, o PCP decide.
 
 ```mermaid
 sequenceDiagram
@@ -165,10 +174,11 @@ sequenceDiagram
         end
     end
 ```
-
-Selo ✅: `compras.service.ts:356-402` (chegada exige NF, parcial em `COMPRAS`), `:404-455` (liberar), `recebimento.service.ts:135,249,331`; rotas `recebimento.controller.ts:46,52,62`. 🔴 O custo da OC não é gravado no lote (R4).
+✅ Conferido. 🔴 O custo da OC não é gravado no lote (`R4`).
 
 ## 5. Inspeção de entrada e volta ao Estoque (Q1 a Q4, E5)
+
+A Qualidade aprova o lote com laudo e ele volta ao Estoque. Se reprova, abre a RNC (registro de não conformidade), a parte reprovada volta a Compras para recompra e a parte aprovada espera em quarentena.
 
 ```mermaid
 sequenceDiagram
@@ -190,10 +200,11 @@ sequenceDiagram
         Note over MES,CMP: substituicao aprovada une as parciais e libera a quarentena
     end
 ```
-
-Selo ✅: `qualidade.service.ts:83-100` (aprovar), `:102-262` (reprovar, quarentena em `:243`), `circuito-compra.ts:166-` (união e volta ao Estoque). 🟡 A recompra por RNC não tem contrato com o av-hub.
+✅ Conferido. 🟡 A recompra por RNC ainda não tem contrato com o av-hub.
 
 ## 6. Produção, inspeção de saída e Expedição (F1, Q7, X1 a X4, O1)
+
+O operador executa o roteiro. A Qualidade inspeciona a saída: se aprova, o item segue; se reprova, abre divergência e o PCP resolve ou manda retrabalho. A Expedição recebe, baixa o saldo e registra a entrega com NF e comprovante. O Omie emite a nota.
 
 ```mermaid
 sequenceDiagram
@@ -218,10 +229,11 @@ sequenceDiagram
     MES-->>EXP: entrega registrada
     Note over MES,OM: O1 O2 o Omie emite a nota. A sinalizacao do MES ao Omie nao existe
 ```
-
-Selo ✅: `itens-parciais.controller.ts:206-229` (reprovar, resolver, retrabalho), `itens-parciais.service.ts:279` e `entregas.service.ts:88` (baixa). 🟡 Q8 (aprovado volta ao Estoque) e X3 (consolidar carga) sem código. 🔴 Sinalização de faturamento (11.1).
+✅ Conferido. O Mestre manda o aprovado ao Estoque (`Q8` para `E5`), mas o código manda à Expedição; o desenho mostra as duas coisas (dono: Robert). 🟡 `Q8` (aprovado volta ao Estoque) e `X3` (consolidar carga) sem código. 🔴 Aviso do MES ao Omie para faturar (11.1).
 
 ## 7. Despacho do Estoque: hoje e decidido (E6)
+
+Hoje o saldo baixa quando a Embalagem ou a Expedição recebe a parcial. Decidido em 14/10: a baixa passa a sair de um documento de retirada gerado no Estoque.
 
 ```mermaid
 sequenceDiagram
@@ -237,5 +249,38 @@ sequenceDiagram
     REQ->>MES: receber a parcial na Embalagem ou Expedicao
     MES->>DB: consumirReservasDaParcial, Reserva CONSUMIDA e SAIDA
 ```
+📝 Decisão do Nathan de 14/10. 🔴 O documento de retirada e a tela ainda não existem. Dono: Robert ([[03-Estoque-Atendimento-e-Despacho]]).
+
+## Detalhe técnico
+
+### 1. Do pedido liberado à Destinação
+
+Fluxo 4 da integração ([[Integracao-AvHub-MES]], INT-01). Selo ✅: rotas em `api-pcp/src/pedidos/pedidos.controller.ts:58,102` e `omie-integracao.ts:331-425` (conferidas na nota de integração).
+
+### 2. Atendimento do Estoque
+
+Selo ✅: `itens-parciais.service.ts:607-700` (`atenderEstoque`, `destinoRestante` `'ROTEIRO' | 'COMPRA'`); saldo em `estoque-operacao.controller.ts:46`. 🔴 O custo do item (média dos lotes) não é calculado: não existe `GET /itens/custo` no MES.
+
+### 3.1 Ida (LOG-34)
+
+Selo ✅: `envio-avhub.service.ts:21,98-102,129-175`; resposta do hub `requisicoes_compra.route.js:221-265`.
+
+### 3.2 Volta (LOG-35)
+
+Selo ✅: `eventos-avhub.service.ts:25-27,31,80,150-181`, tratamento por tipo em `requisicao-avhub.eventos.ts:234-318`. 🔴 O MES não recebe fornecedor da OC: falta o job do contrato 004/007.
+
+### 4. Chegada com NF e Recebimento
+
+Selo ✅: `compras.service.ts:356-402` (chegada exige NF, parcial em `COMPRAS`), `:404-455` (liberar), `recebimento.service.ts:135,249,331`; rotas `recebimento.controller.ts:46,52,62`. 🔴 O custo da OC não é gravado no lote (R4).
+
+### 5. Inspeção de entrada e volta ao Estoque
+
+Selo ✅: `qualidade.service.ts:83-100` (aprovar), `:102-262` (reprovar, quarentena em `:243`), `circuito-compra.ts:166-` (união e volta ao Estoque). 🟡 A recompra por RNC não tem contrato com o av-hub.
+
+### 6. Produção, inspeção de saída e Expedição
+
+Selo ✅: `itens-parciais.controller.ts:206-229` (reprovar, resolver, retrabalho), `itens-parciais.service.ts:279` e `entregas.service.ts:88` (baixa). 🟡 Q8 (aprovado volta ao Estoque) e X3 (consolidar carga) sem código. 🔴 Sinalização de faturamento (11.1). O nó `Q8` do Mestre manda o aprovado ao Estoque (E5); o código manda à Expedição.
+
+### 7. Despacho do Estoque
 
 📝 Decisão do Nathan de 14/10. 🔴 Não existe documento de retirada nem tela; hoje a baixa é na Embalagem/Expedição (`itens-parciais.service.ts:274-282`). Dono: Robert ([[03-Estoque-Atendimento-e-Despacho]]).

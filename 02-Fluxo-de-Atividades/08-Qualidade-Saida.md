@@ -63,13 +63,13 @@ As 100 flanges chegam à inspeção de saída. O inspetor as confere.
 
 ## Detalhe técnico
 
-### Objetivo e divergência entre código e decisão
+### Como a inspeção entra no roteiro e divergência entre código e decisão
 
-Garantir que nada fabricado ou beneficiado siga adiante sem inspeção. A inspeção é **um setor do roteiro** (tipo `QUALIDADE`), por parcial, não por lote. Aprovado: o item segue para a próxima etapa. Reprovado: abre divergência e o PCP decide o novo norte ([[07-Producao-e-Roteiro]], P6).
+Nada fabricado ou beneficiado segue sem inspeção. A inspeção é **um setor do roteiro** (tipo `QUALIDADE`), por parcial, não por lote. Reprovado: o PCP decide o novo norte (P6).
 
 **Divergência entre código e decisão (🔴).** A decisão do Nathan de 14/10 é que o "sim" do Q8 leva o item ao **Estoque** (`E5`: vira lote e saldo, sai pelo documento de retirada). O código leva o "sim" à **Expedição**: não há ação de aprovar; o inspetor usa `mover` e a parcial cai na próxima etapa do roteiro, que é de tipo `EXPEDICAO` (`itens-parciais.service.ts:426-435`, regra de ordem em `pedidos.service.ts:520-525`).
 
-### Quem atua (detalhe)
+### Quem atua (onde)
 
 | Quem | Papel | Onde |
 |---|---|---|

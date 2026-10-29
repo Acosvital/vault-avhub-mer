@@ -1,7 +1,7 @@
 ---
 tags: [sistemas, av-hub, api-acos-vital, express, sequelize, compras, torre-de-fluxo, custo]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Gustavo (DBA)
 fontes: [api-acos-vital f322dcd (develop), Dump Avhub (Esqueleto).sql de 14/10, v1 AV-Hub-API-Estado-Atual, AV-Hub-RBAC, Integracao-AvHub-MES-Especificacao-F1]
@@ -9,9 +9,49 @@ fontes: [api-acos-vital f322dcd (develop), Dump Avhub (Esqueleto).sql de 14/10, 
 
 # AV-Hub API (`api-acos-vital`)
 
+**Em uma frase:** é a API do av-hub. Guarda os dados de vendas e compras, aplica as permissões e conversa com o MES e o Omie. Dono: Gustavo (DBA, quem cuida do banco); o front é do Nathan ([[AV-Hub-Front]]).
+
+## Quem usa e para quê
+
+- **HUB (as telas):** lê e grava pedidos, requisições, ordens de compra e permissões.
+- **MES:** lê os pedidos liberados, avisa que importou, envia a requisição de compra e lê o andamento dela ([[MES-Backend]]).
+- **Pipeline do Omie:** pega a fila de OCs (ordens de compra) a enviar e devolve o resultado ([[Pipeline-Omie]]).
+- **API Comercial:** consulta as permissões do usuário ([[API-Comercial]]).
+
+## Como se encaixa no fluxo
+
+- **Vendas (`V1` a `V3`):** guarda a caixa de liberação do vendedor. O MES só enxerga o que está liberado.
+- **Compras (`C0` a `C5`):** recebe a requisição e controla cotação, OC, aprovação, envio ao Omie e follow-up do CCP.
+- **Etapa dos itens:** a cada 90 segundos lê no MES onde cada item está e mostra ao vendedor.
+- **Torre de Fluxo e custo por item:** o código está pronto aqui, mas o MES ainda não envia os dados.
+
+## Regras que valem
+
+- OC até R$ 30 mil nasce aprovada. Acima disso, só o Gerente de Compras aprova (N14-21). A Diretoria não aprova.
+- Só comprador vinculado à unidade emite OC.
+- Pedido já importado pelo MES não aceita mais mudança na marcação (erro 409).
+- Cancelar requisição exige motivo de 3 a 500 caracteres.
+- Quem age vem sempre do token de login, nunca do corpo do pedido.
+- Rota sem mapa de permissão é negada por padrão.
+- Marco de compra só nasce para requisição que veio do MES. A requisição criada no Compras não chega ao MES.
+- Jobs novos não guardam regra em variável de ambiente. Só o job de status por item ainda faz isso.
+
+## O que já existe e o que falta
+
+- ✅ Liberação, requisições, OC com aprovação, follow-up e status por item.
+- ✅ Torre de Fluxo e custo por item, só no código. 🔴 O MES não publica os dados e o HUB não tem a tela.
+- 🔴 O MES não consome a referência da OC (N14-20, BL-049 e BL-050).
+- 🔴 O banco de 14/10 está sem a migration 047b: a rota de custo responde erro 500.
+- 🟡 O limite de R$ 30 mil é provisório. Endurece depois da conversa com Compras.
+- ✅ Defeitos conhecidos: o filtro `alterado_desde` não roda em produtos e parceiros; `pessoa_vendedor` não tem tabela.
+- ❓ A rota de favoritos já falhou em setembro; não reproduzido em 14/10.
+- ❓ Valor do início da liberação em produção e quais perfis abrem a Torre.
+
+## Detalhe técnico
+
 API do av-hub: Node (ESM) + Express 4 + Sequelize 6 + PostgreSQL (`pg`), sessão em `connect-pg-simple`, docs Scalar em `/docs` atrás de Azure AD ✅ `api-acos-vital/package.json`, `src/app.js`. Dono: Gustavo (DBA faz banco e API); o front é do Nathan ([[AV-Hub-Front]]). Banco: [[Banco-AvHub]]. Schemas: [[Schemas-Postgres]]. Selos: [[Regras-do-Vault]].
 
-## Como a requisição é tratada (ordem do `app.js`)
+### Como a requisição é tratada (ordem do `app.js`)
 
 1. `express.json` (limite `JSON_BODY_LIMIT`, padrão 10 mb), cache HTTP, CORS (`CORS_ORIGINS`, padrão `*`), rate limit global de 10 000 req/min por chave e 20 logins/min por IP ✅ `app.js:46-96` (`express.json` `:46`, rate limit `:74-92`).
 2. Sessão no Postgres (`auth.sessions`) só em `/auth`, `/docs`, `/api-docs-json` ✅ `app.js:94-122`.
@@ -22,13 +62,13 @@ API do av-hub: Node (ESM) + Express 4 + Sequelize 6 + PostgreSQL (`pg`), sessão
 
 Autenticação e permissão em detalhe: [[RBAC-e-Permissoes]] e [[Chaves-e-Autenticacao]].
 
-## Organização do código
+### Organização do código
 
 `src/schemas/<schema>/{tables,views,aggregates,functions}/<entidade>/<entidade>.{model,route}.js` + `.swagger.json`; `src/schemas/<schema>/index.js` registra models e a lista `rotas` (caminho, router, middlewares); `src/schemas/index.js` junta tudo ✅. Schemas com rotas: `auth`, `core`, `core_aprovacao_de_vagas`, `core_mapas`, `core_organograma`, `core_comissionamento`, `core_compras`, `core_fluxo`, `core_vendas_faturamento`. `core_fluxo` não tem model Sequelize: usa SQL direto sobre funções do banco ✅ `core_fluxo/index.js:1-6`.
 
-## Rotas do fluxo de Atividades
+### Rotas do fluxo de Atividades
 
-### Liberação do pedido (LOG-26) — V1 a V3, P1, P2
+#### Liberação do pedido (LOG-26) — V1 a V3, P1, P2
 
 | Rota | Quem chama | O que faz | Código |
 |---|---|---|---|
@@ -40,7 +80,7 @@ Autenticação e permissão em detalhe: [[RBAC-e-Permissoes]] e [[Chaves-e-Auten
 
 Trava no banco: `trg_pedidos_vendas_liberacao_regras` e `_historico` (função no dump `:7751`; tabela `:18285`). A caixa só mostra pedidos a partir de `parametros_vendas.data_inicio_liberacao` ✅ tabela no dump `:18031`; o valor em produção ❓ Gustavo.
 
-### Requisição de compra (LOG-34, LOG-35) — P3, C0, C1
+#### Requisição de compra (LOG-34, LOG-35) — P3, C0, C1
 
 | Rota | Quem chama | O que faz | Código |
 |---|---|---|---|
@@ -56,7 +96,7 @@ Estados da requisição no av-hub: `aberta`, `em_cotacao`, `atendida`, `cancelad
 
 **Marcos (14 tipos)** gravados por trigger em `requisicoes_compra_eventos`, só quando a requisição tem `id_origem`, ou seja, veio do MES ✅ `fn_req_evento` (dump `:8580`): `requisicao_recebida`, `em_cotacao`, `oc_criada`, `oc_removida`, `oc_enviada_aprovacao`, `oc_aprovada`, `oc_no_omie`, `fornecedor_confirmou`, `previsao_alterada`, `despachada`, `ocorrencia`, `oc_cancelada`, `requisicao_cancelada`, `requisicao_reaberta` (CHECK `requisicoes_compra_eventos_tipo_check`). Requisição criada pelo Compras não gera marco: **não chega ao MES** 🔴.
 
-### Ordem de compra e aprovação — C2 a C4
+#### Ordem de compra e aprovação — C2 a C4
 
 | Rota | Faz | Código |
 |---|---|---|
@@ -83,14 +123,14 @@ Estados da requisição no av-hub: `aberta`, `em_cotacao`, `atendida`, `cancelad
 
 Isto **é** a regra decidida em 14/10 (N14-21): a OC que excede R$ 30 mil é aprovada pelo Gerente de Compras; até R$ 30 mil os compradores ficam livres (o banco aprova sozinho); a Diretoria não aprova ✅ (`ordens_compra.route.js:1230-1240`; função `fn_ordens_compra_recalcular` em `docs/ENVIAR - contrato-compras-backend.md:649-694` do HUB). 🟡 A regra é provisória: endurece depois da conversa com Compras. Ver [[Contradicoes-Resolvidas]] CR-13.
 
-### Status por item (API-005/006) — todos os nós
+#### Status por item (API-005/006) — todos os nós
 
 | Rota | Faz | Código |
 |---|---|---|
 | `GET /itens_pedido_status?codigo_empresa=&pedido_venda=` | etapa dos itens do pedido, com escopo de vendedor | ✅ `tables/itens_pedido_status/itens_pedido_status.route.js:54` |
 | Job | a cada `MES_STATUS_INTERVALO_SEG` (padrão 90 s) por unidade ativa: `GET {MES_API_URL}/itens/status?alterado_desde=&codigo_empresa=&incluir_deletados=true&limit=1000`; grava com `fn_itens_pedido_status_gravar`; trava `avhub.mes_status_itens`; corte inicial `MES_STATUS_CORTE_INICIAL_DIAS` (30) | ✅ `itens_pedido_status.job.js:3-60` |
 
-### Torre de Fluxo (LOG-46) — os 9 setores
+#### Torre de Fluxo (LOG-46) — os 9 setores
 
 | Rota | Permissão (migration 046/046b em `auth.rotas_telas`) | Faz | Código |
 |---|---|---|---|
@@ -104,7 +144,7 @@ Isto **é** a regra decidida em 14/10 (N14-21): a OC que excede R$ 30 mil é apr
 - **Escopo:** por unidade (`auth.usuarios_unidades`); fora do escopo, 403 na lista e 404 no item; MES fora do ar devolve 200 com `mes_indisponivel = true` ✅ `:16-33`.
 - **Estado hoje:** o MES **não publica** `/fluxo/*` 🔴 (Robert); o job está dando 404. O HUB não tem a tela 🔴 (Nathan). A 046b concede as duas telas só ao perfil de testes do time de TI ✅ comentário `:22-25`, então nenhum perfil de negócio abre a Torre; a concessão real ❓ Gustavo.
 
-### Custo real por item (LOG-47 §1, API-008) — E3, R4
+#### Custo real por item (LOG-47 §1, API-008) — E3, R4
 
 | Rota | Permissão | Faz | Código |
 |---|---|---|---|
@@ -115,7 +155,7 @@ Isto **é** a regra decidida em 14/10 (N14-21): a OC que excede R$ 30 mil é apr
 - O MES **não** tem `GET /itens/custo` 🔴 (o job recebe 404). O custo do lote existe no MES ([[Modelo-Estoque-e-Custo-do-Lote]]).
 - Etapas 2 (simulador pré-preenchido) e 3 (comissão por NF) do LOG-47 são Ciclo 2 e não leem a tabela ✅ comentário do job.
 
-## Funções e triggers que carregam a regra
+### Funções e triggers que carregam a regra
 
 | Objeto (schema `core_vendas_faturamento`) | Regra | Dump |
 |---|---|---|
@@ -133,11 +173,11 @@ Isto **é** a regra decidida em 14/10 (N14-21): a OC que excede R$ 30 mil é apr
 | `core_fluxo.fn_feed_aplicar`, `fn_torre_setores`, `fn_torre_itens`, `fn_evento_imutavel` | projeção da Torre | `:1914` |
 | `auth.fn_autorizar`, `fn_me_permissoes`, `fn_escopo_vendedores_usuario`, `fn_validar_chave_servico` | permissão por rota, `/me/permissoes`, escopo, chaves de serviço | `:357` |
 
-## Outros módulos (resumo; detalhe nos anexos)
+### Outros módulos (resumo; detalhe nos anexos)
 
 Vendas e faturamento (`/pedidos_venda`, `/vendas_*`, `/faturamento_*`, `/dashboard*`, `/ranking_*`, `/ritmo_*`, `/nf_classified`), Comissão (`core_comissionamento`), Vagas (`core_aprovacao_de_vagas`), Organograma, Orçamento (`/orcamento/*` sobre `core_compras.orc_*`), cadastros `core.*` (parceiros, produtos, unidades, funcionários), Acompanhamento de Clientes e grupos de clientes (`/acompanhamento_clientes`, `/grupos_clientes`, contrato 48). Ficam em [[Comissoes]], [[Dashboards]], [[Orcamento]], [[RH-Vagas-Funcionarios]], [[Acompanhamento-Clientes]].
 
-## Variáveis de ambiente (conferidas)
+### Variáveis de ambiente (conferidas)
 
 | Variável | Uso | Código |
 |---|---|---|
@@ -153,7 +193,7 @@ Vendas e faturamento (`/pedidos_venda`, `/vendas_*`, `/faturamento_*`, `/dashboa
 
 Os jobs de Torre e custo seguem a regra do Nathan: nada de regra em ambiente, só endereço e segredo ✅ cabeçalhos `item_estado_projetado.job.js:41-46`, `itens_pedido_custo.job.js:36-44`.
 
-## Defeitos conhecidos da API
+### Defeitos conhecidos da API
 
 Resumo; lista com severidade em [[Bugs-Conhecidos]].
 

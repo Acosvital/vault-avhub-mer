@@ -24,6 +24,11 @@ fontes: ["api-acos-vital/src/schemas/core_aprovacao_de_vagas/tables/vaga/vaga.ro
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Moveu para o banco a fila de solicitações de vagas e a decisão de aprovar ou recusar, incluindo quem pode decidir.
+> **Quem é afetado:** O RH e a diretoria decidem pela rota de decisão; editar uma vaga já aprovada a devolve para "pendente".
+> **Situação:** ✅ Entregue e conferido na `api-test` em 01/10/2026. 🟡 Falta confirmar em produção que a API está na versão com a trava sempre ligada.
+
 
 > **✅ Situação em 01/10/2026 — ENTREGUE (conferido na `api-test`).**
 >

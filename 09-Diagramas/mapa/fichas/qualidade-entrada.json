@@ -1,0 +1,195 @@
+{
+  "id": "qualidade-entrada",
+  "nome": "Qualidade (entrada)",
+  "fase": "Abastecer",
+  "fraseMapa": "Libera ou reprova o lote comprado",
+  "titulo": "Qualidade de entrada: do lote em quarentena ao estoque",
+  "resumo": "A Qualidade recebe o lote que chegou do fornecedor e ainda está em quarentena. Ela inspeciona com laudo e decide: libera para o Estoque ou reprova, no todo ou em parte, devolvendo a parte reprovada para Compras.",
+  "recebeDe": [
+    "Recebimento: lote em quarentena, aguardando inspeção",
+    "Compras: a substituição do material reprovado, que chega como nova entrega com nota"
+  ],
+  "entregaA": [
+    "Estoque: lote liberado, que passa a contar no saldo disponível",
+    "Compras: a parte reprovada, para alinhar devolução e substituição com o fornecedor"
+  ],
+  "atuam": [
+    {
+      "quem": "Inspetor da Qualidade",
+      "papel": "Anexa o laudo e aprova ou reprova o lote, informando a quantidade reprovada."
+    },
+    {
+      "quem": "Almoxarife / Recebimento",
+      "papel": "Entrega o lote em quarentena e depois recebe a parcial de volta no Estoque."
+    },
+    {
+      "quem": "Compras (comprador)",
+      "papel": "Recebe de volta a parte reprovada e alinha com o fornecedor a devolução e a substituição."
+    },
+    {
+      "quem": "PCP",
+      "papel": "Só acompanha a parcial andando; não decide nada nesta etapa."
+    }
+  ],
+  "estados": [
+    "PENDENTE",
+    "LIBERADO",
+    "REPROVADO",
+    "QUARENTENA"
+  ],
+  "passos": [
+    {
+      "id": "Q1",
+      "t": "O lote espera a inspeção",
+      "quem": "Inspetor da Qualidade",
+      "onde": "Inspeção de entrada (/qualidade/inspecao-entrada)",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "PENDENTE",
+      "o": "O lote recém-recebido aparece na fila da Qualidade, do mais antigo para o mais novo. Enquanto não for inspecionado, ele não conta no saldo disponível.",
+      "ex": "O lote de aço carbono comprado para as 100 flanges aparece na fila e fica em quarentena até alguém decidir."
+    },
+    {
+      "id": "Q2",
+      "t": "Decisão: aprova o lote?",
+      "quem": "Inspetor da Qualidade",
+      "onde": "Inspeção de entrada (/qualidade/inspecao-entrada)",
+      "st": "part",
+      "stl": "Tela pronta; trava ao setor falta",
+      "estado": "",
+      "o": "O inspetor abre a decisão do lote. Para aprovar é preciso anexar o laudo. Para reprovar são exigidos laudo, motivo e evidência, e a quantidade reprovada pode ser parcial. Decidido em 29/10 (N16-124 e N16-125): só quem é da Qualidade decide o lote, e não existe concessão para aceitar lote fora da especificação. Ou libera ou reprova.",
+      "ex": "O inspetor confere o material das flanges e decide se libera tudo ou se reprova uma parte."
+    },
+    {
+      "id": "Q2 · E5",
+      "t": "Aprovado: entra no Estoque",
+      "quem": "Sistema",
+      "onde": "Sistema",
+      "st": "ok",
+      "stl": "Feito no código",
+      "estado": "LIBERADO",
+      "o": "O lote vira liberado. A parcial que esperava na Qualidade é unida às demais do mesmo item e segue para o Estoque. Material aprovado nunca vai direto à Expedição.",
+      "ex": "Se o aço das flanges for aprovado, o lote passa a contar no saldo e o almoxarife pode atendê-lo pelo Estoque."
+    },
+    {
+      "id": "Q3",
+      "t": "Reprovado: RNC e divisão do lote",
+      "quem": "Sistema",
+      "onde": "Sistema",
+      "st": "part",
+      "stl": "Abre a RNC, sem fechamento",
+      "estado": "REPROVADO",
+      "o": "Numa reprovação parcial, a quantidade reprovada vira um lote filho, separado do lote original. O sistema abre a RNC e sinaliza que a nota de devolução está pendente. A parte reprovada volta para Compras. Lote totalmente reprovado: volta ao fornecedor e abre a recompra (decidido em 29/10, N16-126). O Compras será avisado no av-hub (N16-127), o que ainda precisa de contrato.",
+      "ex": "Se parte do aço das flanges for reprovada, só essa quantidade sai do lote e volta a Compras para devolução e substituição."
+    },
+    {
+      "id": "Q4",
+      "t": "Parte aprovada fica em quarentena",
+      "quem": "Sistema",
+      "onde": "Sistema",
+      "st": "ok",
+      "stl": "Feito no código",
+      "estado": "QUARENTENA",
+      "o": "Quando ainda há parcial esperando, a parte aprovada fica bloqueada em quarentena até a substituição chegar e ser aprovada. Aprovada a substituição, as duas partes se unem e seguem ao Estoque.",
+      "ex": "O aço aprovado do pedido das flanges espera em quarentena. Quando a reposição chegar e passar na inspeção, tudo segue junto para o Estoque."
+    }
+  ],
+  "outroCaminho": {
+    "titulo": "E se o lote for reprovado?",
+    "texto": "A parte reprovada volta para Compras, que alinha com o fornecedor a devolução e a substituição. A substituição chega como nova entrega com nota, passa de novo pela inspeção e, aprovada, une-se à parte que ficou em quarentena.",
+    "etapas": [
+      "Reprovação com RNC",
+      "Compras alinha devolução e substituição",
+      "Substituição passa pela inspeção e segue ao Estoque"
+    ],
+    "nota": "Fechar a RNC e registrar a nota de devolução ainda é manual, fora do sistema. O Omie é quem emite a nota."
+  },
+  "regras": [
+    {
+      "t": "Inspeção por lote",
+      "d": "A inspeção de entrada vale para o lote, nunca para a parcial."
+    },
+    {
+      "t": "Laudo obrigatório",
+      "d": "Aprovar exige laudo; reprovar exige laudo, motivo e evidência."
+    },
+    {
+      "t": "Parte aprovada espera",
+      "d": "Na reprovação parcial, a parte aprovada fica em quarentena até a substituição ser aprovada."
+    },
+    {
+      "t": "Aprovado vai ao Estoque",
+      "d": "Material aprovado entra no saldo do Estoque e nunca segue direto para a Expedição."
+    },
+    {
+      "t": "Nota de devolução é do Omie",
+      "d": "O sistema só sinaliza a devolução pendente; quem emite a nota é o Omie."
+    },
+    {
+      "t": "Reprovação total tem saída",
+      "d": "Mesmo reprovado por inteiro, o material volta para Compras e não fica parado sem dono."
+    },
+    {
+      "t": "Carga inicial sem inspeção",
+      "d": "O lote da carga inicial já nasce liberado, porque a dupla conferência faz o papel do laudo."
+    },
+    {
+      "t": "Sem concessão",
+      "d": "Lote fora da especificação é liberado ou reprovado; não há aceite condicionado (decidido em 29/10)."
+    }
+  ],
+  "telas": [
+    {
+      "nome": "Inspeção de entrada",
+      "rota": "/qualidade/inspecao-entrada",
+      "quem": "Inspetor da Qualidade",
+      "st": "ok"
+    },
+    {
+      "nome": "Qualidade · Entrada (fila do setor, só leitura)",
+      "rota": "/movimentacoes/[setorId]",
+      "quem": "Qualidade, PCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Painel do Estoque, alerta de RNC pendentes",
+      "rota": "/estoque-operacao/painel-estoque",
+      "quem": "Almoxarife",
+      "st": "part"
+    }
+  ],
+  "contratos": [
+    {
+      "id": "LOG-35",
+      "titulo": "Compras: marcos da requisição para o MES",
+      "nos": "C1 · C3 · C4 · C5 · R0 · P3"
+    },
+    {
+      "id": "LOG-34",
+      "titulo": "Requisições: o MES empurra para o av-hub",
+      "nos": "P3 · E4"
+    },
+    {
+      "id": "API-008",
+      "titulo": "Custo do lote no MES",
+      "nos": "R4 · E3 · E5"
+    }
+  ],
+  "cartao": {
+    "id": "API-008",
+    "titulo": "Custo do lote no MES",
+    "serve": "Guarda o custo de cada lote no MES. Na divisão por reprovação, o lote filho herda o custo do lote original.",
+    "quem": "Desenvolvimento do MES e do av-hub (API).",
+    "nos": "R4 · E3 · E5",
+    "situacao": "Parcial",
+    "st": "part",
+    "muda": "Para quem desenvolve: faltam o custo da compra no Recebimento, o custo gravado na saída do estoque e a consulta de custo por item. Quem usa a Qualidade não percebe mudança.",
+    "arquivo": "06-Contratos/Ativos, nota API-008"
+  },
+  "palavrasFonte": 2230,
+  "duvidas": [
+    "A nota não confirma o nome do perfil da Qualidade no ambiente real.",
+    "Comportamento indefinido quando a substituição chega antes de o lote reprovado ser baixado fisicamente.",
+    "O aviso ao Compras no av-hub sobre a recompra por RNC está decidido (29/10), mas não existe contrato entre o MES e o hub para isso."
+  ]
+}

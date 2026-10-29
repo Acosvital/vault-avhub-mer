@@ -27,6 +27,11 @@ criado_original: 2026-10-22
 >
 > Selos em [[Regras-do-Vault]].
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** A Carteira do Dashboard do PCP (Planejamento e Controle da Produção) passou a respeitar o período escolhido e ganhou a previsão de faturamento mês a mês.
+> **Quem é afetado:** O PCP e quem acompanha faturamento: os números da carteira agora batem com a lista, e dá para ver quanto há a faturar em cada mês.
+> **Situação:** ✅ Aplicado em produção em 22/10/2026, com aceite conferido (totais da carteira, da lista e por vendedor batem). Banco, API e front prontos.
+
 ## Por quê
 
 O Dashboard PCP mostra o mês no topo e uma carteira sem mês embaixo, e os números não conversam (875 contra 720). O diligenciador também precisa responder "quanto vou faturar este mês e nos próximos?", que a carteira de hoje não separa: tudo que tem saldo aberto está num número só, sem dizer **quando** deve ser faturado. Este contrato resolve as duas coisas com a mesma base: a carteira (saldo das parcelas abertas) **recortada pelo período do seletor** e **aberta por mês de previsão**.

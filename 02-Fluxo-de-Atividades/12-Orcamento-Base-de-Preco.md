@@ -69,23 +69,15 @@ Depois, Compras emite a OC dos 100 flanges. O preço pago passa a ser a última 
 
 ## Detalhe técnico
 
-Tudo abaixo é o conteúdo completo da nota original, sem cortes.
+### Ligações
 
-### Título original e ligações
-
-Raia Orçamento: base de preço de compra, página do produto, pedido de custo (B1 a B4).
-
-**Esta nota substitui o anexo [[Orcamento]]**, arquivado em 26/10/2026. O que foi do antigo está na última seção. Nós do [[00-Fluxo-Mestre-0b]]: `B1` a `B4`. Ligações: `V0.2` (o vendedor preenche o custo, consulta ou pede cotação) e `V0.3` em [[11-Proposta-e-Pedido-de-Venda]]; `C6` a `C8` em [[04-Circuito-de-Compra]]. Selos em [[Regras-do-Vault]].
+O que foi do antigo anexo [[Orcamento]] está na última seção. Nós do [[00-Fluxo-Mestre-0b]]: `B1` a `B4`. Ligações: `V0.2` (o vendedor preenche o custo, consulta ou pede cotação) e `V0.3` em [[11-Proposta-e-Pedido-de-Venda]]; `C6` a `C8` em [[04-Circuito-de-Compra]]. Selos em [[Regras-do-Vault]].
 
 ### Objetivo
 
-O **Orçamento é o setor orçamentário** (N16-07): vai atrás de fornecedores e mantém a **base de precificação**, que é o **preço de compra do produto, sempre com histórico**. O setor é **novo e ainda está em formação**; uma das pessoas é o **Moisés** (N16-104). O sistema funciona mesmo sem orçamentista disponível (N16-59), e o perfil "orçamentista" deve existir.
+O **Orçamento é o setor orçamentário** (N16-07): vai atrás de fornecedores e mantém a **base de precificação**. O setor é **novo e ainda está em formação**; uma das pessoas é o **Moisés** (N16-104). O sistema funciona sem orçamentista disponível (N16-59) e o perfil "orçamentista" deve existir.
 
-**O vendedor não é o dono do dado de custo** (N16-54). Na proposta, ele preenche a parte de orçamento e compra com o que conseguiu (telefone, e-mail). Quando não tem o dado, ele **consulta a página do produto** (histórico, média) ou **pede uma cotação** ao orçamentista. A base tem **duas fontes** (N16-41): as **ordens de compra efetivadas** (o custo da última compra, item a item) e o **setor orçamentário**, que também atualiza os valores à mão; **vale sempre o valor mais atualizado** (N16-52).
-
-A **matriz de preços** é por produto × fornecedor × unidade × vigência (N16-32); quantidade, moeda e condição de compra ficam para depois.
-
-O **pedido de custo** não tem prazo fixo: é preciso responder o mais rápido possível, mas o sistema **cronometra o tempo** (N16-58). O vendedor nunca fica bloqueado: segue sozinho.
+**O vendedor não é o dono do dado de custo** (N16-54). Sem o dado, ele **consulta a página do produto** ou **pede uma cotação**. A base tem **duas fontes** (N16-41): as **ordens de compra efetivadas** (o custo da última compra, item a item) e o **setor orçamentário**, que também atualiza os valores à mão; **vale sempre o valor mais atualizado** (N16-52). A **matriz de preços** é por produto × fornecedor × unidade × vigência (N16-32); quantidade, moeda e condição de compra ficam para depois. O **pedido de custo** não tem prazo fixo e o sistema **cronometra o tempo** (N16-58); o vendedor nunca fica bloqueado.
 
 Os nós (numeração 🟡: o desenho do Nathan fixou só o intervalo `B1` a `B4`; o significado de cada um é proposta):
 

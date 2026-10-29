@@ -31,6 +31,11 @@ criado_original: 2026-10-19
 >
 > Selos em [[Regras-do-Vault]].
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Moveu para o banco e a API o cálculo de produtos que provavelmente são duplicados, em modo só leitura, por unidade, mostrando uso em venda, compra e estoque.
+> **Quem é afetado:** Quem cuida do cadastro de produtos usa a tela nova de duplicatas; Gustavo (DBA) fez rota e banco, Nathan fez a tela.
+> **Situação:** ✅ Rota e tela entregues em 21/10/2026, testadas na API real. 🟡 Falta remover os dados de exemplo e melhorar a nota. 📝 Curadoria dos grupos segue em modelagem, sem contrato.
+
 ## Por quê
 
 A tela hoje perde duplicatas com nome escrito de outro jeito, com família errada ou com código parecido, não diz **quão** provável é cada uma e não mostra o uso do produto, então quem decide não sabe qual cadastro manter nem se vale a pena mexer. Este contrato entrega: uma rota única que devolve grupos já calculados, com nota, motivos e uso; e a tela nova que os mostra. Quem **resolve** a duplicata continua sendo o Omie.

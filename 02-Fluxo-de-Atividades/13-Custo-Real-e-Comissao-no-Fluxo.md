@@ -79,7 +79,7 @@ Um pedido com 50 flanges (item A). Na proposta, o vendedor cotou R$ 100 por flan
 
 ## Detalhe técnico
 
-**Só o fluxo.** Esta nota mostra por onde o custo real e a comissão atravessam o fluxo mestre. Os **modelos de dados** estão nos contratos: o custo realizado por item em `core_vendas_faturamento` e a comissão nova em `core_comissao` (testado em Postgres 18 com as respostas da Controladoria). O modelo está explicado em [[03-Modelo-Novo-core_comissao]].
+O custo realizado por item fica em `core_vendas_faturamento` e a comissão nova em `core_comissao` (testado em Postgres 18 com as respostas da Controladoria); o modelo está explicado em [[03-Modelo-Novo-core_comissao]].
 
 ### Os nós K1 a K6
 

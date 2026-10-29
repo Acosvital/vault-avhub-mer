@@ -39,7 +39,7 @@ A Expedição avisa que as 100 flanges do Cliente Exemplo S.A. estão prontas. O
 |---|---|
 | Faturamento (Omie) | Emite a nota de saída |
 | Expedição ou Logística | Avisa que a carga está pronta |
-| Pipeline do Omie | Traz pedidos e notas para o banco do av-hub |
+| Pipeline do Omie (`omie-elt-pipeline`) | Traz pedidos e notas para o banco do av-hub |
 | Vendedor | Acompanha o pedido faturado |
 | Gustavo e Robert | Gustavo cuida do banco e do pipeline; Robert, da futura sinalização no MES |
 
@@ -64,7 +64,7 @@ A Expedição avisa que as 100 flanges do Cliente Exemplo S.A. estão prontas. O
 
 ### Objetivo
 
-Fechar o ciclo: da carga pronta até a nota emitida e o item "faturado" no pedido de venda. **O sistema nunca emite nem edita nota fiscal.** O Omie é o sistema fiscal e financeiro (decisão #30 do registro de 07/10). O MES só deveria **sinalizar** que a carga está pronta (11.1); o retorno da nota chega pelo pipeline ELT, que já funciona.
+O Omie é o sistema fiscal e financeiro (decisão #30 do registro de 07/10). O MES só deveria **sinalizar** que a carga está pronta (11.1); o retorno da nota chega pelo pipeline ELT, que já funciona.
 
 ### Regras decididas
 
@@ -126,16 +126,16 @@ Os endpoints do av-hub que expõem pedidos e notas pertencem ao módulo de venda
 
 #### O1 e O2 (lado Omie) ✅
 
-1. O faturista emite a NF no Omie.
-2. O `ListarPedidos` a cada 3 minutos (janela de hoje) traz o pedido com `faturado = S`; a trigger recalcula `situacao = 'Faturado'`.
-3. O `ListarNF` traz a nota e o `afterUpsert` carimba `codigo_nf_omie` e `numero_nf` em cada item de `produto_vendas`. O item "dá baixa" no pedido por esse vínculo.
-4. O vendedor vê o pedido em Pedidos e Notas.
+Mecanismo dos passos 2 a 5 do resumo do topo:
+
+- `ListarPedidos` a cada 3 minutos (janela de hoje) traz o pedido com `faturado = S`; a trigger recalcula `situacao = 'Faturado'`.
+- `ListarNF` traz a nota e o `afterUpsert` carimba `codigo_nf_omie` e `numero_nf` em cada item de `produto_vendas`. O item "dá baixa" no pedido por esse vínculo.
 
 Limitação conhecida: o Omie filtra por data de inclusão, então o pipeline revarre janelas fixas em vez de usar watermark (`pedidosVendas.ts`, comentário de abertura). Itens legados com `codigo_item_omie` nulo podem ser pulados no vínculo ([[Riscos]]).
 
 #### Sinalização do MES ao Omie (11.1) 🔴
 
-Não existe no `api-pcp` nem na API do av-hub: nenhuma rota, tabela ou fila que sinalize "carga pronta, emitir NF". Hoje a Expedição avisa o faturista fora do sistema. O MES não sabe se o pedido foi faturado, e o pedido pode ser faturado antes da entrega no MES.
+Não existe no `api-pcp` nem na API do av-hub: nenhuma rota, tabela ou fila que sinalize "carga pronta, emitir NF".
 
 O desenho do v1 (11.1): lista de cargas prontas, botão que sinaliza, acompanhamento do retorno (número e chave) pela sincronização. Como o MES nunca fala com o Omie direto, a sinalização passaria pelo av-hub, que já tem o caminho de escrita ao Omie (envio de OC pelo pipeline).
 
@@ -153,8 +153,8 @@ O desenho do v1 (11.1): lista de cargas prontas, botão que sinaliza, acompanham
 
 ### Pendências
 
-- Nathan e Faturamento: quem sinaliza (Expedição ou Logística) e qual o gatilho (carga fechada ou item `CONCLUIDO`)? **Decidido em 29/10/2026 (N16-132): a Logística, ao fechar a carga.**
-- Nathan: sinalização por carga ou por pedido? Faturamento parcial gera um pedido filho (`sequencial`) no Omie? **Respondido: por carga fechada (N16-132); o sequencial não é outro pedido, é um agrupamento (N16-92 a N16-94). Faturado antes da entrega: só aviso (N16-133).**
+- Nathan e Faturamento: quem sinaliza (Expedição ou Logística) e qual o gatilho (carga fechada ou item `CONCLUIDO`)? **Decidido em 29/10/2026 (N16-132), ver quadro no topo.**
+- Nathan: sinalização por carga ou por pedido? Faturamento parcial gera um pedido filho (`sequencial`) no Omie? **Respondido (N16-132, N16-92 a N16-94, N16-133), ver quadro no topo: por carga fechada.**
 - Gustavo: o pipeline tem latência de minutos; o MES precisa do retorno em quanto tempo?
 - Nathan: devolução de cliente (`Devolvido`, `Dev. Parcial`) afeta saldo do Estoque? Fluxo decidido para o Estoque na Fase D, sem código.
 

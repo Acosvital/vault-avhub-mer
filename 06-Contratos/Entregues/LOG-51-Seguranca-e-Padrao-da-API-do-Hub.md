@@ -27,6 +27,11 @@ criado_original: 2026-10-15
 >
 > Divisão de trabalho ([[Regras-do-Vault]]): **banco e API são do Gustavo**; o que o front/BFF precisa mudar para destravar cada item está na seção 7 e é do Nathan. O S1 (troca da chave de serviço) vale **nos dois lados**, então há uma parte do Robert (MES), na seção 7b.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Reúne a auditoria de segurança da `api-acos-vital` em 27 itens (S1 a S27). O risco central é uma chave de serviço de administrador compartilhada entre Hub, MES (sistema de chão de fábrica) e pipeline.
+> **Quem é afetado:** Gustavo (API e banco), Nathan (front) e Robert (MES).
+> **Situação:** 🔴 Nenhum item da API está feito. 🟡 No front (seção 7), os itens H1 a H7 foram feitos e testados em homologação em 28/10. ❓ Nada foi executado na auditoria.
+
 ## 1. Por que este contrato existe
 
 O av-hub vai ser o ERP único da Aços Vital, e a `api-acos-vital` é a única porta de entrada para o banco. A auditoria de 15/10 achou que a base é boa (SQL parametrizado, JWT com algoritmo fixo e revogação por versão, bcrypt cost 12 feito no banco, rota sem mapa de permissão dando 403, dinheiro em `numeric`, todas as 124 tabelas com chave primária), mas o **modelo de confiança gira em volta de uma chave de serviço admin** que dispensa permissão, escopo e identidade, e que o BFF, o MES e o pipeline compartilham. Um vazamento dessa chave é controle total da API. O contrato junta o que falta para fechar isso e para a API seguir o padrão de um sistema de gestão: autenticação forte, menor privilégio, auditoria com valor anterior, erro sem vazamento, teste e CI.

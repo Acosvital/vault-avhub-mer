@@ -16,6 +16,12 @@ criado_original: 2026-10-13
 
 > **Onde atua:** av-hub: banco, API, front
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define a tela de Acompanhamento de Clientes e os grupos de empresa, que juntam CNPJs do mesmo cliente para que um CNPJ sem compra não seja marcado como inativo se outro do grupo comprou.
+> **Quem é afetado:** Vendedores veem só os próprios clientes. Gerência e admin veem tudo.
+> **Situação:** Parcial. Banco e API foram entregues pelo DBA (Gustavo) e conferidos na `api-test` em 15/10. Produção e as páginas novas do front não foram conferidas.
+> **Exemplo:** Cliente com 50 CNPJs: o CNPJ 50 sem venda fica como coberto pelo grupo se outro CNPJ comprou dentro do prazo.
+
 > [!info] Situação em 26/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >

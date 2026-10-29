@@ -16,6 +16,12 @@ criado_original: 2026-10-15
 
 > **Onde atua:** av-hub: banco, API · MES: API, front
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Cria uma rota para o MES (sistema de produção) enxergar a requisição de compra feita no av-hub com pedido de venda (PV), antes de ela virar Ordem de Compra (OC).
+> **Quem é afetado:** O PCP (planejamento da produção) passa a ver que o item já está em compra e evita requisitar de novo. Compras não muda.
+> **Situação:** Parcial. O lado do av-hub está entregue (✅; migration em produção desde 20/10, segundo o Gustavo). Job e telas no MES (Robert) ainda não existem (🔴).
+> **Exemplo:** Uma requisição de 8 unidades do material CH45025X6X1K para o pedido 27605 aparece ao PCP em até 5 minutos.
+
 > [!info] Situação em 26/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** C0, P1, P2, P3, E1 · **Dono:** Gustavo (rota, view, marca); Robert (job e telas no MES, [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno]])
 >

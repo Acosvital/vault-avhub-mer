@@ -85,19 +85,15 @@ Depois, Compras acha o flange mais caro que o previsto. O aviso mostra a margem 
 
 ## Detalhe técnico
 
-Tudo abaixo é o conteúdo completo da nota original, sem cortes.
-
-### Título original e nota de raia
-
-Raia Vendas: da proposta ao pedido de venda (V0.1 a V0.7, V0C, V1 com duas origens), Compras confere (C6, C7), compra acima do valor (C8) e cancelamento.
+### Nota de raia
 
 **Nota de raia (proposta, fluxo aprovado em 26/10/2026).** Nós do [[00-Fluxo-Mestre-0b]]: `V0.1` a `V0.7`, `V0C`, `V1`, e para o pedido digitado no Omie `V2` e `V3` ([[01-Vendas-Liberacao]]); `B1` a `B4` aparecem aqui só como ligação ([[12-Orcamento-Base-de-Preco]]); `C6`, `C7` e `C8` na raia de Compras; `K1` a `K6` em [[13-Custo-Real-e-Comissao-no-Fluxo]]. Selos em [[Regras-do-Vault]]; decisões em [[Registro-de-Decisoes]]; o que o Omie permite em [[Estudo-Omie-API]].
 
 ### Objetivo
 
-Construir dentro do av-hub o começo do fluxo, que hoje não tem lugar: o vendedor monta a **proposta**, preenche a parte de venda e a de orçamento e compra com o que conseguiu (telefone, e-mail), mas **não é o dono do dado de custo**: o dono é Compras e o Orçamento (N16-54). A Gerência aprova desconto e margem (fisicamente neste ciclo) e a proposta aprovada vira **pedido de venda** criado por API no Omie. O pedido **nasce liberado**: a escolha "a Qualidade acompanha?" já foi feita na proposta. O pedido digitado direto no Omie segue o **mesmo fluxo e a mesma tela** (N16-106): chega travado, com a parte de vendas pronta (só se altera no Omie), e o vendedor responde `V2`/`V3` e preenche a parte de compras.
+Construir dentro do av-hub o começo do fluxo, que hoje não tem lugar. O vendedor preenche a parte de venda e a de orçamento e compra com o que conseguiu (telefone, e-mail), mas **não é o dono do dado de custo**: o dono é Compras e o Orçamento (N16-54). O pedido criado pela proposta **nasce liberado**: a escolha "a Qualidade acompanha?" já foi feita na proposta. O pedido digitado direto no Omie segue o **mesmo fluxo e a mesma tela** (N16-106): chega travado, com a parte de vendas pronta (só se altera no Omie), e o vendedor responde `V2`/`V3` e preenche a parte de compras.
 
-Depois do pedido, o PCP abre as requisições (`P3`). Compras recebe, o sistema **puxa os dados da proposta** (impostos, frete, fornecedor), Compras **confere os impostos**, edita no hub e valida se segue ou busca valor ou condição melhor (`C6`, `C7`). A proposta não muda e o preço fechado com o cliente não muda. **Se Compras compra por mais que o valor da proposta, o vendedor é avisado na tela "Meus Pedidos" e aprova ou reprova, por produto** (`C8`, N16-60 a N16-67). Se o pedido é **cancelado**, o sistema avisa a OC e o PCP, cancela a requisição e a OC ainda não emitida, e o que já foi comprado vai ao Estoque (N16-68 a N16-71).
+Depois do pedido, o PCP abre as requisições (`P3`). Compras recebe e o sistema **puxa os dados da proposta**; Compras **confere os impostos**, edita no hub e valida se segue ou busca valor ou condição melhor (`C6`, `C7`). A compra acima do valor da proposta passa pelo vendedor, produto por produto, em "Meus Pedidos" (`C8`, N16-60 a N16-67). O cancelamento do pedido avisa a OC e o PCP e cancela a requisição e a OC ainda não emitida (N16-68 a N16-71). O passo a passo está no resumo do topo.
 
 ### Quem atua (completo)
 

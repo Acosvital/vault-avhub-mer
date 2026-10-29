@@ -15,69 +15,77 @@ Esta nota mostra o que cada tela de Vendas, Orçamento e Compras faz hoje, como 
 
 ## Como usar esta nota
 
-- Quer saber **o que uma tela faz e se ela muda**? Veja a seção 1.
-- Quer saber **o que está desconectado**? Veja a seção 2.
-- Quer saber **o que está repetido ou confuso**? Veja a seção 3.
-- Quer saber **quais telas ainda faltam e como será a proposta**? Veja as seções 4 e 5.
-- Nomes de arquivos, colunas e filtros de cada tela estão em "Detalhe técnico", no fim.
+- Ache o setor no **Mapa rápido** e vá à seção 1. Desconectado: seção 2. Repetido: seção 3. Faltam: seção 4. Proposta: seção 5. Menu: seção 6.
+- Colunas, filtros e o texto completo estão em "Detalhe técnico".
 
-Esta nota substitui a primeira versão de 23/10. Agora **todas as páginas foram lidas**. O que não foi lido por dentro está marcado ❓: o que cada botão faz no servidor, as telas de Cadastros, e as de PCP e Meus Pedidos, que só foram vistas por fora.
+Substitui a versão de 23/10: **todas as páginas foram lidas**. Marcado ❓ o que não foi lido por dentro: botões no servidor, Cadastros, PCP e Meus Pedidos.
 
 Selos: ✅ existe e foi lido · 🔴 não existe · 🟡 proposta · ❓ não conferido.
+
+## Mapa rápido por setor
+
+| Setor | Telas | Situação |
+|---|---|---|
+| Vendas | Propostas, Clientes, Relatórios, Pedidos de Venda do Omie: criar e acompanhar propostas | ✅ 🔴 |
+| Orçamento | Painel do Comprador, Ofertas, Fornecedores, Catálogo, Parâmetros: manter o preço de compra | ✅ 🔴 |
+| Compras | Requisições, Emitir OC, Ordens, Aprovações, Follow-up: da requisição à OC | ✅ 🔴 |
+| Painéis | PCP, Dashboard de Vendas, Meus Pedidos: carteira do vendedor | ❓ |
+| Faltam | Aprovar, transformar em pedido, pendências, fila do Fiscal, comissões (seção 4) | 🔴 |
+| Proposta nova | Cinco blocos e um botão por estado (seção 5) | 🟡 |
 
 ## 1. O que cada tela faz hoje
 
 ### 1.1 Vendas
 
-| Tela | O que faz | No modelo novo |
-|---|---|---|
-| **Propostas, lista** | Mostra o resumo das propostas, com filtros por empresa, status, período, unidade e responsável. Daqui o vendedor abre uma nova proposta. | ✅ Muda: estados e rótulos (seção 4) |
-| **Proposta, formulário** | Reúne emissão, cliente, itens, condições e análise de margem. Na lateral ficam os totais e as ações. | 🔴 Será reescrita (seção 5) |
-| **Proposta, "Pedido no Omie"** | Monta os dados para o vendedor **digitar no Omie à mão** e pede de volta o número do pedido. | 🔴 **Sai.** O pedido vai por API, com fila e pipeline |
-| **Clientes, lista** | Mostra cards de clientes, propostas dos últimos 90 dias e contatos atrasados. Permite exportar contatos. | ✅ Mantém |
-| **Cliente, ficha** | Mostra dados, compradores, relacionamento e estatísticas de propostas. | ✅ Mantém. "Total fechado" e "Conversão" passam a contar **propostas aprovadas** |
-| **Relatório de Cotações** | Mostra totais de propostas, valor acumulado, fechadas e conversão, com Excel. | ✅ Mantém, com os novos estados |
-| **Relatório Gerencial** | Mostra o resumo, a divisão por responsável, empresa e unidade, os motivos de perda e a carteira. | ✅ Mantém. "Perdidas" vira **Canceladas**. Os motivos de perda viram **motivos de cancelamento** |
-| **Pedidos de Venda** (inativa no menu, N16-33) | Lista os pedidos **sincronizados do Omie**. O detalhe mostra a situação e as datas de cada pedido. | ✅ Continua inativa, mas **é valiosa**: já mostra os **sinalizadores do Omie** que a comissão precisa (cancelado, devolvido, devolvido parcial). É a base da fila do Fiscal (seção 4) |
-| **Notas Fiscais de Saída** (inativa) | Lista as notas de saída com valores e se foi averbada. | ✅ Continua inativa |
+| Tela | Para que serve | Quem usa | Situação |
+|---|---|---|---|
+| Propostas, lista | Resumo e filtros; abre a nova proposta | Vendedor, gerente | ✅ Muda: estados e rótulos (seção 4) |
+| Proposta, formulário | Emissão, cliente, itens, condições, margem | Vendedor | 🔴 Será reescrita (seção 5) |
+| Proposta, "Pedido no Omie" | Dados para digitar no Omie à mão | Vendedor | 🔴 **Sai**: o pedido vai por API |
+| Clientes, lista | Cards, propostas de 90 dias, contatos atrasados | Vendedor | ✅ Mantém |
+| Cliente, ficha | Dados, compradores, estatísticas | Vendedor | ✅ Mantém; "Total fechado" e "Conversão" contam **propostas aprovadas** |
+| Relatório de Cotações | Totais e conversão, com Excel | Gerência | ✅ Mantém, com os novos estados |
+| Relatório Gerencial | Resumo por responsável, empresa, unidade | Gerência | ✅ Mantém; "Perdidas" vira **Canceladas** |
+| Pedidos de Venda (inativa no menu, N16-33) | Pedidos sincronizados do Omie | Vendedor; Fiscal (futuro) | ✅ Continua inativa, mas **valiosa**: base da fila do Fiscal (seção 4) |
+| Notas Fiscais de Saída (inativa) | Notas de saída | — | ✅ Continua inativa |
 
 ### 1.2 Orçamento
 
-| Tela | O que faz | No modelo novo |
-|---|---|---|
-| **Painel do Comprador** | Organiza a fila de pedidos de custo. O comprador assume, libera, responde, diz "sem fornecedor" ou cancela. | ✅ Mantém, mas **tira "Vencem hoje" e "Atrasadas"**, porque não há prazo (N16-58). Fica o tempo cronometrado |
-| **Responder solicitação** | O comprador escolhe a **oferta vigente** que vira o custo do item. O vendedor é avisado. | ✅ Mantém |
-| **Pedido de cotação** | Envia um e-mail por fornecedor da categoria, com os itens e a data de resposta. | ✅ Mantém |
-| **Ofertas de fornecedor** | Lista as ofertas e deixa lançar, importar o mapa de Compras, invalidar e exportar. | ✅ Mantém. As ofertas das OCs (ordens de compra) entram sozinhas |
-| **Fornecedores, lista e ficha** | Mostra o perfil de compras, as categorias, os certificados e as ofertas de cada fornecedor. | ✅ Mantém |
-| **Catálogo de produtos, lista e ficha** | Lista os produtos e mostra preços e a média geral de 90 dias. Permite ligar produtos pendentes ao Omie. | ✅ Vira a **página do produto** (`B2`) |
-| **Pesquisa de materiais** | Mostra o menor custo e o fornecedor vencedor de cada material. Gera o PDF "Cotação de Materiais". | ✅ Mantém. **Repete** parte do catálogo (seção 3) |
-| **Parâmetros de custo** | Guarda ICMS a recuperar, validade da oferta e janela do histórico. Salvar abre uma nova vigência. | ✅ Mantém |
-| **Tabela da telha** | Guarda o custo por classe e espessura, com vigência. Telhas já orçadas mantêm o custo da época. | ✅ Mantém |
-| **Custo por item** (`custo-itens`) | Mostra itens, lotes e custo médio de um pedido. | ✅ Vira "Custo real do pedido". O aviso de exemplo precisa sair quando houver dado real |
-| **Simulador de Orçamento** | Calcula custo, preço sugerido, margem e letra sem pedido. **Não grava.** | ✅ Existe. **Repete** a análise da proposta (seção 3) |
-| **Sincronização Omie** | Mostra a sincronização rodando. A automática está desligada: só roda pelo botão. | ✅ Existe na `develop`. É ferramenta de TI, **não** de usuário final ❓ |
-| **Guia do fluxo do custo** | Páginas explicativas "Para que serve". | 🔴 Descrevem o fluxo **antigo**. Precisam ser reescritas |
+| Tela | Para que serve | Quem usa | Situação |
+|---|---|---|---|
+| Painel do Comprador | Fila de pedidos de custo | Comprador | ✅ Mantém; **tira "Vencem hoje" e "Atrasadas"** (N16-58), fica o tempo cronometrado |
+| Responder solicitação | Escolhe a oferta vigente que vira o custo | Comprador | ✅ Mantém |
+| Pedido de cotação | E-mail por fornecedor da categoria | Comprador | ✅ Mantém |
+| Ofertas de fornecedor | Lança, importa, invalida e exporta ofertas | Orçamento | ✅ Mantém; ofertas das OCs entram sozinhas |
+| Fornecedores, lista e ficha | Perfil de compras e ofertas | Orçamento | ✅ Mantém |
+| Catálogo de produtos, lista e ficha | Produtos, preços, média de 90 dias | Orçamento | ✅ Vira a **página do produto** (`B2`) |
+| Pesquisa de materiais | Menor custo e fornecedor vencedor | Orçamento | ✅ Mantém; **repete** parte do catálogo (seção 3) |
+| Parâmetros de custo | ICMS, validade, janela do histórico | Orçamento | ✅ Mantém |
+| Tabela da telha | Custo por classe e espessura | Orçamento | ✅ Mantém |
+| Custo por item (`custo-itens`) | Itens, lotes e custo médio do pedido | Orçamento | ✅ Vira "Custo real do pedido"; o aviso de exemplo sai com dado real |
+| Simulador de Orçamento | Custo, preço e margem sem pedido; **não grava** | Vendedor | ✅ Existe; **repete** a análise da proposta (seção 3) |
+| Sincronização Omie | Só roda pelo botão | TI | ✅ Existe na `develop`; ferramenta de TI ❓ |
+| Guia do fluxo do custo | Páginas "Para que serve" | Todos | 🔴 Descrevem o fluxo **antigo**; reescrever |
 
 ### 1.3 Compras
 
-| Tela | O que faz | No modelo novo |
-|---|---|---|
-| **Dashboard de compras** | Mostra a fila de compras, o valor comprado em 12 meses, os atrasos e o que há a receber. | ✅ Mantém |
-| **Requisições** (lista e kanban) | Lista as requisições do PCP ou manuais. Permite fechar a compra, ver a OC e cancelar com motivo. | ✅ Mantém e **ganha a tarja de pedido cancelado** |
-| **Nova requisição** | É o "pedido de compra interno": unidade, número do pedido de venda, produto, quantidade, prazo e finalidade. | ✅ Mantém. Com a proposta, o pedido de venda vem do hub, não do Omie |
-| **Emitir OC** | Monta a ordem de compra com fornecedor, pagamento, itens, frete e observações. O Omie só aceita item com produto cadastrado na unidade. | 🔴 **Não tem imposto por item e não conhece a proposta.** Precisa de `C6` e `C7` (puxar da proposta, conferir e editar impostos) |
-| **Pedidos de venda da OC** | Responde "Para que é esta compra". O comprador **digita um pedido de venda de cada vez** e marca o que falta comprar. | ✅ Mantém. 🟡 Com a proposta, a ligação PV ↔ item de compra deixa de ser digitada |
-| **Ordens** (lista, kanban, detalhe) | Mostra as OCs por status e origem, com Aprovar, Reprovar e Cancelar OC. | ✅ Mantém. O detalhe ganha "compra acima do valor" (`C8`) |
-| **Aprovações** | Mostra as OCs **acima do limite da unidade** que esperam o aprovador. | ✅ Mantém. ⚠️ **Nome igual a outra coisa**: não é a aprovação do vendedor (`C8`) |
-| **Follow-up (CCP)** | Acompanha as OCs aprovadas: confirmação do fornecedor, despacho, contatos e ocorrências. | ✅ Mantém. 📝 **CCP é parte do PCP e cuida do follow-up das compras** (N14-24) |
-| **Pedido Omie (detalhe)** | Mostra, só para leitura, o pedido de compra **feito direto no Omie**. | ✅ Mantém |
-| **Histórico de compras** | Mostra as compras por conta, período, produto e fornecedor, com gráfico por mês. | ✅ Mantém. Vira aba da página do produto |
-| **Compradores** | Liga os compradores do Omie por unidade ao funcionário que emite a OC por eles. | ✅ Mantém (Cadastros/Acessos) |
+| Tela | Para que serve | Quem usa | Situação |
+|---|---|---|---|
+| Dashboard de compras | Fila, valor comprado, atrasos | Compras | ✅ Mantém |
+| Requisições (lista e kanban) | Requisições do PCP ou manuais | Comprador | ✅ Mantém e **ganha a tarja de pedido cancelado** |
+| Nova requisição | "Pedido de compra interno" | Comprador | ✅ Mantém; o pedido de venda vem do hub |
+| Emitir OC | Monta a OC | Comprador | 🔴 **Sem imposto por item e sem a proposta**: precisa de `C6` e `C7` |
+| Pedidos de venda da OC | "Para que é esta compra" | Comprador | ✅ Mantém. 🟡 Com a proposta, a ligação PV ↔ item deixa de ser digitada |
+| Ordens (lista, kanban, detalhe) | OCs por status e origem | Comprador | ✅ Mantém; o detalhe ganha "compra acima do valor" (`C8`) |
+| Aprovações | OCs acima do limite da unidade | Aprovador | ✅ Mantém. ⚠️ **Nome igual a outra coisa**: não é a aprovação do vendedor (`C8`) |
+| Follow-up (CCP) | Acompanha as OCs aprovadas | CCP (PCP) | ✅ Mantém. 📝 **CCP é parte do PCP** (N14-24) |
+| Pedido Omie (detalhe) | Pedido feito direto no Omie, só leitura | Comprador | ✅ Mantém |
+| Histórico de compras | Compras por conta, período, produto | Comprador | ✅ Mantém; vira aba da página do produto |
+| Compradores | Liga comprador do Omie ao funcionário | Administrador | ✅ Mantém (Cadastros/Acessos) |
 
 ### 1.4 Painéis que a proposta deve respeitar
 
-O **Painel PCP** e o **Dashboard de Vendas** mostram a carteira, o desvio de previsão e o **"Em avanço"**. "Em avanço" é o pedido que o diligenciador marcou como faturamento em etapas. **Meus Pedidos** e **Pedidos da Equipe** são a casa do pedido do vendedor. ❓ Foram lidos só pelo nome dos componentes.
+O **Painel PCP**, o **Dashboard de Vendas**, **Meus Pedidos** e **Pedidos da Equipe** mostram a carteira e o "Em avanço"; a proposta deve respeitá-los. ❓ Lidos só pelo nome dos componentes (texto completo em "Detalhe técnico").
 
 ## 2. Como as telas se conectam
 
@@ -99,14 +107,7 @@ flowchart LR
     OC --> OFE
 ```
 
-**Já está ligado no código** ✅:
-- Proposta e Painel do Comprador: o vendedor pede o custo e recebe a resposta.
-- Proposta e Simulador de comissão: "simular a comissão deste pedido".
-- Catálogo, Ofertas, Fornecedores e Pesquisa conversam entre si.
-- Requisição, Emitir OC, Follow-up e Ordens seguem em sequência.
-- Pedidos de venda do Omie alimentam o Painel PCP.
-
-**Ainda falta ligar** 🔴:
+**Ainda falta ligar** 🔴 (o que já está ligado fica em "Detalhe técnico"):
 
 | Ligação | O que acontece hoje |
 |---|---|
@@ -121,6 +122,158 @@ flowchart LR
 | Proposta ↔ Página do produto | O vendedor sai da proposta para consultar preço. |
 
 ## 3. Repetições e confusões, com a decisão proposta
+
+| # | Onde | Decisão proposta 🟡 |
+|---|---|---|
+| 1 | Margem em três lugares | Um só cálculo, na API; a proposta é a casa |
+| 2 | Preço do produto em quatro telas | Uma **página do produto** com abas |
+| 3 | Duas condições de pagamento | **Um só campo**, com a lista da conta Omie ([[Mapa-IncluirPedido-Omie]] §5.1) |
+| 4 | Estado de destino × UF do cliente | O destino vem do cliente ou da entrega; editar exige motivo |
+| 5 | ICMS, IPI e ST digitados × Omie | ✅ **Decidido (N16-95):** o vendedor digita e o valor segue para o pedido |
+| 6 | Revenda × Fabricação interna | Mantém, com texto de ajuda sobre a comissão **estimada** (N16-78) |
+| 7 | **Dois "Aprovações"** em Compras | **"Aprovar OC"** (Compras) e **"Pendências"** (Meus Pedidos, `C8`) |
+| 8 | "Custo" com três sentidos | **Custo cotado**, **Custo da oferta** e **Custo real** |
+| 9 | Painel do Comprador com SLA | Tira "Vencem hoje" e "Atrasadas" (N16-58) |
+| 10 | Relatórios com "Fechadas/Perdidas" | **Aprovadas/Canceladas** |
+| 11, 12 | Guias do fluxo do custo; Sincronização Omie no menu | Reescrever os guias depois do fluxo novo; Sincronização só para TI ❓ |
+| 13 | Unidades Mogi, Uberaba e Arujá | ✅ **Resolvido (N16-79):** três contas Omie, um só sistema |
+
+
+## 4. Telas que faltam, com dono do dado
+
+| Tela | Onde fica | Quem usa | Nó |
+|---|---|---|---|
+| Aprovar proposta | Dentro da proposta | Vendedor | `V0.5` |
+| Transformar em pedido | Dentro da proposta | Vendedor | `V0.6` |
+| Estado do pedido no Omie | Proposta e Meus Pedidos | Vendedor | `V0.7` |
+| Página do produto | Orçamento e proposta | Vendedor, Orçamento, Compras | `B2` |
+| Emitir OC com dados da proposta e imposto por item | Compras | Comprador | `C6`, `C7` |
+| Pendências (compra acima do valor) | Meus Pedidos | Vendedor | `C8` |
+| Reprovados sem solução | Compras | Comprador | `C8` |
+| Tarja de pedido cancelado | Requisição, OC, PCP | Todos | `V0C` |
+| **Fila do Fiscal** | Cadastros ou Fiscal | Fiscal, Controladoria | `K6` |
+| Comissões novas | Comissões (novas) | Vendedor, Controladoria, Gerência, Fiscal | `K1` a `K6` |
+| Configuração por conta Omie | Administração | TI | `V0.7` |
+| **Calendário** (N16-104) | Cadastros | Marketing | datas |
+| **Histórico de datas do pedido** (N16-104) | Meus Pedidos e Carteira do PCP | Vendedor, PCP | datas |
+| **Pedido do Omie na tela do pedido** (N16-106) | Meus Pedidos | Vendedor | `V1`, `K1` |
+
+## 5. A página de proposta
+
+A tela de hoje é pesada (ordem confusa, item com cerca de 25 campos, botões do modelo antigo). O desenho novo 🟡 tem **uma ação principal por estado**, cinco blocos (quem e para quem, o que se vende, condições, custo de compra, resultado) e um resumo fixo com pendências clicáveis e o botão do estado: `Salvar`, `Marcar como aprovada`, `Transformar em pedido` (pede previsão de faturamento, Qualidade e faturar em partes; N16-88, N16-89). Pedido em partes ganha o bloco **Sequenciais**. Texto completo (5.1 a 5.4) em "Detalhe técnico".
+
+## 6. Organização do menu 🟡
+
+Menus de Vendas e Orçamento revistos em 27/10/2026 (N16-107, N16-108); o texto está em "Detalhe técnico".
+
+| Menu | Entradas | Observação |
+|---|---|---|
+| **Vendas** | Propostas · Clientes · **Meus Pedidos** · Relatórios | Meus Pedidos: o vendedor responde `C8` |
+| **Orçamento** | **Pedidos de custo** · **Produtos** · Fornecedores · **Parâmetros** | De 9 entradas para 4 |
+| **Compras** | Requisições · Ordens · **Aprovar OC** · Follow-up (CCP) · **Reprovados** · Dashboard | "Aprovações" vira "Aprovar OC"; **sem Histórico** |
+| **Comissões** | Módulo atual (não muda) + Comissões da proposta (novas) | Nada do atual é tocado |
+| **Cadastros ou Fiscal** | Compradores · **Fila do Fiscal** · Sincronização Omie (TI) | |
+| **Ocultas** | `propostas-delegacao`, `propostas-valores`, `custo-item`, `solicitacoes-custo` | Liberam capacidade, sem menu |
+
+## 7. Ordem de construção
+
+1. **Proposta nova** (seção 5): a tela de uso diário. Depende da condição de pagamento virar lista da conta; o imposto continua digitado (N16-95).
+2. **Meus Pedidos com pendência `C8`**, junto com a frente "encerrar pedido zerado".
+3. **Página do produto** (reaproveita Catálogo e Histórico).
+4. **Emitir OC** com dados da proposta e imposto por item.
+5. **Fila do Fiscal** (reaproveita Pedidos de Venda).
+6. Comissões novas.
+
+## Ver também
+
+[[11-Proposta-e-Pedido-de-Venda]] · [[12-Orcamento-Base-de-Preco]] · [[13-Custo-Real-e-Comissao-no-Fluxo]] · [[Mapa-IncluirPedido-Omie]]
+
+## Detalhe técnico
+
+Para quem mexe no código. Tudo o que saiu do texto principal está aqui.
+
+### Como a auditoria foi feita
+
+Foram lidos os 47 arquivos `page.tsx` de `app/(protected)/vendas`, `orcamento` e `compras` e os componentes que cada um abre: títulos, colunas, filtros, ações e serviços chamados. Os arquivos de PCP e Meus Pedidos foram vistos só pelo nome dos componentes (`CarteiraPrevisao`, `PainelPcp`, `PainelVendas`) ❓.
+
+### Texto completo e detalhe lido no código: Vendas
+
+| Tela | O que faz (texto completo) | No modelo novo (texto completo) | Detalhe lido no código |
+|---|---|---|---|
+| **Propostas, lista** | Mostra o resumo das propostas, com filtros por empresa, status, período, unidade e responsável. Daqui o vendedor abre uma nova proposta. | ✅ Muda: estados e rótulos (seção 4) | Resumo: Total cotado, Em aberto, Fechadas, Perdidas, Conversão. Filtros: Empresa, Status, Período, Unidade (**Mogi, Uberaba, Arujá**), Responsável. Busca por nº e cliente. Botão "Nova proposta". |
+| **Proposta, formulário** | Reúne emissão, cliente, itens, condições e análise de margem. Na lateral ficam os totais e as ações. | 🔴 Será reescrita (seção 5) | Blocos Emissão, Cliente, Itens, Condições de fornecimento, Análise de margem. Lateral com Totais e ações: Salvar, Fechar itens, Reabrir, Perder, "Pedido no Omie", Duplicar, Revisões, Linha do tempo, PDF, E-mail. |
+| **Proposta, "Pedido no Omie"** | Monta os dados para o vendedor **digitar no Omie à mão** e pede de volta o número do pedido. | 🔴 **Sai.** O pedido vai por API, com fila e pipeline | `PedidoOmieModal`: monta o cabeçalho e os itens para **copiar e digitar no Omie à mão**, escolhe a conta (Mogi ou Uberaba) e pede de volta o nº do pedido digitado. |
+| **Clientes, lista** | Mostra cards de clientes, propostas dos últimos 90 dias e contatos atrasados. Permite exportar contatos. | ✅ Mantém | Cards Clientes, Com proposta em 90 dias, Próximo contato vencido. Filtros Status, Segmento, Próximo contato. Exportar contatos. |
+| **Cliente, ficha** | Mostra dados, compradores, relacionamento e estatísticas de propostas. | ✅ Mantém. "Total fechado" e "Conversão" passam a contar **propostas aprovadas** | Dados, compradores, relacionamento (segmento, potencial, próximo contato). Estatísticas: Propostas, Última proposta, Total cotado, **Total fechado**, **Conversão**, Ticket médio. |
+| **Relatório de Cotações** | Mostra totais de propostas, valor acumulado, fechadas e conversão, com Excel. | ✅ Mantém, com os novos estados | Totais: Propostas, Valor acumulado, **Fechadas**, Valor fechado, Conversão. Tabela Cliente, Responsável, Valor. Excel. |
+| **Relatório Gerencial** | Mostra o resumo, a divisão por responsável, empresa e unidade, os motivos de perda e a carteira. | ✅ Mantém. "Perdidas" vira **Canceladas**. Os motivos de perda viram **motivos de cancelamento** | Resumo (Total cotado, Em aberto, Fechadas, **Perdidas**, Conversão). Por responsável, empresa e unidade (**Mogi, Uberaba, Arujá**). **Motivos de perda**. Status da carteira. Excel. |
+| **Pedidos de Venda** (inativa no menu, N16-33) | Lista os pedidos **sincronizados do Omie**. O detalhe mostra a situação e as datas de cada pedido. | ✅ Continua inativa, mas **é valiosa**: já mostra os **sinalizadores do Omie** que a comissão precisa (cancelado, devolvido, devolvido parcial). É a base da fila do Fiscal (seção 4) | Pedidos **sincronizados do Omie**: nº, sequencial, inclusão, etapa, cliente, vendedor, valor, situação. Detalhe com **Autorizado, Denegado, Faturado, Cancelado, Devolvido, Devolução Parcial, Encerrado**. Datas de inclusão, previsão, faturamento, cancelamento e encerramento. Motivo e usuário do encerramento. |
+| **Notas Fiscais de Saída** (inativa) | Lista as notas de saída com valores e se foi averbada. | ✅ Continua inativa | Data, nº NF, cliente, vendedor, filial, categoria, IPI, mercadorias, total, "Averbada?". |
+
+### Texto completo e detalhe lido no código: Orçamento
+
+| Tela | O que faz (texto completo) | No modelo novo (texto completo) | Detalhe lido no código |
+|---|---|---|---|
+| **Painel do Comprador** | Organiza a fila de pedidos de custo. O comprador assume, libera, responde, diz "sem fornecedor" ou cancela. | ✅ Mantém, mas **tira "Vencem hoje" e "Atrasadas"**, porque não há prazo (N16-58). Fica o tempo cronometrado | Cards Fila de hoje, Solicitações abertas, **Vencem hoje, Atrasadas**, Ofertas vencendo em 7 dias. Atribuição: Comigo, Livres na fila. Ações: Assumir, Liberar, Responder, "Sem fornecedor", Cancelar. Avisos de "Sem disputas suficientes" e de certificados vencendo. |
+| **Responder solicitação** | O comprador escolhe a **oferta vigente** que vira o custo do item. O vendedor é avisado. | ✅ Mantém | O Comprador escolhe a **oferta vigente** que vira o custo do item; "o vendedor é avisado"; lança nova oferta ou responde "Sem fornecedor". |
+| **Pedido de cotação** | Envia um e-mail por fornecedor da categoria, com os itens e a data de resposta. | ✅ Mantém | Um e-mail por fornecedor da categoria, com itens e "Resposta até". Busca no catálogo. Modal de análise do item: última compra, média e mínimo, cotações válidas. |
+| **Ofertas de fornecedor** | Lista as ofertas e deixa lançar, importar o mapa de Compras, invalidar e exportar. | ✅ Mantém. As ofertas das OCs (ordens de compra) entram sozinhas | Lista: produto, fornecedor, preço, custo líquido, cotação, validade. Ações: Lançar oferta, **Importar mapa** (xlsx de Compras, com produtos pendentes), Importações, Invalidar, Exportar. |
+| **Fornecedores, lista e ficha** | Mostra o perfil de compras, as categorias, os certificados e as ofertas de cada fornecedor. | ✅ Mantém | Busca por nome ou CNPJ, categoria. Ficha com perfil de compras (e-mail de cotação, origem do ICMS padrão, entrega certificado), categorias, certificados, ofertas. |
+| **Catálogo de produtos, lista e ficha** | Lista os produtos e mostra preços e a média geral de 90 dias. Permite ligar produtos pendentes ao Omie. | ✅ Vira a **página do produto** (`B2`) | Busca por código ou trechos. **Produtos pendentes** (modal para ligar ao Omie). Ficha com preços, **média geral de 90 dias**, "pendente no Omie". |
+| **Pesquisa de materiais** | Mostra o menor custo e o fornecedor vencedor de cada material. Gera o PDF "Cotação de Materiais". | ✅ Mantém. **Repete** parte do catálogo (seção 3) | Menor custo e fornecedor vencedor por material, prazo e frete, quantos cotaram. Comparativo por quantidade. PDF "Cotação de Materiais". |
+| **Parâmetros de custo** | Guarda ICMS a recuperar, validade da oferta e janela do histórico. Salvar abre uma nova vigência. | ✅ Mantém | ICMS a recuperar por origem, validade padrão da oferta, janela do histórico; "salvar abre uma nova vigência". |
+| **Tabela da telha** | Guarda o custo por classe e espessura, com vigência. Telhas já orçadas mantêm o custo da época. | ✅ Mantém | Custo por classe × espessura, núcleos, pinturas, com vigência; telhas já orçadas mantêm o custo da época. |
+| **Custo por item** (`custo-itens`) | Mostra itens, lotes e custo médio de um pedido. | ✅ Vira "Custo real do pedido". O aviso de exemplo precisa sair quando houver dado real | Resumo do pedido, itens, **lotes**, custo médio, origem, "Cotação a conferir", "Custo completo/incompleto". Avisos **"Dados de exemplo"** e **"Custo sem impostos"**. |
+| **Simulador de Orçamento** | Calcula custo, preço sugerido, margem e letra sem pedido. **Não grava.** | ✅ Existe. **Repete** a análise da proposta (seção 3) | Digita compra e venda sem pedido e vê custo líquido, preço sugerido, margem, letra e status com o motor do Simulador de Comissão. **Não grava.** |
+| **Sincronização Omie** | Mostra a sincronização rodando. A automática está desligada: só roda pelo botão. | ✅ Existe na `develop`. É ferramenta de TI, **não** de usuário final ❓ | "Sincronizando agora" e "Automática desligada: só pelo botão". |
+| **Guia do fluxo do custo** | Páginas explicativas "Para que serve". | 🔴 Descrevem o fluxo **antigo**. Precisam ser reescritas | `FluxoDoCusto` e `GuiaSuprimentos`: páginas "Para que serve". |
+
+### Texto completo e detalhe lido no código: Compras
+
+| Tela | O que faz (texto completo) | No modelo novo (texto completo) | Detalhe lido no código |
+|---|---|---|---|
+| **Dashboard de compras** | Mostra a fila de compras, o valor comprado em 12 meses, os atrasos e o que há a receber. | ✅ Mantém | `PainelCompras`, `ComprasDashboard`. Fila de compras: requisições abertas, em cotação, aguardando aprovação, a receber, entregas atrasadas. Valor comprado em 12 meses, por comprador, atraso por tempo, a receber por etapa. |
+| **Requisições** (lista e kanban) | Lista as requisições do PCP ou manuais. Permite fechar a compra, ver a OC e cancelar com motivo. | ✅ Mantém e **ganha a tarja de pedido cancelado** | Requisições vindas do PCP ou manuais. Fechar compra, Ver OC. Filtro Unidade, Status, Ação. Arrastar no kanban. Cancelar com motivo. |
+| **Nova requisição** | É o "pedido de compra interno": unidade, número do pedido de venda, produto, quantidade, prazo e finalidade. | ✅ Mantém. Com a proposta, o pedido de venda vem do hub, não do Omie | Unidade, **nº do pedido de venda**, produto, quantidade, prazo, tipo sugerido (acabado ou não), finalidade. |
+| **Emitir OC** | Monta a ordem de compra com fornecedor, pagamento, itens, frete e observações. O Omie só aceita item com produto cadastrado na unidade. | 🔴 **Não tem imposto por item e não conhece a proposta.** Precisa de `C6` e `C7` (puxar da proposta, conferir e editar impostos) | `FecharCompra`, **1.869 linhas**. Campos: unidade, fornecedor, contato, previsão, condição de pagamento e parcelas, moeda, contrato, nº do pedido no fornecedor, itens (produto, qtd, valor, desconto, tipo de material, local de estoque), frete (modalidade, placa), categoria, conta corrente, projeto, observações, resumo. "O Omie só aceita item com produto cadastrado na unidade." |
+| **Pedidos de venda da OC** | Responde "Para que é esta compra". O comprador **digita um pedido de venda de cada vez** e marca o que falta comprar. | ✅ Mantém. 🟡 Com a proposta, a ligação PV ↔ item de compra deixa de ser digitada | `PedidosVendaOC`: "Para que é esta compra". O comprador **digita um pedido de venda de cada vez**, vê o que falta comprar por item e marca. |
+| **Ordens** (lista, kanban, detalhe) | Mostra as OCs por status e origem, com Aprovar, Reprovar e Cancelar OC. | ✅ Mantém. O detalhe ganha "compra acima do valor" (`C8`) | OC por status e origem ("Pedido feito direto no Omie: só leitura"). Detalhe com itens, parcelas, observações, histórico, comprador, PDF, Aprovar, Reprovar, Cancelar OC. |
+| **Aprovações** | Mostra as OCs **acima do limite da unidade** que esperam o aprovador. | ✅ Mantém. ⚠️ **Nome igual a outra coisa**: não é a aprovação do vendedor (`C8`) | OCs **acima do limite da unidade** aguardando o aprovador: Aprovar, Reprovar com motivo. |
+| **Follow-up (CCP)** | Acompanha as OCs aprovadas: confirmação do fornecedor, despacho, contatos e ocorrências. | ✅ Mantém. 📝 **CCP é parte do PCP e cuida do follow-up das compras** (N14-24) | OCs aprovadas: confirmação do fornecedor, despacho (data, NF, transportadora), contatos, ocorrências. Cards Sem confirmação, Atrasadas, Chegam em 7 dias, Com ocorrência. |
+| **Pedido Omie (detalhe)** | Mostra, só para leitura, o pedido de compra **feito direto no Omie**. | ✅ Mantém | Pedido de compra **feito direto no Omie**, só leitura, com itens, "Recebido", parcelas. |
+| **Histórico de compras** | Mostra as compras por conta, período, produto e fornecedor, com gráfico por mês. | ✅ Mantém. Vira aba da página do produto | Filtro Conta (Mogi, Uberaba), período, produto, fornecedor. Resumo. Gráfico por mês. |
+| **Compradores** | Liga os compradores do Omie por unidade ao funcionário que emite a OC por eles. | ✅ Mantém (Cadastros/Acessos) | Compradores do Omie por unidade e o funcionário que emite a OC por eles. |
+
+### Painéis que a proposta deve respeitar: texto completo
+
+O **Painel PCP** e o **Dashboard de Vendas** mostram a carteira, o desvio de previsão e o **"Em avanço"**. "Em avanço" é o pedido que o diligenciador marcou como faturamento em etapas. **Meus Pedidos** e **Pedidos da Equipe** são a casa do pedido do vendedor. ❓ Foram lidos só pelo nome dos componentes.
+
+### Menu: tabela completa
+
+| Menu | Entradas | Observação |
+|---|---|---|
+| **Vendas** | Propostas · Clientes · **Meus Pedidos** · Relatórios (Gerencial, com a aba Cotações) | Meus Pedidos entra no grupo: é onde o vendedor responde `C8`. |
+| **Orçamento** | **Pedidos de custo** (Painel do Comprador + Pedido de cotação) · **Produtos** (Catálogo + Pesquisa de materiais + Ofertas, com a página do produto) · Fornecedores · **Parâmetros** (custo e telha) | De 9 entradas para 4. |
+| **Compras** | Requisições · Ordens · **Aprovar OC** · Follow-up (CCP) · **Reprovados** · Dashboard | "Aprovações" vira "Aprovar OC". **Sem Histórico**: vira filtro por produto em Ordens. |
+| **Comissões** | O módulo atual (não muda) + Comissões da proposta (novas) | Nada do módulo atual é tocado. |
+| **Cadastros ou Fiscal** | Compradores · **Fila do Fiscal** · Sincronização Omie (TI) | |
+| **Ocultas** | `propostas-delegacao`, `propostas-valores`, `custo-item`, `solicitacoes-custo` | Liberam capacidade e não aparecem no menu. |
+
+### Menu revisto em 27/10/2026
+
+> [!info] Menu de Vendas e Orçamento revisto em 27/10/2026
+> As decisões N16-107 e N16-108 enxugaram o menu. Vendas fica com 4 entradas. Orçamento também fica com 4: Pedidos de custo (abas Fila e Cotação), Produtos (abas Preços, Comparar e Ofertas), Fornecedores e Parâmetros (abas Custo e Telha). O **Histórico de compras sai**, porque a tela Ordens de compra já mostra o histórico. As linhas de Vendas, Orçamento e Compras abaixo já refletem isso.
+
+### Conexões entre telas: o que já está ligado
+
+**Já está ligado no código** ✅:
+- Proposta e Painel do Comprador: o vendedor pede o custo e recebe a resposta.
+- Proposta e Simulador de comissão: "simular a comissão deste pedido".
+- Catálogo, Ofertas, Fornecedores e Pesquisa conversam entre si.
+- Requisição, Emitir OC, Follow-up e Ordens seguem em sequência.
+- Pedidos de venda do Omie alimentam o Painel PCP.
+
+### Repetições e confusões: texto completo
 
 | # | Onde | O problema | Proposta 🟡 |
 |---|---|---|---|
@@ -138,7 +291,7 @@ flowchart LR
 | 12 | Sincronização Omie no menu de Orçamento | Ferramenta de TI parece tarefa do usuário. | Sair do menu comum e ficar só para TI ❓ |
 | 13 | Unidades: **Mogi (Aços Vital), Uberaba (Aços Uberaba) e Arujá (HRM)** | ✅ **Resolvido (N16-79): são três contas Omie e um só sistema.** O Hub mostra a **logo e a identidade da unidade do usuário** e emite pedidos, OCs e propostas com essa identidade. | O catálogo de condições, as categorias e as contas correntes são **por unidade**. A proposta e o relatório escolhem a unidade pela emissora (AV, AU, HRM). |
 
-## 4. Telas que faltam, com dono do dado
+### Telas que faltam: texto completo
 
 | Tela | Onde fica | Quem usa | Nó |
 |---|---|---|---|
@@ -163,9 +316,9 @@ Sobre o **pedido do Omie na tela do pedido** (N16-106):
 - O vendedor também responde Qualidade e faturamento em partes.
 - A tela e as pendências são as mesmas do pedido que nasceu da proposta.
 
-## 5. A página de proposta
+### A página de proposta: texto completo (seção 5)
 
-### 5.1 O que está pesado ou errado hoje
+#### 5.1 O que está pesado ou errado hoje
 
 - **Ordem confusa.** O vendedor só descobre o que falta depois de rolar a tela toda.
 - **Item com cerca de 25 campos.** Venda e compra aparecem misturadas na mesma linha.
@@ -174,7 +327,7 @@ Sobre o **pedido do Omie na tela do pedido** (N16-106):
 - **Duas condições de pagamento, destino repetido e imposto digitado** (seção 3).
 - **Sem o estado do pedido.** Só aparece "Pedido no Omie: nº" depois de digitado à mão.
 
-### 5.2 Como deve ficar 🟡
+#### 5.2 Como deve ficar 🟡
 
 **Princípio:** uma ação principal por estado, sempre visível. A tela diz o que falta para a próxima etapa.
 
@@ -202,7 +355,7 @@ Sobre o **pedido do Omie na tela do pedido** (N16-106):
 - **Transformada:** faixa com o número do hub, o número do Omie e o estado (na fila, enviado ou erro com **motivo**). Mostra também a Qualidade marcada e o aviso de compra acima do valor, se existir.
 - **Cancelada:** só leitura, com motivo, quem e quando. Só permite **Duplicar**.
 
-### 5.3 Regras de clareza (valem para todas as telas novas)
+#### 5.3 Regras de clareza (valem para todas as telas novas)
 
 1. **Um número, um nome, uma origem visível.** Use "Custo cotado", "Custo da oferta", "Custo real", "Preço de venda" e "Preço sugerido".
 2. **O que é calculado fica só para leitura e diz quem calculou** ("Omie", "motor", "média das OCs").
@@ -213,7 +366,7 @@ Sobre o **pedido do Omie na tela do pedido** (N16-106):
 7. **Uma pergunta por decisão.** Aprovar ou reprovar, informar a devolução, decidir a comissão.
 8. **Nenhum nome repetido para coisas diferentes** (ver "Aprovações", seção 3, item 7).
 
-### 5.4 O pedido em partes (sequenciais) 🟡
+#### 5.4 O pedido em partes (sequenciais) 🟡
 
 O vendedor pode marcar "pode faturar em partes" (N16-89). Nesse caso a tela do **pedido**, dentro de Meus Pedidos, ganha o bloco **Sequenciais**.
 
@@ -225,89 +378,6 @@ O vendedor pode marcar "pode faturar em partes" (N16-89). Nesse caso a tela do *
 - Pedido "somente inteiro" não mostra o bloco.
 - O nome na tela é **"Faturamento em partes"**. Assim não se confunde com a **divisão da triagem do PCP** (fabricação, revenda…), que é outra coisa (N16-93).
 - Tela e API dependem de descobrir como o Omie cria o sequencial.
-
-## 6. Organização do menu 🟡
-
-> [!info] Menu de Vendas e Orçamento revisto em 27/10/2026
-> As decisões N16-107 e N16-108 enxugaram o menu. Vendas fica com 4 entradas. Orçamento também fica com 4: Pedidos de custo (abas Fila e Cotação), Produtos (abas Preços, Comparar e Ofertas), Fornecedores e Parâmetros (abas Custo e Telha). O **Histórico de compras sai**, porque a tela Ordens de compra já mostra o histórico. As linhas de Vendas, Orçamento e Compras abaixo já refletem isso.
-
-| Menu | Entradas | Observação |
-|---|---|---|
-| **Vendas** | Propostas · Clientes · **Meus Pedidos** · Relatórios (Gerencial, com a aba Cotações) | Meus Pedidos entra no grupo: é onde o vendedor responde `C8`. |
-| **Orçamento** | **Pedidos de custo** (Painel do Comprador + Pedido de cotação) · **Produtos** (Catálogo + Pesquisa de materiais + Ofertas, com a página do produto) · Fornecedores · **Parâmetros** (custo e telha) | De 9 entradas para 4. |
-| **Compras** | Requisições · Ordens · **Aprovar OC** · Follow-up (CCP) · **Reprovados** · Dashboard | "Aprovações" vira "Aprovar OC". **Sem Histórico**: vira filtro por produto em Ordens. |
-| **Comissões** | O módulo atual (não muda) + Comissões da proposta (novas) | Nada do módulo atual é tocado. |
-| **Cadastros ou Fiscal** | Compradores · **Fila do Fiscal** · Sincronização Omie (TI) | |
-| **Ocultas** | `propostas-delegacao`, `propostas-valores`, `custo-item`, `solicitacoes-custo` | Liberam capacidade e não aparecem no menu. |
-
-## 7. Ordem de construção
-
-1. **Proposta nova** (seção 5). É a tela de uso diário e a que mais muda. Depende de uma decisão: a condição de pagamento vira lista da conta. O imposto continua digitado pelo vendedor (N16-95).
-2. **Meus Pedidos com pendência `C8`.** Combinar com a frente "encerrar pedido zerado", que mexe na mesma tela.
-3. **Página do produto.** Reaproveita Catálogo e Histórico.
-4. **Emitir OC com dados da proposta e imposto por item.**
-5. **Fila do Fiscal.** Reaproveita Pedidos de Venda.
-6. Comissões novas.
-
-## Ver também
-
-[[11-Proposta-e-Pedido-de-Venda]] · [[12-Orcamento-Base-de-Preco]] · [[13-Custo-Real-e-Comissao-no-Fluxo]] · [[Mapa-IncluirPedido-Omie]]
-
-## Detalhe técnico
-
-Para quem mexe no código. Tudo o que saiu do texto principal está aqui.
-
-### Como a auditoria foi feita
-
-Foram lidos os 47 arquivos `page.tsx` de `app/(protected)/vendas`, `orcamento` e `compras` e os componentes que cada um abre: títulos, colunas, filtros, ações e serviços chamados. Os arquivos de PCP e Meus Pedidos foram vistos só pelo nome dos componentes (`CarteiraPrevisao`, `PainelPcp`, `PainelVendas`) ❓.
-
-### Colunas, filtros e campos por tela: Vendas
-
-| Tela | Detalhe lido no código |
-|---|---|
-| Propostas, lista | Resumo: Total cotado, Em aberto, Fechadas, Perdidas, Conversão. Filtros: Empresa, Status, Período, Unidade (**Mogi, Uberaba, Arujá**), Responsável. Busca por nº e cliente. Botão "Nova proposta". |
-| Proposta, formulário | Blocos Emissão, Cliente, Itens, Condições de fornecimento, Análise de margem. Lateral com Totais e ações: Salvar, Fechar itens, Reabrir, Perder, "Pedido no Omie", Duplicar, Revisões, Linha do tempo, PDF, E-mail. |
-| Proposta, "Pedido no Omie" | `PedidoOmieModal`: monta o cabeçalho e os itens para **copiar e digitar no Omie à mão**, escolhe a conta (Mogi ou Uberaba) e pede de volta o nº do pedido digitado. |
-| Clientes, lista | Cards Clientes, Com proposta em 90 dias, Próximo contato vencido. Filtros Status, Segmento, Próximo contato. Exportar contatos. |
-| Cliente, ficha | Dados, compradores, relacionamento (segmento, potencial, próximo contato). Estatísticas: Propostas, Última proposta, Total cotado, **Total fechado**, **Conversão**, Ticket médio. |
-| Relatório de Cotações | Totais: Propostas, Valor acumulado, **Fechadas**, Valor fechado, Conversão. Tabela Cliente, Responsável, Valor. Excel. |
-| Relatório Gerencial | Resumo (Total cotado, Em aberto, Fechadas, **Perdidas**, Conversão). Por responsável, empresa e unidade (**Mogi, Uberaba, Arujá**). **Motivos de perda**. Status da carteira. Excel. |
-| Pedidos de Venda (inativa no menu, N16-33) | Pedidos **sincronizados do Omie**: nº, sequencial, inclusão, etapa, cliente, vendedor, valor, situação. Detalhe com **Autorizado, Denegado, Faturado, Cancelado, Devolvido, Devolução Parcial, Encerrado**. Datas de inclusão, previsão, faturamento, cancelamento e encerramento. Motivo e usuário do encerramento. |
-| Notas Fiscais de Saída (inativa) | Data, nº NF, cliente, vendedor, filial, categoria, IPI, mercadorias, total, "Averbada?". |
-
-### Colunas, filtros e campos por tela: Orçamento
-
-| Tela | Detalhe lido no código |
-|---|---|
-| Painel do Comprador | Cards Fila de hoje, Solicitações abertas, **Vencem hoje, Atrasadas**, Ofertas vencendo em 7 dias. Atribuição: Comigo, Livres na fila. Ações: Assumir, Liberar, Responder, "Sem fornecedor", Cancelar. Avisos de "Sem disputas suficientes" e de certificados vencendo. |
-| Responder solicitação (modal) | O Comprador escolhe a **oferta vigente** que vira o custo do item; "o vendedor é avisado"; lança nova oferta ou responde "Sem fornecedor". |
-| Pedido de cotação | Um e-mail por fornecedor da categoria, com itens e "Resposta até". Busca no catálogo. Modal de análise do item: última compra, média e mínimo, cotações válidas. |
-| Ofertas de fornecedor | Lista: produto, fornecedor, preço, custo líquido, cotação, validade. Ações: Lançar oferta, **Importar mapa** (xlsx de Compras, com produtos pendentes), Importações, Invalidar, Exportar. |
-| Fornecedores, lista e ficha | Busca por nome ou CNPJ, categoria. Ficha com perfil de compras (e-mail de cotação, origem do ICMS padrão, entrega certificado), categorias, certificados, ofertas. |
-| Catálogo de produtos, lista e ficha | Busca por código ou trechos. **Produtos pendentes** (modal para ligar ao Omie). Ficha com preços, **média geral de 90 dias**, "pendente no Omie". |
-| Pesquisa de materiais | Menor custo e fornecedor vencedor por material, prazo e frete, quantos cotaram. Comparativo por quantidade. PDF "Cotação de Materiais". |
-| Parâmetros de custo | ICMS a recuperar por origem, validade padrão da oferta, janela do histórico; "salvar abre uma nova vigência". |
-| Tabela da telha | Custo por classe × espessura, núcleos, pinturas, com vigência; telhas já orçadas mantêm o custo da época. |
-| Custo por item (`custo-itens`) | Resumo do pedido, itens, **lotes**, custo médio, origem, "Cotação a conferir", "Custo completo/incompleto". Avisos **"Dados de exemplo"** e **"Custo sem impostos"**. |
-| Simulador de Orçamento | Digita compra e venda sem pedido e vê custo líquido, preço sugerido, margem, letra e status com o motor do Simulador de Comissão. **Não grava.** |
-| Sincronização Omie | "Sincronizando agora" e "Automática desligada: só pelo botão". |
-| Guia do fluxo do custo | `FluxoDoCusto` e `GuiaSuprimentos`: páginas "Para que serve". |
-
-### Colunas, filtros e campos por tela: Compras
-
-| Tela | Detalhe lido no código |
-|---|---|
-| Dashboard de compras | `PainelCompras`, `ComprasDashboard`. Fila de compras: requisições abertas, em cotação, aguardando aprovação, a receber, entregas atrasadas. Valor comprado em 12 meses, por comprador, atraso por tempo, a receber por etapa. |
-| Requisições (lista e kanban) | Requisições vindas do PCP ou manuais. Fechar compra, Ver OC. Filtro Unidade, Status, Ação. Arrastar no kanban. Cancelar com motivo. |
-| Nova requisição | Unidade, **nº do pedido de venda**, produto, quantidade, prazo, tipo sugerido (acabado ou não), finalidade. |
-| Emitir OC | `FecharCompra`, **1.869 linhas**. Campos: unidade, fornecedor, contato, previsão, condição de pagamento e parcelas, moeda, contrato, nº do pedido no fornecedor, itens (produto, qtd, valor, desconto, tipo de material, local de estoque), frete (modalidade, placa), categoria, conta corrente, projeto, observações, resumo. "O Omie só aceita item com produto cadastrado na unidade." |
-| Pedidos de venda da OC | `PedidosVendaOC`: "Para que é esta compra". O comprador **digita um pedido de venda de cada vez**, vê o que falta comprar por item e marca. |
-| Ordens (lista, kanban, detalhe) | OC por status e origem ("Pedido feito direto no Omie: só leitura"). Detalhe com itens, parcelas, observações, histórico, comprador, PDF, Aprovar, Reprovar, Cancelar OC. |
-| Aprovações | OCs **acima do limite da unidade** aguardando o aprovador: Aprovar, Reprovar com motivo. |
-| Follow-up (CCP) | OCs aprovadas: confirmação do fornecedor, despacho (data, NF, transportadora), contatos, ocorrências. Cards Sem confirmação, Atrasadas, Chegam em 7 dias, Com ocorrência. |
-| Pedido Omie (detalhe) | Pedido de compra **feito direto no Omie**, só leitura, com itens, "Recebido", parcelas. |
-| Histórico de compras | Filtro Conta (Mogi, Uberaba), período, produto, fornecedor. Resumo. Gráfico por mês. |
-| Compradores | Compradores do Omie por unidade e o funcionário que emite a OC por eles. |
 
 ### Itens da proposta e campos do formulário (`PropostaForm.tsx`, `ItemProposta.tsx`)
 

@@ -16,6 +16,12 @@ criado_original: 2026-10-09
 
 > **Onde atua:** av-hub: API · MES: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define como o MES (sistema de produção) guarda o custo de cada lote de estoque e o informa ao av-hub, por uma rota que devolve o custo de cada item do pedido.
+> **Quem é afetado:** Estoque, Recebimento e a comissão: o custo do pedido passa a vir dos lotes realmente usados.
+> **Situação:** Parcial, dono Robert. Tabela de custo, carga inicial e telas prontas (✅); o lote do Recebimento já nasce com custo da OC. Faltam o custo na saída e a rota de custo (🔴). Em 16/10 decidiu-se que todo lote terá custo obrigatório (📝).
+> **Exemplo:** 20 flanges em três lotes (10×10, 5×12 e 5×15) dão custo total de 235,00 e médio de 11,75.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** R4, E3, E5 · **Dono:** Robert
 >

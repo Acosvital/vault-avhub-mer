@@ -16,6 +16,11 @@ criado_original: 2026-10-01
 
 > **Onde atua:** av-hub: banco, API · MES: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** O MES (sistema de produção) envia cada requisição de compra ao av-hub por `PUT`, com nova tentativa se falhar. Requisição só cancela se não tiver OC.
+> **Quem é afetado:** Robert (MES) e o DBA. Compras vê no av-hub as requisições assim que são abertas no MES.
+> **Situação:** ✅ Entregue em 02/10: o MES chama o PUT e a função de banco existe em produção. 📝 Requisição criada direto no av-hub não chega ao MES. 🔴 O MES ainda não lê a OC dela.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** P3, E4 · **Dono:** Robert
 >

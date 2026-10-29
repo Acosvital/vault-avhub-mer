@@ -70,20 +70,22 @@ As 100 flanges do Cliente Exemplo S.A. chegam à Embalagem, que registra os pall
 
 ### Objetivo (original)
 
-Receber o que está pronto, embalar e paletizar, decidir se o pedido sai por partes ou inteiro, montar a carga, definir o transporte e registrar a entrega. A Expedição tem **duas portas de entrada** hoje: a parcial atendida pelo Estoque (`atendidoPeloEstoque`) e a parcial que a Qualidade moveu (fabricado, [[08-Qualidade-Saida]]). Pela decisão de 14/10 haverá uma só: o **documento de retirada do Estoque**, porque tudo que é fabricado ou comprado passa pelo Estoque ([[03-Estoque-Atendimento-e-Despacho]]).
+A Expedição tem **duas portas de entrada** hoje: a parcial atendida pelo Estoque (`atendidoPeloEstoque`) e a parcial que a Qualidade moveu (fabricado, [[08-Qualidade-Saida]]). Pela decisão de 14/10 haverá uma só: o **documento de retirada do Estoque**, porque tudo que é fabricado ou comprado passa pelo Estoque ([[03-Estoque-Atendimento-e-Despacho]]).
 
 O sistema **nunca emite nota fiscal**. Ele sinaliza a necessidade e o Omie emite. No v1 as telas são 10.1 a 10.4.
 
 ### Quem atua (com telas)
 
-| Quem | Papel | Onde |
-|---|---|---|
-| Operador da Embalagem | Recebe a parcial, lança pallets (nome, peso, unidades) | `/logistica/expedicao`, setor tipo `EXPEDICAO` |
-| Operador da Logística | Confirma entrega, anexa comprovante, canhoto ou NF | idem, último setor |
-| PCP | Acompanha pedido, embalagens e entregas no detalhe | `/ordens-producao/[id]` |
-| Vendedor | Observa o status final no av-hub | HUB |
-| Cliente | Recebe | externo |
-| Faturamento (Omie) | Emite a NF | [[10-Fiscal-Omie]] |
+Papéis como no resumo do topo; aqui só onde cada um atua.
+
+| Quem | Onde |
+|---|---|
+| Operador da Embalagem | `/logistica/expedicao`, setor tipo `EXPEDICAO` (lança pallets: nome, peso, unidades) |
+| Operador da Logística | idem, último setor (NF além de comprovante e canhoto) |
+| PCP | `/ordens-producao/[id]` |
+| Vendedor | HUB |
+| Cliente | externo |
+| Faturamento (Omie) | [[10-Fiscal-Omie]] |
 
 ### Regras decididas
 
@@ -94,7 +96,7 @@ O sistema **nunca emite nota fiscal**. Ele sinaliza a necessidade e o Omie emite
 | 3 | O peso dos pallets só é editável no setor `EXPEDICAO`; nos seguintes viaja com a peça, só leitura | ✅ `FilaSetor.tsx:810-835` |
 | 4 | Entrega é **livre, item a item e por quantidade**: não existe trava de "pedido inteiro pronto". O pedido só vira `ENTREGUE` quando zera o pendente de todos os itens ativos e não resta parcial ativa | ✅ `entregas.service.ts:17-24`, `:104-130` |
 | 5 | Só entrega parcial `CONCLUIDO`, com quantidade até o pendente do item e até a quantidade da parcial | ✅ `entregas.service.ts:44-63` |
-| 6 | Parcial ou integral é decisão humana. Faturamento integral travado por um item que nunca chega: muda para parcial automaticamente ou exige decisão manual? (T-06) **Decidido em 29/10 (N16-130 e N16-131): o vendedor decide, pela marca "pode faturar em partes"; item que nunca chega é decisão manual, sem prazo automático.** | 📝 🔴 sem campo |
+| 6 | Parcial ou integral é decisão humana. Faturamento integral travado por um item que nunca chega: muda para parcial automaticamente ou exige decisão manual? (T-06) **Decidido em 29/10 (N16-130 e N16-131), ver quadro no topo.** | 📝 🔴 sem campo |
 | 7 | **Despacho é no Estoque**: quem precisa da mercadoria (Expedição ou Produção) gera um **documento de retirada**; a baixa do saldo acontece na retirada. Hoje a baixa ocorre quando a Embalagem **recebe** a parcial | 📝 🔴 |
 | 8 | Nota fiscal de saída é do Omie. O MES guarda só o número digitado na entrega | 📝 ✅ `entregas.service.ts:82` |
 | 9 | Remessa de produtos (registro de remessa) vai ao Ciclo 2 (22/01/2027), item 27 do registro de 07/10 | 📝 |
@@ -178,8 +180,8 @@ Nenhuma entidade (carga, romaneio, veículo, transportadora de saída) existe em
 
 ### Pendências
 
-- Nathan: quem pode gerar o documento de retirada e quem o confirma (almoxarife)? A retirada exige conferência física dupla? **Decidido em 29/10/2026 (N16-120): a Expedição pede, só o Estoque confirma. Conferência física dupla e o que o documento imprime seguem abertos.**
-- Nathan e Comercial: pedido integral é opção do vendedor, regra do cliente ou decisão da Expedição? E o prazo máximo de espera? **Decidido em 29/10/2026 (N16-130 e N16-131): o vendedor decide; sem prazo automático.**
+- Nathan: quem pode gerar o documento de retirada e quem o confirma (almoxarife)? A retirada exige conferência física dupla? **Decidido em 29/10/2026 (N16-120): a Expedição pede, só o Estoque confirma. Seguem abertos a conferência física dupla e o que o documento imprime.**
+- Nathan e Comercial: pedido integral é opção do vendedor, regra do cliente ou decisão da Expedição? E o prazo máximo de espera? **Decidido em 29/10/2026 (N16-130 e N16-131), ver quadro no topo.**
 - Expedição: frota própria e terceirizada usam o mesmo fluxo de carga?
 - Robert: `PerfilSetor` por filial (hoje inexistente) afeta quem vê a carga.
 

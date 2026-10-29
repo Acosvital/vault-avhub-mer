@@ -11,11 +11,12 @@ fontes: [00-Fluxo-Mestre-0b, LOG-26, v1 01-Fluxo-Operacional/PCP-Carteira, v1 Mo
 
 **Em uma frase:** o PCP (planejamento e controle da produção) vê os pedidos que o vendedor liberou e decide, para cada item, para onde ele vai, quanto vai agora e por quais setores passa.
 
-> [!info] Decisões de 29/10/2026
+> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
 > - A Triagem não mostra o saldo do Estoque. Quem decide sobre saldo é o Estoque, na etapa dele (N16-138).
 > - Saldo zero continua exigindo o clique do almoxarife, mesmo depois do marco zero de 13/11 (N16-139).
 > - No retrabalho, o PCP escolhe o setor de volta. Hoje o código volta sempre ao setor anterior (N16-141).
 > - Pedido anterior à data de corte fica fora do MES e termina no sistema antigo. Falta trocar o erro 404 por uma mensagem clara (N16-142).
+> - Ordem de Produção: desenho em [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] (uma por destino de fabricação, numerada `pedido/N`; revenda não gera ordem). Proposta aceita em 15/10, sem código.
 
 ## Como funciona, passo a passo
 
@@ -68,22 +69,9 @@ Entrada: [[01-Vendas-Liberacao]]. Próxima raia: [[03-Estoque-Atendimento-e-Desp
 
 ## Detalhe técnico
 
-Tudo abaixo é o conteúdo completo da nota anterior: nós, regras numeradas, matriz de destinação, estados, telas, rotas, código, pendências e o diagrama.
-
 Nós do [[00-Fluxo-Mestre-0b]]: `P1` Triagem do Pedido, `P2` Destinação do Pedido, `P6` Novo norte. O nó `P3` (requisição de compra de origem PCP) fica em [[04-Circuito-de-Compra]]. Entrada: [[01-Vendas-Liberacao]]. Saída: [[03-Estoque-Atendimento-e-Despacho]]. Selos em [[Regras-do-Vault]].
 
-> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
-> - N16-138: a Triagem **não** mostra o saldo do Estoque por item; o Estoque decide na etapa dele.
-> - N16-139: o saldo zero continua exigindo o clique do almoxarife, também depois do marco zero de 13/11.
-> - N16-141: no retrabalho (`P6`), o PCP escolhe o setor de volta; hoje o código volta sempre ao setor anterior.
-> - N16-142: pedidos anteriores à data de corte da liberação ficam fora do MES e terminam no sistema antigo; falta trocar o erro 404 por uma mensagem clara.
-> - Ordem de Produção: desenho em [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] (uma por destino de fabricação, numerada `pedido/N`; revenda não gera ordem). Proposta aceita em 15/10, sem código.
-
-### Objetivo
-
-O PCP enxerga os pedidos que o vendedor liberou (`P1`) e, por **rodada**, decide para cada item **qual destino** recebe (fábrica de fabricação ou a fábrica Revenda), **quanto** manda agora (até o restante) e **qual roteiro** o destino segue (`P2`). Cada rodada gera **uma ordem por destino**. O backend insere o setor **Estoque** como etapa 1 de todo roteiro: a pergunta "há saldo?" não é do PCP, é do Estoque ([[03-Estoque-Atendimento-e-Despacho]]). Ao gravar, o MES confirma a importação ao av-hub e a marcação do vendedor trava.
-
-### Quem atua
+### Quem atua (onde)
 
 | Quem | Papel | Onde |
 |---|---|---|
@@ -181,11 +169,11 @@ O `POST /pedidos/completo` singular foi apagado (PR #50); só o `/lote` existe.
 | 1 | Fila "Novo norte" (P6): decidir retrabalho ou reabrir compra depois de reprovação de saída ou recompra | Robert | P6 | 🔴 |
 | 2 | `RoteiroItem` (roteiro por item, C8, EC-03) | Robert | P2, P6 | 🔴 |
 | 3 | Renomear rota, campo e prefixo (`/carteira`, `ordemProducao`, `OP-`) para os nomes novos (BL-036) | Robert | P1, P2 | 🔴 |
-| 7 | **Ordem de Produção: entidade e documento imprimível**, só para o que será fabricado (BL-052; esforço a estimar pelo Robert) | Robert | P2 | 🔴 📝 N14-22 |
-| 8 | **Mostrar a OC do pedido** (Triagem, Destinação, Atendimento) lendo a referência da OC do hub (BL-049, depende de BL-001) | Robert | P1, P2, E1 | 🔴 📝 N14-20 |
 | 4 | Consumo de matéria-prima ao enviar à produção (J2, J3): hoje o restante segue o roteiro sem baixa | Robert | P2, E4 | 🔴 |
 | 5 | Pedido manual (`SistemaOrigem.MANUAL`) fora da espinha; ver anexo [[Pedido-Manual]] | Nathan | P2 | 🟡 |
 | 6 | Pedido liberado anterior à data de corte não aparece na Triagem (404 nos itens) | Nathan | P1 | 📝 decidido em 29/10 (N16-142): ficam fora do MES e terminam no sistema antigo; falta a mensagem no lugar do 404 (ver [[01-Vendas-Liberacao]]) |
+| 7 | **Ordem de Produção: entidade e documento imprimível**, só para o que será fabricado (BL-052; esforço a estimar pelo Robert) | Robert | P2 | 🔴 📝 N14-22 |
+| 8 | **Mostrar a OC do pedido** (Triagem, Destinação, Atendimento) lendo a referência da OC do hub (BL-049, depende de BL-001) | Robert | P1, P2, E1 | 🔴 📝 N14-20 |
 
 ### Pendências
 
@@ -212,5 +200,3 @@ flowchart TD
     P6 -->|retrabalho| F1["F1 · Setores produtivos do roteiro"]
     P6 -->|"reabre compra"| P3
 ```
-
-Próxima raia: [[03-Estoque-Atendimento-e-Despacho]].

@@ -1,0 +1,249 @@
+{
+  "id": "orcamento",
+  "nome": "Orçamento",
+  "fase": "Vender",
+  "fraseMapa": "Mantém a base de preço de compra",
+  "titulo": "Orçamento: a base de preço de compra e o pedido de custo",
+  "resumo": "O Orçamento é o setor novo que vai atrás de fornecedores e mantém a base de preço de compra de cada produto, sempre com histórico. O vendedor consulta essa base ou pede uma cotação quando não tem o custo, e nunca fica bloqueado esperando.",
+  "recebeDe": [
+    "Vendas: pedido de custo do vendedor que não tem o dado",
+    "Compras: valor das ordens de compra efetivadas, que alimenta a base",
+    "Fornecedores: ofertas e cotações, por fora do sistema",
+    "Compras: valor correto usado na OC, que entra no histórico"
+  ],
+  "entregaA": [
+    "Vendas: custo preenchido na proposta, depois da cotação",
+    "Vendas: página do produto, só para consulta",
+    "Compras: histórico de preço de compra por produto"
+  ],
+  "atuam": [
+    {
+      "quem": "Orçamento",
+      "papel": "Setor novo que cota com fornecedores, atualiza ofertas e responde pedidos de custo."
+    },
+    {
+      "quem": "Vendedor",
+      "papel": "Consulta a página do produto, pede cotação e decide o valor que põe na proposta."
+    },
+    {
+      "quem": "Compras",
+      "papel": "Dona do dado de compra; o valor das ordens efetivadas alimenta a base."
+    }
+  ],
+  "estados": [
+    "ABERTA",
+    "RESPONDIDA",
+    "SEM_FORNECEDOR",
+    "VIGENTE",
+    "INVALIDADA",
+    "HISTORICA"
+  ],
+  "passos": [
+    {
+      "id": "V0.2",
+      "t": "Vendedor tenta preencher o custo",
+      "quem": "Vendedor",
+      "onde": "Proposta (detalhe)",
+      "st": "gap",
+      "stl": "Falta a base de preço",
+      "estado": "",
+      "o": "O vendedor digita o custo que conseguiu por telefone ou e-mail. Ele não é o dono do dado de custo, mas decide o valor que põe na proposta e responde por ele.",
+      "ex": "O vendedor do Cliente Exemplo S.A. não tem o preço do flange e precisa de uma referência antes de fechar a proposta."
+    },
+    {
+      "id": "B2",
+      "t": "Consulta a página do produto",
+      "quem": "Vendedor",
+      "onde": "Catálogo (/orcamento/catalogo-produtos); página do produto ainda a definir",
+      "st": "part",
+      "stl": "Catálogo pronto, página do vendedor falta",
+      "estado": "",
+      "o": "A página do produto mostra histórico de preços, top fornecedores com nota, flutuação e valor médio. É só leitura. Hoje só quem tem permissão de custo vê esses preços.",
+      "ex": "O vendedor olha o histórico do flange e vê a média das compras anteriores. Se a cotação for recente, usa o valor dela."
+    },
+    {
+      "id": "B3",
+      "t": "Pede o custo ao Orçamento",
+      "quem": "Vendedor",
+      "onde": "Solicitações de custo, na proposta",
+      "st": "part",
+      "stl": "Pedido pronto, cronômetro falta",
+      "estado": "ABERTA",
+      "o": "Sem o dado, o vendedor cria um pedido de custo de um item. Não há prazo fixo, e o sistema cronometra o tempo. O vendedor segue trabalhando enquanto espera.",
+      "ex": "O vendedor pede ao Orçamento o custo dos 100 flanges e continua montando a proposta."
+    },
+    {
+      "id": "B4",
+      "t": "Orçamentista cota com fornecedores",
+      "quem": "Orçamento",
+      "onde": "Painel do Comprador (/orcamento/painel-comprador) e Pedido de cotação (/orcamento/pedido-cotacao)",
+      "st": "part",
+      "stl": "Pronto no módulo de teste",
+      "estado": "RESPONDIDA",
+      "o": "O orçamentista assume o pedido, cota com os fornecedores e responde com uma oferta. A oferta grava na base e o custo é preenchido na proposta. Se nenhum fornecedor serve, o pedido fecha com justificativa.",
+      "ex": "O orçamentista cota os flanges com fornecedores e responde ao pedido. O custo aparece na proposta do vendedor."
+    },
+    {
+      "id": "B1",
+      "t": "Oferta entra na base com histórico",
+      "quem": "Sistema e Orçamento",
+      "onde": "Ofertas de fornecedor (/orcamento/ofertas-fornecedor)",
+      "st": "part",
+      "stl": "Oferta pronta, fonte da OC falta",
+      "estado": "VIGENTE",
+      "o": "A oferta não se altera depois de gravada. Para corrigir, o orçamentista invalida com motivo e lança outra, e assim o histórico fica completo. Vale sempre o valor mais atualizado.",
+      "ex": "A cotação dos flanges vira uma oferta vigente. Se estava errada, o orçamentista a invalida com motivo e lança a certa."
+    },
+    {
+      "id": "C7 · B1",
+      "t": "Ordem de compra alimenta a base",
+      "quem": "Compras e sistema",
+      "onde": "Histórico de compras (/compras/historico-compras)",
+      "st": "gap",
+      "stl": "Decidido, sem código",
+      "estado": "",
+      "o": "As ordens de compra efetivadas são a segunda fonte da base, com o custo da última compra item a item. O valor correto que Compras usou na ordem também deve entrar no histórico.",
+      "ex": "Quando Compras emitir a ordem dos 100 flanges, o preço pago passa a ser a última referência de compra do produto."
+    },
+    {
+      "id": "V0.3",
+      "t": "Custo chega à proposta",
+      "quem": "Sistema",
+      "onde": "Rodapé da proposta",
+      "st": "gap",
+      "stl": "Falta fazer",
+      "estado": "",
+      "o": "Com o custo preenchido, o sistema calcula margem e comissão estimada para o vendedor. Item sem custo e sem fornecedor deixa a proposta incompleta.",
+      "ex": "Com o custo dos flanges respondido, a proposta fica completa e a margem aparece para o vendedor."
+    }
+  ],
+  "outroCaminho": {
+    "titulo": "E se nenhum fornecedor atender?",
+    "texto": "O orçamentista registra uma justificativa quando não há fornecedor, e o pedido de custo encerra sem resposta de preço. O vendedor nunca fica bloqueado e segue com o que tem.",
+    "etapas": [
+      "Orçamentista tenta cotar",
+      "Nenhum fornecedor serve",
+      "Pedido fecha com justificativa"
+    ],
+    "nota": "O sistema funciona mesmo sem orçamentista disponível."
+  },
+  "regras": [
+    {
+      "t": "Base com histórico",
+      "d": "A base é o preço de compra do produto e guarda sempre o histórico."
+    },
+    {
+      "t": "Duas fontes, vale o mais novo",
+      "d": "Ordens de compra efetivadas e atualização do orçamentista alimentam a base, e vale o valor mais atualizado."
+    },
+    {
+      "t": "O custo não é do vendedor",
+      "d": "Ele preenche com o que conseguiu e responde pelo valor que decide."
+    },
+    {
+      "t": "Pedido de custo sem prazo fixo",
+      "d": "O tempo é cronometrado e o vendedor nunca fica bloqueado."
+    },
+    {
+      "t": "Oferta não se edita",
+      "d": "Para corrigir, invalida com motivo e lança outra."
+    },
+    {
+      "t": "Nota do fornecedor",
+      "d": "Pesa preço em 50%, prazo em 30% e histórico em 20%; sem dado, a nota fica neutra com aviso de poucos dados."
+    },
+    {
+      "t": "Cotação recente",
+      "d": "Vale a última cotação com menos de 7 dias; mais velha, o vendedor vê a média e pode pedir nova."
+    }
+  ],
+  "telas": [
+    {
+      "nome": "Painel do Comprador",
+      "rota": "/orcamento/painel-comprador",
+      "quem": "Orçamento",
+      "st": "ok"
+    },
+    {
+      "nome": "Pedido de cotação",
+      "rota": "/orcamento/pedido-cotacao",
+      "quem": "Orçamento",
+      "st": "ok"
+    },
+    {
+      "nome": "Ofertas de fornecedor",
+      "rota": "/orcamento/ofertas-fornecedor",
+      "quem": "Orçamento",
+      "st": "ok"
+    },
+    {
+      "nome": "Fornecedores",
+      "rota": "/orcamento/fornecedores",
+      "quem": "Orçamento",
+      "st": "ok"
+    },
+    {
+      "nome": "Catálogo de produtos",
+      "rota": "/orcamento/catalogo-produtos",
+      "quem": "Orçamento, vendedor",
+      "st": "ok"
+    },
+    {
+      "nome": "Pesquisa de materiais",
+      "rota": "/orcamento/pesquisa-materiais",
+      "quem": "Orçamento",
+      "st": "ok"
+    },
+    {
+      "nome": "Parâmetros de custo",
+      "rota": "/orcamento/parametros-custo",
+      "quem": "Orçamento",
+      "st": "ok"
+    },
+    {
+      "nome": "Tabela da telha",
+      "rota": "/orcamento/tabela-telha",
+      "quem": "Orçamento",
+      "st": "ok"
+    },
+    {
+      "nome": "Histórico de compras",
+      "rota": "/compras/historico-compras",
+      "quem": "Compras",
+      "st": "ok"
+    },
+    {
+      "nome": "Página do produto para o vendedor",
+      "rota": "a definir",
+      "quem": "Vendedor",
+      "st": "gap"
+    },
+    {
+      "nome": "Matriz de preços",
+      "rota": "a definir",
+      "quem": "Orçamento, vendedor",
+      "st": "gap"
+    }
+  ],
+  "contratos": [
+    {
+      "id": "LOG-52",
+      "titulo": "Migração do módulo Comercial para a API do Hub",
+      "nos": "B1 · B2 · B3 · B4"
+    },
+    {
+      "id": "LOG-42",
+      "titulo": "Orçamento sair do JSON do repositório",
+      "nos": "B1"
+    }
+  ],
+  "cartao": null,
+  "palavrasFonte": 2961,
+  "duvidas": [
+    "Os nós B1 a B4 seguem o fluxo mestre, mas a nota do Orçamento continua marcada como proposta.",
+    "A nota está com status proposta, e a maior parte do módulo existe só no módulo de teste do Pablo, ainda não na API do Hub.",
+    "Os passos V0.2, V0.3 e C7 pertencem a outras raias; entraram aqui porque a nota os liga ao Orçamento.",
+    "A fase no mapa (Vender) é minha escolha, a nota não diz em qual fase o setor fica.",
+    "O setor é novo e o Moisés é uma das pessoas (N16-104). Os perfis, inclusive o de orçamentista, serão cadastrados depois (N16-85)."
+  ]
+}

@@ -15,6 +15,11 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:190-197", 
 
 > **Onde atua:** av-hub: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Lista única de trabalho do banco e da API de Compras: ordens de compra (OC), requisições, compradores, parâmetros, catálogos do Omie e rotas `/compras/*`. Reúne as decisões do Nathan de 24/09.
+> **Quem é afetado:** DBA e backend construíram. Compradores e Gerência de Compras (que aprova e cancela, com limite de R$ 30.000) usam o resultado.
+> **Situação:** ✅ Tabelas e rotas existem no código. 🟡 O B0 (levar o schema à produção) ficou superado: as tabelas existem em produção desde 02/10, pelo dump de 07/10. Os apêndices A a C ainda precisam de conferência.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C0, C1, C4 · **Dono:** Gustavo (DBA)
 >

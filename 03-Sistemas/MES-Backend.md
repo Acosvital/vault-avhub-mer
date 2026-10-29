@@ -1,7 +1,7 @@
 ---
 tags: [sistemas, mes, api-pcp, nestjs, backend]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Robert
 fontes: [api-pcp 579a625 (develop), Dump MES (Esqueleto).sql de 14/10, v1 App-PCP-Backend-Producao, App-PCP-Visao-Geral, MES-Arquitetura-Decisoes]
@@ -9,9 +9,51 @@ fontes: [api-pcp 579a625 (develop), Dump MES (Esqueleto).sql de 14/10, v1 App-PC
 
 # MES Backend (`api-pcp`)
 
+**Em uma frase:** é a API do MES, o sistema de chão de fábrica da Aços Vital. Ela guarda os pedidos liberados, a produção por setor, o Estoque, as compras (lado fábrica), o Recebimento, a Qualidade e a Expedição. Dono: Robert.
+
+## Quem usa e para quê
+
+- As telas do MES ([[MES-Front]]): toda ação do operador passa por ela.
+- O av-hub ([[AV-Hub-API]]): troca pedidos liberados, requisições de compra e a etapa de cada item.
+- O sistema de permissões ([[RBAC-e-Permissoes]]): decide o que cada pessoa pode fazer.
+
+## Como se encaixa no fluxo
+
+- **PCP (planejamento e controle da produção):** lê os pedidos liberados na Triagem e grava a Destinação (`P1`, `P2`).
+- **Estoque:** guarda saldo, lotes e reservas e atende as parciais (`E1` a `E5`).
+- **Compras e Recebimento:** registra a requisição de compra (`P3`), a chegada com nota fiscal e a conferência (`R0` a `R6`).
+- **Qualidade:** inspeciona o lote que chegou (`Q1` a `Q4`).
+- **Produção e Expedição:** controla a fila de cada setor, a embalagem em pallets e a entrega (`F1`, `X1`, `X4`).
+- **Troca com o av-hub:** três rotinas automáticas enviam a requisição de compra, leem o andamento da compra e reenviam o aviso de pedido importado.
+
+## Regras que valem
+
+- Toda rota exige login. Só a checagem de saúde e o login são públicos.
+- Quem não tem permissão explícita não passa. Basta um dos perfis da pessoa permitir.
+- Mesmo com a tela liberada, só age num setor quem tem "pode atuar" nele.
+- O custo do lote só aparece para quem tem a permissão de custo.
+- Entrar com a conta Microsoft não cria usuário: o e-mail precisa já estar cadastrado.
+- As rotinas automáticas rodam dentro da própria API, sem agendador externo.
+
+## O que já existe e o que falta
+
+- ✅ Pedidos, parciais, Estoque, Compras · CCP, Recebimento, Qualidade, Expedição e entregas.
+- ✅ Envio da requisição ao av-hub e leitura dos 14 marcos da compra.
+- 🔴 Torre de Fluxo e custo por item não existem aqui. Os jobs do av-hub recebem erro 404.
+- 🔴 Fabricado aprovado não vira lote nem saldo.
+- 🔴 Não há documento de retirada. A baixa do saldo acontece quando a Embalagem recebe.
+- 🔴 O custo da OC (ordem de compra) nunca é gravado no lote.
+- 🔴 O MES não lê a referência da OC no av-hub.
+- 🟡 A tabela de fornecedores existe, mas nada a preenche nem lê.
+- 🟡 A rota antiga `GET /requisicoes-compra` não tem consumidor.
+- 🟡 Os três intervalos automáticos ainda ficam em variável de ambiente.
+- ❓ Conferir se as telas `movimentacao` e `movimentacoes` existem em produção.
+
+## Detalhe técnico
+
 API NestJS do MES: pedidos liberados, produção por setor, Estoque, circuito de compra (lado MES), Recebimento, Qualidade e Expedição. Dono: Robert. Stack: NestJS 11, Prisma 7 com adaptador `pg`, `class-validator`, JWT + `bcrypt`, Swagger/Scalar em `/docs` (✅ `api-pcp/package.json:19-47`, `src/main.ts:56-60`). Banco: [[Banco-MES]]. Telas que a consomem: [[MES-Front]]. Permissões: [[RBAC-e-Permissoes]]. Integração com o av-hub: [[Integracao-AvHub-MES]]. Selos: [[Regras-do-Vault]].
 
-## Como o app sobe
+### Como o app sobe
 
 | Item | Valor | Fonte |
 |---|---|---|
@@ -25,7 +67,7 @@ API NestJS do MES: pedidos liberados, produção por setor, Estoque, circuito de
 
 192 rotas em 33 módulos (contagem dos decorators `@Get/@Post/@Put/@Patch/@Delete` dos controllers, 14/10). A tabela rota a rota está na seção seguinte.
 
-## Módulos (`src/app.module.ts:36-72`)
+### Módulos (`src/app.module.ts:36-72`)
 
 | Módulo | Pasta | O que faz | Nós do 0b |
 |---|---|---|---|
@@ -43,11 +85,11 @@ API NestJS do MES: pedidos liberados, produção por setor, Estoque, circuito de
 | Integração av-hub | `integracao-avhub/` | rotas de serviço para o av-hub (`/requisicoes-compra`, `/itens/status`), envio da requisição (LOG-34), leitura dos marcos (LOG-35) | P3, C1 a C5 |
 | Painéis | `dashboard/`, `relatorios/`, `pedidos-excluidos/` | início, TV, relatórios de tempo por setor e de compras, pedidos excluídos | — |
 
-## Rotas por módulo e permissão
+### Rotas por módulo e permissão
 
 `telaSlug, ação` vem do `@RequirePermission` (ver [[RBAC-e-Permissoes]]). Todas exigem Bearer JWT, exceto as marcadas `público` ou `chave`. A lista inteira foi extraída dos controllers de `api-pcp/src` em 14/10 ✅.
 
-### Auth, Auditoria, Saúde
+#### Auth, Auditoria, Saúde
 
 | Rota | Permissão | Código |
 |---|---|---|
@@ -58,7 +100,7 @@ API NestJS do MES: pedidos liberados, produção por setor, Estoque, circuito de
 | `GET /auth/dashboard-check` | `dashboard`, visualizar | ✅ `auth.controller.ts:70` |
 | `GET /auditoria/login`, `/auditoria/acesso` | `usuarios`, visualizar | ✅ `auditoria.controller.ts:18,24` |
 
-### Pedidos (Triagem e Destinação) — P1, P2
+#### Pedidos (Triagem e Destinação) — P1, P2
 
 | Rota | Permissão | Código |
 |---|---|---|
@@ -75,7 +117,7 @@ API NestJS do MES: pedidos liberados, produção por setor, Estoque, circuito de
 | `/roteiro-item` (CRUD) | `ordens-producao` (editar/visualizar) | ✅ `roteiro-item.controller.ts` |
 | `GET /historico-itens-parciais`, `/:id` | `ordens-producao`, visualizar | ✅ `historico-itens-parciais.controller.ts:17,23` |
 
-### Parciais (fila de setor) — E3, E4, F1, Q7, X1
+#### Parciais (fila de setor) — E3, E4, F1, Q7, X1
 
 Todas com `movimentacoes`, que no guard vale "qualquer tela de fila de setor" (`atendimento`, `requisicoes`, `pedidos-compra`, `logistica-entrada`, `expedicao`, `inspecao-saida`) ✅ `common/constants/telas-fila-setor.constants.ts:7-19`, `auth/guards/permissions.guard.ts:56-58`. Além disso o service confere o `PerfilSetor.podeAtuar` do setor atual (`PerfisService.ensurePodeAtuar`).
 
@@ -90,7 +132,7 @@ Todas com `movimentacoes`, que no guard vale "qualquer tela de fila de setor" (`
 | `/divergencias` (POST, GET, GET `:id`, PATCH `:id`, PATCH `:id/resolver`) | `movimentacoes` | ✅ `divergencias.controller.ts:32-56` |
 | `POST /entregas`, `GET /entregas`, `GET /entregas/:id` | `movimentacoes` editar/visualizar | ✅ `entregas.controller.ts:35-47` |
 
-### Compras (lado MES) e Recebimento — P3, C5, R0 a R6
+#### Compras (lado MES) e Recebimento — P3, C5, R0 a R6
 
 | Rota | Permissão | Código |
 |---|---|---|
@@ -111,7 +153,7 @@ Todas com `movimentacoes`, que no guard vale "qualquer tela de fila de setor" (`
 
 A rota `PATCH /compras/requisicoes/:id/compra` ("Registrar compra" manual) **não existe mais** ✅ (nenhuma ocorrência em `compras.controller.ts`).
 
-### Estoque — E1, E3, E5
+#### Estoque — E1, E3, E5
 
 | Rota | Permissão | Código |
 |---|---|---|
@@ -130,7 +172,7 @@ A rota `PATCH /compras/requisicoes/:id/compra` ("Registrar compra" manual) **nã
 
 Observação: o controller usa o slug `movimentacao` (singular, ações do Estoque) e `movimentacoes` (plural, fila de setor). São duas telas diferentes em `telas` ✅ `estoque-operacao.controller.ts:55-85` x `itens-parciais.controller.ts:57`. Conferir se as duas existem em produção ❓.
 
-### Qualidade — Q1 a Q4
+#### Qualidade — Q1 a Q4
 
 | Rota | Permissão | Código |
 |---|---|---|
@@ -139,7 +181,7 @@ Observação: o controller usa o slug `movimentacao` (singular, ações do Estoq
 
 A Inspeção de saída (Q7) não tem controller próprio: é uma fila de setor tipo `QUALIDADE` (`/itens-parciais/:id/reprovar`).
 
-### Cadastros de produção, RBAC, Painéis
+#### Cadastros de produção, RBAC, Painéis
 
 `/fabricas`, `/maquinas`, `/operadores`, `/roteiros`, `/setores`, `/usuarios`, `/perfis`, `/telas`, `/usuarios-perfis`, `/dashboard`, `/dashboard/tv`: CRUD por tela com o mesmo slug do recurso (`fabricas`, `maquinas`, `operadores`, `roteiros`, `setores`, `usuarios`, `perfis`, `telas`, `dashboard`). Exceções ✅:
 - `GET /setores`, `/setores/:id`, `/setores/:id/painel` sem `@RequirePermission` (só JWT) — `setores.controller.ts:42-53`.
@@ -147,7 +189,7 @@ A Inspeção de saída (Q7) não tem controller próprio: é uma fila de setor t
 - `POST /perfis/:id/permissoes/bulk`, `/setores/bulk`, `/depositos/bulk`, `/usuarios`: `perfis`, editar — `perfis.controller.ts:66-97`.
 - `GET /usuarios-perfis`: `usuarios-perfis`, visualizar — `usuarios-perfis.controller.ts:17`.
 
-### Rotas de serviço para o av-hub (sem JWT)
+#### Rotas de serviço para o av-hub (sem JWT)
 
 | Rota | Auth | Uso | Código |
 |---|---|---|---|
@@ -156,7 +198,7 @@ A Inspeção de saída (Q7) não tem controller próprio: é uma fila de setor t
 
 **Não existem no MES** ✅ (grep em `api-pcp/src` sem ocorrência de `fluxo` nem `itens/custo`): `GET /fluxo/eventos`, `GET /fluxo/itens/:id/(tempo)`, `GET /fluxo/sla-etapas` (Torre de Fluxo, LOG-46) e `GET /itens/custo` (API-008/LOG-47). Os jobs do av-hub recebem 404 e esperam 10 min ([[AV-Hub-API]], [[Rastreabilidade-e-Torre-de-Fluxo]]). Dono: Robert 🔴.
 
-## Serviços que fazem a regra
+### Serviços que fazem a regra
 
 | Serviço (arquivo) | Responsabilidade | Observações |
 |---|---|---|
@@ -176,7 +218,7 @@ A Inspeção de saída (Q7) não tem controller próprio: é uma fila de setor t
 | `AuthService` | login com `bcrypt`, rate limit de 5 falhas por usuário e 20 por IP em 15 min, token por `JWT_EXPIRES_IN` (padrão `8h`) | `auth.service.ts:8-15`, `auth.module.ts:19` |
 | `PerfisService` | permissão por tela (OR entre perfis), `ensurePodeAtuar` por setor, `ensurePodeAtuarDepositos`, `depositosVisiveis`, `temPermissao` | `perfis.service.ts:349-364` |
 
-## Jobs e timers (todos dentro do processo da API, sem `@nestjs/schedule`)
+### Jobs e timers (todos dentro do processo da API, sem `@nestjs/schedule`)
 
 Não há `@Cron`; os três timers usam `setInterval` com `unref()` ✅ (grep em `src`).
 
@@ -188,7 +230,7 @@ Não há `@Cron`; os três timers usam `setInterval` com `unref()` ✅ (grep em 
 
 Reação por marco (`requisicao-avhub.eventos.ts:234-246`): `requisicao_recebida`, `requisicao_reaberta`, `oc_cancelada` → `AGUARDANDO_COMPRADOR`; `em_cotacao`, `oc_removida` → `EM_COTACAO`; `oc_criada`, `oc_enviada_aprovacao` → `EM_APROVACAO`; `oc_aprovada` → `COM_FORNECEDOR`; `despachada` → `EM_TRANSITO`; `requisicao_cancelada` → `CANCELADA` ✅. `fornecedor_confirmou`, `previsao_alterada`, `ocorrencia` e `oc_no_omie` só atualizam campos da situação (previsão, ocorrência aberta) sem mudar a etapa ❓ (conferir ramo a ramo em `:107-230`).
 
-## Variáveis de ambiente (conferidas no código)
+### Variáveis de ambiente (conferidas no código)
 
 | Variável | Uso | Padrão | Código |
 |---|---|---|---|
@@ -207,11 +249,11 @@ Reação por marco (`requisicao-avhub.eventos.ts:234-246`): `requisicao_recebida
 
 As três variáveis `AVHUB_*_INTERVALO_*`/`_MIN` são regra em ambiente. A regra do Nathan ("nenhuma regra em variável de ambiente para jobs novos") vale para os jobs do av-hub; no MES esses três timers são anteriores à regra 🟡. Chaves e escopos: [[Chaves-e-Autenticacao]].
 
-## O que o MES chama no av-hub
+### O que o MES chama no av-hub
 
 `GET /pedidos_liberados`, `GET /pedidos_liberados/:numero/itens`, `POST /pedidos_liberados/:numero/importado` (LOG-26); `PUT /compras/requisicoes/origem/:id` (LOG-34); `GET /compras/requisicoes/eventos` (LOG-35); `GET /produtos`, `GET /produtos/:id` (snapshot do material); `GET /unidades` (nome da filial, cache de 10 min, `estoque-operacao.service.ts:36`) ✅. **Nunca chama** `GET /ordens-compra/referencia` (API-004/007): o MES não consome a referência da OC 🔴.
 
-## O que falta ou diverge (resumo; detalhe em [[Pontas-Soltas]] e [[Diferencas-Codigo-x-Banco]])
+### O que falta ou diverge (resumo; detalhe em [[Pontas-Soltas]] e [[Diferencas-Codigo-x-Banco]])
 
 - 🔴 Módulo `fluxo` (Torre) e `GET /itens/custo` não existem.
 - 🔴 Fabricado aprovado não vira lote (`OrigemLote` só tem `RECEBIMENTO` e `CARGA_INICIAL`, `lotes` dump `:155-158`).

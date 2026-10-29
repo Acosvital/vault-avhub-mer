@@ -16,6 +16,11 @@ criado_original: 2026-10-15
 
 > **Onde atua:** MES: banco, API, front
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define o documento de retirada: quem precisa da mercadoria do Estoque (Expedição ou Produção) pede, o Estoque confirma, e só então o saldo baixa.
+> **Quem é afetado:** Estoque, Expedição, Produção e Embalagem. Hoje a baixa ocorre quando a Embalagem recebe a parcela. Passa a ocorrer na retirada confirmada, e a Embalagem só recebe depois dela.
+> **Situação:** Proposta, dono Robert. Nada existe no código; o SQL foi validado em banco descartável. Decidido em 29/10 quem pede e quem confirma; o que o documento imprime segue aberto. O BL-007 (3,5 pd) está fora da conta do Ciclo 1 até o Nathan decidir.
+
 > [!info] Situação em 15/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** E6, X1, F1 · **Dono:** Robert (MES, sem API entre sistemas)
 >

@@ -1,7 +1,7 @@
 ---
 tags: [pesquisa, omie, api, pedido, compra, recebimento, nf, cancelamento, oq-15, oq-16, oq-37, staging]
 criado: 2026-10-21
-atualizado: 2026-10-21
+atualizado: 2026-10-29
 status: proposta
 dono: Nathan
 fontes: [documentação pública do Omie lida em 21/10/2026: app.omie.com.br/api/v1/produtos/pedido/ (PedidoVendaProduto), /produtos/pedidocompra/ (PedidoCompra), /produtos/recebimentonfe/ (RecebimentoNFe), /produtos/nfconsultar/ (NFConsultar); vault-avhub-mer-v2 Omie-Integracao-Estado e Omie-Dicionarios/Pedidos-de-Venda; Perguntas-Proposta-Pedido-Comissao OQ-15, OQ-16, OQ-17, OQ-37, OQ-39, OQ-48; Registro-de-Decisoes]
@@ -9,13 +9,40 @@ fontes: [documentação pública do Omie lida em 21/10/2026: app.omie.com.br/api
 
 # Estudo do Omie para o projeto (21/10/2026)
 
+**Em uma frase:** esta nota resume o que a documentação da API do Omie (o ERP, sistema fiscal e financeiro) permite fazer com pedidos de venda, pedidos de compra e notas de entrada, e o que isso muda no projeto.
+
+**Quando consultar esta nota:** antes de desenhar qualquer envio ou leitura de pedido, nota, cancelamento ou devolução com o Omie. Status: 🟡 proposta. **Nenhum teste foi feito**: só leitura da documentação (21/10/2026). O Omie não tem ambiente de teste.
+
+Marcas: ✅ a documentação mostra · 🟡 leitura minha · ❓ só um teste real no Omie resolve.
+
+## Quem manda dado para quem, quando e por quê
+
+- **Hub para Omie (pedido de venda, a construir).** O hub enviará o pedido pelo `IncluirPedido`, usando o código do próprio hub como chave. Assim o hub conhece o pedido antes de o Omie responder (resolve OQ-15).
+- **Hub para Omie (ordem de compra, já existe).** A pipeline envia a OC pelo `UpsertPedCompra`. Hoje o envio não manda os impostos por item; o Omie aceita recebê-los.
+- **Omie para hub (pipeline).** A pipeline copia pedidos, notas e pedidos de compra. Ainda não copia a NF de entrada, que traz o imposto real e a data real de recebimento. Isso é um recurso novo a criar.
+
+## O que mudou nas decisões
+
+- **Cancelar pedido existe por API** (`CancelarPedidoVenda`). A primeira leitura errou, e foi corrigida em 23/10. O vendedor cancela, edita e exclui pelo hub (N16-84).
+- **Imposto da compra existe por item, em valor, sem DIFAL** (diferencial de alíquota). A NF de entrada traz percentual e valor.
+- **A NF de entrada não vem ligada ao item da OC** na prática (correção do Nathan, 21/10). O vínculo continua manual, com o PCP (N16-57).
+- **A quantidade devolvida não vem do Omie** (correção do Nathan, 21/10). Falta definir de onde sai a proporção do abatimento (OQ-42).
+- **Dá para mandar o nosso número de pedido** 🟡, mas falta testar se o Omie o mantém.
+- **O pedido criado por API pode nascer bloqueado** 🟡. Se nascer, o Fiscal não fatura sem desbloquear.
+
+## O que a pipeline precisa ganhar
+
+São sete trabalhos: gravar os códigos de integração de pedido e item, ler a NF de entrada, ampliar o espelho do pedido de compra, ampliar o envio da OC, capturar cancelamento e devolução na nota, criar o envio do pedido de venda por fila e ajustar o `exclusionSync` (a limpeza que apaga do hub o pedido que sumiu do Omie). Detalhe e checklist de 8 testes abaixo.
+
+## Detalhe técnico
+
 **O que é esta nota.** Resultado da leitura da documentação da API do Omie, cruzada com o que a pipeline do hub já faz (vault: [[Omie-Integracao-Estado]] e [[Pedidos-de-Venda]]). Marquei ✅ o que a **documentação mostra**, 🟡 o que é **leitura minha** e ❓ o que **só um teste real no Omie resolve**. O Omie **não tem ambiente de teste** (cadastros TESTE no ambiente de verdade): nenhum teste foi feito, só leitura.
 
-## 1. Pedido de venda (`/produtos/pedido/`)
+### 1. Pedido de venda (`/produtos/pedido/`)
 
 **Métodos do serviço:** `IncluirPedido`, `AlterarPedidoVenda`, `ConsultarPedido`, `ListarPedidos`, `StatusPedido`, `TrocarEtapaPedido`, `ExcluirPedido`, `DevolverPedido`, `AlterarPedFaturado`, `SimularImpostos`. **Não existe** método de cancelar nem de encerrar pedido.
 
-### Criar o pedido (V0.7): responde a OQ-15 e a OQ-16
+#### Criar o pedido (V0.7): responde a OQ-15 e a OQ-16
 | O que a documentação mostra | Efeito no projeto |
 |---|---|
 | ✅ `cabecalho.codigo_pedido_integracao` (texto de até 60) é o **nosso código** do pedido. Serve para consultar, alterar e excluir sem conhecer o número do Omie | **Resolve a OQ-15:** o hub sabe a chave **antes** de o Omie responder. A liberação pode ser gravada **na resposta do `IncluirPedido`**, que devolve `codigo_pedido` e `numero_pedido` (a opção (b) que eu já tinha como padrão) |
@@ -28,7 +55,7 @@ fontes: [documentação pública do Omie lida em 21/10/2026: app.omie.com.br/api
 | ✅ Não há campo de imposto de venda obrigatório no exemplo de inclusão; existe `codigo_cenario_impostos` e o método **`SimularImpostos`** (devolve ICMS, ST, IPI, PIS, COFINS por item) | 🟡 O Omie **calcula** o imposto de venda pelo cenário. O `SimularImpostos` pode alimentar o simulador (ST e DIFAL da venda) **sem digitação** |
 | ✅ Itens aceitam `inf_adic.numero_pedido_compra` e `item_pedido_compra` | Existe campo para ligar o item de venda a um pedido de compra no próprio Omie 🟡 |
 
-### Cancelar, devolver e encerrar (OQ-17 e OQ-48)
+#### Cancelar, devolver e encerrar (OQ-17 e OQ-48)
 | O que a documentação mostra | Efeito no projeto |
 |---|---|
 | ✅ **Existe `CancelarPedidoVenda`** (serviço `/produtos/pedidovendafat/`, entrada `nCodPed` ou `cCodIntPed`). **Correção de 23/10:** a primeira leitura olhou só o serviço `/produtos/pedido/` e concluiu errado que não havia cancelar. Esse serviço (Faturamento) também tem `FaturarPedidoVenda`, `ValidarPedidoVenda`, `DuplicarPedidoVenda`, `AssociarCodIntPedidoVenda` e `ObterPedidosVenda`. O serviço `/produtos/pedidoetapas/` (`ListarEtapasPedido`) devolve por pedido `cancelamento` (`cCancelado`, data, usuário), `devolucao` (`cDevolvido`) e `faturamento` (NF, chave, autorização) | O **vendedor** cancela, edita e exclui o pedido pelo Hub, que chama o Omie (N16-84). O hub registra o cancelamento e confirma lendo o `ListarEtapasPedido`. ❓ Testar a diferença entre `CancelarPedidoVenda` e `ExcluirPedido` |
@@ -39,7 +66,7 @@ fontes: [documentação pública do Omie lida em 21/10/2026: app.omie.com.br/api
 | ✅ `StatusPedido` devolve `etapa`, `cancelada`, `faturada` e a lista de NF-e (`ListaNfe`: número, chave, status, data) | Consulta barata do estado de **um** pedido, útil para a tela de "Meus Pedidos" sem esperar o sync |
 | ❓ "Operação não realizada" e "Operação desconhecida" (manifestação do destinatário) **não estão nestes serviços** | Hoje vêm do **scraping** da pipeline (`manifestos`, das 3 unidades: Aços, HRM e Uberaba; correção do Nathan, 22/10). O abatimento por **recusa** depende dessa cobertura (OQ-42) |
 
-## 2. Pedido de compra (`/produtos/pedidocompra/`): responde a OQ-37 em parte
+### 2. Pedido de compra (`/produtos/pedidocompra/`): responde a OQ-37 em parte
 | O que a documentação mostra | Efeito no projeto |
 |---|---|
 | ✅ **O item do pedido de compra TEM imposto por valor:** `nValorIcms`, `nValorSt`, `nValorIpi`, `nValorPis`, `nValorCofins`. Na consulta vêm também `nFrete`, `nSeguro`, `nDespesas` e `nValTot` (total do item com descontos, despesas e impostos) | **Confirma Compras:** o Omie guarda IPI, ICMS, ST, PIS e COFINS **por item**, em **valor** (não em percentual) |
@@ -51,7 +78,7 @@ fontes: [documentação pública do Omie lida em 21/10/2026: app.omie.com.br/api
 | ✅ `cEmailAprovador` no cabeçalho de inclusão e de upsert | O Omie tem **aprovador** de pedido de compra por e-mail 🟡 |
 | ✅ `cMkpAtuPv` e `nMkpPerc` por item | Ao receber, o Omie pode **atualizar o preço de venda** do produto. 🟡 Cuidado para não ligar isso sem querer |
 
-## 3. Recebimento de NF-e (`/produtos/recebimentonfe/`): a **NF de entrada** (N16-40 e N16-57)
+### 3. Recebimento de NF-e (`/produtos/recebimentonfe/`): a **NF de entrada** (N16-40 e N16-57)
 | O que a documentação mostra | Efeito no projeto |
 |---|---|
 | 🟡 A documentação lista, por item da NF de entrada, `nIdPedido`, `nIdItPedido`, `nNumPedCompra` e `cNumItPedCompra`. **O Nathan corrige (21/10): na prática a NF de entrada NÃO vem ligada ao item da OC.** Tratar como **não disponível** | **A tarefa do PCP (N16-57) continua inteira:** ligar a NF de entrada ao item do pedido, além do problema de unidade diferente (KG na nota, PC no pedido). Não dá para contar com a ligação automática. O teste 6 só confirma o que o Omie realmente devolve |
@@ -61,7 +88,7 @@ fontes: [documentação pública do Omie lida em 21/10/2026: app.omie.com.br/api
 | ✅ `itensCustoEstoque`: marca se ICMS, PIS, COFINS, IPI, frete, seguro e outras despesas **entram no custo de estoque** | 🟡 O Omie **já decide** quais impostos são custo e quais são crédito. Pode servir de **referência para o custo líquido** (a conferir com a Controladoria) |
 | ✅ `lote_validade` por item (número, quantidade, fabricação e validade) | O Omie guarda lote e validade do que entra |
 
-## 4. O que muda nas perguntas abertas
+### 4. O que muda nas perguntas abertas
 
 **Correção do Nathan em 21/10/2026:** a NF de entrada **não** vem ligada ao item da OC e a quantidade devolvida **não** dá para ver. Onde a documentação diz o contrário, vale a prática dele.
 | Pergunta | Situação depois do estudo |
@@ -75,7 +102,7 @@ fontes: [documentação pública do Omie lida em 21/10/2026: app.omie.com.br/api
 | **OQ-14** (numeração própria) | 🟡 Possível mandar `numero_pedido` ❓ testar |
 | **Data real de recebimento** (N16-56) | ✅ Existe (`dRec`), em serviço **ainda não sincronizado** |
 
-## 5. O que a pipeline do hub precisa ganhar (trabalho, não decisão)
+### 5. O que a pipeline do hub precisa ganhar (trabalho, não decisão)
 1. **Gravar** `codigo_pedido_integracao` do pedido e `codigo_item_integracao` do item.
 2. **Novo recurso:** recebimento de NF-e (`ListarRecebimentos` e `ConsultarRecebimento`), com `dRec`, itens, imposto real, cancelada e devolvida.
 3. **Ampliar** o espelho do pedido de compra com os valores de imposto e `cNumPedido`.
@@ -84,7 +111,7 @@ fontes: [documentação pública do Omie lida em 21/10/2026: app.omie.com.br/api
 6. **Novo envio:** `IncluirPedido` por fila, no padrão de `envioOrdensCompra.ts` (com `AlterarPedidoVenda` se o `bloqueado` exigir).
 7. **Ajustar o `exclusionSync`** para não apagar do hub o pedido que o sistema cancelou por conta própria.
 
-## 6. Testes que só o Omie responde (checklist)
+### 6. Testes que só o Omie responde (checklist)
 Todos no Omie de verdade, com **cadastros TESTE** e conferindo que nada vá a cliente, fornecedor ou financeiro reais.
 1. `IncluirPedido` mínimo: quais campos o Omie **exige** em cada filial.
 2. O Omie aceita o **nosso `numero_pedido`** e o mantém?

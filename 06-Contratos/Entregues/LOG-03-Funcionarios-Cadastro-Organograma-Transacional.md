@@ -23,6 +23,11 @@ fontes: ["api-acos-vital/src/schemas/core/tables/funcionarios/funcionarios.route
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Fez o cadastro de funcionário e o organograma (quem reporta a quem) serem salvos juntos, numa operação só, com a regra de ciclo no banco.
+> **Quem é afetado:** O RH: se algo falha, nada fica gravado pela metade; o sistema recusa hierarquia em ciclo e libera subordinados ao excluir um superior.
+> **Situação:** ✅ Entregue e confirmado ao vivo na `api-test` em 25/09/2026 (ciclo, falha desfeita e exclusão testados). O front ganhou a aba "Equipe".
+
 
 > **✅ Implementado e confirmado ao vivo contra `api-test.acosvital.com.br` em 25/09/2026.** Os 3
 > itens do "4. Aceite": dois usuários fechando ciclo ao mesmo tempo — exatamente 1 recebe 409

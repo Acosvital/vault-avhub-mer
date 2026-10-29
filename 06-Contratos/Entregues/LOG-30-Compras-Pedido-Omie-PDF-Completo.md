@@ -16,6 +16,11 @@ criado_original: 2026-09-30
 
 > **Onde atua:** av-hub: API · pipeline Omie
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Completou o detalhe do pedido de compra do Omie com o que faltava no PDF enviado ao fornecedor: endereço, e-mail, telefone, inscrição estadual (IE) e código do produto por item.
+> **Quem é afetado:** Compradores que geram o PDF do pedido. Backend e pipeline entregam os dados.
+> **Situação:** ✅ API entregue em 01/10; a pipeline passou a gravar a IE e os dados fiscais dos parceiros. Em aberto no contrato: IPI e ICMS ST, e o PDF do av-hub exibir os campos novos.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
 >

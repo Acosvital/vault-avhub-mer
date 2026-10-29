@@ -16,6 +16,11 @@ criado_original: 2026-09-29
 
 > **Onde atua:** av-hub: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Revisado em 02/10: enquanto o Omie for a origem, vendedor e comprador não são criados, excluídos nem editados (nome, e-mail, ativo) no av-hub. Têm período de atividade, e o comprador ganha sugestão de vínculo por semelhança de nome.
+> **Quem é afetado:** Quem cuida de Cadastros › Acessos: as telas perderam "Novo" e "Excluir" e mostram os dados do Omie só para leitura.
+> **Situação:** ✅ Entregue em 02/10: `POST` e `DELETE /vendedores` respondem 403; a sugestão existe. 🟡 As datas de atividade dos compradores estão no código, mas não deu para conferir pela API.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >

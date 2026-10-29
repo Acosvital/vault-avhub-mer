@@ -15,13 +15,14 @@ O MES (sistema de chão de fábrica) pede e depois só lê. O av-hub cota, aprov
 
 Nós do [[00-Fluxo-Mestre-0b]]: `P3`, `C0` a `C5`, `FN1`. Fecha em `FN1 → R0` ([[05-Recebimento]]). Selos em [[Regras-do-Vault]].
 
-> [!info] Decisões de 16 a 29/10/2026 (fluxo aprovado em 26/10)
-> - Antes de cotar, Compras confere o que o vendedor preencheu na proposta (`C6`).
-> - Compras pode seguir o fornecedor do vendedor ou usar o valor correto (`C7`).
-> - Se comprar acima do custo do vendedor, ele aprova ou reprova em Meus Pedidos (`C8`).
-> - Não há trava entre quem emite e quem aprova a OC (N16-123).
-> - O Compras será avisado da recompra por RNC (N16-127) e da reabertura do recebimento (N16-137).
-> - Tudo isso exige contrato novo entre MES e hub. Detalhe completo na seção técnica e em [[11-Proposta-e-Pedido-de-Venda]].
+> [!info] Decisões de 16 a 29/10/2026 (fluxo aprovado em 26/10; N16-120 a N16-143)
+> - Antes de cotar, Compras confere o que o vendedor preencheu na proposta: fornecedor, impostos e frete, que o sistema puxa para a OC (`C6`).
+> - Compras pode seguir o fornecedor do vendedor ou usar o valor correto, sem mudar a proposta (`C7`).
+> - Se comprar acima do custo do vendedor, por produto e sem tolerância, ele aprova ou reprova em Meus Pedidos; o reprovado vai à Gerência fisicamente e à lista de Reprovados de Compras (`C8`). Vale para o pedido da proposta e para o digitado no Omie 📝 (N16-08, N16-60 a N16-67, N16-76, N16-106) 🔴.
+> - Compras e o CCP registram as datas de entrega do fornecedor, que movem a previsão de faturamento (N16-88).
+> - Não há trava entre quem emite e quem aprova a OC; o Gerente de Compras pode aprovar a que ele mesmo emitiu. O limite de R$ 30 mil continua provisório (N16-123).
+> - O Compras será avisado no av-hub da recompra por RNC (N16-127; hoje só o MES sabe e a OC segue "atendida") e da reabertura do recebimento pelo PCP (N16-137), pelo mesmo caminho.
+> - Tudo isso exige contrato novo entre MES e hub. Detalhe em [[11-Proposta-e-Pedido-de-Venda]].
 
 ## Como funciona, passo a passo
 
@@ -81,25 +82,11 @@ O comprador manda o PDF ao fornecedor por fora. O CCP anota a confirmação e a 
 
 ## Detalhe técnico
 
-Tudo abaixo é o conteúdo original da nota, mantido para consulta.
-
-### Nós, entradas e decisões (texto original)
+### Nós e entradas
 
 Nós do [[00-Fluxo-Mestre-0b]]: `P3` requisição de compra (origem PCP, MES), `C0` requisição de compra (origem Compras, av-hub), `C1` cotação, `C2` acima de R$ 30 mil?, `C3` aprovação, `C4` emissão da OC, `C5` follow-up do CCP, `FN1` fornecedor. Fecha em `FN1 → R0` ([[05-Recebimento]]). Entrada: `E4` "solicitar compra" ([[03-Estoque-Atendimento-e-Despacho]]) e `Q3` recompra ([[06-Qualidade-Entrada]]). Sequências técnicas completas em [[Integracao-AvHub-MES]]. Selos em [[Regras-do-Vault]].
 
-> [!info] `C6` a `C8` (decisões de 16 a 26/10/2026, fluxo aprovado em 26/10)
-> Antes de cotar, Compras **confere a parte de compras** que o vendedor preencheu (fornecedor, impostos, frete), que o sistema puxa para a OC (`C6`); segue o fornecedor do vendedor ou usa o valor correto, sem mudar a proposta (`C7`); se comprar **acima do custo do vendedor**, por produto e sem tolerância, ele aprova ou reprova em Meus Pedidos, e o reprovado vai à Gerência fisicamente e à lista de Reprovados de Compras (`C8`). Vale para o pedido da proposta e para o digitado no Omie 📝 (N16-08, N16-60 a N16-67, N16-76, N16-106) 🔴. Compras e o CCP registram as datas de entrega do fornecedor, que movem a previsão de faturamento (N16-88). Detalhe em [[11-Proposta-e-Pedido-de-Venda]].
-
-> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
-> - N16-123: não há trava entre quem emite e quem aprova a OC; o Gerente de Compras pode aprovar a que ele mesmo emitiu. O limite de R$ 30 mil continua provisório.
-> - N16-127: o Compras é avisado no av-hub da recompra por RNC (hoje só o MES sabe e a OC segue "atendida"); exige contrato novo entre MES e hub.
-> - N16-137: a reabertura do recebimento pelo PCP também avisa o av-hub, pelo mesmo caminho.
-
-### Objetivo (original)
-
-Transformar uma **necessidade de material** em uma **Ordem de Compra aprovada**, enviada ao fornecedor e ao Omie, e acompanhar até a chegada física. O circuito cruza dois sistemas: o MES pede e depois só **lê**; o av-hub cota, aprova, emite, envia ao Omie e acompanha. O dado comercial (preço, fornecedor, condição) fica no av-hub; o MES recebe só os **marcos**.
-
-### Quem atua (completo)
+### Quem atua (onde)
 
 | Quem | Papel | Onde |
 |---|---|---|
@@ -305,5 +292,3 @@ flowchart TD
     P6["P6 · Novo norte: reabre compra"] --> P3
     C3 -.->|"reprovada ou OC cancelada"| C1
 ```
-
-Próxima raia: [[05-Recebimento]].

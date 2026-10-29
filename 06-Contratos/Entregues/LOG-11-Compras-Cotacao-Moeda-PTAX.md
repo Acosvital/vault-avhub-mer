@@ -25,6 +25,11 @@ fontes: ["api-acos-vital/src/schemas/core/tables/cotacoes_moeda/cotacoes_moeda.r
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Fez a cotação do dólar ou do euro na ordem de compra (OC) vir preenchida com a PTAX (cotação oficial) do Banco Central, em vez de digitada à mão.
+> **Quem é afetado:** Compradores: menos erro de digitação, que podia fazer a OC pular a aprovação por valor.
+> **Situação:** ✅ Rotas de cotação no código e job da PTAX na pipeline. ❓ Dados em produção não conferidos; na `api-test` a tabela estava vazia em 28/09.
+
 
 > **Concluído — movido para `Realizados/`[^c1] em 28/09/2026** (era o contrato 20). Backend na `api-test` e front mergeado na `develop` do av-hub. O que ainda falta (produção e dados da pipeline) é acompanhado no [[LOG-23-Compras-Pipeline-Consolidado|23-Compras-Pipeline-Consolidado]] e no B0 do [[LOG-13a-Compras-Backend-Consolidado|13-Compras-Backend-Consolidado]].
 >

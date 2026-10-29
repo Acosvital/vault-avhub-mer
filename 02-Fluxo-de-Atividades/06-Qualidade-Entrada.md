@@ -22,9 +22,9 @@ fontes: [v1 02-PRD-Estoque/Fluxo-Qualidade-Completo, v1 01-Fluxo-Operacional/Enc
 1. O [[05-Recebimento]] entrega o lote em quarentena (status `PENDENTE`). Ele aparece na fila da Qualidade, do mais antigo ao mais novo, e ainda não conta no saldo. `Q1`
 2. O inspetor da Qualidade abre o lote na tela de inspeção e decide: aprova ou reprova. `Q2`
 3. Para aprovar, ele anexa o laudo. Para reprovar, anexa laudo, motivo e evidência e informa a quantidade reprovada. `Q2`
-4. Aprovado: o lote fica `LIBERADO`. A parcial que esperava junta-se às outras do mesmo item e volta ao Estoque. `E5`
+4. Aprovado: o lote fica `LIBERADO`. A parcial que esperava junta-se às outras do mesmo item e volta ao Estoque ([[03-Estoque-Atendimento-e-Despacho]]). `E5`
 5. Reprovado em parte: a quantidade reprovada vira um lote filho separado e o sistema abre a RNC (registro de não conformidade). `Q3`
-6. A parte reprovada volta para Compras, que combina com o fornecedor a devolução e a substituição. `Q3`
+6. A parte reprovada volta para Compras ([[04-Circuito-de-Compra]]), que combina com o fornecedor a devolução e a substituição. `Q3`
 7. Se ainda há parcial esperando, a parte aprovada fica em quarentena até a substituição chegar. `Q4`
 8. A substituição chega como nova entrega com nota, passa de novo pela inspeção e, aprovada, une-se à parte em quarentena. `Q4` → `E5`
 
@@ -65,7 +65,7 @@ O lote de aço carbono comprado para as 100 flanges chega e fica em quarentena. 
 
 ## Detalhe técnico
 
-### Quem atua (com telas e perfis)
+### Quem atua (onde)
 
 | Quem | Onde | O que faz |
 |---|---|---|
@@ -75,10 +75,6 @@ O lote de aço carbono comprado para as 100 flanges chega e fica em quarentena. 
 | PCP | MES | Não decide nada aqui; só vê a parcial andando |
 
 CCP = acompanhamento de compras. Os perfis são dados do banco (`perfis`, `permissoes`, `perfil_setores`); o código não fixa nome de perfil "Qualidade" ❓ (confirmar o nome no ambiente). Detalhe de permissões na seção "Perfil e permissões do setor QUALIDADE".
-
-### Objetivo (original)
-
-Impedir que material comprado chegue ao saldo disponível sem laudo. A inspeção é **por lote** (a entidade `Lote`), nunca por parcial. O que sai aprovado vira saldo no Estoque ([[03-Estoque-Atendimento-e-Despacho]], nó `E5`); o que sai reprovado abre uma RNC e volta a Compras. A raia recebe o lote em quarentena que o [[05-Recebimento]] criou e devolve a parte reprovada para o [[04-Circuito-de-Compra]].
 
 ### Regras decididas
 

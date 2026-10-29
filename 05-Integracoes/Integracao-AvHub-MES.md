@@ -1,7 +1,7 @@
 ---
 tags: [integracao, av-hub, mes, contratos, sequencia]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Nathan
 fontes: [api-pcp 579a625, api-acos-vital f322dcd, app-pcp 1fca8d3, HUB b55ac55, Dump Avhub e Dump MES de 14/10, v1 Chaves-de-Integracao-AvHub-MES-Pipeline, Integracao-AvHub-MES-Especificacao-F1, Integracao-AvHub-MES-Volta-Plano, MES-Arquitetura-Decisoes]
@@ -9,9 +9,45 @@ fontes: [api-pcp 579a625, api-acos-vital f322dcd, app-pcp 1fca8d3, HUB b55ac55, 
 
 # Integração av-hub ↔ MES
 
+**Em uma frase:** esta nota mostra como o av-hub (o sistema comercial) e o MES (o sistema da fábrica) trocam informação: quem manda o quê, quando e o que acontece se um dos dois cair.
+
+**Quando consultar esta nota:** ao mexer em qualquer troca entre os dois sistemas (liberação de pedido, requisição de compra, etapa do item, custo, Torre de Fluxo) ou ao investigar por que um dado não chegou ao outro lado.
+
+Siglas: **av-hub** = a API `api-acos-vital` mais as telas do HUB. **MES** = a API `api-pcp` mais as telas `app-pcp`. **PCP** = planejamento da produção. **OC** = ordem de compra. Os dois sistemas têm bancos separados e nunca leem o banco um do outro.
+
+## Quem manda dado para quem, quando e por quê
+
+Cada dado tem um dono. O dono oferece o dado numa "rota" (um endereço de consulta protegido por chave). Quem precisa pergunta de tempos em tempos e guarda uma cópia própria. Não há aviso automático: sempre é consulta periódica.
+
+- **Liberação do pedido (INT-01).** O vendedor libera o pedido no HUB. Quando o PCP abre a Triagem no MES, o MES pergunta ao av-hub quais pedidos estão liberados. Depois de criar a Destinação, o MES avisa que "importou". Por quê: o pedido só vai à produção depois de liberado. ✅ funciona ponta a ponta.
+- **Requisição de compra, ida (INT-02).** O MES envia ao av-hub cada pedido de material que o PCP faz, assim Compras passa a vê-lo. Se o av-hub estiver fora, a fila do MES espera e reenvia. ✅
+- **Marcos da requisição, volta (INT-03).** A cada 5 minutos, o MES pergunta ao av-hub em que ponto da compra está cada requisição dele (cotação, OC aprovada, despachada). Por quê: o MES acompanha a compra sem receber dado comercial. ✅ para requisição criada no MES.
+- **Referência da OC (INT-04).** O av-hub oferece as OCs aprovadas. O MES deveria consultá-las para conferir o recebimento e dar custo ao lote. 🔴 O MES ainda não consulta.
+- **Etapa de cada item (INT-05).** A cada 90 segundos, o av-hub pergunta ao MES em que etapa está cada item. Por quê: o vendedor vê "Etapa dos itens" no pedido. ✅
+- **Custo real por item (INT-06).** O av-hub quer perguntar ao MES o custo de cada item. 🔴 O MES ainda não tem essa rota.
+- **Torre de Fluxo (INT-07).** O av-hub quer ler do MES o histórico de eventos de cada item. 🔴 O MES ainda não tem o módulo.
+- **Requisições lidas do MES (INT-08).** Desenho antigo, sem uso: ninguém consome. Candidato a remoção.
+
+O MES nunca fala com o Omie (o ERP, sistema fiscal e financeiro). O que ele precisa do Omie chega pelo av-hub. Requisição criada só no HUB não vai ao MES; o MES enxerga a OC dela (decisão N14-20).
+
+## Se um lado cair
+
+- **av-hub fora:** a Triagem e a Destinação mostram erro, a fila de requisições acumula e nada se perde. O aviso "importado" é reenviado a cada 10 minutos por 7 dias.
+- **MES fora:** o vendedor segue liberando pedidos. Os jobs do av-hub repetem a consulta, e o HUB mostra "dado velho" depois de 10 minutos.
+
+## O que falta
+
+- **Robert (MES):** consultar a OC (BL-001), criar a rota de custo (BL-004) e o módulo da Torre (BL-003).
+- **Gustavo (banco e API):** chave de acesso com escopo mínimo (BL-018) e permissões das telas de custo e Torre.
+- **Nathan (HUB):** telas da Torre e de custo (BL-022, BL-023).
+
+A lista completa, com donos e nós, está em "O que falta desenvolver" no detalhe. Selos: ✅ pronto · 🟡 proposta · 🔴 não existe · ❓ não conferido. Regras do vault: [[Regras-do-Vault]].
+
+## Detalhe técnico
+
 Nota canônica das integrações entre o av-hub (`api-acos-vital` + HUB) e o MES (`api-pcp` + `app-pcp`). Uma seção por fluxo, com rota, direção, chave, cursor, idempotência, falha e estado no código. Os IDs dos nós são os do [[00-Fluxo-Mestre-0b]]. Chaves e escopos: [[Chaves-e-Autenticacao]]. Selos: [[Regras-do-Vault]].
 
-## Regras que valem para todos os fluxos
+### Regras que valem para todos os fluxos
 
 - **Mecanismo:** REST com `x-api-key`. Dois bancos separados, nenhum acesso cruzado. Quem tem o dado expõe, quem precisa lê e grava projeção própria 📝 ([[Registro-de-Decisoes]], DEC-2). O padrão de leitura é polling com cursor, sem webhook.
 - **Exceção da ida:** a requisição de compra é **empurrada** pelo MES (`PUT`, fila de saída), não puxada ✅ (`api-pcp` `envio-avhub.service.ts:129-175`). O contrato 003 (hub puxa do MES) ficou sem consumidor (ver INT-08 abaixo).
@@ -20,7 +56,7 @@ Nota canônica das integrações entre o av-hub (`api-acos-vital` + HUB) e o MES
 - **Fronteira de dado:** o dado comercial (fornecedor, condição de pagamento) fica no av-hub. Para o MES vai o necessário para conferir e, desde o contrato 007, preço, moeda e cotação por item (para o custo do lote).
 - **Nenhuma regra em variável de ambiente** para jobs novos (regra do Nathan): intervalo, página e janela são constantes no código; só endereço e segredo ficam em ambiente ✅ (`item_estado_projetado.job.js:44-49`).
 
-## Tabela-resumo
+### Tabela-resumo
 
 | ID | Fluxo | Contrato | Direção e rota | Nós 0b | Estado |
 |---|---|---|---|---|---|
@@ -35,7 +71,7 @@ Nota canônica das integrações entre o av-hub (`api-acos-vital` + HUB) e o MES
 
 Detalhe da Torre: [[Rastreabilidade-e-Torre-de-Fluxo]].
 
-## INT-01 Liberação do pedido (contrato 26)
+### INT-01 Liberação do pedido (contrato 26)
 
 **Para quê:** o pedido chega do Omie travado e só vai para o PCP depois que o vendedor marca se a Qualidade acompanha desde o início e libera. Nós V2, V3, P1, P2.
 
@@ -74,7 +110,7 @@ sequenceDiagram
     Note over MES,API: falhou o POST, o MES reenvia a cada 10 min por 7 dias
 ```
 
-## INT-02 Requisição de compra, ida (contrato 34)
+### INT-02 Requisição de compra, ida (contrato 34)
 
 **Para quê:** o PCP pede compra de material de um pedido e o av-hub (Compras) passa a ver a requisição. Nó P3.
 
@@ -107,7 +143,7 @@ sequenceDiagram
     MES->>MES: envio RECUSADO sem repetir
 ```
 
-## INT-03 Marcos da requisição, volta (contrato 35)
+### INT-03 Marcos da requisição, volta (contrato 35)
 
 **Para quê:** o MES saber em que ponto do circuito de Compras está cada requisição dele, sem receber o dado comercial. Nós C1 a C5 e R0. A tela Compras · CCP do MES é só leitura e espelha esses marcos.
 
@@ -155,7 +191,7 @@ sequenceDiagram
     Note over MES,CCP: C5 oc_aprovada faz a parcial entrar nos esperados do Recebimento R0
 ```
 
-## INT-04 Referência da OC (contratos 004 e 007)
+### INT-04 Referência da OC (contratos 004 e 007)
 
 **Para quê:** (1) o Recebimento conferir contra o que foi comprado e o lote nascer com custo (nós C4, R0, R1, R4); hoje o Recebimento confere contra a **NF** 📝, e o cruzamento com a OC espera o job abaixo; (2) o PCP ver a OC de cada pedido e o Estoque ver o **saldo futuro** das OCs de estoque, inclusive as de requisição criada só no hub (C0, N14-20; ver "Requisito: o MES lê as OCs do hub").
 
@@ -182,7 +218,7 @@ sequenceDiagram
     Note over JOB,MES: nada disso existe no MES hoje
 ```
 
-## INT-05 Status por item (contratos 005 e 006)
+### INT-05 Status por item (contratos 005 e 006)
 
 **Para quê:** o vendedor ver a etapa de cada item do pedido. Todos os nós, resumido em 11 etapas.
 
@@ -210,7 +246,7 @@ sequenceDiagram
     Note over MES,HUB: F1 E1 Q1 Q7 X1 viram as 11 etapas
 ```
 
-## INT-06 Custo real por item (contratos 008 e 47)
+### INT-06 Custo real por item (contratos 008 e 47)
 
 **Para quê:** o custo do item do pedido = média dos lotes reservados (nó E3), usado pelo hub no Ciclo 2 para o simulador e a comissão ([[LOG-47-Custo-Real-por-Item-no-Hub]]).
 
@@ -236,7 +272,7 @@ sequenceDiagram
     HUB->>JOB: GET itens_pedido_custo exige custo-itens
 ```
 
-## INT-07 Torre de Fluxo (contrato 46)
+### INT-07 Torre de Fluxo (contrato 46)
 
 Resumo; o desenho completo (envelope, projeção, telas) está em [[Rastreabilidade-e-Torre-de-Fluxo]].
 
@@ -262,11 +298,11 @@ sequenceDiagram
     Note over BFF,MES: mes_indisponivel true se o MES nao responde
 ```
 
-## INT-08 `GET /requisicoes-compra` (003, legado)
+### INT-08 `GET /requisicoes-compra` (003, legado)
 
 `GET /requisicoes-compra` e `GET /itens/status` ficam no mesmo controller do MES, protegidos por `MES_API_KEY` ✅ `integracao-avhub.controller.ts:20`. A primeira rota era o antigo desenho "o hub puxa a requisição". Foi substituída pelo INT-02 e **nenhum job do hub a consome** ✅ (nenhuma referência em `api-acos-vital/src`). Fica como código morto 🔴 Robert decidir remover (BL-032). O comentário "JOB DE POLLING do MES" no `api-acos-vital` está velho (Gustavo, BL-033).
 
-## Requisito: o MES lê as OCs do hub (requisição só do av-hub, C0)
+### Requisito: o MES lê as OCs do hub (requisição só do av-hub, C0)
 
 Compras cria requisição de necessidade própria no HUB (nó C0, `POST /compras/requisicoes`, número por trigger, permissão `compras.pode_criar`) ✅ `requisicoes_compra.route.js:384`. A **requisição** não chega ao MES (sem `id_origem` não há evento do contrato 35) e **não precisa chegar**. 📝 Decisão N14-20 (14/10): o MES lê a **OC**, pela referência (INT-04), e com ela:
 
@@ -276,13 +312,13 @@ Compras cria requisição de necessidade própria no HUB (nó C0, `POST /compras
 
 ✅ No hub já existe: `ordens_compra.finalidade` (`estoque`, `pedidos_venda`, `recompra`, `uso_interno`), `ordens_compra_itens_vinculos`, a view `vw_pedido_venda_itens_compra`, `GET /compras/pedidos-venda/:numero` e `/:numero/compras`, e a referência com `destino[]` e `finalidade` (arquivos em [[04-Circuito-de-Compra]]). 🔴 Falta no MES: o job K4 (BL-001), a projeção da OC, as telas e o cálculo do saldo futuro (BL-049, BL-050, BL-051). Falta no hub só conferir se a referência (que traz só OC aprovada) e uma consulta por produto e por pedido bastam (BL-028). Dono: Robert (MES), Gustavo se a API precisar expor por produto ou pedido, Nathan se precisar de tela no HUB (BL-041). Pendência [[Pontas-Soltas]] (PS-003, resolvida em 14/10).
 
-## Outras pontes com o MES
+### Outras pontes com o MES
 
 - **MES→Omie:** o MES nunca fala com o Omie. A sinalização de faturamento (nó O1, tela 11.1) não existe 🔴 ([[10-Fiscal-Omie]]).
 - **Pipeline→av-hub→Omie:** a única escrita no Omie é o envio da OC pela pipeline (`GET /compras/ordens/fila-omie`, `PATCH /compras/ordens/:id/sincronizacao`); não passa pelo MES. Ver [[Omie-Integracao-Estado]] e [[Pipeline-Omie]].
 - **Pedido manual** ([[LOG-45-Pedido-de-Venda-Manual]]) não percorre o fluxo do MES.
 
-## O que acontece quando o outro lado cai
+### O que acontece quando o outro lado cai
 
 | Cai | Efeito | Recuperação |
 |---|---|---|
@@ -290,7 +326,7 @@ Compras cria requisição de necessidade própria no HUB (nó C0, `POST /compras
 | MES (`api-pcp`) | O vendedor segue liberando; os jobs de status, custo e Torre falham e repetem (90 s; 10 min em 404); o HUB mostra "dado velho" após 10 min | automática ao voltar; cursores não andam em falha |
 | Banco do MES vazio ou sem migrations | o `main` do MES parou em 28/08 e o banco de produção não tem as migrations da `develop` | merge `develop`→`main` antes do piloto 📝 ([[Riscos]], RS-002) |
 
-## O que falta desenvolver
+### O que falta desenvolver
 
 | Item | Dono | Nós | Backlog |
 |---|---|---|---|
@@ -305,7 +341,7 @@ Compras cria requisição de necessidade própria no HUB (nó C0, `POST /compras
 
 Lista completa: [[Backlog-por-Frente]].
 
-## Pendências
+### Pendências
 
 - Quem marca a requisição como atendida no fluxo do MES: hoje `resumirRequisicao` fecha por OC e recebimento; confirmar regra com o Robert ([[Pontas-Soltas]] PS-011).
 - Teste ponta a ponta do cancelamento de requisição (marcos do 35) ❓ Robert (PS-012).

@@ -11,11 +11,12 @@ fontes: [00-Fluxo-Mestre-0b, v1 02-PRD-Estoque/Fluxo-Estoque-Completo, v1 Estoqu
 
 **Em uma frase:** toda parcial de item passa primeiro pelo Estoque. O almoxarife atende o que o saldo cobre e decide o que fazer com o resto: comprar ou mandar para a produção.
 
-> [!info] Decisões de 29/10/2026
-> - O documento de retirada é pedido ao Estoque por quem precisa da mercadoria, Expedição ou Produção. Só o Estoque confirma (N16-120). O que o documento imprime segue aberto.
+> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
+> - O documento de retirada é pedido ao Estoque por quem precisa da mercadoria, Expedição ou Produção. Só o Estoque confirma (N16-120). O que o documento imprime segue aberto. Contrato: [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada]].
 > - A reserva é consumida junto com a baixa. A saída grava lote, pedido e o custo do lote naquele momento (N16-121).
 > - A Embalagem só recebe a parcial depois da retirada confirmada (N16-122).
 > - A matéria-prima da produção sai por documento de retirada, pela quantidade pedida (N16-140).
+> - Fabricado: [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] define um lote de origem Produção por ordem de produção e produto (proposta aceita em 15/10, sem código).
 
 ## Como funciona, passo a passo
 
@@ -53,7 +54,7 @@ O pedido tem 100 flanges. O almoxarife encontra 40 em lotes liberados e informa 
 - O item comprado só volta ao Estoque depois que a Qualidade libera o lote.
 - Ajuste de saldo não usa o que está reservado e exige motivo.
 - O custo do lote é opcional e nunca bloqueia nada.
-- Tudo que é fabricado ou comprado deve passar pelo Estoque. O fabricado ainda não passa.
+- Tudo que é fabricado ou comprado deve passar pelo Estoque (decisão de 14/10). O fabricado ainda não passa.
 
 ## O que já existe e o que falta
 
@@ -70,22 +71,9 @@ Entrada: [[02-PCP-Triagem-e-Destinacao]]. Próxima raia: [[04-Circuito-de-Compra
 
 ## Detalhe técnico
 
-Tudo abaixo é o conteúdo completo da nota anterior: nós, regras numeradas, estados de lote e reserva, telas, rotas, código, custo do lote, pendências e o diagrama.
-
 Nós do [[00-Fluxo-Mestre-0b]]: `E1` saldo disponível, `E2` saldo cobre?, `E3` atende pelo saldo (split e reserva, custo do item), `E4` o que fazer com o restante, `E5` entrada no Estoque, `E6` despacho. Entrada: [[02-PCP-Triagem-e-Destinacao]]. Vizinhos: [[04-Circuito-de-Compra]], [[05-Recebimento]], [[06-Qualidade-Entrada]], [[08-Qualidade-Saida]], [[09-Expedicao]]. Selos em [[Regras-do-Vault]].
 
-> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
-> - N16-120: o documento de retirada é pedido ao Estoque por quem precisa da mercadoria (Expedição ou Produção) e só o Estoque confirma. O que o documento imprime segue aberto. Contrato: [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada]].
-> - N16-121: a reserva é consumida junto com a baixa; a saída grava lote, pedido e o custo do lote no momento.
-> - N16-122: a Embalagem só recebe a parcial depois da retirada confirmada.
-> - N16-140: a matéria-prima da produção sai por documento de retirada, pela quantidade pedida.
-> - Fabricado: [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] define um lote de origem Produção por ordem de produção e produto (proposta aceita em 15/10, sem código).
-
-### Objetivo
-
-O Estoque é a **porta de entrada e de saída** de todo item. Toda parcial nasce no Estoque (etapa 1 do roteiro). O almoxarife vê o saldo livre da filial do pedido, atende o que o saldo cobre (split + reserva em lote já liberado) e decide o restante: **solicitar compra** ou **enviar à produção**. O que é comprado e aprovado **volta ao mesmo Estoque** (`E5`), vira lote e saldo e sai por reserva. O que é fabricado e aprovado **deveria** fazer o mesmo (decisão de 14/10), mas ainda não faz. A saída física acontece no **despacho** (`E6`): quem precisa da mercadoria (Expedição ou Produção) gera um **documento de retirada**, e a **baixa do saldo é feita na retirada, no Estoque** 📝. Hoje o código baixa quando a Embalagem recebe a parcial, e não existe documento de retirada 🔴.
-
-### Quem atua
+### Quem atua (onde)
 
 | Quem | Papel | Onde |
 |---|---|---|
@@ -279,5 +267,3 @@ flowchart TD
     E6 -->|"produto pronto"| X1["X1 · Embalagem e paletização"]
     E6 -->|"matéria-prima ou beneficiamento"| F1["F1 · Setores produtivos do roteiro"]
 ```
-
-Próxima raia: [[04-Circuito-de-Compra]].

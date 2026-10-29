@@ -16,6 +16,11 @@ criado_original: 2026-10-15
 
 > **Onde atua:** av-hub: banco, API, front
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define como levar o módulo Comercial & Suprimentos (a `api-comercial`, API de teste do Pablo) para a API do Hub, com um só banco e uma só permissão, sem recriar o que o Hub já tem.
+> **Quem é afetado:** Pablo mantém as telas, que passam a chamar a API do Hub. Robert conduz o módulo e Gustavo cuida do banco e da API.
+> **Situação:** Parcial. A fase 1 do banco foi aplicada em produção em 20/10, segundo o Gustavo. Rotas e corte do HUB seguem abertos, com o Robert começando pela proposta. O ciclo da proposta mudou e virá em contratos que ele vai criar.
+
 > [!info] Situação em 28/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Robert (módulo, N16-117; o Pablo acompanha) · **Banco e API:** Gustavo (DBA), dono da `api-acos-vital`
 >

@@ -33,6 +33,11 @@ criado_original: 2026-10-13
 > Conferido em 15/10/2026 no código do HUB (`develop`) e contra a `api-test`.
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Tirou do front as duas marcas de remendo que restavam do escopo de vendedores. O front agora só lê as permissões da API e repassa os erros dela.
+> **Quem é afetado:** Vendedores, diligenciadores e Gerência do PCP (Planejamento e Controle da Produção), em Meus Pedidos e no Portal do PCP.
+> **Situação:** ✅ Marcas removidas e testadas na `api-test` com vendedor, diligenciador PCP e Gerência PCP. ❓ Faltam gerente de equipe, auxiliar, vendedor sem vínculo e token expirado. 🟡 Achados de código de erro 403 para o Gustavo.
+
 
 > **(atualizado em 13/10/2026)** A **marca C (`nextauth`) foi reclassificada** pelo Nathan na branch `feat/escopo-vendedor-liberacao-no-backend` (comentário normal, sem `GAMBIARRA(`; o menu do JWT é cache de apresentação). **Restam 2 marcas: A e B**, que dependem do contrato 49.
 >

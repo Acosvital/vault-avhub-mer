@@ -1,7 +1,7 @@
 ---
 tags: [sistemas, rbac, permissoes, mes, av-hub, seguranca]
 criado: 2026-10-14
-atualizado: 2026-10-15
+atualizado: 2026-10-29
 status: vigente
 dono: Gustavo (DBA)
 fontes: [api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, HUB b55ac55, Dump MES e Dump Avhub de 14/10, v1 AV-Hub-RBAC, Achado-Duplicacao-RBAC]
@@ -9,11 +9,53 @@ fontes: [api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, HUB b55ac55, 
 
 # RBAC e permissões
 
+**Em uma frase:** é o controle de quem pode ver e fazer o quê. Existem **dois sistemas de permissão separados**, um no MES e outro no av-hub, sem sincronização entre eles. Dono: Gustavo (DBA).
+
+## Quem usa e para quê
+
+- **Administrador:** cadastra usuários e perfis.
+- **Qualquer usuário:** só vê as telas e faz as ações que o perfil permite.
+- **Sistemas entre si:** usam chaves de serviço ([[Chaves-e-Autenticacao]]).
+- **Quem decide fluxo (Nathan, Gustavo):** monta os perfis, como a Gerência de Compras.
+
+## Como se encaixa no fluxo
+
+- **MES:** permissão por tela e por setor. O Estoque ainda separa por depósito.
+- **av-hub:** permissão por tela e por rota. A liberação, a Torre de Fluxo e o custo por item têm a sua.
+- **Compras:** a aprovação da OC acima de R$ 30 mil depende da permissão "aprovar" do av-hub (N14-21).
+- **Comercial:** a API Comercial usa as permissões do av-hub ([[API-Comercial]]).
+- Um perfil do MES não existe no av-hub e vice-versa. O usuário tem um cadastro em cada um ([[Schemas-Postgres]]).
+
+## Regras que valem
+
+- Rota sem mapa de permissão é negada por padrão.
+- Basta **um** perfil do usuário permitir.
+- No MES, ter a tela não basta: é preciso "pode atuar" no setor ou no depósito.
+- No av-hub, o vendedor só vê pedidos e notas dos vendedores do seu escopo (`proprios`, `vinculados` ou `todos`).
+- O que o usuário faz é sempre registrado em nome do token de login, nunca de um campo enviado.
+- O menu da tela é só apresentação. Quem nega é o servidor.
+- Dois acessos especiais no MES: o custo do lote e a liberação de recebimento sem OC.
+- A tela de custo por item do av-hub nasce sem permissão para nenhum perfil (decisão de 13/10).
+
+## O que já existe e o que falta
+
+- ✅ Regras do MES e do av-hub, com checagem na tela, no BFF e na API.
+- ✅ Aprovação da OC com uma permissão só, sem segunda alçada nem Diretoria. 🟡 Endurece depois da conversa com Compras.
+- 🟡 A Gerência de Compras ainda não tem usuários vinculados (tarefa de cadastro, Nathan e Gustavo).
+- 🟡 Perfil CCP no MES (N14-24): hoje é só leitura, sem perfil próprio. Criar é tarefa de cadastro.
+- 🟡 Alinhar os perfis das duas permissões de custo: `estoque-custo` (MES) e `custo-itens` (av-hub).
+- 🔴 Permissão do documento de retirada (`E6`): a tela e a rota também não existem.
+- 🔴 Chave do MES com acesso mínimo ao av-hub (hoje lê e escreve). Gustavo.
+- ❓ As linhas de `auth.rotas_telas` das rotas novas e o que existe em produção. Gustavo.
+- ❓ O cadastro das telas `movimentacao` e `movimentacoes` e o do `compras-liberar` (a seed não está nos repositórios).
+
+## Detalhe técnico
+
 São **dois RBACs separados**, em dois bancos, sem sincronização: o do MES (`api-pcp`, schema `public`) e o do av-hub (`api-acos-vital`, schema `auth`). Um perfil do MES não existe no av-hub e vice-versa; o usuário tem um cadastro em cada um. Isso não é contradição: ver [[Schemas-Postgres]]. Chaves de serviço entre sistemas: [[Chaves-e-Autenticacao]]. Selos: [[Regras-do-Vault]].
 
-## 1. RBAC do MES
+### 1. RBAC do MES
 
-### Modelo ✅ ([[Banco-MES]])
+#### Modelo ✅ ([[Banco-MES]])
 
 | Tabela | Chave | Colunas que decidem |
 |---|---|---|
@@ -26,7 +68,7 @@ São **dois RBACs separados**, em dois bancos, sem sincronização: o do MES (`a
 
 Dump MES `:1046-1113`, `:1396-1440` ✅.
 
-### Regras no código
+#### Regras no código
 
 - **Guard global.** `JwtAuthGuard` e depois `PermissionsGuard` são `APP_GUARD`. Rota sem `@Public()` exige Bearer; rota com `@RequirePermission(slug, ação)` confere a permissão ✅ `api-pcp/src/app.module.ts:94-98`, `auth/guards/permissions.guard.ts:33-80`. Rota **sem** `@RequirePermission` só exige JWT (ex.: `GET /setores`, `PATCH /usuarios/:id/senha`).
 - **OR entre perfis.** Basta **um** perfil do usuário permitir ✅ `permissions.guard.ts:56-70`; mesma regra em `PerfisService.temPermissao` ✅ `rbac/perfis/perfis.service.ts:349-364`.
@@ -36,7 +78,7 @@ Dump MES `:1046-1113`, `:1396-1440` ✅.
 - **Permissão que muda o conteúdo.** `temPermissao(userId, slug, campo)` decide o que vai na resposta, não a rota: `estoque-custo` e `compras-liberar` ✅ abaixo.
 - **Front.** O menu da sessão (`GET /auth/menu`) leva as 4 flags por tela; `usePermission()` usa o último segmento da URL como slug ✅ `app-pcp/hooks/usePermission.ts:8-17`, `lib/permissions.ts:3`. O front esconde botões; quem garante é a API.
 
-### Telas só de permissão (sem página nem menu) ✅
+#### Telas só de permissão (sem página nem menu) ✅
 
 | Slug | Flag | Efeito | Código |
 |---|---|---|---|
@@ -46,7 +88,7 @@ Dump MES `:1046-1113`, `:1396-1440` ✅.
 
 Seeds: `estoque-custo` nasce "default-deny, só o Administrador" ✅ `common/constants/estoque-custo.constants.ts:1-5`; `compras-liberar` entra por `01-base.sql`, que **não está nos repositórios** ❓ Robert. A lista de telas só de permissão: `app-pcp/lib/telasSoPermissao.ts:8`.
 
-### Slugs do MES (extraídos dos controllers) ✅
+#### Slugs do MES (extraídos dos controllers) ✅
 
 | Slug | Quem usa | Ações |
 |---|---|---|
@@ -66,15 +108,15 @@ Seeds: `estoque-custo` nasce "default-deny, só o Administrador" ✅ `common/con
 
 `movimentacao` (singular, ajuste e carga inicial) e `movimentacoes` (plural, fila) são telas distintas ✅ `estoque-operacao.controller.ts:55-85` e `itens-parciais.controller.ts:57`; conferir o cadastro de ambas em produção ❓.
 
-### Autenticação do MES
+#### Autenticação do MES
 
 - Login por usuário e senha com `bcrypt`; bloqueio por tentativas: 5 por usuário e 20 por IP em 15 min ✅ `auth/auth.service.ts:8-15,218-232`. Token com `JWT_EXPIRES_IN` (padrão `8h`) ✅ `auth.module.ts:19`.
 - Azure AD: o app-pcp valida com o Azure e chama `POST /auth/azure` com `x-api-key: MES_INTERNAL_API_KEY`; o MES **resolve** o e-mail para um usuário já cadastrado (não cria conta) ✅ `auth.service.ts:68`, `api-key.guard.ts:15`.
 - Auditoria: `auditoria_login` e `auditoria_acesso` ✅ dump `:465-492`.
 
-## 2. RBAC do av-hub
+### 2. RBAC do av-hub
 
-### Modelo ✅ ([[Banco-AvHub]], schema `auth`)
+#### Modelo ✅ ([[Banco-AvHub]], schema `auth`)
 
 | Tabela | Papel |
 |---|---|
@@ -87,7 +129,7 @@ Seeds: `estoque-custo` nasce "default-deny, só o Administrador" ✅ `common/con
 | `auth.chaves_servico` | chaves de serviço no banco (`hash_sha256`, `acesso` leitura/escrita/admin, `exige_usuario`, `expira_em`, `revogada_em`) |
 | `auth.ip_regras`, `logs`, `auditoria`, `login_tentativas`, `sessions`, `usuarios_favoritos` | apoio |
 
-### Como a API decide ✅
+#### Como a API decide ✅
 
 1. **Chave de serviço** (`x-api-key`): `API_KEYS` do `.env` (admin), chaves de `auth.chaves_servico`, ou `MES_INTEGRACAO_KEYS` (só `PUT /compras/requisicoes/origem/:id`; qualquer outra rota dá 403 `CHAVE_MES_ROTA_NAO_PERMITIDA`) ✅ `api-acos-vital/src/middlewares/apiKeyAuth.js:1-76`.
 2. **Token de usuário** (`Authorization: Bearer`): `identidadeUsuario` valida o token e chama `auth.fn_autorizar(usuario, versão, método, caminho)` ✅ `middlewares/identidadeUsuario.js:40-100`. A função devolve 401 `usuario_invalido` ou `token_revogado`; 403 `rota_sem_mapa` (rota sem linha em `auth.rotas_telas`: **fail-closed**) ou 403 `sem_permissao` (com a lista `exige_uma_de`); 200 com o escopo de vendedores. A permissão é **OR entre perfis** do usuário ✅ dump `fn_autorizar` `:357` (join `usuarios_perfis → perfis → permissoes → telas`).
@@ -99,7 +141,7 @@ Seeds: `estoque-custo` nasce "default-deny, só o Administrador" ✅ `common/con
 
 Dados em `auth.rotas_telas` e `auth.telas`: **o dump é só esqueleto** (sem `COPY`/`INSERT`), então quais linhas existem em produção ❓ Gustavo (`auth.vw_rotas_telas_conferencia` ajuda a conferir).
 
-### Permissões do av-hub que o fluxo de Atividades usa
+#### Permissões do av-hub que o fluxo de Atividades usa
 
 | Tela (slug) | Ação | Quem decide | Efeito | Código |
 |---|---|---|---|---|
@@ -117,11 +159,11 @@ Dados em `auth.rotas_telas` e `auth.telas`: **o dump é só esqueleto** (sem `CO
 | `pcp-pedidos`, `pcp-notas`, `pcp-dashboard` | visualizar (+criar e deletar nas observações) | BFF | portal PCP do av-hub (leitura) | ✅ `HUB app/api/pcp/**` |
 | `meus-pedidos`, `pedidos-equipe` | visualizar | BFF | card "Etapa dos itens" | ✅ `HUB lib/api/pedidosVenda.ts` |
 
-### Slugs do Comercial
+#### Slugs do Comercial
 
 `propostas`, `propostas-delegacao`, `propostas-valores`, `custo-item` (singular, ≠ `custo-itens`), `relatorio-gerencial`, `painel-comprador`, `clientes` ✅ `api-comercial/src/domain/permissoes/capacidades.ts:44-52`. A API Comercial lê `GET /me/permissoes` do av-hub e não tem tabela de perfil própria ([[API-Comercial]]).
 
-## 3. Lacunas e decisões abertas
+### 3. Lacunas e decisões abertas
 
 | Item | Estado |
 |---|---|

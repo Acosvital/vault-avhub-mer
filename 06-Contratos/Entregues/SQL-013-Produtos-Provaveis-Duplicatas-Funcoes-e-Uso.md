@@ -28,6 +28,11 @@ criado_original: 2026-10-19
 >
 > Selos em [[Regras-do-Vault]].
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Leva para o banco a busca de produtos prováveis duplicatas: compara nome, código e NCM, dá uma nota e mostra o uso do produto (venda, OC, estoque, fornecedores). Só leitura.
+> **Quem é afetado:** Quem cuida do cadastro de produtos; a duplicata em si é resolvida no Omie. A busca é por unidade.
+> **Situação:** ✅ Aplicado em 21/10; a rota respondeu com dado real nas 3 unidades. 🟡 A qualidade da nota precisa melhorar: quase metade do catálogo cai em grupo.
+
 ## Por quê
 
 Cadastros de produto que são o mesmo item viram duplicatas por falha de cadastro (o vendedor não achou o produto e cadastrou de novo, código digitado de outro jeito, família errada). O algoritmo de hoje só pega a descrição **idêntica** depois de tirar acento e pontuação e ainda exige a **mesma família e unidade**; por isso perde "FLANGE 304 2\"" × "Flange aço inox 304 2 pol" e qualquer duplicata com a família errada, que é justamente o erro mais comum. Também baixa ~35 mil produtos (180 páginas) a cada troca de unidade e não mostra o uso, então o usuário não sabe qual cadastro manter.

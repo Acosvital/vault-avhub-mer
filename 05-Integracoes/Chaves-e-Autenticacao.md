@@ -1,7 +1,7 @@
 ---
 tags: [integracao, seguranca, chaves, autenticacao, av-hub, mes, pipeline]
 criado: 2026-10-14
-atualizado: 2026-10-15
+atualizado: 2026-10-29
 status: vigente
 dono: Gustavo (DBA)
 fontes: [api-acos-vital f322dcd (apiKeyAuth.js, acessoConfig.js), api-pcp 579a625, app-pcp 1fca8d3, omie-elt-pipeline 0f739f0, HUB b55ac55, v1 Chaves-de-Integracao-AvHub-MES-Pipeline, Registro-de-Decisoes #8 #9 #10 #11 #12 #87 #88]
@@ -9,9 +9,40 @@ fontes: [api-acos-vital f322dcd (apiKeyAuth.js, acessoConfig.js), api-pcp 579a62
 
 # Chaves e autenticação
 
+**Em uma frase:** esta nota lista as chaves (senhas de serviço) que os sistemas usam para se identificar entre si, o que cada uma abre e o que falta endurecer. **Só nomes de variáveis, nunca valores.**
+
+**Quando consultar esta nota:** ao configurar um ambiente, trocar uma chave ou investigar erro 401 ("não identificado") ou 403 ("sem permissão") entre sistemas. Quem chama quem: [[Integracao-AvHub-MES]]. Os valores por ambiente não foram conferidos ❓.
+
+## Quem manda dado para quem, quando e por quê
+
+Cada chave serve a uma ligação específica. Todas viajam no cabeçalho `x-api-key` da chamada.
+
+- **Chave A: MES para av-hub.** Serve só para o MES enviar a requisição de compra. Abre uma única rota; qualquer outra dá 403.
+- **Chave B: MES para av-hub (leitura e confirmação).** Serve para ler pedidos liberados e eventos de requisição e para confirmar o "importado". Hoje dá acesso total 🔴.
+- **Chave C: pipeline para av-hub.** Serve para a fila de ordens de compra que a pipeline envia ao Omie. Também dá acesso total 🔴.
+- **Chave D: av-hub para MES.** Serve para ler etapa e custo dos itens e a Torre de Fluxo.
+- **Chave E: tela do MES para a API do MES.** É interna ao MES.
+- **Chave F: página de documentação** `/docs` da API.
+- **Chave G: HUB para a API comercial.** É outra integração ❓ ([[API-Comercial]]).
+
+## O que ainda não está bom
+
+- Não existe chave "de leitura mais confirmação" restrita às rotas do MES e da pipeline. Hoje elas usam chave de acesso total. Decisão: Gustavo (BL-018).
+- A chave de acesso total sem login de usuário dispensa permissão, escopo e identidade. O desenho da correção está na auditoria de 15/10 ([[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]]).
+- Falta reauditar o BFF do HUB (a camada que chama a API pelo servidor) para que tudo mande o token do usuário (PS-018).
+- Falta conferir valores e presença das variáveis nos ambientes reais (PS-019) e a exposição pública do `api-pcp` (RS-009).
+
+## Como trocar uma chave
+
+O cadastro de chaves no banco é do DBA e não tem tela. Cadastro ou revogação no banco leva até 30 segundos para valer. Troque sempre nos dois lados da ligação. As listas aceitam chave nova e antiga ao mesmo tempo durante a troca.
+
+A tabela de regras que já viraram fixas, o mapa completo das chaves e as rotas de cada chave estão no detalhe.
+
+## Detalhe técnico
+
 **Só nomes de variáveis, nunca valores.** Todas as chaves de serviço viajam no header `x-api-key`. Os valores por ambiente não foram conferidos ❓. Quem chama quem: [[Integracao-AvHub-MES]].
 
-## Mapa das chaves
+### Mapa das chaves
 
 | Chave | Direção | Variável no emissor | Variável no receptor | Vale para | Selo |
 |---|---|---|---|---|---|
@@ -25,7 +56,7 @@ fontes: [api-acos-vital f322dcd (apiKeyAuth.js, acessoConfig.js), api-pcp 579a62
 
 O nome do lado do MES na chave A é `AVHUB_MES_INTEGRACAO_KEY` (singular), e o valor é **um** dos valores da lista `MES_INTEGRACAO_KEYS` do hub ✅ (#11). Qualquer nota que diga `...KEYS` no lado do MES está errada.
 
-## Tipos de chave que a API do av-hub reconhece
+### Tipos de chave que a API do av-hub reconhece
 
 `apiKeyAuth.js` conhece três tipos ✅:
 
@@ -35,7 +66,7 @@ O nome do lado do MES na chave A é `AVHUB_MES_INTEGRACAO_KEY` (singular), e o v
 
 Falha de validação no banco responde 503 (`:187-189`). Rotas públicas: `/health`, `/docs`, `/favicon.ico`, `/auth`, `/blog` (`:49`).
 
-## Quais rotas cada chave abre para o MES
+### Quais rotas cada chave abre para o MES
 
 | Rota que o MES chama | Chave A | Chave B |
 |---|---|---|
@@ -47,7 +78,7 @@ Falha de validação no banco responde 503 (`:187-189`). Rotas públicas: `/heal
 
 Por isso o MES lê com chave admin ou do banco. **A pendência L6 segue aberta**: não existe chave "de leitura mais confirmação" restrita às rotas do MES, nem para o pipeline. Escrita do MES (`POST /pedidos_liberados/:n/importado`) e do pipeline (`PATCH .../sincronizacao`) obriga nível `escrita` no mínimo; o nível `leitura` não serve ❓. Decisão da chave restrita: 🔴 Gustavo ([[Registro-de-Decisoes]] #10; [[Backlog-por-Frente]] BL-018).
 
-## Token do usuário e regras que viraram fixas
+### Token do usuário e regras que viraram fixas
 
 | Regra | Estado no código | Selo |
 |---|---|---|
@@ -62,16 +93,16 @@ Por isso o MES lê com chave admin ou do banco. **A pendência L6 segue aberta**
 
 As quatro últimas só podem ser fixadas depois de separar as chaves de serviço (BL-018). O registro anterior dizia que `ESCOPO_VENDEDORES_EXIGIR` não estava fixado: o código já o fixou (ver [[Contradicoes-Resolvidas]] CR-15).
 
-## Front do HUB
+### Front do HUB
 
 - Os helpers do BFF (`headersDaApi()` em `HUB lib/api/escopoUnidade.ts:45`; `headersApi = () => headersDaApi()` em `lib/api/pedidosVenda.ts:96`) mandam `x-api-key` e, havendo sessão, `Authorization: Bearer`, sem variável de ambiente ✅ (#88, HUB b55ac55). Sem Bearer a API trata a chamada como serviço, sem escopo nem permissão por tela. Rotas de BFF que ainda mandam só a chave: ❓ não reauditado desde 08/10 (a auditoria de 08/10 achou 38 arquivos; o PR #178 cobriu os helpers) → [[Pontas-Soltas]] PS-018. Desde a PR #206 (HUB `d0ef359`) o token é lido do cookie no servidor e não vai na sessão do navegador, e `requirePermission` responde 401 sem ele.
 - Páginas e permissões: [[RBAC-e-Permissoes]]; rotas do BFF: [[Mapa-Rotas-BFF-Bearer]].
 
-## Guards do MES
+### Guards do MES
 
 `api-pcp` tem `JwtAuthGuard` e `PermissionsGuard` como `APP_GUARD` global (nega por padrão) ✅ `app.module.ts:90-91` (PR #51, e8f951e). Rotas públicas só com `@Public()`: health, login, Azure e as duas de `integracao-avhub` (protegidas por `MES_API_KEY`). Exposição pública do `api-pcp` no Coolify: 🔴 Gustavo (#13, [[Riscos]] RS-009).
 
-## Cadastro e rotação
+### Cadastro e rotação
 
 - Cadastro em `auth.chaves_servico` é do **DBA**; não há tela. Cache de 30 s: cadastro ou revogação leva até 30 s.
 - `API_KEYS` e `MES_INTEGRACAO_KEYS` são listas separadas por vírgula, o que permite sobrepor a chave nova e a antiga na troca ✅ (`apiKeyAuth.js:52-68`). O procedimento escrito está no PDF `docs/arquitetura/chaves-integracao-avhub-mes-pipeline.pdf` do repo do HUB (não transcrito).
@@ -79,7 +110,7 @@ As quatro últimas só podem ser fixadas depois de separar as chaves de serviço
 - `MES_INTEGRACAO_KEYS`: mínimo de 32 caracteres.
 - Regra do Nathan: nenhuma regra em variável de ambiente nos jobs novos; só endereço e segredo ficam no ambiente ✅ (`item_estado_projetado.job.js:38-49`).
 
-## Pendências
+### Pendências
 
 | ID | Pendência | Dono |
 |---|---|---|
@@ -90,7 +121,7 @@ As quatro últimas só podem ser fixadas depois de separar as chaves de serviço
 
 Ver também: [[Registro-de-Decisoes]], [[Infraestrutura]].
 
-## Endurecimento pendente (auditoria de 15/10/2026)
+### Endurecimento pendente (auditoria de 15/10/2026)
 
 A auditoria da `api-acos-vital` (`276dab8`) achou que a chave de `API_KEYS` sem token **dispensa permissão, escopo e identidade** (`apiKeyAuth.js:160-161`, `exigirToken` com padrão `false` em `acessoConfig.js:71`) e que `POST /autenticacao/azure` emite JWT só com o e-mail enquanto `AUTENTICACAO_AZURE_VALIDAR_ID_TOKEN` está desligado (padrão, `azureIdToken.js:27-28`). Desenho da correção, ordem e testes: [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]] (S1 e S2), com o lado do HUB no BL-058.
 

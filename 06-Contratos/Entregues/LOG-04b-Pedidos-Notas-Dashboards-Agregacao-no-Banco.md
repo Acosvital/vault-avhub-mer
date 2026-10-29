@@ -25,6 +25,11 @@ fontes: ["Dump Avhub (Esqueleto).sql:7526", "api-acos-vital/src/schemas/core_ven
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Pediu que Pedidos, Notas e os três Dashboards deixem de agrupar e somar no navegador: o banco devolve um registro por pedido, filtros e totais.
+> **Quem é afetado:** Vendedores, PCP (Planejamento e Controle da Produção) e gestão: telas mais leves, com a regra de negócio num só lugar.
+> **Situação:** ✅ Pedidos (P1 a P5, P7) e dashboards no código. 🟡 A ordem das etapas (P6) segue em outro contrato. ❓ Notas (N1 a N3) e P8 não foram conferidos.
+
 
 **Criado em:** 20/09/2026, inventário das telas oficializadas neste ciclo (Pedidos, Notas e os três
 Dashboards). Complementa — e não repete — estes contratos, que continuam valendo:
