@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, raia, recebimento, doca, nf, conferencia, divergencia, lote, mes, r0, r1, r2, r3, r4, r6]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Robert (MES) · Nathan (decisões)
 fontes: [00-Fluxo-Mestre-0b, Integracao-AvHub-MES (INT-03), API-007, API-008, v1 02-PRD-Estoque/Fluxo-Recebimento-Completo, v1 App-PCP-Recebimento-Conferencia, decisões do Nathan de 14/10 (conferência contra a NF), api-pcp 579a625 (recebimento.service.ts, compras.service.ts, compras.prisma, compras-ccp.dto.ts), app-pcp 1fca8d3 (FilaSetor, ConferirRecebimentoModal, decisoes-pcp)]
@@ -10,6 +10,12 @@ fontes: [00-Fluxo-Mestre-0b, Integracao-AvHub-MES (INT-03), API-007, API-008, v1
 # Raia Recebimento (R0 a R6)
 
 Nós do [[00-Fluxo-Mestre-0b]]: `R0` esperados e chegada com NF, `R1` conferência contra a NF, `R2` pesagem, `R3` bate com o esperado?, `R4` cria o lote em quarentena, `R6` divergência. (`R5` não existe no 0b.) Entrada: `FN1` fornecedor entrega ([[04-Circuito-de-Compra]]). Saída: `Q1` ([[06-Qualidade-Entrada]]) ou `P6` ([[02-PCP-Triagem-e-Destinacao]]). Selos em [[Regras-do-Vault]].
+
+> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
+> - N16-134: tolerância de peso de 5% por padrão, ajustável por material; deixa de ser provisória.
+> - N16-135: quando o cruzamento com a OC existir, divergência contra a OC bloqueia, como a divergência contra a nota.
+> - N16-136: uma nota pode trazer itens de mais de uma OC; a conferência é por item da OC (proposta do Robert).
+> - N16-137: a reabertura do recebimento pelo PCP avisa o av-hub; exige contrato novo entre MES e hub.
 
 ## Objetivo
 
@@ -172,9 +178,9 @@ Pontos a decidir pelo Robert: se o "esperado por OC" é entidade própria ou uma
 
 ## Pendências
 
-- Nathan: tolerância de peso de 5% vale para toda categoria (decisão provisória do v1), ou por material? O código guarda por material (`toleranciaPeso`, padrão 0,05).
-- Nathan: quando existir o cruzamento com a OC, a divergência de quantidade contra a OC bloqueia (como a da NF) ou só avisa?
-- Robert: conferência de NF com **várias OCs** ou várias requisições na mesma nota (hoje a conferência é por requisição e parcial).
+- Nathan: tolerância de peso de 5% vale para toda categoria (decisão provisória do v1), ou por material? O código guarda por material (`toleranciaPeso`, padrão 0,05). **Decidido em 29/10/2026 (N16-134): 5% por padrão, ajustável por material.**
+- Nathan: quando existir o cruzamento com a OC, a divergência de quantidade contra a OC bloqueia (como a da NF) ou só avisa? **Decidido em 29/10/2026 (N16-135): bloqueia.**
+- Robert: conferência de NF com **várias OCs** ou várias requisições na mesma nota (hoje a conferência é por requisição e parcial). **Decidido em 29/10/2026 (N16-136): uma nota pode trazer várias OCs, conferidas por item da OC.**
 - Robert: `RecebimentoService.conferir` usa o fornecedor digitado quando o MES não tem `fornecedor` da OC; confirmar que o campo preenchido pela doca não conflita com o futuro vindo do 004.
 
 ## Subfluxo

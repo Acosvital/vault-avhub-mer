@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, raia, pcp, triagem, destinacao, mes, p1, p2, p6]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Robert (MES) · Nathan (decisões)
 fontes: [00-Fluxo-Mestre-0b, LOG-26, v1 01-Fluxo-Operacional/PCP-Carteira, v1 Modelo-Destinacao-Item, v1 Encaixe-Estoque-Revenda-no-PCP, v1 Fluxo-Estoque-Completo, api-pcp 579a625 (pedidos.service.ts, pedidos-carteira.service.ts, pedidos.controller.ts, fabricas.prisma), app-pcp 1fca8d3 (carteira, ordens-producao/novo), Registro-de-Decisoes #31b #50b]
@@ -10,6 +10,13 @@ fontes: [00-Fluxo-Mestre-0b, LOG-26, v1 01-Fluxo-Operacional/PCP-Carteira, v1 Mo
 # Raia PCP: Triagem e Destinação do Pedido (P1, P2, P6)
 
 Nós do [[00-Fluxo-Mestre-0b]]: `P1` Triagem do Pedido, `P2` Destinação do Pedido, `P6` Novo norte. O nó `P3` (requisição de compra de origem PCP) fica em [[04-Circuito-de-Compra]]. Entrada: [[01-Vendas-Liberacao]]. Saída: [[03-Estoque-Atendimento-e-Despacho]]. Selos em [[Regras-do-Vault]].
+
+> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
+> - N16-138: a Triagem **não** mostra o saldo do Estoque por item; o Estoque decide na etapa dele.
+> - N16-139: o saldo zero continua exigindo o clique do almoxarife, também depois do marco zero de 13/11.
+> - N16-141: no retrabalho (`P6`), o PCP escolhe o setor de volta; hoje o código volta sempre ao setor anterior.
+> - N16-142: pedidos anteriores à data de corte da liberação ficam fora do MES e terminam no sistema antigo; falta trocar o erro 404 por uma mensagem clara.
+> - Ordem de Produção: desenho em [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] (uma por destino de fabricação, numerada `pedido/N`; revenda não gera ordem). Proposta aceita em 15/10, sem código.
 
 ## Objetivo
 
@@ -117,12 +124,12 @@ O `POST /pedidos/completo` singular foi apagado (PR #50); só o `/lote` existe.
 | 8 | **Mostrar a OC do pedido** (Triagem, Destinação, Atendimento) lendo a referência da OC do hub (BL-049, depende de BL-001) | Robert | P1, P2, E1 | 🔴 📝 N14-20 |
 | 4 | Consumo de matéria-prima ao enviar à produção (J2, J3): hoje o restante segue o roteiro sem baixa | Robert | P2, E4 | 🔴 |
 | 5 | Pedido manual (`SistemaOrigem.MANUAL`) fora da espinha; ver anexo [[Pedido-Manual]] | Nathan | P2 | 🟡 |
-| 6 | Pedido liberado anterior à data de corte não aparece na Triagem (404 nos itens) | Nathan | P1 | 🔴 pergunta aberta (ver [[01-Vendas-Liberacao]]) |
+| 6 | Pedido liberado anterior à data de corte não aparece na Triagem (404 nos itens) | Nathan | P1 | 📝 decidido em 29/10 (N16-142): ficam fora do MES e terminam no sistema antigo; falta a mensagem no lugar do 404 (ver [[01-Vendas-Liberacao]]) |
 
 ## Pendências
 
-- Nathan: o saldo zero continua exigindo clique mesmo depois do marco zero do Estoque (13/11)? Hoje vale o clique sempre (#31b).
-- Nathan e Robert: a Triagem deve mostrar o saldo do Estoque por item (hoje não mostra; a decisão de saldo é só no Estoque). Com N14-20, ela também mostraria o saldo futuro e a OC do pedido.
+- Nathan: o saldo zero continua exigindo clique mesmo depois do marco zero do Estoque (13/11)? Hoje vale o clique sempre (#31b). **Decidido em 29/10/2026 (N16-139): sim, o clique vale sempre, também depois do marco zero.**
+- Nathan e Robert: a Triagem deve mostrar o saldo do Estoque por item (hoje não mostra; a decisão de saldo é só no Estoque). Com N14-20, ela também mostraria o saldo futuro e a OC do pedido. **Decidido em 29/10/2026 (N16-138): a Triagem não mostra o saldo do Estoque; o Estoque decide na etapa dele.**
 - Robert: a OP é uma entidade por destino de fabricação, por item ou por rodada? Como se relaciona com a "ordem" que o código grava hoje (`pedidoVenda/N`)?
 - Robert: se `ensureEtapasPorTipo` deve aceitar roteiro de Revenda **sem nenhuma** etapa além do Estoque (o front exige roteiro não vazio, `ordens-producao/novo/page.tsx:376-379`).
 

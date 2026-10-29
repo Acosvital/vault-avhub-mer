@@ -94,7 +94,7 @@ Termos do projeto em ordem alfabética, com o nome atual primeiro. Nomes de tela
 
 ## Proposta, Orçamento, custo real e comissão nova (desenho aprovado em 26/10/2026)
 
-- **Proposta** — documento do vendedor no Hub, antes do pedido (nós `V0.1` a `V0.7`). Só a aprovada vira pedido, e uma proposta vira um pedido só (N16-02). Estados (SQL-016): `ABERTA`, `APROVADA`, `TRANSFORMADA`, `CANCELADA`. Ver [[11-Proposta-e-Pedido-de-Venda]].
+- **Proposta** — documento do vendedor no Hub, antes do pedido (nós `V0.1` a `V0.7`). Só a aprovada vira pedido, e uma proposta vira um pedido só (N16-02). Estados: `ABERTA`, `APROVADA`, `TRANSFORMADA`, `CANCELADA`. Ver [[11-Proposta-e-Pedido-de-Venda]].
 - **Proposta incompleta** — a que tem item sem custo e sem fornecedor. É um campo calculado, não um estado, e impede a aprovação (N16-03, N16-31).
 - **Transformar em pedido** — botão da proposta aprovada (`V0.6`): pede a previsão de faturamento, se a Qualidade acompanha e se o pedido pode faturar em partes; depois o Hub cria o pedido no Omie por fila e pipeline (`V0.7`).
 - **Pedido do Hub** — pedido de venda em `core_comercial.pedidos`, com `origem` `PROPOSTA` ou `OMIE`. Os dois seguem o mesmo fluxo e a mesma tela; o do Omie chega com a parte de vendas pronta, que só se altera no Omie (N16-106).
@@ -110,4 +110,4 @@ Termos do projeto em ordem alfabética, com o nome atual primeiro. Nomes de tela
 - **Comissão estimada e comissão real** — a estimada nasce na proposta ou na parte de compras do pedido do Omie (`K1`) e é a única que o vendedor vê antes da decisão; a real fecha por nota fiscal com o custo real (`K3`) e só aparece ao vendedor depois da decisão (`K5`).
 - **Apuração seguinte** — quando o custo completa depois da decisão, a diferença (complemento ou desconto) vai para a próxima apuração, para nova decisão (N16-49).
 - **Abatimento** — redução da comissão na mesma proporção da nota cancelada, devolvida ou recusada (`K6`, N16-47).
-- **`core_comissao`** — schema novo da comissão, em Operações ([[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]). O `core_comissionamento` atual não muda (N16-11).
+- **`core_comissao`** — schema novo da comissão, em Operações. O `core_comissionamento` atual não muda (N16-11).

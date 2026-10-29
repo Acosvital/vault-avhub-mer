@@ -36,7 +36,7 @@ Responde às perguntas da página do produto do vendedor ([[Registro-de-Decisoes
 | **Nota Prazo** | `prazo` na `Oferta` é **texto livre** (`String?`) | Precisa de **prazo de entrega em dias, como número**. Sem isso a nota não calcula. E dizer se é prazo de **entrega** (o que a regra quer) ou de pagamento |
 | **Nota Histórico** | A OC do hub tem `data_previsao_chegada` (prevista). Não achei score nem avaliação de fornecedor no modelo | Precisa da **data real do recebimento** para medir "entrega no prazo" (conferir com o contrato do Recebimento). E de um **mínimo de compras**: fornecedor com uma compra só não tem histórico confiável |
 | **Frequência de vitória** | Não existe | Precisa de definição: ganhou quando teve o **menor custo líquido** numa cotação ou numa OC? Em cotações ou em compras? |
-| **Categoria** | O SQL-017 tem `categoria_suprimento` | O ranking por categoria já tem onde se apoiar |
+| **Categoria** | O Orçamento tem `categoria_suprimento` | O ranking por categoria já tem onde se apoiar |
 | **Volatilidade** | O histórico de ofertas e de OC existe | Precisa de um **mínimo de pontos** no período (por exemplo, 3) e a mesma unidade e moeda. Com poucos pontos o CV engana |
 | **Dado recente** | A OC efetivada entra como oferta (`fonte` pedido do Omie) | Casa com a N16-41 (vale o mais atualizado) e com a N16-52 (sem dado recente, mostra a média e o botão de pedir cotação) |
 

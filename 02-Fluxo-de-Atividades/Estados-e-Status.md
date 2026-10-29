@@ -186,9 +186,9 @@ Aprovação (`C3`, N14-21): OC acima do limite da unidade (`parametros_compras.l
 
 Os 8 estados macro do desenho do vendedor (`AGUARDANDO_LIBERACAO`, `PENDENTE_PCP`, `EM_ESTOQUE`, `EM_COMPRA`, `EM_PRODUCAO`, `EM_RECEBIMENTO`, `EM_INSPECAO`, `PRONTO_EXPEDICAO`, `FATURADO`) não existem no código 🟡 ([[01-Vendas-Liberacao]]). O MES ainda não publica `/fluxo/eventos` 🔴 ([[Rastreabilidade-e-Torre-de-Fluxo]]).
 
-### Proposta, pedido de venda do Hub, custo real e comissão nova (proposta 🟡, SQL-016 a SQL-018)
+### Proposta, pedido de venda do Hub, custo real e comissão nova (proposta 🟡)
 
-Valores dos `CHECK` das migrações propostas em 26/10/2026 ([[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]], [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]). Ainda não estão no banco de produção.
+Valores dos `CHECK` das migrações propostas em 26/10/2026. Ainda não estão no banco de produção.
 
 | Campo | Valores | Fonte |
 |---|---|---|
@@ -199,7 +199,7 @@ Valores dos `CHECK` das migrações propostas em 26/10/2026 ([[SQL-016-Proposta-
 | `core_comercial.pedidos_sequenciais.status` | `ABERTO`, `FATURADO`, `CANCELADO` | N16-92 |
 | `core_vendas_faturamento.pedidos_vendas_sequenciais_itens.origem_vinculo` | `HUB`, `PRODUTO`, `AMBIGUO`, `SEM_VINCULO` | N16-99, N16-100 |
 | `core_comercial.calendario_excecoes.tipo` | `FERIADO`, `DIA_UTIL` | N16-104 |
-| `core_comercial.ofertas.fonte` | `MANUAL`, `MAPA_COTACAO`, `MIGRACAO`, `OC_HUB`, `OC_OMIE` | SQL-017 |
+| `core_comercial.ofertas.fonte` | `MANUAL`, `MAPA_COTACAO`, `MIGRACAO`, `OC_HUB`, `OC_OMIE` | |
 | `core_comercial.custos_eventos.origem` | `OC_MATERIAL`, `LOTE_ESTOQUE`, `MATERIA_PRIMA_FABRICACAO`, `MAO_DE_OBRA_OC_SERVICO`; `status` `VALIDO`, `DESCARTADO`; `sentido` `1` ou `-1` (estorno) | N16-09, N16-20 |
 | `core_comercial.divergencias_compra.estado` | `PENDENTE`, `APROVADO`, `REPROVADO`, `RESOLVIDO`; `solucao_tipo` `NOVO_VALOR`, `NOVO_FORNECEDOR`, `MANTIDO`, `PEDIDO_CANCELADO` | N16-60 a N16-73 |
 | `core_comissao.comissoes.estado` | `ESTIMADA`, `CONGELADA`, `EM_ACOMPANHAMENTO`, `ENCERRADA`, `CANCELADA`; `origem` `PROPOSTA`, `PEDIDO_OMIE` | N16-10, N16-103 |

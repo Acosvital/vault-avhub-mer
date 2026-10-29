@@ -4,7 +4,7 @@ criado: 2026-10-23
 atualizado: 2026-10-23
 status: proposta
 dono: Nathan
-fontes: ["Documentação do Omie lida em 23/10/2026: https://app.omie.com.br/api/v1/produtos/pedido/ (serviço PedidoVendaProduto, método IncluirPedido e tipos complexos)", "Exemplo de IncluirPedido enviado pelo Nathan em 23/10/2026", "05-Integracoes/Estudo-Omie-API (estudo de 21/10)", "av-hub components/Propostas/PropostaForm (PedidoOmieModal.tsx, ItemProposta.tsx, PropostaForm.tsx)", "06-Contratos/Ativos/SQL-016 (pedido_venda, pedidos_itens)"]
+fontes: ["Documentação do Omie lida em 23/10/2026: https://app.omie.com.br/api/v1/produtos/pedido/ (serviço PedidoVendaProduto, método IncluirPedido e tipos complexos)", "Exemplo de IncluirPedido enviado pelo Nathan em 23/10/2026", "05-Integracoes/Estudo-Omie-API (estudo de 21/10)", "av-hub components/Propostas/PropostaForm (PedidoOmieModal.tsx, ItemProposta.tsx, PropostaForm.tsx)"]
 ---
 
 # Mapa do `IncluirPedido` do Omie: o que o hub manda, de onde vem cada campo e o que ainda não sabemos
@@ -190,13 +190,13 @@ O que isso resolve e o que não resolve:
 
 ## 8. O que isso muda nos contratos
 
-- **SQL-016:** `pedidos` precisa guardar `valor_total_omie` (conferência), `status_etapa_omie`, a resposta de `ConsultarPedido` em JSON para auditoria, o câmbio usado e o `valor_frete`/`modalidade_frete` já mapeados. 🟡
-- **API-019:** a pipeline lê o pedido de volta (`ConsultarPedido`) depois de incluir e compara total, itens e `codigo_item_omie`; divergência marca o pedido com aviso e **não libera**.
-- **Condições de pagamento de venda por conta:** desenhado em [[SQL-019-Condicoes-de-Pagamento-de-Venda-do-Omie]] (amostra real de 330 condições, dias inferidos da descrição, de-para automático com os encargos). Novo recurso na pipeline (`condicoesPagamentoVenda`, `ListarParcelas`, camada lenta, no molde do `condicoesPagamentoCompras`) e tabela espelho (`codigo_empresa`, `codigo_omie`, `descricao`, `quantidade_parcelas`), mais o de-para com a chave da tabela de encargos do motor. 🔴 não existe
+- **Pedido no Hub:** `pedidos` precisa guardar `valor_total_omie` (conferência), `status_etapa_omie`, a resposta de `ConsultarPedido` em JSON para auditoria, o câmbio usado e o `valor_frete`/`modalidade_frete` já mapeados. 🟡
+- **Conferência na pipeline:** a pipeline lê o pedido de volta (`ConsultarPedido`) depois de incluir e compara total, itens e `codigo_item_omie`; divergência marca o pedido com aviso e **não libera**.
+- **Condições de pagamento de venda por conta:** desenhado (amostra real de 330 condições, dias inferidos da descrição, de-para automático com os encargos). Novo recurso na pipeline (`condicoesPagamentoVenda`, `ListarParcelas`, camada lenta, no molde do `condicoesPagamentoCompras`) e tabela espelho (`codigo_empresa`, `codigo_omie`, `descricao`, `quantidade_parcelas`), mais o de-para com a chave da tabela de encargos do motor. 🔴 não existe
 - **Categoria, conta corrente, projeto e etapa já são sincronizados** pela pipeline (`categorias`, `contasCorrentes`, `projetos`, `etapasFaturamento`, `vendedores`). ✅ Não é preciso digitar códigos: a configuração por conta **escolhe** da lista sincronizada. 🟡 O que falta é guardar **qual** categoria, conta corrente e cenário o pedido de venda usa em cada conta.
 - **Configuração por conta Omie** (nova tabela ou parâmetros): `codigo_categoria`, `codigo_conta_corrente`, `codigo_cenario_impostos`, etapa inicial e local de estoque, **por conta** (Mogi e Uberaba). 🔴 hoje não existe lugar.
 - **Proposta:** ver [[14-Telas-e-Experiencia-do-Usuario]] para o que isso muda na tela (condição de pagamento escolhida de uma lista, imposto vindo do Omie, destino derivado do cliente).
 
 ## Ver também
 
-[[Estudo-Omie-API]] · [[11-Proposta-e-Pedido-de-Venda]] · [[14-Telas-e-Experiencia-do-Usuario]] · [[LOG-58-Liberacao-do-Pedido-Origem-Proposta]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]]
+[[Estudo-Omie-API]] · [[11-Proposta-e-Pedido-de-Venda]] · [[14-Telas-e-Experiencia-do-Usuario]] · · ·

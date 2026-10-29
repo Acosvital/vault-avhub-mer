@@ -119,7 +119,7 @@ Repositórios: **HUB** é o front do av-hub (`b55ac55`, conferido em disco), **a
 
 ## Proposta, Orçamento e comissão nova (`V0`, `B1` a `B4`, `C6` a `C8`, `K1` a `K6`) · [[11-Proposta-e-Pedido-de-Venda]]
 
-Telas novas do desenho aprovado em 26/10/2026, ainda sem código 🔴. A auditoria das telas que existem, as conexões e a página de proposta estão em [[14-Telas-e-Experiencia-do-Usuario]]; o menu em [[LOG-57-Menu-Vendas-Orcamento-Compras]].
+Telas novas do desenho aprovado em 26/10/2026, ainda sem código 🔴. A auditoria das telas que existem, as conexões e a página de proposta estão em [[14-Telas-e-Experiencia-do-Usuario]]; o menu em.
 
 | Nós | Tela | Quem | Estado |
 |---|---|---|---|

@@ -38,7 +38,7 @@ Os nós (numeração 🟡: o desenho do Nathan fixou só o intervalo `B1` a `B4`
 | Vendedor | Consulta a página do produto, pede cotação; **decide o valor que põe na proposta** | Vendas e Orçamento (só consulta) |
 | Compras | Dona do dado de compra; o valor das OC efetivadas alimenta a base; o valor correto da OC (`C7`) entra no histórico | Compras |
 | Pablo | Escreve o módulo na `api-acos-vital` | `api-acos-vital` |
-| Gustavo (DBA) | Revisa e aplica a migração do Orçamento no `core_comercial` (SQL-017) | `api-acos-vital` |
+| Gustavo (DBA) | Revisa e aplica a migração do Orçamento no `core_comercial` | `api-acos-vital` |
 | Nathan | Telas | HUB |
 
 `Admin (Dev)` não é ator.
@@ -87,7 +87,7 @@ A oferta é **imutável** (RN-130): corrigir é invalidar com motivo e lançar o
 
 ## Telas
 
-Menu **Orçamento** desde 16/10/2026 ([[LOG-57-Menu-Vendas-Orcamento-Compras]]). Telas movidas de `suprimentos/*` para `orcamento/*` (`200e860`):
+Menu **Orçamento** desde 16/10/2026. Telas movidas de `suprimentos/*` para `orcamento/*` (`200e860`):
 
 | Nome atual | Rota | Slug (`auth.telas`) | Nó | Estado |
 |---|---|---|---|---|
@@ -120,7 +120,7 @@ Rotas do `api-comercial` (módulo de teste) que serão migradas ([[LOG-52-Migrac
 | `POST /custos/sugerir` | sugestão de custo | `B2` | ✅ `custos.routes.ts:30` |
 | Matriz de preços | 🟡 | `B1`, `B2` | 🔴 |
 
-Contratos: [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]] (o Orçamento sobre o `core_comercial` real) e [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]]. Dependências: [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] (fases 4 e 5).
+Contratos: os do Orçamento foram removidos em 29/10/2026 e o Robert cria os novos. Dependências: [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] (fases 4 e 5).
 
 ## Como está no código (✅)
 
@@ -134,7 +134,7 @@ Contratos: [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido
 
 ## Dados 🟡
 
-Tudo no `core_comercial` (SQL-017). O banco real já tem as ofertas (imutáveis, com histórico), as solicitações de custo, os fornecedores, os produtos e os parâmetros de custo; a migração acrescenta só o que falta: ofertas geradas das OCs, base e estatística de preço e o pedido de custo sem prazo. O schema separado `core_orcamento`, do desenho de 16 a 21/10, foi abandonado em 26/10 (o mesmo que o [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] já fazia).
+Tudo no `core_comercial`. O banco real já tem as ofertas (imutáveis, com histórico), as solicitações de custo, os fornecedores, os produtos e os parâmetros de custo; a migração acrescenta só o que falta: ofertas geradas das OCs, base e estatística de preço e o pedido de custo sem prazo. O schema separado `core_orcamento`, do desenho de 16 a 21/10, foi abandonado em 26/10 (o mesmo que o [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] já fazia).
 
 Campos novos pelas decisões 🟡: `oferta.prazo_entrega_dias` (número); `solicitacao_custo.aberta_em` e `respondida_em` (cronômetro); parâmetros do score (pesos, limite de volatilidade, dias de "dado recente", mínimo de pontos) em tabela de parâmetros **com vigência**, por categoria.
 
@@ -163,7 +163,7 @@ Hoje a regra do código é mais restrita: `veCusto` vem de `custo-item` ou de se
 | 7 | Cronômetro do pedido de custo no lugar do prazo | Pablo | `B3` | 🔴 |
 | 8 | Perfil "orçamentista" (setor novo) | Gustavo | — | 🔴 |
 | 9 | O valor correto da OC (`C7`) vira oferta ou linha do histórico de compras | Pablo, Gustavo | `B1` | 🟡 |
-| 10 | Cadastro das telas em produção (SQL do 16/10) | Gustavo | — | 🟡 ([[LOG-57-Menu-Vendas-Orcamento-Compras]]) |
+| 10 | Cadastro das telas em produção (SQL do 16/10) | Gustavo | — | 🟡 |
 
 ## Pendências
 

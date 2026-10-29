@@ -9,7 +9,7 @@ fontes: [av-hub 5aa5311 (branch feat/menu-orcamento-vendas-compras) api-comercia
 
 # Mapa do módulo do Pablo (Comercial e Suprimentos), como está hoje
 
-Este mapa descreve o código de teste `av-hub\api-comercial` (N14-15, N16-15) e o que as decisões N16 mudam nele. Cada fato do código traz arquivo e linha (✅). Decisão traz o ID `N16-xx` (📝). O que é proposta nova leva 🟡. O que não deu para conferir leva ❓ ou 🔴. Os desenhos que nascem daqui estão em [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]] e [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]. Decisões: [[Registro-de-Decisoes]].
+Este mapa descreve o código de teste `av-hub\api-comercial` (N14-15, N16-15) e o que as decisões N16 mudam nele. Cada fato do código traz arquivo e linha (✅). Decisão traz o ID `N16-xx` (📝). O que é proposta nova leva 🟡. O que não deu para conferir leva ❓ ou 🔴. Decisões: [[Registro-de-Decisoes]].
 
 Caminhos abaixo são relativos a `av-hub\api-comercial\` quando não dizem o contrário.
 
@@ -23,10 +23,10 @@ Caminhos abaixo são relativos a `av-hub\api-comercial\` quando não dizem o con
 | Banco publicado | Não existe `core_comercial` no dump do hub | ✅ `Dump Avhub (Esqueleto).sql` (só há `core_comissionamento`, `core_compras`, `core_vendas_faturamento` e outros; nenhum `CREATE SCHEMA core_comercial`) |
 | Permissão | 100% do RBAC do hub: telas × ações e escopo de vendedores viram "capacidades" | ✅ `src/domain/permissoes/capacidades.ts:8-19,64-84` |
 | Front | Telas em `app/(protected)/vendas`, `orcamento` e `compras/historico-compras`; BFF em `app/api/comercial/[...rota]/route.ts` | ✅ |
-| Cadastro das telas | Feito pelo Nathan na api-test em 16/10; em produção o Gustavo roda o SQL | 📝 N16-14, `06-Contratos/Ativos/LOG-57-anexos/telas-vendas-orcamento-compras.sql` |
+| Cadastro das telas | Feito pelo Nathan na api-test em 16/10; em produção o Gustavo roda o SQL | 📝 N16-14, `telas-vendas-orcamento-compras.sql` (anexo do contrato do menu, removido em 29/10/2026) |
 
 > [!info] O que não migra (27/10/2026)
-> O módulo é só ambiente de teste e **não tem dado** (Nathan, N16-109). Para a migração, a lista do que **não portar** (sincronização própria do Omie e suas 7 tabelas de cópia, Histórico de compras, planilha do pedido no Omie, migração do ERP antigo, fechamento parcial, autenticação própria) e do que **reaproveitar** (motor na API, ofertas, fornecedores, parâmetros, pedido de custo, notificações) está em [[LOG-62-Reescopo-Menu-Enxuto-e-Limpeza-do-Modulo-do-Pablo]] §5. O menu das telas descritas aqui também foi enxugado nesse contrato.
+> O módulo é só ambiente de teste e **não tem dado** (Nathan, N16-109). Para a migração, a lista do que **não portar** (sincronização própria do Omie e suas 7 tabelas de cópia, Histórico de compras, planilha do pedido no Omie, migração do ERP antigo, fechamento parcial, autenticação própria) e do que **reaproveitar** (motor na API, ofertas, fornecedores, parâmetros, pedido de custo, notificações) está em §5. O menu das telas descritas aqui também foi enxugado nesse contrato.
 
 ## 2. Camadas da requisição
 
@@ -140,7 +140,7 @@ Configurador por classe, espessura, núcleo (EPS ou PIR) e pintura; o custo base
 - Escopo por usuário dono (`id_responsavel`): `PROPRIAS`, `COMPARTILHADA` (que não restringe nada) e `TODAS` ✅ `propostas.service.ts:23-34`.
 - Slugs que decidem capacidade ✅ `src/domain/permissoes/capacidades.ts:47-56`: `propostas`, `propostas-delegacao`, `propostas-valores`, `custo-item`, `relatorio-gerencial`, `painel-comprador`, `clientes`, `simulador`. Capacidades: `veValores`, `veCusto`, `comprador`, `podeDelegar`, `editaTerceiros`, `exclui`, `escopo`, `escopoClientes`, `relatorioGerencial`, `simulador`.
 - Perfis de teste (bypass de desenvolvimento): `Comercial - Vendedor`, `Auxiliar`, `Gestão`, `Diretoria`, `Suprimentos - Comprador`, `Pós-venda`, `Comissões - Simulador` ✅ `perfisDev.ts:12-77`. São fixtures do bypass; não migram.
-- Telas cadastradas em 16/10 (nome, slug, pai, ordem relativa) ✅ `06-Contratos/Ativos/LOG-57-anexos/telas-vendas-orcamento-compras.sql:51-70`:
+- Telas cadastradas em 16/10 (nome, slug, pai, ordem relativa) ✅ `telas-vendas-orcamento-compras.sql:51-70` (anexo removido em 29/10/2026):
 
 | Grupo | Slugs |
 |---|---|
@@ -225,21 +225,21 @@ Tipos de tela ainda dizem "api-comercial" e `PARCIAL`/`FECHADA` (`lib/domain/com
 
 | Hoje no código | Muda para | Decisão | Onde fica o desenho |
 |---|---|---|---|
-| Número `CO-AV2026-0012-R03`, com letras, ano e revisão no texto | Número só numérico, em sequência própria; prefixo só na tela e no PDF | 📝 N16-04 | [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], SQL-016 |
-| Status `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` e editar só em `ABERTA` | `ABERTA` (ajusta), `APROVADA` (trava), `TRANSFORMADA`, `CANCELADA` | 📝 N16-02, N16-03 | API-019 |
-| `PUT` edita e reabre depois de fechada ou perdida | Depois de aprovada não se ajusta nem se reabre | 📝 N16-03 | API-019 |
-| Fechamento parcial por itens, `valor_fechado`, `valor_aberto`, evento `FECHAMENTO_PARCIAL` | Some: uma proposta é um pedido | 📝 N16-02 | API-019 |
-| Proposta incompleta (item sem custo) pode ser salva e fechada | Incompleta não aprova (parte de compras vazia) | 📝 N16-03 | SQL-016 (`fn_proposta_travar`) |
-| Pedido digitado pelo vendedor no Omie, com `PUT /pedido_omie` registrando número e Qualidade | Botão "Transformar em pedido de venda"; a API grava numa fila e a pipeline cria o pedido por API | 📝 N16-02 | API-020 |
-| Qualidade registrada depois, na liberação do hub (V3) | `V2` obrigatório na proposta; o pedido nasce liberado, sem V3; o pedido que chega do Omie sem proposta segue com V2 e V3 | 📝 N16-05 | API-020 |
-| Câmbio da AwesomeAPI com fallback PTAX | PTAX do hub (`core.cotacoes_moeda`) | 📝 N16-13 | SQL-016 (`id_cotacao_moeda`) |
-| Custo do item só como snapshot da oferta sugerida | Parte de compras do vendedor + pedido de custo ao Orçamento, que preenche | 📝 N16-06 | API-021 |
-| Solicitação de custo com prazo fixo de 2 dias úteis no código | Prazo definido pelo negócio (parâmetro) | 📝 N16-06, 🔴 OQ-02 | SQL-017 (`sla_solicitacao_dias_uteis`) |
-| Catálogo de produtos é tela de Compras | O vendedor ganha tela de consulta (histórico, fornecedores, preços, média); matriz de preços nova | 📝 N16-07, 🔴 OQ-10 | LOG-60 |
-| Ofertas `PEDIDO_OMIE` vêm de sincronização própria que lê o Omie | Derivam das OCs do hub e do espelho `pedidos_compras` (a pipeline é a fonte) | 📝 N16-15 | SQL-017 (`fn_oferta_gerar_de_ocs`) |
-| Custo real do pedido não existe (só margem estimada com o custo cotado) | Custo real por evento e por item do pedido, com view `vw_pedido_item_custo` | 📝 N16-09 | LOG-61, [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] |
-| Compras não tem papel sobre a proposta | Compras confere a parte de compras (C6) e usa o valor correto na OC (C7); não altera a proposta; o preço fechado com o cliente não muda | 📝 N16-08, N16-17 | LOG-61 |
-| Simulador de Comissões lê a proposta pelo `numero_pedido_omie` | Lê o pedido de venda do hub ligado à proposta (`pedido_venda.id_proposta`) | 📝 N16-11 | [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] §9 |
+| Número `CO-AV2026-0012-R03`, com letras, ano e revisão no texto | Número só numérico, em sequência própria; prefixo só na tela e no PDF | 📝 N16-04 | |
+| Status `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` e editar só em `ABERTA` | `ABERTA` (ajusta), `APROVADA` (trava), `TRANSFORMADA`, `CANCELADA` | 📝 N16-02, N16-03 | |
+| `PUT` edita e reabre depois de fechada ou perdida | Depois de aprovada não se ajusta nem se reabre | 📝 N16-03 | |
+| Fechamento parcial por itens, `valor_fechado`, `valor_aberto`, evento `FECHAMENTO_PARCIAL` | Some: uma proposta é um pedido | 📝 N16-02 | |
+| Proposta incompleta (item sem custo) pode ser salva e fechada | Incompleta não aprova (parte de compras vazia) | 📝 N16-03 | (`fn_proposta_travar`) |
+| Pedido digitado pelo vendedor no Omie, com `PUT /pedido_omie` registrando número e Qualidade | Botão "Transformar em pedido de venda"; a API grava numa fila e a pipeline cria o pedido por API | 📝 N16-02 | |
+| Qualidade registrada depois, na liberação do hub (V3) | `V2` obrigatório na proposta; o pedido nasce liberado, sem V3; o pedido que chega do Omie sem proposta segue com V2 e V3 | 📝 N16-05 | |
+| Câmbio da AwesomeAPI com fallback PTAX | PTAX do hub (`core.cotacoes_moeda`) | 📝 N16-13 | (`id_cotacao_moeda`) |
+| Custo do item só como snapshot da oferta sugerida | Parte de compras do vendedor + pedido de custo ao Orçamento, que preenche | 📝 N16-06 | |
+| Solicitação de custo com prazo fixo de 2 dias úteis no código | Prazo definido pelo negócio (parâmetro) | 📝 N16-06, 🔴 OQ-02 | (`sla_solicitacao_dias_uteis`) |
+| Catálogo de produtos é tela de Compras | O vendedor ganha tela de consulta (histórico, fornecedores, preços, média); matriz de preços nova | 📝 N16-07, 🔴 OQ-10 | |
+| Ofertas `PEDIDO_OMIE` vêm de sincronização própria que lê o Omie | Derivam das OCs do hub e do espelho `pedidos_compras` (a pipeline é a fonte) | 📝 N16-15 | (`fn_oferta_gerar_de_ocs`) |
+| Custo real do pedido não existe (só margem estimada com o custo cotado) | Custo real por evento e por item do pedido, com view `vw_pedido_item_custo` | 📝 N16-09 | |
+| Compras não tem papel sobre a proposta | Compras confere a parte de compras (C6) e usa o valor correto na OC (C7); não altera a proposta; o preço fechado com o cliente não muda | 📝 N16-08, N16-17 | |
+| Simulador de Comissões lê a proposta pelo `numero_pedido_omie` | Lê o pedido de venda do hub ligado à proposta (`pedido_venda.id_proposta`) | 📝 N16-11 | §9 |
 
 ### 8.3 Fica de fora da migração
 
@@ -252,12 +252,12 @@ Tipos de tela ainda dizem "api-comercial" e `PARCIAL`/`FECHADA` (`lib/domain/com
 | `Auditoria` própria | Já existe `auth.auditoria` | 🟡 [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §3.1 |
 | `perfisDev.ts` e `AUTH_DEV_BYPASS` | Perfis fictícios, nunca em produção | 🟡 LOG-52 §6 |
 | As 5 telas antigas de `/orcamento/*` e as rotas `app/api/historicoProdutos` | Removidas do av-hub em 16/10 | 📝 N16-14 |
-| `Unidade` (`MOGI`, `UBERABA`, `ARUJA`) e `ContaOmie` como enums | Viram `core.unidades` (uuid) | 🟡 SQL-016 |
-| Faixa "fluxo do custo" que começa em "Vendedor pede custo" | Texto muda: o setor orçamentário preenche | 🟡 LOG-60 |
+| `Unidade` (`MOGI`, `UBERABA`, `ARUJA`) e `ContaOmie` como enums | Viram `core.unidades` (uuid) | 🟡 |
+| Faixa "fluxo do custo" que começa em "Vendedor pede custo" | Texto muda: o setor orçamentário preenche | 🟡 |
 
 ## 9. Defeitos do código de teste que a migração não pode herdar
 
-A auditoria de 15/10 (24 itens) está em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §10. Os que tocam as tabelas e regras da proposta, do Orçamento e da comissão: filtro por responsável que anula o escopo `proprios` (item 1), `vinculados` que não restringe (item 2), CNPJ alfanumérico rejeitado (item 4), cliente criado na proposta que sobrescreve o cadastro de outro vendedor (item 6), custo e margem apagados por `PUT` sem `veCusto` (item 8), `normalizarIpi` na oferta digitada (item 16), sem FK nem `CHECK` (item 17). Os DDL de [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] e [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]] já trazem FK, `CHECK` e CNPJ de 14 posições alfanuméricas.
+A auditoria de 15/10 (24 itens) está em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §10. Os que tocam as tabelas e regras da proposta, do Orçamento e da comissão: filtro por responsável que anula o escopo `proprios` (item 1), `vinculados` que não restringe (item 2), CNPJ alfanumérico rejeitado (item 4), cliente criado na proposta que sobrescreve o cadastro de outro vendedor (item 6), custo e margem apagados por `PUT` sem `veCusto` (item 8), `normalizarIpi` na oferta digitada (item 16), sem FK nem `CHECK` (item 17). Os DDL de já trazem FK, `CHECK` e CNPJ de 14 posições alfanuméricas.
 
 ## 10. Perguntas que nascem deste mapa
 

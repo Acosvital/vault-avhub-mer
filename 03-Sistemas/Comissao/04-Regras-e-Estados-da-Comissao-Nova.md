@@ -4,12 +4,12 @@ criado: 2026-10-21
 atualizado: 2026-10-21
 status: proposta
 dono: Nathan
-fontes: [SQL-018-Schema-core_comissao-Comissao-da-Proposta (comissoes, comissoes_nf, comissao_lancamentos, comissao_devolucao_pendencia), N16-10, N16-42 a N16-51, N16-74]
+fontes: [ (comissoes, comissoes_nf, comissao_lancamentos, comissao_devolucao_pendencia), N16-10, N16-42 a N16-51, N16-74]
 ---
 
 # Regras e estados da comissão nova
 
-Resumo dos estados e das regras que o banco impõe ([[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]). Modelo: [[03-Modelo-Novo-core_comissao]].
+Resumo dos estados e das regras que o banco impõe. Modelo: [[03-Modelo-Novo-core_comissao]].
 
 ## 1. Dossiê da proposta (`comissoes`)
 
@@ -47,4 +47,4 @@ Resumo dos estados e das regras que o banco impõe ([[SQL-018-Schema-core_comiss
 
 ## Ver também
 
-[[01-Motor-Atual-Como-Calcula]] · [[02-Tabelas-Atuais-core_comissionamento]] · [[03-Modelo-Novo-core_comissao]] · [[API-022-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria]]
+[[01-Motor-Atual-Como-Calcula]] · [[02-Tabelas-Atuais-core_comissionamento]] · [[03-Modelo-Novo-core_comissao]] ·

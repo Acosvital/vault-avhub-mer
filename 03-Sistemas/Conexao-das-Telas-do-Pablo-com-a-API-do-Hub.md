@@ -4,7 +4,7 @@ tags: [comercial, suprimentos, api-acos-vital, analise, rascunho]
 criado: 2026-10-27
 atualizado: 2026-10-27
 status: rascunho
-fontes: ["Dump do Avhub para referência (completo).sql (avhub_prd_db, gerado em 26/10/2026 08:30)", "av-hub branch refactor/menu-enxuto-vendas-orcamento-compras (3bccfce): app/(protected)/vendas, orcamento, dashboards/dash-comercial, comissoes/simulador; app/api/comercial/**; services/comercial/*", "api-acos-vital origin/develop a7fda49: src/schemas/**", "LOG-52 §0, LOG-56, API-019, API-020, N16-109, N16-111"]
+fontes: ["Dump do Avhub para referência (completo).sql (avhub_prd_db, gerado em 26/10/2026 08:30)", "av-hub branch refactor/menu-enxuto-vendas-orcamento-compras (3bccfce): app/(protected)/vendas, orcamento, dashboards/dash-comercial, comissoes/simulador; app/api/comercial/**; services/comercial/*", "api-acos-vital origin/develop a7fda49: src/schemas/**", "LOG-52 §0, N16-109, N16-111"]
 ---
 
 # Conexão das telas do Pablo com a API do Hub — análise página a página
@@ -80,7 +80,7 @@ Contagem de linhas por tabela no dump completo de `avhub_prd_db`. Muda dois pont
 4. **Não há e-mail na API do Hub** (sem biblioteca nem rotina de envio). Proposta por e-mail e pedido de cotação dependem disso: é infraestrutura, um contrato à parte.
 5. **Não há notificações (sino)** em nenhum schema. Também é transversal.
 6. **Clientes e fornecedores ficam juntos em `core.parceiros`**, e `/parceiros` **não filtra por tipo**. Só `/compras/fornecedores` filtra (fornecedor e transportadora). Falta o equivalente para cliente com CNPJ e unidade (`/todos_os_clientes` não traz nenhum dos dois).
-7. **O motor de margem e letra existe no front** (`lib/simulador/motor.ts`) e os parâmetros no Hub (`/simulador_parametros?codigo_empresa=&vigente=true`). O vault manda o cálculo para a API (LOG-56 R42, N16-109 "uma fonte").
+7. **O motor de margem e letra existe no front** (`lib/simulador/motor.ts`) e os parâmetros no Hub (`/simulador_parametros?codigo_empresa=&vigente=true`). O vault manda o cálculo para a API (N16-109 "uma fonte").
 8. **Permissões tortas no BFF** (do Pablo): na proposta, "Sugerir custo" exige a tela `custo-item` e "Pedir custo" exige `solicitacoes-custo`; no Painel do Comprador, ofertas, produtos, categorias e fornecedores não aceitam a tela `painel-comprador`. Rever junto com cada contrato.
 
 ---
@@ -92,8 +92,8 @@ Contagem de linhas por tabela no dump completo de `avhub_prd_db`. Muda dois pont
 
 | Precisa | No Hub | |
 |---|---|---|
-| Lista, busca, filtros e excluir | — | ❌ API-019 §3.1 (só lista e detalhe estão lá; **filtros e KPIs não**) |
-| KPIs do topo | — | ❌ falta no API-019; os status mudam para ABERTA, APROVADA, TRANSFORMADA, CANCELADA (KPIs "fechadas/perdidas" deixam de existir) |
+| Lista, busca, filtros e excluir | — | ❌ (só lista e detalhe estão lá; **filtros e KPIs não**) |
+| KPIs do topo | — | ❌ os status mudam para ABERTA, APROVADA, TRANSFORMADA, CANCELADA (KPIs "fechadas/perdidas" deixam de existir) |
 | Filtro por responsável | `/vendedores` e o escopo do token | 🟡 trocar "responsável" (usuário do `core_comercial`) por **vendedor** (`codigo_vendedor_omie`), como os outros portais |
 | Empresa | `/unidades` | ✅ |
 | PDF em lote | o PDF é montado no BFF | 🟡 depende só da proposta existir no Hub |
@@ -104,21 +104,21 @@ Contagem de linhas por tabela no dump completo de `avhub_prd_db`. Muda dois pont
 | Precisa | No Hub | |
 |---|---|---|
 | Empresa emissora | `/comercial/empresas_emissoras` (Pablo, `core_comercial`) ou `/unidades` | 🟡 ligado ao do Pablo; pela N16-111 vai para `/unidades` + extensão do PDF (logo, CRC, textos), decisão do Gustavo (N16-80) |
-| Emitir em nome de | `/me/permissoes` (vendedores `titular`) | ✅ ligado (27/10). Falta gravar na proposta (API-019) |
+| Emitir em nome de | `/me/permissoes` (vendedores `titular`) | ✅ ligado (27/10). Falta gravar na proposta |
 | Buscar cliente | `/parceiros` (sem filtro de tipo) | 🟡 falta filtro de **cliente** + busca por CNPJ e nome com unidade |
 | Consulta CNPJ na Receita | — | ❌ decidir se fica (prospect, N16-109 em aberto) |
 | Compradores do cliente | só e-mail e telefone únicos em `core.parceiros` | ❌ contatos do cliente (ou sai) |
 | Câmbio | `/cotacoes_moeda/atual` | ✅ ligado |
-| Condições de pagamento de venda | — | ❌ SQL-019 (`condicoes_pagamento_vendas`, a criar) |
+| Condições de pagamento de venda | — | ❌ (`condicoes_pagamento_vendas`, a criar) |
 | Destino, condição da tabela, origens (análise) | `/simulador_parametros` | ✅ dado existe; falta a rota que entrega as opções à proposta (ou o front lê direto) |
-| Cálculo (totais, margem, letra) | motor só no front | ❌ cálculo na API (LOG-56 R42, API-019) |
+| Cálculo (totais, margem, letra) | motor só no front | ❌ cálculo na API |
 | Buscar produto | `/produtos?q=&codigo_empresa=` e `/catalogo_de_produtos` | ✅ |
 | Sugerir custo do item | `/produtos/:id/fornecedores` (última cotação e compra), `/historico_precos`, `/catalogo_de_produtos` (preço médio) | 🟡 dados existem; a **regra** (menor custo líquido válido, média 90 d, conversão de unidade) ❌ contrato |
-| Pedir custo ao Orçamento | — | ❌ API-020 (pedido de custo) |
+| Pedir custo ao Orçamento | — | ❌ (pedido de custo) |
 | Telha (configurador) | só `densidades` em parâmetros de custo | ❌ |
 | Importar itens de planilha e baixar modelo | — | ❌ (ou leitura no front, se o Nathan aceitar) |
-| Salvar, revisões, eventos, duplicar | — | ❌ API-019 |
-| Aprovar, cancelar, transformar em pedido (Qualidade, faturar em partes, data) | — | ❌ API-019 + SQL-016 |
+| Salvar, revisões, eventos, duplicar | — | ❌ |
+| Aprovar, cancelar, transformar em pedido (Qualidade, faturar em partes, data) | — | ❌ + |
 | Fechar, fechar itens, perder, reabrir, planilha do pedido no Omie | — | 🚫 saem (N16-02, N16-109) |
 | PDFs comercial, técnico e de aprovação | montados no BFF | 🟡 dependem da proposta no Hub |
 | Enviar por e-mail | — | ❌ infraestrutura de e-mail (achado 4) |
@@ -131,7 +131,7 @@ Contagem de linhas por tabela no dump completo de `avhub_prd_db`. Muda dois pont
 | Lista de clientes da carteira | `/acompanhamento_clientes` (status, última compra, dias sem comprar, setor, grupo, escopo do vendedor) e `/parceiros` | ✅ |
 | Segmento | setores de cliente (`/setores_clientes`, `/clientes_setor`) | ✅ equivalente |
 | Potencial, próximo contato, responsável próprio (CRM) | — | ❌ ou sai (N16-109 deixou o cadastro de clientes em aberto) |
-| "Com proposta em 90 d" | — | ❌ depende de propostas (API-019) |
+| "Com proposta em 90 d" | — | ❌ depende de propostas |
 | Exportar | — | ❌ |
 | **Pergunta para o Nathan** | Esta tela duplica o Acompanhamento de Clientes. Unir as duas? | ❓ |
 
@@ -144,7 +144,7 @@ Contagem de linhas por tabela no dump completo de `avhub_prd_db`. Muda dois pont
 | Criar cliente | `POST /parceiros` (upsert por conta Omie) | 🟡 o Omie é a fonte do cadastro; prospect sem Omie ❓ |
 | Compradores | — | ❌ (mesma decisão da proposta) |
 | Compras do cliente | `/pedido_venda_itens?codigo_cliente=`, `/acompanhamento_clientes/movimento` | ✅ |
-| Propostas do cliente e estatísticas de cotação | — | ❌ API-019 |
+| Propostas do cliente e estatísticas de cotação | — | ❌ |
 
 ### 5. Relatórios (`/vendas/relatorio-gerencial`, abas Gerencial e Cotações)
 Ambas leem só propostas (cotado, conversão, motivos de perda, por responsável, empresa e unidade) e geram PDF e planilha.
@@ -156,7 +156,7 @@ Ambas leem só propostas (cotado, conversão, motivos de perda, por responsável
 | Planilha | — | ❌ |
 
 ### 6. Dashboard Comercial (`/dashboards/dash-comercial`)
-KPIs cotado, fechado, em aberto, perdido e conversão; evolução diária; ranking de vendedores; status; motivos de perda; top clientes; propostas em risco. **Tudo de propostas: ❌** (contrato junto com o API-019, ou uma rota de resumo).
+KPIs cotado, fechado, em aberto, perdido e conversão; evolução diária; ranking de vendedores; status; motivos de perda; top clientes; propostas em risco. **Tudo de propostas: ❌** (contrato à parte ou uma rota de resumo).
 
 ---
 
@@ -196,7 +196,7 @@ KPIs cotado, fechado, em aberto, perdido e conversão; evolução diária; ranki
 | Histórico de preços | `/historico_precos`, `/orcamento/cotacoes` | ✅ |
 | Média, mínimo e máximo de 90 d por fornecedor | — | ❌ (rota de resumo; o dado existe) |
 | Dados técnicos | — | ❌ `produtos_perfil` |
-| É a página do produto `B2` do vault (LOG-56 R5: histórico, top fornecedores, flutuação) | | ❓ alinhar com o contrato do `B2` |
+| É a página do produto `B2` do vault (: histórico, top fornecedores, flutuação) | | ❓ alinhar com o contrato do `B2` |
 
 ### 9. Fornecedores — lista (`/orcamento/fornecedores`)
 
@@ -223,7 +223,7 @@ KPIs cotado, fechado, em aberto, perdido e conversão; evolução diária; ranki
 
 | Precisa | No Hub | |
 |---|---|---|
-| Fila do pedido de custo e respostas | — | ❌ API-020 |
+| Fila do pedido de custo e respostas | — | ❌ |
 | Ranking, cobertura, itens sem preço, ofertas vencendo | — | ❌ (dependem de ofertas e do pedido de custo) |
 | Certificados vencendo | — | ❌ (dependem dos certificados) |
 
@@ -251,7 +251,7 @@ A base já é do Hub. Só dois enriquecimentos opcionais vinham do Pablo:
 
 | Precisa | No Hub | |
 |---|---|---|
-| Proposta ligada ao pedido (pré-preencher a compra) | — | ❌ depende de `pedidos` ↔ proposta (SQL-016) |
+| Proposta ligada ao pedido (pré-preencher a compra) | — | ❌ depende de `pedidos` ↔ proposta |
 | Sugerir compra | — | ❌ mesma regra do "Sugerir custo" da proposta |
 
 ### 14. Sino de notificações (menu, todas as telas)
@@ -264,17 +264,17 @@ A base já é do Hub. Só dois enriquecimentos opcionais vinham do Pablo:
 **Ligar já, sem contrato (o Hub tem a rota):** Fornecedores (lista e ficha, sem perfil e certificados), Produtos (lista, detalhe com fornecedores e histórico), Clientes (lista e ficha pelo Acompanhamento e `/parceiros`, se o Nathan aprovar unir), opções da análise de margem (`/simulador_parametros`), busca de produto na proposta, fornecedores por categoria e análise do item na Cotação.
 
 **Contratos a criar (agrupados):**
-1. **Proposta no Hub** — API-019 já cobre o ciclo; falta acrescentar filtros e KPIs da lista, cálculo na API, PDF e relatórios/dashboard de propostas.
+1. **Proposta no Hub** — já cobre o ciclo; falta acrescentar filtros e KPIs da lista, cálculo na API, PDF e relatórios/dashboard de propostas.
 2. **Cliente para vendas** — filtro de cliente em `/parceiros` (CNPJ, unidade); compradores; prospect e Receita (se ficarem).
 3. **Produto: perfil técnico e pendentes** (`produtos_perfil`, `produtos_pendentes`).
 4. **Fornecedor: perfil de compras e certificados** (`fornecedores_perfil`) e edição de categorias.
 5. **Oferta de fornecedor** — estender `parceiros_produtos` ou tabela nova; importar mapa; vencedor e resumo de 90 d.
 6. **Sugerir custo** (regra no backend, usada pela proposta e pelo simulador).
-7. **Pedido de custo** — API-020.
+7. **Pedido de custo**.
 8. **Tabela da telha.**
 9. **E-mail** (proposta e pedido de cotação) — infraestrutura.
 10. **Notificações** — infraestrutura.
-11. **Condições de pagamento de venda** — SQL-019.
+11. **Condições de pagamento de venda**.
 12. **Exportar planilhas** (clientes, fornecedores, ofertas, relatórios) — ou decidir que sai.
 
 **Perguntas para a revisão:**

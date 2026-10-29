@@ -187,12 +187,12 @@ flowchart LR
 
 ## 5.4 O pedido em partes (sequenciais) 🟡
 
-Quando o vendedor marcou "pode faturar em partes" (N16-89), a tela do **pedido** (dentro de Meus Pedidos) ganha o bloco **Sequenciais**: uma linha por sequencial (número, valor, estado: aberto, faturado ou cancelado, nota fiscal) e o **saldo do original**. Ações (normalmente do **Fiscal**): **Quebrar** (escolhe **itens e quantidades**; o valor sai delas), **Cancelar** (o valor volta ao saldo, o número não se reusa) e **Excluir** (só aberto). Pedido "somente inteiro" não mostra o bloco. O nome na tela é **"Faturamento em partes"**, para não confundir com a **divisão da triagem do PCP** (fabricação, revenda…), que é outra coisa (N16-93). Tela e API dependem de descobrir como o Omie cria o sequencial (R83 do LOG-56).
+Quando o vendedor marcou "pode faturar em partes" (N16-89), a tela do **pedido** (dentro de Meus Pedidos) ganha o bloco **Sequenciais**: uma linha por sequencial (número, valor, estado: aberto, faturado ou cancelado, nota fiscal) e o **saldo do original**. Ações (normalmente do **Fiscal**): **Quebrar** (escolhe **itens e quantidades**; o valor sai delas), **Cancelar** (o valor volta ao saldo, o número não se reusa) e **Excluir** (só aberto). Pedido "somente inteiro" não mostra o bloco. O nome na tela é **"Faturamento em partes"**, para não confundir com a **divisão da triagem do PCP** (fabricação, revenda…), que é outra coisa (N16-93). Tela e API dependem de descobrir como o Omie cria o sequencial.
 
 ## 6. Organização do menu 🟡
 
 > [!info] Menu de Vendas e Orçamento revisto em 27/10/2026
-> A tabela abaixo foi **enxugada** em [[LOG-62-Reescopo-Menu-Enxuto-e-Limpeza-do-Modulo-do-Pablo]] (N16-107, N16-108): Vendas fica com 4 entradas, Orçamento com 4 (Pedidos de custo com abas Fila e Cotação; Produtos com abas Preços, Comparar e Ofertas; Fornecedores; Parâmetros com abas Custo e Telha) e o **Histórico de compras sai** (a tela Ordens de compra já mostra o histórico). As linhas de Vendas, Orçamento e Compras abaixo já refletem isso.
+> A tabela abaixo foi **enxugada** pelas decisões N16-107 e N16-108: Vendas fica com 4 entradas, Orçamento com 4 (Pedidos de custo com abas Fila e Cotação; Produtos com abas Preços, Comparar e Ofertas; Fornecedores; Parâmetros com abas Custo e Telha) e o **Histórico de compras sai** (a tela Ordens de compra já mostra o histórico). As linhas de Vendas, Orçamento e Compras abaixo já refletem isso.
 
 | Menu | Entradas | Observação |
 |---|---|---|
@@ -214,4 +214,4 @@ Quando o vendedor marcou "pode faturar em partes" (N16-89), a tela do **pedido**
 
 ## Ver também
 
-[[11-Proposta-e-Pedido-de-Venda]] · [[12-Orcamento-Base-de-Preco]] · [[13-Custo-Real-e-Comissao-no-Fluxo]] · [[Mapa-IncluirPedido-Omie]] · [[LOG-57-Menu-Vendas-Orcamento-Compras]] · [[LOG-59-Telas-da-Comissao-Nova]] · [[LOG-60-Matriz-de-Precos-e-Consulta-do-Vendedor]] · [[LOG-61-Custo-Real-do-Pedido-Telas]]
+[[11-Proposta-e-Pedido-de-Venda]] · [[12-Orcamento-Base-de-Preco]] · [[13-Custo-Real-e-Comissao-no-Fluxo]] · [[Mapa-IncluirPedido-Omie]] · · · ·

@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, raia, custo-real, comissao, k1, k2, k3, k4, k5, k6, controladoria, simulador, tela, devolucao, apuracao]
 criado: 2026-10-16
-atualizado: 2026-10-26
+atualizado: 2026-10-29
 status: proposta
 dono: Nathan (fluxo) · Gustavo (banco e API) · Robert (custo no MES) · Michele (decisão da comissão)
 fontes: [Registro-de-Decisoes (N16-09 a N16-11, N16-17 a N16-23, N16-34 a N16-51, N16-57, N16-71, N16-74), Proposta-Orcamento-Comissao/01-Decisoes/Respostas-da-Controladoria-2026-10-19 (fora do vault), Proposta-Orcamento-Comissao/01-Decisoes/Respostas-de-Compras-2026-10-19 (fora do vault), Estudo-Omie-API, 09-Diagramas/fontes/tela-simulador-comissao.png, av-hub comissoes/simulador/page.tsx e lib/simulador/motor.ts, 03-Sistemas/Comissao/01-Motor-Atual-Como-Calcula, 00-Fluxo-Mestre-0b, 03-Estoque-Atendimento-e-Despacho, 04-Circuito-de-Compra, Modelo-Estoque-e-Custo-do-Lote, API-008, LOG-47, 10-Anexo-Fora-do-Fluxo/Comissoes, api-pcp (estoque.prisma, compras.service.ts), 09-Diagramas/artifact-proposta-pedido.html]
@@ -9,7 +9,11 @@ fontes: [Registro-de-Decisoes (N16-09 a N16-11, N16-17 a N16-23, N16-34 a N16-51
 
 # Custo real e comissão no fluxo (K1 a K6)
 
-**Só o fluxo.** Esta nota mostra por onde o custo real e a comissão atravessam o fluxo mestre. Os **modelos de dados** estão nos contratos: o custo realizado por item em `core_comercial` ([[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]]) e a comissão nova em `core_comissao` ([[SQL-018-Schema-core_comissao-Comissao-da-Proposta]], testado em Postgres 18 com as respostas da Controladoria). O modelo está explicado em [[03-Modelo-Novo-core_comissao]]. Decisões: [[Registro-de-Decisoes]]. Selos em [[Regras-do-Vault]].
+**Só o fluxo.** Esta nota mostra por onde o custo real e a comissão atravessam o fluxo mestre. Os **modelos de dados** estão nos contratos: o custo realizado por item em `core_vendas_faturamento` e a comissão nova em `core_comissao` (testado em Postgres 18 com as respostas da Controladoria). O modelo está explicado em [[03-Modelo-Novo-core_comissao]]. Decisões: [[Registro-de-Decisoes]]. Selos em [[Regras-do-Vault]].
+
+> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
+> - N16-143: a comissão nova fica em `core_comissao`, schema próprio (modelado e testado). Proposta, pedido e custo realizado vão para `core_vendas_faturamento`; o `core_comercial` não existe (N16-116).
+> - A pendência de devolução parcial já está no banco: anexo de 21/10 (`comissao_devolucao_pendencia`).
 
 ## Nós
 
@@ -81,7 +85,7 @@ O item A mostra a regra: o vendedor cotou R$ 100 o unitário (R$ 5.000 as 50); o
 
 ### Várias notas, mesmo item (N16-49)
 
-Exemplo da Michele: venda de R$ 1.000 a 2%, com notas de 500, 100, 100, 100, 100 e 100: a comissão é paga a 2% sobre cada nota. Se o custo real muda entre uma nota e outra, **cada nota fecha com o percentual vigente naquele momento**; quando o custo completa, o sistema recalcula o percentual final e **lança a diferença na apuração seguinte**. O banco guarda a **quantidade já comissionada** por item e nunca paga duas vezes a mesma peça (SQL-018, testado em 19/10).
+Exemplo da Michele: venda de R$ 1.000 a 2%, com notas de 500, 100, 100, 100, 100 e 100: a comissão é paga a 2% sobre cada nota. Se o custo real muda entre uma nota e outra, **cada nota fecha com o percentual vigente naquele momento**; quando o custo completa, o sistema recalcula o percentual final e **lança a diferença na apuração seguinte**. O banco guarda a **quantidade já comissionada** por item e nunca paga duas vezes a mesma peça (testado em 19/10).
 
 ## As condições de cada evento de custo (N16-20)
 
@@ -112,7 +116,7 @@ Na tela da Controladoria, cada item abre a **lista dos seus eventos de custo**. 
 | Cotado × real | o que o vendedor pôs para a mesma quantidade e a diferença (só a Controladoria vê) |
 | Estado da linha | normal, estornada (OC cancelada), "unidade diferente", "sem imposto" |
 
-Fonte de cada linha: eventos de custo realizado por item no `core_comercial` (SQL-016) e cálculos da comissão (SQL-018). O vendedor **não** vê esta lista.
+Fonte de cada linha: eventos de custo realizado por item no `core_vendas_faturamento` e cálculos da comissão. O vendedor **não** vê esta lista.
 
 ## A tela da comissão: três visões da mesma tela (N16-19)
 
@@ -143,7 +147,7 @@ No fluxo novo (N16-51, OQ-28 em parte): o **percentual de Compras** deixa de ser
 | Operações › "Custo real por item" | `app/(protected)/custo-itens/page.tsx` (`CustoItens`): custo real por pedido, KPIs, lotes e simulador de margem **sem imposto**, sobre dados de teste (BL-023, `544ee0b`; [[LOG-47-Custo-Real-por-Item-no-Hub]]) | Pode ser a entrada do drill-down por evento da Controladoria; precisa ligar ao custo por evento e ao imposto |
 | Dashboards › "Matriz de preços" | O BFF cita o slug `matriz-precos`; a tela ainda não existe | É a matriz de preços do Orçamento ([[12-Orcamento-Base-de-Preco]]) |
 
-Detalhe das telas e das regras: [[LOG-56-Fluxo-da-Proposta-ao-Pedido]] (seção 3.7); para a comissão, [[LOG-59-Telas-da-Comissao-Nova]] e [[API-022-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria]].
+Os contratos com o detalhe das telas e das regras foram removidos em 29/10/2026; o Robert cria os novos.
 
 ### Relatórios da Controladoria (N16-50)
 
@@ -166,7 +170,7 @@ A lista por mês, vendedor, unidade e status (com exportação para Excel), mais
 
 ## Estados da comissão
 
-Os estados são os do banco ([[SQL-018-Schema-core_comissao-Comissao-da-Proposta]], testado), resumidos em [[04-Regras-e-Estados-da-Comissao-Nova]]. Por nó do fluxo:
+Os estados são os do banco (testado), resumidos em [[04-Regras-e-Estados-da-Comissao-Nova]]. Por nó do fluxo:
 
 | Nó | Dossiê da proposta ou do pedido (`comissoes`) | Comissão da nota (`comissoes_nf`) e lançamentos |
 |---|---|---|
@@ -197,14 +201,14 @@ A decisão tem seis ações (`aprovar`, `desaprovar`, `bloquear`, `desbloquear`,
 | Item | Estado | Selo |
 |---|---|---|
 | Motor atual (menor entre o percentual do vendedor e o de compras, regras fixas, bloqueios, blacklists) | existe em `core_comissionamento`, só leitura aqui ([[Comissoes]]) | ✅ |
-| Módulo novo em `core_comissao`, em Operações | SQL-018 rascunhado e **testado num Postgres 18 em 19/10**; sem API nem tela | 🔴 Gustavo (banco), Nathan (telas) |
+| Módulo novo em `core_comissao`, em Operações | rascunhado e **testado num Postgres 18 em 19/10**; sem API nem tela | 🔴 Gustavo (banco), Nathan (telas) |
 | Comissão estimada na proposta (`K1`) | não existe; o simulador do Hub só pré-preenche o lado da compra | 🔴 |
 | Custo real por evento, com a NF de entrada como verdade (`K2`) | não existe | 🔴 Pablo, Gustavo, Robert |
 | Recurso novo da pipeline: recebimento de NF-e (imposto real, data de recebimento) | não existe | 🔴 Nathan ([[Estudo-Omie-API]]) |
 | Custo obrigatório em todo lote e `GET /itens/custo` | não existe | 🔴 Robert (OQ-07) |
 | Tela da Controladoria igual à do Simulador, com custo real, e visão geral (`K4`, N16-19) | não existe; o Simulador atual é a referência | 🔴 Nathan |
-| Aprovação do vendedor na compra acima do valor, lista de Compras e cancelamento | não existe; o SQL-018 **ainda não conhece** | 🔴 |
-| Abatimento por devolução, pendência de devolução parcial e apuração do vendedor | abatimento está no SQL-018; a pendência de devolução parcial e a apuração (OQ-42) **não** | 🔴 |
+| Aprovação do vendedor na compra acima do valor, lista de Compras e cancelamento | não existe; o modelo atual **ainda não conhece** | 🔴 |
+| Abatimento por devolução, pendência de devolução parcial e apuração do vendedor | o abatimento está no modelo; a pendência de devolução parcial e a apuração (OQ-42) **não** | 🔴 |
 | Tela da proposta no formato do Simulador | não existe; o Simulador atual calcula no navegador | 🔴 Nathan (tela), Pablo (proposta) |
 
 ## Diagrama do subfluxo

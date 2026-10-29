@@ -12,7 +12,7 @@ fontes: [api-acos-vital f322dcd src/schemas/core_comissionamento, HUB b55ac55 ap
 Fora do fluxo 0b. Banco e API são do Gustavo; as telas são do Nathan. A comissão por faturamento e o custo real por item (Ciclo 2) dependem do `GET /itens/custo`, que o MES ainda não tem ([[Integracao-AvHub-MES]], INT-06).
 
 > [!info] Comissão nova (26/10/2026)
-> Este anexo descreve o módulo **atual** (`core_comissionamento`), que **não muda** (N16-11). A **comissão nova** entrou no [[00-Fluxo-Mestre-0b]] como `K1` a `K6`, em schema próprio (`core_comissao`), para o pedido da proposta e para o digitado no Omie: [[13-Custo-Real-e-Comissao-no-Fluxo]], [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]], [[API-022-Comissao-da-Proposta-Calculo-e-Decisao-da-Controladoria]], [[LOG-59-Telas-da-Comissao-Nova]]. Como o motor atual calcula: [[01-Motor-Atual-Como-Calcula]]; o modelo novo: [[03-Modelo-Novo-core_comissao]].
+> Este anexo descreve o módulo **atual** (`core_comissionamento`), que **não muda** (N16-11). A **comissão nova** entrou no [[00-Fluxo-Mestre-0b]] como `K1` a `K6`, em schema próprio (`core_comissao`), para o pedido da proposta e para o digitado no Omie: [[13-Custo-Real-e-Comissao-no-Fluxo]]. Como o motor atual calcula: [[01-Motor-Atual-Como-Calcula]]; o modelo novo: [[03-Modelo-Novo-core_comissao]].
 
 ## Estado
 

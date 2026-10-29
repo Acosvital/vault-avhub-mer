@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, raia, producao, roteiro, f1, p6, mes]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Robert (MES) · Nathan (decisões)
 fontes: [api-pcp 579a625 (itens-parciais.service.ts, pedidos.service.ts, divergencias, roteiro-item, prisma/models/producao.prisma e fabricas.prisma), app-pcp 1fca8d3 (movimentacoes), v1 02-PRD-Estoque/Fluxo-Producao-OS-OP-Completo, v1 01-Fluxo-Operacional/Fluxograma-Telas-por-Bloco bloco 7, Dump MES 14/10]
@@ -10,6 +10,11 @@ fontes: [api-pcp 579a625 (itens-parciais.service.ts, pedidos.service.ts, diverge
 # Produção e roteiro (F1, P6)
 
 Nós do [[00-Fluxo-Mestre-0b]]: `F1` setores produtivos do roteiro de cada fábrica e `P6` novo norte (retrabalho ou reabre compra). A entrada vem do despacho do Estoque (`E6`, [[03-Estoque-Atendimento-e-Despacho]]); a saída vai para a inspeção de saída `Q7` ([[08-Qualidade-Saida]]). Selos em [[Regras-do-Vault]].
+
+> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
+> - N16-140: a matéria-prima é baixada na retirada do Estoque, pela quantidade pedida, no mesmo documento de retirada da Expedição. O operador não lança consumo ao concluir a etapa.
+> - N16-141: no retrabalho, o PCP escolhe o setor de volta; a regra 8 abaixo (volta ao setor anterior) vale só até isso ter código.
+> - Fabricado: [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] desenha a volta ao Estoque como lote de origem Produção (proposta aceita em 15/10, sem código).
 
 ## Objetivo
 
@@ -40,11 +45,11 @@ O acesso a cada fila depende de `PerfilSetor` (`podeVisualizar`, `podeAtuar`), d
 | 5 | `receber` e `iniciar` são obrigatórios em todo setor antes de `mover` ou `concluir`. `iniciar` preenche `startedAt` (cronômetro) e, em setor com `exigeMaquinaOperador`, exige `idMaquina` e `idOperador` (`:299-321`) | ✅ |
 | 6 | `concluir` só no **último** setor do roteiro; `mover` só quando existe próximo (`:540-547`, `:426-434`). `mover` aceita `idSetorDestino` livre dentro da fábrica e quantidade parcial (split na passagem) | ✅ |
 | 7 | `reprovar` é exclusivo de setor tipo `QUALIDADE` (403 fora dele) e exige `EM_ANDAMENTO` (`:966-989`, `:1011-1021`) | ✅ |
-| 8 | `retrabalho` só sai de `REPROVADO`: cancela a linha e cria outra `EM_TRANSITO` no setor anterior com `retrabalho = true` (`:1124-1192`). Não altera a quantidade do `ItensPedido` | ✅ |
+| 8 | `retrabalho` só sai de `REPROVADO`: cancela a linha e cria outra `EM_TRANSITO` no setor anterior com `retrabalho = true` (`:1124-1192`). Não altera a quantidade do `ItensPedido` | ✅; **superada em parte pela N16-141 (29/10): o PCP passa a escolher o setor de volta, ainda sem código** |
 | 9 | `devolver` cria linha nova ligada por `idDevolvidoDe`; a antiga vira `CANCELADO` e nunca é editada (`:1387-1488`). Não vale para parcial com requisição de compra viva (`ensureDevolucaoForaDaCompra`, `:1391`) | ✅ |
 | 10 | Item de pedido inativo bloqueia toda ação, menos `cancelar` (`:202-208`) | ✅ |
 | 11 | **Tudo que é fabricado volta ao Estoque** como lote e saldo, e só sai pelo documento de retirada. Decisão do Nathan de 14/10 | 📝 🔴 |
-| 12 | **Matéria-prima é consumida do Estoque** na produção (J2/J3 do v1). Sem código | 🔴 |
+| 12 | **Matéria-prima é consumida do Estoque** na produção (J2/J3 do v1). **Decidido em 29/10 (N16-140): a baixa é na retirada do Estoque, pela quantidade pedida.** Sem código | 🔴 |
 | 13 | Novo norte (P6): o PCP decide entre retrabalho e reabrir a compra. Roteiro individual do item (`RoteiroItem`, C8) é a ferramenta decidida | 📝 🔴 |
 
 ## Estados
@@ -172,9 +177,9 @@ O que falta: definir quem informa o material consumido (setor ao concluir etapa,
 
 ## Pendências
 
-- Nathan: quem informa o consumo de matéria-prima e em que momento (retirada do Estoque ou conclusão da etapa)?
+- Nathan: quem informa o consumo de matéria-prima e em que momento (retirada do Estoque ou conclusão da etapa)? **Decidido em 29/10/2026 (N16-140): na retirada do Estoque, pela quantidade pedida.**
 - Nathan e Robert: a fábrica com múltiplos setores `PRODUTIVO` consome por etapa ou só no primeiro?
-- Nathan: retrabalho volta sempre ao setor imediatamente anterior? Hoje é `idSetorOrigem`, sem escolha (`:1134-1142`).
+- Nathan: retrabalho volta sempre ao setor imediatamente anterior? Hoje é `idSetorOrigem`, sem escolha (`:1134-1142`). **Decidido em 29/10/2026 (N16-141): não; o PCP escolhe o setor de volta.**
 - Robert: confirmar nomes de setores e filas reais do ambiente de produção (código só traz o seed) ❓.
 
 ## Subfluxo

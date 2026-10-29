@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, raia, fiscal, omie, nota-fiscal, o1, o2, pipeline]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Gustavo (DBA, pipeline e banco) · Robert (sinalização no MES) · Nathan (decisões)
 fontes: [omie-elt-pipeline 0f739f0 (notasFiscais.ts, pedidosVendas.ts, scheduler/config), Dump Avhub 14/10 (fn_sync_situacao_pv, pedidos_vendas, notas_fiscais, produto_vendas), api-pcp 579a625 (entregas), v1 Fluxo-Expedicao-Faturamento-Completo, v1 Fluxograma-Telas-por-Bloco bloco 11, v1 08-Integracao-Omie/01-Dados-Extraidos]
@@ -10,6 +10,12 @@ fontes: [omie-elt-pipeline 0f739f0 (notasFiscais.ts, pedidosVendas.ts, scheduler
 # Fiscal no Omie (O1, O2)
 
 Nós do [[00-Fluxo-Mestre-0b]]: `O1` o Omie emite a nota fiscal e `O2` baixa o item no pedido. Fica depois de `X4` ([[09-Expedicao]]). Contexto do pipeline em [[Pipeline-Omie]] e [[Omie-Integracao-Estado]].
+
+> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
+> - N16-130: parcial ou integral na faturação é decisão do vendedor, pela marca "pode faturar em partes".
+> - N16-132: quem sinaliza que a carga está pronta é a Logística, ao fechar a carga; contrato MES para hub e tela seguem sem código.
+> - N16-133: pedido faturado antes da entrega no MES só gera aviso.
+> - N16-92 a N16-94: o sequencial não é outro pedido, é um agrupamento para faturar em partes (um pedido, várias notas).
 
 ## Objetivo
 
@@ -32,7 +38,7 @@ Fechar o ciclo: da carga pronta até a nota emitida e o item "faturado" no pedid
 |---|---|---|
 | 1 | Emissão fiscal 100% no Omie; nenhum módulo do ERP emite ou edita NF | 📝 (#30) |
 | 2 | A baixa de item no pedido volta pelo **pipeline** (polling), sem tela e sem escrita do MES | 📝 ✅ |
-| 3 | Parcial x integral na faturação é decisão da Expedição ([[09-Expedicao]], X2, T-06) | 🔴 |
+| 3 | Parcial x integral na faturação é decisão da Expedição ([[09-Expedicao]], X2, T-06); pela N16-130, de 29/10, quem decide é o vendedor, pela marca "pode faturar em partes" | 📝 |
 | 4 | A sinalização ao Omie é uma fila de cargas prontas (tela 11.1), com acompanhamento do número e da chave da NF pelo pipeline | 🟡 desenho, sem código |
 | 5 | Remessa de produtos (registro de remessa) fica para o Ciclo 2 (22/01/2027) | 📝 |
 | 6 | Só uma escrita do pipeline no Omie: envio da OC (`UpsertPedCompra`, `ExcluirPedCompra`) | ✅ [[04-Circuito-de-Compra]] |
@@ -113,8 +119,8 @@ O desenho do v1 (11.1): lista de cargas prontas, botão que sinaliza, acompanham
 
 ## Pendências
 
-- Nathan e Faturamento: quem sinaliza (Expedição ou Logística) e qual o gatilho (carga fechada ou item `CONCLUIDO`)?
-- Nathan: sinalização por carga ou por pedido? Faturamento parcial gera um pedido filho (`sequencial`) no Omie?
+- Nathan e Faturamento: quem sinaliza (Expedição ou Logística) e qual o gatilho (carga fechada ou item `CONCLUIDO`)? **Decidido em 29/10/2026 (N16-132): a Logística, ao fechar a carga.**
+- Nathan: sinalização por carga ou por pedido? Faturamento parcial gera um pedido filho (`sequencial`) no Omie? **Respondido: por carga fechada (N16-132); o sequencial não é outro pedido, é um agrupamento (N16-92 a N16-94). Faturado antes da entrega: só aviso (N16-133).**
 - Gustavo: o pipeline tem latência de minutos; o MES precisa do retorno em quanto tempo?
 - Nathan: devolução de cliente (`Devolvido`, `Dev. Parcial`) afeta saldo do Estoque? Fluxo decidido para o Estoque na Fase D, sem código.
 

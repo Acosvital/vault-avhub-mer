@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, raia, compras, ccp, requisicao, oc, aprovacao, omie, fornecedor, p3, c0, c1, c2, c3, c4, c5, fn1]
 criado: 2026-10-14
-atualizado: 2026-10-26
+atualizado: 2026-10-29
 status: vigente
 dono: Compras (regra) · Gustavo (API) · Nathan (front av-hub) · Robert (MES)
 fontes: [00-Fluxo-Mestre-0b, Integracao-AvHub-MES (INT-02, INT-03, INT-04), LOG-34, LOG-35, LOG-32, LOG-23, LOG-36, SQL-008, API-004, v1 02-PRD-Estoque/Fluxo-Compras-Completo, decisões do Nathan de 14/10 (duas origens, aprovação, Compras·CCP só leitura), api-pcp 579a625, api-acos-vital f322dcd, omie-elt-pipeline 0f739f0, HUB b55ac55 (lido em disco), Dump Avhub 14/10]
@@ -12,7 +12,12 @@ fontes: [00-Fluxo-Mestre-0b, Integracao-AvHub-MES (INT-02, INT-03, INT-04), LOG-
 Nós do [[00-Fluxo-Mestre-0b]]: `P3` requisição de compra (origem PCP, MES), `C0` requisição de compra (origem Compras, av-hub), `C1` cotação, `C2` acima de R$ 30 mil?, `C3` aprovação, `C4` emissão da OC, `C5` follow-up do CCP, `FN1` fornecedor. Fecha em `FN1 → R0` ([[05-Recebimento]]). Entrada: `E4` "solicitar compra" ([[03-Estoque-Atendimento-e-Despacho]]) e `Q3` recompra ([[06-Qualidade-Entrada]]). Sequências técnicas completas em [[Integracao-AvHub-MES]]. Selos em [[Regras-do-Vault]].
 
 > [!info] `C6` a `C8` (decisões de 16 a 26/10/2026, fluxo aprovado em 26/10)
-> Antes de cotar, Compras **confere a parte de compras** que o vendedor preencheu (fornecedor, impostos, frete), que o sistema puxa para a OC (`C6`); segue o fornecedor do vendedor ou usa o valor correto, sem mudar a proposta (`C7`); se comprar **acima do custo do vendedor**, por produto e sem tolerância, ele aprova ou reprova em Meus Pedidos, e o reprovado vai à Gerência fisicamente e à lista de Reprovados de Compras (`C8`). Vale para o pedido da proposta e para o digitado no Omie 📝 (N16-08, N16-60 a N16-67, N16-76, N16-106) 🔴. Compras e o CCP registram as datas de entrega do fornecedor, que movem a previsão de faturamento (N16-88). Detalhe em [[11-Proposta-e-Pedido-de-Venda]], [[LOG-56-Fluxo-da-Proposta-ao-Pedido]] e [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]].
+> Antes de cotar, Compras **confere a parte de compras** que o vendedor preencheu (fornecedor, impostos, frete), que o sistema puxa para a OC (`C6`); segue o fornecedor do vendedor ou usa o valor correto, sem mudar a proposta (`C7`); se comprar **acima do custo do vendedor**, por produto e sem tolerância, ele aprova ou reprova em Meus Pedidos, e o reprovado vai à Gerência fisicamente e à lista de Reprovados de Compras (`C8`). Vale para o pedido da proposta e para o digitado no Omie 📝 (N16-08, N16-60 a N16-67, N16-76, N16-106) 🔴. Compras e o CCP registram as datas de entrega do fornecedor, que movem a previsão de faturamento (N16-88). Detalhe em [[11-Proposta-e-Pedido-de-Venda]].
+
+> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
+> - N16-123: não há trava entre quem emite e quem aprova a OC; o Gerente de Compras pode aprovar a que ele mesmo emitiu. O limite de R$ 30 mil continua provisório.
+> - N16-127: o Compras é avisado no av-hub da recompra por RNC (hoje só o MES sabe e a OC segue "atendida"); exige contrato novo entre MES e hub.
+> - N16-137: a reabertura do recebimento pelo PCP também avisa o av-hub, pelo mesmo caminho.
 
 ## Objetivo
 
@@ -199,7 +204,7 @@ Montagem em `core_vendas_faturamento/index.js:190-193`. Contratos de banco: [[SQ
 ## Pendências
 
 - Nathan e Compras (🟡, futuro): como endurecer a regra de aprovação (só valor, finalidade, tipo de item, aprovação abaixo do limite). O limite é por unidade (o código já tem assim).
-- Nathan: segregação comprador ≠ aprovador vale se o Gerente também compra?
+- Nathan: segregação comprador ≠ aprovador vale se o Gerente também compra? **Decidido em 29/10/2026 (N16-123): não há trava; o Gerente de Compras pode aprovar a OC que ele mesmo emitiu.**
 - Compras: prazo máximo de OC sem confirmação do fornecedor até destacar na fila do CCP.
 - Compras: quem avisa quando uma OC é cancelada depois de aprovada e a parcial já estava esperada no Recebimento (o MES tira da lista, mas ninguém avisa a doca).
 - Robert e Gustavo: o MES vê a OC de requisição do Compras só pela referência; `requisicoes_compra_eventos.id_origem` continua `NOT NULL` e não precisa mudar.

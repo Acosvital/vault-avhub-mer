@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, raia, qualidade, qualidade-entrada, lote, rnc, quarentena, mes]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Robert (MES) · Qualidade (regra de negócio) · Nathan (decisões)
 fontes: [v1 02-PRD-Estoque/Fluxo-Qualidade-Completo, v1 01-Fluxo-Operacional/Encaixe-Estoque-Revenda-no-PCP (EC-01, EC-07), api-pcp 579a625 (qualidade.service.ts, circuito-compra.ts, estoque.prisma), app-pcp 1fca8d3 (qualidade/inspecao-entrada), Registro-de-Decisoes #25 #26]
@@ -10,6 +10,12 @@ fontes: [v1 02-PRD-Estoque/Fluxo-Qualidade-Completo, v1 01-Fluxo-Operacional/Enc
 # Qualidade de entrada (Q1 a Q4)
 
 Raia do 0b: nós `Q1`, `Q2`, `Q3`, `Q4` (ver [[00-Fluxo-Mestre-0b]]). Recebe o lote em quarentena que o [[05-Recebimento]] criou e decide: libera para o Estoque, ou reprova (total ou em parte) e devolve a parte reprovada para o [[04-Circuito-de-Compra]]. A inspeção de saída da produção é outra raia: [[08-Qualidade-Saida]].
+
+> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
+> - N16-124: a decisão do lote fica travada ao setor da Qualidade; hoje qualquer usuário com permissão de editar a inspeção decide qualquer lote.
+> - N16-125: não existe concessão de lote fora da especificação; o lote é liberado ou reprovado.
+> - N16-126: lote 100% reprovado volta ao fornecedor e abre a recompra (RNC).
+> - N16-127: o Compras é avisado no av-hub da recompra por RNC; exige contrato novo entre MES e hub.
 
 ## Objetivo
 
@@ -168,8 +174,8 @@ Consequência de projeto: qualquer usuário com `inspecao-entrada:editar` decide
 ## Pendências
 
 - Nathan: a trava do laudo vale igual na inspeção de processo (documental)? (T-04 do v1, só afeta o Ciclo 2).
-- Nathan: concessão de lote fora de especificação existe? Quem autoriza? Qual o destino de um lote 100% reprovado?
-- Qualidade e Robert: nome do perfil da Qualidade no ambiente e quem pode decidir lote (ver item 3).
+- Nathan: concessão de lote fora de especificação existe? Quem autoriza? Qual o destino de um lote 100% reprovado? **Decidido em 29/10/2026 (N16-125 e N16-126): não existe concessão; lote 100% reprovado volta ao fornecedor e abre a recompra.**
+- Qualidade e Robert: nome do perfil da Qualidade no ambiente e quem pode decidir lote (ver item 3). **Decidido em 29/10/2026 (N16-124): a decisão do lote fica travada ao setor da Qualidade. O nome do perfil no ambiente segue ❓.**
 - Robert: comportamento esperado quando o fornecedor entrega a substituição **antes** de o lote reprovado ser baixado fisicamente (sem movimento de devolução, o saldo do filho `REPROVADO` convive com o novo lote).
 
 ## Diagrama do subfluxo

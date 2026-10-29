@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, raia, expedicao, logistica-saida, paletes, entrega, x1, x2, x3, x4, mes]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Robert (MES) · Expedição/Logística (regra) · Nathan (decisões)
 fontes: [api-pcp 579a625 (entregas, itens-parciais.service.ts, pedido-embalagens, pedido-embalagem-pallets, estoque-operacao.helpers.ts), app-pcp 1fca8d3 (logistica/expedicao, movimentacoes, ordens-producao), v1 Fluxo-Expedicao-Faturamento-Completo, v1 Fluxograma-Telas-por-Bloco bloco 10, T-06]
@@ -10,6 +10,13 @@ fontes: [api-pcp 579a625 (entregas, itens-parciais.service.ts, pedido-embalagens
 # Expedição e logística de saída (X1 a X4)
 
 Nós do [[00-Fluxo-Mestre-0b]]: `X1` embalagem e paletização, `X2` parcial ou integral?, `X3` consolida a carga, `X4` logística de saída (transporte). Termina na emissão da nota no Omie ([[10-Fiscal-Omie]]). No v1 as telas são 10.1 a 10.4.
+
+> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
+> - N16-120, N16-121 e N16-122: a Expedição pede a retirada ao Estoque, só o Estoque confirma, a reserva é consumida junto com a baixa e a Embalagem só recebe depois da retirada confirmada. O que o documento imprime segue aberto. Contrato: [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada]].
+> - N16-130: quem decide se o pedido sai inteiro ou por partes é o vendedor, pela marca "pode faturar em partes".
+> - N16-131: item que nunca chega num pedido integral é decisão manual, sem prazo automático.
+> - N16-132: quem avisa o Fiscal é a Logística, ao fechar a carga (depende da consolidação de carga, `X3`, que não existe).
+> - N16-133: pedido faturado antes da entrega no MES só gera aviso, sem bloqueio.
 
 ## Objetivo
 
@@ -37,7 +44,7 @@ O sistema **nunca emite nota fiscal**. Ele sinaliza a necessidade e o Omie emite
 | 3 | O peso dos pallets só é editável no setor `EXPEDICAO`; nos seguintes viaja com a peça, só leitura | ✅ `FilaSetor.tsx:810-835` |
 | 4 | Entrega é **livre, item a item e por quantidade**: não existe trava de "pedido inteiro pronto". O pedido só vira `ENTREGUE` quando zera o pendente de todos os itens ativos e não resta parcial ativa | ✅ `entregas.service.ts:17-24`, `:104-130` |
 | 5 | Só entrega parcial `CONCLUIDO`, com quantidade até o pendente do item e até a quantidade da parcial | ✅ `entregas.service.ts:44-63` |
-| 6 | Parcial ou integral é decisão humana. Faturamento integral travado por um item que nunca chega: muda para parcial automaticamente ou exige decisão manual? (T-06) | 🔴 aberta |
+| 6 | Parcial ou integral é decisão humana. Faturamento integral travado por um item que nunca chega: muda para parcial automaticamente ou exige decisão manual? (T-06) **Decidido em 29/10 (N16-130 e N16-131): o vendedor decide, pela marca "pode faturar em partes"; item que nunca chega é decisão manual, sem prazo automático.** | 📝 🔴 sem campo |
 | 7 | **Despacho é no Estoque**: quem precisa da mercadoria (Expedição ou Produção) gera um **documento de retirada**; a baixa do saldo acontece na retirada. Hoje a baixa ocorre quando a Embalagem **recebe** a parcial | 📝 🔴 |
 | 8 | Nota fiscal de saída é do Omie. O MES guarda só o número digitado na entrega | 📝 ✅ `entregas.service.ts:82` |
 | 9 | Remessa de produtos (registro de remessa) vai ao Ciclo 2 (22/01/2027), item 27 do registro de 07/10 | 📝 |
@@ -121,8 +128,8 @@ Nenhuma entidade (carga, romaneio, veículo, transportadora de saída) existe em
 
 ## Pendências
 
-- Nathan: quem pode gerar o documento de retirada e quem o confirma (almoxarife)? A retirada exige conferência física dupla?
-- Nathan e Comercial: pedido integral é opção do vendedor, regra do cliente ou decisão da Expedição? E o prazo máximo de espera?
+- Nathan: quem pode gerar o documento de retirada e quem o confirma (almoxarife)? A retirada exige conferência física dupla? **Decidido em 29/10/2026 (N16-120): a Expedição pede, só o Estoque confirma. Conferência física dupla e o que o documento imprime seguem abertos.**
+- Nathan e Comercial: pedido integral é opção do vendedor, regra do cliente ou decisão da Expedição? E o prazo máximo de espera? **Decidido em 29/10/2026 (N16-130 e N16-131): o vendedor decide; sem prazo automático.**
 - Expedição: frota própria e terceirizada usam o mesmo fluxo de carga?
 - Robert: `PerfilSetor` por filial (hoje inexistente) afeta quem vê a carga.
 

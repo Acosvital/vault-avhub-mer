@@ -91,11 +91,11 @@ Estimativas da proposta de cronograma de 16/10/2026 (`Proposta-Orcamento-Comissa
 | Pessoa | Blocos | pd (faixa) | Foco | Início | Fim proposto |
 |---|---|---|---|---|---|
 | Pablo | P1 domínio portado e testes (8,0) · P2 clientes e propostas com as regras novas (13,0) · P3 pedido por API (6,0) · P4 suprimentos e pedido de custo (8,0) · P5 Orçamento: matriz, consulta do vendedor, valor da OC no histórico (10,0) · P6 motor da comissão na API (8,0) · P7 custo por evento (6,0) | 59,0 (41,3 a 76,7) | 75% | 19/10/2026 | 15/02/2027 |
-| Gustavo | G1 migração do `core_comercial` (SQL-016, 6,0) · G2 Orçamento no `core_comercial` (SQL-017, 4,0) · G3 `core_comissao` (SQL-018, 6,0) · G4 contadores, telas e `auth.rotas_telas` (2,5) · G5 liberação do pedido da proposta (2,0) · G6 rotas da proposta, do pedido e do Orçamento (API-019, API-020, 8,0) · G7 rotas da comissão (API-022, 5,0) · G8 rotas do custo por evento e job do `GET /itens/custo` (API-021, 7,0) | 40,5 (28,4 a 52,7) | 60% | 19/10/2026 | G1 a G5 em 08/12/2026, dentro da folga (20,5 de 21,7 pd ❓ o Gustavo confirma); G6 a G8 em 11/02/2027 |
+| Gustavo | G1 migração do `core_comercial` (6,0) · G2 Orçamento no `core_comercial` (4,0) · G3 `core_comissao` (6,0) · G4 contadores, telas e `auth.rotas_telas` (2,5) · G5 liberação do pedido da proposta (2,0) · G6 rotas da proposta, do pedido e do Orçamento (8,0) · G7 rotas da comissão (5,0) · G8 rotas do custo por evento e job do `GET /itens/custo` (7,0) | 40,5 (28,4 a 52,7) | 60% | 19/10/2026 | G1 a G5 em 08/12/2026, dentro da folga (20,5 de 21,7 pd ❓ o Gustavo confirma); G6 a G8 em 11/02/2027 |
 | Nathan | N1 tela da proposta (10,0) · N2 aprovar, transformar, cancelar (3,0) · N3 pipeline do pedido (5,0) · N4 visão de Compras (5,0) · N5 Controladoria (10,0) · N6 visão geral, minhas comissões, parâmetros (10,0) · N7 Orçamento: consulta e matriz (9,0) · N8 cadastro de telas (1,0) | 53,0 (37,1 a 68,9) | 40% | 21/12/2026 (depois da S5) | 06/07/2027: **é o gargalo** |
 | Robert | R1 custo obrigatório na carga inicial (1,5) · R2 custo obrigatório no Recebimento (1,5) · R3 `GET /itens/custo`, o antigo K8 (3,0) · R4 origem e documento em cada linha de custo (2,0) · R5 custo do fabricado = matéria-prima, os antigos K9 a K11 (4,0) | 12,0 (8,4 a 15,6) | 75% | R1 já; o resto em 21/12/2026 | R1 leva a G1 do MES de 23/10 a 27/10; K5, K6, R2 a R4 em 07/01/2027; o resto entra na W0 (cenários na proposta) |
 
-Desde 16/10 o desenho andou: em 26/10 as migrações SQL-016 a SQL-018 já estavam escritas e testadas em Postgres 18, e o Gustavo passa a revisar e aplicar, não a criar do zero (G1 a G3 devem encolher); o pedido do Omie no mesmo fluxo (N16-106), as datas, os sequenciais e o calendário do marketing entraram depois da estimativa e não têm pd ❓. R5 depende de BL-008 e BL-010, sem pd ❓. O imposto real por evento (BL-053, OQ-11 e OQ-12) não está em nenhum bloco.
+Desde 16/10 o desenho andou: em 26/10 as migrações já estavam escritas e testadas em Postgres 18, e o Gustavo passa a revisar e aplicar, não a criar do zero (G1 a G3 devem encolher); o pedido do Omie no mesmo fluxo (N16-106), as datas, os sequenciais e o calendário do marketing entraram depois da estimativa e não têm pd ❓. R5 depende de BL-008 e BL-010, sem pd ❓. O imposto real por evento (BL-053, OQ-11 e OQ-12) não está em nenhum bloco.
 
 Alternativas para o gargalo do Nathan 🟡 (decisão do Nathan):
 
@@ -120,9 +120,9 @@ gantt
     P6 Motor da comissao :p6, 2027-01-18, 2027-02-01
     P7 Custo por evento :p7, 2027-02-02, 2027-02-15
     section Gustavo
-    G1 a G3 Migracoes SQL-016 a SQL-018 :g1, 2026-10-19, 2026-11-25
+    G1 a G3 Migracoes :g1, 2026-10-19, 2026-11-25
     G4 e G5 Contadores e liberacao :g4, 2026-11-26, 2026-12-08
-    G6 a G8 Rotas API-019 a API-022 :g6, 2026-12-21, 2027-02-11
+    G6 a G8 Rotas :g6, 2026-12-21, 2027-02-11
     section Nathan
     N1 a N3 Proposta e pedido :n1, 2026-12-21, 2027-02-26
     N4 Visao de Compras :n4, 2027-03-01, 2027-03-17

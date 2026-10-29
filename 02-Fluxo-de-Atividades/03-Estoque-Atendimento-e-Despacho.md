@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, raia, estoque, atendimento, despacho, reserva, lote, custo, mes, e1, e2, e3, e4, e5, e6]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Robert (MES) · Nathan (decisões)
 fontes: [00-Fluxo-Mestre-0b, v1 02-PRD-Estoque/Fluxo-Estoque-Completo, v1 Estoque-Custo-do-Lote, v1 Rota-Estoque, v1 Modelo-Destinacao-Item, v1 Encaixe-Estoque-Revenda-no-PCP, decisões do Nathan de 14/10, API-008, api-pcp 579a625 (itens-parciais.service.ts, estoque-operacao.*, estoque.prisma, circuito-compra.ts), app-pcp 1fca8d3 (AtenderEstoqueModal)]
@@ -10,6 +10,13 @@ fontes: [00-Fluxo-Mestre-0b, v1 02-PRD-Estoque/Fluxo-Estoque-Completo, v1 Estoqu
 # Raia Estoque: atendimento e despacho (E1 a E6)
 
 Nós do [[00-Fluxo-Mestre-0b]]: `E1` saldo disponível, `E2` saldo cobre?, `E3` atende pelo saldo (split e reserva, custo do item), `E4` o que fazer com o restante, `E5` entrada no Estoque, `E6` despacho. Entrada: [[02-PCP-Triagem-e-Destinacao]]. Vizinhos: [[04-Circuito-de-Compra]], [[05-Recebimento]], [[06-Qualidade-Entrada]], [[08-Qualidade-Saida]], [[09-Expedicao]]. Selos em [[Regras-do-Vault]].
+
+> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
+> - N16-120: o documento de retirada é pedido ao Estoque por quem precisa da mercadoria (Expedição ou Produção) e só o Estoque confirma. O que o documento imprime segue aberto. Contrato: [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada]].
+> - N16-121: a reserva é consumida junto com a baixa; a saída grava lote, pedido e o custo do lote no momento.
+> - N16-122: a Embalagem só recebe a parcial depois da retirada confirmada.
+> - N16-140: a matéria-prima da produção sai por documento de retirada, pela quantidade pedida.
+> - Fabricado: [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] define um lote de origem Produção por ordem de produção e produto (proposta aceita em 15/10, sem código).
 
 ## Objetivo
 
@@ -41,7 +48,7 @@ Permissão: agir no setor exige `PerfilSetor.podeAtuar` (`ensurePodeAtuar`, `ite
 | 7 | Na **Fabricação** o restante pode seguir o roteiro (`ROTEIRO`) ou ir à compra (`COMPRA`, matéria-prima) | 📝 ✅ `:607-613`, `AtenderEstoqueModal.tsx:332-345` |
 | 8 | A parte atendida vai para a **primeira etapa `EXPEDICAO`** depois do Estoque; sem ela no roteiro, 409 | ✅ `itens-parciais.service.ts:701-714` |
 | 9 | Parcial de item **comprado** só entra de volta no Estoque depois que a Qualidade liberou o lote (409 se há lote `PENDENTE`) | 📝 ✅ `itens-parciais.service.ts:862-874` |
-| 10 | **Despacho é no Estoque**: quem precisa da mercadoria gera o **documento de retirada**; a **baixa do saldo ocorre na retirada** | 📝 🔴 não existe |
+| 10 | **Despacho é no Estoque**: quem precisa da mercadoria gera o **documento de retirada**; a **baixa do saldo ocorre na retirada** | 📝 🔴 não existe; contrato [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada]], decisões N16-120 a N16-122 |
 | 11 | **Tudo que é fabricado ou comprado vai para o Estoque**: o fabricado aprovado vira lote e saldo e só então é despachado | 📝 🔴 fabricado não vira lote |
 | 12 | **Custo do item = média ponderada dos lotes** das reservas (Regra A: faturamento parcial usa o custo médio do item no pedido) | 📝 🔴 sem `GET /itens/custo` |
 | 13 | O custo do lote é **opcional** e nunca bloqueia carga inicial, recebimento, reserva nem despacho | 📝 ✅ `estoque-operacao.service.ts:404-409`, `estoque.prisma:385-393` |
@@ -183,9 +190,9 @@ Modelo completo e custo em [[Modelo-Estoque-e-Custo-do-Lote]] e [[Banco-MES]].
 
 ## Pendências
 
-- Nathan: o documento de retirada nasce de quem? Expedição pede ao Estoque, ou o Estoque gera quando a parcial chega à Expedição? O que o documento imprime e quem confirma?
-- Nathan: a Reserva continua existindo depois da retirada (para rastrear custo) ou é consumida junto?
-- Nathan e Robert: como o item **fabricado** entra no Estoque: um lote por ordem de produção, ou por parcial aprovada? Quem informa localização?
+- Nathan: o documento de retirada nasce de quem? Expedição pede ao Estoque, ou o Estoque gera quando a parcial chega à Expedição? O que o documento imprime e quem confirma? **Decidido em 29/10/2026 (N16-120): a Expedição ou a Produção pede ao Estoque, e só o Estoque confirma. O que o documento imprime segue aberto.**
+- Nathan: a Reserva continua existindo depois da retirada (para rastrear custo) ou é consumida junto? **Decidido em 29/10/2026 (N16-121): consumida junto com a baixa.**
+- Nathan e Robert: como o item **fabricado** entra no Estoque: um lote por ordem de produção, ou por parcial aprovada? Quem informa localização? **Parcialmente respondido: [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] define um lote por ordem de produção e produto (proposta aceita em 15/10). Quem informa a localização segue aberto.**
 - Nathan: custo do item fabricado (rateio por peso ou área) continua fora do ciclo 1 (decisão de 09/10)?
 - Robert: o setor Estoque aparece uma vez no roteiro (etapa 0). O v1 falava em duas vezes (início e fim); o código resolveu com a parcial voltando ao mesmo setor. Confirmar que o histórico mostra isso com clareza.
 

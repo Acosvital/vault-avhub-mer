@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-26
 status: vigente
 dono: Nathan
-fontes: [v1 Diagramas-UML (5, 6, 7, 8, 20, 24), api-pcp 579a625 prisma/models, api-acos-vital f322dcd, 00-Fluxo-Mestre-0b, api-comercial 5aa5311 enums.prisma, SQL-016 a SQL-018 (migrações de 26/10/2026), Registro-de-Decisoes N16]
+fontes: [v1 Diagramas-UML (5, 6, 7, 8, 20, 24), api-pcp 579a625 prisma/models, api-acos-vital f322dcd, 00-Fluxo-Mestre-0b, api-comercial 5aa5311 enums.prisma, migrações de 26/10/2026, Registro-de-Decisoes N16]
 ---
 
 # Diagramas de estados
@@ -252,7 +252,7 @@ Selo ✅ `integracao-avhub.service.ts:160-192`. 🟡 `compras.fechamento` ainda 
 
 ## 13. Proposta (`core_comercial.propostas.status`, 🟡)
 
-O enum de hoje, no módulo do Pablo, é `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76` ✅). O desenho abaixo é o da migração do [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] (`ck_propostas_status`), pelas N16-02 e N16-03: sem fechamento parcial, ajuste só até aprovar, proposta incompleta não aprova, cancelada não reabre.
+O enum de hoje, no módulo do Pablo, é `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76` ✅). O desenho abaixo é o da migração (`ck_propostas_status`), pelas N16-02 e N16-03: sem fechamento parcial, ajuste só até aprovar, proposta incompleta não aprova, cancelada não reabre.
 
 ```mermaid
 stateDiagram-v2
@@ -301,11 +301,11 @@ stateDiagram-v2
     CANCELADA --> [*]
 ```
 
-Selo ✅ valores em `enums.prisma:188-195`; transições conforme `custos.routes.ts:406-510` ❓ não relidas linha a linha. O prazo obrigatório (`prazo_resposta`, 2 dias úteis por padrão, `custos.routes.ts:378`) **sai**: o [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]] deixa a coluna nula, e o tempo é só cronometrado (N16-58). O setor de Orçamento é novo; o Moisés é uma das pessoas (N16-104). Regras: [[12-Orcamento-Base-de-Preco]].
+Selo ✅ valores em `enums.prisma:188-195`; transições conforme `custos.routes.ts:406-510` ❓ não relidas linha a linha. O prazo obrigatório (`prazo_resposta`, 2 dias úteis por padrão, `custos.routes.ts:378`) **sai**: a migração do Orçamento deixa a coluna nula, e o tempo é só cronometrado (N16-58). O setor de Orçamento é novo; o Moisés é uma das pessoas (N16-104). Regras: [[12-Orcamento-Base-de-Preco]].
 
 ## 16. Comissão nova (`core_comissao`, 🟡)
 
-Dois diagramas: o dossiê da proposta ou do pedido (`comissoes.estado`) e a comissão de cada nota fiscal (`comissoes_nf.estado`). Valores do [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]], resumidos em [[04-Regras-e-Estados-da-Comissao-Nova]].
+Dois diagramas: o dossiê da proposta ou do pedido (`comissoes.estado`) e a comissão de cada nota fiscal (`comissoes_nf.estado`). Valores resumidos em [[04-Regras-e-Estados-da-Comissao-Nova]].
 
 ```mermaid
 stateDiagram-v2
@@ -339,7 +339,7 @@ stateDiagram-v2
     NF_CANCELADA --> [*]
 ```
 
-Selo 🟡 (SQL-018 testado em Postgres 18, fora da produção; N16-10, N16-43 a N16-49). Toda decisão leva justificativa e rastro, e ninguém decide a própria comissão. O vendedor só vê a comissão real, com a justificativa, depois de `K4` (`K5`). Depois da decisão, o que muda vira **lançamento** na apuração seguinte (`comissao_lancamentos`): `COMPLEMENTO` ou `DESCONTO` quando o custo completa, com nova decisão, e `ABATIMENTO` quando a nota é cancelada, devolvida ou recusada (`K6`), sem decisão. A devolução parcial abre `comissao_devolucao_pendencia` (`ABERTA` → `INFORMADA` ou `DISPENSADA`).
+Selo 🟡 (testado em Postgres 18, fora da produção; N16-10, N16-43 a N16-49). Toda decisão leva justificativa e rastro, e ninguém decide a própria comissão. O vendedor só vê a comissão real, com a justificativa, depois de `K4` (`K5`). Depois da decisão, o que muda vira **lançamento** na apuração seguinte (`comissao_lancamentos`): `COMPLEMENTO` ou `DESCONTO` quando o custo completa, com nova decisão, e `ABATIMENTO` quando a nota é cancelada, devolvida ou recusada (`K6`), sem decisão. A devolução parcial abre `comissao_devolucao_pendencia` (`ABERTA` → `INFORMADA` ou `DISPENSADA`).
 
 ## Outros enums de status do MES
 

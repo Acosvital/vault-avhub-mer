@@ -15,7 +15,7 @@ Fora do fluxo 0b e do MES. É o segundo backend do HUB: propostas, clientes, ofe
 > O serviço `api-comercial` descrito abaixo é de teste e será absorvido pela `api-acos-vital` (N14-15). O que já existe na API do hub, o que criar e o que descartar está em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]].
 
 > [!info] Proposta e Orçamento no fluxo (26/10/2026)
-> A proposta (`V0`) e o Orçamento (`B1` a `B4`) entraram no [[00-Fluxo-Mestre-0b]] (N16-01, N16-07; N14-02 ajustada). O desenho aprovado muda o ciclo da proposta do módulo (sem fechamento parcial, cancelada no lugar de perdida, pedido criado pelo Hub) e está nos contratos [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]], [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] e [[API-020-Orcamento-Base-de-Preco-e-Pedido-de-Custo]]; a combinar com o Pablo antes da fase 3 do LOG-52 🔴. Mapa do módulo: [[Mapa-do-Modulo-do-Pablo]].
+> A proposta (`V0`) e o Orçamento (`B1` a `B4`) entraram no [[00-Fluxo-Mestre-0b]] (N16-01, N16-07; N14-02 ajustada). O desenho aprovado muda o ciclo da proposta do módulo (sem fechamento parcial, cancelada no lugar de perdida, pedido criado pelo Hub) e está nos contratos a combinar com o Pablo antes da fase 3 do LOG-52 🔴. Mapa do módulo: [[Mapa-do-Modulo-do-Pablo]].
 
 ## O serviço
 
