@@ -1,23 +1,101 @@
 ---
 tags: [fluxo, raia, vendas, proposta, pedido-de-venda, compras, v0, v1, v2, v3, c6, c7, c8, cancelamento, simulador, tela]
 criado: 2026-10-16
-atualizado: 2026-10-26
+atualizado: 2026-10-29
 status: proposta
 dono: Nathan (regra e front) · Pablo (módulo comercial) · Gustavo (banco e API) · Compras (C6, C7, C8)
 fontes: [Registro-de-Decisoes (N16-01 a N16-106), Estudo-Omie-API, 09-Diagramas/fontes/tela-simulador-comissao.png, 09-Diagramas/fontes/email-divergencia-margem-pv27824.jpg e pv28204.jpg, av-hub comissoes/simulador/page.tsx, 00-Fluxo-Mestre-0b, 01-Vendas-Liberacao, 04-Circuito-de-Compra, Proposta-Orcamento-Comissao/08-Reuniao/Proposta-Orcamento-Pedido-Comissao.docx (fora do vault), 09-Diagramas/artifact-proposta-pedido.html, api-comercial 5aa5311 (propostas.routes.ts, propostas.service.ts, vendas.prisma, enums.prisma, custos.routes.ts, numeroProposta.ts), Dump Avhub 14/10]
 ---
 
-# Raia Vendas: da proposta ao pedido de venda (V0.1 a V0.7, V0C, V1 com duas origens), Compras confere (C6, C7), compra acima do valor (C8) e cancelamento
+# Proposta e pedido de venda
 
-**Nota de raia (proposta, fluxo aprovado em 26/10/2026).** Nós do [[00-Fluxo-Mestre-0b]]: `V0.1` a `V0.7`, `V0C`, `V1`, e para o pedido digitado no Omie `V2` e `V3` ([[01-Vendas-Liberacao]]); `B1` a `B4` aparecem aqui só como ligação ([[12-Orcamento-Base-de-Preco]]); `C6`, `C7` e `C8` na raia de Compras; `K1` a `K6` em [[13-Custo-Real-e-Comissao-no-Fluxo]]. Selos em [[Regras-do-Vault]]; decisões em [[Registro-de-Decisoes]]; regras completas em [[LOG-56-Fluxo-da-Proposta-ao-Pedido]]; o que o Omie permite em [[Estudo-Omie-API]].
+**Em uma frase:** o vendedor monta a proposta, a Gerência aprova, e a proposta aprovada vira pedido de venda (PV) no Omie, já liberado para o PCP (planejamento e controle da produção) começar.
 
-## Objetivo
+Nesta etapa o vendedor também acompanha o pedido, aprova compras mais caras e pode cancelar. A nota é uma proposta: o fluxo foi aprovado em 26/10/2026.
 
-Construir dentro do av-hub o começo do fluxo, que hoje não tem lugar: o vendedor monta a **proposta**, preenche a parte de venda e a de orçamento e compra com o que conseguiu (telefone, e-mail), mas **não é o dono do dado de custo**: o dono é Compras e o Orçamento (N16-54). A Gerência aprova desconto e margem (fisicamente neste ciclo) e a proposta aprovada vira **pedido de venda** criado por API no Omie. O pedido **nasce liberado**: a escolha "a Qualidade acompanha?" já foi feita na proposta. O pedido digitado direto no Omie segue o **mesmo fluxo e a mesma tela** (N16-106): chega travado, com a parte de vendas pronta (só se altera no Omie), e o vendedor responde `V2`/`V3` e preenche a parte de compras.
+## Como funciona, passo a passo
 
-Depois do pedido, o PCP abre as requisições (`P3`). Compras recebe, o sistema **puxa os dados da proposta** (impostos, frete, fornecedor), Compras **confere os impostos**, edita no hub e valida se segue ou busca valor ou condição melhor (`C6`, `C7`). A proposta não muda e o preço fechado com o cliente não muda. **Se Compras compra por mais que o valor da proposta, o vendedor é avisado na tela "Meus Pedidos" e aprova ou reprova, por produto** (`C8`, N16-60 a N16-67). Se o pedido é **cancelado**, o sistema avisa a OC e o PCP, cancela a requisição e a OC ainda não emitida, e o que já foi comprado vai ao Estoque (N16-68 a N16-71).
+1. O vendedor cria a proposta. O sistema dá a ela um número automático, só com dígitos. `V0.1`
+2. O vendedor preenche o custo com o que conseguiu, por telefone ou e-mail. Se não tem o dado, pede cotação ao Orçamento ou olha o histórico das ordens de compra (OC). `V0.2`
+3. O sistema calcula margem e comissão estimada. Só o vendedor vê. Item sem custo e sem fornecedor deixa a proposta incompleta, e ela não pode ser aprovada. `V0.3`
+4. A Gerência aprova desconto e margem pessoalmente, fora do sistema, neste ciclo. `V0.4`
+5. O vendedor marca "aprovada" no sistema. O sistema grava quem, quando e qual revisão, e a proposta trava. Se a proposta não segue, ela é cancelada e não reabre. `V0.5`, `V0C`
+6. O vendedor clica em "Transformar em pedido de venda". Ele precisa dizer se a Qualidade acompanha o pedido. `V0.6`
+7. O sistema coloca o pedido numa fila e a integração o cria no Omie. Se o Omie recusar, aparece o motivo e o botão "Tentar novamente". `V0.7`
+8. O pedido nasce liberado e o PCP o vê na triagem. O pedido digitado direto no Omie segue o mesmo caminho: chega travado, com vendas pronta, e o vendedor responde e libera. `V1`, `V2`, `V3`
+9. Compras recebe a requisição. O sistema puxa da proposta impostos, frete e fornecedor. Compras confere, edita e usa o valor correto na OC. A proposta não muda. `C6`, `C7`
+10. Se Compras comprar por mais que o valor da proposta, o vendedor recebe um aviso em Meus Pedidos. Ele aprova ou reprova, produto por produto. `C8`
+
+## Exemplo
+
+O Cliente Exemplo S.A. pede 100 flanges. O vendedor lança o cliente e o item e a proposta nasce aberta. Ele não tem o preço do flange, pede ao Orçamento e vê o histórico enquanto espera.
+
+Com o custo preenchido, a margem aparece no rodapé. A Gerência aceita o desconto numa conversa, e o vendedor marca a proposta como aprovada. Os flanges têm certificado de material, então ele marca que a Qualidade acompanha. O pedido vai ao Omie e nasce liberado.
+
+Depois, Compras acha o flange mais caro que o previsto. O aviso mostra a margem atual, a nova margem e o motivo. O vendedor aprova e a comissão dele cai.
 
 ## Quem atua
+
+| Quem | O que faz |
+|---|---|
+| Vendedor | Cria e revisa a proposta, marca aprovada, transforma em pedido, aprova ou reprova compra mais cara, cancela ou exclui o pedido |
+| Auxiliar do titular | Faz o mesmo pelos titulares que ajuda 🟡 |
+| Gerência (João Vitor, Sérgio Vital) | Aprova desconto e margem pessoalmente. Não tem tela no sistema |
+| Orçamento | Setor novo; o Moisés é uma das pessoas. Responde pedidos de custo |
+| PCP | Lê o pedido liberado, abre a requisição, é avisado do cancelamento e liga a NF de entrada ao item |
+| Compras | Confere a parte de compras (`C6`, `C7`), trata a compra acima do valor (`C8`) e emite a OC |
+| Fiscal | Cria produto novo no Omie, separa o pedido para faturar em partes e informa devolução parcial. Não cancela pedido |
+| Controladoria (Michele) | Decide a comissão no fim, com o custo real |
+| Gerente de Vendas | Lê as propostas da equipe 🟡 |
+
+## Regras que valem
+
+- Uma proposta vira um único pedido. Não existe fechamento parcial.
+- A proposta só muda até ser aprovada. Cada ajuste gera uma revisão.
+- Proposta incompleta (item sem custo e sem fornecedor) não pode ser aprovada.
+- O botão "Transformar em pedido" só aparece na proposta aprovada.
+- Sem a resposta "a Qualidade acompanha?", o pedido não é criado. O vendedor pode corrigir até o MES (sistema de chão de fábrica) importar o pedido.
+- O pedido criado pela proposta nasce liberado, porque a Qualidade já foi respondida na proposta.
+- O vendedor não é dono do dado de custo. Ele decide o valor que põe e responde por ele.
+- Compras não altera a proposta. O preço fechado com o cliente não muda.
+- Compra acima do valor da proposta: o vendedor aprova ou reprova, por produto, sem tolerância e sem tempo limite.
+- Se ele reprova, Compras leva o caso à Gerência pessoalmente. A Gerência não cancela no sistema.
+- Aviso favorável (a margem sobe) é só informativo.
+- Proposta cancelada não reabre. O vendedor duplica.
+- Pedido cancelado: a requisição e a OC ainda não emitida cancelam sozinhas. O que já foi comprado vai ao Estoque, livre.
+- Pedido já faturado: o cancelamento não desfaz compra nem produção.
+- Produto pendente (`PEND-xxxx`) não vira pedido até o cadastro no Omie.
+- O câmbio vem da PTAX do Hub, do dia da aprovação.
+
+## O que já existe e o que falta
+
+- ✅ Lista de propostas, nova proposta, detalhe da proposta e clientes.
+- ✅ Telas Liberar Pedidos e Liberação da Equipe.
+- ✅ Meus Pedidos, com a etapa dos itens.
+- ✅ Módulo de propostas do Pablo, só em ambiente de teste.
+- 📝 Todas as regras acima estão decididas.
+- 🔴 Aprovar a proposta e transformar em pedido.
+- 🔴 Criar o pedido no Omie por fila e pipeline.
+- 🔴 Tela da proposta no formato do Simulador de Comissão, com comissão estimada.
+- 🔴 `C6` e `C7` na tela da OC.
+- 🔴 Aviso e aprovação da compra mais cara em Meus Pedidos (`C8`).
+- 🔴 Cancelamento do pedido, com tarja na requisição e na OC.
+- 🟡 Nomes de rota: o Gustavo e o Pablo fecham.
+- ❓ Testes no Omie: número próprio do pedido, pedido bloqueado e `ExcluirPedido`.
+
+## Detalhe técnico
+
+### Nota de raia
+
+**Nota de raia (proposta, fluxo aprovado em 26/10/2026).** Nós do [[00-Fluxo-Mestre-0b]]: `V0.1` a `V0.7`, `V0C`, `V1`, e para o pedido digitado no Omie `V2` e `V3` ([[01-Vendas-Liberacao]]); `B1` a `B4` aparecem aqui só como ligação ([[12-Orcamento-Base-de-Preco]]); `C6`, `C7` e `C8` na raia de Compras; `K1` a `K6` em [[13-Custo-Real-e-Comissao-no-Fluxo]]. Selos em [[Regras-do-Vault]]; decisões em [[Registro-de-Decisoes]]; o que o Omie permite em [[Estudo-Omie-API]].
+
+### Objetivo
+
+Construir dentro do av-hub o começo do fluxo, que hoje não tem lugar. O vendedor preenche a parte de venda e a de orçamento e compra com o que conseguiu (telefone, e-mail), mas **não é o dono do dado de custo**: o dono é Compras e o Orçamento (N16-54). O pedido criado pela proposta **nasce liberado**: a escolha "a Qualidade acompanha?" já foi feita na proposta. O pedido digitado direto no Omie segue o **mesmo fluxo e a mesma tela** (N16-106): chega travado, com a parte de vendas pronta (só se altera no Omie), e o vendedor responde `V2`/`V3` e preenche a parte de compras.
+
+Depois do pedido, o PCP abre as requisições (`P3`). Compras recebe e o sistema **puxa os dados da proposta**; Compras **confere os impostos**, edita no hub e valida se segue ou busca valor ou condição melhor (`C6`, `C7`). A compra acima do valor da proposta passa pelo vendedor, produto por produto, em "Meus Pedidos" (`C8`, N16-60 a N16-67). O cancelamento do pedido avisa a OC e o PCP e cancela a requisição e a OC ainda não emitida (N16-68 a N16-71). O passo a passo está no resumo do topo.
+
+### Quem atua (completo)
 
 | Quem | Papel | Onde |
 |---|---|---|
@@ -36,7 +114,7 @@ Depois do pedido, o PCP abre as requisições (`P3`). Compras recebe, o sistema 
 
 `Admin (Dev)` não é ator ([[Regras-do-Vault]]).
 
-## Regras decididas
+### Regras decididas
 
 Origem: [[Registro-de-Decisoes]].
 
@@ -75,11 +153,11 @@ Origem: [[Registro-de-Decisoes]].
 | 31 | A Michele tem a tela igual, com o custo real e afins, lado a lado com o estimado, e as condições de **cada evento de custo** | 📝 N16-19, N16-20 |
 | 32 | **Pedidos de Venda e Notas Fiscais de Saída** ficam inativas também em produção | 📝 N16-33 |
 
-## Estados
+### Estados
 
-### Proposta (`status`) 🟡
+#### Proposta (`status`) 🟡
 
-O enum de hoje, no módulo do Pablo, é `StatusProposta`: `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76`). Valores novos, no `CHECK` da migração ([[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], `ck_propostas_status`):
+O enum de hoje, no módulo do Pablo, é `StatusProposta`: `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76`). Valores novos, no `CHECK` da migração (`ck_propostas_status`):
 
 | Valor 🟡 | De onde vem | Significado | Quem vê |
 |---|---|---|---|
@@ -90,19 +168,19 @@ O enum de hoje, no módulo do Pablo, é `StatusProposta`: `ABERTA`, `PARCIAL`, `
 
 `PARCIAL` deixa de existir (N16-02). Eventos da linha do tempo: `TipoEventoProposta` tem `CRIADA`, `REVISADA`, `PERDIDA`, `REABERTA`, `FECHAMENTO_PARCIAL`, `FECHAMENTO_TOTAL`, `DUPLICADA`, `COPIADA`, `PDF_GERADO`, `EMAIL_ENVIADO`, `EXCLUIDA`, `CUSTO_ALTERADO`, `MIGRADA`, `PEDIDO_OMIE_ATUALIZADO` (`enums.prisma:119-136`); na migração saem `PERDIDA`, `REABERTA` e `FECHAMENTO_*` e entram 🟡 `CUSTO_SOLICITADO`, `CUSTO_RESPONDIDO`, `APROVADA`, `CANCELADA`, `TRANSFORMADA_EM_PEDIDO`, `PEDIDO_ENVIADO_OMIE`, `PEDIDO_RECUSADO_OMIE`, `PEDIDO_NUMERO_OMIE` e `REATRIBUIDA` (`ck_propostas_eventos_tipo`).
 
-### Pedido de venda do hub (`status_sincronizacao_omie`) 🟡
+#### Pedido de venda do hub (`status_sincronizacao_omie`) 🟡
 
 Mesmo vocabulário da OC (`pendente`, `sincronizado`, `erro`; Dump Avhub 17315-17320): `pendente` (na fila), `sincronizado` (Omie criou; guarda o número do Omie), `erro` (Omie recusou; texto do erro; botão "Tentar novamente", N16-36).
 
-### Pedido de aprovação do vendedor (`C8`) 🟡
+#### Pedido de aprovação do vendedor (`C8`) 🟡
 
 Estados propostos (N16-66, N16-73): `PENDENTE` (na lista do vendedor, sem tempo limite), `APROVADO` (a compra segue), `REPROVADO` (em tratativa: entra na **lista de Compras**) e `RESOLVIDO` (Compras registrou a solução: novo valor, novo fornecedor, mantido ou pedido cancelado; o vendedor foi notificado). O tempo em cada estado é cronometrado.
 
-### Liberação
+#### Liberação
 
-O pedido da proposta nasce em `status_liberacao = liberado` (valores em [[01-Vendas-Liberacao]]); o histórico `liberado` é gravado **na resposta do `IncluirPedido`**, usando o `codigo_pedido_integracao` como chave ([[LOG-58-Liberacao-do-Pedido-Origem-Proposta]], [[Estudo-Omie-API]]).
+O pedido da proposta nasce em `status_liberacao = liberado` (valores em [[01-Vendas-Liberacao]]); o histórico `liberado` é gravado **na resposta do `IncluirPedido`**, usando o `codigo_pedido_integracao` como chave ([[Estudo-Omie-API]]).
 
-## Telas
+### Telas
 
 | Nome atual | Rota | App | Quem | Nó | Estado |
 |---|---|---|---|---|---|
@@ -125,9 +203,9 @@ O pedido da proposta nasce em `status_liberacao = liberado` (valores em [[01-Ven
 | Liberar Pedidos, Liberação da Equipe | `/liberar-pedidos`, `/liberacao-equipe` | HUB | Vendedor, gerente | `V2`, `V3` | ✅ hoje; a resposta passa para a tela do pedido (N16-106) 🟡 |
 | Conferência de Compras (parte de compras da proposta) | dentro de `/compras/nova/[requisicaoId]` 🟡 | HUB | Comprador | `C6`, `C7` | 🔴 |
 
-O menu de Vendas, Orçamento e Compras: [[LOG-57-Menu-Vendas-Orcamento-Compras]].
+O contrato do menu de Vendas, Orçamento e Compras foi removido em 29/10/2026; o Robert cria o novo.
 
-## Endpoints e contratos
+### Endpoints e contratos
 
 | Método e rota | Uso | Nó | Estado |
 |---|---|---|---|
@@ -149,9 +227,9 @@ O menu de Vendas, Orçamento e Compras: [[LOG-57-Menu-Vendas-Orcamento-Compras]]
 
 Auditoria das telas e a nova página de proposta: [[14-Telas-e-Experiencia-do-Usuario]]; mapa do pedido no Omie: [[Mapa-IncluirPedido-Omie]].
 
-Contratos: [[LOG-56-Fluxo-da-Proposta-ao-Pedido]] (regras e permissões), [[LOG-58-Liberacao-do-Pedido-Origem-Proposta]] (liberação), [[LOG-57-Menu-Vendas-Orcamento-Compras]] (menu e telas), API-019 a API-022 e SQL-016 a SQL-018. Nomes de rota 🟡: o Gustavo e o Pablo fecham.
+Contratos: os desta parte foram removidos em 29/10/2026 e o Robert cria os novos. Nomes de rota 🟡: o Gustavo e o Pablo fecham.
 
-## Como está no código (✅ do módulo do Pablo)
+### Como está no código (✅ do módulo do Pablo)
 
 Tudo abaixo é do `api-comercial` (pasta `av-hub/api-comercial`), serviço **só de teste** (N14-15). Nada disto existe na `api-acos-vital` 🔴.
 
@@ -166,20 +244,20 @@ Tudo abaixo é do `api-comercial` (pasta `av-hub/api-comercial`), serviço **só
 - ✅ **Pedido de custo** com prazo padrão de 2 dias úteis (`custos.routes.ts:378`) e rótulos `ATRASADA`, `VENCE_HOJE`, `NO_PRAZO` (`:338`): **saem** com N16-58 (cronômetro, sem prazo). `GET /produtos/:id/precos` (`suprimentos.routes.ts:823-880`).
 - ✅ **Simulador do Hub** lê a proposta ligada ao pedido para pré-preencher o lado da compra (`simulador.routes.ts`, PR #207). Não é a comissão estimada da proposta.
 
-No HUB (branch `feat/menu-orcamento-vendas-compras`, `5aa5311`): as páginas de Vendas já estão em `app/(protected)/vendas/*` ✅ ([[LOG-57-Menu-Vendas-Orcamento-Compras]]).
+No HUB (branch `feat/menu-orcamento-vendas-compras`, `5aa5311`): as páginas de Vendas já estão em `app/(protected)/vendas/*` ✅.
 
 No av-hub (API do hub), o que serve de padrão: contador por `(unidade, tipo)` (`contadores_documento`, `fn_proximo_numero_documento`, Dump Avhub 8110-8140, 16552-16564); fila da OC para o Omie (`GET /compras/ordens/fila-omie`, `PATCH …/sincronizacao`, `POST …/reenviar`, `ordens_compra.route.js:857`, `:1267`, `:1321`); liberação (`pedidos_vendas_liberacao`, Dump 18285).
 
-## O Omie nesta raia ([[Estudo-Omie-API]])
+### O Omie nesta raia ([[Estudo-Omie-API]])
 
 - ✅ O `IncluirPedido` aceita o **nosso código de integração** do pedido e do item: o hub grava a liberação na **resposta** da inclusão e liga o item da proposta ao `codigo_item_omie`. Etapa inicial `"10"`. A pipeline precisa **gravar** `codigo_pedido_integracao`.
 - 🟡 Pode ser possível **mandar o nosso `numero_pedido`**, e o pedido criado por API pode nascer **bloqueado** na tela do Omie: ❓ só teste.
 - ✅ **Existe cancelar pedido por API** (`CancelarPedidoVenda`, serviço `/produtos/pedidovendafat/`), e também `ExcluirPedido` e `AlterarPedidoVenda`. **Quem cancela, edita e exclui é o vendedor** (N16-84), não o Fiscal. O `ListarEtapasPedido` (`/produtos/pedidoetapas/`) devolve, por pedido, cancelamento, devolução e faturamento. **O hub guarda o cancelamento por conta própria** (quem, quando, motivo) porque o `exclusionSync` apagaria do hub um pedido excluído no Omie.
 - ✅ Devolução de **venda**: a total vem do Omie; a **parcial** só chega marcada, sem valor, item nem quantidade. Fiscal ou Controladoria informam o que voltou (N16-74).
 
-## Dados 🟡
+### Dados 🟡
 
-Schema `core_comercial` (proposta, pedido de venda do hub, numeração, custo realizado por item): modelo em SQL-016. Aqui só o que o fluxo exige:
+Schema `core_comercial` (proposta, pedido de venda do hub, numeração, custo realizado por item): modelo no banco (contrato removido em 29/10/2026). Aqui só o que o fluxo exige:
 
 | Dado | Regra |
 |---|---|
@@ -190,7 +268,7 @@ Schema `core_comercial` (proposta, pedido de venda do hub, numeração, custo re
 | Item da proposta ↔ item do pedido ↔ `codigo_item_omie` ↔ item da OC | chave do custo real |
 | `divergencias_compra` (pedido, produto, valor da proposta, valor da compra, motivo, estado, quem decidiu e quando, solução, tempos) | uma linha por produto (N16-63); estados `PENDENTE`, `APROVADO`, `REPROVADO`, `RESOLVIDO` 🟡 |
 
-## Quem vê o quê
+### Quem vê o quê
 
 | Dado | Vendedor | Auxiliar | Gerente de equipe | Orçamento | Compras | PCP | Controladoria |
 |---|---|---|---|---|---|---|---|
@@ -200,9 +278,9 @@ Schema `core_comercial` (proposta, pedido de venda do hub, numeração, custo re
 | Comissão estimada | só a que ele pôs | idem | 🟡 OQ-21 | não | não | não | sim |
 | Pedido de venda do hub | os dele | idem | equipe | não | o vinculado à requisição | liberado; **avisado do cancelamento** | não |
 
-Matriz completa por perfil em [[LOG-56-Fluxo-da-Proposta-ao-Pedido]].
+A matriz completa por perfil estava no contrato removido em 29/10/2026; o Robert cria o novo.
 
-## A tela da proposta (N16-19)
+### A tela da proposta (N16-19)
 
 A tela de criar e revisar a proposta segue a do **Simulador de Comissão atual** (`09-Diagramas/fontes/tela-simulador-comissao.png`; `av-hub/app/(protected)/comissoes/simulador/page.tsx`). Blocos, na ordem da imagem:
 
@@ -211,11 +289,11 @@ A tela de criar e revisar a proposta segue a do **Simulador de Comissão atual**
 3. **Itens**: bloco Compra (fabricação, quantidade, unidade, preço, origem, % IPI, ST, frete e fornecedor: o vendedor preenche), bloco Venda (quantidade e preço) e bloco Resultado (custo líquido, sugerido, margem e letra: o sistema calcula).
 4. **Rodapé de totais**: custo, venda, total da NF, sugerido, mark-up real, mark-up sobre a compra, margem e letra.
 
-As colunas e as condições **vêm das mesmas entradas do motor atual** (`simulacoes`, `simulacao_itens`, `simulador_parametros` e a view `vw_simulacao_resolvida`, ver [[01-Motor-Atual-Como-Calcula]]); o `core_comercial` (itens da proposta) e o `core_comissao` casam com elas, sem colunas paralelas (SQL-016 e SQL-018). Hoje o Simulador calcula no navegador (`calcularSimulacao`, `simulador/page.tsx:1053`) e a proposta não calcula comissão; o cálculo passa à API ([[03-Modelo-Novo-core_comissao]]).
+As colunas e as condições **vêm das mesmas entradas do motor atual** (`simulacoes`, `simulacao_itens`, `simulador_parametros` e a view `vw_simulacao_resolvida`, ver [[01-Motor-Atual-Como-Calcula]]); o `core_comercial` (itens da proposta) e o `core_comissao` casam com elas, sem colunas paralelas. Hoje o Simulador calcula no navegador (`calcularSimulacao`, `simulador/page.tsx:1053`) e a proposta não calcula comissão; o cálculo passa à API ([[03-Modelo-Novo-core_comissao]]).
 
 **Três visões da mesma tela** (detalhe e tabela por bloco em [[13-Custo-Real-e-Comissao-no-Fluxo]]): (a) o vendedor, na proposta, preenche o custo e vê margem, letra e a comissão estimada que ele colocou; (b) Compras vê o cotado do vendedor ao lado do valor da OC e usa o valor correto na OC, sem alterar a proposta; quando o valor é maior, o vendedor aprova em Meus Pedidos; (c) a Controladoria vê estimado e real lado a lado, com o drill-down por evento de custo (cada evento com as suas condições, N16-20), e decide com justificativa.
 
-## O que falta desenvolver
+### O que falta desenvolver
 
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
@@ -224,7 +302,7 @@ As colunas e as condições **vêm das mesmas entradas do motor atual** (`simula
 | 3 | Cancelar com motivo e histórico da comissão estimada | Pablo | `V0C` | 🔴 |
 | 4 | Botão "Transformar em pedido", marcação da Qualidade obrigatória, fila do pedido e retorno da pipeline | Pablo (API), Nathan (tela e pipeline), Gustavo (banco) | `V0.6`, `V0.7` | 🔴 |
 | 5 | Pipeline: `IncluirPedido` por fila, espelho do `envioOrdensCompra.ts`, com `codigo_pedido_integracao` e `codigo_item_integracao`; gravar esses códigos no hub | Nathan | `V0.7` | 🔴 |
-| 6 | Liberação gravada na resposta do `IncluirPedido`, com histórico | Gustavo | `V1` | 🔴 ([[LOG-58-Liberacao-do-Pedido-Origem-Proposta]]) |
+| 6 | Liberação gravada na resposta do `IncluirPedido`, com histórico | Gustavo | `V1` | 🔴 |
 | 7 | `C6` e `C7` na tela de emissão da OC: mostrar a parte de compras da proposta, puxar fornecedor e impostos, editar, gravar o valor correto sem tocar a proposta | Nathan, Gustavo | `C6`, `C7` | 🔴 |
 | 8 | Trocar a AwesomeAPI pela PTAX do hub | Pablo | `V0.1` | 🔴 |
 | 9 | Aprovar com perfil da Gerência no sistema | — | `V0.4` | próximo ciclo (N16-12) |
@@ -235,7 +313,7 @@ As colunas e as condições **vêm das mesmas entradas do motor atual** (`simula
 | 14 | **Pipeline do Omie:** gravar os códigos de integração, ampliar o espelho e o envio da OC com os impostos, recurso novo de recebimento de NF-e, cancelamento e devolução da NF | Nathan, Gustavo | vários | 🔴 ([[Estudo-Omie-API]]) |
 | 15 | Página do produto e regras do score | Nathan, Pablo | `V0.2`, `B2` | 🔴 ([[12-Orcamento-Base-de-Preco]]) |
 
-## Pendências
+### Pendências
 
 | # | Pergunta | Dono |
 |---|---|---|
@@ -250,7 +328,7 @@ As colunas e as condições **vêm das mesmas entradas do motor atual** (`simula
 
 Lista completa em [[Perguntas-Proposta-Pedido-Comissao]].
 
-## Diagrama do subfluxo
+### Diagrama do subfluxo
 
 ```mermaid
 flowchart TD

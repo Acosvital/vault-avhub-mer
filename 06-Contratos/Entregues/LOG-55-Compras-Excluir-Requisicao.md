@@ -26,6 +26,11 @@ criado_original: 2026-10-20
 > - ✅ **Q1 decidida (20/10):** só a criada no Hub; a do MES continua cancelada com motivo.
 > - 🔴 **Pergunta aberta** (seção 6): o perfil Comprador ter `pode_deletar` em `compras` (Q2).
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Permite ao comprador excluir uma requisição de compra criada à mão no Hub (erro, duplicada, teste). É exclusão lógica; a do MES (sistema de chão de fábrica) continua sendo cancelada com motivo.
+> **Quem é afetado:** Compradores, que ganham o botão Excluir. Só vale para requisição sem OC (Ordem de Compra).
+> **Situação:** ✅ Banco, API e front entregues (26/10). 🟡 Os erros 409 e 403 não foram testados. 🔴 Aberta: o perfil Comprador ter permissão de excluir (Q2).
+
 ## 1. Por quê
 
 O comprador não consegue apagar uma requisição. Só existe **cancelar** (kanban: arrastar para "Cancelada" com motivo), que serve para a requisição do MES, porque o motivo volta ao PCP ([[LOG-35-Compras-Marcos-Requisicao-para-MES]]). Para a requisição **criada à mão no Hub** (erro de digitação, duplicada, teste) o cancelamento deixa lixo na fila e na coluna "Cancelada" para sempre.

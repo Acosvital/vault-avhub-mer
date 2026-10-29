@@ -1,19 +1,42 @@
 ---
 tags: [omie, pedido-de-venda, incluir-pedido, api, mapa-de-campos, pesquisa]
 criado: 2026-10-23
-atualizado: 2026-10-23
+atualizado: 2026-10-29
 status: proposta
 dono: Nathan
-fontes: ["Documentação do Omie lida em 23/10/2026: https://app.omie.com.br/api/v1/produtos/pedido/ (serviço PedidoVendaProduto, método IncluirPedido e tipos complexos)", "Exemplo de IncluirPedido enviado pelo Nathan em 23/10/2026", "05-Integracoes/Estudo-Omie-API (estudo de 21/10)", "av-hub components/Propostas/PropostaForm (PedidoOmieModal.tsx, ItemProposta.tsx, PropostaForm.tsx)", "06-Contratos/Ativos/SQL-016 (pedido_venda, pedidos_itens)"]
+fontes: ["Documentação do Omie lida em 23/10/2026: https://app.omie.com.br/api/v1/produtos/pedido/ (serviço PedidoVendaProduto, método IncluirPedido e tipos complexos)", "Exemplo de IncluirPedido enviado pelo Nathan em 23/10/2026", "05-Integracoes/Estudo-Omie-API (estudo de 21/10)", "av-hub components/Propostas/PropostaForm (PedidoOmieModal.tsx, ItemProposta.tsx, PropostaForm.tsx)"]
 ---
 
 # Mapa do `IncluirPedido` do Omie: o que o hub manda, de onde vem cada campo e o que ainda não sabemos
+
+**Em uma frase:** esta nota lista, campo a campo, o que o hub vai mandar ao Omie quando uma proposta virar pedido de venda, de onde vem cada dado e o que ainda precisa de teste.
+
+**Quando consultar esta nota:** ao desenhar ou revisar o envio do pedido ao Omie (o ERP, sistema fiscal e financeiro), ou ao decidir qual dado da proposta vira campo do pedido. Status: 🟡 proposta. **Nenhuma chamada foi feita ao Omie**; tudo foi lido da documentação dele em 23/10/2026.
+
+## Quem manda dado para quem, quando e por quê
+
+- **Hub para Omie, ao virar pedido.** O vendedor transforma a proposta em pedido no hub. O hub envia o pedido ao Omie pelo método `IncluirPedido` (a chamada do Omie que cria pedido de venda). Por quê: o faturamento acontece no Omie.
+- **Uma conta Omie por unidade.** São três contas: Mogi (Aços Vital), Arujá (HRM) e Uberaba (Aços Uberaba). O pedido vai à conta da empresa emissora da proposta (N16-79, N16-80).
+- **O hub manda só o necessário para faturar:** cliente, produtos, quantidades, preços, condição de pagamento, vendedor. O que só o hub tem fica no hub: Qualidade, faturamento em partes, previsões, requisitos e moeda de origem (decisão do Nathan, 23/10).
+- **Omie para hub, na volta.** O Omie devolve o código e o número do pedido. A pipeline (o programa que copia dados do Omie para o hub) lê o pedido de volta e compara total, itens e códigos. Se algo divergir, o pedido recebe um aviso e **não é liberado**.
+- **Moeda.** O Omie não tem campo de moeda. Proposta em dólar ou euro vira reais pela cotação do Banco Central (PTAX) do dia da aprovação (N16-13, N16-27). O pedido do hub e o do Omie ficam em reais.
+- **Impostos.** O vendedor digita ICMS, IPI e ST na proposta, e esses valores vão para o pedido (N16-95). O Omie pode recalcular, então o total da proposta e o da nota podem divergir. Isso é ponto de atenção.
+- **Quando o pedido não vai:** se o cliente não tem cadastro na conta do Omie, ou se o produto ainda é pendente (N16-28).
+- **Condição de pagamento.** Hoje a proposta guarda texto livre, mas o Omie quer um código cadastrado, diferente em cada conta. A proposta é usar o código real e mandar só ele 🟡. A pipeline ainda precisa copiar essas condições 🔴.
+
+## O que ainda não sabemos
+
+Os testes no Omie ficam para depois que as telas estiverem prontas (N16-82). O Omie não tem ambiente de teste, então usa-se cadastros TESTE no ambiente real. Perguntas em aberto: mínimo obrigatório por conta, se o pedido nasce bloqueado, como o Omie trata CFOP e cenário de impostos, e como conta o vencimento das parcelas. A lista de 13 testes está na seção 6 do detalhe (OQ-16).
+
+Complementa o [[Estudo-Omie-API]]. Selos: ✅ está na documentação ou no código · 📝 decisão do Nathan · 🟡 proposta · 🔴 não existe · ❓ não conferido.
+
+## Detalhe técnico
 
 Complementa o [[Estudo-Omie-API]]. Aqui a documentação do `IncluirPedido` foi lida campo a campo e cruzada com a proposta do hub. **Nenhuma chamada foi feita ao Omie**: tudo o que depende de comportamento real está marcado ❓ e entra na lista de testes da seção 6.
 
 Selos: ✅ está na documentação ou no código · 📝 decisão do Nathan · 🟡 proposta · 🔴 não existe · ❓ não conferido.
 
-## 1. O método em uma tela
+### 1. O método em uma tela
 
 - **Endpoint:** `https://app.omie.com.br/api/v1/produtos/pedido/`, método `IncluirPedido` ("Inclui um pedido de venda de produto"). ✅
 - **Entrada e saída:** recebe `pedido_venda_produto` e devolve `codigo_pedido`, `codigo_pedido_integracao`, `numero_pedido`, `codigo_status` e `descricao_status`. ✅ Erro vem no formato `omie_fail` (`code`, `description`, `referer`, `fatal`). ✅
@@ -21,7 +44,7 @@ Selos: ✅ está na documentação ou no código · 📝 decisão do Nathan · �
 - **Outros métodos do serviço:** `ListarPedidos`, `ConsultarPedido`, `StatusPedido`, `TrocarEtapaPedido`, `AlterarPedFaturado`, `SimularImpostos`, `DevolverPedido` e `ExcluirPedido`. ✅ **Não existe** método de cancelar pedido. ✅
 - **Cada conta Omie é uma unidade — são três:** Mogi (Aços Vital), Arujá (HRM) e Uberaba (Aços Uberaba), no mesmo sistema do Hub (N16-79). O pedido vai à conta da empresa emissora da proposta (a unidade da proposta, `core.unidades`; N16-80). ✅
 
-## 2. Cabeçalho (`cabecalho`)
+### 2. Cabeçalho (`cabecalho`)
 
 | Campo do Omie | Tipo | O que o hub manda | Origem no hub | Situação |
 |---|---|---|---|---|
@@ -42,9 +65,9 @@ Selos: ✅ está na documentação ou no código · 📝 decisão do Nathan · �
 | `nao_gerar_boleto` | texto 1 | — | — | 🟡 decidir com o Financeiro |
 | `cbs`, `ibs` | — | — | — | ✅ já existem no tipo (reforma tributária); não enviar, o Omie calcula |
 
-## 3. Itens (`det`, uma linha por item)
+### 3. Itens (`det`, uma linha por item)
 
-### 3.1 Identificação (`ide`)
+#### 3.1 Identificação (`ide`)
 
 | Campo | O que mandar | Origem | Situação |
 |---|---|---|---|
@@ -53,7 +76,7 @@ Selos: ✅ está na documentação ou no código · 📝 decisão do Nathan · �
 | `acao_item` | só em alteração | — | ✅ |
 | `id_ordem_producao` | — | — | ❓ ver se o Omie liga o PV a uma OP dele; não é o nosso PCP |
 
-### 3.2 Produto (`produto`)
+#### 3.2 Produto (`produto`)
 
 | Campo | Tipo | Origem | Situação |
 |---|---|---|---|
@@ -71,7 +94,7 @@ Selos: ✅ está na documentação ou no código · 📝 decisão do Nathan · �
 | `reservado` | `"S"`/`"N"` | — | ❓ **reserva estoque no Omie**; o nosso estoque é o MES, então `"N"` |
 | `ean`, `cnpj_fabricante`, `indicador_escala`, `kit`, `valor_deducao`, `valor_icms_desonerado` | — | — | 🟡 não usar |
 
-### 3.3 Informações adicionais do item (`inf_adic`)
+#### 3.3 Informações adicionais do item (`inf_adic`)
 
 | Campo | O que mandar | Situação |
 |---|---|---|
@@ -82,11 +105,11 @@ Selos: ✅ está na documentação ou no código · 📝 decisão do Nathan · �
 | `dados_adicionais_item` | texto para a NF | 🟡 candidato a levar norma, material e certificados da proposta |
 | `codigo_cenario_impostos_item` | cenário por item | ❓ ver seção 4 |
 
-### 3.4 Observação do item (`observacao.obs_item`)
+#### 3.4 Observação do item (`observacao.obs_item`)
 
 **Não usamos** (N16-90): a especificação técnica fica só no Hub. A `descricao` do Omie tem limite de 120 caracteres; o excesso é cortado com aviso na tela do Hub, que mantém a descrição inteira.
 
-## 4. Impostos de venda
+### 4. Impostos de venda
 
 - **Cenários e CFOP (lidos em 23/10/2026, serviço `/geral/cenarios/`):** `ListarCenarios` lista os cenários da conta (`nCodigo`, `cNome`, `padrao`, tipo de empresa, `inativo`); `ListarImpostosCenario` recebe cliente, produto e cenário e devolve **o CFOP e todas as alíquotas** (ICMS, ST, IPI, PIS, COFINS, IBS, CBS). ✅ O Omie também tem o serviço **CFOP** (`/produtos/cfop/`) e **Origem do Pedido** (`/geral/origempedido/`), ainda não lidos ❓. **Decisão do Nathan (N16-83):** o CFOP e o cenário se escolhem ao cadastrar o produto na proposta; o CFOP já está no banco do Hub e os cenários vêm do Omie. 🔴 Falta o recurso de pipeline que sincroniza os cenários por conta. 🟡 `ListarImpostosCenario` pode ser a fonte das alíquotas **mostradas na proposta**, no lugar do `SimularImpostos`; testar qual bate com o pedido.
 - O exemplo de `IncluirPedido` **não manda imposto**: o Omie calcula pelo cenário de impostos da conta. ✅
@@ -95,9 +118,9 @@ Selos: ✅ está na documentação ou no código · 📝 decisão do Nathan · �
 - O imposto **é o que o vendedor digitou** (N16-95); o Omie não o substitui. O `SimularImpostos` e o `ListarImpostosCenario` podem servir só de **conferência opcional**. ❓ Falta definir se o Hub manda os impostos digitados em `det[].imposto` do `IncluirPedido` (o tipo `det` tem o bloco `imposto`) ou se o Omie os calcula pelo cenário; e onde o Fiscal os altera.
 - `total_pedido` (`valor_total_pedido`, `valor_mercadorias`, impostos) existe na resposta; 🟡 usar para **conferir** o total depois da inclusão: se divergir da proposta, marcar o pedido com aviso e não liberar.
 
-## 5. Condição de pagamento, frete, informações adicionais
+### 5. Condição de pagamento, frete, informações adicionais
 
-### 5.1 Parcelas (`lista_parcelas.parcela[]`)
+#### 5.1 Parcelas (`lista_parcelas.parcela[]`)
 
 | Campo | Observação |
 |---|---|
@@ -138,7 +161,7 @@ O que isso resolve e o que não resolve:
 - 🔴 **O catálogo de venda não traz os dias de cada condição** (o de compra traz `cListaParc`). Com `codigo_parcela` cadastrado, o Omie calcula os vencimentos sozinho (na OC o prazo contou a partir da data de previsão; ❓ na venda, a partir de quê?). 🟡 O hub **não precisa** dos dias para criar o pedido. Só precisaria para **mostrar o vencimento na proposta ou no PDF**; nesse caso: ou se lê `ConsultarPedido` depois de incluir, ou se cadastra os dias no de-para (condição do hub × código Omie × dias).
 - 🟡 **Decisão proposta:** usar o **código real** (`codigo_parcela`) e **não mandar `lista_parcelas`**, igual à OC. `"999"` com parcelas só para condição especial combinada com o cliente que não exista no cadastro, e então a perda da condição é aceita e avisada.
 
-### 5.2 Frete (`frete`)
+#### 5.2 Frete (`frete`)
 
 | Campo | Observação |
 |---|---|
@@ -146,7 +169,7 @@ O que isso resolve e o que não resolve:
 | `valor_frete`, `valor_seguro`, `outras_despesas` | 🟡 o frete da proposta (CIF) vai em `valor_frete` |
 | `codigo_transportadora`, `placa`, `peso_*`, `quantidade_volumes` | 🟡 opcionais; transportadora não existe na proposta |
 
-### 5.3 Informações adicionais (`informacoes_adicionais`)
+#### 5.3 Informações adicionais (`informacoes_adicionais`)
 
 | Campo | O que mandar | Origem | Situação |
 |---|---|---|---|
@@ -161,11 +184,11 @@ O que isso resolve e o que não resolve:
 | `dados_adicionais_nf` | texto da NF | `observacoes`? | ❓ o que da proposta deve sair na NF |
 | `meio_pagamento`, `tipo_documento`, `nfRelacionada`, `outros_detalhes` | — | — | 🟡 `outros_detalhes.cNatOperacaoOd` (natureza da operação) e local de retirada/entrega só se necessário |
 
-### 5.4 Observações (`observacoes.obs_venda`)
+#### 5.4 Observações (`observacoes.obs_venda`)
 
 **Não usamos** (decisão do Nathan, 23/10): os dados que o Hub tem e o Omie não (Qualidade, faturamento em partes, previsões, requisitos, moeda de origem) **ficam só no Hub**. O Omie recebe o que ele precisa para faturar e nada mais.
 
-## 6. O que a documentação **não** responde (testes no Omie, OQ-16)
+### 6. O que a documentação **não** responde (testes no Omie, OQ-16)
 
 **Decisão do Nathan (N16-82): os testes ficam para depois que as telas estiverem prontas**; cadastra-se pelas telas e vão-se cortando as rebarbas ou acrescentando o que falta, como foi feito com a OC. Já respondidos: o Omie **aceita o nosso `numero_pedido`** (item 2); o vencimento conta do **faturamento** (item 9, provisório); o catálogo de condições é **por unidade** (as três contas são puxadas e cada unidade vê a sua); apagar o pedido no Hub apaga no Omie e o código de integração pode ser reutilizado (item 12). Sem ambiente de teste, os testes usam cadastros TESTE no ambiente real e devem ser feitos por quem tem acesso, um por vez:
 
@@ -183,20 +206,20 @@ O que isso resolve e o que não resolve:
 13. **Sequencial:** criar um sequencial (faturar em partes) por `IncluirPedido` com `cabecalho.sequencial`, com itens e quantidades parciais; ver se o valor sai do original e volta ao cancelar. Testar quando a tela de "Faturamento em partes" existir (N16-92, N16-93).
 12. **Reenvio:** repetir o `IncluirPedido` com o mesmo `codigo_pedido_integracao` devolve erro ou o pedido existente?
 
-## 7. Dois achados que mudam o desenho
+### 7. Dois achados que mudam o desenho
 
 1. **O `IncluirPedido` não tem campo de moeda.** ✅ (nenhum campo de moeda ou cotação no cabeçalho, no item ou no total, nesta documentação). Proposta em USD ou EUR precisa virar **reais** antes de ir ao Omie, pela PTAX do dia da aprovação (N16-13, N16-27). 🟡 O contrato precisa dizer: a proposta guarda moeda e câmbio; o **pedido do hub e o do Omie ficam em reais**, com o valor convertido congelado e o câmbio gravado. Existe o bloco `exportacao` (`nao_exportacao`, local de embarque, UF, local de despacho) para cliente estrangeiro. ❓ Testar com cliente estrangeiro de teste.
 2. **O Omie recalcula impostos.** O total da proposta (digitado) e o total da nota (calculado) podem divergir. A solução proposta é a da seção 4: mostrar e conferir pelo Omie.
 
-## 8. O que isso muda nos contratos
+### 8. O que isso muda nos contratos
 
-- **SQL-016:** `pedidos` precisa guardar `valor_total_omie` (conferência), `status_etapa_omie`, a resposta de `ConsultarPedido` em JSON para auditoria, o câmbio usado e o `valor_frete`/`modalidade_frete` já mapeados. 🟡
-- **API-019:** a pipeline lê o pedido de volta (`ConsultarPedido`) depois de incluir e compara total, itens e `codigo_item_omie`; divergência marca o pedido com aviso e **não libera**.
-- **Condições de pagamento de venda por conta:** desenhado em [[SQL-019-Condicoes-de-Pagamento-de-Venda-do-Omie]] (amostra real de 330 condições, dias inferidos da descrição, de-para automático com os encargos). Novo recurso na pipeline (`condicoesPagamentoVenda`, `ListarParcelas`, camada lenta, no molde do `condicoesPagamentoCompras`) e tabela espelho (`codigo_empresa`, `codigo_omie`, `descricao`, `quantidade_parcelas`), mais o de-para com a chave da tabela de encargos do motor. 🔴 não existe
+- **Pedido no Hub:** `pedidos` precisa guardar `valor_total_omie` (conferência), `status_etapa_omie`, a resposta de `ConsultarPedido` em JSON para auditoria, o câmbio usado e o `valor_frete`/`modalidade_frete` já mapeados. 🟡
+- **Conferência na pipeline:** a pipeline lê o pedido de volta (`ConsultarPedido`) depois de incluir e compara total, itens e `codigo_item_omie`; divergência marca o pedido com aviso e **não libera**.
+- **Condições de pagamento de venda por conta:** desenhado (amostra real de 330 condições, dias inferidos da descrição, de-para automático com os encargos). Novo recurso na pipeline (`condicoesPagamentoVenda`, `ListarParcelas`, camada lenta, no molde do `condicoesPagamentoCompras`) e tabela espelho (`codigo_empresa`, `codigo_omie`, `descricao`, `quantidade_parcelas`), mais o de-para com a chave da tabela de encargos do motor. 🔴 não existe
 - **Categoria, conta corrente, projeto e etapa já são sincronizados** pela pipeline (`categorias`, `contasCorrentes`, `projetos`, `etapasFaturamento`, `vendedores`). ✅ Não é preciso digitar códigos: a configuração por conta **escolhe** da lista sincronizada. 🟡 O que falta é guardar **qual** categoria, conta corrente e cenário o pedido de venda usa em cada conta.
 - **Configuração por conta Omie** (nova tabela ou parâmetros): `codigo_categoria`, `codigo_conta_corrente`, `codigo_cenario_impostos`, etapa inicial e local de estoque, **por conta** (Mogi e Uberaba). 🔴 hoje não existe lugar.
 - **Proposta:** ver [[14-Telas-e-Experiencia-do-Usuario]] para o que isso muda na tela (condição de pagamento escolhida de uma lista, imposto vindo do Omie, destino derivado do cliente).
 
-## Ver também
+### Ver também
 
-[[Estudo-Omie-API]] · [[11-Proposta-e-Pedido-de-Venda]] · [[14-Telas-e-Experiencia-do-Usuario]] · [[LOG-58-Liberacao-do-Pedido-Origem-Proposta]] · [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]] · [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]]
+[[Estudo-Omie-API]] · [[11-Proposta-e-Pedido-de-Venda]] · [[14-Telas-e-Experiencia-do-Usuario]]

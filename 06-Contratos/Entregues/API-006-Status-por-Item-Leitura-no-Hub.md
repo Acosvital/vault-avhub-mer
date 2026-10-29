@@ -26,6 +26,11 @@ criado_original: 2026-10-08
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Definiu o lado do av-hub: um job que lê o status dos itens no MES a cada 90 segundos e uma rota para a tela do pedido mostrar a etapa de cada item.
+> **Quem é afetado:** Vendedores e PCP (Planejamento e Controle da Produção), que veem a etapa dos itens; o Gustavo (DBA) entregou job e rota.
+> **Situação:** ✅ Job, rota e tabela no código e no dump de 14/10. ❓ O cartão "Etapa dos itens" no front não foi conferido; produção também não.
+
 
 > **(atualizado em 09/10/2026)** Este texto é a **especificação de 08/10** que o DBA recebeu; o que ela descrevia como "não existe" **já foi implementado** (`dee35b0`, 08/10, `api-acos-vital`; `fe55923` para a rota da referência da OC). A seção **Implementação conferida no código (09/10/2026)**, ao final, descreve o que o código faz hoje, com arquivo e linha. Produção não verificada.
 

@@ -1,0 +1,222 @@
+{
+  "id": "controladoria",
+  "nome": "Controladoria",
+  "fase": "Entregar e fechar",
+  "fraseMapa": "Acompanha o custo, decide a comissão",
+  "titulo": "Controladoria: custo real e decisão da comissão",
+  "resumo": "A Controladoria acompanha o custo real de cada pedido, conforme as compras, o estoque e a produção vão chegando. Quando a nota sai, ela decide a comissão do vendedor, sempre com justificativa. Todo o desenho ainda é proposta, sem API nem tela.",
+  "recebeDe": [
+    "Vendas: a comissão estimada na proposta",
+    "Compras, Estoque e Produção: os eventos de custo real, por item",
+    "Fiscal: a nota emitida, que fecha a comissão, e as notas canceladas ou devolvidas"
+  ],
+  "entregaA": [
+    "Vendedor: a comissão real, com a justificativa, só depois da decisão",
+    "Fiscal: o pedido de informação sobre devolução parcial, feito em conjunto",
+    "Gerência: a visão geral e os relatórios de markup e de faturamento contra compras"
+  ],
+  "atuam": [
+    {
+      "quem": "Controladoria",
+      "papel": "Acompanha o custo real, decide a comissão e informa o que voltou nas devoluções parciais."
+    },
+    {
+      "quem": "Gerência e Coordenação",
+      "papel": "Têm as mesmas permissões de decisão da Controladoria."
+    },
+    {
+      "quem": "Vendedor",
+      "papel": "Vê só a comissão que colocou e, depois da decisão, a comissão real com a justificativa."
+    },
+    {
+      "quem": "Fiscal",
+      "papel": "Informa, junto com a Controladoria, o que voltou numa devolução parcial."
+    },
+    {
+      "quem": "Compras",
+      "papel": "Fornece o custo real pela ordem de compra e pela nota de entrada."
+    }
+  ],
+  "estados": [
+    "ESTIMADA",
+    "CONGELADA",
+    "EM_ACOMPANHAMENTO",
+    "AGUARDANDO_DECISAO",
+    "APROVADA",
+    "ENCERRADA"
+  ],
+  "passos": [
+    {
+      "id": "K1",
+      "t": "Comissão estimada",
+      "quem": "Vendedor (na proposta)",
+      "onde": "av-hub, em Operações (tela ainda não existe)",
+      "st": "gap",
+      "stl": "Decidido, sem código",
+      "estado": "ESTIMADA",
+      "o": "A comissão estimada nasce na proposta, pelo motor atual, numa tela parecida com a do Simulador. O vendedor só vê a comissão que ele mesmo colocou. Quando o pedido é digitado direto no Omie, ela nasce na parte de compras do pedido. Decidido em 29/10 (N16-143): a comissão nova fica em schema próprio (core_comissao), já modelado e testado em banco de teste.",
+      "ex": "Ao montar a proposta das 100 flanges, o vendedor vê a comissão estimada com o custo que cotou. A Controladoria ainda não age."
+    },
+    {
+      "id": "K2",
+      "t": "Recalcula com o custo real",
+      "quem": "Sistema; a Controladoria acompanha",
+      "onde": "av-hub (drill-down por item, ainda não existe)",
+      "st": "gap",
+      "stl": "Decidido, sem código",
+      "estado": "EM_ACOMPANHAMENTO",
+      "o": "A cada evento de custo (ordem de compra, nota de entrada, lote do Estoque, matéria-prima da produção) o sistema recalcula. Enquanto o custo do item não cobre a quantidade, o custo é parcial, e a comissão vale só para as peças que já têm custo real.",
+      "ex": "Conforme a compra do aço das flanges é recebida, o custo real aparece por partes. A Controladoria vê custo parcial e a diferença contra o que o vendedor cotou."
+    },
+    {
+      "id": "K3",
+      "t": "Fecha por nota fiscal",
+      "quem": "Sistema",
+      "onde": "Sistema",
+      "st": "gap",
+      "stl": "Decidido, sem código",
+      "estado": "AGUARDANDO_DECISAO",
+      "o": "Quando o Omie emite a nota, a comissão fecha com o percentual vigente naquele momento e chega à Controladoria já calculada. O mesmo item pode sair em várias notas, sem pagar duas vezes a mesma quantidade. Se o custo completar depois da decisão, a diferença vai para a apuração seguinte, para nova decisão.",
+      "ex": "A nota emitida pelo Omie para as flanges fecha a comissão e a coloca na fila da Controladoria."
+    },
+    {
+      "id": "K4",
+      "t": "Controladoria decide a comissão",
+      "quem": "Controladoria, Gerência ou Coordenação",
+      "onde": "av-hub, tela da Controladoria (ainda não existe)",
+      "st": "gap",
+      "stl": "Decidido, sem código",
+      "estado": "APROVADA",
+      "o": "Quem decide pode aprovar, desaprovar, bloquear, desbloquear, cortar ou alterar, por valor ou percentual, sem teto e sempre com justificativa. Fica o rastro de quem, quando e dos valores anterior e novo. Ninguém decide a própria comissão.",
+      "ex": "A Controladoria olha o custo real das flanges, compara com a estimativa e aprova a comissão da nota, ou corta, com a justificativa registrada."
+    },
+    {
+      "id": "K5",
+      "t": "Vendedor vê a comissão real",
+      "quem": "Vendedor",
+      "onde": "av-hub (tela ainda não existe)",
+      "st": "gap",
+      "stl": "Decidido, sem código",
+      "estado": "",
+      "o": "Só depois da decisão o vendedor vê o valor real, com a justificativa. Comissão desaprovada aparece com R$ 0 e o motivo.",
+      "ex": "O vendedor do Cliente Exemplo S.A. passa a ver o valor real da comissão e o porquê, mas só depois da decisão."
+    },
+    {
+      "id": "K6",
+      "t": "Nota cancelada, devolvida ou recusada",
+      "quem": "Sistema; Fiscal e Controladoria na devolução parcial",
+      "onde": "av-hub (ainda não existe)",
+      "st": "gap",
+      "stl": "Parcial no banco, sem API nem tela",
+      "estado": "ENCERRADA",
+      "o": "A comissão é abatida na mesma proporção. Se ainda não foi paga, reduz o valor a pagar; se já foi paga, o desconto entra na próxima apuração. A devolução total vem do Omie; a parcial chega só marcada, e o Fiscal ou a Controladoria informam o que voltou.",
+      "ex": "Se o Cliente Exemplo S.A. devolver parte das flanges, a Controladoria ou o Fiscal informam quantas voltaram e a comissão é abatida na proporção."
+    }
+  ],
+  "outroCaminho": {
+    "titulo": "E se o custo completar depois da decisão?",
+    "texto": "Se a nota fechou com custo parcial e o custo completa depois da decisão, o sistema gera a diferença como complemento (a comissão sobe) ou desconto (a comissão cai). A diferença vai para a apuração seguinte, para nova decisão.",
+    "etapas": [
+      "Nota fecha com custo parcial",
+      "Custo completa",
+      "Complemento ou desconto na apuração seguinte",
+      "Nova decisão"
+    ],
+    "nota": "O pedido que sai em várias notas segue a mesma lógica: cada nota fecha com o percentual vigente e nunca se paga duas vezes a mesma peça."
+  },
+  "regras": [
+    {
+      "t": "Quem decide",
+      "d": "Controladoria, Gerência e Coordenação têm as mesmas permissões, sem teto, e ninguém decide a própria comissão."
+    },
+    {
+      "t": "Sempre com justificativa",
+      "d": "Toda decisão registra justificativa, quem decidiu, quando e os valores anterior e novo."
+    },
+    {
+      "t": "Vendedor vê depois",
+      "d": "O vendedor só vê a comissão real depois da decisão, com a justificativa; desaprovada aparece com R$ 0."
+    },
+    {
+      "t": "Custo parcial",
+      "d": "Enquanto o custo do item não cobre a quantidade, só as peças com custo real entram na comissão."
+    },
+    {
+      "t": "Uma nota, um percentual",
+      "d": "Cada nota fecha com o percentual vigente naquele momento, sem pagar duas vezes a mesma quantidade."
+    },
+    {
+      "t": "Nota de entrada manda",
+      "d": "No recebimento da compra, o valor da nota de entrada substitui o valor da ordem de compra no custo real."
+    },
+    {
+      "t": "Abatimento proporcional",
+      "d": "Nota cancelada, devolvida ou recusada abate a comissão na mesma proporção; se já foi paga, o desconto entra na próxima apuração."
+    }
+  ],
+  "telas": [
+    {
+      "nome": "Tela da Controladoria, igual à do Simulador, com custo real e visão geral",
+      "rota": "ainda sem rota (menu Operações)",
+      "quem": "Controladoria",
+      "st": "gap"
+    },
+    {
+      "nome": "Custo real por item",
+      "rota": "/custo-itens",
+      "quem": "Controladoria",
+      "st": "part"
+    },
+    {
+      "nome": "Simulador de Comissão (referência da tela nova)",
+      "rota": "/comissoes/simulador",
+      "quem": "Vendedor",
+      "st": "ok"
+    },
+    {
+      "nome": "Relatórios da Controladoria (markup real e faturamento contra compras)",
+      "rota": "ainda sem rota",
+      "quem": "Controladoria",
+      "st": "gap"
+    },
+    {
+      "nome": "Comissões atual (Análise, Minhas Comissões, Parâmetros, Bloqueio)",
+      "rota": "/comissoes/...",
+      "quem": "Vendas e Controladoria",
+      "st": "ok"
+    }
+  ],
+  "contratos": [
+    {
+      "id": "API-008",
+      "titulo": "Custo do lote no MES",
+      "nos": "K2"
+    },
+    {
+      "id": "LOG-47",
+      "titulo": "Custo real por item no hub",
+      "nos": "K2"
+    },
+    {
+      "id": "LOG-14b",
+      "titulo": "Vínculo da compra ao pedido de venda",
+      "nos": "K2"
+    },
+    {
+      "id": "LOG-53",
+      "titulo": "Ordem de produção e lote do fabricado",
+      "nos": "K2"
+    },
+    {
+      "id": "LOG-45",
+      "titulo": "Pedido de venda manual",
+      "nos": "K2"
+    }
+  ],
+  "cartao": null,
+  "palavrasFonte": 4837,
+  "duvidas": [
+    "Quem vê a comissão estimada e o custo real (Gerência, Coordenação) depende dos perfis, que serão cadastrados depois (N16-85, OQ-21).",
+    "Sobra aproveitável de chapa (OQ-32) e devolução de compra ao fornecedor (OQ-42) dependem de PCP, Engenharia, Recebimento e do que o Omie informa."
+  ]
+}

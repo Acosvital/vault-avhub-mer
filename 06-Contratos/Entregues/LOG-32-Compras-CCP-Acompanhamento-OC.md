@@ -16,6 +16,11 @@ criado_original: 2026-09-30
 
 > **Onde atua:** av-hub: banco, API, front
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define o acompanhamento da OC pelo CCP depois que o comprador a emite: confirmação com o fornecedor, prazo, despacho, contatos e renegociações, com histórico. O fornecedor não acessa o sistema.
+> **Quem é afetado:** O CCP registra tudo. O comprador da OC decide mudança de preço, quantidade ou condição.
+> **Situação:** ✅ Entregue em 01/10: rotas de acompanhamento, contatos e ocorrências; o MES recebe os marcos. 🔴 Falta criar o perfil CCP (cadastro). ❓ Front não conferido.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C5 · **Dono:** Gustavo (DBA)
 >

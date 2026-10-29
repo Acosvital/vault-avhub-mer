@@ -27,6 +27,11 @@ criado_original: 2026-09-17
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Criou `core.locais_estoque`, o cadastro de galpões e depósitos vindos do Omie (ERP). É pré-requisito do saldo de estoque.
+> **Quem é afetado:** DBA, estoque e pipeline.
+> **Situação:** ✅ Tabela existe e tem rota. ✅ Gustavo respondeu em 16/10: o depósito fica no banco do MES e a ligação é pelo código, sem FK (chave estrangeira). ❓ Produção não reconferida.
+
 
 **Status: aplicada — pergunta em aberto sobre FK opcional segue sem resposta.** Confirmado contra o dump de produção `dump-avhub_prd_db-202609210741.sql` (21/09/2026) — ver [[Mapa-v1-para-v2|Auditoria-Dump-Producao-2026-09-21]]. `core.locais_estoque` já existe, campos batem com o DDL proposto abaixo. **Sem FK para `deposito`** (tabela `deposito` ainda não existe do lado do Estoque/MES) — Gustavo adiciona quando ela existir; a pergunta em aberto 1 abaixo não é respondível por dump, é decisão de arquitetura ainda pendente.
 

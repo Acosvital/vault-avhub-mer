@@ -26,6 +26,11 @@ criado_original: 2026-10-07
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define a política de segurança do bucket (armazenamento) das fotos enviadas pelo av-hub e reclassifica uma marca de remendo no front.
+> **Quem é afetado:** TI e DBA. Para quem envia foto nada muda. O storage é SeaweedFS e nega acesso anônimo.
+> **Situação:** ❓ Aplicado na palavra do DBA, sem teste nem conferência no código. Faltam a credencial própria do av-hub e o teste da seção F. Prioridade baixa.
+
 
 > **(atualizado em 13/10/2026) MOVIDO PARA `Realizados/` NA PALAVRA DO DBA.** O Nathan confia no DBA e pediu a mudança; **nenhum teste da seção F foi rodado por quem escreveu esta nota e o storage não foi visto.** Vale o que está abaixo como lista do que ainda seria bom guardar aqui.
 >

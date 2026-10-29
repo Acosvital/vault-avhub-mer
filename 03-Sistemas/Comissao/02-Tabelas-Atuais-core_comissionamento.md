@@ -1,7 +1,7 @@
 ---
 tags: [comissao, banco, core_comissionamento, tabelas, dba]
 criado: 2026-10-16
-atualizado: 2026-10-16
+atualizado: 2026-10-29
 status: proposta
 dono: Gustavo (DBA)
 fontes: [dump core_comissionamento convertido (09-Diagramas/fontes), api-acos-vital f322dcd src/schemas/core_comissionamento, N16-11]
@@ -9,11 +9,55 @@ fontes: [dump core_comissionamento convertido (09-Diagramas/fontes), api-acos-vi
 
 # Tabelas, views e funções atuais do `core_comissionamento`
 
+**Em uma frase:** o banco atual da comissão (`core_comissionamento`) tem 9 tabelas, 4 views e 5 funções, e esta nota lista o que há nele e o que o módulo novo corrige.
+
+**Quando consultar esta nota:** quando o time de TI ou o DBA (Gustavo) precisar saber o que existe hoje, o que está frágil e para onde cada tabela vai no módulo novo. O schema atual **não é alterado** (N16-11). Quem não é técnico lê só este resumo.
+
+## O que existe hoje, em palavras simples
+
+| Tabela | O que guarda | Linhas |
+|---|---|---|
+| `simulador_parametros` | Percentuais do motor por unidade e vigência ("Maio/23") | 3 |
+| `simulacoes` | Cada versão da simulação de um pedido (vendedor ou Compras) | 14 |
+| `simulacao_itens` | Os itens de cada simulação, com a comissão decidida item a item | 21 |
+| `regras_comissoes_fixas` | Teto de comissão por cliente | 5 (1 apagada) |
+| `bloqueio_comissoes` | Bloqueio de comissão por nota fiscal (NF) | 2 |
+| `blacklist_comissoes_destinatario` | Clientes fora do cálculo | 1 |
+| `blacklist_comissoes_vendedores` | Vendedores fora do cálculo | 8 |
+| `comissao_coordenadores` | Ajuda de custo e percentual dos coordenadores | 6 |
+| `comissao_coordenadores_historico` | Histórico imutável das mudanças dos coordenadores | 6 |
+
+As 4 views juntam tudo para mostrar a comissão por item, por NF e por mês. As 5 funções montam o dashboard e gravam o histórico dos coordenadores.
+
+## Exemplo
+
+Um bloqueio por NF é gravado com o número digitado com zeros, como `00051698`. Se alguém digitar sem os zeros, o bloqueio nunca casa com a nota e nada avisa. O módulo novo usa o código da NF no Omie (`codigo_nf_omie`), que não depende de zeros.
+
+## O que está frágil e o que o módulo novo faz
+
+1. **Regra de negócio dentro de JSON** (parâmetros). O módulo novo usa tabelas com tipo.
+2. **Texto livre como chave** (origem da compra, destino, nome do coordenador, número da NF). Passa a usar códigos e ids.
+3. **Sem vigência** em regra fixa e listas de bloqueio. Mudar a regra reescreve o passado. Passam a ter vigência.
+4. **Sem autoria e sem histórico** em regra fixa, listas e bloqueio. Passam a ter autor e auditoria.
+5. **Motivo opcional** no bloqueio e nas listas. Passa a ser obrigatório.
+6. **Quantidade em ponto flutuante** (`double`). Passa a `numeric(15,4)`.
+7. **Cálculo não gravado.** Contas intermediárias, fonte do custo e versão do motor somem. Tudo passa a ser gravado.
+8. **Leitura recalcula tudo.** Mês fechado pode mudar. A NF decidida passa a ser uma foto.
+9. **Motor no navegador.** O banco só faz o menor percentual. O motor vai para o servidor.
+10. **Visibilidade decidida na tela (BFF).** Passa a ser decidida no banco e na API.
+11. **Exclusão física** do bloqueio apaga a auditoria. Reverter vira uma nova decisão.
+
+Bom exemplo a copiar: o histórico dos coordenadores é imutável e gravado por gatilho. O módulo novo generaliza isso numa tabela `auditoria`.
+
+Para o motor e as regras, veja [[01-Motor-Atual-Como-Calcula]]. Para o desenho novo, [[03-Modelo-Novo-core_comissao]].
+
+## Detalhe técnico
+
 Inventário do que existe hoje, com o que está bom e o que deve ser **melhorado no módulo novo** ([[03-Modelo-Novo-core_comissao]]). O schema atual **não é alterado** (N16-11). Citações: `dump` = `09-Diagramas/fontes/core_comissionamento-dump-convertido.sql`; "API" = `api-acos-vital\src\schemas\core_comissionamento`. Selos em [[Regras-do-Vault]].
 
 **Contagem conferida no dump:** 9 tabelas, 4 views, **5 funções** (o briefing diz 6; ver [[01-Motor-Atual-Como-Calcula]], ponto 11). Linhas hoje: `blacklist_comissoes_destinatario` 1, `blacklist_comissoes_vendedores` 8, `bloqueio_comissoes` 2, `comissao_coordenadores` 6, `comissao_coordenadores_historico` 6, `regras_comissoes_fixas` 5 (1 apagada), `simulacoes` 14, `simulacao_itens` 21, `simulador_parametros` 3 (`dump:1549-1662`).
 
-## Mapa do schema
+### Mapa do schema
 
 ```mermaid
 erDiagram
@@ -27,9 +71,9 @@ erDiagram
 
 Convenção do schema atual: `codigo_empresa uuid` = unidade (`core.unidades`); percentuais em **pontos percentuais** (2 = 2%).
 
-## Tabelas
+### Tabelas
 
-### 1. `simulador_parametros` (`dump:909-952`)
+#### 1. `simulador_parametros` (`dump:909-952`)
 
 Parâmetros do motor por unidade e vigência. ✅ Uma simulação grava `id_parametros` e fica amarrada a ela.
 
@@ -62,7 +106,7 @@ Parâmetros do motor por unidade e vigência. ✅ Uma simulação grava `id_para
 - Sem auditoria de quem mudou (só `updated_by`). → tabela `auditoria`.
 - Uma linha por unidade com valores iguais (3 cópias). Mantido por unidade (cada unidade pode divergir), mas a Controladoria deve confirmar (M02 em [[01-Motor-Atual-Como-Calcula]]).
 
-### 2. `simulacoes` (`dump:780-835`)
+#### 2. `simulacoes` (`dump:780-835`)
 
 Uma linha por **versão** de simulação de um pedido (substitui planilhas .xlsx). ✅ Versão enviada é imutável.
 
@@ -87,7 +131,7 @@ Uma linha por **versão** de simulação de um pedido (substitui planilhas .xlsx
 - Sem histórico de recálculo: cada mudança de custo exige digitar nova versão. → cada recálculo automático é uma linha nova e imutável.
 - Sem coluna da versão do motor: não se sabe com que código o número saiu. → `versao_motor`.
 
-### 3. `simulacao_itens` (`dump:672-706`)
+#### 3. `simulacao_itens` (`dump:672-706`)
 
 Itens de uma simulação. A comissão é decidida **aqui, item a item**.
 
@@ -108,7 +152,7 @@ Itens de uma simulação. A comissão é decidida **aqui, item a item**.
 - Não guarda **de onde veio o custo** ("a fonte some ao recarregar", `simulador/page.tsx:117-124`). → novo modelo guarda custo cotado, custo real e cobertura.
 - Sem `id_item_proposta`/`id_item_pedido`: amarra pelo `codigo_item_omie`, que só existe depois de o pedido estar no Omie.
 
-### 4. `regras_comissoes_fixas` (`dump:589-603`)
+#### 4. `regras_comissoes_fixas` (`dump:589-603`)
 
 Teto por cliente e unidade.
 
@@ -128,7 +172,7 @@ Teto por cliente e unidade.
 - Soft delete só pelo `deleted_at`; a API usa `paranoid` (`dump:640-643`).
 - Dados: 5 linhas, uma apagada; `margem` = 100,00 em todas (`dump:1602-1606`).
 
-### 5. `bloqueio_comissoes` (`dump:410-420`)
+#### 5. `bloqueio_comissoes` (`dump:410-420`)
 
 Bloqueio por NF.
 
@@ -146,7 +190,7 @@ Bloqueio por NF.
 - A API tem `DELETE` físico ("só para lançamento por engano", `bloqueio_comissoes.route.js:144-158`): apaga a auditoria. → sem delete.
 - Dados: 2 linhas, ambas `is_blocked = false` (`dump:1570-1571`).
 
-### 6 e 7. `blacklist_comissoes_destinatario` e `blacklist_comissoes_vendedores` (`dump:333-342, 372-381`)
+#### 6 e 7. `blacklist_comissoes_destinatario` e `blacklist_comissoes_vendedores` (`dump:333-342, 372-381`)
 
 | Tabela | Chave | Colunas |
 |---|---|---|
@@ -163,7 +207,7 @@ A presença da linha é o bloqueio. ✅
 - Sem `deleted_at`: remoção física. → `deleted_at/by` + auditoria.
 - Domínio do `codigo_cliente` (varchar 60) difere de `core.parceiros.codigo_parceiro_omie` (varchar 15); exige `::text` (`dump:361-365`). Mantido, documentado.
 
-### 8. `comissao_coordenadores` (`dump:475-498`)
+#### 8. `comissao_coordenadores` (`dump:475-498`)
 
 | Coluna | Tipo | Obs. |
 |---|---|---|
@@ -185,7 +229,7 @@ A presença da linha é o bloqueio. ✅
 - Valores nominais (remuneração) numa tabela legível; a LOG-42 já alertou para o dado pessoal no repositório. Aqui não são copiados.
 - Dados: 6 linhas, vigência desde 2000-01-01 (carga sem data real), `id_funcionario` nulo (`dump:1578-1583`).
 
-### 9. `comissao_coordenadores_historico` (`dump:549-559`)
+#### 9. `comissao_coordenadores_historico` (`dump:549-559`)
 
 | Coluna | Tipo |
 |---|---|
@@ -201,7 +245,7 @@ Gravada por trigger (`fn_comissao_coordenadores_historico`, `dump:35-54`) e **im
 
 **Melhorias:** o histórico existe só para esta tabela (parâmetros, regras e blacklists não têm). → `core_comissao.auditoria` genérica, alimentada por **uma** função de trigger, nas 10 tabelas de configuração.
 
-## Views
+### Views
 
 | View | Grão | O que faz | Linhas |
 |---|---|---|---|
@@ -218,7 +262,7 @@ Gravada por trigger (`fn_comissao_coordenadores_historico`, `dump:35-54`) e **im
 - Comentário da master truncado (`dump:1386`).
 - A leitura de `situacao` exige conhecer a precedência de 6 estados escrita em texto (`dump:1399-1403`). → duas máquinas de estados com tabela de visibilidade.
 
-## Funções
+### Funções
 
 | Função | O que faz | Linhas | Problema / melhoria |
 |---|---|---|---|
@@ -230,7 +274,7 @@ Gravada por trigger (`fn_comissao_coordenadores_historico`, `dump:35-54`) e **im
 
 Também usadas: `public.set_updated_at()` em 8 tabelas (`dump:1862-1918`).
 
-## Rotas da API que existem hoje
+### Rotas da API que existem hoje
 
 Montadas em `core_comissionamento/index.js:44-58`.
 
@@ -246,7 +290,7 @@ Montadas em `core_comissionamento/index.js:44-58`.
 
 Sem rota: `comissao_coordenadores` e o histórico.
 
-## Resumo dos problemas de estrutura (o que o módulo novo corrige)
+### Resumo dos problemas de estrutura (o que o módulo novo corrige)
 
 1. **JSON com regra** em parâmetros (4 colunas), em `comissoes_provisoria` e no histórico → tabelas tipadas; JSON só em log (`avisos`, `dados` de evento, auditoria).
 2. **Texto livre como chave** (origem da compra, destino, condição de pagamento, nome do coordenador, número da NF) → códigos controlados, ids e `codigo_nf_omie`.

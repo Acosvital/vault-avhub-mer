@@ -23,6 +23,11 @@ fontes: ["api-acos-vital/src/middlewares/identidadeUsuario.js", "api-acos-vital/
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Determinou que permissão, escopo de unidade e de vendedores e identidade do usuário sejam decididos no banco e na API, não no BFF (camada intermediária do front).
+> **Quem é afetado:** Todos os usuários do Hub: o que cada um vê ou faz passa a depender da identidade autenticada, e não de uma chave de serviço única.
+> **Situação:** ✅ Entregue em partes: identidade pelo token, escopos, limite de tentativas de login e auditoria. 🟡 Upload de foto (S10) segue em outro contrato. ❓ Palavra do DBA.
+
 
 **Criado em:** 20/09/2026, junto da auditoria de segurança (`docs/seguranca/auditoria-2026-09-19.md`).
 

@@ -1,0 +1,244 @@
+{
+  "id": "producao",
+  "nome": "Produção",
+  "fase": "Fabricar",
+  "fraseMapa": "Fabrica pela rota do item",
+  "titulo": "Produção: da ordem à peça pronta",
+  "resumo": "A Produção leva cada parcial do item pelos setores do roteiro do pedido, na ordem, até o último setor. Cada setor recebe, inicia, move ou conclui, e tudo fica registrado no histórico.",
+  "recebeDe": [
+    "Estoque: o que ele não atendeu e não foi para compra, via despacho",
+    "PCP: o roteiro montado na Destinação do Pedido",
+    "Qualidade (saída): o item reprovado que volta como retrabalho"
+  ],
+  "entregaA": [
+    "Qualidade (saída): o item concluído nos setores produtivos, para inspeção",
+    "PCP: a divergência aberta quando o item é reprovado, para decidir o novo norte"
+  ],
+  "atuam": [
+    {
+      "quem": "PCP",
+      "papel": "Monta o roteiro na Destinação do Pedido e decide o novo norte quando algo reprova."
+    },
+    {
+      "quem": "Operador de setor",
+      "papel": "Recebe, inicia, move, pausa, retoma e conclui nas filas de produção."
+    },
+    {
+      "quem": "Máquina e operador",
+      "papel": "Cadastros que certos setores exigem ao iniciar uma etapa."
+    },
+    {
+      "quem": "Quem cancela",
+      "papel": "Cancela pelo detalhe do pedido, com permissão própria de cancelamento."
+    }
+  ],
+  "estados": [
+    "CRIADO",
+    "RECEBIDO",
+    "EM_ANDAMENTO",
+    "EM_TRANSITO",
+    "PAUSADO",
+    "CONCLUIDO"
+  ],
+  "passos": [
+    {
+      "id": "P6",
+      "t": "Roteiro montado pelo PCP",
+      "quem": "PCP",
+      "onde": "Destinação do Pedido (/ordens-producao/novo)",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "",
+      "o": "O PCP define os setores e a ordem do pedido. O Estoque entra sozinho como primeira etapa, e o roteiro de fabricação precisa ter um setor de Qualidade antes da Expedição.",
+      "ex": "O PCP monta a rota das 100 flanges de aço carbono. O Estoque vem primeiro e a inspeção de saída fica antes da Expedição."
+    },
+    {
+      "id": "E6",
+      "t": "Despacho do Estoque chega à produção",
+      "quem": "Almoxarife",
+      "onde": "Fila do setor (/movimentacoes/[setorId])",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "EM_TRANSITO",
+      "o": "A parte que o Estoque não atendeu chega ao primeiro setor produtivo. A produção só recebe o que não saiu do estoque nem foi para compra.",
+      "ex": "O que faltar das flanges depois do Estoque segue para o primeiro setor da rota."
+    },
+    {
+      "id": "F1",
+      "t": "Receber e iniciar a etapa",
+      "quem": "Operador de setor",
+      "onde": "Fila do setor (/movimentacoes/[setorId])",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "RECEBIDO",
+      "o": "O operador confirma o recebimento e inicia a etapa. Receber e iniciar são obrigatórios antes de mover ou concluir. Ao iniciar, o cronômetro começa e, em setores que exigem, é preciso informar máquina e operador.",
+      "ex": "O operador do primeiro setor recebe as flanges e inicia a etapa, e o tempo passa a ser contado."
+    },
+    {
+      "id": "F1",
+      "t": "Trabalhar, pausar e retomar",
+      "quem": "Operador de setor",
+      "onde": "Fila do setor (/movimentacoes/[setorId])",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "EM_ANDAMENTO",
+      "o": "Enquanto a etapa está em andamento o operador pode pausar e retomar. Uma pausa volta ao andamento quando retomada.",
+      "ex": "Se a máquina parar, o operador pausa as flanges e retoma quando voltar a produzir."
+    },
+    {
+      "id": "F1",
+      "t": "Mover para o próximo setor",
+      "quem": "Operador de setor",
+      "onde": "Fila do setor (/movimentacoes/[setorId])",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "EM_TRANSITO",
+      "o": "Terminada a etapa, a parcial segue para o próximo setor do roteiro. É possível mover só uma parte da quantidade, e a parcial se divide na passagem.",
+      "ex": "As flanges prontas na primeira etapa seguem para a próxima, que pode ser a inspeção de saída."
+    },
+    {
+      "id": "F1",
+      "t": "Concluir no último setor",
+      "quem": "Operador de setor",
+      "onde": "Fila do setor (/movimentacoes/[setorId])",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "CONCLUIDO",
+      "o": "Só o último setor do roteiro conclui. Nos demais, o caminho é mover.",
+      "ex": "Quando as flanges passam pelo último setor da rota, a parcial fica concluída."
+    },
+    {
+      "id": "F1 · E1",
+      "t": "Consumo de matéria-prima",
+      "quem": "Estoque e Produção",
+      "onde": "Fora do sistema",
+      "st": "gap",
+      "stl": "Decidido, sem código",
+      "estado": "",
+      "o": "Está decidido que a matéria-prima é consumida do Estoque na produção. Hoje o sistema não baixa material ao iniciar ou concluir uma etapa. Decidido em 29/10 (N16-140): a baixa acontece na retirada do Estoque, pela quantidade pedida, no mesmo documento de retirada da Expedição.",
+      "ex": "O aço usado nas 100 flanges não é baixado do Estoque pelo sistema; esse controle ainda não existe."
+    },
+    {
+      "id": "F1 · Q7",
+      "t": "Entrega para a inspeção de saída",
+      "quem": "Sistema",
+      "onde": "Sistema",
+      "st": "ok",
+      "stl": "Feito no código",
+      "estado": "",
+      "o": "A Qualidade de saída é um setor do roteiro. Quando a parcial chega a ela, a inspeção começa; o que acontece depois está na ficha da Qualidade (saída).",
+      "ex": "As flanges chegam ao setor de Qualidade da rota e esperam a inspeção."
+    }
+  ],
+  "outroCaminho": {
+    "titulo": "E se o item for reprovado na inspeção?",
+    "texto": "A reprovação abre uma divergência e o item fica reprovado. O PCP decide o novo norte. Hoje o retrabalho faz o item voltar ao setor imediatamente anterior, e um falso alarme devolve o item ao andamento.",
+    "etapas": [
+      "Reprovação abre divergência",
+      "PCP decide: retrabalho ou falso alarme",
+      "Item volta ao setor anterior ou ao andamento"
+    ],
+    "nota": "Reabrir a compra a partir da produção e a tela do novo norte ainda não existem."
+  },
+  "regras": [
+    {
+      "t": "Estoque é a etapa 1",
+      "d": "O Estoque é sempre a primeira etapa do roteiro e o sistema o insere sozinho."
+    },
+    {
+      "t": "Compra fica fora do roteiro",
+      "d": "Setores de estoque, requisição, compras e logística de entrada não entram no roteiro do PCP, porque o circuito de compra é fixo."
+    },
+    {
+      "t": "Qualidade antes da Expedição",
+      "d": "O roteiro de fabricação precisa de um setor de Qualidade antes da primeira Expedição."
+    },
+    {
+      "t": "Receber e iniciar primeiro",
+      "d": "Em todo setor é preciso receber e iniciar antes de mover ou concluir."
+    },
+    {
+      "t": "Concluir só no último setor",
+      "d": "Concluir vale apenas no último setor do roteiro; nos outros se move."
+    },
+    {
+      "t": "Histórico não se edita",
+      "d": "Devolver cria uma linha nova e a antiga vira cancelada, sem edição."
+    },
+    {
+      "t": "Revenda não produz",
+      "d": "A fábrica de revenda só envia o restante para compra."
+    },
+    {
+      "t": "Retrabalho: o PCP escolhe o setor",
+      "d": "Decidido em 29/10: o PCP escolhe a que setor o item volta. Hoje o código volta sempre ao setor anterior."
+    }
+  ],
+  "telas": [
+    {
+      "nome": "Filas de Produção (escolha de setor)",
+      "rota": "/movimentacoes",
+      "quem": "Operador de setor",
+      "st": "ok"
+    },
+    {
+      "nome": "Fila do setor",
+      "rota": "/movimentacoes/[setorId]",
+      "quem": "Operador de setor",
+      "st": "ok"
+    },
+    {
+      "nome": "Destinação do Pedido",
+      "rota": "/ordens-producao/novo",
+      "quem": "PCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Acompanhamento dos Pedidos",
+      "rota": "/ordens-producao",
+      "quem": "PCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Cadastros operacionais (fábricas, setores, máquinas, operadores)",
+      "rota": "/cadastros/operacional/fabricas",
+      "quem": "PCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Painel TV",
+      "rota": "/dashboard/tv",
+      "quem": "Chão de fábrica",
+      "st": "gap"
+    }
+  ],
+  "contratos": [
+    {
+      "id": "LOG-53",
+      "titulo": "Ordem de Produção e lote do fabricado",
+      "nos": "P2 · F1 · Q7 · Q8 · E5"
+    },
+    {
+      "id": "API-005",
+      "titulo": "Status por item, lado do MES",
+      "nos": "F1 · X1 · Q7"
+    }
+  ],
+  "cartao": {
+    "id": "LOG-53",
+    "titulo": "Ordem de Produção e lote do fabricado",
+    "serve": "Define a Ordem de Produção de cada destino de fabricação e faz o fabricado aprovado virar lote e saldo no Estoque.",
+    "quem": "PCP, Produção, Estoque e Qualidade (saída). Dono: Robert.",
+    "nos": "P2 · F1 · Q7 · Q8 · E5",
+    "situacao": "Proposta aceita em 15/10, sem código",
+    "st": "gap",
+    "muda": "MES: tabela da ordem de produção, lote com origem Produção e impressão da ordem. Nada disso existe no código hoje; o SQL está escrito e validado em banco de teste.",
+    "arquivo": "06-Contratos/Ativos, nota LOG-53"
+  },
+  "palavrasFonte": 2239,
+  "duvidas": [
+    "O fabricado voltar ao Estoque como lote está desenhado no LOG-53 (proposta aceita em 15/10), mas nada existe no código: a conclusão só baixa por quantidade do pedido.",
+    "Os nomes e filas reais dos setores produtivos vêm do banco do ambiente e não foram confirmados.",
+    "O roteiro individual do item tem cadastro, mas nenhuma movimentação o consulta."
+  ]
+}

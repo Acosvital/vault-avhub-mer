@@ -22,6 +22,11 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_vendas_pla
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Corrigiu a paginação da planilha de vendas: um pedido com várias parcelas era cortado entre páginas. Agora dá para paginar por pedido.
+> **Quem é afetado:** Quem consome essa rota; as telas de Pedidos do Hub já listam por pedido e não precisaram mudar.
+> **Situação:** ✅ Entregue com `agrupar_por=pedido_venda`, conferido na `api-test` em 01/10/2026. Sem o parâmetro, a lista continua por linha.
+
 
 **Criado em:** 15/09/2026, achado num review de correção de dados.
 

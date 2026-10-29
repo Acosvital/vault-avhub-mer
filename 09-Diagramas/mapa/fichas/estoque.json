@@ -1,0 +1,265 @@
+{
+  "id": "estoque",
+  "nome": "Estoque",
+  "fase": "Abastecer",
+  "fraseMapa": "Porta de entrada e saída de todo item",
+  "titulo": "Estoque: atendimento e despacho",
+  "resumo": "Toda parcial de item passa pelo Estoque primeiro. O almoxarife vê o saldo livre da filial do pedido, atende o que o saldo cobre e decide o que fazer com o restante: comprar ou mandar para a produção. O que é comprado e aprovado volta ao mesmo Estoque, e a saída física acontece no despacho.",
+  "recebeDe": [
+    "PCP: parcial do item, nascida no Estoque com toda a quantidade",
+    "Qualidade de entrada: lote comprado e aprovado, que vira saldo",
+    "Compras: ordens de compra em andamento, que viram saldo futuro (ainda não existe)"
+  ],
+  "entregaA": [
+    "Expedição: parte atendida pelo saldo, com reserva de lote",
+    "Compras: restante que precisa ser comprado, pelo setor Requisições",
+    "Produção: restante que segue o roteiro, e matéria-prima por documento de retirada (ainda não existe)"
+  ],
+  "atuam": [
+    {
+      "quem": "Almoxarife",
+      "papel": "Atende pelo saldo, solicita compra, dá entrada, ajusta e transfere saldo."
+    },
+    {
+      "quem": "Gestor de Estoque",
+      "papel": "Supervisiona o painel e o saldo, sem entrar nas conversas operacionais."
+    },
+    {
+      "quem": "Expedição (Embalagem)",
+      "papel": "Hoje dispara a baixa ao receber a parcial; no desenho final pedirá a retirada."
+    },
+    {
+      "quem": "Produção",
+      "papel": "Receberia matéria-prima por documento de retirada, que ainda não existe."
+    },
+    {
+      "quem": "Compras",
+      "papel": "Recebe o pedido de compra pelo setor Requisições."
+    },
+    {
+      "quem": "Robert",
+      "papel": "Responsável pelo código do MES."
+    }
+  ],
+  "estados": [
+    "LIBERADO",
+    "ATIVA",
+    "CONSUMIDA",
+    "LIBERADA",
+    "EM_TRANSITO"
+  ],
+  "passos": [
+    {
+      "id": "E1",
+      "t": "Ver o saldo disponível",
+      "quem": "Almoxarife",
+      "onde": "Atendimento do Estoque (/estoque-operacao/atendimento)",
+      "st": "part",
+      "stl": "Saldo atual pronto, futuro não",
+      "estado": "LIBERADO",
+      "o": "O almoxarife vê os lotes liberados e livres na filial do pedido, já descontadas as reservas. O saldo futuro, com as ordens de compra em andamento, ainda não aparece.",
+      "ex": "Para as 100 flanges, o almoxarife vê quantas já estão prontas em lotes liberados na filial do pedido."
+    },
+    {
+      "id": "E2",
+      "t": "Decidir quanto atender",
+      "quem": "Almoxarife",
+      "onde": "Atendimento do Estoque, janela de atender pelo estoque",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "",
+      "o": "O almoxarife informa quanto atende pelo saldo, de zero até a quantidade da parcial, e de quais lotes. Atender zero é uma ação explícita: a parcial nunca passa sozinha.",
+      "ex": "Se houver flanges para 40 unidades, o almoxarife informa 40 e escolhe os lotes. Se não houver nenhuma, ele atende zero com um clique."
+    },
+    {
+      "id": "E3",
+      "t": "Atender pelo saldo",
+      "quem": "Sistema",
+      "onde": "Sistema",
+      "st": "part",
+      "stl": "Reserva pronta, custo do item não",
+      "estado": "ATIVA",
+      "o": "O sistema reserva o lote para a parcial e separa a parte atendida, que segue para a Expedição. A parcial original continua com o restante. O custo médio do item a partir dos lotes ainda não é calculado.",
+      "ex": "As 40 flanges atendidas viram uma parcial própria, com reserva, indo para a Expedição. As 60 restantes seguem na parcial original."
+    },
+    {
+      "id": "E4",
+      "t": "Comprar o restante",
+      "quem": "Almoxarife",
+      "onde": "Atendimento do Estoque, opção de solicitar compra",
+      "st": "ok",
+      "stl": "Feito no código",
+      "estado": "EM_TRANSITO",
+      "o": "O restante vai para o setor Requisições e o PCP abre a requisição de compra. Na Revenda o restante sempre vai para compra. Na fabricação, a compra é a opção para matéria-prima.",
+      "ex": "Se o destino das flanges for a Revenda, as 60 restantes vão para a compra. Se for fabricação, o almoxarife escolhe entre comprar matéria-prima ou seguir para a produção."
+    },
+    {
+      "id": "E4",
+      "t": "Enviar o restante à produção",
+      "quem": "Almoxarife",
+      "onde": "Atendimento do Estoque, opção de seguir o roteiro",
+      "st": "part",
+      "stl": "Move a parcial, sem baixa de material",
+      "estado": "EM_TRANSITO",
+      "o": "Na fabricação, o restante pode seguir para a próxima etapa do roteiro. Isso só move a parcial: não reserva nem baixa matéria-prima.",
+      "ex": "As 60 flanges a fabricar seguem para a primeira etapa de produção do roteiro, sem registro de consumo do aço."
+    },
+    {
+      "id": "E5",
+      "t": "Receber de volta no Estoque",
+      "quem": "Qualidade e Almoxarife",
+      "onde": "Atendimento do Estoque / Recebimento",
+      "st": "part",
+      "stl": "Comprado volta, fabricado não",
+      "estado": "LIBERADO",
+      "o": "O item comprado volta ao mesmo Estoque depois que a Qualidade libera o lote, e o almoxarife faz a reserva numa segunda passada. O item fabricado aprovado deveria voltar como lote e saldo, mas hoje segue direto para a Expedição. O contrato LOG-53 (proposta do Robert, sem código) desenha o lote do fabricado: um lote de origem Produção por ordem e produto.",
+      "ex": "Se as 60 flanges forem compradas, elas voltam ao Estoque como lote liberado e saem por reserva. Se forem fabricadas, hoje não viram lote."
+    },
+    {
+      "id": "E6",
+      "t": "Despachar",
+      "quem": "Expedição",
+      "onde": "Hoje no recebimento da Embalagem; retirada ainda sem tela",
+      "st": "gap",
+      "stl": "Baixa existe, retirada não",
+      "estado": "CONSUMIDA",
+      "o": "Hoje o saldo baixa quando a Embalagem recebe a parcial. O desenho decidido é outro: quem precisa da mercadoria gera um documento de retirada e a baixa acontece na retirada, no Estoque. Esse documento não existe. Decidido em 29/10 (N16-120 e N16-121): a Expedição pede, só o Estoque confirma, e a reserva é consumida junto com a baixa, que grava o custo do lote no momento. O desenho está no contrato LOG-54 (proposta do Robert, sem código).",
+      "ex": "A Expedição pede a retirada das 100 flanges. O almoxarife separa o lote, confirma a retirada e só então o saldo baixa, com o custo daquele lote."
+    }
+  ],
+  "outroCaminho": {
+    "titulo": "E se não houver saldo?",
+    "texto": "O almoxarife atende zero e o restante inteiro segue para compra ou, na fabricação, para o roteiro. A compra volta pelo circuito de Recebimento e Qualidade, de volta ao mesmo Estoque.",
+    "etapas": [
+      "Atender zero",
+      "Solicitar compra",
+      "Recebimento e Qualidade",
+      "Volta ao Estoque"
+    ],
+    "nota": "O mesmo pedido pode misturar saldo, compra e produção, item a item."
+  },
+  "regras": [
+    {
+      "t": "Saldo livre é por filial",
+      "d": "Vale a soma dos lotes liberados menos as reservas ativas, na filial do pedido."
+    },
+    {
+      "t": "Saldo zero exige clique",
+      "d": "A parcial nunca passa sozinha; atender zero é uma ação explícita do almoxarife."
+    },
+    {
+      "t": "Leitura e reserva no mesmo passo",
+      "d": "O saldo é lido e a reserva criada juntos, para evitar corrida entre pedidos."
+    },
+    {
+      "t": "Reserva não expira",
+      "d": "Ela só termina por liberação explícita ou quando a ordem é excluída."
+    },
+    {
+      "t": "Revenda sempre compra o restante",
+      "d": "Na fabricação, o restante pode comprar ou seguir o roteiro."
+    },
+    {
+      "t": "Comprado volta ao mesmo Estoque",
+      "d": "Só depois que a Qualidade liberou o lote."
+    },
+    {
+      "t": "Ajuste respeita a reserva",
+      "d": "Ajuste de saldo não pode usar o que já está reservado e exige motivo."
+    }
+  ],
+  "telas": [
+    {
+      "nome": "Atendimento",
+      "rota": "/estoque-operacao/atendimento",
+      "quem": "Almoxarife",
+      "st": "ok"
+    },
+    {
+      "nome": "Saldo",
+      "rota": "/estoque-operacao/saldo",
+      "quem": "Almoxarife",
+      "st": "ok"
+    },
+    {
+      "nome": "Reservas",
+      "rota": "/estoque-operacao/reservas",
+      "quem": "Almoxarife",
+      "st": "ok"
+    },
+    {
+      "nome": "Movimentação",
+      "rota": "/estoque-operacao/movimentacao",
+      "quem": "Almoxarife",
+      "st": "ok"
+    },
+    {
+      "nome": "Lote (detalhe e etiqueta)",
+      "rota": "/estoque-operacao/lotes/[id]",
+      "quem": "Almoxarife",
+      "st": "ok"
+    },
+    {
+      "nome": "Painel do Estoque",
+      "rota": "/estoque-operacao/painel-estoque",
+      "quem": "Gestor de Estoque",
+      "st": "part"
+    },
+    {
+      "nome": "Mapa do Depósito",
+      "rota": "/estoque-operacao/mapa-deposito",
+      "quem": "Almoxarife",
+      "st": "part"
+    },
+    {
+      "nome": "Retirada (documento de despacho)",
+      "rota": "",
+      "quem": "Expedição e Produção",
+      "st": "gap"
+    }
+  ],
+  "contratos": [
+    {
+      "id": "LOG-53",
+      "titulo": "Ordem de Produção e lote do fabricado",
+      "nos": "P2 · F1 · Q7 · Q8 · E5"
+    },
+    {
+      "id": "LOG-54",
+      "titulo": "Documento de retirada e baixa na retirada",
+      "nos": "E6 · X1 · F1"
+    },
+    {
+      "id": "API-008",
+      "titulo": "Custo do lote no MES",
+      "nos": "R4 · E3 · E5"
+    },
+    {
+      "id": "LOG-47",
+      "titulo": "Custo real por item no hub",
+      "nos": "E3 · R4"
+    },
+    {
+      "id": "API-007",
+      "titulo": "Referência da OC com valores no MES",
+      "nos": "R4"
+    }
+  ],
+  "cartao": {
+    "id": "API-008",
+    "titulo": "Custo do lote no MES",
+    "serve": "Guarda o custo de cada lote e entrega ao hub o custo médio do item.",
+    "quem": "Robert (MES) publica a rota; Gustavo consome no hub.",
+    "nos": "R4 · E3 · E5",
+    "situacao": "Parcial",
+    "st": "part",
+    "muda": "O custo do lote já é gravado na carga inicial e na cisão. Falta gravar o custo vindo da OC no recebimento e criar a rota de custo médio do item.",
+    "arquivo": "06-Contratos/Ativos, API-008-Custo-do-Lote-no-MES"
+  },
+  "palavrasFonte": 3023,
+  "duvidas": [
+    "Documento de retirada: o que ele imprime (lote, localização, quantidade, assinatura) segue em aberto no LOG-54. Quem pede, quem confirma e o destino da reserva já foram decididos em 29/10.",
+    "Fabricado no Estoque: o LOG-53 define um lote por ordem de produção e produto. Falta confirmar quem informa a localização do lote.",
+    "O v1 falava em dois momentos do Estoque (início e fim); o código usa um só setor com a parcial voltando. A nota pede confirmação de que o histórico mostra isso com clareza."
+  ]
+}

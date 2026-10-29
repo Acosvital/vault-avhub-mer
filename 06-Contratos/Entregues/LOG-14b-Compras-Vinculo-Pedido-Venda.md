@@ -14,6 +14,11 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:195", "api
 
 > **Onde atua:** av-hub: banco, API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define como a OC se liga ao pedido de venda (PV). Antes, o comprador escrevia o número do PV à mão no Omie. Agora escolhe a finalidade (um PV, vários, estoque, recompra, uso interno) e o vínculo é por item.
+> **Quem é afetado:** Compradores, e quem consulta o card "Compras deste pedido" no PV.
+> **Situação:** ✅ API entregue: rotas `/compras/pedidos-venda/:numero` e `/:numero/compras`, mais a tabela de vínculos. ❓ O front (4 telas) só foi conferido pelo vault anterior.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4, P3 · **Dono:** Gustavo (DBA)
 >

@@ -22,6 +22,11 @@ fontes: ["api-acos-vital/src/utils/ordering.js"]
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Pediu ordenação feita pelo servidor (`sort` e `order`) nas listas paginadas do Hub, com a mesma regra que já existia em Vendedores.
+> **Quem é afetado:** Quem usa as listas de parceiros, pedidos, notas e cadastros: clicar no cabeçalho agora ordena todos os registros, não só a página.
+> **Situação:** ✅ Entregue: a ordenação está centralizada em `ordering.js` e usada pelas listagens da `api-acos-vital`.
+
 
 **Criado em:** 15/09/2026, horário de Brasília
 

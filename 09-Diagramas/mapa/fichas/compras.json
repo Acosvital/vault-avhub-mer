@@ -1,0 +1,306 @@
+{
+  "id": "compras",
+  "nome": "Compras",
+  "fase": "Abastecer",
+  "fraseMapa": "Cota e emite a ordem de compra",
+  "titulo": "Compras: da requisição à ordem de compra",
+  "resumo": "Compras transforma uma necessidade de material em uma ordem de compra aprovada, enviada ao Omie e acompanhada até o fornecedor entregar. O PCP pede o material do pedido de venda pelo MES, e o Compras cota, aprova, emite e acompanha pelo av-hub.",
+  "recebeDe": [
+    "PCP: requisição do material do pedido, aberta no MES",
+    "Estoque: pedido de solicitar compra quando falta material",
+    "Qualidade de entrada: recompra de parte reprovada",
+    "Vendas: dados de compra que o vendedor preencheu na proposta"
+  ],
+  "entregaA": [
+    "Fornecedor: a ordem de compra, por e-mail ou PDF fora do sistema",
+    "Recebimento: lista de ordens aprovadas esperadas na doca",
+    "Omie: a ordem de compra aprovada, pela fila da integração",
+    "PCP: marcos da compra, só para leitura no MES"
+  ],
+  "atuam": [
+    {
+      "quem": "PCP",
+      "papel": "Abre no MES a requisição do material do pedido."
+    },
+    {
+      "quem": "Comprador",
+      "papel": "Cota, negocia e emite a ordem de compra; até R$ 30 mil emite sem aprovação."
+    },
+    {
+      "quem": "Gerente de Compras",
+      "papel": "Aprova a ordem de compra acima de R$ 30 mil."
+    },
+    {
+      "quem": "CCP",
+      "papel": "Acompanha o fornecedor: confirmação, previsão, despacho e ocorrências."
+    },
+    {
+      "quem": "Fornecedor",
+      "papel": "Recebe a ordem e entrega, ou libera para coleta; não acessa o sistema."
+    },
+    {
+      "quem": "Doca",
+      "papel": "Registra a chegada com a nota fiscal, o que tira a parcial de Compras · CCP."
+    }
+  ],
+  "estados": [
+    "aberta",
+    "em_cotacao",
+    "aguardando_aprovacao",
+    "aprovado",
+    "atendida",
+    "cancelada"
+  ],
+  "passos": [
+    {
+      "id": "P3 · C0",
+      "t": "Nasce a requisição de compra",
+      "quem": "PCP (no MES) ou Compras (no av-hub)",
+      "onde": "Requisições de compras no MES (/compras/requisicoes) ou Nova requisição no av-hub (/compras/requisicoes)",
+      "st": "ok",
+      "stl": "Telas prontas nas duas origens",
+      "estado": "aberta",
+      "o": "A requisição tem duas origens. O PCP pede o material do pedido pelo MES, e o sistema empurra cada item ao av-hub. O Compras também cria requisição própria, sem pedido de venda, pelo botão Nova requisição.",
+      "ex": "O PCP vê que faltam os materiais para os 100 flanges do Cliente Exemplo S.A. e abre a requisição no MES. Ela aparece na caixa do Compras."
+    },
+    {
+      "id": "C6",
+      "t": "Compras confere a parte do vendedor",
+      "quem": "Comprador",
+      "onde": "Emissão da OC (/compras/nova/[requisicaoId])",
+      "st": "gap",
+      "stl": "Decidido, sem código",
+      "estado": "aberta",
+      "o": "Quando o pedido vem de uma proposta, o sistema puxa para a ordem de compra o fornecedor, os impostos e o frete que o vendedor preencheu. O comprador confere e pode alterar os impostos da ordem.",
+      "ex": "O vendedor indicou um fornecedor para os flanges. O comprador vê o que ele preencheu ao lado da ordem de compra e confere os impostos."
+    },
+    {
+      "id": "C1",
+      "t": "Cotação e negociação",
+      "quem": "Comprador",
+      "onde": "Requisições (/compras/requisicoes) e Fora do sistema",
+      "st": "part",
+      "stl": "Caixa pronta, cotação por fora",
+      "estado": "em_cotacao",
+      "o": "As requisições das duas origens caem na mesma caixa do Compras. O comprador cota e negocia com o fornecedor fora do sistema e marca a requisição como em cotação.",
+      "ex": "O comprador pega a requisição dos flanges, negocia preço e condição com fornecedores por telefone e e-mail, e a requisição passa a em cotação."
+    },
+    {
+      "id": "C7 · C8",
+      "t": "Valor correto e aviso ao vendedor",
+      "quem": "Comprador e vendedor",
+      "onde": "Emissão da OC, Meus Pedidos e lista de Reprovados de Compras",
+      "st": "gap",
+      "stl": "Decidido, sem código",
+      "estado": "em_cotacao",
+      "o": "Compras segue o fornecedor do vendedor ou usa o valor correto, sem mudar a proposta. Se comprar por mais que o custo do vendedor, ele aprova ou reprova em Meus Pedidos, produto por produto, sem tolerância. O reprovado vai à Gerência pessoalmente e à lista de Reprovados de Compras.",
+      "ex": "Se o flange sair mais caro que o custo da proposta, o vendedor recebe o aviso. Aprovando, a compra segue. Reprovando, Compras leva o caso à Gerência."
+    },
+    {
+      "id": "C2 · C3",
+      "t": "Acima de R$ 30 mil, o Gerente aprova",
+      "quem": "Sistema e Gerente de Compras",
+      "onde": "Aprovações (/compras/aprovacoes)",
+      "st": "part",
+      "stl": "Pronto, regra ainda provisória",
+      "estado": "aguardando_aprovacao",
+      "o": "A ordem de compra até R$ 30 mil é liberada sozinha. Acima disso, fica aguardando o Gerente de Compras. A Diretoria não aprova. O limite vale por unidade e a regra deve ficar mais rígida depois da conversa com Compras. Não há trava entre quem emitiu e quem aprova a ordem (decidido em 29/10, N16-123).",
+      "ex": "Se a compra dos flanges passar de R$ 30 mil, a ordem espera o Gerente de Compras. Se ficar abaixo, sai direto."
+    },
+    {
+      "id": "C4",
+      "t": "Emite a ordem de compra e envia ao Omie",
+      "quem": "Comprador e integração",
+      "onde": "Emissão da OC (/compras/nova) e Ordens de Compra (/compras/ordens)",
+      "st": "ok",
+      "stl": "Tela pronta, Omie testado",
+      "estado": "aprovado",
+      "o": "A ordem leva fornecedor, frete CIF ou FOB, moeda e valor por item. Ao emitir, a requisição passa a atendida. A integração envia a ordem aprovada ao Omie por fila, e o sistema não envia a ordem ao fornecedor.",
+      "ex": "O comprador emite a ordem de compra dos 100 flanges, e ela segue ao Omie. O comprador manda o PDF ao fornecedor por fora."
+    },
+    {
+      "id": "C5",
+      "t": "Follow-up do CCP",
+      "quem": "CCP",
+      "onde": "Follow-up do CCP (/compras/followup)",
+      "st": "part",
+      "stl": "Tela pronta, falta perfil do CCP",
+      "estado": "aprovado",
+      "o": "O CCP registra a confirmação do fornecedor, a previsão, o despacho e as ocorrências. Esses marcos aparecem no MES, na tela Compras · CCP, só para leitura.",
+      "ex": "O CCP anota que o fornecedor confirmou os flanges e informa a previsão de chegada. O PCP acompanha pelo MES."
+    },
+    {
+      "id": "FN1",
+      "t": "Fornecedor entrega",
+      "quem": "Fornecedor",
+      "onde": "Fora do sistema",
+      "st": "gap",
+      "stl": "Fora do sistema, por decisão",
+      "estado": "",
+      "o": "O fornecedor recebe a ordem e entrega no frete CIF, ou libera a carga para coleta no frete FOB. Com a ordem aprovada, a parcial entra na lista de esperados do Recebimento.",
+      "ex": "Os 100 flanges chegam à doca com a nota fiscal do fornecedor. A partir daí o trabalho é do Recebimento."
+    }
+  ],
+  "outroCaminho": {
+    "titulo": "E se a ordem de compra for cancelada?",
+    "texto": "A ordem cancelada devolve todas as requisições dela ao estado aberta, porque nenhum estado é beco sem saída. Se já estava esperada no Recebimento, o MES a tira da lista.",
+    "etapas": [
+      "OC cancelada",
+      "Requisições voltam a aberta",
+      "Sai dos esperados da doca"
+    ],
+    "nota": "Ainda não está decidido quem avisa a doca quando a ordem é cancelada depois de aprovada."
+  },
+  "regras": [
+    {
+      "t": "Até R$ 30 mil, comprador livre",
+      "d": "A ordem até esse valor sai sem aprovação, e acima dele o Gerente de Compras aprova."
+    },
+    {
+      "t": "A Diretoria não aprova",
+      "d": "Só o Gerente de Compras, com permissão de aprovar, decide as ordens acima do limite."
+    },
+    {
+      "t": "Duas origens, uma caixa",
+      "d": "Requisição do PCP e requisição do Compras caem na mesma fila e são tratadas igual."
+    },
+    {
+      "t": "MES só lê",
+      "d": "Compras · CCP no MES mostra os marcos, e quem cota, aprova e emite trabalha no av-hub."
+    },
+    {
+      "t": "Cancelar exige motivo",
+      "d": "Cancelar uma requisição pede um motivo de 3 a 500 caracteres."
+    },
+    {
+      "t": "Requisição com OC não cancela pelo MES",
+      "d": "O sistema recusa o cancelamento e o envio não se repete."
+    },
+    {
+      "t": "Ordem aprovada vai ao Omie por fila",
+      "d": "Ordem com erro sai da fila e só volta quando alguém reenvia."
+    }
+  ],
+  "telas": [
+    {
+      "nome": "Requisições de compras (MES, fila do PCP)",
+      "rota": "/compras/requisicoes",
+      "quem": "PCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Compras · CCP (MES, só leitura)",
+      "rota": "/compras/pedidos-compra",
+      "quem": "PCP, doca",
+      "st": "ok"
+    },
+    {
+      "nome": "Requisições (lista e kanban, Nova requisição)",
+      "rota": "/compras/requisicoes",
+      "quem": "Comprador",
+      "st": "ok"
+    },
+    {
+      "nome": "Emissão da OC",
+      "rota": "/compras/nova",
+      "quem": "Comprador",
+      "st": "ok"
+    },
+    {
+      "nome": "Ordens de Compra",
+      "rota": "/compras/ordens",
+      "quem": "Comprador",
+      "st": "ok"
+    },
+    {
+      "nome": "Aprovações",
+      "rota": "/compras/aprovacoes",
+      "quem": "Gerência de Compras",
+      "st": "ok"
+    },
+    {
+      "nome": "Follow-up do CCP",
+      "rota": "/compras/followup",
+      "quem": "CCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Dashboard de Compras e Compradores",
+      "rota": "/compras/dashboard-compras",
+      "quem": "Compras",
+      "st": "ok"
+    },
+    {
+      "nome": "Conferência de Compras na emissão da OC",
+      "rota": "/compras/nova/[requisicaoId]",
+      "quem": "Comprador",
+      "st": "gap"
+    },
+    {
+      "nome": "Lista de reprovados pelo vendedor",
+      "rota": "/compras/...",
+      "quem": "Comprador",
+      "st": "gap"
+    }
+  ],
+  "contratos": [
+    {
+      "id": "LOG-34",
+      "titulo": "MES empurra a requisição ao av-hub",
+      "nos": "P3"
+    },
+    {
+      "id": "LOG-35",
+      "titulo": "Marcos da requisição para o MES",
+      "nos": "C1 · C3 · C4 · C5 · R0 · P3"
+    },
+    {
+      "id": "LOG-32",
+      "titulo": "Acompanhamento da OC pelo CCP",
+      "nos": "C5"
+    },
+    {
+      "id": "LOG-23",
+      "titulo": "Envio da OC ao Omie pela pipeline",
+      "nos": "C4"
+    },
+    {
+      "id": "LOG-36",
+      "titulo": "Produto obrigatório e comprador da OC",
+      "nos": "C4"
+    },
+    {
+      "id": "SQL-008",
+      "titulo": "Tabela de requisições de compra",
+      "nos": "P3 · C0"
+    },
+    {
+      "id": "API-004",
+      "titulo": "Referência da OC para o MES",
+      "nos": "C4 · R0 · R4"
+    },
+    {
+      "id": "API-007",
+      "titulo": "Valores da OC no MES",
+      "nos": "C4 · R4"
+    }
+  ],
+  "cartao": {
+    "id": "LOG-35",
+    "titulo": "Marcos da requisição para o MES",
+    "serve": "Define os 14 marcos que o av-hub registra sobre a requisição e a OC (recebida, em cotação, aprovada, no Omie, despachada, cancelada e outros) para o MES mostrar o andamento.",
+    "quem": "CCP e Comprador geram os marcos; PCP e doca leem no Compras · CCP.",
+    "nos": "C1 · C3 · C4 · C5 · R0 · P3",
+    "situacao": "Feito no código",
+    "st": "ok",
+    "muda": "MES: lê os marcos a cada 5 minutos e ao abrir a tela; o marco de OC aprovada põe a parcial na lista de esperados do Recebimento. Front: nada novo.",
+    "arquivo": "06-Contratos/Entregues, LOG-35-Compras-Marcos-Requisicao-para-MES"
+  },
+  "palavrasFonte": 3867,
+  "duvidas": [
+    "A regra de aprovação de R$ 30 mil é provisória e deve endurecer depois da conversa com Compras; não há desenho nem data.",
+    "O envio da OC ao Omie foi testado em 14/10, mas a nota deixa a produção como não confirmada.",
+    "C6 a C8 estão decididos em 26/10 sem código. A nota de Compras só resume, e o detalhe está na nota 11 (Proposta e Pedido de Venda), por isso a ordem C6, C1, C7, C8 segue o fluxo mestre.",
+    "O MES ainda não lê a OC de uma requisição criada só no av-hub; a nota dá o caminho como proposta, e a tela de Reprovados está com rota ainda a definir."
+  ]
+}

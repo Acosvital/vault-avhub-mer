@@ -1,0 +1,235 @@
+{
+  "id": "recebimento",
+  "nome": "Recebimento",
+  "fase": "Abastecer",
+  "fraseMapa": "Confere a carga contra a nota fiscal",
+  "titulo": "Recebimento: da chegada com nota fiscal ao lote em quarentena",
+  "resumo": "O Recebimento recebe na doca o material comprado e o confere contra a nota fiscal. O que chegou vira um lote em quarentena, com entrada no saldo, para a Qualidade inspecionar. Enquanto há divergência aberta, nada entra no estoque.",
+  "recebeDe": [
+    "Compras: ordem de compra aprovada, que põe a parcial na lista de esperados",
+    "Fornecedor: a carga e a nota fiscal na doca",
+    "Compras · CCP: a parcial que espera a nota chegar"
+  ],
+  "entregaA": [
+    "Qualidade de entrada: lote em quarentena para inspeção",
+    "PCP: divergência que a recontagem não resolveu",
+    "Compras · CCP: restante da nota ou parcial reaberta"
+  ],
+  "atuam": [
+    {
+      "quem": "Doca (conferente)",
+      "papel": "Registra a chegada com a nota, conta, pesa e informa avaria e descrição."
+    },
+    {
+      "quem": "Segunda pessoa",
+      "papel": "Reconta quando há divergência; quem conferiu não pode recontar."
+    },
+    {
+      "quem": "PCP",
+      "papel": "Aceita ou reabre quando a recontagem continua divergindo."
+    },
+    {
+      "quem": "Compras",
+      "papel": "Libera para o Recebimento sem ordem aprovada, em geral só o Administrador."
+    },
+    {
+      "quem": "Qualidade",
+      "papel": "Recebe o lote e faz a inspeção de entrada."
+    }
+  ],
+  "estados": [
+    "CONCLUIDO",
+    "AGUARDANDO_RECONTAGEM",
+    "AGUARDANDO_DECISAO",
+    "ACEITO",
+    "REABERTO",
+    "PENDENTE"
+  ],
+  "passos": [
+    {
+      "id": "R0",
+      "t": "Esperados e chegada com nota fiscal",
+      "quem": "Doca",
+      "onde": "Recebimento (/logistica/logistica-entrada), ação Receber com NF",
+      "st": "part",
+      "stl": "Pronto para OC do MES; falta OC só do hub",
+      "estado": "",
+      "o": "Só aparece na lista da doca a parcial cuja ordem de compra foi aprovada, ou que Compras liberou à mão. Sem a nota, a parcial não sai de Compras · CCP. A doca informa o número ou a chave de 44 dígitos.",
+      "ex": "A ordem dos 100 flanges está aprovada, então a parcial aparece na lista. Na chegada, a doca informa a nota e a parcial passa ao Recebimento."
+    },
+    {
+      "id": "R1",
+      "t": "Conferência contra a nota",
+      "quem": "Doca",
+      "onde": "Recebimento, ação Conferir recebimento",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "",
+      "o": "O conferente conta o que chegou e compara com a nota fiscal, não com a ordem de compra. Receber mais do que a requisição pede é permitido, e a sobra fica livre no estoque. A comparação com a ordem de compra ainda não existe. Decidido em 29/10 (N16-136): uma nota poderá trazer itens de mais de uma ordem de compra, conferidos por item da OC. É a proposta do Robert, ainda sem código.",
+      "ex": "A nota diz 100 flanges e a doca conta 100. Se contasse 98, o sistema apontaria divergência de quantidade."
+    },
+    {
+      "id": "R2",
+      "t": "Pesagem",
+      "quem": "Doca",
+      "onde": "Recebimento, na própria conferência",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "",
+      "o": "Se o material tem peso teórico cadastrado, o peso real é obrigatório. Desvio acima da tolerância (padrão 5%, por material) vira divergência de peso. A balança não tem saída digital, então o peso é digitado. Confirmado em 29/10 (N16-134): 5% por padrão, ajustável por material.",
+      "ex": "Como o flange tem peso teórico cadastrado, a doca pesa a carga e digita o peso real, e o sistema compara com o esperado."
+    },
+    {
+      "id": "R3",
+      "t": "Bate com o esperado?",
+      "quem": "Sistema",
+      "onde": "Sistema",
+      "st": "ok",
+      "stl": "Regra pronta",
+      "estado": "",
+      "o": "Bate quando não há divergência de quantidade, de peso, de descrição nem de avaria. Se bate, o lote nasce na hora. Se não bate, nada entra e outra pessoa precisa recontar. Quando o sistema cruzar a nota com a ordem de compra, a divergência contra a OC também bloqueia (N16-135).",
+      "ex": "Os 100 flanges batem com a nota e o peso fica dentro da tolerância. O sistema segue direto para criar o lote."
+    },
+    {
+      "id": "R4",
+      "t": "Cria o lote em quarentena",
+      "quem": "Sistema",
+      "onde": "Sistema (etiqueta do lote em PDF)",
+      "st": "part",
+      "stl": "Lote pronto, custo da OC falta",
+      "estado": "PENDENTE",
+      "o": "O lote nasce sempre pendente, mesmo para item acabado, com entrada no saldo na localização da conferência. Se chegou só parte, essa parte segue para a Qualidade e o restante volta a Compras · CCP esperando a próxima nota. O custo da ordem ainda não é gravado no lote.",
+      "ex": "Os 100 flanges viram um lote pendente com entrada no saldo, e o lote segue para a inspeção da Qualidade."
+    },
+    {
+      "id": "R6",
+      "t": "Divergência: recontagem e decisão do PCP",
+      "quem": "Segunda pessoa e PCP",
+      "onde": "Recebimento (Recontar) e Divergências de Recebimento (/decisoes-pcp)",
+      "st": "part",
+      "stl": "Tela pronta, aviso ao hub falta",
+      "estado": "AGUARDANDO_RECONTAGEM",
+      "o": "Quando diverge, outra pessoa reconta todos os itens. Se a recontagem bate, o recebimento conclui. Se ainda diverge, o PCP aceita, e entra a quantidade recontada, ou reabre, e nada entra e a parcial volta a Compras. O motivo é obrigatório. Decidido em 29/10 (N16-137): a reabertura passa a avisar o av-hub, para a OC deixar de aparecer como atendida. Isso exige um contrato novo entre o MES e o hub.",
+      "ex": "Se faltassem flanges mesmo depois da recontagem, o PCP decidiria entre aceitar o que chegou ou reabrir a compra."
+    }
+  ],
+  "outroCaminho": {
+    "titulo": "E se chegar só uma parte do pedido?",
+    "texto": "O recebimento parcial divide a parcial. O que chegou segue para a Qualidade e o restante volta a Compras · CCP, aguardando a próxima nota.",
+    "etapas": [
+      "Chega parte com nota",
+      "Essa parte vai à Qualidade",
+      "Restante volta a Compras · CCP"
+    ],
+    "nota": "A requisição fica como recebida parcial até todos os itens serem cobertos."
+  },
+  "regras": [
+    {
+      "t": "Conferência é contra a nota",
+      "d": "Não se compara com o pendente nem com a ordem de compra."
+    },
+    {
+      "t": "Sem nota, a parcial não sai de Compras",
+      "d": "Assim o tempo do fornecedor não cai no Recebimento."
+    },
+    {
+      "t": "Divergência trava a entrada",
+      "d": "Enquanto houver divergência aberta, nada entra no estoque."
+    },
+    {
+      "t": "Quem conferiu não reconta",
+      "d": "A recontagem exige outra pessoa e todos os itens."
+    },
+    {
+      "t": "Peso obrigatório com peso teórico",
+      "d": "O desvio acima da tolerância, padrão de 5% por material, é divergência."
+    },
+    {
+      "t": "Lote sempre em quarentena",
+      "d": "Mesmo item acabado nasce pendente e vai à Qualidade."
+    },
+    {
+      "t": "Recebimento não decide compra",
+      "d": "O Recebimento nunca decide compra: a divergência vai ao PCP, e a reabertura devolve a Compras."
+    },
+    {
+      "t": "Avaria exige foto",
+      "d": "Toda avaria informada na conferência traz uma foto."
+    },
+    {
+      "t": "Divergência contra a OC também bloqueia",
+      "d": "Quando o cruzamento com a ordem de compra existir, a diferença segue o mesmo caminho da divergência contra a nota (decidido em 29/10)."
+    }
+  ],
+  "telas": [
+    {
+      "nome": "Recebimento (lista de esperados, Receber com NF, Conferir, Recontar)",
+      "rota": "/logistica/logistica-entrada",
+      "quem": "Doca",
+      "st": "ok"
+    },
+    {
+      "nome": "Divergências de Recebimento (Aceitar ou Reabrir)",
+      "rota": "/decisoes-pcp",
+      "quem": "PCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Compras · CCP (onde a parcial espera a nota)",
+      "rota": "/compras/pedidos-compra",
+      "quem": "PCP, doca",
+      "st": "ok"
+    },
+    {
+      "nome": "Esperado por OC, sem requisição do MES",
+      "rota": "a definir",
+      "quem": "Doca",
+      "st": "gap"
+    },
+    {
+      "nome": "Leitor de código de barras da chave da nota",
+      "rota": "a definir",
+      "quem": "Doca",
+      "st": "gap"
+    }
+  ],
+  "contratos": [
+    {
+      "id": "LOG-35",
+      "titulo": "Marcos da requisição para o MES",
+      "nos": "C5 · R0"
+    },
+    {
+      "id": "API-004",
+      "titulo": "Referência da OC para o MES",
+      "nos": "C4 · R0 · R4"
+    },
+    {
+      "id": "API-007",
+      "titulo": "Valores da OC no MES",
+      "nos": "C4 · R4"
+    },
+    {
+      "id": "API-008",
+      "titulo": "Custo do lote no MES",
+      "nos": "R4 · E3 · E5"
+    }
+  ],
+  "cartao": {
+    "id": "API-008",
+    "titulo": "Custo do lote no MES",
+    "serve": "Define como o custo da ordem de compra é gravado no lote quando a mercadoria é recebida, e como o custo é lido depois.",
+    "quem": "MES (Robert) e API do av-hub (Gustavo); o Recebimento é onde o custo deveria entrar no lote.",
+    "nos": "R4 · E3 · E5",
+    "situacao": "Parcial",
+    "st": "part",
+    "muda": "MES: gravar o custo da OC no lote ao receber, com o job do contrato 004 e 007. Quem desenvolve: lote sem custo fica sinalizado quando a unidade difere.",
+    "arquivo": "06-Contratos/Ativos, API-008-Custo-do-Lote-no-MES"
+  },
+  "palavrasFonte": 2855,
+  "duvidas": [
+    "A nota é de 14/10 e não reflete a proposta do Robert de receber por item da OC; a seção sobre OC sem requisição do MES é proposta e o desenho é dele.",
+    "O nó R5 não existe no fluxo mestre.",
+    "O cruzamento com a OC, a conferência por item da OC e o aviso de reabertura ao hub dependem de contratos MES e hub que ainda não existem em código."
+  ]
+}

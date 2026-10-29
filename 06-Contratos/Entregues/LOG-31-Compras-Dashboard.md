@@ -16,6 +16,11 @@ criado_original: 2026-09-30
 
 > **Onde atua:** av-hub: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Criou a rota de dashboard de Compras com valores calculados no banco: quanto se compra, de quem, por categoria e comprador, e o que está atrasado. Antes só havia contagens.
+> **Quem é afetado:** Gestão e compradores de Compras. O av-hub não soma pedidos no navegador; o banco entrega pronto.
+> **Situação:** ✅ Entregue em 01/10: `GET /compras/ordens/dashboard` responde 200 na `api-test`, com valores zerados por falta de pedidos aprovados lá.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
 >

@@ -30,6 +30,11 @@ criado_original: 2026-10-19
 >
 > Selos em [[Regras-do-Vault]].
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Adicionou ao Acompanhamento de clientes o filtro "só clientes" (parceiros com a tag Cliente) e a opção de ver todo o período, na tela e no Excel.
+> **Quem é afetado:** O time comercial, que deixa de ver fornecedores e cadastros errados misturados e passa a ver o histórico inteiro de cada cliente.
+> **Situação:** ✅ Aplicado em produção em 20/10/2026 e validado pelo Nathan: a tela mostra só clientes e todo o período, e o Excel sai filtrado.
+
 ## Por quê
 
 O time comercial quer ver, e levar para o Excel, a lista de **clientes** (parceiros com a etiqueta Cliente no Omie), não a mistura de clientes com quem só aparece em pedido ou NF por cadastro errado. E quer olhar o **histórico inteiro** de venda e faturamento de cada cliente, sem escolher mês a mês. As duas regras são de dados (tag no cadastro; soma por intervalo de datas), então ficam no banco e na API, como pede a regra de lógica no backend; o navegador só manda a escolha e exibe.

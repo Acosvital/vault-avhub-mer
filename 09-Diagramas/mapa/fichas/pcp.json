@@ -1,0 +1,227 @@
+{
+  "id": "pcp",
+  "nome": "PCP",
+  "fase": "Planejar",
+  "fraseMapa": "Decide o destino de cada item",
+  "titulo": "PCP: da triagem à destinação",
+  "resumo": "O PCP vê os pedidos que o vendedor liberou e, a cada rodada, decide para cada item onde ele será tratado, quanto vai agora e por quais setores passa. O PCP não responde se há saldo: essa pergunta é do Estoque, que entra como primeiro setor de todo roteiro.",
+  "recebeDe": [
+    "Vendas: pedido liberado pelo vendedor, com os itens",
+    "Compras (via Estoque): requisição ou ordem de compra do pedido, quando existir",
+    "Qualidade de saída e Recebimento: itens reprovados ou divergentes que pedem uma nova decisão"
+  ],
+  "entregaA": [
+    "Estoque: uma parcial por item, nascida no setor Estoque com toda a quantidade",
+    "Vendas: confirmação de que o pedido foi importado, que trava a marcação do vendedor",
+    "Circuito de compra e produção: novo rumo do item depois de reprovação ou recompra"
+  ],
+  "atuam": [
+    {
+      "quem": "PCP",
+      "papel": "Escolhe o destino, a quantidade, a prioridade e o roteiro de cada item, e decide o novo rumo quando algo reprova."
+    },
+    {
+      "quem": "Vendedor",
+      "papel": "Só libera o pedido, na etapa anterior."
+    },
+    {
+      "quem": "Almoxarife",
+      "papel": "Recebe a parcial no Estoque, na etapa seguinte."
+    },
+    {
+      "quem": "Robert",
+      "papel": "Responsável pelo código do MES, onde o PCP trabalha."
+    }
+  ],
+  "estados": [
+    "AGUARDANDO",
+    "NAO_ENVIADO",
+    "PARCIAL",
+    "TOTAL",
+    "CRIADO"
+  ],
+  "passos": [
+    {
+      "id": "P1",
+      "t": "Ver os pedidos liberados",
+      "quem": "PCP",
+      "onde": "Triagem do Pedido (/carteira)",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "NAO_ENVIADO",
+      "o": "O PCP lista os pedidos liberados por mês, ano e filial. A tela mostra se cada pedido já foi enviado, total ou em parte, e como está a produção. Pedidos anteriores à data de corte da liberação ficam fora do MES e terminam no sistema antigo (decidido em 29/10, N16-142).",
+      "ex": "O pedido de 100 flanges de aço carbono do Cliente Exemplo S.A. aparece na lista assim que o vendedor o libera, ainda sem nada enviado."
+    },
+    {
+      "id": "P2 · 1/4",
+      "t": "Escolher destino e quantidade",
+      "quem": "PCP",
+      "onde": "Destinação do Pedido (/ordens-producao/novo)",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "",
+      "o": "Para cada item, o PCP escolhe a fábrica de destino (fabricação ou Revenda) e quanto manda nesta rodada, até o que ainda resta do pedido. Também define a prioridade. Item sem destino fica de fora e volta na próxima rodada. Decidido em 29/10 (N16-138): a Triagem não mostra o saldo do Estoque; quem atende pelo saldo é o Estoque, na etapa 1.",
+      "ex": "O PCP pode mandar as 100 flanges para a fábrica de fabricação, ou, numa emergência, algumas para a Revenda e o resto para a fabricação, em ordens diferentes."
+    },
+    {
+      "id": "P2 · 2/4",
+      "t": "Montar o roteiro do destino",
+      "quem": "PCP",
+      "onde": "Destinação do Pedido (/ordens-producao/novo)",
+      "st": "ok",
+      "stl": "Feito no código",
+      "estado": "",
+      "o": "O PCP monta os setores que o item percorre em cada destino. O Estoque já vem fixo no topo e não pode ser retirado. Roteiro de fabricação precisa de uma inspeção de qualidade antes da expedição. Compras e Estoque não entram no roteiro montado pelo PCP.",
+      "ex": "Para as flanges fabricadas, o roteiro leva o Estoque primeiro e uma inspeção de saída antes da expedição."
+    },
+    {
+      "id": "P2 · 3/4",
+      "t": "Gravar a rodada",
+      "quem": "Sistema",
+      "onde": "Sistema",
+      "st": "part",
+      "stl": "Gravar pronto; Ordem de Produção falta",
+      "estado": "CRIADO",
+      "o": "Todas as ordens da rodada, uma por destino, gravam de uma vez. Se uma falhar, nenhuma é gravada. Cada item nasce como uma parcial no setor Estoque com 100% da quantidade. Pelo contrato LOG-53 (proposta do Robert, aceita em 15/10, sem código), a ordem de cada destino de fabricação passa a ser uma Ordem de Produção impressa pelo sistema. Revenda não gera ordem.",
+      "ex": "As 100 flanges vão para um destino de fabricação e viram uma parcial no Estoque, esperando o almoxarife. Pelo desenho do LOG-53, esse destino ganha uma Ordem de Produção numerada, como a de número 1 do pedido."
+    },
+    {
+      "id": "P2 · 4/4",
+      "t": "Avisar a Vendas",
+      "quem": "Sistema",
+      "onde": "Sistema",
+      "st": "ok",
+      "stl": "Feito no código",
+      "estado": "",
+      "o": "Depois de gravar, o MES confirma ao av-hub que importou o pedido, e a marcação do vendedor trava. Se o aviso falhar, o MES tenta de novo a cada 10 minutos por 7 dias.",
+      "ex": "O vendedor do Cliente Exemplo passa a ver o pedido como importado e não mexe mais na liberação."
+    },
+    {
+      "id": "E1",
+      "t": "Passar ao Estoque",
+      "quem": "Almoxarife",
+      "onde": "Atendimento do Estoque (/estoque-operacao/atendimento)",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "CRIADO",
+      "o": "A pergunta de haver saldo é respondida pelo Estoque, na etapa 1 do roteiro. O saldo zero sempre exige um clique do almoxarife: nenhuma parcial passa sozinha. O saldo zero continua exigindo o clique mesmo depois do marco zero de 13/11 (decidido em 29/10, N16-139).",
+      "ex": "O almoxarife vê se há flanges prontas na filial do pedido. O PCP não decide isso, só escolheu o destino."
+    },
+    {
+      "id": "P6",
+      "t": "Decidir o novo rumo",
+      "quem": "PCP",
+      "onde": "Sem tela de fila",
+      "st": "gap",
+      "stl": "Decidido, sem tela",
+      "estado": "",
+      "o": "Se a Qualidade de saída reprova o item ou o Recebimento reabre a compra, o PCP decide entre retrabalho e nova compra. A fila para isso ainda não existe. Hoje só existe a fila de divergência de recebimento. Decidido em 29/10 (N16-141): no retrabalho, o PCP escolhe a qual setor o item volta; hoje volta sempre ao setor anterior.",
+      "ex": "Se um lote de flanges fabricadas reprovar na saída, o PCP escolheria entre retrabalhar ou comprar de novo, mas hoje não tem tela para essa escolha."
+    }
+  ],
+  "outroCaminho": {
+    "titulo": "E se a qualidade reprovar o item?",
+    "texto": "O item volta ao PCP, que decide o novo rumo. A tela dessa fila ainda não existe e o roteiro por item também não.",
+    "etapas": [
+      "Qualidade de saída reprova",
+      "PCP decide o novo rumo",
+      "Retrabalho ou nova compra"
+    ],
+    "nota": "Hoje a única fila de decisão do PCP é a de divergência de recebimento."
+  },
+  "regras": [
+    {
+      "t": "Natureza vem do destino",
+      "d": "Fabricação ou revenda não é do produto: é o tipo da fábrica escolhida na rodada."
+    },
+    {
+      "t": "Só pedido liberado entra",
+      "d": "Se o vendedor não liberou, o sistema recusa a criação da ordem."
+    },
+    {
+      "t": "Estoque é sempre o primeiro",
+      "d": "O sistema coloca o Estoque como etapa 1 de todo roteiro e o PCP não pode incluí-lo nem retirá-lo."
+    },
+    {
+      "t": "Quantidade tem teto",
+      "d": "A soma de todas as ordens de um produto não passa do total do pedido de venda."
+    },
+    {
+      "t": "Rodada é tudo ou nada",
+      "d": "Todas as ordens da rodada gravam juntas; um erro desfaz tudo."
+    },
+    {
+      "t": "Saldo zero exige clique",
+      "d": "Nenhuma parcial passa sozinha pelo Estoque, mesmo sem saldo."
+    },
+    {
+      "t": "Fabricação exige inspeção de saída",
+      "d": "O roteiro de fabricação precisa de um setor de qualidade antes da primeira expedição."
+    }
+  ],
+  "telas": [
+    {
+      "nome": "Triagem do Pedido",
+      "rota": "/carteira",
+      "quem": "PCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Destinação do Pedido",
+      "rota": "/ordens-producao/novo",
+      "quem": "PCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Acompanhamento dos Pedidos",
+      "rota": "/ordens-producao",
+      "quem": "PCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Divergências de Recebimento",
+      "rota": "/decisoes-pcp",
+      "quem": "PCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Filas de Produção",
+      "rota": "/movimentacoes",
+      "quem": "PCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Fila de novo rumo",
+      "rota": "",
+      "quem": "PCP",
+      "st": "gap"
+    }
+  ],
+  "contratos": [
+    {
+      "id": "LOG-53",
+      "titulo": "Ordem de Produção e lote do fabricado",
+      "nos": "P2 · F1 · Q7 · Q8 · E5"
+    },
+    {
+      "id": "LOG-26",
+      "titulo": "Liberação do pedido pelo vendedor",
+      "nos": "V2 · V3 · P1 · P2"
+    }
+  ],
+  "cartao": {
+    "id": "LOG-26",
+    "titulo": "Vendas: liberação do pedido pelo vendedor",
+    "serve": "Faz o pedido liberado pelo vendedor chegar ao PCP e devolve ao hub a confirmação de importação.",
+    "quem": "Vendedor libera; PCP recebe; MES e av-hub trocam os avisos.",
+    "nos": "V2 · V3 · P1 · P2",
+    "situacao": "Feito no código",
+    "st": "ok",
+    "muda": "Para o PCP, só pedido liberado aparece na Triagem; para quem desenvolve, o MES confirma a importação ao hub depois de gravar.",
+    "arquivo": "06-Contratos/Entregues, LOG-26-Vendas-Liberacao-Pedido"
+  },
+  "palavrasFonte": 2324,
+  "duvidas": [
+    "A Ordem de Produção está desenhada no LOG-53 (uma por destino de fabricação, numerada pedido/N, proposta aceita em 15/10), mas nada existe no código."
+  ]
+}

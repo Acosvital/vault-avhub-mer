@@ -1,19 +1,29 @@
 ---
 tags: [diagramas, estados, uml, mes, av-hub]
 criado: 2026-10-14
-atualizado: 2026-10-26
+atualizado: 2026-10-29
 status: vigente
 dono: Nathan
-fontes: [v1 Diagramas-UML (5, 6, 7, 8, 20, 24), api-pcp 579a625 prisma/models, api-acos-vital f322dcd, 00-Fluxo-Mestre-0b, api-comercial 5aa5311 enums.prisma, SQL-016 a SQL-018 (migrações de 26/10/2026), Registro-de-Decisoes N16]
+fontes: [v1 Diagramas-UML (5, 6, 7, 8, 20, 24), api-pcp 579a625 prisma/models, api-acos-vital f322dcd, 00-Fluxo-Mestre-0b, api-comercial 5aa5311 enums.prisma, migrações de 26/10/2026, Registro-de-Decisoes N16]
 ---
 
 # Diagramas de estados
 
-Os enums vêm do Prisma do `api-pcp` (`prisma/models/*.prisma`) e das rotas do `api-acos-vital` em 14/10/2026. Os diagramas 13 a 16 (proposta, pedido do Hub, pedido de custo e comissão nova) vêm das migrações propostas em 26/10/2026, ainda fora da produção. Vocabulário completo de status e etapas: [[Estados-e-Status]]. Destino de cada diagrama do v1: [[Indice-de-Diagramas]].
+**Em uma frase:** cada desenho mostra as fases por onde passa uma coisa (lote, recebimento, requisição, proposta…) e o que a faz mudar de fase.
 
-## 1. Parcial do item (`ItemParcial`, enum `StatusItemParcial`)
+**Como ler estes diagramas**
 
-Motor de estado do chão de fábrica. 9 valores no enum ✅ (`producao.prisma:29-55`): `CRIADO`, `RECEBIDO`, `EM_ANDAMENTO`, `EM_TRANSITO`, `PAUSADO`, `REPROVADO`, `CONCLUIDO`, `RETRABALHO`, `CANCELADO`. Não é entrega ao cliente (isso é `Entrega`).
+- Cada caixa arredondada é uma fase (um status). A bolinha preta é onde a coisa nasce; a bolinha com anel é o fim.
+- Cada seta é uma mudança de fase. O texto na seta diz o que provoca a mudança.
+- Quando um nome tem código (`Q2`, `K4`), ele é o passo no [[00-Fluxo-Mestre-0b]]. Olhe primeiro de onde a seta sai e para onde ela vai.
+- Os nomes em MAIÚSCULAS são os valores reais gravados no sistema.
+- Os diagramas 13 a 16 (proposta, pedido do Hub, pedido de custo e comissão nova) vêm de migrações propostas em 26/10/2026, ainda fora da produção 🟡.
+
+Vocabulário completo de status e etapas: [[Estados-e-Status]]. Destino de cada diagrama do v1: [[Indice-de-Diagramas]].
+
+## 1. Parcial do item
+
+A parcial é a parte de um item que anda pelos setores da fábrica. Ela é recebida, trabalhada, pausada, reprovada ou concluída. Não é a entrega ao cliente (isso é `Entrega`).
 
 ```mermaid
 stateDiagram-v2
@@ -41,10 +51,11 @@ stateDiagram-v2
         RETRABALHO so existe por legado
     end note
 ```
+Devolver ao setor anterior e retrabalho criam uma nova parcial; a antiga é cancelada.
 
-Selo ✅: ações em `itens-parciais.controller.ts:100-297` (receber, iniciar, mover, concluir, atender-estoque, pausar, reprovar, resolver, retrabalho, retomar, split, devolver, cancelar, desfazer-recebimento, consolidar). Nó do Mestre: F1, Q7, X1. `desfazer-recebimento` ✅ `itens-parciais.controller.ts:285` estorna o consumo da reserva; ❓ o status de destino exato não foi relido nesta rodada (desenhado como `EM_TRANSITO`).
+## 2. Lote
 
-## 2. Lote (`StatusQualidadeLote`)
+O lote recém-chegado fica pendente. A Qualidade o libera, o reprova ou o põe em quarentena. A carga inicial já nasce liberada.
 
 ```mermaid
 stateDiagram-v2
@@ -64,10 +75,11 @@ stateDiagram-v2
         ou LIBERADO se nao
     end note
 ```
+Se a reprovação é parcial, o MES cria um lote filho reprovado com a quantidade ruim. 🔴 Ainda não existe origem de lote para o fabricado aprovado.
 
-Selo ✅: enum `estoque.prisma:25-32`; `qualidade.service.ts:83-262` (quarentena em `:243`); carga inicial `OrigemLote.CARGA_INICIAL`. 🔴 Não existe origem de lote para fabricado aprovado (`OrigemLote` só tem `RECEBIMENTO` e `CARGA_INICIAL`).
+## 3. Reserva de estoque
 
-## 3. Reserva de estoque (`StatusReserva`)
+Atender pelo estoque reserva o lote para um item. A reserva é consumida na baixa do saldo, ou liberada se o pedido for cancelado.
 
 ```mermaid
 stateDiagram-v2
@@ -85,10 +97,11 @@ stateDiagram-v2
         documento de retirada no Estoque, E6
     end note
 ```
+Hoje a baixa acontece quando a Embalagem ou a Expedição recebe a parcial. Decidido em 14/10: passa para o documento de retirada no Estoque (`E6`) 📝, sem código 🔴.
 
-Selo ✅ enum `estoque.prisma:48-52`, `consumirReservasDaParcial` em `estoque-operacao.helpers.ts:208`; 📝 retirada decidida; 🔴 sem código. Liberação manual: `PATCH /estoque/reservas/:id/liberar` ✅ `estoque-operacao.controller.ts:97`.
+## 4. Recebimento
 
-## 4. Recebimento (`StatusRecebimento`)
+A conferência sem divergência conclui o recebimento e o lote nasce. Se diverge, nada entra: outra pessoa reconta, e o PCP decide se aceita ou reabre.
 
 ```mermaid
 stateDiagram-v2
@@ -102,10 +115,11 @@ stateDiagram-v2
     ACEITO --> [*]
     REABERTO --> [*]
 ```
+É obrigatório dar motivo ao aceitar ou reabrir.
 
-Selo ✅: enum `compras.prisma:31-37`; `recebimento.service.ts:135,249,331`. Motivo obrigatório em `ACEITO` e `REABERTO`. Tipos de divergência do recebimento: `QUANTIDADE`, `DESCRICAO`, `PESO`, `AVARIA` ✅ `compras.prisma:42-47`.
+## 5. Divergência de produção
 
-## 5. Divergência de produção (`StatusDivergencia`)
+Quando a Qualidade reprova, abre-se uma divergência. Ela é analisada e resolvida ou cancelada.
 
 ```mermaid
 stateDiagram-v2
@@ -116,12 +130,11 @@ stateDiagram-v2
     RESOLVIDA --> [*]
     CANCELADA --> [*]
 ```
+🔴 Não dá para reabrir uma divergência resolvida (sem rota; risco catalogado e adiado).
 
-Selo ✅ enum `producao.prisma:77-82`. 🔴 Não há reabertura de divergência resolvida (sem endpoint; risco catalogado e adiado). Tipos: `QUALIDADE`, `QUANTIDADE`, `PRAZO`, `DANO`, `DOCUMENTACAO`, `OUTRO`.
+## 6. Requisição de compra no MES
 
-## 6. Requisição de compra no MES (`StatusRequisicaoCompra`)
-
-Resumo da requisição, recalculado por `resumirRequisicao` a cada marco do av-hub e a cada recebimento.
+Resumo da requisição inteira. Muda a cada marco do av-hub e a cada recebimento: aberta, em compra, recebida (parcial ou total) ou cancelada.
 
 ```mermaid
 stateDiagram-v2
@@ -135,12 +148,11 @@ stateDiagram-v2
     CANCELADA --> ABERTA : requisicao_reaberta, so a cancelada pelo Compras
     RECEBIDA --> [*]
 ```
+Só dá para cancelar uma requisição aberta. A liberação manual do recebimento a leva para "em compra". 🟡 As setas de recebida parcial e recebida ainda não foram relidas linha a linha (pendência PS-011 em [[Pontas-Soltas]]).
 
-Selo ✅ enum `compras.prisma:9-15`; cancelamento só em `ABERTA` (`canceladaPor` `mes` ou `compras`, `compras.prisma:84-87`); liberação manual muda `ABERTA` para `EM_COMPRA` (`compras.service.ts:430-436`). 🟡 As arestas `RECEBIDA_PARCIAL` e `RECEBIDA` vêm de `resumirRequisicao`, não relido linha a linha nesta rodada; pendência PS-011 em [[Pontas-Soltas]].
+## 7. Etapa de compra de cada material
 
-## 7. Etapa de compra de cada material (`RequisicaoCompraItem.etapaCompra`)
-
-Espelho dos marcos do contrato 35 ([[Integracao-AvHub-MES]], INT-03).
+Cada material segue os marcos que o av-hub avisa: aguarda comprador, em cotação, em aprovação, com o fornecedor e em trânsito. Integração: [[Integracao-AvHub-MES]], INT-03.
 
 ```mermaid
 stateDiagram-v2
@@ -156,10 +168,11 @@ stateDiagram-v2
     EM_COTACAO --> CANCELADA : requisicao_cancelada
     CANCELADA --> AGUARDANDO_COMPRADOR : requisicao_reaberta
 ```
+Alguns avisos (previsão alterada, fornecedor confirmou, OC no Omie, ocorrência) não mudam a etapa.
 
-Selo ✅ `requisicao-avhub.eventos.ts:234-318`; valores em `compras.prisma:132-135`. `previsao_alterada`, `fornecedor_confirmou`, `oc_no_omie` e `ocorrencia` não mudam a etapa.
+## 8. Requisição no av-hub
 
-## 8. Requisição no av-hub (`requisicoes_compra.status`)
+A requisição do Compras fica aberta ou em cotação, pode ser cancelada e reaberta, e vira "atendida" sozinha quando a OC nasce.
 
 ```mermaid
 stateDiagram-v2
@@ -178,12 +191,11 @@ stateDiagram-v2
     cancelada --> excluida : DELETE, so criada no Hub (LOG-55)
     excluida --> [*]
 ```
+🔴 O estado `excluida` é proposta 📝 ([[LOG-55-Compras-Excluir-Requisicao]]): só vale para requisição criada no Hub, sem OC. A requisição do MES continua só cancelável. Banco e API ainda não existem.
 
-🔴 `excluida` é 📝 proposta ([[LOG-55-Compras-Excluir-Requisicao]]): exclusão lógica (`deleted_at`), sem OC e sem `id_origem`; a requisição do MES continua só cancelável. Banco e API ainda não existem.
+## 9. Ordem de compra no av-hub
 
-Selo ✅ `requisicoes_compra.route.js:13-22` (`atendida` só pela trigger da OC, nunca pelo PATCH); 409 `REQUISICAO_COM_OC` ao cancelar com OC (`:221-265`).
-
-## 9. Ordem de compra no av-hub (`ordens_compra.status`)
+A OC nasce rascunho e vai para aprovação. Até R$ 30 mil, o banco aprova sozinho. Acima disso, só o Gerente de Compras aprova. A Diretoria não aprova (N14-21).
 
 ```mermaid
 stateDiagram-v2
@@ -196,10 +208,11 @@ stateDiagram-v2
     aprovado --> [*]
     cancelado --> [*]
 ```
+O envio ao Omie tem estado próprio e fica fora deste diagrama.
 
-Selo ✅ valores em `ordens_compra.route.js:91` e no `CHECK` do dump (`ck_ordens_compra_status`); 🟡 as transições exatas são feitas por trigger do banco e não foram relidas; ✅ regra de aprovação N14-21: até o limite da unidade (R$ 30 mil por padrão) a trigger `fn_ordens_compra_recalcular` aprova sozinha; acima dele, só o Gerente de Compras (`ordens_compra.route.js:1230-1240`); a Diretoria não aprova (Mestre, nós C2/C3). Envio ao Omie tem estado próprio (`status_sincronizacao_omie`) fora deste diagrama.
+## 10. Envio da requisição ao av-hub
 
-## 10. Envio da requisição ao av-hub (`StatusEnvioAvhub`)
+A fila de saída do MES. Cada requisição fica pendente até o av-hub aceitar (enviado), recusar (recusado) ou rejeitar o formato (falhou). Falha de rede só reagenda.
 
 ```mermaid
 stateDiagram-v2
@@ -212,10 +225,11 @@ stateDiagram-v2
     ENVIADO --> [*]
     RECUSADO --> [*]
 ```
+✅ Conferido.
 
-Selo ✅ `integracao.prisma:17-29`, `envio-avhub.service.ts:164-169`.
+## 11. Liberação do pedido
 
-## 11. Liberação do pedido (`status_liberacao`)
+O pedido chega travado. O vendedor marca e libera. Quando o MES importa, a marcação trava.
 
 ```mermaid
 stateDiagram-v2
@@ -225,12 +239,11 @@ stateDiagram-v2
     liberado --> importado : P2 MES confirma a importacao
     importado --> [*]
 ```
+Veja as regras em [[01-Vendas-Liberacao]].
 
-Selo ✅ valores da view `vw_pedidos_liberacao` e travas: [[01-Vendas-Liberacao]]; importado trava a marcação (409 `PEDIDO_IMPORTADO_MES`).
+## 12. Do setor e do status para a etapa do item
 
-## 12. Do setor e do status para a etapa do item (contrato 005)
-
-Não é um diagrama de transição: o MES calcula a etapa por regra (`etapaDoItem`). As 11 etapas e a tradução no HUB estão em [[Estados-e-Status]].
+Este não é um diagrama de mudança de fase. É uma regra de tradução: o MES olha o status da parcial e o tipo do setor e diz em que etapa o item está (11 etapas). A tradução no HUB está em [[Estados-e-Status]].
 
 ```mermaid
 flowchart TD
@@ -247,12 +260,11 @@ flowchart TD
     S0 -->|"PRODUTIVO em andamento, pausado ou retrabalho F1"| E_FE["fabrica.execucao"]
     S0 -->|"PRODUTIVO nos demais status F1"| E_FS["fabrica.espera"]
 ```
+🟡 `compras.fechamento` ainda aparece como "Em compra", sem cotação, aprovação e trânsito (BL-009).
 
-Selo ✅ `integracao-avhub.service.ts:160-192`. 🟡 `compras.fechamento` ainda é "Em compra", sem cotação, aprovação e trânsito (BL-009).
+## 13. Proposta (🟡)
 
-## 13. Proposta (`core_comercial.propostas.status`, 🟡)
-
-O enum de hoje, no módulo do Pablo, é `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76` ✅). O desenho abaixo é o da migração do [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] (`ck_propostas_status`), pelas N16-02 e N16-03: sem fechamento parcial, ajuste só até aprovar, proposta incompleta não aprova, cancelada não reabre.
+A proposta nasce aberta, o vendedor a revisa, aprova (só se estiver completa) e a transforma em pedido. Cancelada não reabre: o vendedor duplica. Regras: [[11-Proposta-e-Pedido-de-Venda]].
 
 ```mermaid
 stateDiagram-v2
@@ -270,10 +282,11 @@ stateDiagram-v2
         A comissão estimada vira histórico.
     end note
 ```
+🟡 Desenho da migração proposta, fora da produção. A proposta de hoje, no módulo do Pablo, é diferente (ver Detalhe técnico).
 
-Selo 🟡 (migração testada em Postgres 18, fora da produção). Nós do Mestre: `V0.1` a `V0.7`, `V0C`. Hoje (✅ no teste) `atualizar` só roda em `ABERTA` (`propostas.service.ts:478-481`), `perder` leva a `PERDIDA` (`:555-575`), `reabrir` e `fechar` parcial existem (`:578-649`) e saem. Regras: [[11-Proposta-e-Pedido-de-Venda]].
+## 14. Pedido de venda do Hub (🟡)
 
-## 14. Pedido de venda do Hub (`core_comercial.pedidos.status_sincronizacao_omie`, 🟡)
+O pedido criado pela proposta entra numa fila e é enviado ao Omie pela pipeline. Se o Omie recusa, o vendedor vê o motivo e pode tentar de novo.
 
 ```mermaid
 stateDiagram-v2
@@ -284,10 +297,11 @@ stateDiagram-v2
     erro --> pendente : Tentar novamente
     sincronizado --> [*]
 ```
+🟡 Proposta, sem código. O pedido digitado no Omie chega já sincronizado.
 
-Selo 🟡. Mesmo vocabulário da OC (`ck_ordens_compra_status`, Dump Avhub 17315-17320 ✅). O pedido tem `origem` `PROPOSTA` ou `OMIE` (N16-106); o da proposta nasce com `status_liberacao = liberado` (diagrama 11), e o do Omie segue o diagrama 11 desde `pendente`. Na recusa, o vendedor vê o motivo e o botão "Tentar novamente" (N16-36).
+## 15. Pedido de custo ao Orçamento
 
-## 15. Pedido de custo ao Orçamento (`StatusSolicitacao`)
+O vendedor sem o dado de custo pede ao Orçamento. O pedido fica aberto até o orçamentista responder com uma oferta, avisar que não há fornecedor ou cancelar com motivo. Regras: [[12-Orcamento-Base-de-Preco]].
 
 ```mermaid
 stateDiagram-v2
@@ -300,12 +314,11 @@ stateDiagram-v2
     SEM_FORNECEDOR --> [*]
     CANCELADA --> [*]
 ```
+O prazo obrigatório sai: o tempo é só cronometrado (N16-58).
 
-Selo ✅ valores em `enums.prisma:188-195`; transições conforme `custos.routes.ts:406-510` ❓ não relidas linha a linha. O prazo obrigatório (`prazo_resposta`, 2 dias úteis por padrão, `custos.routes.ts:378`) **sai**: o [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]] deixa a coluna nula, e o tempo é só cronometrado (N16-58). O setor de Orçamento é novo; o Moisés é uma das pessoas (N16-104). Regras: [[12-Orcamento-Base-de-Preco]].
+## 16. Comissão nova (🟡)
 
-## 16. Comissão nova (`core_comissao`, 🟡)
-
-Dois diagramas: o dossiê da proposta ou do pedido (`comissoes.estado`) e a comissão de cada nota fiscal (`comissoes_nf.estado`). Valores do [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]], resumidos em [[04-Regras-e-Estados-da-Comissao-Nova]].
+São dois desenhos. O primeiro é o dossiê da comissão da proposta ou do pedido: estimada, congelada, em acompanhamento, encerrada ou cancelada. Valores resumidos em [[04-Regras-e-Estados-da-Comissao-Nova]].
 
 ```mermaid
 stateDiagram-v2
@@ -321,6 +334,7 @@ stateDiagram-v2
     ENCERRADA --> [*]
     CANCELADA --> [*]
 ```
+O segundo é a comissão de cada nota fiscal (NF). Ela fecha já calculada, e alguém decide: aprova, corta, altera, desaprova ou bloqueia.
 
 ```mermaid
 stateDiagram-v2
@@ -338,10 +352,85 @@ stateDiagram-v2
     DESAPROVADA --> [*]
     NF_CANCELADA --> [*]
 ```
+Toda decisão leva justificativa, e ninguém decide a própria comissão. O vendedor só vê a comissão real depois da decisão (`K4` e `K5`).
 
-Selo 🟡 (SQL-018 testado em Postgres 18, fora da produção; N16-10, N16-43 a N16-49). Toda decisão leva justificativa e rastro, e ninguém decide a própria comissão. O vendedor só vê a comissão real, com a justificativa, depois de `K4` (`K5`). Depois da decisão, o que muda vira **lançamento** na apuração seguinte (`comissao_lancamentos`): `COMPLEMENTO` ou `DESCONTO` quando o custo completa, com nova decisão, e `ABATIMENTO` quando a nota é cancelada, devolvida ou recusada (`K6`), sem decisão. A devolução parcial abre `comissao_devolucao_pendencia` (`ABERTA` → `INFORMADA` ou `DISPENSADA`).
+## Detalhe técnico
 
-## Outros enums de status do MES
+Os enums vêm do Prisma do `api-pcp` (`prisma/models/*.prisma`) e das rotas do `api-acos-vital` em 14/10/2026. Os diagramas 13 a 16 vêm das migrações propostas em 26/10/2026, ainda fora da produção.
+
+### 1. Parcial do item (`ItemParcial`, enum `StatusItemParcial`)
+
+Motor de estado do chão de fábrica. 9 valores no enum ✅ (`producao.prisma:29-55`): `CRIADO`, `RECEBIDO`, `EM_ANDAMENTO`, `EM_TRANSITO`, `PAUSADO`, `REPROVADO`, `CONCLUIDO`, `RETRABALHO`, `CANCELADO`. Não é entrega ao cliente (isso é `Entrega`).
+
+Selo ✅: ações em `itens-parciais.controller.ts:100-297` (receber, iniciar, mover, concluir, atender-estoque, pausar, reprovar, resolver, retrabalho, retomar, split, devolver, cancelar, desfazer-recebimento, consolidar). Nó do Mestre: F1, Q7, X1. `desfazer-recebimento` ✅ `itens-parciais.controller.ts:285` estorna o consumo da reserva; ❓ o status de destino exato não foi relido nesta rodada (desenhado como `EM_TRANSITO`).
+
+### 2. Lote (`StatusQualidadeLote`)
+
+Selo ✅: enum `estoque.prisma:25-32`; `qualidade.service.ts:83-262` (quarentena em `:243`); carga inicial `OrigemLote.CARGA_INICIAL`. 🔴 Não existe origem de lote para fabricado aprovado (`OrigemLote` só tem `RECEBIMENTO` e `CARGA_INICIAL`).
+
+### 3. Reserva de estoque (`StatusReserva`)
+
+Selo ✅ enum `estoque.prisma:48-52`, `consumirReservasDaParcial` em `estoque-operacao.helpers.ts:208`; 📝 retirada decidida; 🔴 sem código. Liberação manual: `PATCH /estoque/reservas/:id/liberar` ✅ `estoque-operacao.controller.ts:97`.
+
+### 4. Recebimento (`StatusRecebimento`)
+
+Selo ✅: enum `compras.prisma:31-37`; `recebimento.service.ts:135,249,331`. Motivo obrigatório em `ACEITO` e `REABERTO`. Tipos de divergência do recebimento: `QUANTIDADE`, `DESCRICAO`, `PESO`, `AVARIA` ✅ `compras.prisma:42-47`.
+
+### 5. Divergência de produção (`StatusDivergencia`)
+
+Selo ✅ enum `producao.prisma:77-82`. 🔴 Não há reabertura de divergência resolvida (sem endpoint; risco catalogado e adiado). Tipos: `QUALIDADE`, `QUANTIDADE`, `PRAZO`, `DANO`, `DOCUMENTACAO`, `OUTRO`.
+
+### 6. Requisição de compra no MES (`StatusRequisicaoCompra`)
+
+Resumo da requisição, recalculado por `resumirRequisicao` a cada marco do av-hub e a cada recebimento. Selo ✅ enum `compras.prisma:9-15`; cancelamento só em `ABERTA` (`canceladaPor` `mes` ou `compras`, `compras.prisma:84-87`); liberação manual muda `ABERTA` para `EM_COMPRA` (`compras.service.ts:430-436`). 🟡 As arestas `RECEBIDA_PARCIAL` e `RECEBIDA` vêm de `resumirRequisicao`, não relido linha a linha nesta rodada; pendência PS-011 em [[Pontas-Soltas]].
+
+### 7. Etapa de compra de cada material (`RequisicaoCompraItem.etapaCompra`)
+
+Espelho dos marcos do contrato 35 ([[Integracao-AvHub-MES]], INT-03). Selo ✅ `requisicao-avhub.eventos.ts:234-318`; valores em `compras.prisma:132-135`. `previsao_alterada`, `fornecedor_confirmou`, `oc_no_omie` e `ocorrencia` não mudam a etapa.
+
+### 8. Requisição no av-hub (`requisicoes_compra.status`)
+
+🔴 `excluida` é 📝 proposta ([[LOG-55-Compras-Excluir-Requisicao]]): exclusão lógica (`deleted_at`), sem OC e sem `id_origem`; a requisição do MES continua só cancelável. Banco e API ainda não existem.
+
+Selo ✅ `requisicoes_compra.route.js:13-22` (`atendida` só pela trigger da OC, nunca pelo PATCH); 409 `REQUISICAO_COM_OC` ao cancelar com OC (`:221-265`).
+
+### 9. Ordem de compra no av-hub (`ordens_compra.status`)
+
+Selo ✅ valores em `ordens_compra.route.js:91` e no `CHECK` do dump (`ck_ordens_compra_status`); 🟡 as transições exatas são feitas por trigger do banco e não foram relidas; ✅ regra de aprovação N14-21: até o limite da unidade (R$ 30 mil por padrão) a trigger `fn_ordens_compra_recalcular` aprova sozinha; acima dele, só o Gerente de Compras (`ordens_compra.route.js:1230-1240`); a Diretoria não aprova (Mestre, nós C2/C3). Envio ao Omie tem estado próprio (`status_sincronizacao_omie`) fora deste diagrama.
+
+### 10. Envio da requisição ao av-hub (`StatusEnvioAvhub`)
+
+Selo ✅ `integracao.prisma:17-29`, `envio-avhub.service.ts:164-169`.
+
+### 11. Liberação do pedido (`status_liberacao`)
+
+Selo ✅ valores da view `vw_pedidos_liberacao` e travas: [[01-Vendas-Liberacao]]; importado trava a marcação (409 `PEDIDO_IMPORTADO_MES`).
+
+### 12. Do setor e do status para a etapa do item (contrato 005)
+
+Não é um diagrama de transição: o MES calcula a etapa por regra (`etapaDoItem`). As 11 etapas e a tradução no HUB estão em [[Estados-e-Status]]. Selo ✅ `integracao-avhub.service.ts:160-192`. 🟡 `compras.fechamento` ainda é "Em compra", sem cotação, aprovação e trânsito (BL-009).
+
+### 13. Proposta (`core_comercial.propostas.status`, 🟡)
+
+O enum de hoje, no módulo do Pablo, é `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76` ✅). O desenho é o da migração (`ck_propostas_status`), pelas N16-02 e N16-03: sem fechamento parcial, ajuste só até aprovar, proposta incompleta não aprova, cancelada não reabre.
+
+Selo 🟡 (migração testada em Postgres 18, fora da produção). Nós do Mestre: `V0.1` a `V0.7`, `V0C`. Hoje (✅ no teste) `atualizar` só roda em `ABERTA` (`propostas.service.ts:478-481`), `perder` leva a `PERDIDA` (`:555-575`), `reabrir` e `fechar` parcial existem (`:578-649`) e saem. Regras: [[11-Proposta-e-Pedido-de-Venda]].
+
+### 14. Pedido de venda do Hub (`core_comercial.pedidos.status_sincronizacao_omie`, 🟡)
+
+Selo 🟡. Mesmo vocabulário da OC (`ck_ordens_compra_status`, Dump Avhub 17315-17320 ✅). O pedido tem `origem` `PROPOSTA` ou `OMIE` (N16-106); o da proposta nasce com `status_liberacao = liberado` (diagrama 11), e o do Omie segue o diagrama 11 desde `pendente`. Na recusa, o vendedor vê o motivo e o botão "Tentar novamente" (N16-36).
+
+### 15. Pedido de custo ao Orçamento (`StatusSolicitacao`)
+
+Selo ✅ valores em `enums.prisma:188-195`; transições conforme `custos.routes.ts:406-510` ❓ não relidas linha a linha. O prazo obrigatório (`prazo_resposta`, 2 dias úteis por padrão, `custos.routes.ts:378`) **sai**: a migração do Orçamento deixa a coluna nula, e o tempo é só cronometrado (N16-58). O setor de Orçamento é novo; o Moisés é uma das pessoas (N16-104). Regras: [[12-Orcamento-Base-de-Preco]].
+
+### 16. Comissão nova (`core_comissao`, 🟡)
+
+Dois diagramas: o dossiê da proposta ou do pedido (`comissoes.estado`) e a comissão de cada nota fiscal (`comissoes_nf.estado`). Valores resumidos em [[04-Regras-e-Estados-da-Comissao-Nova]].
+
+Selo 🟡 (testado em Postgres 18, fora da produção; N16-10, N16-43 a N16-49). Toda decisão leva justificativa e rastro, e ninguém decide a própria comissão. O vendedor só vê a comissão real, com a justificativa, depois de `K4` (`K5`). Depois da decisão, o que muda vira **lançamento** na apuração seguinte (`comissao_lancamentos`): `COMPLEMENTO` ou `DESCONTO` quando o custo completa, com nova decisão, e `ABATIMENTO` quando a nota é cancelada, devolvida ou recusada (`K6`), sem decisão. A devolução parcial abre `comissao_devolucao_pendencia` (`ABERTA` → `INFORMADA` ou `DISPENSADA`).
+
+### Outros enums de status do MES
 
 | Enum | Valores | Selo |
 |---|---|---|

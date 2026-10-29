@@ -16,22 +16,27 @@ criado_original: 2026-10-15
 
 > **Onde atua:** av-hub: banco, API, front
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define como levar o módulo Comercial & Suprimentos (a `api-comercial`, API de teste do Pablo) para a API do Hub, com um só banco e uma só permissão, sem recriar o que o Hub já tem.
+> **Quem é afetado:** Pablo mantém as telas, que passam a chamar a API do Hub. Robert conduz o módulo e Gustavo cuida do banco e da API.
+> **Situação:** Parcial. A fase 1 do banco foi aplicada em produção em 20/10, segundo o Gustavo. Rotas e corte do HUB seguem abertos, com o Robert começando pela proposta. O ciclo da proposta mudou e virá em contratos que ele vai criar.
+
 > [!info] Situação em 28/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Robert (módulo, N16-117; o Pablo acompanha) · **Banco e API:** Gustavo (DBA), dono da `api-acos-vital`
 >
 > - 📝 **28/10/2026, N16-117 a N16-119:** o **Robert** conduz o módulo na `api-acos-vital` e começa pela **proposta** (N16-118); o Pablo acompanha. A `api-comercial` **não é removida do repositório**: volta ao av-hub como legado só para leitura (com `LEIA-ME-LEGADO.md`, fora da CI, do lint e do `tsc`); a remoção de **produção** segue valendo (corrige a N16-111). As telas do Pablo **ficam** e o BFF passa a chamar a `api-acos-vital` (N16-119). Onde esta nota diz "Pablo" como quem faz, leia Robert.
 > - 📝 **28/10/2026, N16-116:** não existirá `core_comercial`. O que migra entra em `core_vendas_faturamento`; o prefixo `/comercial/` das rotas sai. As seções 3 a 9 que falam em "criar em `core_comercial`" valem com esse schema.
 > - 📝 **N16-112:** o Hub é um sistema só: cada conceito tem uma tabela, uma rota e uma tela ([[Conexao-das-Telas-do-Pablo-com-a-API-do-Hub]]). **N16-113:** serviço de e-mail e notificações fica para o futuro.
-> - ✅ **Fase 1 do banco feita, informado pelo Gustavo (26/10/2026):** schema `core_comercial` (migration `052`) aplicado no teste em 16/10 e **em produção em 20/10**. Não conferi no banco. O resto (rotas na `api-acos-vital`, módulo, corte do HUB) segue aberto e passou ao Robert (N16-117). Pela N16-116 esse schema **sai**: o SQL-016 (bloco A0) move as tabelas para `core_vendas_faturamento`.
+> - ✅ **Fase 1 do banco feita, informado pelo Gustavo (26/10/2026):** schema `core_comercial` (migration `052`) aplicado no teste em 16/10 e **em produção em 20/10**. Não conferi no banco. O resto (rotas na `api-acos-vital`, módulo, corte do HUB) segue aberto e passou ao Robert (N16-117). Pela N16-116 esse schema **sai**: o bloco A0 da migração move as tabelas para `core_vendas_faturamento`.
 > - 📝 **A decisão já existe:** [[Registro-de-Decisoes]] N14-15 (14/10/2026): a `api-comercial` é uma API de teste do Pablo, **não será publicada**, e ele migra tudo para a `api-acos-vital`. Este contrato não decide *se* migra; propõe **como**, separando o que a API do hub já tem, o que precisa ser criado e o que deve ser descartado.
 > - ✅ **Inventário feito em 15/10/2026** nos dois lados, por leitura de código: `api-comercial` (30 tabelas, 24 enums, 13 migrations, ~91 handlers, cerca de 300 testes) e `api-acos-vital` `276dab8` (124 tabelas, rotas por schema).
 > - 🕓 Registro de 15/10 (parte superada): nada migrado; hoje só a fase 1 do banco existe (item acima).
 > - 🟡 O desenho das seções 3 a 9 é **proposta**; as decisões que dependem do Nathan, do Pablo e do Gustavo estão na seção 13.
 > - ❓ Não conferi: `auth.rotas_telas` e `auth.telas` em produção, o que a pipeline carrega de pedidos de compra, e nada foi executado.
 >
-> - 📝 **O que não migra (Nathan, 27/10/2026, N16-109):** o módulo do Pablo é só ambiente de teste e **não tem dado**, então a migração é escolher o que entra na `api-acos-vital`. **Não portar:** a sincronização própria do Omie e suas tabelas de cópia (`ordens_compra`, `itens_ordem_compra`, `produtos_contas_omie`, `fornecedores_contas_omie`, `omie_registros_brutos`, `sincronizacoes_omie`, `travas_tarefa`), o Histórico de compras, a planilha do pedido a digitar no Omie, a migração do ERP antigo, o fechamento parcial, a autenticação e os perfis próprios. **Reaproveitar** o motor na API (uma fonte), as ofertas, fornecedores, parâmetros e o pedido de custo. Lista completa, com tamanhos e motivos, em [[LOG-62-Reescopo-Menu-Enxuto-e-Limpeza-do-Modulo-do-Pablo]] §5. Isso **confirma e amplia** o corte que a seção 3.4 desta nota já fazia para a sincronização de pedidos de compra ("Some. A pipeline é a fonte"): agora vale também para o Histórico de compras que a lia, para a planilha do pedido e para a migração do ERP antigo.
+> - 📝 **O que não migra (Nathan, 27/10/2026, N16-109):** o módulo do Pablo é só ambiente de teste e **não tem dado**, então a migração é escolher o que entra na `api-acos-vital`. **Não portar:** a sincronização própria do Omie e suas tabelas de cópia (`ordens_compra`, `itens_ordem_compra`, `produtos_contas_omie`, `fornecedores_contas_omie`, `omie_registros_brutos`, `sincronizacoes_omie`, `travas_tarefa`), o Histórico de compras, a planilha do pedido a digitar no Omie, a migração do ERP antigo, o fechamento parcial, a autenticação e os perfis próprios. **Reaproveitar** o motor na API (uma fonte), as ofertas, fornecedores, parâmetros e o pedido de custo. Lista completa, com tamanhos e motivos, em §5. Isso **confirma e amplia** o corte que a seção 3.4 desta nota já fazia para a sincronização de pedidos de compra ("Some. A pipeline é a fonte"): agora vale também para o Histórico de compras que a lia, para a planilha do pedido e para a migração do ERP antigo.
 >
-> - 🟡 **Desenho aprovado em 26/10/2026 muda o ciclo da proposta** (N16-02, N16-03, N16-84, N16-106): sem fechamento parcial, cancelada no lugar de perdida, sem reabrir, pedido criado pelo Hub e pedido do Omie no mesmo fluxo. A migração proposta está em [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] e as rotas em [[API-019-Proposta-e-Pedido-de-Venda-na-API-do-Hub]]; o domínio de preço, margem e custo continua portado como está. Combinar antes da fase 3 (PS-035).
+> - 🟡 **Desenho aprovado em 26/10/2026 muda o ciclo da proposta** (N16-02, N16-03, N16-84, N16-106): sem fechamento parcial, cancelada no lugar de perdida, sem reabrir, pedido criado pelo Hub e pedido do Omie no mesmo fluxo. A migração e as rotas dessa parte virão em contratos que o Robert vai criar; o domínio de preço, margem e custo continua portado como está. Combinar antes da fase 3 (PS-035).
 >
 > **Não confundir** com [[LOG-51-Seguranca-e-Padrao-da-API-do-Hub]]: aquele corrige a API que já existe; este traz o módulo novo para dentro dela. O módulo **tem de entrar já seguindo o LOG-51**, para não herdar o problema.
 
@@ -41,18 +46,18 @@ criado_original: 2026-10-15
 
 | O que o módulo do Pablo criou (`api-comercial` e fase 1 em `core_comercial`) | O que o Hub já tem e deve ser usado |
 |---|---|
-| `unidades_emissoras`, `GET /comercial/empresas_emissoras` | `core.unidades` (`GET /unidades`). Só o que a unidade não tem (logo, CRC, textos do PDF) pode ficar como extensão 1:1, se o Gustavo decidir (N16-80, SQL-016 §2.2) |
+| `unidades_emissoras`, `GET /comercial/empresas_emissoras` | `core.unidades` (`GET /unidades`). Só o que a unidade não tem (logo, CRC, textos do PDF) pode ficar como extensão 1:1, se o Gustavo decidir (N16-80) |
 | `perfis_comerciais`, `fn_responsaveis_proposta`, `GET /comercial/responsaveis` | `auth.usuarios`, `auxiliar_vendedor` e os vendedores de `GET /me/permissoes` (`proprio`, `titular`). **"Emitir em nome de"**: o auxiliar escolhe entre os titulares que representa; o vendedor oficial não vê o campo |
 | Capacidades derivadas por rota própria (`GET /comercial/me`) | As telas e ações de `GET /me/permissoes` (`auth.telas`, `auth.rotas_telas`) |
 | Autenticação e perfis próprios (`perfisDev`, JWT próprio) | Token do Hub e `auth.fn_autorizar` (LOG-51) |
 | `produtos`, `produtos_contas_omie` (cópia do Omie) | `core.produtos`, `vw_catalogo_de_produtos` (`GET /produtos`) |
 | `fornecedores`, `fornecedores_contas_omie` | `core.parceiros` (tipo FORNECEDOR) e `parceiros_produtos` |
 | `clientes` (CRM próprio) | `core.parceiros` (clientes), grupos e Acompanhamento de Clientes. 🟡 Prospect sem cadastro no Omie continua em aberto (N16-109) |
-| `GET /cambio` (AwesomeAPI e PTAX próprias) | `core.cotacoes_moeda` (`GET /cotacoes_moeda/atual`), a mesma da OC (LOG-56 R6) |
+| `GET /cambio` (AwesomeAPI e PTAX próprias) | `core.cotacoes_moeda` (`GET /cotacoes_moeda/atual`), a mesma da OC |
 | `ordens_compra`, `itens_ordem_compra`, Histórico de compras | `core_vendas_faturamento.pedidos_compras` e a tela Ordens de compra (N16-108) |
 | Parâmetros do simulador lidos por HTTP | `core_comissionamento.simulador_parametros`, no mesmo banco |
 
-**No front (27/10/2026):** "Emitir em nome de" já usa o vínculo do Hub (`GET /api/me/vendedores`, que lê `/me/permissoes`); empresa e câmbio leem o Hub. O vendedor representado ainda não vai ao backend, porque a proposta ainda não existe na API do Hub (API-019).
+**No front (27/10/2026):** "Emitir em nome de" já usa o vínculo do Hub (`GET /api/me/vendedores`, que lê `/me/permissoes`); empresa e câmbio leem o Hub. O vendedor representado ainda não vai ao backend, porque a proposta ainda não existe na API do Hub.
 
 ## 1. O que muda e o que fica
 
@@ -325,7 +330,7 @@ Achado durante este inventário (✅ relido em 15/10/2026): em `src/schemas/core
 
 ## 16. O que não foi conferido
 
-- `auth.rotas_telas` e `auth.telas` em produção; o schema `core_comercial` publicado (está no dump de 26/10, vazio; a N16-116 o tira e o SQL-016 bloco A0 move as tabelas).
+- `auth.rotas_telas` e `auth.telas` em produção; o schema `core_comercial` publicado (está no dump de 26/10, vazio; a N16-116 o tira e o bloco A0 move as tabelas).
 - O que a pipeline carrega de `pedidos_compras` (conferi o vault, não o código dela).
 - O corpo completo de `relatorios.service.ts`, `dashboards.routes.ts` e `pedidoOmie.ts` do `api-comercial` (li guardas e assinaturas); as fixtures "dourados" de cálculo citadas no código; o upload de certificado; as constantes da telha.
 - Se `empresas_emissoras`, `notificacoes` e `clientes` duplicam algo que já exista no hub além do que está nesta nota.

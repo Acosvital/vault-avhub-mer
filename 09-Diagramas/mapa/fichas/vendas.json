@@ -1,0 +1,275 @@
+{
+  "id": "vendas",
+  "nome": "Vendas",
+  "fase": "Vender",
+  "fraseMapa": "Monta a proposta e libera o pedido",
+  "titulo": "Vendas: da proposta ao pedido liberado",
+  "resumo": "O vendedor monta a proposta com o preço que conseguiu, a Gerência aprova, e a proposta vira pedido no Omie. Só um pedido liberado chega ao PCP.",
+  "recebeDe": [
+    "Cliente (pedido de compra)",
+    "Orçamento (preço de custo, quando o vendedor pede)",
+    "Omie (pedidos digitados direto lá)"
+  ],
+  "entregaA": [
+    "PCP: pedido liberado, com a marcação \"a Qualidade acompanha?\"",
+    "O PCP lê a lista; ninguém empurra nada"
+  ],
+  "atuam": [
+    {
+      "quem": "Vendedor",
+      "papel": "Cria a proposta, marca aprovada, transforma em pedido, libera, responde compras mais caras"
+    },
+    {
+      "quem": "Auxiliar do titular",
+      "papel": "Faz o mesmo pelos titulares que ajuda"
+    },
+    {
+      "quem": "Gerência",
+      "papel": "Aprova desconto e margem pessoalmente. Não tem tela"
+    },
+    {
+      "quem": "Orçamento",
+      "papel": "Responde pedidos de custo e mantém a base de preço"
+    },
+    {
+      "quem": "Compras",
+      "papel": "Confere a parte de compras do pedido"
+    },
+    {
+      "quem": "Gerente de Vendas",
+      "papel": "Só vê as propostas e a liberação da equipe"
+    }
+  ],
+  "estados": [
+    "ABERTA",
+    "APROVADA",
+    "TRANSFORMADA",
+    "LIBERADO",
+    "EM ANDAMENTO"
+  ],
+  "passos": [
+    {
+      "id": "V0.1",
+      "t": "Cria a proposta",
+      "quem": "Vendedor",
+      "onde": "Nova proposta (/vendas/propostas/nova)",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "ABERTA",
+      "o": "Escolhe o cliente, a unidade que emite e os itens. O sistema dá à proposta um número próprio, só com dígitos.",
+      "ex": "O Cliente Exemplo S.A. pede 100 flanges. O vendedor lança o cliente e o item. A proposta nasce aberta."
+    },
+    {
+      "id": "V0.2",
+      "t": "Preenche o custo",
+      "quem": "Vendedor, e o Orçamento se ele pedir",
+      "onde": "Proposta (detalhe)",
+      "st": "gap",
+      "stl": "Falta fazer a base de preço",
+      "estado": "ABERTA",
+      "o": "Digita o custo que conseguiu por telefone ou e-mail. Se não sabe, pede cotação ao Orçamento e continua trabalhando; nada fica bloqueado.",
+      "ex": "Ele não tem o preço do flange. Pede ao Orçamento e, enquanto espera, vê o histórico das compras anteriores."
+    },
+    {
+      "id": "V0.3",
+      "t": "Comissão estimada nasce",
+      "quem": "Sistema",
+      "onde": "Rodapé da proposta",
+      "st": "gap",
+      "stl": "Falta fazer",
+      "estado": "ABERTA",
+      "o": "O sistema calcula margem e comissão estimada. Só o vendedor vê. Se algum item está sem custo e sem fornecedor, a proposta fica incompleta e não pode ser aprovada.",
+      "ex": "O item dos flanges já tem custo. A proposta está completa e a margem aparece no rodapé, com a letra de classificação."
+    },
+    {
+      "id": "V0.4 · V0.5",
+      "t": "Gerência aprova, vendedor marca",
+      "quem": "Gerência (fora do sistema) e vendedor",
+      "onde": "Proposta (detalhe)",
+      "st": "gap",
+      "stl": "Falta fazer",
+      "estado": "APROVADA",
+      "o": "Desconto e margem são aprovados pessoalmente, neste ciclo. Depois o vendedor marca \"aprovada\" no sistema, que grava quem, quando e qual revisão. A proposta trava.",
+      "ex": "A Gerência conversa com o vendedor e aceita o desconto. Ele marca a proposta como aprovada. Dali em diante ela não muda."
+    },
+    {
+      "id": "V0.6",
+      "t": "Transforma em pedido",
+      "quem": "Vendedor",
+      "onde": "Proposta (detalhe)",
+      "st": "gap",
+      "stl": "Falta fazer",
+      "estado": "TRANSFORMADA",
+      "o": "O botão só aparece em proposta aprovada. É obrigatório responder: a Qualidade acompanha o pedido desde o início? Também informa a previsão e se o faturamento será em partes.",
+      "ex": "Os flanges têm certificado de material. O vendedor marca que a Qualidade acompanha."
+    },
+    {
+      "id": "V0.7",
+      "t": "Pedido vai ao Omie",
+      "quem": "Sistema",
+      "onde": "Proposta (detalhe)",
+      "st": "gap",
+      "stl": "Falta fazer",
+      "estado": "TRANSFORMADA",
+      "o": "O sistema grava o pedido numa fila e a integração o envia ao Omie. Se o Omie recusar, aparece \"erro de sincronia\" com o motivo e o botão \"Tentar novamente\". A proposta segue aprovada.",
+      "ex": "O Omie recusa por um produto sem cadastro. A tela mostra o motivo. Depois do cadastro, o vendedor clica em Tentar novamente."
+    },
+    {
+      "id": "V1",
+      "t": "Pedido nasce liberado",
+      "quem": "Sistema",
+      "onde": "Liberar Pedidos (/liberar-pedidos)",
+      "st": "part",
+      "stl": "Liberação pronta; falta ligar à proposta",
+      "estado": "LIBERADO",
+      "o": "O pedido que veio da proposta já nasce liberado, sem passo extra. Só pedido liberado atravessa para o MES; o PCP o enxerga na Triagem.",
+      "ex": "O PCP abre a Triagem, vê os 100 flanges e decide o destino de cada item."
+    },
+    {
+      "id": "C8",
+      "t": "Vendedor acompanha e responde",
+      "quem": "Vendedor",
+      "onde": "Meus Pedidos (/meus-pedidos)",
+      "st": "part",
+      "stl": "Acompanhar pronto; aviso falta",
+      "estado": "EM ANDAMENTO",
+      "o": "Acompanha a etapa de cada item. Se Compras comprar por mais que a proposta, ele recebe um aviso e aprova ou reprova, produto por produto, sem prazo.",
+      "ex": "Compras achou o flange mais caro. O aviso mostra a margem atual, a nova margem e o motivo. Ele aprova e a comissão dele cai."
+    }
+  ],
+  "outroCaminho": {
+    "titulo": "E se o pedido for digitado direto no Omie?",
+    "texto": "Mesmo fluxo e mesma tela, só muda a entrada: o pedido chega travado, com a parte de vendas pronta, e o vendedor libera.",
+    "etapas": [
+      "Digitado no Omie",
+      "Chega travado (Aguardando você)",
+      "*Vendedor marca se a Qualidade acompanha",
+      "*Libera, na mesma ação",
+      "Liberado",
+      "PCP importa (No PCP, marcação trava)"
+    ],
+    "nota": "Até o PCP importar, o vendedor ainda pode corrigir a marcação. Depois disso fica travada."
+  },
+  "regras": [
+    {
+      "t": "Uma proposta, um pedido",
+      "d": "Não existe fechamento parcial da proposta."
+    },
+    {
+      "t": "Aprovou, travou",
+      "d": "A proposta só muda até ser aprovada. Cada ajuste vira uma revisão."
+    },
+    {
+      "t": "Sem custo, sem aprovação",
+      "d": "Se um item não tem custo nem fornecedor, a proposta é incompleta e não pode ser aprovada."
+    },
+    {
+      "t": "O custo não é do vendedor",
+      "d": "Ele digita o que conseguiu, mas o dono do dado é Compras e o Orçamento."
+    },
+    {
+      "t": "Só liberado vai ao PCP",
+      "d": "Sem liberação, o pedido não aparece na Triagem."
+    },
+    {
+      "t": "Compra mais cara: o vendedor decide",
+      "d": "Se Compras gastar mais que a proposta, o vendedor aprova ou reprova, produto por produto, sem prazo."
+    },
+    {
+      "t": "Cancelou, desfaz sozinho",
+      "d": "Requisição e ordem de compra ainda não emitida cancelam. O que já foi comprado vai ao Estoque."
+    }
+  ],
+  "telas": [
+    {
+      "nome": "Propostas (lista)",
+      "rota": "/vendas/propostas",
+      "quem": "Vendedor, equipe",
+      "st": "ok"
+    },
+    {
+      "nome": "Nova proposta",
+      "rota": "/vendas/propostas/nova",
+      "quem": "Vendedor",
+      "st": "part",
+      "obs": "sem comissão"
+    },
+    {
+      "nome": "Proposta: aprovar e transformar em pedido",
+      "rota": "/vendas/propostas/[id]",
+      "quem": "Vendedor",
+      "st": "gap"
+    },
+    {
+      "nome": "Proposta no formato do Simulador (itens, margem, letra)",
+      "rota": "dentro da proposta",
+      "quem": "Vendedor",
+      "st": "gap"
+    },
+    {
+      "nome": "Página do produto (histórico de preço)",
+      "rota": "a definir",
+      "quem": "Vendedor",
+      "st": "gap"
+    },
+    {
+      "nome": "Liberar Pedidos",
+      "rota": "/liberar-pedidos",
+      "quem": "Vendedor",
+      "st": "ok"
+    },
+    {
+      "nome": "Liberação da Equipe",
+      "rota": "/liberacao-equipe",
+      "quem": "Gerente (leitura)",
+      "st": "ok"
+    },
+    {
+      "nome": "Meus Pedidos: etapa dos itens",
+      "rota": "/meus-pedidos",
+      "quem": "Vendedor",
+      "st": "ok"
+    },
+    {
+      "nome": "Meus Pedidos: aprovar ou reprovar compra mais cara",
+      "rota": "/meus-pedidos",
+      "quem": "Vendedor",
+      "st": "gap"
+    }
+  ],
+  "contratos": [
+    {
+      "id": "LOG-26",
+      "titulo": "Liberação do pedido",
+      "nos": "V1 · V3"
+    },
+    {
+      "id": "LOG-40",
+      "titulo": "Escopo do vendedor pelo token",
+      "nos": "V1"
+    },
+    {
+      "id": "API-005",
+      "titulo": "Status por item: MES informa",
+      "nos": "V1"
+    },
+    {
+      "id": "API-006",
+      "titulo": "Status por item: Hub lê",
+      "nos": "V1"
+    }
+  ],
+  "cartao": {
+    "id": "LOG-26",
+    "titulo": "Liberação do pedido",
+    "serve": "Define como o pedido do Omie chega travado, o vendedor libera e o PCP o enxerga.",
+    "quem": "Vendedor e Gerente (telas), PCP (leitura).",
+    "nos": "V1 · V2 · V3",
+    "situacao": "Feito no código",
+    "st": "ok",
+    "muda": "Front: telas Liberar Pedidos e Liberação da Equipe. MES: o PCP consulta a lista de liberados e confirma a importação.",
+    "arquivo": "06-Contratos, nota LOG-26"
+  },
+  "palavrasFonte": 8413,
+  "duvidas": []
+}

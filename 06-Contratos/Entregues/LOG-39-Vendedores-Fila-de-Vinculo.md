@@ -16,6 +16,11 @@ criado_original: 2026-10-06
 
 > **Onde atua:** av-hub: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Entrega a API para a tela de Vendedores refeita no padrão de Compradores: fila de quem falta vincular a um funcionário, nomes do funcionário e do usuário, e setor e unidade dos candidatos.
+> **Quem é afetado:** Quem vincula vendedores em Cadastros › Acessos: vincula em um clique e a tela abre mais rápido, sem baixar todos os funcionários.
+> **Situação:** ✅ Entregue e conferido em produção em 07/10: `sem_vinculo=true` devolveu 30 de 88 vendedores ativos. Destrava a tela (av-hub#155).
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >

@@ -16,6 +16,11 @@ criado_original: 2026-10-02
 
 > **Onde atua:** av-hub: banco, API · MES: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Os marcos da requisição de compra (cotação, OC, aprovação, Omie, confirmação, despacho, cancelamento) vão do av-hub ao MES com data e hora, para medir as etapas de Compras na Torre de Fluxo.
+> **Quem é afetado:** Robert (MES) lê os marcos e atualiza a etapa da compra. Quem cancela em Compras precisa informar o motivo.
+> **Situação:** ✅ Entregue em 02/10: o MES lê `GET /compras/requisicoes/eventos` a cada 5 minutos ou sob demanda e usa todos os marcos. 🟡 Trechos do texto original estão superados.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C1, C3, C4, C5, R0, P3 · **Dono:** Robert
 >

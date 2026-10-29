@@ -1,7 +1,7 @@
 ---
 tags: [rastreabilidade, torre-de-fluxo, sla, integracao, av-hub, mes]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Nathan
 fontes: [LOG-46, v1 Rastreabilidade-e-SLA-de-Eventos, v1 Campos-e-API-para-Rastreabilidade, api-acos-vital f322dcd (77223e9, 7c3f57a), api-pcp 579a625, HUB b55ac55, Dump Avhub de 14/10, Registro-de-Decisoes #35 #89 #92]
@@ -9,13 +9,43 @@ fontes: [LOG-46, v1 Rastreabilidade-e-SLA-de-Eventos, v1 Campos-e-API-para-Rastr
 
 # Rastreabilidade e Torre de Fluxo
 
+**Em uma frase:** a Torre de Fluxo é uma tela de consulta (só leitura) que mostra onde cada item do pedido está, há quanto tempo, com quem e quem autorizou.
+
+**Quando consultar esta nota:** ao trabalhar no histórico de eventos, no prazo por etapa (SLA, a meta de tempo), nas telas T.3 a T.6 ou na troca de eventos entre MES e av-hub. Ela atravessa **todos os nós** do [[00-Fluxo-Mestre-0b]]. Contrato completo: [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas]] (status `parcial`).
+
+## Quem manda dado para quem, quando e por quê
+
+- **Cada sistema registra os próprios eventos** num histórico que nunca é alterado nem apagado. O av-hub registra os dele e o MES, os dele. Nada é copiado entre os bancos.
+- **O MES deveria oferecer uma lista de eventos em ordem** (o "feed", rota `/fluxo/eventos`). 🔴 Ele ainda não tem esse módulo (BL-003) e responde "não encontrado" (404). Por isso a Torre está vazia.
+- **O av-hub lê essa lista a cada 90 segundos** e calcula o estado atual, o dono atual, o tempo em cada etapa e a contagem por setor. ✅ Banco e job do av-hub estão prontos.
+- **Trilha, tempo e SLA** vêm do MES sob demanda, quando alguém abre a tela. Se o MES estiver fora, o av-hub responde com `mes_indisponivel: true`.
+- **O vendedor vê só o resumo** no cartão "Etapa dos itens" ([[Integracao-AvHub-MES]], INT-05). A Torre é uma visão interna.
+
+## Decisões em uma olhada
+
+- A meta de cada etapa nasce do tempo médio histórico. Ninguém digita meta; sem histórico, aparece "sem meta ainda".
+- O SLA conta em horas corridas, e a pausa interrompe a contagem.
+- Cada setor tem um líder responsável. "Fila do setor" e "com uma pessoa" são estados diferentes.
+- O histórico fica 5 anos, sem apagar sozinho.
+
+## Estado das peças
+
+- ✅ Banco, job e rotas do av-hub.
+- 🔴 Módulo `fluxo` e eventos nas transições do MES (Robert, BL-003).
+- 🔴 Perfis de acesso às telas (BL-021) e eventos do lado do av-hub (BL-029).
+- 🔴 Telas T.3, T.4, T.5, T.5b no HUB (Nathan, BL-022).
+
+**Regra de ouro:** API e banco antes das telas. Ordem de subida: o Robert publica o feed, o Gustavo liga perfis e job, o Nathan troca os dados de teste pelos reais.
+
+## Detalhe técnico
+
 A Torre de Fluxo responde: onde cada item do pedido está, há quanto tempo, com quem e quem autorizou. Ela atravessa **todos os nós** do [[00-Fluxo-Mestre-0b]]. É só leitura. O contrato completo é [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas]] (status `parcial`). O fluxo de transporte entre os sistemas está em [[Integracao-AvHub-MES]], INT-07.
 
-## Princípio
+### Princípio
 
 Um **log de eventos imutável** (append-only, sem `UPDATE` nem `DELETE`) por sistema; estado atual, dono atual, tempo em etapa e contagem por setor são projeções derivadas dele 📝. Cada sistema é dono dos próprios eventos (`origem` = `av-hub` ou `mes`); nenhuma tabela é copiada entre os dois. Transporte: polling REST com cursor `seq`, sem webhook (DEC-2).
 
-## Decisões vigentes
+### Decisões vigentes
 
 | Decisão | Valor | Selo |
 |---|---|---|
@@ -30,7 +60,7 @@ Um **log de eventos imutável** (append-only, sem `UPDATE` nem `DELETE`) por sis
 | Ranking de gargalos (T.5b) | proposta de levar ao Ciclo 2 para o Nathan caber na S5 (11,0 pd contra 9,2) | 🟡 #35 |
 | Etapas do feed | vocabulário **provisório**; as de fábrica saem do roteiro e do `ItemParcial` | 🟡 |
 
-## Envelope do evento (feed do MES)
+### Envelope do evento (feed do MES)
 
 `GET /fluxo/eventos?apos_seq=&limite=` (limite máximo previsto 1000), ordem crescente por `seq`, `x-api-key` entre serviços (chave D em [[Chaves-e-Autenticacao]]).
 
@@ -54,7 +84,7 @@ Ações que exigem `autorizado_por` (provisório, R-13): compra acima do limite,
 
 Idempotência: o hub só aplica o evento se for mais novo que o último aplicado ao item (compara `seq`); a janela de 200 `seq` relidos cobre confirmação fora de ordem entre transações ✅ (`item_estado_projetado.job.js:44-49`).
 
-## Estado de cada peça (14/10)
+### Estado de cada peça (14/10)
 
 | Peça | Dono | Estado | Selo |
 |---|---|---|---|
@@ -70,7 +100,7 @@ Idempotência: o hub só aplica o evento se for mais novo que o último aplicado
 | BFF `/api/fluxo/*` e as telas T.3, T.4, T.5, T.5b no HUB | Nathan | **não existem**: nenhuma ocorrência de `fluxo/torre` ou `torre-fluxo` em `app`, `lib`, `components`, `services` do HUB b55ac55 | 🔴 BL-022 |
 | `GET /itens/status` (005) e cartão "Etapa dos itens" | Robert, Gustavo, Nathan | no ar; HUB `components/Pedidos/EtapaDosItens.tsx`, `PedidoDetalhe.tsx` | ✅ |
 
-## Telas (numeração reconciliada)
+### Telas (numeração reconciliada)
 
 | Número | Tela | Origem dos dados | Permissão | Na S5 |
 |---|---|---|---|---|
@@ -82,11 +112,11 @@ Idempotência: o hub só aplica o evento se for mais novo que o último aplicado
 
 Estados comuns das telas: carregando (esqueleto), vazio ("Nenhum item acompanhado ainda"), indisponível (`disponivel: false`, quando a rota do hub responde 404), dado velho (faixa se `lido_em` passar de 10 min), erro genérico, etapa desconhecida (mostra o código cru). A trilha mostra o selo "autorização não registrada" quando a ação exige `autorizado_por` e ele falta, e o selo de inconsistência quando autorizador = ator. Fixtures nunca vão a produção.
 
-## Como o front avança sem esperar o MES
+### Como o front avança sem esperar o MES
 
 Tipos em `lib/domain/fluxo-torre.ts` (modelo `lib/domain/etapas-item.ts`), interface `FonteTorre { listar(filtros); item(id) }`, fixtures com os casos de borda, fonte HTTP começando em `disponivel: false`, BFF com `requirePermission`, `headersDaApi()` (Bearer) e filtros em lista fechada (`HUB lib/api/escopoUnidade.ts:45`). A fonte é escolhida por constante no código, nunca por variável de ambiente. Plano completo na seção 8 do [[LOG-46-Torre-de-Fluxo-Feed-Jobs-e-Telas]].
 
-## Ordem de subida
+### Ordem de subida
 
 1. Robert publica o contrato do feed e o módulo `fluxo` em homologação.
 2. Gustavo: banco (feito), perfis das telas, job contra o MES de homologação.
@@ -95,11 +125,11 @@ Tipos em `lib/domain/fluxo-torre.ts` (modelo `lib/domain/etapas-item.ts`), inter
 
 Regra de ouro: **API e banco antes do front**; rota sem linha em `auth.rotas_telas` devolve 403 `ROTA_SEM_PERMISSAO_MAPEADA` a todo usuário com token.
 
-## Rollback
+### Rollback
 
 Front: reverter o PR. Job: sem chave de ligar e desligar (regra do Nathan); desligar é retirar `iniciarJobFluxoTorre()` do `app.js` ou tirar `MES_API_KEY` do ambiente 🟡 (Gustavo escolhe). Dados: a projeção é derivável; `TRUNCATE`, zerar o cursor e reprocessar.
 
-## Riscos e perguntas abertas
+### Riscos e perguntas abertas
 
 | Item | Dono | Selo |
 |---|---|---|

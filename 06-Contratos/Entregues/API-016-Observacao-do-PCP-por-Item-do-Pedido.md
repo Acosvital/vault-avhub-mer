@@ -27,6 +27,11 @@ criado_original: 2026-10-22
 >
 > Selos em [[Regras-do-Vault]].
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Passou a observação do diligenciador do PCP (Planejamento e Controle da Produção) de "por parcela" para "por produto do pedido", com histórico próprio em cada item.
+> **Quem é afetado:** Diligenciadores do PCP escrevem e leem a observação em cada produto; vendedores veem só as do seu escopo. As observações antigas por parcela foram descartadas.
+> **Situação:** ✅ Aplicado em produção em 22/10/2026. Banco, API e front prontos; o Nathan testou criar e apagar observações no Hub.
+
 ## Por quê
 
 Um pedido de venda tem vários produtos e cada um anda no seu ritmo (um já saiu da produção, outro espera matéria-prima). A observação "falta chapa, previsão dia 30" pertence **ao produto**, não à parcela inteira: na parcela, o diligenciador hoje escreve num balde só e o leitor não sabe a qual produto o texto se refere. Com a observação no item, o histórico do produto fica junto dele, e a lista de produtos do pedido mostra de relance **quais têm observação**.

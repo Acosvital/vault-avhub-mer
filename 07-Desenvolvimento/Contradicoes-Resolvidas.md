@@ -1,13 +1,34 @@
 ---
 tags: [desenvolvimento, contradicoes, v1, historico]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Nathan
 fontes: [v1 00-Indice/Registro-de-Decisoes-2026-10-07, v1 04-Arquitetura-Transversal (Decisoes-Chave-ERP, Chaves-de-Integracao, Rastreabilidade), v1 08-Integracao-Omie, v1 09-Contratos, código de 14/10 (api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, omie-elt-pipeline 0f739f0, HUB b55ac55), decisões de 14/10]
 ---
 
 # Contradições resolvidas
+
+**Em uma frase:** o vault antigo (v1) dizia coisas que se contradiziam; esta nota mostra, para cada caso, o que valia antes e o que vale hoje.
+
+## Como ler esta lista
+
+- Cada linha tem um ID `CR-nn` (CR = contradição resolvida). O texto fala de **19** casos.
+- Colunas: **Tema**, **Antes (v1)**, **Depois (v2)** (a versão que vale), **Evidência** (onde se conferiu) e **Selo**.
+- Selos: ✅ confirmado no código, 📝 decidido, 🔴 decidido mas ainda sem código.
+- Regra simples: se uma nota do v1 contradiz uma linha daqui, vale a coluna "Depois".
+- As linhas têm até uns 60 palavras por célula, por isso não receberam resumo extra.
+- Siglas: OC = ordem de compra; MES = sistema de chão de fábrica; NF = nota fiscal; CFOP = código fiscal da operação.
+
+## Resumo por tema
+
+- **Estoque e custo.** A baixa do saldo passa para a retirada (CR-01), tudo que é fabricado ou comprado vira saldo no Estoque (CR-02) e o custo do lote já existe no código (CR-09, CR-11). Os dois primeiros ainda não têm código.
+- **Compras e requisição.** A requisição tem duas origens (CR-04), o MES empurra em vez de o hub puxar (CR-05), o registro manual da compra saiu (CR-12), o MES trata todos os marcos (CR-18), o Recebimento confere contra a NF (CR-14) e a aprovação da OC acima de R$ 30 mil é do Gerente de Compras (CR-13).
+- **Integração e segurança.** Referência da OC e status por item existem no hub (CR-06, CR-07), a Torre existe no banco e na API (CR-10), o escopo de vendedores é fixo no código (CR-15), o nome da chave do MES foi esclarecido (CR-16) e são 8 fluxos de integração (CR-17).
+- **Cronograma e outros.** Datas do cronograma (CR-08), schema do Estoque (CR-03) e CFOP por item (CR-19).
+- **Aliases.** A tabela no fim traduz nomes antigos do código e do v1 para os nomes atuais.
+
+## Lista completa
 
 O vault anterior (v1, congelado) dizia coisas que se contradiziam entre si, com o código ou com decisões posteriores. Esta nota lista as **19** e a versão que vale hoje. O resto do vault v2 diz só a versão correta. Se uma nota do v1 contradiz uma linha abaixo, vale a coluna "Depois". Numeração `CR-nn` reconstruída na revisão de 14/10 (comparação v1 contra código e decisões).
 

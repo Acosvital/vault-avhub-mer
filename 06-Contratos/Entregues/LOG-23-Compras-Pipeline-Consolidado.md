@@ -16,6 +16,11 @@ criado_original: 2026-09-23
 
 > **Onde atua:** pipeline Omie
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Lista de trabalho da pipeline (`omie-elt-pipeline`, que troca dados com o Omie) para Compras: puxar pedidos e catálogos, enviar a OC ao Omie e atualizar a cotação PTAX (do Banco Central) todo dia.
+> **Quem é afetado:** Gustavo (DBA) mantém. Compradores têm a OC enviada ao Omie automaticamente; por decisão de 07/10, o envio é fixo, sem chaves de teste.
+> **Situação:** ✅ Envio da OC, cotação PTAX e pedidos de compra estão no código. ❓ Deploy em produção não conferido. Pontos sem teste real viraram risco aceito.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
 >

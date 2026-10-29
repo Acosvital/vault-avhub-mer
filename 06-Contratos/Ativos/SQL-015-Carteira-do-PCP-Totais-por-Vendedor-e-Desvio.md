@@ -16,6 +16,12 @@ criado_original: 2026-10-21
 
 > **Onde atua:** av-hub: banco, API e front (Portal do PCP)
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define os totais que o banco entrega ao Dashboard do PCP (Planejamento e Controle da Produção): carteira (valor de pedidos ainda abertos), no prazo, atrasado, desvio de previsão e carteira por vendedor. Inclui a marca "Avanço" do diligenciador.
+> **Quem é afetado:** O PCP e os diligenciadores, que passam a ver quanto dinheiro está em carteira e quem concentra o atraso.
+> **Situação:** Parcial. Funções e rotas estão no ar e foram conferidas em 22 e 26/10 (dono: Gustavo). A marcação de avanço ainda não foi testada.
+> **Exemplo:** Em 22/10, o vendedor Euveraldo concentrava R$ 29,7 milhões da carteira em 5 pedidos.
+
 > [!info] Situação em 26/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >

@@ -25,6 +25,11 @@ criado_original: 2026-10-09
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Criou a view e a tabela de marca que entregam ao MES (sistema de chão de fábrica) as OCs (Ordens de Compra) aprovadas ou canceladas. O Recebimento confere o material contra a OC; o MES consulta a cada 5 minutos.
+> **Quem é afetado:** Recebimento do MES e Compras.
+> **Situação:** ✅ View, tabela e gatilho existem no dump de 14/10; migration `api004` aplicada, segundo o DBA. 🟡 Descreve a interface exigida, não um DDL; falta o script versionado.
+
 
 > **Status: `implementada`.[^c1] ✅ Migration `api004` entregue e aplicada pelo DBA (Gustavo afirmou em 09/10/2026).** O vault não a enxerga porque o repositório não versiona SQL; a confirmação é a palavra do DBA, e o que continua pendente é só **o script versionado** (checklist abaixo). A rota `GET /ordens-compra/referencia` existe na `api-acos-vital` (`fe55923`, 08/10/2026; lida em `origin/develop`, `dee35b0`) e lê estes objetos. O repositório da API **não versiona SQL** e o DDL real **não foi achado em lugar nenhum** (nem em `api-acos-vital`, nem em `omie-elt-pipeline\sql`, nem no vault, nem no [[Mapa-v1-para-v2|Auditoria-Dump-Producao-2026-10-07]]). Fonte das decisões: [[Registro-de-Decisoes|Registro-de-Decisoes-2026-10-07]] (#41).
 

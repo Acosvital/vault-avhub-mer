@@ -1,7 +1,7 @@
 ---
 tags: [comissao, motor-atual, core_comissionamento, proposta, validacao]
 criado: 2026-10-16
-atualizado: 2026-10-21
+atualizado: 2026-10-29
 status: proposta
 dono: Nathan
 fontes: [dump core_comissionamento convertido (09-Diagramas/fontes), api-acos-vital f322dcd src/schemas/core_comissionamento, av-hub lib/simulador/motor.ts, av-hub app/(protected)/comissoes/simulador e analise-simuladores, av-hub app/api/comissoes, tela-simulador-comissao.png, N16-10, N16-11, N16-18, N16-19, N16-20]
@@ -9,11 +9,94 @@ fontes: [dump core_comissionamento convertido (09-Diagramas/fontes), api-acos-vi
 
 # Como o motor de comissão atual calcula
 
+**Em uma frase:** hoje o vendedor simula a margem de cada item, Compras confere o custo, e a comissão é o menor entre os dois percentuais, paga só sobre o que foi faturado.
+
+**Quando consultar esta nota:** quando precisar saber como o Simulador de Comissão atual chega ao percentual e ao valor de cada nota. A Michele (Controladoria) confere o motor aqui antes de ele ir para a proposta. Nada do módulo atual é alterado ([[Registro-de-Decisoes]], N16-11: o motor novo é o mesmo).
+
+## Como a comissão é calculada
+
+**Em português:** a comissão de cada item é o **menor** entre o percentual do vendedor e o percentual de Compras, depois das regras fixas e dos bloqueios. O valor em reais é esse percentual aplicado sobre o que foi faturado.
+
+1. O vendedor preenche o simulador do pedido, item a item: custo de compra, impostos e preço de venda.
+2. O simulador calcula a margem líquida de cada item. Cada margem cai numa faixa, com uma letra e um percentual.
+3. Compras abre a mesma simulação e corrige o custo para o valor real. Isso gera o percentual de Compras.
+4. Vale o menor dos dois. Custo real melhor que o cotado não aumenta a comissão.
+5. Alguns clientes têm regra fixa: um teto de percentual.
+6. Item de fabricação interna paga 2% fixo. Item em prejuízo paga 0%.
+7. A comissão só vira dinheiro depois de faturar: valor faturado do item vezes o percentual final.
+8. Bloqueio por nota fiscal (NF) zera a comissão daquela nota. Cliente ou vendedor na lista de bloqueio tira a nota do cálculo.
+
+| Letra | Margem líquida do item | Percentual |
+|---|---|---|
+| A | 15% ou mais | 2,0% |
+| B | 12% até menos de 15% | 1,3% |
+| C | 9% até menos de 12% | 0,7% |
+| D | 0% até menos de 9% | 0,5% |
+
+## Exemplo
+
+**Um item.** 50 flanges custam R$ 100 cada, com ICMS de 12% e frete por rateio. O custo líquido fica em R$ 4.471,95. Vendidas a R$ 230 cada (R$ 11.500), a margem líquida é 29,41%. É letra A, 2%. A comissão estimada é R$ 230,00.
+
+**Menor dos dois.** No pedido 27917, o vendedor deu letra A (2,0%) ao item 1. Compras refez o custo e ele caiu para letra C (0,7%). Vale **0,7%**. O item 2 ficou em 2,0% nos dois e vale **2,0%**.
+
+**Várias notas.** Exemplo da Michele: venda de R$ 1.000 a 2%, faturada em seis notas (500, 100, 100, 100, 100 e 100). A comissão é 2% sobre cada nota, R$ 20 no total. O caso está em [[13-Custo-Real-e-Comissao-no-Fluxo]].
+
+## Quem faz o quê hoje
+
+| Quem | O que faz |
+|---|---|
+| Vendedor | Preenche, salva rascunho e envia o simulador do pedido |
+| Compras | Aprova a simulação como está ou cria uma versão com os custos corrigidos |
+| Analista e Gerência | Acompanham o mês na Visão Geral e bloqueiam NF |
+| Coordenador | Recebe ajuda de custo mais um percentual do faturamento total do mês |
+
+O vendedor só vê o valor em reais depois que Compras aprova. Hoje quem valida é Compras: não existe etapa de Controladoria. Isso muda no módulo novo (N16-10).
+
+## Outras regras em uma linha
+
+- **Prejuízo:** item de revenda sem lucro paga 0%, qualquer que seja a letra.
+- **Regra fixa:** o teto muda conforme o markup bruto do pedido (venda menos compra, dividido pela compra).
+- **Bloqueio por NF:** o número da nota é digitado com zeros à esquerda. Sem os zeros, o bloqueio não casa e ninguém é avisado.
+- **Coordenadores:** total = ajuda de custo mais percentual sobre o faturamento do mês. O bloqueio por NF não vale para eles.
+- **Parâmetros:** faixas, impostos e despesas ficam em tabela com vigência. Hoje é "Maio/23", nas três unidades.
+
+## O que muda no módulo novo
+
+- O percentual de Compras deixa de ser digitado. Ele passa a ser calculado sozinho, a cada evento de custo.
+- A Controladoria decide no final, com justificativa. O vendedor só vê o valor real depois da decisão.
+- O passo "Compras aprova o percentual" fica pronto no sistema, mas desligado (N16-51).
+- O cálculo sai do navegador. Hoje ele roda só lá e a API apenas grava.
+
+O desenho completo está em [[03-Modelo-Novo-core_comissao]] e os estados em [[04-Regras-e-Estados-da-Comissao-Nova]].
+
+## Pontos de atenção
+
+1. O resumo mensal mostra "bloqueado" sempre R$ 0, mesmo com NF bloqueada. ✅
+2. O teto da regra fixa só é aplicado pelo banco. O motor da tela não o recebe. ✅
+3. Bloqueio e listas de bloqueio não têm data nem motivo obrigatório. Valem para sempre, até sobre meses pagos. ✅
+4. Quem aprova não é separado de quem digita. A tela esconde o botão, mas o servidor não barra. ✅
+5. Nada reconfere o custo líquido gravado, porque só o navegador o calcula. ✅
+
+A lista completa, com 14 pontos, está no detalhe técnico.
+
+## O que a Michele precisa confirmar
+
+Ela respondeu em 19/10/2026 (N16-42 a N16-51). Onde a resposta difere do padrão proposto, vale a resposta. Em resumo:
+
+- Decidem Controladoria, Gerência e Coordenação, sem teto (M10).
+- O vendedor lê a justificativa (M11).
+- Só entram as peças com custo real (M12).
+- Cancelamento e devolução abatem na mesma proporção (M13).
+
+As perguntas M01 a M19, com os padrões, estão no detalhe técnico.
+
+## Detalhe técnico
+
 Esta nota explica, em linguagem simples, **o que o módulo Comissões de hoje faz**. Serve para a Michele (Controladoria) conferir antes de o motor ir para a proposta ([[Registro-de-Decisoes]], N16-11: o motor novo é o mesmo). Nada do módulo atual é alterado. A lista de perguntas está no fim, em "O que a Michele precisa confirmar".
 
 Como ler: **✅** está no código ou no banco (com arquivo e linha) · **📝** decisão do Nathan · **🟡** proposta · **🔴** aberto · **❓** não conferido em produção. Nos números, `dump` é `09-Diagramas/fontes/core_comissionamento-dump-convertido.sql`.
 
-## Resumo em dez linhas
+### Resumo em dez linhas
 
 1. O **vendedor** preenche um "simulador" por pedido, item a item: custo de compra, impostos, preço de venda. O simulador calcula a **margem líquida de cada item** e dá uma **letra** (A, B, C ou D) e um **percentual** de comissão.
 2. **Compras** abre a mesma simulação, corrige os custos para o valor real e gera uma segunda versão, com o **percentual de Compras**.
@@ -26,7 +109,7 @@ Como ler: **✅** está no código ou no banco (com arquivo e linha) · **📝**
 9. Os **coordenadores** têm conta à parte: ajuda de custo mais um percentual do faturamento total do mês.
 10. Quem valida hoje é **Compras**; não existe etapa de Controladoria. Isso muda no módulo novo (N16-10).
 
-## Visão do fluxo atual
+### Visão do fluxo atual
 
 ```mermaid
 flowchart LR
@@ -39,7 +122,7 @@ flowchart LR
     B --> P["Comissão a pagar<br/>(situação VALIDADO)"]
 ```
 
-## 1. Quem faz o quê hoje
+### 1. Quem faz o quê hoje
 
 | Quem | O que faz | Onde |
 |---|---|---|
@@ -50,9 +133,9 @@ flowchart LR
 
 ✅ O simulador é **calculado no navegador** (`calcularSimulacao(form, parametros)`, `simulador/page.tsx:1053`) por uma função do front, `lib/simulador/motor.ts`. O banco guarda o resultado e só faz a conta do **menor percentual** (view `vw_simulacao_resolvida`). Isso importa para o módulo novo: o motor precisa sair do navegador (ver nota 03).
 
-## 2. Regra a regra
+### 2. Regra a regra
 
-### R1. Custo líquido do item (o que a empresa gasta para ter o item)
+#### R1. Custo líquido do item (o que a empresa gasta para ter o item)
 
 **O que faz.** Soma o que se paga ao fornecedor, tira o ICMS que a empresa recupera e soma IPI, ST e frete de compra.
 
@@ -73,7 +156,7 @@ flowchart LR
 
 **De onde vem.** ✅ `lib/simulador/motor.ts:277-283` (compra, IPI, crédito de ICMS), `:307-312` (frete e custo líquido). Alíquotas: `simulador_parametros.icms_entrada` e `pct_rateio_logistica` (`dump:909-952`). A quantidade da compra é separada da quantidade da venda (`qtd_compra`, `dump:697-699`); o motor não converte unidade, cada lado usa o seu total.
 
-### R2. Margem líquida do item
+#### R2. Margem líquida do item
 
 **O que faz.** Pega o preço de venda do item e desconta custo líquido, despesas operacionais, impostos sobre a venda e a provisão de comissão. O que sobra, dividido pela venda, é a **margem líquida do item**. É ela que decide a letra.
 
@@ -95,7 +178,7 @@ flowchart LR
 
 **De onde vem.** ✅ `lib/simulador/motor.ts:336-348` (lucro e margem), `:104-110` (impostos), `:144-167` (ICMS efetivo na venda: importação, base reduzida e ST têm regras próprias). Gravado em `simulacao_itens.margem_item` (`dump:745-747`).
 
-### R3. Letra e percentual do vendedor
+#### R3. Letra e percentual do vendedor
 
 **O que faz.** A margem líquida do item cai numa faixa. Cada faixa tem uma letra e um percentual de comissão. Os intervalos são "de X até antes da próxima faixa".
 
@@ -110,7 +193,7 @@ flowchart LR
 
 **De onde vem.** ✅ `lib/simulador/motor.ts:176-179` (`faixaDaMargem`) e `:389-401`. Faixas em `simulador_parametros.faixas_comissao` (`dump:998-1000`, valores em `dump:1660`). A letra é decidida **por item**; a letra do pedido (`simulacoes.letra_equivalente`) é só informativa (`dump:901-902`).
 
-### R4. Prejuízo e fabricação interna
+#### R4. Prejuízo e fabricação interna
 
 **O que faz.**
 - **Prejuízo:** item de revenda com lucro menor ou igual a zero (ou sem preço de venda) paga **0%**, qualquer que seja a letra.
@@ -120,7 +203,7 @@ flowchart LR
 
 **De onde vem.** ✅ `motor.ts:363-388`. Fabricação vem **antes** do teste de prejuízo de propósito (`:364-371`). Regra gravada em `simulacao_itens.regra_aplicada` (`PREJUIZO`, `FABRICACAO_INTERNA`, `LETRA`, `TETO_PADRAO`, `TETO_CONDICIONAL`; `dump:704, 754-756`).
 
-### R5. Percentual de Compras
+#### R5. Percentual de Compras
 
 **O que faz.** Compras abre a simulação do vendedor e, se o custo estiver errado, grava uma **segunda versão** (origem `COMPRAS`) com o custo correto. O motor roda de novo e dá um novo percentual por item. A versão do vendedor passa a `CONTESTADO`; a de Compras fica `APROVADO`. Se Compras concorda, só aprova a versão do vendedor.
 
@@ -128,7 +211,7 @@ flowchart LR
 
 **De onde vem.** ✅ `simulacoes.route.js:30-36` (transições), `:233-259` (Compras contesta a do vendedor no mesmo POST), `:311-345` (transição; `DEVOLVIDO` exige motivo), `:348-351` (só rascunho edita). Tela: `simulador/page.tsx:1192-1234`.
 
-### R6. `pct_final`: o menor dos dois
+#### R6. `pct_final`: o menor dos dois
 
 **O que faz.** Para cada item: `pct_final` = o **menor** entre o percentual do vendedor e o de Compras. Se Compras não analisou, vale o do vendedor. Consequência: **custo real melhor que o cotado não aumenta a comissão**; só o pior caso conta.
 
@@ -141,7 +224,7 @@ flowchart LR
 
 **De onde vem.** ✅ `vw_simulacao_resolvida`: `LEAST(...)` em `dump:1186-1190`. Dados em `dump:1648-1649`. A comissão do vendedor para esse pedido era R$ 216,69 e a de Compras R$ 142,48 (`dump:1648-1649`).
 
-### R7. Regras fixas por cliente (teto)
+#### R7. Regras fixas por cliente (teto)
 
 **O que faz.** Alguns clientes têm um **teto** de percentual combinado. Cada cliente (por unidade) tem três números: comissão **padrão**, comissão **condicional** e a **margem** de gatilho. O teto vale assim: se o **markup bruto** do pedido for **maior ou igual** à margem de gatilho, o teto é a condicional; senão, a padrão. O teto só limita item de **revenda** que pagou pela letra.
 
@@ -151,7 +234,7 @@ Atenção: o gatilho usa o **markup bruto** do pedido, `(total da NF − compra 
 
 **De onde vem.** ✅ A view aplica o teto: `dump:1151-1198` (cada versão usa o markup da própria versão; `regra_fixa_aplicada` em `:1136-1142`). Regra em `regras_comissoes_fixas` (`dump:589-603`). ⚠️ O motor do front **tem** um trecho que aplica o teto (`motor.ts:467-484`), mas a tela chama `calcularSimulacao(form, parametros)` **sem** a regra fixa (`simulador/page.tsx:1053`): na prática o teto só é aplicado pela view.
 
-### R8. Comissão em reais: sobre o faturado, por item
+#### R8. Comissão em reais: sobre o faturado, por item
 
 **O que faz.** O dinheiro só existe depois de faturar. Para cada item que saiu em uma NF: `valor da comissão = valor faturado do item × pct_final ÷ 100`, arredondado a 2 casas. Item **ainda não faturado fica sem valor (nulo, pendente), nunca zero**.
 
@@ -159,7 +242,7 @@ Atenção: o gatilho usa o **markup bruto** do pedido, `(total da NF − compra 
 
 **De onde vem.** ✅ `dump:1128` (`valor_comissao`), `:1129` (`economia_compras`, comparada com a **primeira** versão do vendedor), `:1105-1113` (faturado por `codigo_empresa` + `codigo_item_omie`, não por código do pedido Omie, que muda quando o Omie recria o pedido; `dump:863-865`).
 
-### R9. Comissão por NF e situação
+#### R9. Comissão por NF e situação
 
 **O que faz.** Soma os itens da NF. O percentual efetivo da NF é **ponderado** pelo valor dos itens. A **situação** da NF é a mais grave entre seus itens, nesta ordem: `BLOQUEADA`, `SEM_SIMULADOR`, `RASCUNHO`, `AGUARDANDO_COMPRAS`, `ITENS_FORA_DO_SIMULADOR`, `VALIDADO`. Só `VALIDADO` entra em "a pagar". A validação é **do pedido**: aprovado uma vez, vale para todas as NFs, inclusive de meses depois.
 
@@ -167,13 +250,13 @@ Também conta os itens da NF **sem vínculo** com a simulação (`qtd_itens_sem_
 
 **De onde vem.** ✅ `vw_comissao_master` situação em `dump:1348-1360`; `vw_comissao_nf` em `dump:1426-1465` (ponderação em `:1444`); resumo do mês em `dump:1520`. A lista só considera NF faturada, de venda líquida, com pedido e vendedor (`dump:1305`).
 
-### R10. O vendedor só vê o valor depois da aprovação
+#### R10. O vendedor só vê o valor depois da aprovação
 
 **O que faz.** Enquanto Compras não aprova, o vendedor vê a **letra** e a margem do item, mas **não o valor em reais**. O corte é feito no servidor da tela (BFF), não no CSS, para o número não ir no JSON.
 
 **De onde vem.** ✅ `app/api/comissoes/minhas-comissoes/route.ts:27-31` (corte), `:229` (validado = alguma versão `APROVADO`), `:233-243` (situação), `:249-264` (percentual, valor e teto só se validado). ✅ No simulador a coluna de comissão em reais só aparece na visão de Compras (`simulador/page.tsx:536`). 🟡 No módulo novo o corte passa para o banco e a API (nota 03), porque o BFF não é barreira de segurança.
 
-### R11. Bloqueio por NF
+#### R11. Bloqueio por NF
 
 **O que faz.** Uma NF pode ser **bloqueada**: o valor da comissão daquela nota vira zero, com um motivo em texto livre. Desbloquear é marcar "não bloqueada" (a linha fica, com quem mexeu). Não existe chave para a NF: o número é digitado com zeros à esquerda (`00051698`) e, se vier sem os zeros, **o bloqueio nunca casa e nada avisa**.
 
@@ -181,7 +264,7 @@ Também conta os itens da NF **sem vínculo** com a simulação (`qtd_itens_sem_
 
 **De onde vem.** ✅ `bloqueio_comissoes` (`dump:410-420`), uso em `vw_comissao_master` (`dump:1338-1347, 1368`). O motivo é opcional (`dump:465-468`).
 
-### R12. Listas de bloqueio: cliente e vendedor
+#### R12. Listas de bloqueio: cliente e vendedor
 
 **O que faz.** Cliente na lista de bloqueio, ou vendedor na lista, **faz a NF sair do cálculo**: a nota não aparece na lista de comissões. Não confundir com `blacklist_vendedor_g5` do faturamento, que é outra coisa (cascata de deduções da venda líquida).
 
@@ -189,19 +272,19 @@ Também conta os itens da NF **sem vínculo** com a simulação (`qtd_itens_sem_
 
 **De onde vem.** ✅ `blacklist_comissoes_destinatario` e `blacklist_comissoes_vendedores` (`dump:333-342, 372-381`), usadas nos `NOT EXISTS` da `vw_comissao_master` (`dump:1305-1309`). Não têm data: valem para sempre, sobre qualquer NF, inclusive de meses já pagos.
 
-### R13. Valor máximo (pior caso)
+#### R13. Valor máximo (pior caso)
 
 **O que faz.** Para planejar o mês antes de existir simulador, a Visão Geral mostra o **valor máximo possível**: valor do item × o menor entre a maior faixa vigente (2%) e o maior dos dois percentuais da regra fixa do cliente. Se a nota já está validada, mostra o valor real.
 
 **De onde vem.** ✅ `dump:1361-1365` e comentário `:1410-1419`.
 
-### R14. Resumo mensal e cartões
+#### R14. Resumo mensal e cartões
 
 **O que faz.** Mostra por mês e por vendedor: notas por situação, faturado, comissão a pagar (só `VALIDADO`), valor máximo, bloqueado e economia de Compras. A linha de total e as linhas por vendedor vêm juntas (`is_total`); somar sem filtrar duplica.
 
 ⚠️ **A coluna "bloqueado" do resumo é sempre zero.** A conta é `valor_faturado_nf × 0` (`dump:1522`). Quem lê "comissões bloqueadas" nessa view vê R$ 0, mesmo com NF bloqueada. No módulo novo o valor retido é a soma do valor calculado das NFs bloqueadas.
 
-### R15. Coordenadores
+#### R15. Coordenadores
 
 **O que faz.** Coordenadores não dependem de proposta. Cada um tem **ajuda de custo** (valor fixo) e um **percentual**, com data de vigência. Duas famílias:
 - **Gerência:** ranking próprio; comissão = percentual ÷ 100 × **faturamento total do mês** (todas as vendas líquidas).
@@ -217,13 +300,13 @@ Também conta os itens da NF **sem vínculo** com a simulação (`qtd_itens_sem_
 
 **De onde vem.** ✅ `fn_dashboard_comissoes` (`dump:111-287`; conta do coordenador em `:179-194`), `fn_comissao_coordenadores_mes` (`dump:85-95`), tabela e travas (`dump:475-498, 1693`), histórico e imutabilidade (`dump:35-54, 70-76, 1883-1890`). ✅ Bloqueio desligado: `fn_dashboard_comissoes.route.js:20-22, 50`. ✅ A tela `dash-comissoes` ainda lê `lib/comissoes/coordenadores.json` do repositório e calcula no navegador (`LOG-42`, [[Comissoes]]). A tabela `comissao_coordenadores` **não tem rota na API**; só a função de leitura.
 
-### R16. Vendedores do dashboard
+#### R16. Vendedores do dashboard
 
 **O que faz.** A lista de vendedores do dashboard (`dash-comissoes`) vem do **relatório provisório do mês** (`comissoes_provisoria`, um JSON que um gerador externo grava), e não das views novas. A comissão e o bloqueio ali "como o gerador mandou".
 
 **De onde vem.** ✅ `fn_dashboard_comissoes` (`dump:158-161, 197-214`), `comissoes_provisoria.route.js` (PUT grava o JSON). ❓ Quem é o gerador (o "sistema Python" que o código cita) não está nos repositórios lidos.
 
-### R17. Parâmetros e versão
+#### R17. Parâmetros e versão
 
 **O que faz.** Os percentuais (faixas, impostos, despesas, ICMS, encargos de pagamento, margem desejada, fabricação interna) ficam numa tabela com **vigência** por unidade. A simulação grava qual versão usou (`id_parametros`) e fica amarrada a ela. **Não se edita parâmetro vigente**: fecha-se a vigência e abre-se outra.
 
@@ -231,7 +314,7 @@ Também conta os itens da NF **sem vínculo** com a simulação (`qtd_itens_sem_
 
 **De onde vem.** ✅ `simulador_parametros` (`dump:909-952`), regra no comentário `dump:961-965`, exclusão de sobreposição `dump:1701`.
 
-### R18. Mark-up e preço sugerido (informativo)
+#### R18. Mark-up e preço sugerido (informativo)
 
 **O que faz.** O simulador sugere um preço de venda: `mark-up = 1 ÷ (1 − (margem desejada + despesas + impostos + provisão))`, arredondado **para cima** em 2 casas, aplicado ao custo líquido por unidade, mais o encargo da condição de pagamento. Não decide comissão.
 
@@ -239,7 +322,7 @@ Também conta os itens da NF **sem vínculo** com a simulação (`qtd_itens_sem_
 
 **De onde vem.** ✅ `motor.ts:119-133, 324-326`. O arredondamento para cima copia o `ROUNDUP` da planilha (`:40-55`).
 
-## 3. Onde o custo líquido é calculado e a fórmula exata (N16-20)
+### 3. Onde o custo líquido é calculado e a fórmula exata (N16-20)
 
 **Onde.** O custo líquido é calculado **só no navegador**, por uma função pura do front: `calcularSimulacao(entrada, parametros, regraFixa)` em `av-hub\lib\simulador\motor.ts:187-548` (custo líquido em `:277-312`). A tela a chama a cada edição (`simulador/page.tsx:1053`) e manda o resultado pronto à API. ✅ **Não existe função no banco nem rota na API que calcule**: a API só grava e valida (`api-acos-vital\...\simulacoes.route.js` guarda os campos como vieram; o BFF diz "A API ARMAZENA, NÃO CALCULA", `av-hub\app\api\comissoes\simulacoes\route.ts:11`). Do banco, só o `LEAST` e o teto em `vw_simulacao_resolvida` (`dump:1151-1198`). Consequência: o módulo novo precisa portar o motor para o servidor (nota 03, "Onde o cálculo roda").
 
@@ -262,9 +345,9 @@ Também conta os itens da NF **sem vínculo** com a simulação (`qtd_itens_sem_
 
 **Como isso vira "por evento" (N16-20).** Cada evento de custo (uma OC, um lote, uma parcial 5.01…) carrega as **suas** condições: fornecedor, condição de pagamento, encargo, frete, origem do ICMS, IPI, ST, DIFAL. O custo líquido do **evento** usa a mesma tabela de passos acima, com as entradas do evento (`compra_bruta` = valor do evento sem imposto; origem, IPI e ST do evento; frete do evento por VALOR quando a OC traz frete, senão RATEIO). O custo líquido do **item** é a soma dos eventos, mais a parte da quantidade ainda sem evento, calculada com as condições cotadas. Propriedade usada como teste: se todos os eventos de um item têm as mesmas condições, a soma é igual ao custo líquido calculado de uma vez (a fórmula é linear, exceto o zero de ICMS quando há ST, que é por evento). A venda continua com **um** conjunto de condições por pedido (destino, condição de pagamento, impostos sobre a venda, frete e ST da venda).
 
-**O que a OC do hub guarda hoje** (fato do dump, N14-23): no cabeçalho, fornecedor, condição de pagamento, moeda e cotação, tipo e valor do frete, seguro e desconto; no item, quantidade, valor unitário e desconto. **Não guarda IPI, ICMS, ST nem DIFAL por item.** O `custos_eventos` do SQL-016 grava `valor_total` já com desconto e cotação (`SQL-016 fn_custo_evento_sincronizar_oc`) e tem colunas `icms_recuperar_total`, `ipi_total`, `st_total`, `frete_total` **sem preenchimento hoje**. Enquanto o imposto real não existe (OQ-11), o módulo novo faz assim 🟡: o evento herda origem, IPI e ST da proposta, proporcionais à quantidade coberta, e o cálculo fica marcado **"custo parcial por imposto"** (`imposto_completo = false`). A comissão calcula normalmente; só a Controladoria vê a marca. Quando o imposto real chegar, o evento passa a usá-lo e a marca some no recálculo seguinte.
+**O que a OC do hub guarda hoje** (fato do dump, N14-23): no cabeçalho, fornecedor, condição de pagamento, moeda e cotação, tipo e valor do frete, seguro e desconto; no item, quantidade, valor unitário e desconto. **Não guarda IPI, ICMS, ST nem DIFAL por item.** O `custos_eventos` grava `valor_total` já com desconto e cotação e tem colunas `icms_recuperar_total`, `ipi_total`, `st_total`, `frete_total` **sem preenchimento hoje**. Enquanto o imposto real não existe (OQ-11), o módulo novo faz assim 🟡: o evento herda origem, IPI e ST da proposta, proporcionais à quantidade coberta, e o cálculo fica marcado **"custo parcial por imposto"** (`imposto_completo = false`). A comissão calcula normalmente; só a Controladoria vê a marca. Quando o imposto real chegar, o evento passa a usá-lo e a marca some no recálculo seguinte.
 
-## 4. O passo "Comissão: após a aprovação de Compras" e onde ele entra no fluxo novo
+### 4. O passo "Comissão: após a aprovação de Compras" e onde ele entra no fluxo novo
 
 **O que é hoje.** Na tela do vendedor a coluna de comissão em reais **não existe** e no lugar aparece o chip "Comissão: após a aprovação de Compras" (`simulador/page.tsx:1800-1803`; a coluna só aparece no modo Compras, `mostrarComissao = modoCompras`, `:536`). O texto da dica diz que o valor pago é o menor entre a versão do vendedor e a de Compras, calculado sobre o faturado. O passo existe de ponta a ponta no código:
 
@@ -295,7 +378,7 @@ Estados e transições: `RASCUNHO → ENVIADO → APROVADO | CONTESTADO | DEVOLV
 
 Em uma frase: **a aprovação de Compras sobre o percentual vira a conferência do cálculo real, e a decisão final sai de Compras e vai para a Controladoria.**
 
-## 5. Pontos de atenção que achei
+### 5. Pontos de atenção que achei
 
 | # | O que | Onde | Selo |
 |---|---|---|---|
@@ -314,7 +397,7 @@ Em uma frase: **a aprovação de Compras sobre o percentual vira a conferência 
 | 13 | O BFF não separa quem aprova de quem digita: o `PUT` de status aceita `pode_editar` do `Simulador` do vendedor | `app/api/comissoes/simulacoes/[id]/route.ts:60` | ✅ |
 | 14 | O custo líquido só existe no navegador; nenhuma rota nem função de banco o recalcula, então nada reconfere o valor gravado | `motor.ts:277-312`, `simulacoes.route.js` | ✅ |
 
-## O que a Michele precisa confirmar
+### O que a Michele precisa confirmar
 
 Cada pergunta traz o que o módulo novo vai fazer se ela não responder (🟡). **A Michele respondeu em 19/10/2026 ([[Registro-de-Decisoes|respostas da Controladoria de 19/10 (N16-42 a N16-51)]]); onde a resposta diverge do padrão abaixo, vale a resposta (N16-42 a N16-51).**
 

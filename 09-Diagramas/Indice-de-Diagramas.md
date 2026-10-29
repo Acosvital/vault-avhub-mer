@@ -1,7 +1,7 @@
 ---
 tags: [diagramas, indice, uml, mapa]
 criado: 2026-10-14
-atualizado: 2026-10-26
+atualizado: 2026-10-29
 status: vigente
 dono: Nathan
 fontes: [v1 04-Arquitetura-Transversal/Diagramas-UML, v1 01-Fluxo-Operacional (Fluxogramas-Completos, Fluxograma-Telas-por-Bloco, Fluxo-Sistema-no-Meio, Fluxo-Operacional-Visao-Geral, Encaixe-Estoque-Revenda-no-PCP), v1 02-PRD-Estoque (Fluxo-*-Completo, Proposta-Transferencia-Estoque-Filiais), 00-Fluxo-Mestre-0b, código de 14/10/2026]
@@ -9,14 +9,35 @@ fontes: [v1 04-Arquitetura-Transversal/Diagramas-UML, v1 01-Fluxo-Operacional (F
 
 # Índice de diagramas
 
-O v1 tinha 31 diagramas na UML e outros espalhados nas pastas de fluxo, quase todos escritos entre 24/09 e 08/10 e nunca refeitos depois que o código mudou. Aqui cada um tem um destino: **mantido** (bate com o código de 14/10), **redesenhado** (o conceito vale, o desenho estava velho ou errado) ou **descartado** (ilustrativo, redundante ou superado), com o motivo. O fluxo de referência é o [[00-Fluxo-Mestre-0b]]; todo diagrama de fluxo usa os IDs de nó dele.
+**Em uma frase:** esta página diz qual desenho abrir para cada dúvida e o que aconteceu com os desenhos antigos do v1.
+
+**Quando consultar:** quando você quer ver o processo desenhado e não sabe onde está. Use a tabela "Quer saber… | Veja…" abaixo. O fluxo de referência é o [[00-Fluxo-Mestre-0b]]; todo diagrama de fluxo usa os códigos dos passos dele (`V2`, `P3`, `R0`…).
+
+## Quer saber… | Veja…
+
+| Quer saber… | Veja… |
+|---|---|
+| O processo inteiro, do pedido à nota fiscal | [[00-Fluxo-Mestre-0b]] |
+| Da proposta ao pedido de venda | `artifact-proposta-pedido.html` (página "Fluxo da Proposta ao Pedido"), [[11-Proposta-e-Pedido-de-Venda]] |
+| A jornada do usuário num caso real (Mogi: flanges, tubos, flanges cegas) | `Historia-da-Proposta-ao-Pedido.pdf` |
+| Como o Orçamento mantém o preço de compra | [[12-Orcamento-Base-de-Preco]] |
+| Como o custo real e a comissão entram no fluxo | [[13-Custo-Real-e-Comissao-no-Fluxo]] |
+| Quem faz o quê em cada área | [[Casos-de-Uso]] |
+| Quem pede o quê a quem, passo a passo (pedido ao PCP, Estoque, compra, Recebimento, Qualidade, Expedição) | [[Sequencia]] |
+| Por quais fases passa um lote, uma reserva, um recebimento, uma requisição, uma proposta ou uma comissão | [[Estados]] |
+| Que "coisas" o sistema guarda e como se ligam | [[Classes]] |
+| Quais programas existem, onde rodam e como se falam | [[Componentes-e-Implantacao]] |
+| Quais tabelas existem nos bancos do MES e do av-hub | [[Modelo-de-Dados]] |
+| O circuito de compra em forma de grafo | [[04-Circuito-de-Compra]] |
+| As conversas entre o av-hub e o MES (INT-01 a INT-07) | [[Integracao-AvHub-MES]] |
+| A transferência de estoque entre filiais | [[Transferencia-entre-Filiais]] |
 
 ## Os diagramas do v2
 
-| Nota | Conteúdo | Diagramas |
+| Nota | O que mostra | Diagramas |
 |---|---|---|
-| [[00-Fluxo-Mestre-0b]] | Fluxo de atividades de ponta a ponta, com IDs `V0.1` a `O2` e `K1` a `K6` | 1 |
-| `artifact-proposta-pedido.html` | Fluxo da proposta ao pedido, aprovado em 26/10/2026: proposta, compra, datas, faturamento em partes, custo real, comissão e cancelamento (página publicada "Fluxo da Proposta ao Pedido") | 1 página |
+| [[00-Fluxo-Mestre-0b]] | Fluxo de ponta a ponta, com passos `V0.1` a `O2` e `K1` a `K6` | 1 |
+| `artifact-proposta-pedido.html` | Da proposta ao pedido, aprovado em 26/10/2026: proposta, compra, datas, faturamento em partes, custo real, comissão e cancelamento (página publicada "Fluxo da Proposta ao Pedido") | 1 página |
 | `Historia-da-Proposta-ao-Pedido.pdf` | A jornada do usuário de ponta a ponta, num caso só (Mogi: flanges, tubos, flanges cegas e flange sobre desenho) | 3 páginas |
 | [[11-Proposta-e-Pedido-de-Venda]], [[12-Orcamento-Base-de-Preco]], [[13-Custo-Real-e-Comissao-no-Fluxo]] | Subfluxos da proposta ao pedido, do Orçamento e do custo real e da comissão | 3 |
 | [[Sequencia]] | Pedido ao PCP, atendimento do Estoque, requisição ida e volta, chegada com NF e Recebimento, inspeção de entrada, produção e Expedição, despacho | 8 |
@@ -28,7 +49,19 @@ O v1 tinha 31 diagramas na UML e outros espalhados nas pastas de fluxo, quase to
 
 Diagramas de apoio em outras pastas: o grafo do Circuito de Compra em [[04-Circuito-de-Compra]], as sequências de integração em [[Integracao-AvHub-MES]] (INT-01 a INT-07) e a transferência entre filiais em [[Transferencia-entre-Filiais]].
 
-## Destino dos diagramas da UML do v1 (`Diagramas-UML.md`)
+## O que aconteceu com os desenhos do v1
+
+O v1 tinha 31 diagramas na UML e outros espalhados nas pastas de fluxo, quase todos escritos entre 24/09 e 08/10 e nunca refeitos depois que o código mudou. No v2, cada um teve um destino:
+
+- **Mantido:** bate com o código de 14/10.
+- **Redesenhado:** o conceito vale, mas o desenho estava velho ou errado.
+- **Descartado:** era ilustrativo, redundante ou foi superado.
+
+As duas tabelas abaixo, em "Detalhe técnico", dão o motivo de cada um. Um limite importante: `Q8` no Mestre manda o aprovado ao Estoque (`E5`), mas o código manda à Expedição. O diagrama [[Sequencia]] 6 mostra as duas coisas. Dono: Robert.
+
+## Detalhe técnico
+
+### Destino dos diagramas da UML do v1 (`Diagramas-UML.md`)
 
 | # v1 | Diagrama | Destino | Por quê | Onde está agora |
 |---|---|---|---|---|
@@ -60,7 +93,7 @@ Diagramas de apoio em outras pastas: o grafo do Circuito de Compra em [[04-Circu
 | 24 | Estados: Recebimento | Mantido | Enum e transições batem | [[Estados]] 4 |
 | 25 | Classes: `api-comercial` | Redesenhado | `PerfilComercial` virou `UsuarioComercial` e o enum de cargo saiu | [[Classes]] 4 |
 
-## Destino dos fluxogramas e sequências das pastas de fluxo do v1
+### Destino dos fluxogramas e sequências das pastas de fluxo do v1
 
 | Origem no v1 | Diagrama | Destino | Por quê |
 |---|---|---|---|
@@ -82,7 +115,7 @@ Diagramas de apoio em outras pastas: o grafo do Circuito de Compra em [[04-Circu
 | `Proposta-Transferencia-Estoque-Filiais` | Estados da transferência | Mantido no anexo | [[Transferencia-entre-Filiais]] (Ciclo 2) |
 | `Mapa-Rotas-BFF-API-para-Bearer` | Tabelas, sem diagrama | n/a | [[Mapa-Rotas-BFF-Bearer]] |
 
-## Limites desta conferência
+### Limites desta conferência
 
 - Os diagramas de classes, estados e dados foram reescritos do Prisma, dos routers e dos dumps de 14/10. Os diagramas de sequência foram conferidos contra os serviços do `api-pcp` e do `api-acos-vital` citados em cada bloco.
 - Os fluxogramas de atividades por raia e as sequências `Fluxo-*-Completo` do v1 foram classificados pelo tema e pela comparação com o 0b e com o código, não relidos linha a linha: a regra foi não manter nenhum que mencione "confere contra a OC", registro manual da compra, baixa só no despacho ou aprovador genérico.

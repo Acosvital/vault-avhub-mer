@@ -16,6 +16,11 @@ criado_original: 2026-10-09
 
 > **Onde atua:** av-hub: banco, API, front · MES: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define a Torre de Fluxo: o MES (sistema da produção) publica um feed de eventos dos itens, o Hub grava o estado atual de cada um e quatro telas mostram setores, tempo por etapa e trilha.
+> **Quem é afetado:** Quem acompanha onde cada item está parado e há quanto tempo. No time: Robert (MES), Gustavo (banco e API) e Nathan (BFF, a camada do Next que serve o front, e telas).
+> **Situação:** Parcial. Banco, job de projeção e rotas do Hub estão entregues. O MES ainda não publica o feed, então a Torre responde vazia (Robert). BFF e telas (Nathan) não foram conferidos.
+
 > [!info] Situação em 26/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** F1, X1, Q7 · **Dono:** Robert
 >

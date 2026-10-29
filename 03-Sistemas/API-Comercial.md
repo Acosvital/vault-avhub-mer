@@ -1,7 +1,7 @@
 ---
 tags: [sistemas, api-comercial, comercial, suprimentos, express, prisma]
 criado: 2026-10-14
-atualizado: 2026-10-15
+atualizado: 2026-10-29
 status: vigente
 dono: Pablo
 fontes: [HUB b55ac55, pasta C:\Users\nathan.silva\Desktop\TI\NATHAN\00 - HUB\api-comercial (README.md, src/app.ts, src/config/env.ts, src/domain/permissoes/capacidades.ts, prisma/), v1 AV-Hub-Comercial-Suprimentos]
@@ -9,13 +9,50 @@ fontes: [HUB b55ac55, pasta C:\Users\nathan.silva\Desktop\TI\NATHAN\00 - HUB\api
 
 # API Comercial (`api-comercial`)
 
+**Em uma frase:** é o backend do módulo AV Comercial & Suprimentos (propostas, ofertas de fornecedor, custo de referência e sincronização com o Omie). Hoje é só uma API de teste do Pablo, que vai migrar para a API do av-hub.
+
+> [!info] Decisão do Nathan, 14/10/2026 📝
+> A `api-comercial` não será publicada. Tudo migra para a `api-acos-vital`. A migração está proposta em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]].
+
+## Quem usa e para quê
+
+- **Comercial (vendedor, auxiliar, gestão, diretoria):** monta propostas e consulta clientes.
+- **Suprimentos (comprador):** mantém ofertas, fornecedores e responde pedidos de custo.
+- **Pablo:** é o dono e desenvolve o módulo.
+
+## Como se encaixa no fluxo
+
+- Fica **fora do fluxo de Atividades**. O pedido de venda entra no fluxo pelo av-hub ([[AV-Hub-API]]), não por aqui.
+- A proposta fechada gera um "pedido a digitar no Omie" (planilha). O pedido só entra no fluxo quando o Omie o cria e a pipeline o traz (`V1`, [[Pipeline-Omie]]).
+- Divide com o av-hub as permissões, os usuários e a fonte de dados do Omie. Anexo: [[Comercial-Suprimentos]].
+
+## Regras que valem
+
+- A identidade vem sempre do login do Hub. Não há perfil próprio nesta API.
+- As permissões são as do Hub ([[RBAC-e-Permissoes]]).
+- Mudar um documento exige a versão atual dele. Versão velha é recusada.
+- Dinheiro e quantidade usam números decimais exatos.
+- Não confundir as ordens de compra daqui (espelho do Omie, só para análise) com a OC do av-hub, que segue o circuito de compra.
+
+## O que já existe e o que falta
+
+- ✅ Propostas, clientes, catálogo e ofertas, custo, configurador de telha, painéis e e-mail.
+- ✅ Sincronização com o Omie a cada 15 minutos.
+- 📝 Migração de 22 das 30 tabelas para a API do Hub. 8 são descartadas.
+- 🟡 Defeitos deste código de teste que a migração não deve herdar: o filtro `?responsavel=` anula o escopo `proprios`, o escopo `vinculados` não restringe e o CNPJ alfanumérico é rejeitado.
+- 🟡 `GET /pedidos_compras` do av-hub vem vazio na api-test, por isso a API lê o Omie direto.
+- 🟡 Migração do ERP Comercial antigo por `npm run migrar:erp-antigo`.
+- ❓ O banco `core_comercial` não foi conferido contra um banco publicado. Quem publica é o Gustavo.
+
+## Detalhe técnico
+
 > **Decisão do Nathan, 14/10/2026 📝:** a `api-comercial` é só uma API de teste do Pablo. Ele vai migrar tudo para a `api-acos-vital` (API do av-hub). Ela não será publicada, e o que está descrito abaixo é o estado do código de teste, não um serviço de produção.
 
 **Como a migração será feita:** [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] (proposta de 15/10/2026). Das 30 tabelas, 22 migram e 8 são descartadas (espelhos do Omie e do hub); a sincronização própria some e a pipeline é a fonte; o domínio de cálculo é portado como está. A auditoria de 15/10 achou defeitos **neste** código de teste (o filtro `?responsavel=` anula o escopo `proprios`, o escopo `vinculados` não restringe, CNPJ alfanumérico rejeitado, entre outros) que o LOG-52 lista como critérios de aceite para **não** serem herdados.
 
 Backend do módulo **AV Comercial & Suprimentos**: propostas, ofertas de fornecedor, custo de referência, configurador de telha, solicitações de custo, dashboards e a sincronização com o Omie (produtos, fornecedores, pedidos de compra). Dono: Pablo. Está **fora do fluxo de Atividades**: o pedido de venda do Omie entra no fluxo pelo av-hub ([[AV-Hub-API]]), e não por aqui. Mesmo assim ele compartilha RBAC, usuários e a fonte Omie com o av-hub. Anexo: [[Comercial-Suprimentos]]. Selos: [[Regras-do-Vault]].
 
-## Onde mora e como roda
+### Onde mora e como roda
 
 - **Repositório:** pasta `api-comercial/` dentro do repositório do HUB (HUB b55ac55, develop) ✅ `00 - HUB/api-comercial`. CI próprio em `.github/workflows/api-comercial.yml`, só quando a pasta muda ✅ README.
 - **Stack:** Node 22, Express 5, TypeScript (ESM), Prisma 7, PostgreSQL (schema **`core_comercial`**), zod 4 (mensagens em pt-BR), pino, decimal.js, Vitest + supertest ✅ `package.json`, `src/app.ts:20-22`.
@@ -23,7 +60,7 @@ Backend do módulo **AV Comercial & Suprimentos**: propostas, ofertas de fornece
 - **Porta e docs:** 3001; `/docs` (Scalar) e `/api-docs-json` quando `DOCS_ENABLED` não é `false` ✅ `src/app.ts:81-84`, `config/env.ts`.
 - **Saúde:** `GET /health` testa o banco (200 `ok` ou 503) ✅ `src/app.ts:73-80`.
 
-## Camadas da requisição (`src/app.ts`)
+### Camadas da requisição (`src/app.ts`)
 
 `helmet` → `pino-http` (aceita `x-request-id` curto) → `express.json` 8 MB → CORS por `CORS_ORIGINS` → tudo em `/v1`: rate limit por IP (limite alto, antes da identidade), **`apiKey`** (`x-api-key` do BFF do HUB), **`autenticacao`** (JWT do Hub), rate limit por usuário (`RATE_LIMIT_MAX`, padrão 300/min) ✅ `app.ts:44-56,90-94`.
 
@@ -32,7 +69,7 @@ Backend do módulo **AV Comercial & Suprimentos**: propostas, ofertas de fornece
 - **Bypass de desenvolvimento:** `AUTH_DEV_BYPASS=true` só vale com `NODE_ENV` explícito `development` ou `test`; aceita `x-dev-usuario` e `x-dev-perfis` ✅ `config/env.ts:74-77`, README.
 - **Convenções:** envelope de erro `{ detail, codigo?, campos? }`; paginação `{ data, total, page, limit, total_pages }`; dinheiro e quantidade em `Decimal` (strings); comandos que mudam documento exigem `If-Match` com o `ETag` (428 sem, 409 com versão velha); `POST /propostas` e `POST /solicitacoes_custo` aceitam `Idempotency-Key` ✅ README.
 
-## Rotas (`/v1`)
+### Rotas (`/v1`)
 
 Extraídas dos routers de `src/modules/**` em 14/10 ✅.
 
@@ -47,13 +84,13 @@ Extraídas dos routers de `src/modules/**` em 14/10 ✅.
 | `notificacoes` | `GET /notificacoes`; `POST /:id/lida`, `/ler_todas` | avisos in-app |
 | `omie` | `GET /omie/sincronizacoes`; `POST /omie/sincronizar` | motor de sincronização |
 
-## Sincronização com o Omie
+### Sincronização com o Omie
 
 `src/modules/omie/` trabalha sobre a interface `FonteOmie` (D-30): fonte pelo espelho do av-hub (`fonteHub.ts`, `HUB_API_URL` + `HUB_API_KEY`, produtos e fornecedores) e pedidos de compra direto na API do Omie (`pedidosOmieApi.ts`, `OMIE_MOGI_APP_KEY/SECRET` e `OMIE_UBERABA_APP_KEY/SECRET`, porque `GET /pedidos_compras` do av-hub não traz o que a tela precisa) ✅ `config/env.ts`, README. A sincronização automática roda a cada `OMIE_SYNC_INTERVALO_MIN` (padrão 15; 0 desliga), é idempotente (hash por registro bruto), incremental e em lotes; sem fonte, `POST /omie/sincronizar` responde 503 `OMIE_SEM_FONTE` ✅ `config/env.ts`, README.
 
 **Não confundir** `core_comercial.OrdemCompra`/`ItemOrdemCompra` (espelho de pedidos de compra do Omie para análise) com `core_vendas_faturamento.ordens_compra` (a OC que nasce no av-hub e segue o circuito de compra do fluxo) ✅ `prisma/models/omie.prisma`, [[Banco-AvHub]]. A proposta fechada gera um "pedido a digitar no Omie" (xlsx); o pedido de venda só entra no fluxo quando o Omie o cria e a pipeline o traz ([[Pipeline-Omie]], nó V1).
 
-## Variáveis de ambiente
+### Variáveis de ambiente
 
 | Variável | Uso | Padrão |
 |---|---|---|
@@ -69,11 +106,11 @@ Extraídas dos routers de `src/modules/**` em 14/10 ✅.
 
 BFF no HUB: `COMERCIAL_API_URL` e `COMERCIAL_API_KEY` ✅ `app/api/comercial/[...rota]/route.ts`.
 
-## Slugs de permissão que a API consulta
+### Slugs de permissão que a API consulta
 
 `propostas`, `propostas-delegacao` (criar = pode delegar), `propostas-valores` (visualizar = vê valores), `custo-item` (visualizar = vê custo; ou ser comprador), `relatorio-gerencial`, `painel-comprador` (editar = é comprador), `clientes` ✅ `domain/permissoes/capacidades.ts:44-52`. Os 6 perfis de desenvolvimento (`Comercial - Vendedor`, `Auxiliar`, `Gestão`, `Diretoria`, `Suprimentos - Comprador`, `Pós-venda`) ficam em `domain/permissoes/perfisDev.ts` ✅ README.
 
-## Pontas soltas
+### Pontas soltas
 
 - ❓ O schema `core_comercial` e as 13 migrations não foram conferidos contra um banco publicado (o repositório não traz dump). Quem publica é o Gustavo.
 - 🟡 `GET /pedidos_compras` do av-hub vem vazio na api-test; por isso a API lê o Omie direto (README e nota v1 `AV-Hub-Comercial-Suprimentos`, resumida em [[Comercial-Suprimentos]]).

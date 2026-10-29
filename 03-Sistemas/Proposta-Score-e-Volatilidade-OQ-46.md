@@ -1,7 +1,7 @@
 ---
 tags: [decisoes, orcamento, score, fornecedor, volatilidade, oq-46, staging]
 criado: 2026-10-19
-atualizado: 2026-10-19
+atualizado: 2026-10-29
 status: proposta
 dono: Nathan
 fontes: [proposta do Nathan de 19/10/2026 (dados de exemplo), Perguntas-Proposta-Pedido-Comissao OQ-46, Registro-de-Decisoes N16-52, api-comercial suprimentos.prisma (model Oferta), Dump Avhub (Esqueleto) ordens_compra]
@@ -9,9 +9,49 @@ fontes: [proposta do Nathan de 19/10/2026 (dados de exemplo), Perguntas-Proposta
 
 # Score, top fornecedores, volatilidade e "dado recente" (OQ-46, N16-55)
 
+**Em uma frase:** regra que nota e ordena os fornecedores na página do produto do vendedor, com score, ranking, volatilidade de preço e cotação recente.
+
+**Quando consultar esta nota:** ao construir a página do produto (`B2`) ou ao ajustar pesos e limites. Responde à N16-52 ([[Registro-de-Decisoes]]).
+
+É decisão do Nathan de 19/10/2026 (N16-55). Pesos, limite e dias eram exemplo; a regra vale e pode melhorar depois.
+
+## As quatro regras
+
+| Regra | Em palavras | Valor decidido |
+|---|---|---|
+| Score do fornecedor | Nota de preço, prazo e histórico | Pesos 50, 30 e 20, configuráveis e com vigência (N16-56) |
+| Top fornecedores | Ranking por score e por vitórias, por categoria | Vitória: Compras comprou dele (aparece numa OC) (N16-72) |
+| Volatilidade | Quanto o preço varia nos últimos 30 a 90 dias | Acima de 15% ou 20%, mostra "Alta Volatilidade" |
+| Dado recente | Última cotação válida | 7 dias, por categoria (N16-72) |
+
+## Ajustes que o Nathan adotou (N16-56)
+
+- Comparar pelo custo líquido, não pelo preço bruto.
+- Guardar o prazo de entrega em dias, como número.
+- Usar a data real de recebimento.
+- Exigir um mínimo de pontos.
+- Dar vigência aos pesos.
+
+## Fechado em 20/10/2026 (N16-72)
+
+Se falta prazo ou histórico, a nota é neutra e aparece o aviso "poucos dados".
+
+## Ainda em aberto
+
+- Limite exato de volatilidade (15% ou 20%).
+- Quem preenche o prazo em dias.
+- Janela do histórico (12 meses?) e mínimo de compras para o fornecedor ter nota.
+
+Ligadas: [[Perguntas-Proposta-Pedido-Comissao]] OQ-46, OQ-34 (unidades) e OQ-35 (base de preço).
+
+## Detalhe técnico
+
+Tudo abaixo é o conteúdo completo da nota original, sem cortes.
+
+
 Responde às perguntas da página do produto do vendedor ([[Registro-de-Decisoes]] N16-52). **É decisão do Nathan de 19/10/2026 (N16-55).** Os valores que estão no SQL (pesos, limite de volatilidade, dias) eram exemplo; a regra vale e a proposta pode melhorar depois. A seção 2 traz ajustes que o Nathan **adotou** (N16-56): custo líquido, prazo em dias, data real de recebimento, mínimo de pontos e pesos com vigência. Os demais pontos continuam como sugestão. Abaixo, as quatro regras como o Nathan mandou, e depois o que conferi no código e no banco.
 
-## 1. As regras propostas
+### 1. As regras propostas
 
 **Score do fornecedor.** Média ponderada de preço, prazo e confiabilidade:
 
@@ -27,7 +67,7 @@ Responde às perguntas da página do produto do vendedor ([[Registro-de-Decisoes
 
 **Dado recente.** A última cotação válida: `ROW_NUMBER() OVER (PARTITION BY produto_id ORDER BY data_cotacao DESC)`, fica só a linha 1, e só se a `data_cotacao` tiver menos de X dias (7 ou 15).
 
-## 2. O que conferi no código e no banco 🟡
+### 2. O que conferi no código e no banco 🟡
 
 | Ponto | O que existe hoje | O que a regra precisa |
 |---|---|---|
@@ -36,17 +76,17 @@ Responde às perguntas da página do produto do vendedor ([[Registro-de-Decisoes
 | **Nota Prazo** | `prazo` na `Oferta` é **texto livre** (`String?`) | Precisa de **prazo de entrega em dias, como número**. Sem isso a nota não calcula. E dizer se é prazo de **entrega** (o que a regra quer) ou de pagamento |
 | **Nota Histórico** | A OC do hub tem `data_previsao_chegada` (prevista). Não achei score nem avaliação de fornecedor no modelo | Precisa da **data real do recebimento** para medir "entrega no prazo" (conferir com o contrato do Recebimento). E de um **mínimo de compras**: fornecedor com uma compra só não tem histórico confiável |
 | **Frequência de vitória** | Não existe | Precisa de definição: ganhou quando teve o **menor custo líquido** numa cotação ou numa OC? Em cotações ou em compras? |
-| **Categoria** | O SQL-017 tem `categoria_suprimento` | O ranking por categoria já tem onde se apoiar |
+| **Categoria** | O Orçamento tem `categoria_suprimento` | O ranking por categoria já tem onde se apoiar |
 | **Volatilidade** | O histórico de ofertas e de OC existe | Precisa de um **mínimo de pontos** no período (por exemplo, 3) e a mesma unidade e moeda. Com poucos pontos o CV engana |
 | **Dado recente** | A OC efetivada entra como oferta (`fonte` pedido do Omie) | Casa com a N16-41 (vale o mais atualizado) e com a N16-52 (sem dado recente, mostra a média e o botão de pedir cotação) |
 
-## 3. Pontos fechados em 20/10/2026 (N16-72)
+### 3. Pontos fechados em 20/10/2026 (N16-72)
 
 - **Dado recente: 7 dias**, como parâmetro por categoria.
 - **Frequência de vitória:** Compras efetivamente comprou do fornecedor (aparece numa OC).
 - **Falta de prazo ou histórico:** nota neutra e aviso "poucos dados".
 
-## 4. Pontos para ajustar depois, se for o caso
+### 4. Pontos para ajustar depois, se for o caso
 
 1. **Pesos 50, 30 e 20** e o **limite de volatilidade (15% ou 20%)**: ficam como **parâmetro configurável**, com vigência, e não fixos no código.
 2. **X dias de "dado recente"**: 7 ou 15? Pode variar por categoria (chapa oscila mais que flange).

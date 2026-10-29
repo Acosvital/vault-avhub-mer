@@ -23,6 +23,11 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compr
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Listou o que faltou no módulo de Compras depois da entrega do backend: nomes na ordem de compra (OC), resumo, limite por unidade e histórico.
+> **Quem é afetado:** Compradores e aprovadores, que passam a ver nomes em vez de códigos nas OCs.
+> **Situação:** ✅ Backend dos itens C1 a C10 entregue em contrato consolidado, e as marcas de gambiarra saíram do av-hub. 🟡 Envio da OC ao Omie e entidades HTML nos nomes seguem em contrato da pipeline.
+
 
 > **Situação em 28/09/2026:** o backend de C1–C10 foi entregue pelo contrato
 > [[LOG-13a-Compras-Backend-Consolidado|13-Compras-Backend-Consolidado]] (na `api-test`). O av-hub já usa tudo e **as marcas

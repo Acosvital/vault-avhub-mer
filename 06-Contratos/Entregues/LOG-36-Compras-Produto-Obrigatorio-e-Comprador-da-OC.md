@@ -16,6 +16,11 @@ criado_original: 2026-10-05
 
 > **Onde atua:** av-hub: banco, API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Todo item da OC precisa ter produto do cadastro da unidade, porque o Omie recusou pedido com item sem produto no teste de 05/10. A OC só vai ao Omie com comprador vinculado.
+> **Quem é afetado:** Compradores escolhem produto do cadastro, sem texto livre. Se o comprador mudar no Omie, o av-hub acompanha e guarda o histórico.
+> **Situação:** ✅ Concluído em 06/10: regra fixa no código, sem chave. ❓ A emissão de OC não foi testada em produção, que era só leitura.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
 >

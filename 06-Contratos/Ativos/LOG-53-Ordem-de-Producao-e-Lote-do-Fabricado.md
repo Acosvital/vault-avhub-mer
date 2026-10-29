@@ -16,6 +16,12 @@ criado_original: 2026-10-15
 
 > **Onde atua:** MES: banco, API, front
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define a Ordem de Produção (OP) como documento em PDF, numerada `pedidoVenda/N`, só para destinos de fabricação. Define também que o item fabricado vira lote no Estoque depois da inspeção de saída.
+> **Quem é afetado:** PCP, Produção, Qualidade e Estoque no MES. Aprovada na inspeção de saída, a peça vai ao Estoque, não mais à Expedição, e o Estoque informa a localização.
+> **Situação:** Proposta, dono Robert. Nada existe no código; o SQL foi escrito e validado em banco descartável. Estimativa: 3,0 e 4,0 pd, dentro do Ciclo 1.
+> **Exemplo:** Pedido 27605 com dois destinos de fabricação e um de revenda gera duas OPs, 27605/1 e 27605/2.
+
 > [!info] Situação em 15/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** P2, F1, Q7, Q8, E5 · **Dono:** Robert (MES, sem API entre sistemas)
 >

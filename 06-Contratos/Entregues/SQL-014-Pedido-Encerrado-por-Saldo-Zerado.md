@@ -29,6 +29,11 @@ criado_original: 2026-10-19
 >
 > Selos em [[Regras-do-Vault]].
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Pedido cujo valor foi todo para parciais ficava "em andamento" e, passada a previsão, atrasado para sempre. Agora aparece como "Faturado, encerrado", com "Em atraso · N dias" quando passou do prazo.
+> **Quem é afetado:** Vendedores e PCP (Planejamento e Controle da Produção): Meus Pedidos, Pedidos da Equipe e Pedidos do PCP.
+> **Situação:** ✅ Banco, API e front entregues. ✅ Nathan confirmou produção em 21/10, sem conferência no banco. 🟡 Vale o SQL das migrations 014 e 014b, não o script do texto.
+
 ## Por quê
 
 No Omie existe a ação de encerrar o pedido, mas ninguém a executa. Pedido terminado continua "em andamento" no hub e, passada a previsão, aparece como atrasado para sempre.

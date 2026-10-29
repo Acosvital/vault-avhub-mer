@@ -16,6 +16,11 @@ criado_original: 2026-10-06
 
 > **Onde atua:** av-hub: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Registra a regra do Nathan de 06/10: regra decidida fica fixa no código, sem variável de ambiente que ligue ou desligue. O contrato removeu as chaves que mantinham regras desligadas.
+> **Quem é afetado:** Backend e quem faz o deploy. Para os usuários, passam a valer sempre: produto obrigatório na OC, notas manuais só do admin e histórico unificado.
+> **Situação:** ✅ Concluído no código em 06/10: saíram 13 chaves. Ficam 6 de segurança e paginação, de propósito, até cumprirem seus pré-requisitos.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >

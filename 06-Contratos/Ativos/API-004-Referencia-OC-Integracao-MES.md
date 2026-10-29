@@ -16,6 +16,12 @@ criado_original: 2026-09-22
 
 > **Onde atua:** av-hub: banco, API · MES: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define a rota pela qual o av-hub entrega ao MES (sistema de produção) as Ordens de Compra (OC) aprovadas ou canceladas, para o Recebimento conferir o que chega na doca.
+> **Quem é afetado:** Recebimento e Compras. O Recebimento passa a ver as OCs emitidas no av-hub; hoje confere só contra a nota fiscal (NF).
+> **Situação:** Parcial. O lado do av-hub está entregue (✅). O job de leitura no MES existe desde 15/10 (Robert); faltam itens do backlog (BL-049, BL-050, BL-051) e o custo da OC no lote.
+> **Exemplo:** Uma OC aprovada aparece na leitura seguinte com itens, tipo de material e destino (pedido de venda ou estoque).
+
 > [!info] Situação em 14/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** C4, R0, R4 · **Dono:** Robert
 >

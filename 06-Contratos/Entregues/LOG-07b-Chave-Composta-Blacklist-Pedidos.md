@@ -22,6 +22,11 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/blacklist_pe
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Corrigiu a blacklist de pedidos: o número do pedido se repete entre empresas, então editar e apagar passaram a exigir também a empresa.
+> **Quem é afetado:** Quem mantém a blacklist de pedidos: deixa de existir o risco de alterar ou apagar o registro da empresa errada.
+> **Situação:** ✅ Entregue: o par empresa e número do pedido é a chave, e a empresa não muda no PUT.
+
 
 **Criado em:** 15/09/2026, achado num review de segurança/correção de dados.
 

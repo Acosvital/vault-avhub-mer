@@ -16,6 +16,12 @@ criado_original: 2026-10-09
 
 > **Onde atua:** av-hub: banco, API · MES: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Amplia a referência da Ordem de Compra (OC) do API-004: a rota passa a devolver também valor unitário, desconto, moeda, cotação e frete, para o lote comprado nascer com custo.
+> **Quem é afetado:** Estoque e Recebimento do MES (o lote ganha custo). Compras e Orçamento poderão comparar orçado, comprado e custo real, como uso futuro.
+> **Situação:** Parcial. O lado do av-hub está entregue (✅). No MES, o job de leitura com valores existe desde 15/10 (Robert); falta gravar o custo da OC no lote.
+> **Exemplo:** Uma OC em dólar chega com moeda, cotação e valor unitário, e o MES calcula o valor unitário em reais.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** C4, R4 · **Dono:** Robert
 >

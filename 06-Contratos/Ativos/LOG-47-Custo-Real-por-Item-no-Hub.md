@@ -16,6 +16,12 @@ criado_original: 2026-10-09
 
 > **Onde atua:** av-hub: banco, API, front · MES: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define como o Hub lê do MES o custo real de cada item (média dos lotes reservados) para usar no simulador de comissão, na comissão por faturamento e em Compras e Orçamento.
+> **Quem é afetado:** Compras e Comercial. O vendedor não vê o custo, só o resultado (letra e percentual). O DBA mantém o job e a rota.
+> **Situação:** Parcial. Só o job de leitura e a rota estão prontos, e o MES não publica a rota `GET /itens/custo`, então nada é gravado. As telas passam à comissão nova, em contratos que o Robert vai criar.
+> **Exemplo:** NF de 10 de 20 flanges com custo médio de 11,75 dá custo de faturamento de 117,50.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** E3, R4 · **Dono:** Gustavo (DBA)
 >
@@ -23,7 +29,7 @@ criado_original: 2026-10-09
 > - 🔴 **O MES não publica `GET /itens/custo`** (ver [[API-008-Custo-do-Lote-no-MES]], §5): o job recebe 404 "ainda não publicado", avisa uma vez e não grava nada. A tabela `itens_pedido_custo` existe mas está sem dados reais do MES.
 > - 🔴 **§2 Simulador pré-preenchido, §3 comissão por faturamento, §4 Compras e Orçamento:** consumo do custo nas telas, sem código conferido (HUB fora da pasta de repos; ❓). Ciclo 2, dono Comercial & Suprimentos.
 > - O custo do item = média dos lotes reservados (nó E3 do [[00-Fluxo-Mestre-0b]]).
-> - 📝 **N16-09 e N16-10 (16/10):** o custo real por item e a comissão com custo real saem do Ciclo 2 e alimentam o `K2` da comissão nova ([[13-Custo-Real-e-Comissao-no-Fluxo]]): custo por evento em `core_vendas_faturamento.custos_eventos` (N16-116) ([[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], [[API-021-Custo-Real-por-Evento-e-Conferencia-de-Compras]]) e comissão em `core_comissao` ([[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]). O "dono: Comercial & Suprimentos, Ciclo 2" dos §2 a §4 deixa de valer; as telas são as do [[LOG-61-Custo-Real-do-Pedido-Telas]] e do [[LOG-59-Telas-da-Comissao-Nova]], em Operações. O §1 (job que lê `GET /itens/custo`) continua valendo como uma das fontes do lote.
+> - 📝 **N16-09 e N16-10 (16/10):** o custo real por item e a comissão com custo real saem do Ciclo 2 e alimentam o `K2` da comissão nova ([[13-Custo-Real-e-Comissao-no-Fluxo]]): custo por evento em `core_vendas_faturamento.custos_eventos` (N16-116) e comissão em `core_comissao`. O "dono: Comercial & Suprimentos, Ciclo 2" dos §2 a §4 deixa de valer; as telas serão as do Custo real do pedido e da comissão nova, em Operações, com contratos que o Robert vai criar. O §1 (job que lê `GET /itens/custo`) continua valendo como uma das fontes do lote.
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.

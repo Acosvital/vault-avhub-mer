@@ -25,6 +25,11 @@ criado_original: 2026-09-22
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Criou as tabelas da OC (Ordem de Compra) que o próprio Hub decide e cria: ordens, itens e parcelas. A aprovação depende de um limite por unidade, padrão R$ 30.000.
+> **Quem é afetado:** Compradores e aprovadores de compras.
+> **Situação:** ✅ Aplicado (PR #273) e em uso pela API. 🟡 O banco difere do DDL do texto; vale o banco. Pendentes: envio real ao Omie, permissão de aprovar e histórico de decisão.
+
 
 **Status: aplicada — confirmado em 23/09/2026.** Entregue em `api-acos-vital` (commit `ec2a42b`, PR #273, mergeado em `main` em 22/09) junto com o [[SQL-008-Requisicoes-Compra|008-Requisicoes-Compra]]. O av-hub já está ligado nele (branch `feat/compras-integracao-backend`), e as leituras foram confirmadas ao vivo em `api-test`. Produção não foi conferida.
 

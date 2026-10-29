@@ -25,6 +25,11 @@ criado_original: 2026-10-09
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Acrescentou à view de referência de OC (Ordem de Compra) os valores: preço, desconto, moeda, cotação, frete e seguro. Assim o lote recebido no MES (sistema de chão de fábrica) nasce com custo.
+> **Quem é afetado:** Compras, Orçamento e Recebimento do MES.
+> **Situação:** ✅ View e rota já trazem os valores (migration `api007` aplicada). 🔴 O consumo no MES continua pendente.
+
 
 > **Status: `para-implementar` (Gustavo, DBA).**[^c1] Estende a migration `api004` do [[SQL-011-Ordens-Compra-Referencia-MES|011-Ordens-Compra-Referencia-MES]], que o DBA informou em 09/10/2026 ter **entregue e aplicado**. Este contrato só **acrescenta** colunas e eventos: nada que a rota ou o MES leem hoje muda de nome, tipo ou significado. Contrato de API que o consome: [[API-007-Referencia-OC-Valores-no-MES|007-Referencia-OC-Valores-no-MES]]. Desenho de negócio: [[Modelo-Estoque-e-Custo-do-Lote|Estoque-Custo-do-Lote]].
 

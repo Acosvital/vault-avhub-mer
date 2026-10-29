@@ -215,20 +215,20 @@ flowchart TD
 
 | Nó | Raia | O que acontece | Tela (nome atual · antigo · rota) | Endpoint / contrato | Código |
 |---|---|---|---|---|---|
-| V0.1 | Vendas | Vendedor cria a proposta: unidade emissora (logo, cores, CRC no PDF), cliente com cadastro no Omie da conta, itens com CFOP, cenário e impostos digitados, condição de pagamento da lista da conta | Propostas · `/vendas/propostas` (HUB) | API-019, SQL-016, SQL-019 · [[11-Proposta-e-Pedido-de-Venda]] | 🔴 (`api-comercial` de teste ✅) |
-| V0.2 | Vendas | Vendedor preenche o custo com o que conseguiu, consultando a página do produto, ou pede ao Orçamento (`B3`) e segue | idem | API-019, API-020 | 🔴 |
-| V0.3 | Vendas | Comissão estimada nasce (motor atual); proposta com item sem custo ou sem fornecedor é incompleta e não aprova | idem | API-022, SQL-018 | 🔴 |
+| V0.1 | Vendas | Vendedor cria a proposta: unidade emissora (logo, cores, CRC no PDF), cliente com cadastro no Omie da conta, itens com CFOP, cenário e impostos digitados, condição de pagamento da lista da conta | Propostas · `/vendas/propostas` (HUB) | · [[11-Proposta-e-Pedido-de-Venda]] | 🔴 (`api-comercial` de teste ✅) |
+| V0.2 | Vendas | Vendedor preenche o custo com o que conseguiu, consultando a página do produto, ou pede ao Orçamento (`B3`) e segue | idem | | 🔴 |
+| V0.3 | Vendas | Comissão estimada nasce (motor atual); proposta com item sem custo ou sem fornecedor é incompleta e não aprova | idem | | 🔴 |
 | V0.4 | Gerência | Aprova desconto e margem fisicamente (neste ciclo) | — (fora do sistema) | N16-75 | — |
-| V0.5 | Vendas | Vendedor marca a proposta aprovada (quem, quando, revisão); depois disso ela trava | idem | `trg_propostas_travar` · SQL-016 | 🔴 |
-| V0C | Vendas | Proposta cancelada: não reabre (o vendedor duplica); a comissão estimada vira histórico | idem | SQL-016, SQL-018 | 🔴 |
-| V0.6 | Vendas | Transformar em pedido: previsão de faturamento, Qualidade e faturamento em partes obrigatórios; produto pendente bloqueia | idem | `fn_propostas_transformar_em_pedido` · SQL-016, LOG-58 | 🔴 |
-| V0.7 | Vendas | Cria o pedido no Omie por API (fila e pipeline, como a OC), com o nosso número; recusa mostra o motivo e "Tentar novamente" | idem | `IncluirPedido` · API-019, LOG-56, [[Mapa-IncluirPedido-Omie]] | 🔴 |
-| B1 | Orçamento | Base de preço de compra com histórico: OCs do Hub e do Omie viram ofertas; estatística por produto | — | `fn_ofertas_gerar_de_ocs` · SQL-017, API-020 · [[12-Orcamento-Base-de-Preco]] | 🔴 |
-| B2 | Orçamento | Página do produto: histórico, top fornecedores com score, volatilidade, média | Página do produto (nova) | API-020, LOG-60 | 🔴 |
-| B3 | Orçamento | Pedido de custo do vendedor, sem prazo fixo, com o tempo cronometrado | Orçamento · Pedidos de custo | API-020 | 🔴 (`api-comercial` de teste ✅ com prazo) |
-| B4 | Orçamento | O setor de Orçamento (o Moisés é uma das pessoas) cota, grava a oferta e responde | idem | API-020 | 🔴 |
-| V1 | Vendas | Pedido de venda no av-hub, com duas origens no mesmo fluxo: o da proposta nasce liberado; o digitado no Omie chega travado e o job o traz para `core_comercial.pedidos` com a parte de vendas pronta (só se altera no Omie) | Meus Pedidos | pipeline `ListarPedidos` → `pedidos_vendas`; `fn_pedidos_omie_sincronizar` · SQL-016 | ✅ pipeline; 🔴 pedido no Hub |
-| V2 | Vendas | Pedido do Omie: vendedor marca "Qualidade acompanha desde o início?" e se fatura em partes; a resposta passa para a tela do pedido (N16-106) | Liberar Pedidos · `/liberar-pedidos` (HUB); depois Meus Pedidos 🟡 | `PUT /pedidos_liberacao/:empresa/:numero` · LOG-26, LOG-58 | ✅ Qualidade; 🔴 faturamento em partes |
+| V0.5 | Vendas | Vendedor marca a proposta aprovada (quem, quando, revisão); depois disso ela trava | idem | `trg_propostas_travar` · | 🔴 |
+| V0C | Vendas | Proposta cancelada: não reabre (o vendedor duplica); a comissão estimada vira histórico | idem | | 🔴 |
+| V0.6 | Vendas | Transformar em pedido: previsão de faturamento, Qualidade e faturamento em partes obrigatórios; produto pendente bloqueia | idem | `fn_propostas_transformar_em_pedido` · | 🔴 |
+| V0.7 | Vendas | Cria o pedido no Omie por API (fila e pipeline, como a OC), com o nosso número; recusa mostra o motivo e "Tentar novamente" | idem | `IncluirPedido` · [[Mapa-IncluirPedido-Omie]] | 🔴 |
+| B1 | Orçamento | Base de preço de compra com histórico: OCs do Hub e do Omie viram ofertas; estatística por produto | — | `fn_ofertas_gerar_de_ocs` · · [[12-Orcamento-Base-de-Preco]] | 🔴 |
+| B2 | Orçamento | Página do produto: histórico, top fornecedores com score, volatilidade, média | Página do produto (nova) | | 🔴 |
+| B3 | Orçamento | Pedido de custo do vendedor, sem prazo fixo, com o tempo cronometrado | Orçamento · Pedidos de custo | | 🔴 (`api-comercial` de teste ✅ com prazo) |
+| B4 | Orçamento | O setor de Orçamento (o Moisés é uma das pessoas) cota, grava a oferta e responde | idem | | 🔴 |
+| V1 | Vendas | Pedido de venda no av-hub, com duas origens no mesmo fluxo: o da proposta nasce liberado; o digitado no Omie chega travado e o job o traz para `core_comercial.pedidos` com a parte de vendas pronta (só se altera no Omie) | Meus Pedidos | pipeline `ListarPedidos` → `pedidos_vendas`; `fn_pedidos_omie_sincronizar` · | ✅ pipeline; 🔴 pedido no Hub |
+| V2 | Vendas | Pedido do Omie: vendedor marca "Qualidade acompanha desde o início?" e se fatura em partes; a resposta passa para a tela do pedido (N16-106) | Liberar Pedidos · `/liberar-pedidos` (HUB); depois Meus Pedidos 🟡 | `PUT /pedidos_liberacao/:empresa/:numero` · LOG-26 | ✅ Qualidade; 🔴 faturamento em partes |
 | V3 | Vendas | Vendedor libera (marcação e liberação numa ação só) e preenche a parte de compras do pedido do Omie (a simulação da comissão), sem travar o fluxo | idem | idem; histórico em `pedidos_vendas_liberacao_historico` | ✅ liberação; 🔴 parte de compras |
 | P1 | PCP | Lista os pedidos liberados | Triagem dos Pedidos · "Carteira" · `/carteira` (app-pcp) | `GET /pedidos/carteira` → `GET /pedidos_liberados` · LOG-26 | ✅ nomes técnicos antigos 🔴 |
 | P2 | PCP | Define destino (FABRICACAO ou REVENDA) e quantidade ≤ restante por item e rodada; insere Estoque como etapa 1; confirma importação | Destinação do Pedido · "Nova Ordem de Produção" · `/ordens-producao/novo` | `POST /pedidos/completo/lote`; `POST /pedidos_liberados/:n/importado` · LOG-26 | ✅ |
@@ -242,9 +242,9 @@ flowchart TD
 | C2/C3 | Compras | Aprovação: OC acima de R$ 30 mil, o Gerente de Compras aprova; até R$ 30 mil, compradores livres (sem aprovação) | Aprovações · `/compras/aprovacoes` (HUB) | parametros_compras; `oc_enviada_aprovacao`, `oc_aprovada` | ✅ 📝 N14-21: a trigger `fn_ordens_compra_recalcular` aprova sozinha a OC até `parametros_compras.limite_aprovacao` (padrão R$ 30 mil, por unidade); acima disso a OC fica `aguardando_aprovacao` e só quem tem `pode_aprovar` na tela `compras` (Gerência) aprova (`ordens_compra.route.js:1230-1240`, `FecharCompra.tsx:604-605`). Regra mais rígida depois, com Compras 🟡 |
 | C4 | Compras | Emite a OC (CIF/FOB; valor, desconto, moeda, cotação PTAX por item; flag acabado/não-acabado) | Ordens · `/compras/ordens` (HUB) | `POST /compras/ordens`; envio ao Omie `GET /compras/ordens/fila-omie` (pipeline) · LOG-23, LOG-36 | ✅ |
 | C5 | Compras · CCP | Follow-up (confirmação, previsão, despacho, ocorrência) | Follow-up · `/compras/followup` (HUB); Compras · CCP · `/compras/pedidos-compra` (MES, só leitura) | `GET /compras/requisicoes/eventos` · LOG-35, LOG-32 | ✅ perfil CCP 🔴 |
-| C6 | Compras | Confere a parte de compras que o vendedor preencheu (fornecedor, impostos, frete), puxada para a OC; pode alterar os impostos da OC | Emitir OC · `/compras/ordens` | API-021, LOG-56 · [[04-Circuito-de-Compra]] | 🔴 |
-| C7 | Compras | Segue o fornecedor do vendedor ou usa o valor correto; a proposta não muda | idem | LOG-56 | 🔴 |
-| C8 | Compras e Vendas | Compra acima do custo do vendedor (por produto, sem tolerância): aviso em Meus Pedidos, o vendedor aprova ou reprova; reprovado, Compras leva à Gerência fisicamente, registra a solução e o vendedor é avisado. Vale para os dois tipos de pedido | Meus Pedidos; Compras · Reprovados | `divergencias_compra` · SQL-016, API-019 | 🔴 |
+| C6 | Compras | Confere a parte de compras que o vendedor preencheu (fornecedor, impostos, frete), puxada para a OC; pode alterar os impostos da OC | Emitir OC · `/compras/ordens` | · [[04-Circuito-de-Compra]] | 🔴 |
+| C7 | Compras | Segue o fornecedor do vendedor ou usa o valor correto; a proposta não muda | idem | | 🔴 |
+| C8 | Compras e Vendas | Compra acima do custo do vendedor (por produto, sem tolerância): aviso em Meus Pedidos, o vendedor aprova ou reprova; reprovado, Compras leva à Gerência fisicamente, registra a solução e o vendedor é avisado. Vale para os dois tipos de pedido | Meus Pedidos; Compras · Reprovados | `divergencias_compra` · | 🔴 |
 | FN1 | Fornecedor | Recebe a OC; entrega (CIF direto ou coleta FOB) | — (fora do sistema) | — | — |
 | R0 | Recebimento | OC aprovada entra nos **esperados**; a doca registra a chegada com a NF | Recebimento · `/logistica/logistica-entrada` | `GET /compras/requisicoes/esperados`; `POST /compras/requisicoes/:id/chegada`; `POST …/liberar-recebimento` (rede de segurança) | ✅ |
 | R1 | Recebimento | Confere contra a NF (chave de 44 dígitos) | idem | `POST /compras/recebimentos` | ✅ |
@@ -266,23 +266,23 @@ flowchart TD
 | X2 | Expedição | Parcial ou integral? | idem | — | 🟡 integral travado por item que não chega: T-06 |
 | X3 | Expedição | Consolida a carga (10.2) | — | — | 🔴 |
 | X4 | Expedição | Logística de saída: transporte (10.3), comprovante (10.4) | idem | `POST /entregas` | 🟡 transporte 🔴, comprovante ✅ |
-| O1 | Fiscal | Omie emite a nota (o sistema nunca emite), inteira ou por sequencial: o Fiscal separa o pedido por item e quantidade (sequencial não é outro pedido nem parcela) | — | pipeline `ListarNF`; `pedidos_vendas_sequenciais_itens` · SQL-016 | ✅ lado Omie; **sinalização do MES ao Omie (11.1) 🔴**; criar sequencial pelo Hub 🔴 (teste no Omie) |
+| O1 | Fiscal | Omie emite a nota (o sistema nunca emite), inteira ou por sequencial: o Fiscal separa o pedido por item e quantidade (sequencial não é outro pedido nem parcela) | — | pipeline `ListarNF`; `pedidos_vendas_sequenciais_itens` · | ✅ lado Omie; **sinalização do MES ao Omie (11.1) 🔴**; criar sequencial pelo Hub 🔴 (teste no Omie) |
 | O2 | Fiscal | Baixa o item no pedido | — | pipeline | ✅ lado Omie |
-| K1 | Comissão | Comissão estimada: na proposta (`V0.3`) ou na parte de compras do pedido do Omie; o vendedor só vê esta | Comissões (novas) · estimada | API-022, SQL-018 · [[13-Custo-Real-e-Comissao-no-Fluxo]] | 🔴 |
-| K2 | Comissão | Recalcula com o custo real, por evento (OC com o valor da NF de entrada, lote do Estoque, matéria-prima), cada um com as suas condições | — (automático) | `custos_eventos` · SQL-016, API-021 | 🔴 |
-| K3 | Comissão | Fecha por nota fiscal, só as peças com custo real e pelo menor percentual; a nota do pedido do Omie sem simulação espera, e a Controladoria já vê a margem real | Fila da Controladoria | `fn_comissao_nf_fechar` · SQL-018 | 🔴 |
-| K4 | Controladoria | Controladoria, Gerência ou Coordenação decidem, com justificativa; ninguém decide a própria comissão | idem | `fn_comissao_decidir` · SQL-018, LOG-59 | 🔴 |
-| K5 | Vendas | O vendedor vê a comissão real só depois da decisão, com a justificativa | Minhas Comissões | `vw_comissao_nf_vendedor` · SQL-018 | 🔴 |
-| K6 | Comissão | Nota cancelada, devolvida ou recusada abate na mesma proporção; a devolução parcial é informada pelo Fiscal ou pela Controladoria | Fila do Fiscal | `fn_comissao_nf_abater` · SQL-018 | 🔴 |
+| K1 | Comissão | Comissão estimada: na proposta (`V0.3`) ou na parte de compras do pedido do Omie; o vendedor só vê esta | Comissões (novas) · estimada | · [[13-Custo-Real-e-Comissao-no-Fluxo]] | 🔴 |
+| K2 | Comissão | Recalcula com o custo real, por evento (OC com o valor da NF de entrada, lote do Estoque, matéria-prima), cada um com as suas condições | — (automático) | `custos_eventos` · | 🔴 |
+| K3 | Comissão | Fecha por nota fiscal, só as peças com custo real e pelo menor percentual; a nota do pedido do Omie sem simulação espera, e a Controladoria já vê a margem real | Fila da Controladoria | `fn_comissao_nf_fechar` · | 🔴 |
+| K4 | Controladoria | Controladoria, Gerência ou Coordenação decidem, com justificativa; ninguém decide a própria comissão | idem | `fn_comissao_decidir` · | 🔴 |
+| K5 | Vendas | O vendedor vê a comissão real só depois da decisão, com a justificativa | Minhas Comissões | `vw_comissao_nf_vendedor` · | 🔴 |
+| K6 | Comissão | Nota cancelada, devolvida ou recusada abate na mesma proporção; a devolução parcial é informada pelo Fiscal ou pela Controladoria | Fila do Fiscal | `fn_comissao_nf_abater` · | 🔴 |
 
 ## Fluxos transversais que acompanham o 0b
 
 - **Status por item** (contratos [[API-005-Status-Item-Integracao-MES]] e [[API-006-Status-por-Item-Leitura-no-Hub]]): `GET /itens/status` no MES → job de 90 s no av-hub → cartão "Etapa dos itens" no HUB. 11 etapas em [[Estados-e-Status]].
 - **Torre de Fluxo** (LOG-46): feed de eventos do MES para o av-hub. O MES ainda não publica `/fluxo/eventos` 🔴.
 - **Custo** (API-008, LOG-47): `lote_custo` no MES, `GET /itens/custo` do MES para o av-hub 🔴.
-- **Datas do pedido** ([[11-Proposta-e-Pedido-de-Venda]], SQL-016): a previsão inicial é a do vendedor (ou a do Omie); Compras registra a entrega do fornecedor e o CCP a nova data com o motivo; a vigente é a maior entre a inicial e a última de cada item, + 1 dia útil pelo calendário da unidade (feriados do estado e exceções que o marketing cadastra); a mudança do CCP só avisa o vendedor; o vendedor e o PCP veem todas as datas; a vigente não volta ao Omie 📝 (N16-88, N16-91, N16-96, N16-97, N16-104) 🔴.
-- **Faturamento em partes** (SQL-016): o Fiscal separa o pedido em sequenciais por item e quantidade; a OC e o custo ficam no item do pedido; a linha do sequencial (código novo no Omie) volta à do original numa tabela própria; cancelar devolve o valor ao original 📝 (N16-92 a N16-94, N16-100) 🔴.
-- **Cancelamento do pedido** ([[LOG-56-Fluxo-da-Proposta-ao-Pedido]]): o vendedor cancela (fica registrado) ou exclui o pedido da proposta, e o Hub chama o Omie; requisição e OC não emitida se cancelam com tarja; o comprado vai ao Estoque. O pedido digitado no Omie se cancela no Omie 📝 (N16-68 a N16-71, N16-84, N16-91, N16-106) 🔴.
+- **Datas do pedido** ([[11-Proposta-e-Pedido-de-Venda]]): a previsão inicial é a do vendedor (ou a do Omie); Compras registra a entrega do fornecedor e o CCP a nova data com o motivo; a vigente é a maior entre a inicial e a última de cada item, + 1 dia útil pelo calendário da unidade (feriados do estado e exceções que o marketing cadastra); a mudança do CCP só avisa o vendedor; o vendedor e o PCP veem todas as datas; a vigente não volta ao Omie 📝 (N16-88, N16-91, N16-96, N16-97, N16-104) 🔴.
+- **Faturamento em partes**: o Fiscal separa o pedido em sequenciais por item e quantidade; a OC e o custo ficam no item do pedido; a linha do sequencial (código novo no Omie) volta à do original numa tabela própria; cancelar devolve o valor ao original 📝 (N16-92 a N16-94, N16-100) 🔴.
+- **Cancelamento do pedido**: o vendedor cancela (fica registrado) ou exclui o pedido da proposta, e o Hub chama o Omie; requisição e OC não emitida se cancelam com tarja; o comprado vai ao Estoque. O pedido digitado no Omie se cancela no Omie 📝 (N16-68 a N16-71, N16-84, N16-91, N16-106) 🔴.
 - **Integração MES ↔ av-hub:** ida da requisição (LOG-34), volta dos marcos (LOG-35), liberação do pedido (LOG-26), referência da OC (API-004, MES não consome 🔴).
 
 ## Mapa para as notas de raia

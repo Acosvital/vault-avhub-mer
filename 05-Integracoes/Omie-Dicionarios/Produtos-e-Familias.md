@@ -1,7 +1,7 @@
 ---
 tags: [omie, dicionario, pipeline, produtos, familias]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Gustavo (DBA)
 fontes: [v1 08-Integracao-Omie/01-Dados-Extraidos/Produtos-e-Familias, omie-elt-pipeline 0f739f0, Registro-de-Decisoes #20]
@@ -9,9 +9,13 @@ fontes: [v1 08-Integracao-Omie/01-Dados-Extraidos/Produtos-e-Familias, omie-elt-
 
 # Dicionário Omie: Produtos e famílias
 
+**Em uma frase:** tabelas de produtos e de famílias (grupos de produtos) copiadas do Omie, com a origem de cada coluna.
+
+**Quando consultar esta nota:** ao procurar de onde vem um dado do produto (código, unidade, NCM, peso) ou ao tratar produto duplicado ou sem família.
+
 ## `core.produtos`
 
-Fonte: `ListarProdutos` (`/geral/produtos/`), resource `produtos.ts`. Chave de conflito: `(codigo_empresa, codigo_produto_omie)`, com fallback legado em `(codigo_empresa, codigo_produto)`.
+Fonte: `ListarProdutos` (`/geral/produtos/`), resource `produtos.ts`. Chave de conflito (identifica a linha e evita duplicar): `(codigo_empresa, codigo_produto_omie)`, com alternativa antiga em `(codigo_empresa, codigo_produto)`.
 
 | Coluna | Campo ou origem Omie |
 |---|---|
@@ -20,11 +24,11 @@ Fonte: `ListarProdutos` (`/geral/produtos/`), resource `produtos.ts`. Chave de c
 | `descricao` | `prod.descricao`, decodificada |
 | `familias_produtos` | `prod.codigo_familia` se válido (não vazio, não "0"); senão a família padrão da filial; se nem isso existir, a linha é pulada |
 | `unidade_medida` | `prod.unidade` (padrão `'PÇ'`) |
-| `ncm` | `prod.ncm` sem pontos |
+| `ncm` | `prod.ncm` sem pontos (NCM é a classificação fiscal) |
 | `especificacoes` (jsonb) | `altura`, `largura`, `profundidade`, `peso_bruto`, `peso_liq`, `marca`, `modelo` (default 0 ou vazio) |
 | `ativo` | `prod.inativo === 'N'` |
 | `codigo_empresa` | filial |
-| `id`, `id_origem`, `created_at/by`, `updated_at/by`, `deleted_at/by` | gerenciadas pelo banco |
+| `id`, `id_origem`, `created_at/by`, `updated_at/by`, `deleted_at/by` | controle do banco (identificador, autoria e datas de criação, alteração e exclusão) |
 
 `peso_bruto` e `peso_liq` já vêm do Omie. Não existem em lugar nenhum: tolerância de peso (decidida em 5% para todas, no MES: `Material.toleranciaPeso` `@default(0.05)`, 📝 DEC-6 e #26), estoque máximo e ponto de pedido. O estoque mínimo existe na API do Omie (por produto e local), mas o saldo do Omie é ignorado 📝 (#28).
 
@@ -45,6 +49,6 @@ Fonte: `PesquisarFamilias` (`/geral/familias/`), resource `familiaProdutos.ts`. 
 
 ## Alias e dedup de catálogo
 
-`material_alias_omie` não é extraído pelo pipeline: é tabela do lado do Estoque (`materialCanonicoId` + `codigoOmie`), pré-requisito de saneamento (produtos duplicados no Omie apontam para um material canônico). O pipeline traz o catálogo bruto, duplicatas incluídas. O `Material` do MES nasce só na primeira entrada de estoque do produto ([[Modelo-Estoque-e-Custo-do-Lote]]).
+`material_alias_omie` não é extraído pelo pipeline: é tabela do lado do Estoque (`materialCanonicoId` + `codigoOmie`), pré-requisito de limpeza do cadastro (produtos duplicados no Omie apontam para um material canônico). O pipeline traz o catálogo bruto, duplicatas incluídas. O `Material` do MES nasce só na primeira entrada de estoque do produto ([[Modelo-Estoque-e-Custo-do-Lote]]).
 
 Ver também: [[Omie-Integracao-Estado]], [[Notas-Fiscais-e-Itens]].

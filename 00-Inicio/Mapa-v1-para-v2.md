@@ -1,7 +1,7 @@
 ---
 tags: [vault, mapa, migracao]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Nathan
 fontes: [vault-avhub-mer (v1, congelado)]
@@ -9,7 +9,11 @@ fontes: [vault-avhub-mer (v1, congelado)]
 
 # Mapa v1 para v2
 
-Cada nota do vault anterior (`vault-avhub-mer`, **171 notas**, congelado) com o destino no v2. Notas de contrato mantêm o texto integral; as demais foram reescritas, consolidadas ou, quando ficaram só no v1, têm o motivo dito aqui.
+**Em uma frase:** diz onde foi parar cada nota do vault antigo (v1) dentro do vault novo (v2).
+
+**Quando consultar esta nota:** quando você achar uma referência a uma nota do v1 e quiser saber onde ela está hoje.
+
+O v1 (`vault-avhub-mer`) tem **171 notas** e está congelado. Os contratos mantêm o texto integral. As demais notas foram reescritas ou juntadas. Quando uma nota ficou só no v1, a tabela diz o motivo.
 
 | Nota do v1 | Destino no v2 |
 |---|---|

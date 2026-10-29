@@ -26,6 +26,11 @@ criado_original: 2026-10-09
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define o pedido de venda manual: criado e editado direto no Hub, só por administrador, convivendo com os pedidos que o pipeline traz do Omie (ERP). Existia no código sem contrato.
+> **Quem é afetado:** Administradores. O pedido manual não entra no custo do item nem no fluxo de Atividades.
+> **Situação:** ✅ Rotas e regra existem no código da API. ❓ Produção não verificada. 🟡 O código chama este assunto de "Contrato 30", numeração que diverge do vault.
+
 
 > **Status: `implementada-no-codigo`. Produção NÃO verificada.** Lido em 09/10/2026 na `develop` da `api-acos-vital` (`origin/develop` = `dee35b0`; a cópia local está 2 commits atrás, por isso tudo abaixo vem de `git show origin/develop:…`), no pipeline `omie-elt-pipeline` (`master` `d2886bf`) e no front `00 - HUB` (`996e320`). Produção só pelo dump de 07/10 ([[Mapa-v1-para-v2|Auditoria-Dump-Producao-2026-10-07]]), que **não** traz o corpo de triggers nem o mapa de rotas deste assunto. Decisões da rodada: [[Registro-de-Decisoes|Registro-de-Decisoes-2026-10-07]]. Origem deste contrato: item "Contrato novo para pedido de venda manual" da [[Mapa-v1-para-v2|Auditoria-Pente-Fino-2026-10-08]].
 >

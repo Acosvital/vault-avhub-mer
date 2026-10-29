@@ -16,6 +16,11 @@ criado_original: 2026-09-30
 
 > **Onde atua:** av-hub: banco, API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Cada vendedor passa a pertencer a uma só unidade nos dashboards (a do RH ou, sem vínculo, a do cadastro no Omie). Ganha também datas de início e fim de atividade, para sumir das listas depois que sai.
+> **Quem é afetado:** Quem usa dashboards de vendas e faturamento. O RH define a unidade. Os totais não mudam; só as listas de vendedor.
+> **Situação:** ✅ Entregue em 01/10: `GET /vendedores` devolve unidade de origem e período. Os números por unidade não foram comparados; o front estava sem push em 01/10.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >

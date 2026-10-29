@@ -3,7 +3,7 @@ id: LOG-54
 aliases: ["Contrato 54", "54-Documento-de-Retirada-e-Baixa-na-Retirada"]
 tags: [contrato, contrato-logica, mes, estoque, retirada, expedicao, sql, prisma]
 criado: 2026-10-15
-atualizado: 2026-10-15
+atualizado: 2026-10-29
 status: proposta
 sistemas: [mes-banco, mes-api, mes-front]
 dono: "Robert"
@@ -16,13 +16,18 @@ criado_original: 2026-10-15
 
 > **Onde atua:** MES: banco, API, front
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define o documento de retirada: quem precisa da mercadoria do Estoque (Expedição ou Produção) pede, o Estoque confirma, e só então o saldo baixa.
+> **Quem é afetado:** Estoque, Expedição, Produção e Embalagem. Hoje a baixa ocorre quando a Embalagem recebe a parcela. Passa a ocorrer na retirada confirmada, e a Embalagem só recebe depois dela.
+> **Situação:** Proposta, dono Robert. Nada existe no código; o SQL foi validado em banco descartável. Decidido em 29/10 quem pede e quem confirma; o que o documento imprime segue aberto. O BL-007 (3,5 pd) está fora da conta do Ciclo 1 até o Nathan decidir.
+
 > [!info] Situação em 15/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** E6, X1, F1 · **Dono:** Robert (MES, sem API entre sistemas)
 >
 > - 📝 **N14-05 (14/10):** o despacho é no Estoque; **quem precisa da mercadoria** (Expedição ou Produção) gera um **documento de retirada**; **a baixa do saldo acontece na retirada**.
 > - 🔴 **Não existe no código** (`api-pcp`): hoje a baixa roda quando a Embalagem **recebe** a parcela (`consumirReservasDaParcial` em `receber()`, `itens-parciais.service.ts:275-285`) e há uma segunda chamada "de garantia" na entrega (`entregas.service.ts:84-94`). Nenhuma ocorrência de "retirada" em `api-pcp/src` nem em `app-pcp`.
 > - ✅ **SQL escrito e validado** em banco descartável (PostgreSQL 18, tabelas-esqueleto): [[0001-documento-de-retirada.sql]] em `LOG-54-anexos/`. Validado: a mesma parcela não entra duas vezes na retirada; não se retira mais que o solicitado; confirmar exige quem confirmou; cancelar exige quem cancelou e o motivo; o movimento de saída carrega a retirada. **Não validado:** contra o schema real do MES; nenhum código existe.
-> - 🔴 **Perguntas do Nathan abertas** (seção "Perguntas"): quem gera o documento e o que ele imprime, e se a reserva continua depois da retirada. O desenho abaixo adota a proposta mais simples para cada uma, marcada.
+> - 📝 **Decidido em 29/10/2026 (N16-120 a N16-122):** a Expedição (ou a Produção) pede e só o Estoque confirma; a reserva é consumida junto com a baixa; a Embalagem só recebe depois da retirada confirmada. **Segue aberto:** o que o documento imprime (seção "Perguntas", Q1).
 > - **BL-007: 3,5 pd (±30%) do Robert, fora da conta do Ciclo 1** até o Nathan decidir (se entrar, o déficit vai a 36,1 pd e a W0 a 03/03/2027 a 75% de foco).
 
 Selos em [[Regras-do-Vault]]. Rotas, nomes e telas são **propostas**; as regras são as decididas ou marcadas 🟡.
@@ -186,9 +191,9 @@ flowchart LR
 
 | # | Pergunta | Dono | Selo |
 |---|---|---|---|
-| Q1 | O documento nasce de **quem**: a Expedição pede ao Estoque (como desenhado acima), ou o Estoque gera quando a parcela chega à Expedição? O que o documento imprime (lote, localização, quantidade, assinatura) e **quem confirma** (só o Estoque)? | Nathan | 🔴 |
-| Q2 | A **reserva** continua depois da retirada (para rastrear custo) ou é consumida junto com a baixa? O desenho consome junto, com o custo gravado na `SAIDA` | Nathan | 🔴 |
-| Q3 | A Embalagem só **recebe** a parcela depois da retirada confirmada (regra 6, é o que traz a mercadoria até ela)? Ou recebe antes e a retirada confirma depois? | Nathan | 🔴 |
+| Q1 | O documento nasce de **quem**: a Expedição pede ao Estoque (como desenhado acima), ou o Estoque gera quando a parcela chega à Expedição? O que o documento imprime (lote, localização, quantidade, assinatura) e **quem confirma** (só o Estoque)? | Nathan | 📝 em 29/10 (N16-120): a Expedição pede e só o Estoque confirma. 🔴 **o que imprime** segue aberto |
+| Q2 | A **reserva** continua depois da retirada (para rastrear custo) ou é consumida junto com a baixa? O desenho consome junto, com o custo gravado na `SAIDA` | Nathan | 📝 em 29/10 (N16-121): consumida junto |
+| Q3 | A Embalagem só **recebe** a parcela depois da retirada confirmada (regra 6, é o que traz a mercadoria até ela)? Ou recebe antes e a retirada confirma depois? | Nathan | 📝 em 29/10 (N16-122): só depois da retirada confirmada |
 | Q4 | **Estornar** uma retirada confirmada (mercadoria devolvida ao Estoque) é ação própria? Hoje `estornarConsumosDaParcial` faz isso para o desfazer-recebimento | Robert | 🟡 |
 | Q5 | O BL-007 (3,5 pd) entra no Ciclo 1? Aguardando decisão | Nathan | 🟡 |
 | Q6 | Uma retirada pode juntar parcelas de **pedidos diferentes** (uma ida ao estoque) ou é por pedido? O desenho aceita várias parcelas | Robert | ❓ |

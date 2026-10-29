@@ -1,7 +1,7 @@
 ---
 tags: [sistemas, bugs, pendencias, mes, av-hub, pipeline]
 criado: 2026-10-14
-atualizado: 2026-10-15
+atualizado: 2026-10-29
 status: vigente
 dono: Nathan
 fontes: [api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, HUB b55ac55, omie-elt-pipeline 0f739f0, Dump MES e Dump Avhub de 14/10, v1 AV-Hub-Bugs-Catalogo (revisado item a item)]
@@ -9,9 +9,52 @@ fontes: [api-pcp 579a625, app-pcp 1fca8d3, api-acos-vital f322dcd, HUB b55ac55, 
 
 # Bugs conhecidos
 
+**Em uma frase:** é a lista de defeitos já conferidos no código ou no banco de 14/10, com gravidade e quem corrige. Falta de funcionalidade fica em [[Pontas-Soltas]] e [[Backlog-por-Frente]].
+
+## Quem usa e para quê
+
+- **Gustavo, Robert e Nathan:** cada um vê o que é seu para corrigir.
+- **Quem planeja:** vê o que ainda trava o fluxo.
+
+## Como se encaixa no fluxo
+
+Os defeitos graves travam a Torre de Fluxo, o custo por item, o Estoque e o Recebimento.
+
+- Banco e API do av-hub: Gustavo.
+- MES: Robert.
+- Telas do av-hub: Nathan.
+
+## Regras que valem
+
+- Só entra aqui o que foi conferido. Cada linha tem gravidade (alta, média ou baixa), dono, selo e evidência.
+- Ao corrigir, apague a linha. A nota mostra só o estado atual.
+- Diferença entre código e banco fica em [[Diferencas-Codigo-x-Banco]].
+
+## O que já existe e o que falta
+
+**Graves (alta), travam o fluxo:**
+
+- 🔴 B1 (Gustavo): o custo por item não funciona. O banco está sem a migration 047b.
+- 🔴 B2 (Robert): o MES não publica a Torre de Fluxo nem o custo. Os jobs do av-hub recebem 404.
+- 🔴 B5 (Robert): fabricado aprovado nunca vira lote nem saldo.
+- 🔴 B6 (Robert): a baixa do saldo acontece na Embalagem, não no despacho do Estoque.
+
+**Médios:**
+
+- 🔴 B7 (Robert): o custo da OC nunca é gravado no lote.
+- 🔴 B8 (Robert): o MES não lê a referência da OC.
+- 🔴 B9 (Robert): o fornecedor da OC não chega ao MES.
+- ✅ B10 e B12 (Gustavo): filtro morto em produtos e parceiros; rota de `pessoa_vendedor` sem tabela.
+
+**Baixos (B13 a B21):** favoritos sem `id` ❓, regras em variável de ambiente 🟡, rota antiga sem consumidor 🟡, `BLOQUEADO` nunca usado, rota de demonstração exposta, 11 marcas `GAMBIARRA(`, Orçamento em JSON local, comentários velhos no pipeline.
+
+**Já resolvidos desde o v1:** paginação da planilha de vendas, rotas de Compras com erro 500, "Registrar compra" manual, marcos da compra no MES e as tabelas de custo e fluxo. A aprovação da OC (N14-21) e a requisição que não chega ao MES (N14-20) não são bugs.
+
+## Detalhe técnico
+
 Só entra aqui o que foi **conferido no código ou no dump de 14/10**. Cada linha tem severidade, quem corrige, o selo e a evidência. O que é lacuna de fluxo (falta construir) fica em [[Pontas-Soltas]] e [[Backlog-por-Frente]]; diferença entre código e banco, em [[Diferencas-Codigo-x-Banco]]. Severidade: **alta** = bloqueia o fluxo ou expõe dado; **média** = degrada; **baixa** = cosmético ou dívida. Selos: [[Regras-do-Vault]].
 
-## Bloqueiam o fluxo de Atividades
+### Bloqueiam o fluxo de Atividades
 
 | # | Severidade | Dono | Bug | Selo e evidência |
 |---|---|---|---|---|
@@ -23,7 +66,7 @@ Só entra aqui o que foi **conferido no código ou no dump de 14/10**. Cada linh
 | B8 | média | Robert | **O MES não lê a referência da OC** (`GET /ordens-compra/referencia`, API-004/007): o Recebimento confere só contra a NF, sem cruzar com a OC | ✅ grep em `api-pcp/src` sem ocorrência; rota existe em `vw_ordens_compra_referencia_mes.route.js:70` |
 | B9 | média | Robert | **Fornecedor da OC não chega ao MES.** A tabela `fornecedores` (projeção de `core.parceiros`) existe e nenhum código a popula ou lê; o fornecedor do lote vem como texto digitado na conferência | ✅ Dump MES `:595`; `prisma/models/estoque.prisma:183-198`; grep sem uso |
 
-## Defeitos de código
+### Defeitos de código
 
 | # | Severidade | Dono | Bug | Selo e evidência |
 |---|---|---|---|---|
@@ -39,7 +82,7 @@ Só entra aqui o que foi **conferido no código ou no dump de 14/10**. Cada linh
 | B20 | baixa | Nathan | Orçamento roda sobre JSON local (`lib/orcamento/data/*.json`), não sobre `core_compras.orc_*` que a API já expõe | ✅ `HUB lib/orcamento/dados.ts:1-20` |
 | B21 | baixa | Gustavo | Comentários velhos no pipeline: `ecosystem.config.cjs` fala em `SYNC_ENVIO_OC=false` e o `README.md` termina com "Ainda não feito: o envio da OC"; o envio é fixo e está feito | ✅ `ecosystem.config.cjs:62`, `README.md:169-171` |
 
-## Fechados ou obsoletos em relação ao v1
+### Fechados ou obsoletos em relação ao v1
 
 Itens do catálogo de bugs do v1 (revisão de 07/10) que o código de 14/10 já resolve ou que mudaram:
 
@@ -51,7 +94,7 @@ Itens do catálogo de bugs do v1 (revisão de 07/10) que o código de 14/10 já 
 - ✅ **Aprovação da OC** (antes B3): não é bug. O banco aprova até o limite e a API exige `pode_aprovar` acima dele, que é a regra decidida em 14/10 (N14-21; `ordens_compra.route.js:1230-1240`).
 - ✅ **Requisição criada só no av-hub não chega ao MES** (antes B4): a requisição não precisa chegar; o MES lê a **OC** pela referência. Virou requisito de integração (N14-20; BL-006, BL-049 a BL-051), não bug.
 
-## Como usar esta lista
+### Como usar esta lista
 
 - Bug de **banco ou API do av-hub**: abrir com o Gustavo. De **MES**: Robert. De **tela do av-hub**: Nathan.
 - Ao corrigir, apague a linha daqui (a nota diz só o estado atual) e registre a mudança no commit.

@@ -22,6 +22,11 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_pedido_ven
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Pediu que a view de itens do pedido informasse a qual parcela (sequencial) cada item pertence, em vez de listar todos os itens misturados.
+> **Quem é afetado:** Vendedores e PCP (Planejamento e Controle da Produção): a página do pedido mostra os produtos de cada parcela sem adivinhar.
+> **Situação:** ✅ Entregue: a view `vw_pedido_venda_itens` traz o `sequencial` de cada item.
+
 
 **Criado em:** 19/09/2026, a partir da página do pedido em Pedidos da Equipe
 (`/pedidos-equipe-v2/pedido/{empresa}/{pedido}`), que precisa mostrar os produtos de cada parcela.

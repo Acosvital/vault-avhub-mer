@@ -16,6 +16,12 @@ criado_original: 2026-10-15
 
 > **Onde atua:** MES: banco, API, front
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define como o MES (sistema de produção) sabe o que o Compras já está comprando para cada pedido e como dá entrada na mercadoria por item da Ordem de Compra (OC), com ou sem requisição, inclusive uso interno.
+> **Quem é afetado:** PCP (aviso ao requisitar, evitando compra duplicada), Recebimento (recebe por NF e por item de OC) e Estoque (saldo futuro e entradas de uso interno).
+> **Situação:** Proposta, dono Robert. A leitura da OC (K4) já está na `develop` (✅); o cruzamento, o recebimento por NF e o uso interno não existem (🔴). Nomes de rotas são propostas.
+> **Exemplo:** Pedido que precisa de 8 unidades, com 3 já em OC aprovada: 3 ficam vinculadas à OC e 5 são requisitadas ao hub.
+
 > [!info] Situação em 15/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** P1, P2, P3, E1, R0, R1, R4 · **Dono:** Robert (MES). O Gustavo entrega as leituras do hub ([[API-009-Referencia-Requisicao-Hub-Integracao-MES]] e [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto]]).
 >

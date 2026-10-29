@@ -1,7 +1,7 @@
 ---
 tags: [pesquisa, comercial, suprimentos, api-comercial, proposta, orcamento, mapa, staging]
 criado: 2026-10-16
-atualizado: 2026-10-16
+atualizado: 2026-10-29
 status: proposta
 dono: Pablo
 fontes: [av-hub 5aa5311 (branch feat/menu-orcamento-vendas-compras) api-comercial/prisma/models e prisma/migrations, api-comercial/src/modules e src/domain, api-comercial/README.md, app/api/comercial/[...rota]/route.ts, app/(protected)/vendas orcamento compras, components/Propostas Suprimentos PainelComprador, lib/domain/fluxo-suprimentos.ts, docs/ENVIAR - contrato-comercial-suprimentos-telas.md, Dump Avhub (Esqueleto).sql, omie-elt-pipeline src/jobs/envioOrdensCompra.ts, 00-Briefing-Decisoes]
@@ -9,11 +9,81 @@ fontes: [av-hub 5aa5311 (branch feat/menu-orcamento-vendas-compras) api-comercia
 
 # Mapa do módulo do Pablo (Comercial e Suprimentos), como está hoje
 
-Este mapa descreve o código de teste `av-hub\api-comercial` (N14-15, N16-15) e o que as decisões N16 mudam nele. Cada fato do código traz arquivo e linha (✅). Decisão traz o ID `N16-xx` (📝). O que é proposta nova leva 🟡. O que não deu para conferir leva ❓ ou 🔴. Os desenhos que nascem daqui estão em [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]] e [[SQL-018-Schema-core_comissao-Comissao-da-Proposta]]. Decisões: [[Registro-de-Decisoes]].
+**Em uma frase:** o Pablo criou um módulo comercial de teste, ainda sem dados, e esta nota diz o que o Hub aproveita dele, o que muda e o que fica de fora.
+
+**Quando consultar esta nota:** antes de migrar, reaproveitar ou descartar qualquer parte do código do Pablo (`av-hub\api-comercial`).
+
+Selos: ✅ visto no código · 📝 decidido (`N16-xx`) · 🟡 proposta nova · ❓ 🔴 não conferido ou falta. Decisões em [[Registro-de-Decisoes]].
+
+## O que existe hoje
+
+- É um servidor de teste do módulo comercial: propostas, clientes, orçamento e compras. Não será publicado (N14-15, N16-15). ✅
+- Tem cerca de 30 tabelas, 24 listas de valores fixos e 91 rotas. ✅
+- As telas já estão no av-hub, em Vendas, Orçamento e Histórico de compras. ✅
+- Não tem dado nenhum (N16-109). 📝
+- O Robert conduz a migração das rotas para a API do Hub (`api-acos-vital`). O Pablo acompanha e o Gustavo revisa o banco (N16-117).
+
+## O que o Hub aproveita
+
+| Item | Por quê | Selo |
+|---|---|---|
+| Cálculo da proposta (linha, totais, margem) | A regra já bate com o sistema antigo. O N16-11 manda manter o motor | ✅ |
+| Custo líquido, médias e escolha do custo | Servem à base de preço do Orçamento | ✅ |
+| Configurador de telha | O N16-15 mantém o módulo | ✅ |
+| Clientes e carteira | Continuam em Vendas | ✅ |
+| Empresas emissoras (AV, AU, HRM) | Continuam, com a unidade do Omie | ✅ |
+| Pedido de custo | Vira o pedido de custo ao Orçamento (N16-06) | ✅ |
+| Ofertas que não mudam | O histórico fica sempre na base (N16-07) | ✅ |
+| Painel do Comprador, fornecedores, catálogo e histórico de compras | São telas do Orçamento e de Compras | ✅ |
+
+## O que muda
+
+| Hoje | Passa a ser | Decisão |
+|---|---|---|
+| Número `CO-AV2026-0012-R03` | Só dígitos, em sequência própria. O prefixo aparece só na tela e no PDF | 📝 N16-04 |
+| Status aberta, parcial, fechada, perdida | Aberta, aprovada, transformada, cancelada | 📝 N16-02, N16-03 |
+| Fechamento parcial por item | Some: uma proposta vale um pedido | 📝 N16-02 |
+| Proposta sem custo podia fechar | Proposta incompleta não aprova | 📝 N16-03 |
+| O vendedor digita o pedido no Omie | Um botão cria o pedido por API, numa fila | 📝 N16-02 |
+| Qualidade registrada na liberação | Obrigatória na proposta. O pedido nasce liberado | 📝 N16-05 |
+| Câmbio da AwesomeAPI | PTAX do Hub | 📝 N16-13 |
+| Pedido de custo com prazo de 2 dias úteis | Sem prazo fixo. O tempo é cronometrado | 📝 N16-06, N16-58 |
+| Custo real do pedido não existe | Custo real por evento e por item | 📝 N16-09 |
+| Compras não atua na proposta | Compras confere (`C6`) e usa o valor correto na OC (`C7`), sem alterar a proposta | 📝 N16-08, N16-17 |
+
+## O que fica de fora da migração
+
+| Item | Motivo |
+|---|---|
+| Migração do ERP antigo | Não há migração (N16-13) |
+| Sincronização própria com o Omie e suas tabelas de cópia | A pipeline é a fonte (N16-14, N14-15) |
+| Câmbio próprio | Vale a PTAX do Hub |
+| Planilha "pedido a digitar no Omie" | O pedido sai por API |
+| Auditoria própria 🟡 | Já existe `auth.auditoria` |
+| Perfis de teste 🟡 | São fictícios e nunca vão à produção |
+
+## Defeitos que a migração não pode herdar
+
+A auditoria de 15/10 achou 24 itens. Exemplos: escopo por vendedor que não restringe e CNPJ alfanumérico rejeitado. A lista está em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §10.
+
+## Perguntas abertas
+
+| # | Pergunta | Quem | Selo |
+|---|---|---|---|
+| M1 | Qual é o nome real da tela de pedidos de venda e de notas fiscais de saída? | Nathan | ❓ |
+| M2 | Como o pedido por API recebe a condição de pagamento de venda, que o Omie não espelha? | Gustavo, Nathan | 🔴 |
+| M3 | O cliente da proposta existe nas duas contas do Omie? | Nathan, Gustavo | 🔴 |
+
+## Detalhe técnico
+
+Tudo abaixo é o conteúdo completo da nota original, sem cortes.
+
+
+Este mapa descreve o código de teste `av-hub\api-comercial` (N14-15, N16-15) e o que as decisões N16 mudam nele. Cada fato do código traz arquivo e linha (✅). Decisão traz o ID `N16-xx` (📝). O que é proposta nova leva 🟡. O que não deu para conferir leva ❓ ou 🔴. Decisões: [[Registro-de-Decisoes]].
 
 Caminhos abaixo são relativos a `av-hub\api-comercial\` quando não dizem o contrário.
 
-## 1. Em uma página
+### 1. Em uma página
 
 | Item | Valor | Selo |
 |---|---|---|
@@ -23,18 +93,18 @@ Caminhos abaixo são relativos a `av-hub\api-comercial\` quando não dizem o con
 | Banco publicado | Não existe `core_comercial` no dump do hub | ✅ `Dump Avhub (Esqueleto).sql` (só há `core_comissionamento`, `core_compras`, `core_vendas_faturamento` e outros; nenhum `CREATE SCHEMA core_comercial`) |
 | Permissão | 100% do RBAC do hub: telas × ações e escopo de vendedores viram "capacidades" | ✅ `src/domain/permissoes/capacidades.ts:8-19,64-84` |
 | Front | Telas em `app/(protected)/vendas`, `orcamento` e `compras/historico-compras`; BFF em `app/api/comercial/[...rota]/route.ts` | ✅ |
-| Cadastro das telas | Feito pelo Nathan na api-test em 16/10; em produção o Gustavo roda o SQL | 📝 N16-14, `06-Contratos/Ativos/LOG-57-anexos/telas-vendas-orcamento-compras.sql` |
+| Cadastro das telas | Feito pelo Nathan na api-test em 16/10; em produção o Gustavo roda o SQL | 📝 N16-14, `telas-vendas-orcamento-compras.sql` (anexo do contrato do menu, removido em 29/10/2026) |
 
 > [!info] O que não migra (27/10/2026)
-> O módulo é só ambiente de teste e **não tem dado** (Nathan, N16-109). Para a migração, a lista do que **não portar** (sincronização própria do Omie e suas 7 tabelas de cópia, Histórico de compras, planilha do pedido no Omie, migração do ERP antigo, fechamento parcial, autenticação própria) e do que **reaproveitar** (motor na API, ofertas, fornecedores, parâmetros, pedido de custo, notificações) está em [[LOG-62-Reescopo-Menu-Enxuto-e-Limpeza-do-Modulo-do-Pablo]] §5. O menu das telas descritas aqui também foi enxugado nesse contrato.
+> O módulo é só ambiente de teste e **não tem dado** (Nathan, N16-109). Para a migração, a lista do que **não portar** (sincronização própria do Omie e suas 7 tabelas de cópia, Histórico de compras, planilha do pedido no Omie, migração do ERP antigo, fechamento parcial, autenticação própria) e do que **reaproveitar** (motor na API, ofertas, fornecedores, parâmetros, pedido de custo, notificações) está em §5. O menu das telas descritas aqui também foi enxugado nesse contrato.
 
-## 2. Camadas da requisição
+### 2. Camadas da requisição
 
 `helmet`, `pino-http`, `express.json` (8 MB), CORS, tudo em `/v1`: rate limit por IP, `apiKey` (chave do BFF), `autenticacao` (JWT do hub), rate limit por usuário ✅ `src/app.ts:41-57,94-96`. Os routers entram na ordem de `src/app.ts:97-115`: cadastros, produtos pendentes, simulador, `/propostas`, suprimentos, histórico de compras, custos, dashboards, omie, pesquisa de materiais, clientes, relatórios, e-mail e PDF de proposta, pedido de cotação, notificações e painel do comprador.
 
 Convenções ✅ `README.md:37-44`: envelope de erro `{ detail, codigo?, campos? }`; paginação `{ data, total, page, limit, total_pages }`; dinheiro como `Decimal` em string; `PUT`, `DELETE`, `/fechar`, `/perder`, `/reabrir` exigem `If-Match` (428 sem, 409 desatualizado); `POST /propostas` e `POST /solicitacoes_custo` aceitam `Idempotency-Key`.
 
-## 3. Banco: o que cada migration criou
+### 3. Banco: o que cada migration criou
 
 As 13 migrations em `prisma/migrations/` (ordem de pasta):
 
@@ -54,7 +124,7 @@ As 13 migrations em `prisma/migrations/` (ordem de pasta):
 | 12 | `20261013130000_pedido_omie_proposta` | `acompanhamento_qualidade` e `numero_pedido_omie` na proposta; evento `PEDIDO_OMIE_ATUALIZADO` | ✅ `migration.sql:2-7` |
 | 13 | `20261013140000_usuarios_comerciais_diretorio` | `perfis_comerciais` vira diretório de usuários; sai cargo, empresas e unidades; entra `responsavel_proposta` | ✅ `migration.sql:8-22` |
 
-### 3.1 As 30 tabelas por arquivo do Prisma
+#### 3.1 As 30 tabelas por arquivo do Prisma
 
 | Arquivo | Models (tabela física) | Linhas |
 |---|---|---|
@@ -64,7 +134,7 @@ As 13 migrations em `prisma/migrations/` (ordem de pasta):
 | `prisma/models/omie.prisma` | `ProdutoContaOmie`, `FornecedorContaOmie`, `OrdemCompra`, `ItemOrdemCompra`, `OmieRegistroBruto` | ✅ `:8-97` |
 | `prisma/models/infra.prisma` | `Notificacao`, `ChaveIdempotencia`, `TravaTarefa` | ✅ `:2-45` |
 
-### 3.2 Enums (24) em `prisma/models/enums.prisma`
+#### 3.2 Enums (24) em `prisma/models/enums.prisma`
 
 | Enum | Valores | Linha |
 |---|---|---|
@@ -93,9 +163,9 @@ As 13 migrations em `prisma/migrations/` (ordem de pasta):
 | `SegmentoCliente` | `INDUSTRIA`, `MINERACAO`, `ENGENHARIA`, `CONSTRUTORA`, `MANUTENCAO`, `REVENDA`, `USINA`, `OUTRO` | `:208-219` |
 | `PotencialCliente` | `BAIXO`, `MEDIO`, `ALTO`, `ESTRATEGICO` | `:221-228` |
 
-## 4. Regras de negócio no código
+### 4. Regras de negócio no código
 
-### 4.1 Numeração: `CO-AV2026-0012-R03`
+#### 4.1 Numeração: `CO-AV2026-0012-R03`
 
 - Formato `CO-{AV|AU|HRM}{AAAA}-{NNNN}-R{RR}`, 4 dígitos que viram 5 depois de 9999; o banco guarda só empresa, ano, sequencial e revisão e o texto é montado na saída ✅ `src/domain/numeracao/numeroProposta.ts:1-12`, migration 11.
 - Sequência por empresa e ano, atômica por `INSERT … ON CONFLICT DO UPDATE … RETURNING` ✅ `src/modules/propostas/propostas.service.ts:313-322`, `prisma/models/empresas.prisma:32-42`. A proposta é única por `(id_empresa, ano, sequencial)` ✅ `vendas.prisma:103`.
@@ -103,7 +173,7 @@ As 13 migrations em `prisma/migrations/` (ordem de pasta):
 - A solicitação de custo usa `SC-AAAA-NNNN` por ano, em `sequencias_documento` ✅ `numeroProposta.ts:61-63`, `src/modules/custos/custos.routes.ts:381-385`.
 - A `api-acos-vital` já numera a OC e a requisição por unidade com `contadores_documento (codigo_empresa, tipo)` e prefixo `OC-000001` ✅ `Dump Avhub (Esqueleto).sql:16555-16561,8110-8135`. É o padrão que N16-04 manda seguir.
 
-### 4.2 Cálculo da proposta (função pura, `decimal.js`)
+#### 4.2 Cálculo da proposta (função pura, `decimal.js`)
 
 | Regra | Onde |
 |---|---|
@@ -116,7 +186,7 @@ As 13 migrations em `prisma/migrations/` (ordem de pasta):
 | ICMS do item só 0, 4, 7, 12 ou 18; PJ exige comprador; exportação exige cotação | ✅ `src/modules/propostas/propostas.schemas.ts:18,30,86-98` |
 | A revisão sobe quando a assinatura do conteúdo comercial muda (preço, impressos, fatores da fórmula; o snapshot de custo não entra) | ✅ `propostas.calculo.ts:278-335`, `propostas.service.ts:483-486` |
 
-### 4.3 Custo de referência, ofertas e médias
+#### 4.3 Custo de referência, ofertas e médias
 
 - Custo líquido = `preço × (1 + IPI) + ST − ICMS a recuperar`; com ST não há crédito ✅ `custo.ts:33-42`. Tabela padrão de ICMS a recuperar por origem em `custo.ts:13-20`, sobrescrita por `parametros_custo` ✅ `prisma/seed.ts:75`.
 - Seleção do custo: vigentes elegíveis primeiro (menor custo); sem vigente, o realizado mais recente dentro de `diasHistorico` (90) ✅ `custo.ts:79-117`. Elegível = fornecedor ativo, vinculado à categoria, não suspenso, com certificado exigido e sem "verificar escala" ✅ `src/modules/custos/custos.routes.ts:57-64`.
@@ -125,22 +195,22 @@ As 13 migrations em `prisma/migrations/` (ordem de pasta):
 - Preço realizado vem do pedido de compra do Omie: cada item vira oferta `PEDIDO_OMIE`; OC cancelada invalida a oferta ✅ `src/modules/omie/sincronizacao.ts:265-380`.
 - Análise para o pedido de cotação (última compra, média e mínimo por unidade, por fornecedor) ✅ `src/domain/custo/analiseCompras.ts:242-277`.
 
-### 4.4 Telha TR40
+#### 4.4 Telha TR40
 
 Configurador por classe, espessura, núcleo (EPS ou PIR) e pintura; o custo base já embute EPS 30 mm e troca pelo núcleo escolhido; largura útil de bobina 1,2 m e aço 7,85 ✅ `src/domain/telha/configurador.ts:60-120`. A tabela de custo tem vigência: salvar abre vigência nova a partir de hoje e fecha a anterior; no mesmo dia corrige a do dia ✅ `custos.routes.ts:213-239`. O dado fica em `tabelas_custo_telha` com `base`, `nucleos` e `pinturas` em JSON ✅ `suprimentos.prisma:200-213`.
 
-### 4.5 Fechamento e pedido no Omie (o que N16 troca)
+#### 4.5 Fechamento e pedido no Omie (o que N16 troca)
 
 - O vendedor fecha a proposta inteira ou por itens; o fechamento parcial marca itens e calcula `valor_fechado` e `valor_aberto` ✅ `propostas.service.ts:609-647`, `fechamento.ts`. A proposta só é editada com status `ABERTA` ✅ `propostas.service.ts:474-476`.
 - Perder (motivo obrigatório, texto de 3 letras ou mais) e reabrir (limpa as marcas de itens fechados) ✅ `propostas.service.ts:555-607`.
 - **O av-hub não cria o pedido no Omie.** A API monta um resumo "a digitar no Omie" (campo a campo, com código do produto da conta de Mogi ou de Uberaba) e uma planilha; o vendedor digita no Omie e registra de volta o número do pedido e se a Qualidade acompanha ✅ `src/modules/propostas/pedidoOmie.ts:7-12`, `propostas.service.ts:649-724`, `propostas.routes.ts:144-164`. Depois o pedido volta pela pipeline e é liberado no hub (V3) ✅ `pedidoOmie.ts:7-12`.
 
-### 4.6 Escopo, perfis e telas de permissão
+#### 4.6 Escopo, perfis e telas de permissão
 
 - Escopo por usuário dono (`id_responsavel`): `PROPRIAS`, `COMPARTILHADA` (que não restringe nada) e `TODAS` ✅ `propostas.service.ts:23-34`.
 - Slugs que decidem capacidade ✅ `src/domain/permissoes/capacidades.ts:47-56`: `propostas`, `propostas-delegacao`, `propostas-valores`, `custo-item`, `relatorio-gerencial`, `painel-comprador`, `clientes`, `simulador`. Capacidades: `veValores`, `veCusto`, `comprador`, `podeDelegar`, `editaTerceiros`, `exclui`, `escopo`, `escopoClientes`, `relatorioGerencial`, `simulador`.
 - Perfis de teste (bypass de desenvolvimento): `Comercial - Vendedor`, `Auxiliar`, `Gestão`, `Diretoria`, `Suprimentos - Comprador`, `Pós-venda`, `Comissões - Simulador` ✅ `perfisDev.ts:12-77`. São fixtures do bypass; não migram.
-- Telas cadastradas em 16/10 (nome, slug, pai, ordem relativa) ✅ `06-Contratos/Ativos/LOG-57-anexos/telas-vendas-orcamento-compras.sql:51-70`:
+- Telas cadastradas em 16/10 (nome, slug, pai, ordem relativa) ✅ `telas-vendas-orcamento-compras.sql:51-70` (anexo removido em 29/10/2026):
 
 | Grupo | Slugs |
 |---|---|
@@ -151,7 +221,7 @@ Configurador por classe, espessura, núcleo (EPS ou PIR) e pintura; o custo base
 
 - O BFF ainda cita o slug `matriz-precos` (`app/api/comercial/[...rota]/route.ts:89,104`), que o SQL de 16/10 não cadastra; o contrato de telas diz "tela ainda não construída" ✅ `docs/ENVIAR - contrato-comercial-suprimentos-telas.md:75`. O slug `simulador` (Simulador de Comissões) também é consultado ✅ `capacidades.ts:55`.
 
-## 5. Rotas por módulo (`/v1`)
+### 5. Rotas por módulo (`/v1`)
 
 Prefixo de cada router em `src/app.ts:97-115`. Linha = handler.
 
@@ -170,7 +240,7 @@ Prefixo de cada router em `src/app.ts:97-115`. Linha = handler.
 
 O BFF tem 84 entradas na allowlist, cada uma com tela e ação ✅ `app/api/comercial/[...rota]/route.ts:10-132`. Rotas dedicadas a arquivo: PDF da proposta, da aprovação interna, do lote e dos relatórios, planilhas de relatório, de clientes, de fornecedores, de ofertas, da importação de itens e do pedido Omie ✅ `find app/api/comercial` (14 arquivos além da allowlist).
 
-## 6. Telas do av-hub
+### 6. Telas do av-hub
 
 | URL | Componente | Slug | Selo |
 |---|---|---|---|
@@ -192,7 +262,7 @@ O BFF tem 84 entradas na allowlist, cada uma com tela e ação ✅ `app/api/come
 
 Tipos de tela ainda dizem "api-comercial" e `PARCIAL`/`FECHADA` (`lib/domain/comercial-propostas.ts:5`): precisam acompanhar a nova API.
 
-## 7. Integrações com o Omie
+### 7. Integrações com o Omie
 
 | O que | Como é hoje | Selo |
 |---|---|---|
@@ -204,9 +274,9 @@ Tipos de tela ainda dizem "api-comercial" e `PARCIAL`/`FECHADA` (`lib/domain/com
 | Pedido de venda por API | A pipeline não tem nenhum método de criação de pedido de venda (grep sem ocorrência de `IncluirPedido`) | ✅ 🔴 `omie-elt-pipeline/src/omie/resources` (só leitura de `pedidosVendas.ts`) |
 | Retorno do pedido | O pedido criado no Omie volta pela pipeline para `core_vendas_faturamento.pedidos_vendas` e `produto_vendas` | ✅ `Dump Avhub (Esqueleto).sql:2328,2490` |
 
-## 8. O que serve como está, o que muda e o que fica de fora
+### 8. O que serve como está, o que muda e o que fica de fora
 
-### 8.1 Serve como está (porta para a `api-acos-vital` sem mudar a regra)
+#### 8.1 Serve como está (porta para a `api-acos-vital` sem mudar a regra)
 
 | Item | Por quê | Selo |
 |---|---|---|
@@ -221,27 +291,27 @@ Tipos de tela ainda dizem "api-comercial" e `PARCIAL`/`FECHADA` (`lib/domain/com
 | Painel do Comprador, pedido de cotação, pesquisa de materiais, fornecedores, catálogo | Telas do Orçamento | ✅ |
 | Histórico de compras | Fica em Compras (N14-14, N16-14) | ✅ `historicoCompras.ts` |
 
-### 8.2 Muda por causa das decisões
+#### 8.2 Muda por causa das decisões
 
 | Hoje no código | Muda para | Decisão | Onde fica o desenho |
 |---|---|---|---|
-| Número `CO-AV2026-0012-R03`, com letras, ano e revisão no texto | Número só numérico, em sequência própria; prefixo só na tela e no PDF | 📝 N16-04 | [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]], SQL-016 |
-| Status `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` e editar só em `ABERTA` | `ABERTA` (ajusta), `APROVADA` (trava), `TRANSFORMADA`, `CANCELADA` | 📝 N16-02, N16-03 | API-019 |
-| `PUT` edita e reabre depois de fechada ou perdida | Depois de aprovada não se ajusta nem se reabre | 📝 N16-03 | API-019 |
-| Fechamento parcial por itens, `valor_fechado`, `valor_aberto`, evento `FECHAMENTO_PARCIAL` | Some: uma proposta é um pedido | 📝 N16-02 | API-019 |
-| Proposta incompleta (item sem custo) pode ser salva e fechada | Incompleta não aprova (parte de compras vazia) | 📝 N16-03 | SQL-016 (`fn_proposta_travar`) |
-| Pedido digitado pelo vendedor no Omie, com `PUT /pedido_omie` registrando número e Qualidade | Botão "Transformar em pedido de venda"; a API grava numa fila e a pipeline cria o pedido por API | 📝 N16-02 | API-020 |
-| Qualidade registrada depois, na liberação do hub (V3) | `V2` obrigatório na proposta; o pedido nasce liberado, sem V3; o pedido que chega do Omie sem proposta segue com V2 e V3 | 📝 N16-05 | API-020 |
-| Câmbio da AwesomeAPI com fallback PTAX | PTAX do hub (`core.cotacoes_moeda`) | 📝 N16-13 | SQL-016 (`id_cotacao_moeda`) |
-| Custo do item só como snapshot da oferta sugerida | Parte de compras do vendedor + pedido de custo ao Orçamento, que preenche | 📝 N16-06 | API-021 |
-| Solicitação de custo com prazo fixo de 2 dias úteis no código | Prazo definido pelo negócio (parâmetro) | 📝 N16-06, 🔴 OQ-02 | SQL-017 (`sla_solicitacao_dias_uteis`) |
-| Catálogo de produtos é tela de Compras | O vendedor ganha tela de consulta (histórico, fornecedores, preços, média); matriz de preços nova | 📝 N16-07, 🔴 OQ-10 | LOG-60 |
-| Ofertas `PEDIDO_OMIE` vêm de sincronização própria que lê o Omie | Derivam das OCs do hub e do espelho `pedidos_compras` (a pipeline é a fonte) | 📝 N16-15 | SQL-017 (`fn_oferta_gerar_de_ocs`) |
-| Custo real do pedido não existe (só margem estimada com o custo cotado) | Custo real por evento e por item do pedido, com view `vw_pedido_item_custo` | 📝 N16-09 | LOG-61, [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] |
-| Compras não tem papel sobre a proposta | Compras confere a parte de compras (C6) e usa o valor correto na OC (C7); não altera a proposta; o preço fechado com o cliente não muda | 📝 N16-08, N16-17 | LOG-61 |
-| Simulador de Comissões lê a proposta pelo `numero_pedido_omie` | Lê o pedido de venda do hub ligado à proposta (`pedido_venda.id_proposta`) | 📝 N16-11 | [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] §9 |
+| Número `CO-AV2026-0012-R03`, com letras, ano e revisão no texto | Número só numérico, em sequência própria; prefixo só na tela e no PDF | 📝 N16-04 | |
+| Status `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` e editar só em `ABERTA` | `ABERTA` (ajusta), `APROVADA` (trava), `TRANSFORMADA`, `CANCELADA` | 📝 N16-02, N16-03 | |
+| `PUT` edita e reabre depois de fechada ou perdida | Depois de aprovada não se ajusta nem se reabre | 📝 N16-03 | |
+| Fechamento parcial por itens, `valor_fechado`, `valor_aberto`, evento `FECHAMENTO_PARCIAL` | Some: uma proposta é um pedido | 📝 N16-02 | |
+| Proposta incompleta (item sem custo) pode ser salva e fechada | Incompleta não aprova (parte de compras vazia) | 📝 N16-03 | (`fn_proposta_travar`) |
+| Pedido digitado pelo vendedor no Omie, com `PUT /pedido_omie` registrando número e Qualidade | Botão "Transformar em pedido de venda"; a API grava numa fila e a pipeline cria o pedido por API | 📝 N16-02 | |
+| Qualidade registrada depois, na liberação do hub (V3) | `V2` obrigatório na proposta; o pedido nasce liberado, sem V3; o pedido que chega do Omie sem proposta segue com V2 e V3 | 📝 N16-05 | |
+| Câmbio da AwesomeAPI com fallback PTAX | PTAX do hub (`core.cotacoes_moeda`) | 📝 N16-13 | (`id_cotacao_moeda`) |
+| Custo do item só como snapshot da oferta sugerida | Parte de compras do vendedor + pedido de custo ao Orçamento, que preenche | 📝 N16-06 | |
+| Solicitação de custo com prazo fixo de 2 dias úteis no código | Prazo definido pelo negócio (parâmetro) | 📝 N16-06, 🔴 OQ-02 | (`sla_solicitacao_dias_uteis`) |
+| Catálogo de produtos é tela de Compras | O vendedor ganha tela de consulta (histórico, fornecedores, preços, média); matriz de preços nova | 📝 N16-07, 🔴 OQ-10 | |
+| Ofertas `PEDIDO_OMIE` vêm de sincronização própria que lê o Omie | Derivam das OCs do hub e do espelho `pedidos_compras` (a pipeline é a fonte) | 📝 N16-15 | (`fn_oferta_gerar_de_ocs`) |
+| Custo real do pedido não existe (só margem estimada com o custo cotado) | Custo real por evento e por item do pedido, com view `vw_pedido_item_custo` | 📝 N16-09 | |
+| Compras não tem papel sobre a proposta | Compras confere a parte de compras (C6) e usa o valor correto na OC (C7); não altera a proposta; o preço fechado com o cliente não muda | 📝 N16-08, N16-17 | |
+| Simulador de Comissões lê a proposta pelo `numero_pedido_omie` | Lê o pedido de venda do hub ligado à proposta (`pedido_venda.id_proposta`) | 📝 N16-11 | §9 |
 
-### 8.3 Fica de fora da migração
+#### 8.3 Fica de fora da migração
 
 | Item | Motivo | Decisão |
 |---|---|---|
@@ -252,14 +322,14 @@ Tipos de tela ainda dizem "api-comercial" e `PARCIAL`/`FECHADA` (`lib/domain/com
 | `Auditoria` própria | Já existe `auth.auditoria` | 🟡 [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §3.1 |
 | `perfisDev.ts` e `AUTH_DEV_BYPASS` | Perfis fictícios, nunca em produção | 🟡 LOG-52 §6 |
 | As 5 telas antigas de `/orcamento/*` e as rotas `app/api/historicoProdutos` | Removidas do av-hub em 16/10 | 📝 N16-14 |
-| `Unidade` (`MOGI`, `UBERABA`, `ARUJA`) e `ContaOmie` como enums | Viram `core.unidades` (uuid) | 🟡 SQL-016 |
-| Faixa "fluxo do custo" que começa em "Vendedor pede custo" | Texto muda: o setor orçamentário preenche | 🟡 LOG-60 |
+| `Unidade` (`MOGI`, `UBERABA`, `ARUJA`) e `ContaOmie` como enums | Viram `core.unidades` (uuid) | 🟡 |
+| Faixa "fluxo do custo" que começa em "Vendedor pede custo" | Texto muda: o setor orçamentário preenche | 🟡 |
 
-## 9. Defeitos do código de teste que a migração não pode herdar
+### 9. Defeitos do código de teste que a migração não pode herdar
 
-A auditoria de 15/10 (24 itens) está em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §10. Os que tocam as tabelas e regras da proposta, do Orçamento e da comissão: filtro por responsável que anula o escopo `proprios` (item 1), `vinculados` que não restringe (item 2), CNPJ alfanumérico rejeitado (item 4), cliente criado na proposta que sobrescreve o cadastro de outro vendedor (item 6), custo e margem apagados por `PUT` sem `veCusto` (item 8), `normalizarIpi` na oferta digitada (item 16), sem FK nem `CHECK` (item 17). Os DDL de [[SQL-016-Proposta-e-Pedido-de-Venda-em-core_vendas_faturamento]] e [[SQL-017-Orcamento-em-core_vendas_faturamento-Base-de-Preco-e-Pedido-de-Custo]] já trazem FK, `CHECK` e CNPJ de 14 posições alfanuméricas.
+A auditoria de 15/10 (24 itens) está em [[LOG-52-Migracao-do-Modulo-Comercial-para-a-API-do-Hub]] §10. Os que tocam as tabelas e regras da proposta, do Orçamento e da comissão: filtro por responsável que anula o escopo `proprios` (item 1), `vinculados` que não restringe (item 2), CNPJ alfanumérico rejeitado (item 4), cliente criado na proposta que sobrescreve o cadastro de outro vendedor (item 6), custo e margem apagados por `PUT` sem `veCusto` (item 8), `normalizarIpi` na oferta digitada (item 16), sem FK nem `CHECK` (item 17). Os DDL de já trazem FK, `CHECK` e CNPJ de 14 posições alfanuméricas.
 
-## 10. Perguntas que nascem deste mapa
+### 10. Perguntas que nascem deste mapa
 
 | # | Pergunta | Quem | Selo |
 |---|---|---|---|

@@ -16,6 +16,12 @@ criado_original: 2026-10-15
 
 > **Onde atua:** av-hub: banco, API, front
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Muda a requisição de compra do av-hub: ela passa a dizer para que se compra (pedido de venda, recompra, estoque ou uso interno), com produto sempre do cadastro e tudo na mesma unidade.
+> **Quem é afetado:** Compras, que cria a requisição com mais regras. Só a requisição com pedido de venda (PV) chega ao MES (sistema de produção).
+> **Situação:** Parcial. Banco e API em produção desde 20/10, segundo o Gustavo (não conferido); front do Nathan pronto (✅). Perguntas sobre a HRM e o setor do uso interno seguem abertas (🟡 🔴).
+> **Exemplo:** Finalidade "pedidos_venda" sem número de pedido de venda é recusada com erro 400.
+
 > [!info] Situação em 26/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nó do 0b:** C0 · **Dono:** Gustavo (banco e API); Nathan (front, já pronto)
 >

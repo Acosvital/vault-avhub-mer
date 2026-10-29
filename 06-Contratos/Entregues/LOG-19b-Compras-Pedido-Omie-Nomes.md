@@ -16,6 +16,11 @@ criado_original: 2026-09-28
 
 > **Onde atua:** av-hub: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Fez o detalhe do pedido de compra vindo do Omie devolver nomes (fornecedor, comprador, categoria etc.) em vez de só códigos. Pedido só de API, sem SQL novo.
+> **Quem é afetado:** Quem abre, na lista de Ordens de compra, um pedido feito direto no Omie: passa a ver o nome do fornecedor, não o código.
+> **Situação:** ✅ API entregue e conferida na `api-test` em 29/09. No teste, comprador e descrições de catálogo vieram nulos porque esses cadastros estavam vazios. Front no av-hub#106.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
 >

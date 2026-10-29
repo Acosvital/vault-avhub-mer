@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, raia, producao, roteiro, f1, p6, mes]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Robert (MES) · Nathan (decisões)
 fontes: [api-pcp 579a625 (itens-parciais.service.ts, pedidos.service.ts, divergencias, roteiro-item, prisma/models/producao.prisma e fabricas.prisma), app-pcp 1fca8d3 (movimentacoes), v1 02-PRD-Estoque/Fluxo-Producao-OS-OP-Completo, v1 01-Fluxo-Operacional/Fluxograma-Telas-por-Bloco bloco 7, Dump MES 14/10]
@@ -9,15 +9,75 @@ fontes: [api-pcp 579a625 (itens-parciais.service.ts, pedidos.service.ts, diverge
 
 # Produção e roteiro (F1, P6)
 
-Nós do [[00-Fluxo-Mestre-0b]]: `F1` setores produtivos do roteiro de cada fábrica e `P6` novo norte (retrabalho ou reabre compra). A entrada vem do despacho do Estoque (`E6`, [[03-Estoque-Atendimento-e-Despacho]]); a saída vai para a inspeção de saída `Q7` ([[08-Qualidade-Saida]]). Selos em [[Regras-do-Vault]].
+**Em uma frase:** a Produção leva cada parte do item (a "parcial") pelos setores do roteiro do pedido, na ordem, até o último setor, e registra tudo no histórico. Nós `F1` (setores produtivos) e `P6` (novo norte: retrabalho ou reabre compra) do [[00-Fluxo-Mestre-0b]]. A entrada vem do despacho do Estoque (`E6`, [[03-Estoque-Atendimento-e-Despacho]]). A saída vai para a inspeção de saída `Q7` ([[08-Qualidade-Saida]]). Selos em [[Regras-do-Vault]].
 
-## Objetivo
+> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
+> - N16-140: a matéria-prima sai do Estoque na retirada, pela quantidade pedida, no mesmo documento de retirada da Expedição. O operador não lança consumo ao concluir a etapa.
+> - N16-141: no retrabalho, o PCP escolhe o setor de volta. A regra 8 (volta ao setor anterior) vale só até isso ter código.
+> - Fabricado: [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] desenha a volta ao Estoque como lote de origem Produção. Proposta aceita em 15/10, sem código.
 
-Levar cada parcial do item pelos setores do roteiro do pedido, na ordem, até o último setor. O motor é o `ItemParcial` (fração de um item) com histórico imutável em `HistoricoItemParcial`. Toda transição usa escrita condicional (`updateMany` com o status esperado e `count === 0` vira 409), sem leitura seguida de escrita (`itens-parciais.service.ts:245-257`, `:324-337`). É o único subfluxo com motor completo no código desde o início do projeto ✅.
+## Como funciona, passo a passo
+
+1. O PCP monta o roteiro na tela Destinação do Pedido. O Estoque entra sozinho como etapa 1. `F1`
+2. O Estoque despacha à produção só o que não atendeu e que não foi para compra. `E6`
+3. O operador do setor recebe a parcial. `F1`
+4. Ele inicia a etapa. O cronômetro começa. Em setor que exige, informa máquina e operador. `F1`
+5. Durante a etapa, o operador pode pausar e retomar. `F1`
+6. Terminada a etapa, ele move a parcial ao próximo setor. Pode mover só parte da quantidade. `F1`
+7. No último setor do roteiro, o operador conclui. `F1`
+8. Setor de Qualidade no roteiro: a parcial chega à inspeção de saída. `Q7`
+9. Se reprovar, abre-se uma divergência e o PCP decide o novo norte: retrabalho ou reabrir a compra. `P6`
+
+## Exemplo
+
+O PCP monta a rota das 100 flanges de aço carbono. O Estoque vem primeiro e a inspeção de saída fica antes da Expedição. O que faltar das flanges depois do Estoque segue ao primeiro setor. O operador recebe, inicia, pausa se a máquina parar e move ao setor seguinte. No último setor, conclui. Se a inspeção reprovar, o PCP decide se há retrabalho.
+
+## Quem atua
+
+| Quem | O que faz |
+|---|---|
+| PCP (planejamento e controle da produção) | Monta o roteiro e decide o novo norte |
+| Operador de setor | Recebe, inicia, move, pausa, retoma e conclui |
+| Máquina e operador (cadastros) | Exigidos ao iniciar em certos setores |
+| Quem cancela | Cancela pelo detalhe do pedido, com permissão própria |
+| Robert | Dono do código do MES (sistema de chão de fábrica) |
+
+## Regras que valem
+
+- O Estoque é sempre a etapa 1. O sistema o insere sozinho.
+- Setores de estoque, requisição, compras e logística de entrada ficam fora do roteiro, porque o circuito de compra é fixo.
+- Roteiro de fabricação precisa de um setor de Qualidade antes da primeira Expedição.
+- O roteiro só usa setores da fábrica do pedido, sem repetir setor nem ordem.
+- Em todo setor, é preciso receber e iniciar antes de mover ou concluir.
+- Só o último setor conclui. Nos outros, move-se.
+- Só a Qualidade reprova. Retrabalho nasce de item reprovado.
+- Devolver cria uma linha nova. A antiga vira cancelada e nunca é editada.
+- Item de pedido inativo bloqueia tudo, menos cancelar.
+- Revenda não produz. A fábrica de revenda só envia o restante para compra.
+- Tudo que é fabricado volta ao Estoque como lote e saldo (decisão de 14/10).
+- Retrabalho: o PCP escolhe o setor de volta (N16-141). O código ainda volta ao setor anterior.
+
+## O que já existe e o que falta
+
+- ✅ Roteiro, filas por setor, receber, iniciar, mover, pausar, retomar, concluir, reprovar, devolver, cancelar. É o único subfluxo com motor completo desde o início.
+- ✅ Telas: Filas de Produção, Destinação do Pedido, Acompanhamento dos Pedidos, Cadastros operacionais.
+- 🔴 Baixa de matéria-prima: decidida (N16-140), sem código.
+- 🔴 Fabricado aprovado virar lote e saldo no Estoque (LOG-53, sem código).
+- 🔴 Roteiro individual do item (`RoteiroItem`): existe o cadastro, mas nada o usa.
+- 🔴 Tela do novo norte, reabrir divergência e reabrir compra a partir da produção.
+- 🔴 Painel TV, `PerfilSetor` por filial e feed `/fluxo/eventos`.
+- 🟡 Botões de dividir e juntar parciais na fila (a API existe).
+- ❓ Nomes e filas reais dos setores produtivos no ambiente.
+
+## Detalhe técnico
+
+### Motor e escrita condicional
+
+O motor é o `ItemParcial` (fração de um item) com histórico imutável em `HistoricoItemParcial`. Toda transição usa escrita condicional (`updateMany` com o status esperado e `count === 0` vira 409), sem leitura seguida de escrita (`itens-parciais.service.ts:245-257`, `:324-337`).
 
 Produção só recebe o que o Estoque não atendeu e que não foi para compra. Revenda não produz: a fábrica `REVENDA` só envia o restante para compra (`itens-parciais.service.ts:722-730`).
 
-## Quem atua
+### Quem atua (onde)
 
 | Quem | Papel | Onde |
 |---|---|---|
@@ -29,7 +89,7 @@ Produção só recebe o que o Estoque não atendeu e que não foi para compra. R
 
 O acesso a cada fila depende de `PerfilSetor` (`podeVisualizar`, `podeAtuar`), default-deny (`fabricas.prisma:162-185`, `itens-parciais.service.ts:52-54`). A rota exige a tela `movimentacoes` (`itens-parciais.controller.ts:56`, `:99`).
 
-## Regras decididas
+### Regras decididas
 
 | # | Regra | Selo |
 |---|---|---|
@@ -40,14 +100,14 @@ O acesso a cada fila depende de `PerfilSetor` (`podeVisualizar`, `podeAtuar`), d
 | 5 | `receber` e `iniciar` são obrigatórios em todo setor antes de `mover` ou `concluir`. `iniciar` preenche `startedAt` (cronômetro) e, em setor com `exigeMaquinaOperador`, exige `idMaquina` e `idOperador` (`:299-321`) | ✅ |
 | 6 | `concluir` só no **último** setor do roteiro; `mover` só quando existe próximo (`:540-547`, `:426-434`). `mover` aceita `idSetorDestino` livre dentro da fábrica e quantidade parcial (split na passagem) | ✅ |
 | 7 | `reprovar` é exclusivo de setor tipo `QUALIDADE` (403 fora dele) e exige `EM_ANDAMENTO` (`:966-989`, `:1011-1021`) | ✅ |
-| 8 | `retrabalho` só sai de `REPROVADO`: cancela a linha e cria outra `EM_TRANSITO` no setor anterior com `retrabalho = true` (`:1124-1192`). Não altera a quantidade do `ItensPedido` | ✅ |
+| 8 | `retrabalho` só sai de `REPROVADO`: cancela a linha e cria outra `EM_TRANSITO` no setor anterior com `retrabalho = true` (`:1124-1192`). Não altera a quantidade do `ItensPedido` | ✅; **superada em parte pela N16-141 (29/10): o PCP passa a escolher o setor de volta, ainda sem código** |
 | 9 | `devolver` cria linha nova ligada por `idDevolvidoDe`; a antiga vira `CANCELADO` e nunca é editada (`:1387-1488`). Não vale para parcial com requisição de compra viva (`ensureDevolucaoForaDaCompra`, `:1391`) | ✅ |
 | 10 | Item de pedido inativo bloqueia toda ação, menos `cancelar` (`:202-208`) | ✅ |
 | 11 | **Tudo que é fabricado volta ao Estoque** como lote e saldo, e só sai pelo documento de retirada. Decisão do Nathan de 14/10 | 📝 🔴 |
-| 12 | **Matéria-prima é consumida do Estoque** na produção (J2/J3 do v1). Sem código | 🔴 |
+| 12 | **Matéria-prima é consumida do Estoque** na produção (J2/J3 do v1). **Decidido em 29/10 (N16-140): a baixa é na retirada do Estoque, pela quantidade pedida.** Sem código | 🔴 |
 | 13 | Novo norte (P6): o PCP decide entre retrabalho e reabrir a compra. Roteiro individual do item (`RoteiroItem`, C8) é a ferramenta decidida | 📝 🔴 |
 
-## Estados
+### Estados
 
 `StatusItemParcial` (enum exato, `producao.prisma:29-54`; dump MES linha 226): `CRIADO`, `RECEBIDO`, `EM_ANDAMENTO`, `EM_TRANSITO`, `PAUSADO`, `REPROVADO`, `CONCLUIDO`, `RETRABALHO`, `CANCELADO`. Rótulos da tela em `movimentacoes/labels.ts:7-17`: Aguardando recebimento, Recebido, Em produção, Em trânsito, Pausado, Reprovado, Concluído, Retrabalho, Cancelado. `RETRABALHO` não é mais alcançado por nenhuma ação (só compatibilidade, `producao.prisma:47-52`).
 
@@ -86,7 +146,7 @@ stateDiagram-v2
 
 `StatusPedido` (`AGUARDANDO`, `EM_PRODUCAO`, `BLOQUEADO`, `ENTREGUE`) e `Prioridade` em [[Estados-e-Status]]. Só `AGUARDANDO` (inicial) e `ENTREGUE` são gravados; `EM_PRODUCAO` e `BLOQUEADO` nunca (`item-parcial-status.constants.ts:44-50`).
 
-## Telas
+### Telas
 
 | Nome atual | Nome antigo | Rota | App | Slug | Estado |
 |---|---|---|---|---|---|
@@ -99,7 +159,7 @@ stateDiagram-v2
 
 Os rótulos de menu moram no banco (tabela `telas`); o código ainda usa os nomes antigos em pastas e rotas. Lista geral em [[Telas-por-Raia]].
 
-## Endpoints e contratos
+### Endpoints e contratos
 
 Todos sob `@UseGuards(JwtAuthGuard, PermissionsGuard)`; setor checado por `perfisService.ensurePodeAtuar` (`itens-parciais.service.ts:227`).
 
@@ -124,24 +184,24 @@ Todos sob `@UseGuards(JwtAuthGuard, PermissionsGuard)`; setor checado por `perfi
 | `/divergencias` (`POST`, `GET`, `PATCH :id`, `PATCH :id/resolver`) | divergência de produção | `movimentacoes` | `divergencias.controller.ts:26-63` ✅ |
 | `GET /itens/status` | foto de cada parcial para o av-hub, com `etapa` | chave `MES_API_KEY` | `integracao-avhub.service.ts:114`, `etapaDoItem :167` ✅ ([[API-005-Status-Item-Integracao-MES]]) |
 
-## Como está no código
+### Como está no código
 
-### Roteiro
+#### Roteiro
 
 - `Roteiros` (`idPedido`, `idSetor`, `ordem`, único por pedido e ordem) é o roteiro do pedido, lido por `mover`, `concluir`, `atenderEstoque` e `findAll` (`producao.prisma:262-275`).
 - `RoteiroItem` (roteiro individual do item, ex.: sub-item de composição) tem CRUD e tabela (`producao.prisma:278-291`) mas **nenhum serviço de movimentação o consulta**: `grep roteiroItem` fora do módulo próprio não acha nada ✅. É a lacuna do P6 (EC-03, C8) 🔴.
 - Tipos de setor (`TipoSetor`, `fabricas.prisma:17-32`): `PRODUTIVO`, `ESTOQUE`, `COMPRAS`, `EXPEDICAO`, `REQUISICAO`, `LOGISTICA_ENTRADA`, `QUALIDADE`. Códigos fixos do circuito de compra em `circuito-compra.ts:19-25`: `requisicoes-compra`, `compras`, `logistica-entrada`, `qualidade-entrada`, `estoque`.
 - Fábrica: `TipoFabrica` `FABRICACAO` ou `REVENDA`, escolhido por rodada na Destinação (`fabricas.prisma:5-8`).
 
-### Filas e setores produtivos
+#### Filas e setores produtivos
 
 Cada setor produtivo (Flange, Caldeiraria HRM, corte etc.) é um registro da tabela `setores` com tipo `PRODUTIVO`, vinculado às fábricas por `fabrica_setores`. Os nomes e as filas reais vêm do banco do ambiente, não do repositório ❓ (o `seed.ts` não cria setores). A fila lista `RECEBIDO`, `EM_ANDAMENTO` etc. do `STATUS_FILA_MOVIMENTACOES` e esconde `CONCLUIDO` já 100% entregue (`service:158-182`).
 
-### Divergência de produção
+#### Divergência de produção
 
 `reprovar` grava `HistoricoItemParcial` e abre uma `Divergencia` tipo `QUALIDADE` `ABERTA` na mesma transação (`service:1036-1058`). `resolver` e `retrabalho` fecham a divergência como `RESOLVIDA` (`:1101-1109`, `:1168-1176`). `DivergenciasService.resolver` só aceita `RESOLVIDA` ou `CANCELADA` e recusa divergência já encerrada: **divergência encerrada não reabre** (`divergencias.service.ts:resolver`) 🔴. Não há tela de divergências de produção; `/decisoes-pcp` trata só divergência de recebimento ([[05-Recebimento]]).
 
-### Consumo de matéria-prima 🔴
+#### Consumo de matéria-prima 🔴
 
 Não existe no `api-pcp`: nenhuma estrutura de produto, nenhuma baixa de insumo ao iniciar ou concluir etapa. Provas:
 
@@ -149,13 +209,13 @@ Não existe no `api-pcp`: nenhuma estrutura de produto, nenhuma baixa de insumo 
 - `TipoItemRequisicao.MATERIA_PRIMA` existe só para a compra, com o comentário "ação no Estoque·Entrada na próxima rodada" (`compras.prisma:17-22`).
 - Consumo de reserva (`consumirReservasDaParcial`, `estoque-operacao.helpers.ts:208`) só trata a parte "atendida pelo estoque", que é a que vai à Expedição.
 
-O que falta: definir quem informa o material consumido (setor ao concluir etapa, ou Estoque ao despachar para a produção pelo documento de retirada), o vínculo produto acabado x matéria-prima, e a geração de `MovimentoEstoque` `SAIDA` com referência à parcial. Dono: Robert, decisão Nathan.
+O que falta: definir quem informa o material consumido (setor ao concluir etapa, ou Estoque ao despachar para a produção pelo documento de retirada), o vínculo produto acabado x matéria-prima, e a geração de `MovimentoEstoque` `SAIDA` com referência à parcial. Dono: Robert, decisão Nathan. **Decidido em 29/10 (N16-140): na retirada do Estoque.**
 
-### Fabricado não vira lote 🔴
+#### Fabricado não vira lote 🔴
 
 `OrigemLote` só tem `RECEBIMENTO` e `CARGA_INICIAL` (`estoque.prisma:17-20`; dump MES linha 155). Ao concluir o último setor, a parcial fica `CONCLUIDO` no setor final e a entrega a baixa por quantidade do `ItensPedido` (`entregas.service.ts:69-80`). Nada cria lote nem `SaldoEstoque` do fabricado.
 
-## O que falta desenvolver
+### O que falta desenvolver
 
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
@@ -170,14 +230,14 @@ O que falta: definir quem informa o material consumido (setor ao concluir etapa,
 | 9 | `PerfilSetor` sem dimensão de filial (T.2/C3) | Robert | F1 | 🔴 |
 | 10 | Feed `/fluxo/eventos` com ator, autorizador e tempo por etapa ([[Rastreabilidade-e-Torre-de-Fluxo]]) | Robert | todos | 🔴 |
 
-## Pendências
+### Pendências
 
-- Nathan: quem informa o consumo de matéria-prima e em que momento (retirada do Estoque ou conclusão da etapa)?
+- Nathan: quem informa o consumo de matéria-prima e em que momento (retirada do Estoque ou conclusão da etapa)? **Decidido em 29/10/2026 (N16-140): na retirada do Estoque, pela quantidade pedida.**
 - Nathan e Robert: a fábrica com múltiplos setores `PRODUTIVO` consome por etapa ou só no primeiro?
-- Nathan: retrabalho volta sempre ao setor imediatamente anterior? Hoje é `idSetorOrigem`, sem escolha (`:1134-1142`).
+- Nathan: retrabalho volta sempre ao setor imediatamente anterior? Hoje é `idSetorOrigem`, sem escolha (`:1134-1142`). **Decidido em 29/10/2026 (N16-141): não; o PCP escolhe o setor de volta.**
 - Robert: confirmar nomes de setores e filas reais do ambiente de produção (código só traz o seed) ❓.
 
-## Subfluxo
+### Subfluxo
 
 ```mermaid
 flowchart TD
@@ -190,5 +250,3 @@ flowchart TD
     P6 -->|reabre compra| P3["P3 · Requisicao de compra"]
     F1 -.->|"consumo de materia-prima (sem codigo)"| E1["E1 · Estoque"]
 ```
-
-Raias vizinhas: [[03-Estoque-Atendimento-e-Despacho]], [[08-Qualidade-Saida]].

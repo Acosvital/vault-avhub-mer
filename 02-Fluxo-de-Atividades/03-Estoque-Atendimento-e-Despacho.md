@@ -1,7 +1,7 @@
 ---
 tags: [fluxo, raia, estoque, atendimento, despacho, reserva, lote, custo, mes, e1, e2, e3, e4, e5, e6]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: vigente
 dono: Robert (MES) · Nathan (decisões)
 fontes: [00-Fluxo-Mestre-0b, v1 02-PRD-Estoque/Fluxo-Estoque-Completo, v1 Estoque-Custo-do-Lote, v1 Rota-Estoque, v1 Modelo-Destinacao-Item, v1 Encaixe-Estoque-Revenda-no-PCP, decisões do Nathan de 14/10, API-008, api-pcp 579a625 (itens-parciais.service.ts, estoque-operacao.*, estoque.prisma, circuito-compra.ts), app-pcp 1fca8d3 (AtenderEstoqueModal)]
@@ -9,13 +9,71 @@ fontes: [00-Fluxo-Mestre-0b, v1 02-PRD-Estoque/Fluxo-Estoque-Completo, v1 Estoqu
 
 # Raia Estoque: atendimento e despacho (E1 a E6)
 
-Nós do [[00-Fluxo-Mestre-0b]]: `E1` saldo disponível, `E2` saldo cobre?, `E3` atende pelo saldo (split e reserva, custo do item), `E4` o que fazer com o restante, `E5` entrada no Estoque, `E6` despacho. Entrada: [[02-PCP-Triagem-e-Destinacao]]. Vizinhos: [[04-Circuito-de-Compra]], [[05-Recebimento]], [[06-Qualidade-Entrada]], [[08-Qualidade-Saida]], [[09-Expedicao]]. Selos em [[Regras-do-Vault]].
+**Em uma frase:** toda parcial de item passa primeiro pelo Estoque. O almoxarife atende o que o saldo cobre e decide o que fazer com o resto: comprar ou mandar para a produção.
 
-## Objetivo
+> [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
+> - O documento de retirada é pedido ao Estoque por quem precisa da mercadoria, Expedição ou Produção. Só o Estoque confirma (N16-120). O que o documento imprime segue aberto. Contrato: [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada]].
+> - A reserva é consumida junto com a baixa. A saída grava lote, pedido e o custo do lote naquele momento (N16-121).
+> - A Embalagem só recebe a parcial depois da retirada confirmada (N16-122).
+> - A matéria-prima da produção sai por documento de retirada, pela quantidade pedida (N16-140).
+> - Fabricado: [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] define um lote de origem Produção por ordem de produção e produto (proposta aceita em 15/10, sem código).
 
-O Estoque é a **porta de entrada e de saída** de todo item. Toda parcial nasce no Estoque (etapa 1 do roteiro). O almoxarife vê o saldo livre da filial do pedido, atende o que o saldo cobre (split + reserva em lote já liberado) e decide o restante: **solicitar compra** ou **enviar à produção**. O que é comprado e aprovado **volta ao mesmo Estoque** (`E5`), vira lote e saldo e sai por reserva. O que é fabricado e aprovado **deveria** fazer o mesmo (decisão de 14/10), mas ainda não faz. A saída física acontece no **despacho** (`E6`): quem precisa da mercadoria (Expedição ou Produção) gera um **documento de retirada**, e a **baixa do saldo é feita na retirada, no Estoque** 📝. Hoje o código baixa quando a Embalagem recebe a parcial, e não existe documento de retirada 🔴.
+## Como funciona, passo a passo
+
+1. A parcial chega ao Estoque, vinda do PCP, com a quantidade toda.
+2. O almoxarife vê o saldo livre na filial do pedido: lotes liberados menos reservas. `E1`
+3. Ele informa quanto atende, de zero até a quantidade da parcial, e de quais lotes. Atender zero é um clique. `E2`
+4. O sistema reserva o lote e separa a parte atendida, que segue para a Expedição. `E3`
+5. Para o restante, o almoxarife escolhe: solicitar compra ou enviar à produção. `E4`
+6. O item comprado volta ao mesmo Estoque depois que a Qualidade libera o lote. O almoxarife faz a reserva. `E5`
+7. Na saída física, quem precisa da mercadoria pede um documento de retirada, e a baixa acontece na retirada. Hoje a baixa acontece quando a Embalagem recebe a parcial. `E6`
+
+## Exemplo
+
+O pedido tem 100 flanges. O almoxarife encontra 40 em lotes liberados e informa 40. Elas viram uma parcial própria, com reserva, a caminho da Expedição. As 60 restantes seguem na parcial original. Se o destino for a Revenda, as 60 vão para a compra. Se for fabricação, ele escolhe entre comprar matéria-prima e seguir o roteiro. Quando a Expedição pede a retirada, o almoxarife confirma e o saldo baixa com o custo daquele lote.
 
 ## Quem atua
+
+| Quem | O que faz |
+|---|---|
+| Almoxarife | Atende pelo saldo, solicita compra, dá entrada, ajusta e transfere saldo |
+| Gestor de Estoque | Supervisiona o painel e o saldo |
+| Expedição (Embalagem) | Hoje dispara a baixa ao receber a parcial. No desenho final, pede a retirada |
+| Produção | Receberia matéria-prima por documento de retirada, que ainda não existe |
+| Compras e CCP (acompanhamento de compras) | Recebem o "Solicitar compra" pelo setor Requisições |
+| Robert | Dono do código do MES (sistema de chão de fábrica) |
+
+## Regras que valem
+
+- O saldo livre é por filial: lotes liberados menos reservas ativas, na filial do pedido.
+- Saldo zero exige clique. A parcial nunca passa sozinha.
+- O saldo é lido e a reserva criada no mesmo passo, para evitar corrida entre pedidos.
+- A reserva não expira. Termina por liberação explícita ou quando a ordem é excluída.
+- Na Revenda, o restante sempre vai para compra.
+- Na fabricação, o restante pode comprar matéria-prima ou seguir o roteiro.
+- O item comprado só volta ao Estoque depois que a Qualidade libera o lote.
+- Ajuste de saldo não usa o que está reservado e exige motivo.
+- O custo do lote é opcional e nunca bloqueia nada.
+- Tudo que é fabricado ou comprado deve passar pelo Estoque (decisão de 14/10). O fabricado ainda não passa.
+
+## O que já existe e o que falta
+
+- ✅ Telas Atendimento, Saldo, Reservas, Movimentação e Lote com etiqueta.
+- ✅ Reserva, divisão da parcial, solicitar compra, entrada do item comprado e baixa na Embalagem.
+- 🟡 Painel do Estoque e Mapa do Depósito ainda são protótipos.
+- 🔴 Documento de retirada e baixa na retirada.
+- 🔴 Fabricado virar lote e saldo.
+- 🔴 Custo médio do item.
+- 🔴 Saldo futuro, com as OCs (ordens de compra) em andamento.
+- 🔴 Consumo de matéria-prima, contagem cíclica, transferência entre filiais e separação física.
+
+Entrada: [[02-PCP-Triagem-e-Destinacao]]. Próxima raia: [[04-Circuito-de-Compra]].
+
+## Detalhe técnico
+
+Nós do [[00-Fluxo-Mestre-0b]]: `E1` saldo disponível, `E2` saldo cobre?, `E3` atende pelo saldo (split e reserva, custo do item), `E4` o que fazer com o restante, `E5` entrada no Estoque, `E6` despacho. Entrada: [[02-PCP-Triagem-e-Destinacao]]. Vizinhos: [[04-Circuito-de-Compra]], [[05-Recebimento]], [[06-Qualidade-Entrada]], [[08-Qualidade-Saida]], [[09-Expedicao]]. Selos em [[Regras-do-Vault]].
+
+### Quem atua (onde)
 
 | Quem | Papel | Onde |
 |---|---|---|
@@ -28,7 +86,7 @@ O Estoque é a **porta de entrada e de saída** de todo item. Toda parcial nasce
 
 Permissão: agir no setor exige `PerfilSetor.podeAtuar` (`ensurePodeAtuar`, `itens-parciais.service.ts:617`); movimentação e carga inicial exigem `PerfilDeposito.podeAtuar` no depósito (`estoque.prisma:86-106`, `estoque-operacao.service.ts:399-401`).
 
-## Regras decididas
+### Regras decididas
 
 | # | Regra | Selo |
 |---|---|---|
@@ -41,7 +99,7 @@ Permissão: agir no setor exige `PerfilSetor.podeAtuar` (`ensurePodeAtuar`, `ite
 | 7 | Na **Fabricação** o restante pode seguir o roteiro (`ROTEIRO`) ou ir à compra (`COMPRA`, matéria-prima) | 📝 ✅ `:607-613`, `AtenderEstoqueModal.tsx:332-345` |
 | 8 | A parte atendida vai para a **primeira etapa `EXPEDICAO`** depois do Estoque; sem ela no roteiro, 409 | ✅ `itens-parciais.service.ts:701-714` |
 | 9 | Parcial de item **comprado** só entra de volta no Estoque depois que a Qualidade liberou o lote (409 se há lote `PENDENTE`) | 📝 ✅ `itens-parciais.service.ts:862-874` |
-| 10 | **Despacho é no Estoque**: quem precisa da mercadoria gera o **documento de retirada**; a **baixa do saldo ocorre na retirada** | 📝 🔴 não existe |
+| 10 | **Despacho é no Estoque**: quem precisa da mercadoria gera o **documento de retirada**; a **baixa do saldo ocorre na retirada** | 📝 🔴 não existe; contrato [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada]], decisões N16-120 a N16-122 |
 | 11 | **Tudo que é fabricado ou comprado vai para o Estoque**: o fabricado aprovado vira lote e saldo e só então é despachado | 📝 🔴 fabricado não vira lote |
 | 12 | **Custo do item = média ponderada dos lotes** das reservas (Regra A: faturamento parcial usa o custo médio do item no pedido) | 📝 🔴 sem `GET /itens/custo` |
 | 13 | O custo do lote é **opcional** e nunca bloqueia carga inicial, recebimento, reserva nem despacho | 📝 ✅ `estoque-operacao.service.ts:404-409`, `estoque.prisma:385-393` |
@@ -51,9 +109,9 @@ Permissão: agir no setor exige `PerfilSetor.podeAtuar` (`ensurePodeAtuar`, `ite
 | 17 | **Saldo futuro:** para OC de itens de **estoque** (sem pedido de venda), o Estoque do MES mostra as **OCs em andamento** e a parte delas que preenche o estoque: **saldo atual + saldo futuro** ([[Glossario]]). A fonte é a referência da OC do hub (`GET /ordens-compra/referencia`, item com `destino` do tipo `estoque`) | 📝 N14-20 🔴 o MES não lê a referência |
 | 18 | Se a OC está **vinculada a um pedido de venda** (`destino` do tipo `pedido_venda`), o Estoque e o PCP veem que já existe OC para aquele pedido; essa quantidade **não** entra no saldo futuro livre | 📝 N14-20 🔴 |
 
-## Estados
+### Estados
 
-### Lote (`StatusQualidadeLote`, `OrigemLote`)
+#### Lote (`StatusQualidadeLote`, `OrigemLote`)
 
 | `StatusQualidadeLote` | Conta no disponível? | Quem muda |
 |---|---|---|
@@ -64,7 +122,7 @@ Permissão: agir no setor exige `PerfilSetor.podeAtuar` (`ensurePodeAtuar`, `ite
 
 `OrigemLote` = `RECEBIMENTO`, `CARGA_INICIAL` (`estoque.prisma:17-20`). **Não existe origem de produção** 🔴. `TipoMovimentoEstoque` = `ENTRADA`, `SAIDA`, `TRANSFERENCIA`, `AJUSTE` (`estoque.prisma:38-43`). `OrigemCusto` = `CARGA_INICIAL`, `OC`, `MANUAL` (`estoque.prisma:378-382`).
 
-### Reserva (`StatusReserva`)
+#### Reserva (`StatusReserva`)
 
 | Valor | Quando |
 |---|---|
@@ -74,11 +132,11 @@ Permissão: agir no setor exige `PerfilSetor.podeAtuar` (`ensurePodeAtuar`, `ite
 
 `quantidadeConsumida` acompanha parcial; estorno (`estornarConsumosDaParcial`) devolve o saldo à mesma localização quando a Embalagem desfaz o recebimento ou devolve ao Estoque (`itens-parciais.service.ts:1450`, `:1587`; `estoque-operacao.helpers.ts:287`).
 
-### Parcial no Estoque
+#### Parcial no Estoque
 
 Aceita agir em `CRIADO`, `EM_TRANSITO`, `RECEBIDO`, `EM_ANDAMENTO` (`itens-parciais.service.ts:629-639`). A parte atendida segue `EM_TRANSITO` com `atendidoPeloEstoque = true`; o restante segue `EM_TRANSITO` ao setor `REQUISICAO` (compra) ou à próxima etapa do roteiro.
 
-## Telas
+### Telas
 
 | Nome atual | Nome antigo | Rota | Slug | Estado |
 |---|---|---|---|---|
@@ -92,7 +150,7 @@ Aceita agir em `CRIADO`, `EM_TRANSITO`, `RECEBIDO`, `EM_ANDAMENTO` (`itens-parci
 | Retirada (documento de despacho) | — | — | — | 🔴 não existe |
 | Saldo futuro (coluna e detalhe das OCs em andamento no Atendimento e no Saldo) | — | `/estoque-operacao/atendimento`, `/estoque-operacao/saldo` | `atendimento`, `saldo` | 🔴 não existe (BL-050) |
 
-## Endpoints e contratos
+### Endpoints e contratos
 
 | Método e rota | Permissão | Efeito | Código |
 |---|---|---|---|
@@ -106,15 +164,15 @@ Aceita agir em `CRIADO`, `EM_TRANSITO`, `RECEBIDO`, `EM_ANDAMENTO` (`itens-parci
 | `GET /itens/custo` (MES → av-hub) | chave do av-hub | Custo médio do item e `completo` | [[API-008-Custo-do-Lote-no-MES]], [[LOG-47-Custo-Real-por-Item-no-Hub]] 🔴 não existe no MES (busca em `api-pcp/src`: só `GET /itens/status` em `integracao-avhub.controller.ts:26`) |
 | Documento de retirada (criar, listar, confirmar) | a definir | Gera a retirada; baixa o saldo | 🔴 sem contrato, sem rota |
 
-## Como está no código
+### Como está no código
 
-### E1 e E2: saldo disponível e decisão
+#### E1 e E2: saldo disponível e decisão
 
 ✅ O modal busca `GET /estoque/saldo/disponivel-parcial/:id` e sugere lotes (inclusive os da compra daquele item). `E2` não é um nó automático: o almoxarife informa quanto atende (0 a quantidade da parcial) e de quais lotes (`alocacoes` somando exatamente a quantidade atendida, `itens-parciais.service.ts:650-659`). Só é possível agir em setor tipo `ESTOQUE` (`:623-627`).
 
 🔴 **Saldo futuro (N14-20).** O modal e a tela Saldo só mostram o saldo atual (lotes `LIBERADO` menos reservas). Falta mostrar as OCs em andamento. Do lado do hub já há: `ordens_compra.finalidade` (`estoque` é o padrão, `ordens_compra.route.js:982`), `ordens_compra_itens_vinculos` (item da OC para pedido de venda), a view `vw_pedido_venda_itens_compra` e a referência `GET /ordens-compra/referencia`, cujo item traz `destino[]` (`pedido_venda` ou `estoque`, somando a quantidade) ✅ (`vw_ordens_compra_referencia_mes.swagger.json:61-88`). Falta no MES: o job que lê a referência (K4, BL-001), uma projeção da OC por produto e filial, o cálculo (OC aprovada, parte `estoque` do `destino`, menos o que já foi recebido) e a coluna no Atendimento e no Saldo (BL-050). A referência só traz OC `aprovado` e as canceladas que já foram aprovadas (`vw_ordens_compra_referencia_mes`, [[Banco-AvHub]]): OC em aprovação não entra, e o Gustavo confere se isso basta (BL-028). Como a mercadoria entra no Estoque: [[05-Recebimento]].
 
-### E3: atender pelo saldo (split e reserva)
+#### E3: atender pelo saldo (split e reserva)
 
 ✅ Duas formas, numa transação (`itens-parciais.service.ts:744-856`):
 - **Tudo atendido** (`restante = 0`): a própria parcial vai `EM_TRANSITO` para a Expedição com `atendidoPeloEstoque = true` e a reserva nasce sobre ela (`:746-779`).
@@ -124,19 +182,19 @@ A reserva valida lote `LIBERADO`, mesmo produto (`codigoProdutoOmie`) e mesma fi
 
 🔴 **Custo do item = média dos lotes.** O dado existe: cada `Reserva` liga lote e parcial, e `lote_custo.custo_liquido_unitario` guarda o custo (`estoque.prisma:394-423`). **O cálculo não existe**: não há rota que some `quantidade × custo` das reservas do item nem o campo `completo`. Pendente com o contrato [[API-008-Custo-do-Lote-no-MES]].
 
-### E4: o restante
+#### E4: o restante
 
 ✅ `destinoRestante = COMPRA` (ou Revenda, sempre) move a parcial para o setor `REQUISICAO` (`setorDoCircuito`, `itens-parciais.service.ts:727-730`); o PCP abre a requisição lá ([[04-Circuito-de-Compra]], nó `P3`). A observação de histórico diz "Sem saldo no estoque: N vão para compra (Requisições)" (`:808-811`).
 
 🔴 **Enviar à produção** (`ROTEIRO`) só move a parcial para a próxima etapa do roteiro (`:731-742`). Não reserva nem baixa matéria-prima; não existe ação de consumo (J2 e J3).
 
-### E5: entrada no Estoque
+#### E5: entrada no Estoque
 
 ✅ **Comprado:** a Qualidade aprova o lote, e `devolverAoEstoqueParciaisProntas` funde as parciais do item e devolve a parcial ao setor Estoque com `idLoteCompra = null` (`circuito-compra.ts:166-250`). O lote já nasceu no Recebimento com `ENTRADA` no saldo e `origem = RECEBIMENTO`. A reserva é criada na **segunda passada** pelo almoxarife: "Atender pelo estoque" com a quantidade toda (`itens-parciais.service.ts:592-593`). Detalhe em [[06-Qualidade-Entrada]].
 
 🔴 **Fabricado:** a Qualidade de saída aprova e a parcial segue para a Expedição, **sem** criar lote nem saldo. `OrigemLote` só tem `RECEBIMENTO` e `CARGA_INICIAL` (`estoque.prisma:17-20`); nenhum `lote.create` do MES parte de produção (`lote.create` aparece só em `compras.service.ts:541` recebimento, `estoque-operacao.service.ts:425` carga inicial e `qualidade.service.ts:134` cisão). Decisão de 14/10: o fabricado aprovado volta ao Estoque como lote e saldo.
 
-### E6: despacho
+#### E6: despacho
 
 ✅ O que existe: quando a **Embalagem recebe** a parcial atendida (`PATCH /itens-parciais/:id/receber`), o código chama `consumirReservasDaParcial` (`itens-parciais.service.ts:275-285`). Ele tira o saldo das localizações do lote (maior saldo primeiro), grava um `MovimentoEstoque` `SAIDA` por pedaço com `idReserva`, e marca a reserva `CONSUMIDA` (`estoque-operacao.helpers.ts:208-284`). Se o saldo físico não cobre, 409 "registre um ajuste antes de entregar" (`:253-258`). Se a Embalagem desfaz o recebimento ou devolve ao Estoque, o saldo volta (`estornarConsumosDaParcial`).
 
@@ -148,7 +206,7 @@ A reserva valida lote `LIBERADO`, mesmo produto (`codigoProdutoOmie`) e mesma fi
 
 Consequência de hoje: o saldo físico só cai quando a Expedição recebe; o almoxarife não tem registro de quem retirou, e item que sai para produção nunca baixa.
 
-## Dados
+### Dados
 
 | Tabela (todas em `public`, MES) | Papel |
 |---|---|
@@ -161,11 +219,11 @@ Consequência de hoje: o saldo físico só cai quando a Expedição recebe; o al
 
 Modelo completo e custo em [[Modelo-Estoque-e-Custo-do-Lote]] e [[Banco-MES]].
 
-### Custo do lote (resumo)
+#### Custo do lote (resumo)
 
 `custo_liquido_unitario = valor_unitario × (1 − desconto) × cotação − ICMS a recuperar + IPI + ST`; frete fica gravado e fora do líquido; moeda estrangeira usa a PTAX da OC; só revenda no ciclo 1. **O que está gravado hoje:** carga inicial (`origem CARGA_INICIAL`, só valor unitário) e cisão. **Não está gravado:** custo vindo da OC no recebimento (`OrigemCusto.OC`) nem edição manual (`MANUAL`, `estoque-custo` editar, motivo obrigatório): nenhum código cria `lote_custo` com essas origens (`loteCusto.create` só em `estoque-operacao.service.ts:440` e `estoque-operacao.helpers.ts:434`). Ver [[05-Recebimento]], nó `R4`.
 
-## O que falta desenvolver
+### O que falta desenvolver
 
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
@@ -181,15 +239,15 @@ Modelo completo e custo em [[Modelo-Estoque-e-Custo-do-Lote]] e [[Banco-MES]].
 | 10 | Importação de carga inicial em lote (hoje um lote por vez) | Robert | — | 🔴 |
 | 11 | **Saldo futuro** no Atendimento e no Saldo (saldo atual + OCs em andamento de estoque), a partir da referência da OC (BL-050; depende de BL-001) | Robert (MES), Gustavo (BL-028) | E1 | 🔴 |
 
-## Pendências
+### Pendências
 
-- Nathan: o documento de retirada nasce de quem? Expedição pede ao Estoque, ou o Estoque gera quando a parcial chega à Expedição? O que o documento imprime e quem confirma?
-- Nathan: a Reserva continua existindo depois da retirada (para rastrear custo) ou é consumida junto?
-- Nathan e Robert: como o item **fabricado** entra no Estoque: um lote por ordem de produção, ou por parcial aprovada? Quem informa localização?
+- Nathan: o documento de retirada nasce de quem? Expedição pede ao Estoque, ou o Estoque gera quando a parcial chega à Expedição? O que o documento imprime e quem confirma? **Decidido em 29/10/2026 (N16-120): a Expedição ou a Produção pede ao Estoque, e só o Estoque confirma. O que o documento imprime segue aberto.**
+- Nathan: a Reserva continua existindo depois da retirada (para rastrear custo) ou é consumida junto? **Decidido em 29/10/2026 (N16-121): consumida junto com a baixa.**
+- Nathan e Robert: como o item **fabricado** entra no Estoque: um lote por ordem de produção, ou por parcial aprovada? Quem informa localização? **Parcialmente respondido: [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] define um lote por ordem de produção e produto (proposta aceita em 15/10). Quem informa a localização segue aberto.**
 - Nathan: custo do item fabricado (rateio por peso ou área) continua fora do ciclo 1 (decisão de 09/10)?
 - Robert: o setor Estoque aparece uma vez no roteiro (etapa 0). O v1 falava em duas vezes (início e fim); o código resolveu com a parcial voltando ao mesmo setor. Confirmar que o histórico mostra isso com clareza.
 
-## Subfluxo
+### Subfluxo
 
 ```mermaid
 flowchart TD
@@ -209,5 +267,3 @@ flowchart TD
     E6 -->|"produto pronto"| X1["X1 · Embalagem e paletização"]
     E6 -->|"matéria-prima ou beneficiamento"| F1["F1 · Setores produtivos do roteiro"]
 ```
-
-Próxima raia: [[04-Circuito-de-Compra]].

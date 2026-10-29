@@ -26,6 +26,11 @@ criado_original: 2026-09-17
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Criou a tabela `core.estoque_saldo` para espelhar o saldo de estoque do Omie (ERP). Depois se decidiu ignorar o estoque do Omie: o MES (sistema de chão de fábrica) é a referência.
+> **Quem é afetado:** DBA e pipeline. Nada muda para o usuário final.
+> **Situação:** ✅ Tabela existe e tem rota própria. 🟡 Está sem uso, só espelho. ❓ Produção vista só nos dumps antigos.
+
 
 > Status: decidido | em produção (verificado em 07/10/2026 pelo dump, [[Mapa-v1-para-v2|Auditoria-Dump-Producao-2026-10-07]]). **`core.estoque_saldo` e o recurso `estoque` do pipeline: sem função, o estoque do Omie é ignorado (✅ 07/10).** A tabela existe em produção, vazia; o Omie recebe dados só manualmente, o passo `ListarPosEstoque` não será feito e o MES é a referência do saldo físico. Fonte: [[Registro-de-Decisoes|Registro-de-Decisoes-2026-10-07]] (#28). O texto abaixo, que prevê ligar o recurso `estoque`, fica como histórico.
 

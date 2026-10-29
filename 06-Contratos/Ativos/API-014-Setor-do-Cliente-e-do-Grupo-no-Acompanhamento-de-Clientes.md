@@ -16,6 +16,12 @@ criado_original: 2026-10-21
 
 > **Onde atua:** av-hub: banco, API, front
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Permite classificar clientes (CNPJ) ou grupos de empresa por setor de atuação (Mineração, Óleo & Gás etc.), com lista que a equipe pode ampliar, e olhar a carteira por setor no Acompanhamento de clientes.
+> **Quem é afetado:** Quem cuida dos clientes classifica e filtra por setor; o vendedor só vê. O MES não tem trabalho.
+> **Situação:** Parcial. Vários setores por cliente está feito no banco e na API (Gustavo, informado em 26/10) e no front (Nathan); o checklist ainda tem itens abertos e salvar 2 setores não foi conferido (🟡).
+> **Exemplo:** Grupo com os setores Mineração e Energia: seus CNPJs herdam os dois, e um CNPJ com Siderurgia própria usa só ela.
+
 > [!info] Situação em 26/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
 >

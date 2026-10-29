@@ -25,6 +25,11 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:190-197", 
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Definiu o fluxo de Compras no av-hub: requisição, ordem de compra (OC) e envio ao Omie. OC acima de R$ 30.000,00 precisa de aprovação.
+> **Quem é afetado:** O PCP (Planejamento e Controle da Produção) gera requisições; compradores emitem OCs; aprovadores e diretoria decidem as de valor alto.
+> **Situação:** ✅ Backend no ar (entregue em 22/09/2026); o envio ao Omie sai pela pipeline. 🟡 Parte do texto é histórico. ❓ O front não foi conferido.
+
 
 > **✅ Implementado — backend entregue em 22/09/2026** (`api-acos-vital` commit `ec2a42b`, PR #273).
 > Front ligado em 23/09/2026 (branch `feat/compras-integracao-backend`): os dados de exemplo foram

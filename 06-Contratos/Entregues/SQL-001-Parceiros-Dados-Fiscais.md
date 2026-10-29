@@ -25,6 +25,11 @@ criado_original: 2026-09-17
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Ampliou o cadastro de parceiros (`core.parceiros`) com dados fiscais que o Omie (ERP) já devolve e criou tabelas de dados bancários e endereço de entrega. Serve para emitir nota sem depender do Omie.
+> **Quem é afetado:** DBA e pipeline Omie. Fiscal e comercial passam a ter o cadastro completo no Hub.
+> **Situação:** ✅ Tabelas existem no dump de 14/10. ❓ Produção confirmada só pelo dump de 21/09, sem reconferência.
+
 
 **Status: aplicada.** Confirmado contra o dump de produção `dump-avhub_prd_db-202609210741.sql` (21/09/2026) — ver [[Mapa-v1-para-v2|Auditoria-Dump-Producao-2026-09-21]]. `core.parceiros` já tem todas as colunas propostas; `core.parceiros_dados_bancarios` e `core.parceiros_endereco_entrega` já existem como tabelas 1:1 com FK CASCADE, e os models Sequelize correspondentes já estão em uso. Diferenças confirmadas contra o proposto abaixo: `dadosBancarios`/`enderecoEntrega` são servidos por endpoint próprio (não só embutidos em `ListarClientes` — resolve a pergunta aberta 1 original), e `chave_pix` foi ajustada para `varchar(255)` (não os `varchar(100)` propostos na pergunta aberta 3). Seção original abaixo preservada como histórico de design.
 

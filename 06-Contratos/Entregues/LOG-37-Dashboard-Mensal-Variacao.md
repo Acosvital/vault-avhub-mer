@@ -16,6 +16,11 @@ criado_original: 2026-10-05
 
 > **Onde atua:** av-hub: API
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Acrescentou `variacao_pct` (variação percentual) às rotas `/dashboard_mensal_vendas` e `/dashboard_mensal_faturamento`, para o Dashboard da Equipe não calcular a variação por conta própria.
+> **Quem é afetado:** Gerentes que usam o Dashboard da Equipe (Portal do Gerente). O front deixou o cálculo próprio.
+> **Situação:** ✅ Concluído em 06/10 na API, na `api-test` e em produção. O front (av-hub#141 e #142) está na `develop`; faltava levá-lo à `main`.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >

@@ -1,0 +1,230 @@
+{
+  "id": "fiscal",
+  "nome": "Fiscal",
+  "fase": "Entregar e fechar",
+  "fraseMapa": "Omie emite a nota e baixa o item",
+  "titulo": "Fiscal: a nota no Omie e a baixa do item",
+  "resumo": "O Fiscal fecha o ciclo no Omie: emite a nota fiscal de saída e dá baixa nos itens do pedido. O sistema nunca emite nem edita nota; ele só recebe de volta o que o Omie emitiu.",
+  "recebeDe": [
+    "Expedição: o aviso de que a carga está pronta (hoje fora do sistema)",
+    "Vendas: o pedido de venda já cadastrado no Omie"
+  ],
+  "entregaA": [
+    "Vendedor: o pedido faturado e a nota, nas telas de notas",
+    "Controladoria: a nota emitida, que dispara o fechamento da comissão",
+    "Expedição: a volta da nota ao MES, que ainda não existe"
+  ],
+  "atuam": [
+    {
+      "quem": "Faturamento (Omie)",
+      "papel": "Emite a nota fiscal de saída a partir do pedido de venda."
+    },
+    {
+      "quem": "Expedição ou Logística",
+      "papel": "Avisa que a carga está pronta, hoje fora do sistema."
+    },
+    {
+      "quem": "Pipeline do Omie",
+      "papel": "Lê pedidos e notas do Omie e grava no banco do av-hub."
+    },
+    {
+      "quem": "Vendedor",
+      "papel": "Vê o pedido passar de aberto para faturado."
+    },
+    {
+      "quem": "Gustavo",
+      "papel": "Dono do banco e do pipeline."
+    },
+    {
+      "quem": "Robert",
+      "papel": "Dono da futura sinalização no MES."
+    }
+  ],
+  "estados": [
+    "Pendente",
+    "Faturado",
+    "Encerrado",
+    "Cancelado",
+    "Devolvido",
+    "Dev. Parcial"
+  ],
+  "passos": [
+    {
+      "id": "X4",
+      "t": "Expedição avisa o faturista",
+      "quem": "Expedição ou Logística",
+      "onde": "Fora do sistema",
+      "st": "gap",
+      "stl": "Aviso fora do sistema",
+      "estado": "Pendente",
+      "o": "Quando a carga está pronta, a Expedição avisa o faturista por fora. A fila de sinalização (tela 11.1) está desenhada, sem contrato e sem código. O MES também não sabe se o pedido já foi faturado. Decidido em 29/10 (N16-132): quem avisa é a Logística, ao fechar a carga.",
+      "ex": "A Expedição avisa que as 100 flanges do Cliente Exemplo S.A. estão prontas. O pedido continua pendente no Omie."
+    },
+    {
+      "id": "O1",
+      "t": "Decide nota inteira ou em partes",
+      "quem": "Fiscal",
+      "onde": "Omie",
+      "st": "part",
+      "stl": "Decidido",
+      "estado": "",
+      "o": "O Fiscal pode manter uma nota por pedido ou separar o pedido por item e quantidade, e cada parte vira uma nota. Pelas decisões N16-92 a N16-94, o sequencial é só um agrupamento do mesmo pedido: um pedido, várias notas, sem pedido filho.",
+      "ex": "O Fiscal pode emitir uma nota para as 100 flanges, ou separar o pedido do Cliente Exemplo S.A. em partes, com uma nota para cada."
+    },
+    {
+      "id": "O1",
+      "t": "Omie emite a nota fiscal",
+      "quem": "Faturista",
+      "onde": "Omie",
+      "st": "ok",
+      "stl": "Funciona no Omie",
+      "estado": "Faturado",
+      "o": "O faturista emite a nota no Omie. Nenhum módulo do ERP emite ou edita nota fiscal.",
+      "ex": "O Omie emite a nota do Cliente Exemplo S.A. O sistema não participa da emissão."
+    },
+    {
+      "id": "O2",
+      "t": "Pipeline traz o pedido faturado",
+      "quem": "Sistema (pipeline)",
+      "onde": "Sistema",
+      "st": "ok",
+      "stl": "Já funciona",
+      "estado": "Faturado",
+      "o": "A cada poucos minutos o pipeline lê os pedidos do Omie. O banco calcula a situação do pedido a partir das marcas do Omie, e o pedido passa a Faturado.",
+      "ex": "Em poucos minutos o pedido do Cliente Exemplo S.A. aparece como faturado no av-hub."
+    },
+    {
+      "id": "O2",
+      "t": "Pipeline traz a nota e baixa o item",
+      "quem": "Sistema (pipeline)",
+      "onde": "Sistema",
+      "st": "ok",
+      "stl": "Já funciona",
+      "estado": "Faturado",
+      "o": "O pipeline lê as notas emitidas e grava o número e o código da nota em cada item do pedido que ainda não tinha nota. É assim que o item dá baixa no pedido, sem tela e sem escrita do MES.",
+      "ex": "As flanges do pedido recebem o número da nota emitida e ficam com baixa registrada."
+    },
+    {
+      "id": "O2",
+      "t": "Vendedor acompanha",
+      "quem": "Vendedor",
+      "onde": "av-hub: Minhas Notas, Notas da Equipe, Notas Fiscais de Saída",
+      "st": "ok",
+      "stl": "Telas prontas",
+      "estado": "",
+      "o": "As telas de notas mostram o que o Omie já emitiu. Elas só olham para trás e não agem sobre a nota. O cartão de etapas do pedido só chega até Pronto para expedição.",
+      "ex": "O vendedor do Cliente Exemplo S.A. encontra a nota nas telas de notas, depois que ela foi emitida."
+    },
+    {
+      "id": "O1",
+      "t": "Sinalização do MES ao Omie",
+      "quem": "Expedição ou Logística, pelo MES",
+      "onde": "Ainda não existe tela",
+      "st": "gap",
+      "stl": "Desenho, sem código",
+      "estado": "",
+      "o": "A tela 11.1 listaria as cargas prontas, teria o botão de sinalizar e mostraria o número e a chave da nota quando voltassem. Como o MES nunca fala com o Omie direto, a sinalização passaria pelo av-hub. O gatilho é a carga fechada pela Logística (N16-132), então a tela depende da consolidação de carga (X3).",
+      "ex": "Em vez de avisar por fora, a Expedição sinalizaria no sistema que as flanges estão prontas."
+    },
+    {
+      "id": "O2",
+      "t": "Volta da nota ao MES",
+      "quem": "Robert e Gustavo",
+      "onde": "Ainda não existe tela",
+      "st": "gap",
+      "stl": "Sem código",
+      "estado": "",
+      "o": "Hoje o número da nota na entrega é um texto digitado. A ideia é ligar esse número ao que o Omie devolve e mostrar faturado na Expedição.",
+      "ex": "A Expedição passaria a ver, na entrega das flanges, o número da nota que o Omie emitiu."
+    }
+  ],
+  "outroCaminho": {
+    "titulo": "E se a nota sair em partes?",
+    "texto": "O Fiscal pode separar o pedido em partes por item e quantidade, e cada parte vira uma nota. No Omie, o pedido original e as partes são numerados em sequência.",
+    "etapas": [
+      "Pedido original",
+      "Fiscal separa por item e quantidade",
+      "Cada parte vira uma nota"
+    ],
+    "nota": "Falta confirmar se o faturamento parcial gera um pedido filho no Omie."
+  },
+  "regras": [
+    {
+      "t": "Emissão só no Omie",
+      "d": "Nenhum módulo do ERP emite ou edita nota fiscal; o Omie é o sistema fiscal e financeiro."
+    },
+    {
+      "t": "Baixa pelo pipeline",
+      "d": "A baixa do item no pedido volta pelo pipeline, sem tela e sem escrita do MES."
+    },
+    {
+      "t": "Situação calculada",
+      "d": "A situação do pedido é calculada pelo banco a partir das marcas do Omie, na ordem: cancelado, denegado, devolvido, devolução parcial, encerrado, faturado, autorizado e pendente."
+    },
+    {
+      "t": "Telas só olham para trás",
+      "d": "As telas de notas do av-hub mostram a nota que o Omie já emitiu; notas manuais ficam fora do fluxo."
+    },
+    {
+      "t": "MES sem estado fiscal",
+      "d": "O MES guarda só o número da nota digitado na entrega e a quantidade pendente."
+    },
+    {
+      "t": "Única escrita no Omie",
+      "d": "A única escrita do pipeline no Omie é o envio da ordem de compra."
+    },
+    {
+      "t": "Remessa fica para depois",
+      "d": "A remessa de produtos fica para o Ciclo 2, em 22/01/2027."
+    },
+    {
+      "t": "Faturou antes, só avisa",
+      "d": "Se o pedido for faturado antes da entrega no MES, o MES mostra um aviso e não bloqueia (decidido em 29/10)."
+    }
+  ],
+  "telas": [
+    {
+      "nome": "Fila de sinalização de faturamento (11.1)",
+      "rota": "ainda sem rota",
+      "quem": "Expedição ou Logística",
+      "st": "gap"
+    },
+    {
+      "nome": "Minhas Notas",
+      "rota": "/minhas-notas",
+      "quem": "Vendedor",
+      "st": "ok"
+    },
+    {
+      "nome": "Notas da Equipe",
+      "rota": "/notas-equipe",
+      "quem": "Gerência",
+      "st": "ok"
+    },
+    {
+      "nome": "Notas do PCP",
+      "rota": "/pcp-notas",
+      "quem": "PCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Notas Fiscais de Saída",
+      "rota": "/vendas/notas-fiscais-saida",
+      "quem": "Vendas",
+      "st": "ok"
+    },
+    {
+      "nome": "Etapa dos itens (cartão no pedido)",
+      "rota": "/meus-pedidos/pedido/...",
+      "quem": "Vendedor",
+      "st": "part"
+    }
+  ],
+  "contratos": [],
+  "cartao": null,
+  "palavrasFonte": 1413,
+  "duvidas": [
+    "Devolução de cliente afeta o saldo do Estoque? A nota diz que o fluxo está decidido para o Estoque, sem código, mas não descreve a decisão.",
+    "A nota não cita nenhum contrato (LOG, API ou SQL) para o Fiscal; por isso a ficha não tem cartão de contrato. Os quadros de quem recebe e quem entrega incluem a Controladoria por causa do fluxo mestre (O1 dispara K3)."
+  ]
+}

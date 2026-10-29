@@ -16,6 +16,12 @@ criado_original: 2026-10-07
 
 > **Onde atua:** av-hub: banco, API, front · pipeline Omie
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Define que a ordem das etapas de faturamento (10, 20, 80, 50, 60, 70) vem de uma coluna do cadastro no banco, e não de uma lista fixa no código do front.
+> **Quem é afetado:** Quem usa as telas de Pedidos continua vendo a mesma ordem. Mudam o trabalho do DBA (Gustavo), do pipeline que importa do Omie (o ERP) e do front.
+> **Situação:** Parcial. Coluna, view e rota já existem e o código morto do front saiu. Falta proteger a coluna no pipeline e conferir o seed (carga inicial) dos valores 1 a 6. Dono: Gustavo.
+> **Exemplo:** Com a ordem no cadastro, a etapa 80 aparece antes da 50, e ajustar isso passa a ser um PUT na API, sem deploy do front.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >

@@ -1,0 +1,356 @@
+<title>Mapa Aços Vital</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: mapa em fases no topo; ao clicar num setor, a ficha dele abre embaixo, com o pedido-exemplo passo a passo. */
+:root {
+  --bg: #EDEFF1;
+  --surface: #F8F9FA;
+  --ink: #18212B;
+  --muted: #566170;
+  --line: #CBD1D8;
+  --vendas: #2B5F85;
+  --on-vendas: #FFFFFF;
+  --vendas-soft: #D9E6F0;
+  --signal: #B84A17;
+  --ok: #2B6E47;
+  --ok-soft: #DAEADF;
+  --part: #8A5A00;
+  --part-soft: #F4E7C8;
+  --gap: #A3392E;
+  --gap-soft: #F3DEDB;
+  --f-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11171D; --surface: #1A222B; --ink: #E6EAEE; --muted: #9AA6B2; --line: #2E3944;
+    --vendas: #74ACD6; --on-vendas: #0E1A24; --vendas-soft: #1F3446; --signal: #F08A55;
+    --ok: #74C698; --ok-soft: #1B3326; --part: #E3B95A; --part-soft: #3A2F14;
+    --gap: #EE8E84; --gap-soft: #3A2220; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11171D; --surface: #1A222B; --ink: #E6EAEE; --muted: #9AA6B2; --line: #2E3944;
+  --vendas: #74ACD6; --on-vendas: #0E1A24; --vendas-soft: #1F3446; --signal: #F08A55;
+  --ok: #74C698; --ok-soft: #1B3326; --part: #E3B95A; --part-soft: #3A2F14;
+  --gap: #EE8E84; --gap-soft: #3A2220; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 400 15px/1.55 var(--f-body);
+  padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; margin: 0; text-wrap: balance; line-height: 1.05; }
+h1 { font-size: clamp(38px, 7vw, 60px); font-weight: 700; letter-spacing: .01em; }
+h2 { font-size: 30px; }
+h3 { font-size: 20px; letter-spacing: .02em; }
+p { margin: 0; }
+.mono { font-family: var(--f-mono); font-size: .86em; }
+.label { font: 500 12px/1 var(--f-body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+.top { display: flex; flex-direction: column; gap: 14px; }
+.lead { font-size: 18px; max-width: 62ch; color: var(--muted); }
+.lead b { color: var(--ink); font-weight: 500; }
+.tag { align-self: flex-start; font: 500 12px/1 var(--f-body); letter-spacing: .06em; text-transform: uppercase; padding: 7px 10px; border: 1px dashed var(--signal); color: var(--signal); }
+.trail { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 0; margin: 4px 0 0; list-style: none; }
+.trail li { display: flex; align-items: baseline; gap: 8px; font-weight: 500; }
+.trail a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+.trail a:hover { border-color: var(--vendas); }
+.trail .n { font: 600 22px/1 var(--f-display); color: var(--vendas); }
+
+section { display: flex; flex-direction: column; gap: 18px; scroll-margin-top: 20px; }
+.sec-head { display: flex; flex-direction: column; gap: 6px; }
+.sec-head p { color: var(--muted); max-width: 64ch; }
+
+.phases { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; }
+.phase { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 0 22px 0 0; }
+.phase:not(:last-child)::after { content: "\2192"; position: absolute; right: 2px; top: 6px; color: var(--muted); font-size: 18px; }
+.phase h3 { font-size: 15px; font-family: var(--f-body); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding-bottom: 8px; border-bottom: 2px solid var(--line); }
+.chip { text-align: left; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; cursor: pointer; }
+.chip:hover { border-color: var(--vendas); }
+.chip b { font: 600 18px/1.1 var(--f-display); letter-spacing: .02em; }
+.chip span { font-size: 13px; color: var(--muted); line-height: 1.35; }
+.chip[disabled] { opacity: .55; cursor: default; border-style: dashed; }
+.chip[disabled]:hover { border-color: var(--line); }
+.chip[aria-pressed="true"] { background: var(--vendas); border-color: var(--vendas); color: var(--on-vendas); box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--signal); }
+.chip[aria-pressed="true"] span { color: var(--on-vendas); opacity: .9; }
+.legend { font-size: 13px; color: var(--muted); }
+
+.ficha { background: var(--surface); border: 1px solid var(--line); border-top: 6px solid var(--vendas); padding: 26px; display: flex; flex-direction: column; gap: 30px; }
+.ficha-head { display: flex; flex-direction: column; gap: 10px; }
+.ficha-head p { font-size: 18px; max-width: 60ch; }
+.ficha-head .sector { font: 700 14px/1 var(--f-body); letter-spacing: .12em; text-transform: uppercase; color: var(--vendas); }
+.sector-nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+.sector-nav button { font: 500 14px/1 var(--f-body); padding: 10px 14px; background: none; color: var(--ink); border: 1px solid var(--line); cursor: pointer; }
+.sector-nav button:disabled { opacity: .35; cursor: default; }
+
+.between { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch; }
+.between .box { border: 1px solid var(--line); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.between .box.me { background: var(--vendas-soft); border-color: var(--vendas); }
+.between .arrow { align-self: center; font-size: 22px; color: var(--muted); }
+.between ul { margin: 0; padding-left: 18px; }
+.between li { margin: 2px 0; }
+
+.who { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.who div { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; }
+.who b { display: block; font-weight: 600; }
+.who span { color: var(--muted); font-size: 14px; }
+
+.tour { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 22px; }
+.rail { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.rail button { width: 100%; text-align: left; font: inherit; color: var(--ink); background: none; border: 0; border-left: 3px solid var(--line); padding: 10px 12px 10px 14px; cursor: pointer; display: grid; grid-template-columns: 56px 1fr auto; gap: 8px; align-items: baseline; }
+.rail button:hover { background: var(--bg); }
+.rail button[aria-current="step"] { border-left-color: var(--signal); background: var(--vendas-soft); font-weight: 500; }
+.rail .id { font: 500 12px/1.2 var(--f-mono); color: var(--muted); overflow-wrap: anywhere; }
+.rail-title { line-height: 1.3; }
+.dot { width: 9px; height: 9px; border-radius: 50%; align-self: center; }
+.dot.ok { background: var(--ok); } .dot.part { background: var(--part); } .dot.gap { background: var(--gap); }
+
+.stage { border: 1px solid var(--line); background: var(--bg); padding: 22px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.stage-head { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; justify-content: space-between; }
+.stage-head h3 { font-size: 28px; }
+.pill { font: 500 12px/1 var(--f-body); letter-spacing: .04em; padding: 6px 9px; display: inline-block; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.part { background: var(--part-soft); color: var(--part); }
+.pill.gap { background: var(--gap-soft); color: var(--gap); }
+.states { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font: 500 12px/1 var(--f-mono); }
+.states span { padding: 5px 8px; border: 1px solid var(--line); color: var(--muted); }
+.states span.on { border-color: var(--signal); color: var(--signal); background: var(--surface); }
+.stage dl { display: grid; grid-template-columns: 110px 1fr; gap: 10px 14px; margin: 0; }
+.stage dt { font: 500 12px/1.6 var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.stage dd { margin: 0; min-width: 0; }
+.example { border-left: 4px solid var(--signal); background: var(--surface); padding: 12px 14px; }
+.example .label { color: var(--signal); display: block; margin-bottom: 6px; }
+.nav { display: flex; gap: 10px; }
+.nav button { font: 500 14px/1 var(--f-body); padding: 10px 16px; background: var(--vendas); color: var(--on-vendas); border: 0; cursor: pointer; }
+.nav button.ghost { background: none; color: var(--ink); border: 1px solid var(--line); }
+.nav button:disabled { opacity: .4; cursor: default; }
+button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--signal); outline-offset: 2px; }
+
+.other { border: 1px dashed var(--vendas); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.lane { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.lane .s { padding: 7px 10px; background: var(--surface); border: 1px solid var(--line); font-size: 14px; }
+.lane .s.hot { border-color: var(--vendas); background: var(--vendas-soft); }
+.lane .a { color: var(--muted); }
+
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 12px; padding: 0; margin: 0; list-style: none; }
+.rules li { border: 1px solid var(--line); background: var(--bg); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.rules b { font: 600 18px/1.2 var(--f-display); letter-spacing: .02em; }
+.rules span { color: var(--muted); font-size: 14px; }
+
+.scroller { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+th { text-align: left; font: 500 12px/1 var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 0 10px 8px 0; border-bottom: 2px solid var(--line); }
+td { padding: 9px 10px 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+
+.contract { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; }
+.card { border: 1px solid var(--line); background: var(--bg); padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card dl { display: grid; grid-template-columns: 112px 1fr; gap: 8px 12px; margin: 0; }
+.card dt { font: 500 12px/1.6 var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.card dd { margin: 0; }
+.card .foot { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+.clist { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.clist li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.clist .mono { color: var(--muted); white-space: nowrap; }
+
+details.doubts { border: 1px solid var(--line); padding: 12px 16px; background: var(--bg); }
+details.doubts summary { cursor: pointer; font-weight: 500; }
+details.doubts ul { margin: 10px 0 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+.note { font-size: 14px; color: var(--muted); max-width: 70ch; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.tag-link { font: 500 13px/1 var(--f-body); color: var(--vendas); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+.tag-link:hover { border-color: var(--vendas); }
+.tech { display: flex; flex-wrap: wrap; gap: 10px; }
+.tech a { color: var(--ink); text-decoration: none; background: var(--bg); border: 1px solid var(--line); padding: 10px 14px; font-weight: 500; }
+.tech a:hover { border-color: var(--vendas); color: var(--vendas); }
+.clist a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+.clist a:hover { border-color: var(--vendas); color: var(--vendas); }
+
+@media (max-width: 860px) {
+  .phases { grid-template-columns: 1fr; gap: 18px; }
+  .phase { padding-right: 0; }
+  .phase:not(:last-child)::after { content: "\2193"; position: static; margin-top: -4px; }
+  .tour, .contract { grid-template-columns: 1fr; }
+  .between { grid-template-columns: 1fr; }
+  .between .arrow { transform: rotate(90deg); justify-self: center; }
+  .stage dl, .card dl { grid-template-columns: 1fr; gap: 2px; }
+  .stage dd, .card dd { margin-bottom: 8px; }
+  .ficha { padding: 18px; }
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="tags"><span class="tag" id="tag"></span><a class="tag-link" id="consulta" href="/consulta" hidden>Consulta técnica: notas, contratos e decisões &rarr;</a></div>
+    <h1>Mapa da Aços Vital</h1>
+    <p class="lead">Do pedido do cliente até a nota e a comissão: <b>quem faz o quê, em que ordem</b>. Clique num setor para abrir a ficha dele.</p>
+    <ol class="trail" aria-label="Ordem de leitura">
+      <li><span class="n">1</span><a href="#mapa">Entenda o fluxo</a></li>
+      <li><span class="n">2</span><a href="#ficha">Veja o seu setor</a></li>
+      <li><span class="n">3</span><a href="#falta">Execute: o que falta</a></li>
+      <li><span class="n">4</span><a href="#contratos">Consulte os contratos</a></li>
+    </ol>
+  </header>
+
+  <section id="mapa">
+    <div class="sec-head">
+      <h2>O caminho de um pedido</h2>
+      <p>Um pedido passa por cinco fases. Dentro de cada fase os setores se ajudam; nem todo pedido passa por todos (um item que já está em estoque não vai à Produção).</p>
+    </div>
+    <div class="phases" id="phases"></div>
+    <p class="legend" id="legend"></p>
+  </section>
+
+  <section id="ficha" class="ficha" aria-live="polite"></section>
+</div>
+
+<script>
+(function () {
+  var DATA = /*__DATA__*/[];
+  var BASE = /*__BASE__*/null; // null: sem links para a consulta (artifact); "": links a partir da raiz do site
+  var ORDER = ["vendas", "orcamento", "pcp", "estoque", "compras", "recebimento", "qualidade-entrada", "producao", "qualidade-saida", "expedicao", "fiscal", "controladoria"];
+  var NAMES = {"vendas":"Vendas","orcamento":"Orçamento","pcp":"PCP","estoque":"Estoque","compras":"Compras","recebimento":"Recebimento","qualidade-entrada":"Qualidade (entrada)","producao":"Produção","qualidade-saida":"Qualidade (saída)","expedicao":"Expedição","fiscal":"Fiscal","controladoria":"Controladoria"};
+  var PHASES = ["Vender", "Planejar", "Abastecer", "Fabricar", "Entregar e fechar"];
+  var PHASE_OF = {"vendas":"Vender","orcamento":"Vender","pcp":"Planejar","estoque":"Abastecer","compras":"Abastecer","recebimento":"Abastecer","qualidade-entrada":"Abastecer","producao":"Fabricar","qualidade-saida":"Fabricar","expedicao":"Entregar e fechar","fiscal":"Entregar e fechar","controladoria":"Entregar e fechar"};
+  var STL = {ok: "Pronto", part: "Parcial", gap: "Falta fazer"};
+  var byId = {};
+  DATA.forEach(function (f) { byId[f.id] = f; });
+  var cur = null, step = 0;
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function list(a) { return (a || []).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join(""); }
+
+  if (BASE !== null) { var cl = document.getElementById("consulta"); cl.href = BASE + "/consulta"; cl.hidden = false; }
+  document.getElementById("tag").textContent ="Rascunho para revisão do time · " + DATA.length + " de " + ORDER.length + " fichas";
+
+  function drawMap() {
+    var html = "";
+    PHASES.forEach(function (ph) {
+      html += '<div class="phase"><h3>' + esc(ph) + "</h3>";
+      ORDER.filter(function (id) { return PHASE_OF[id] === ph; }).forEach(function (id) {
+        var f = byId[id];
+        if (f) {
+          html += '<button class="chip" type="button" data-id="' + id + '" aria-pressed="' + (cur === id) + '"><b>' + esc(f.nome) + "</b><span>" + esc(f.fraseMapa) + "</span></button>";
+        } else {
+          html += '<button class="chip" type="button" disabled><b>' + esc(NAMES[id]) + "</b><span>Ficha em breve</span></button>";
+        }
+      });
+      html += "</div>";
+    });
+    document.getElementById("phases").innerHTML = html;
+    document.getElementById("legend").textContent = DATA.length < ORDER.length ? "Setores tracejados ainda não têm ficha." : "Todos os setores têm ficha.";
+    Array.prototype.forEach.call(document.querySelectorAll(".chip[data-id]"), function (b) {
+      b.addEventListener("click", function () { open(b.getAttribute("data-id"), true); });
+    });
+  }
+
+  function drawFicha() {
+    var f = byId[cur], root = document.getElementById("ficha");
+    var idx = ORDER.indexOf(cur), prev = null, next = null, i;
+    for (i = idx - 1; i >= 0; i--) if (byId[ORDER[i]]) { prev = ORDER[i]; break; }
+    for (i = idx + 1; i < ORDER.length; i++) if (byId[ORDER[i]]) { next = ORDER[i]; break; }
+
+    var h = '<div class="ficha-head"><span class="sector">Ficha do setor · ' + esc(f.nome) + "</span><h2>" + esc(f.titulo) + "</h2><p>" + esc(f.resumo) + "</p></div>";
+
+    h += '<div class="sector-nav"><button type="button" id="sprev"' + (prev ? "" : " disabled") + ">&larr; " + esc(prev ? byId[prev].nome : "Início") + '</button><button type="button" id="snext"' + (next ? "" : " disabled") + ">" + esc(next ? byId[next].nome : "Fim") + " &rarr;</button></div>";
+
+    h += '<div><p class="label" style="margin-bottom:10px">Com quem ' + esc(f.nome) + ' conversa</p><div class="between"><div class="box"><b>Recebe de</b><ul>' + list(f.recebeDe) + '</ul></div><div class="arrow" aria-hidden="true">&rarr;</div><div class="box me"><b>Entrega a</b><ul>' + list(f.entregaA) + "</ul></div></div></div>";
+
+    h += '<div><p class="label" style="margin-bottom:10px">Quem atua nesta raia</p><div class="who">' + (f.atuam || []).map(function (a) { return "<div><b>" + esc(a.quem) + "</b><span>" + esc(a.papel) + "</span></div>"; }).join("") + "</div></div>";
+
+    h += '<div><div class="sec-head" style="margin-bottom:14px"><h2>Um pedido passando por aqui</h2><p>Pedido-exemplo (inventado): <b>100 flanges de aço carbono</b> para o <b>Cliente Exemplo S.A.</b> Clique nos passos ou use os botões.</p></div><div class="tour"><ol class="rail" id="rail" aria-label="Passos do pedido"></ol><article class="stage" id="stage"></article></div></div>';
+
+    var oc = f.outroCaminho;
+    if (oc) {
+      h += '<div class="other"><b>' + esc(oc.titulo) + "</b><p>" + esc(oc.texto) + '</p><div class="lane">' + (oc.etapas || []).map(function (e, k) {
+        var hot = e.charAt(0) === "*";
+        return (k ? '<span class="a">&rarr;</span>' : "") + '<span class="s' + (hot ? " hot" : "") + '">' + esc(hot ? e.slice(1) : e) + "</span>";
+      }).join("") + "</div>" + (oc.nota ? '<p class="note">' + esc(oc.nota) + "</p>" : "") + "</div>";
+    }
+
+    h += '<div><div class="sec-head" style="margin-bottom:14px"><h2>Regras que todo mundo precisa saber</h2></div><ul class="rules">' + (f.regras || []).map(function (r) { return "<li><b>" + esc(r.t) + "</b><span>" + esc(r.d) + "</span></li>"; }).join("") + "</ul></div>";
+
+    h += '<div id="falta"><div class="sec-head" style="margin-bottom:14px"><h2>Telas e o que falta</h2><p>Só o que existe no código hoje está marcado como pronto.</p></div><div class="scroller"><table><thead><tr><th>Tela</th><th>Rota</th><th>Quem usa</th><th>Situação</th></tr></thead><tbody>' + (f.telas || []).map(function (t) {
+      return "<tr><td>" + esc(t.nome) + '</td><td class="mono">' + esc(t.rota || "ainda não existe") + "</td><td>" + esc(t.quem) + '</td><td><span class="pill ' + t.st + '">' + STL[t.st] + "</span>" + (t.obs ? ' <span class="pill part">' + esc(t.obs) + "</span>" : "") + "</td></tr>";
+    }).join("") + "</tbody></table></div></div>";
+
+    h += '<div id="contratos"><div class="sec-head" style="margin-bottom:14px"><h2>Contratos desta raia</h2><p>Cada contrato ganha um cartão de cinco linhas no topo. O texto completo continua no vault, abaixo do cartão.</p></div><div class="contract">';
+    var c = f.cartao;
+    if (c) {
+      h += '<div class="card"><span class="label">Cartão de exemplo</span><h3>' + esc(c.id) + " · " + esc(c.titulo) + "</h3><dl><dt>Para que serve</dt><dd>" + esc(c.serve) + "</dd><dt>Quem usa</dt><dd>" + esc(c.quem) + '</dd><dt>Nós do fluxo</dt><dd><span class="mono">' + esc(c.nos) + '</span></dd><dt>Situação</dt><dd><span class="pill ' + c.st + '">' + esc(c.situacao) + "</span></dd><dt>O que muda para mim</dt><dd>" + esc(c.muda) + '</dd></dl><p class="foot">Texto integral: ' + esc(c.arquivo) + ".</p></div>";
+    }
+    h += '<div class="card"><span class="label">Contratos citados nesta raia</span><ul class="clist">' + (f.contratos || []).map(function (k) { return "<li><span>" + (BASE !== null && k.href ? '<a href="' + esc(BASE + k.href) + '">' + esc(k.titulo) + "</a>" : esc(k.titulo)) + '</span><span class="mono">' + esc(k.id) + (k.nos ? " · " + esc(k.nos) : "") + "</span></li>"; }).join("") + "</ul></div></div></div>";
+
+    if (BASE !== null && f.notas && f.notas.length) {
+      h += '<div><div class="sec-head" style="margin-bottom:14px"><h2>Detalhe técnico</h2><p>As notas completas desta raia, com código, estados e decisões. Para quem vai implementar.</p></div><div class="tech">' + f.notas.map(function (n) { return '<a href="' + esc(BASE + n.href) + '">' + esc(n.titulo) + " &rarr;</a>"; }).join("") + "</div></div>";
+    }
+
+    if (f.duvidas && f.duvidas.length) {
+      h += '<details class="doubts"><summary>Pontos para confirmar nesta ficha (' + f.duvidas.length + ")</summary><ul>" + list(f.duvidas) + "</ul></details>";
+    }
+    h += '<p class="note">Esta ficha resume cerca de ' + Number(f.palavrasFonte || 0).toLocaleString("pt-BR") + " palavras das notas do vault. O detalhe técnico continua nelas, como camada de consulta.</p>";
+
+    root.innerHTML = h;
+    document.getElementById("sprev").addEventListener("click", function () { if (prev) open(prev, true); });
+    document.getElementById("snext").addEventListener("click", function () { if (next) open(next, true); });
+    drawStep();
+  }
+
+  function drawStep() {
+    var f = byId[cur], steps = f.passos || [], s = steps[step];
+    var rail = document.getElementById("rail"), stage = document.getElementById("stage");
+    rail.innerHTML = "";
+    steps.forEach(function (p, i) {
+      var li = document.createElement("li"), b = document.createElement("button");
+      b.type = "button";
+      if (i === step) b.setAttribute("aria-current", "step");
+      b.innerHTML = '<span class="id">' + esc(p.id) + '</span><span class="rail-title">' + esc(p.t) + '</span><span class="dot ' + p.st + '" title="' + esc(p.stl) + '"></span>';
+      b.addEventListener("click", function () { step = i; drawStep(); });
+      li.appendChild(b); rail.appendChild(li);
+    });
+    var states = (f.estados || []).length ? '<div class="states" aria-label="Estado">' + f.estados.map(function (e) { return "<span" + (e === s.estado ? ' class="on"' : "") + ">" + esc(e) + "</span>"; }).join("") + "</div>" : "";
+    stage.innerHTML = '<div class="stage-head"><h3>' + esc(s.t) + '</h3><span class="pill ' + s.st + '">' + esc(s.stl) + "</span></div>" + states +
+      "<dl><dt>Quem</dt><dd>" + esc(s.quem) + "</dd><dt>Onde</dt><dd>" + esc(s.onde) + "</dd><dt>O que acontece</dt><dd>" + esc(s.o) + "</dd></dl>" +
+      '<div class="example"><span class="label">No pedido-exemplo</span>' + esc(s.ex) + "</div>" +
+      '<div class="nav"><button type="button" class="ghost" id="pprev"' + (step === 0 ? " disabled" : "") + '>Anterior</button><button type="button" id="pnext"' + (step === steps.length - 1 ? " disabled" : "") + ">Próximo passo</button></div>";
+    document.getElementById("pprev").addEventListener("click", function () { if (step > 0) { step--; drawStep(); } });
+    document.getElementById("pnext").addEventListener("click", function () { if (step < steps.length - 1) { step++; drawStep(); } });
+  }
+
+  function open(id, scroll) {
+    if (!byId[id]) return;
+    cur = id; step = 0;
+    try { history.replaceState(null, "", "#" + id); } catch (e) {}
+    drawMap(); drawFicha();
+    if (scroll) { var el = document.getElementById("ficha"); if (el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  }
+
+  // Dentro do site da documentação (mesma origem), segue o tema claro ou escuro do site.
+  try {
+    if (window.parent !== window) {
+      var pe = window.parent.document.documentElement;
+      var follow = function () { document.documentElement.setAttribute("data-theme", pe.classList.contains("dark") ? "dark" : "light"); };
+      follow();
+      new MutationObserver(follow).observe(pe, { attributes: true, attributeFilter: ["class"] });
+    }
+  } catch (e) {}
+
+  window.addEventListener("hashchange", function () {
+    var h = (location.hash || "").replace("#", "");
+    if (byId[h] && h !== cur) open(h, false);
+  });
+
+  var start = (location.hash || "").replace("#", "");
+  cur = byId[start] ? start : (byId.vendas ? "vendas" : DATA[0] && DATA[0].id);
+  drawMap();
+  if (cur) drawFicha();
+})();
+</script>

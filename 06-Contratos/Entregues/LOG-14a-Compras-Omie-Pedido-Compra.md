@@ -15,6 +15,11 @@ fontes: ["omie-elt-pipeline/src/omie/resources/pedidosCompras.ts", "omie-elt-pip
 
 > **Onde atua:** av-hub: banco · pipeline Omie
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Definiu dois fluxos entre Compras e o Omie: a pipeline puxa os pedidos de compra do Omie para um espelho só de leitura, e a OC criada no av-hub é enviada ao Omie como pedido.
+> **Quem é afetado:** Compradores emitem a OC no av-hub e ela vira pedido no Omie. A pipeline (`omie-elt-pipeline`) faz o trabalho de integração.
+> **Situação:** ✅ Os dois fluxos estão no código da pipeline; a fila de envio vem de `GET /compras/ordens/fila-omie`. ❓ O deploy da pipeline em produção não foi conferido.
+
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4 · **Dono:** Gustavo (DBA)
 >

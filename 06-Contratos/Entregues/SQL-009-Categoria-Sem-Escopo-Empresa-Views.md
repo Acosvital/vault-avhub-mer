@@ -26,6 +26,11 @@ criado_original: 2026-09-24
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** Corrige um bug em 4 views: o vínculo com `core.categorias` não filtrava a empresa. Como Mogi e Uberaba repetem códigos, pedidos e notas saíam duplicados e somavam em dobro.
+> **Quem é afetado:** Vendas, PCP e dashboards. No pedido 25970, o total errado de R$ 1.409.191,16 voltou a R$ 964.763,88.
+> **Situação:** ✅ Corrigido; conferido em produção em 06/10, só na `vw_vendas_planilha`. 🟡 As outras 3 views não foram testadas uma a uma. A divergência 53 x 311 linhas foi explicada.
+
 
 > Status: no código | em produção (verificado em 07/10/2026 pelo dump). Fonte das decisões: [[Registro-de-Decisoes|Registro-de-Decisoes-2026-10-07]].
 >

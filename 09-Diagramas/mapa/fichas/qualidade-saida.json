@@ -1,0 +1,198 @@
+{
+  "id": "qualidade-saida",
+  "nome": "Qualidade (saída)",
+  "fase": "Fabricar",
+  "fraseMapa": "Inspeciona o que a produção fez",
+  "titulo": "Qualidade de saída: a inspeção do que foi fabricado",
+  "resumo": "A inspeção de saída é um setor do roteiro, por parcial, que olha o que a produção concluiu. Aprovado, o item segue adiante; reprovado, abre uma divergência e o PCP decide o novo norte.",
+  "recebeDe": [
+    "Produção: a parcial concluída nos setores anteriores do roteiro"
+  ],
+  "entregaA": [
+    "Expedição: o item aprovado, hoje, pela próxima etapa do roteiro",
+    "Estoque: o item aprovado, como está decidido, ainda sem código",
+    "PCP: a divergência aberta quando o item é reprovado",
+    "Produção: o item em retrabalho, de volta ao setor que o PCP escolher (hoje, o anterior)"
+  ],
+  "atuam": [
+    {
+      "quem": "Inspetor da Qualidade",
+      "papel": "Recebe e inicia a parcial, e reprova ou segue com ela para a próxima etapa."
+    },
+    {
+      "quem": "PCP",
+      "papel": "Decide retrabalho ou reabertura de compra depois da reprovação, sem tela dedicada."
+    },
+    {
+      "quem": "Operador do setor anterior",
+      "papel": "Recebe o item que volta para retrabalho."
+    }
+  ],
+  "estados": [
+    "EM_ANDAMENTO",
+    "REPROVADO",
+    "EM_TRANSITO"
+  ],
+  "passos": [
+    {
+      "id": "Q7",
+      "t": "A parcial chega à inspeção",
+      "quem": "Inspetor da Qualidade",
+      "onde": "Inspeção de saída (/qualidade/inspecao-saida)",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "EM_TRANSITO",
+      "o": "A parcial concluída pela produção chega ao setor de Qualidade do roteiro. O inspetor precisa de permissão para atuar nesse setor.",
+      "ex": "As 100 flanges, depois da última etapa produtiva, entram na fila da inspeção de saída."
+    },
+    {
+      "id": "Q7",
+      "t": "Receber e iniciar a inspeção",
+      "quem": "Inspetor da Qualidade",
+      "onde": "Fila do setor (/movimentacoes/[setorId])",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "EM_ANDAMENTO",
+      "o": "O inspetor recebe a parcial e inicia a inspeção. Não existe tela de laudo ou checklist: a decisão é um clique e um motivo.",
+      "ex": "O inspetor assume as flanges e começa a conferência."
+    },
+    {
+      "id": "Q8",
+      "t": "Decisão: aprova?",
+      "quem": "Inspetor da Qualidade",
+      "onde": "Fila do setor (/movimentacoes/[setorId])",
+      "st": "part",
+      "stl": "Reprova parcial falta",
+      "estado": "",
+      "o": "Não há botão de aprovar. Aprovar, na prática, é mover a parcial para a próxima etapa do roteiro. A reprovação é uma ação própria, com motivo, e hoje vale para a parcial inteira. Decidido em 29/10 (N16-128): o inspetor poderá reprovar só a parte com problema, por exemplo 5 de 100 peças.",
+      "ex": "Se as flanges estiverem boas, o inspetor as move adiante. Se não, reprova a parcial toda com um motivo."
+    },
+    {
+      "id": "Q8 · E5",
+      "t": "Aprovado: para onde vai",
+      "quem": "Sistema",
+      "onde": "Sistema",
+      "st": "gap",
+      "stl": "Decidido: Estoque; código vai à Expedição",
+      "estado": "EM_TRANSITO",
+      "o": "A decisão é que o item aprovado volte ao Estoque como lote e saldo e saia por documento de retirada. No código de hoje, ele vai direto à Expedição. O contrato LOG-53 (proposta do Robert, aceita em 15/10) desenha isso: um lote de origem Produção por ordem e produto.",
+      "ex": "As flanges aprovadas deveriam entrar no Estoque como lote próprio e sair pela retirada. Hoje seguem direto para a Expedição."
+    },
+    {
+      "id": "Q8 · P6",
+      "t": "Reprovado: divergência e novo norte",
+      "quem": "Inspetor da Qualidade e PCP",
+      "onde": "Fila do setor (/movimentacoes/[setorId])",
+      "st": "part",
+      "stl": "Reprova, sem tela do novo norte",
+      "estado": "REPROVADO",
+      "o": "Reprovar grava o histórico e abre uma divergência de qualidade com o motivo. O item reprovado só tem duas saídas: falso alarme, que devolve ao andamento, ou retrabalho, que volta ao setor anterior. Decidido em 29/10 (N16-141): no retrabalho, o PCP escolhe a qual setor o item volta; hoje volta sempre ao setor anterior.",
+      "ex": "Se as flanges forem reprovadas, abre-se uma divergência e o PCP decide se foi falso alarme ou se a parcial volta ao setor anterior para retrabalho."
+    }
+  ],
+  "outroCaminho": {
+    "titulo": "E se o item for reprovado?",
+    "texto": "A reprovação é da parcial inteira. O PCP escolhe entre falso alarme e retrabalho. O retrabalho cria uma nova linha no setor anterior, marcada como retrabalho, e a divergência é fechada.",
+    "etapas": [
+      "Reprovação com motivo",
+      "PCP decide",
+      "Retrabalho no setor anterior ou volta ao andamento"
+    ],
+    "nota": "A reprovação de saída não gera RNC nem nota de devolução, porque a RNC é do lote comprado."
+  },
+  "regras": [
+    {
+      "t": "Qualidade no roteiro",
+      "d": "Todo roteiro de fabricação tem um setor de Qualidade antes da primeira Expedição; revenda não exige."
+    },
+    {
+      "t": "Reprovar só na Qualidade",
+      "d": "A reprovação só existe em setor de Qualidade e a partir da inspeção em andamento."
+    },
+    {
+      "t": "Reprovação abre divergência",
+      "d": "Reprovar grava histórico e abre uma divergência de qualidade com motivo."
+    },
+    {
+      "t": "Só duas saídas",
+      "d": "Item reprovado só pode voltar ao andamento por falso alarme ou ir a retrabalho."
+    },
+    {
+      "t": "Sem RNC na saída",
+      "d": "A RNC e a nota de devolução pertencem ao lote comprado, não à inspeção de saída."
+    },
+    {
+      "t": "Aprovado volta ao Estoque",
+      "d": "Pela decisão, o fabricado aprovado vira lote e saldo e sai por retirada, o que ainda não está no código."
+    },
+    {
+      "t": "Reprovação parcial",
+      "d": "Decidido em 29/10: o inspetor pode reprovar só a parte com problema. Hoje o código reprova a parcial inteira."
+    },
+    {
+      "t": "Sem laudo",
+      "d": "A inspeção de saída é um clique e um motivo, sem laudo nem checklist (decidido em 29/10)."
+    }
+  ],
+  "telas": [
+    {
+      "nome": "Inspeção de saída",
+      "rota": "/qualidade/inspecao-saida",
+      "quem": "Inspetor da Qualidade",
+      "st": "ok"
+    },
+    {
+      "nome": "Fila do setor Qualidade",
+      "rota": "/movimentacoes/[setorId]",
+      "quem": "Inspetor da Qualidade",
+      "st": "ok"
+    },
+    {
+      "nome": "Qualidade (índice)",
+      "rota": "/qualidade",
+      "quem": "Qualidade",
+      "st": "ok"
+    },
+    {
+      "nome": "Tela do novo norte para reprovação",
+      "rota": "sem rota",
+      "quem": "PCP",
+      "st": "gap"
+    }
+  ],
+  "contratos": [
+    {
+      "id": "LOG-53",
+      "titulo": "Ordem de Produção e lote do fabricado",
+      "nos": "P2 · F1 · Q7 · Q8 · E5"
+    },
+    {
+      "id": "API-005",
+      "titulo": "Status por item, lado do MES",
+      "nos": "F1 · X1 · Q7"
+    },
+    {
+      "id": "API-006",
+      "titulo": "Status por item, leitura no hub",
+      "nos": "F1 · X1 · Q7"
+    }
+  ],
+  "cartao": {
+    "id": "LOG-53",
+    "titulo": "Ordem de Produção e lote do fabricado",
+    "serve": "Define a Ordem de Produção de cada destino de fabricação e faz o fabricado aprovado virar lote e saldo no Estoque.",
+    "quem": "Qualidade (saída), Produção, Estoque e PCP. Dono: Robert.",
+    "nos": "P2 · F1 · Q7 · Q8 · E5",
+    "situacao": "Proposta aceita em 15/10, sem código",
+    "st": "gap",
+    "muda": "MES: tabela da ordem de produção, lote com origem Produção e impressão da ordem. Nada disso existe no código hoje; o SQL está escrito e validado em banco de teste.",
+    "arquivo": "06-Contratos/Ativos, nota LOG-53"
+  },
+  "palavrasFonte": 1179,
+  "duvidas": [
+    "Aprovado vai ao Estoque (LOG-53, proposta aceita em 15/10), mas o código ainda leva direto à Expedição.",
+    "O rótulo Aprovar na tela, na verdade, apenas desfaz uma reprovação; aprovar de fato é mover.",
+    "Ninguém conferiu o uso real da tela de inspeção de saída em ambiente.",
+    "Sucata e refugo da produção não têm regra de saldo e custo."
+  ]
+}

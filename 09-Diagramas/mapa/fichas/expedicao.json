@@ -1,0 +1,249 @@
+{
+  "id": "expedicao",
+  "nome": "Expedição",
+  "fase": "Entregar e fechar",
+  "fraseMapa": "Embala, monta a carga, entrega",
+  "titulo": "Expedição: da embalagem à entrega",
+  "resumo": "A Expedição recebe o que está pronto, embala, separa em pallets e registra a entrega ao cliente. Ela também decide se o pedido sai por partes ou inteiro, mas hoje essa escolha acontece na prática, sem campo no sistema.",
+  "recebeDe": [
+    "Estoque: a parcial pronta para embalar (hoje também chega da Qualidade, com o fabricado aprovado)",
+    "Qualidade: o fabricado aprovado, enquanto existirem as duas portas de entrada"
+  ],
+  "entregaA": [
+    "Fiscal: o aviso de que a carga está pronta para emitir a nota (hoje feito fora do sistema)",
+    "Cliente: a mercadoria entregue, com comprovante",
+    "Vendedor e PCP: o status final do pedido no acompanhamento"
+  ],
+  "atuam": [
+    {
+      "quem": "Operador da Embalagem",
+      "papel": "Recebe a parcial e lança os pallets com nome, peso e unidades."
+    },
+    {
+      "quem": "Operador da Logística",
+      "papel": "Confirma a entrega e anexa comprovante, canhoto ou nota."
+    },
+    {
+      "quem": "PCP",
+      "papel": "Acompanha o pedido, as embalagens e as entregas no detalhe do pedido."
+    },
+    {
+      "quem": "Vendedor",
+      "papel": "Acompanha o status final no av-hub."
+    },
+    {
+      "quem": "Cliente",
+      "papel": "Recebe a mercadoria, fora do sistema."
+    }
+  ],
+  "estados": [
+    "RECEBIDO",
+    "EM_ANDAMENTO",
+    "CONCLUIDO",
+    "ENTREGUE"
+  ],
+  "passos": [
+    {
+      "id": "X1",
+      "t": "Embalagem recebe a parcial",
+      "quem": "Operador da Embalagem",
+      "onde": "Expedição, /logistica/expedicao (fila do setor)",
+      "st": "part",
+      "stl": "Tela pronta; baixa vai para a retirada",
+      "estado": "RECEBIDO",
+      "o": "A parcial pronta entra na fila da Embalagem e o operador confirma o recebimento. Hoje a baixa do saldo do Estoque acontece neste momento. Decidido (14/10 e 29/10, N16-122): a baixa passa para a retirada confirmada pelo Estoque, e a Embalagem só recebe a parcela depois dela. O desenho está no contrato LOG-54 (proposta do Robert, sem código).",
+      "ex": "As 100 flanges do Cliente Exemplo S.A. (ou o lote que já ficou pronto) chegam à fila e a Embalagem confirma que recebeu."
+    },
+    {
+      "id": "X1",
+      "t": "Monta os pallets",
+      "quem": "Operador da Embalagem",
+      "onde": "Expedição, /movimentacoes/[setor] (janela de pallets)",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "EM_ANDAMENTO",
+      "o": "O operador cadastra cada pallet com nome, peso e unidades. A soma das unidades não pode passar da quantidade da parcial; soma menor é aceita, como embalagem incompleta. Depois a parcial passa da Embalagem para a Logística.",
+      "ex": "As flanges são distribuídas em pallets e cada um é registrado. Se só 60 estiverem embaladas, a soma fica em 60 e isso é válido."
+    },
+    {
+      "id": "X2",
+      "t": "Decide parcial ou integral",
+      "quem": "Expedição (decisão humana)",
+      "onde": "Fora do sistema",
+      "st": "part",
+      "stl": "Decidido; falta o campo na tela",
+      "estado": "",
+      "o": "Não existe campo nem tela para escolher. A entrega parcial é permitida por padrão e o integral é a prática de esperar os itens. Decidido em 29/10 (N16-130 e N16-131): quem escolhe é o vendedor, pela marca \"pode faturar em partes\" do pedido. Se um item do pedido integral nunca chega, a Expedição ou o PCP decide manualmente mudar para parcial, sem prazo automático.",
+      "ex": "A Expedição decide se manda as flanges prontas já ou espera o restante do pedido do Cliente Exemplo S.A."
+    },
+    {
+      "id": "X3",
+      "t": "Consolida a carga",
+      "quem": "Expedição",
+      "onde": "Ainda não existe tela",
+      "st": "gap",
+      "stl": "Sem código",
+      "estado": "",
+      "o": "Seria a visão por pedido, a espera dos itens e o romaneio da carga. Nenhuma tela ou cadastro de carga existe hoje.",
+      "ex": "Se o pedido sair inteiro, as flanges seriam reunidas com os outros itens numa só carga. Hoje isso é combinado fora do sistema."
+    },
+    {
+      "id": "X4",
+      "t": "Define o transporte",
+      "quem": "Logística",
+      "onde": "Ainda não existe tela",
+      "st": "gap",
+      "stl": "Sem código",
+      "estado": "",
+      "o": "Transporte e roteiro, com frota própria ou terceirizada, ainda não têm tela nem cadastro de veículo ou transportadora.",
+      "ex": "Quem leva as flanges ao Cliente Exemplo S.A. é combinado fora do sistema."
+    },
+    {
+      "id": "X4",
+      "t": "Confirma a entrega",
+      "quem": "Operador da Logística",
+      "onde": "Expedição, /movimentacoes/[setor] (confirmar entrega)",
+      "st": "ok",
+      "stl": "Tela pronta",
+      "estado": "CONCLUIDO",
+      "o": "A Logística informa a quantidade entregue e anexa o comprovante, o canhoto ou a nota. A entrega é livre, item a item e por quantidade, e só vale para parcial concluída, até o que ainda está pendente. O número da nota é um texto digitado.",
+      "ex": "A Logística registra a entrega das flanges e anexa o canhoto assinado pelo Cliente Exemplo S.A."
+    },
+    {
+      "id": "X4",
+      "t": "Pedido fecha",
+      "quem": "Sistema",
+      "onde": "Sistema",
+      "st": "ok",
+      "stl": "Já funciona",
+      "estado": "ENTREGUE",
+      "o": "O pedido só vira entregue quando o pendente de todos os itens ativos zera e não resta parcial ativa. A segunda condição existe porque um retrabalho pode deixar parcial ativa depois de uma entrega.",
+      "ex": "Quando as 100 flanges e os demais itens do pedido estiverem entregues, o pedido do Cliente Exemplo S.A. passa a entregue."
+    },
+    {
+      "id": "X4",
+      "t": "Avisa o Faturamento",
+      "quem": "Expedição ou Logística",
+      "onde": "Fora do sistema",
+      "st": "gap",
+      "stl": "Aviso fora do sistema",
+      "estado": "",
+      "o": "O sistema nunca emite nota fiscal. A Expedição avisa o faturista por fora e o Omie emite. A fila de sinalização no sistema está desenhada, sem código. Decidido em 29/10 (N16-132): quem avisa é a Logística, ao fechar a carga. Isso depende da tela de consolidar a carga (X3), que não existe.",
+      "ex": "A Expedição avisa que as flanges estão prontas e o Omie emite a nota do Cliente Exemplo S.A."
+    }
+  ],
+  "outroCaminho": {
+    "titulo": "E se o pedido sair em partes?",
+    "texto": "A entrega parcial é permitida por padrão. Cada parcial concluída pode ser entregue na quantidade que estiver pendente, e o pedido só fecha quando tudo foi entregue.",
+    "etapas": [
+      "Parcial pronta",
+      "Entrega da quantidade pendente",
+      "Outra parcial, outra entrega",
+      "Pedido entregue quando zera o pendente"
+    ],
+    "nota": "Falta decidir se o integral é opção do vendedor, regra do cliente ou decisão da Expedição, e qual o prazo máximo de espera."
+  },
+  "regras": [
+    {
+      "t": "Os dois últimos setores",
+      "d": "Embalagem e Logística de saída são os dois últimos setores de todo pedido, e os pallets valem em qualquer um deles."
+    },
+    {
+      "t": "Pallets e quantidade",
+      "d": "A soma das unidades dos pallets não pode passar da quantidade da parcial; soma menor é válida."
+    },
+    {
+      "t": "Peso só na Embalagem",
+      "d": "O peso dos pallets só pode ser editado no setor de expedição; nos seguintes ele viaja com a peça, só para leitura."
+    },
+    {
+      "t": "Entrega livre",
+      "d": "A entrega é item a item e por quantidade, sem trava de pedido inteiro pronto."
+    },
+    {
+      "t": "Quando o pedido fecha",
+      "d": "O pedido só vira entregue quando o pendente de todos os itens ativos zera e não resta parcial ativa."
+    },
+    {
+      "t": "Nota é do Omie",
+      "d": "O sistema nunca emite nota fiscal; guarda só o número digitado na entrega."
+    },
+    {
+      "t": "Despacho no Estoque",
+      "d": "Pela decisão de 14/10, a baixa do saldo passa a acontecer na retirada registrada no Estoque, e a Expedição terá uma só porta de entrada."
+    }
+  ],
+  "telas": [
+    {
+      "nome": "Expedição (Embalagem e Logística)",
+      "rota": "/logistica/expedicao",
+      "quem": "Operadores da Embalagem e da Logística",
+      "st": "ok"
+    },
+    {
+      "nome": "Fila do setor",
+      "rota": "/movimentacoes/[setor]",
+      "quem": "Operadores da Embalagem e da Logística",
+      "st": "ok"
+    },
+    {
+      "nome": "Pallets (editar ou ver)",
+      "rota": "janela na fila do setor",
+      "quem": "Operador da Embalagem",
+      "st": "ok"
+    },
+    {
+      "nome": "Confirmar entrega",
+      "rota": "janela na fila do setor",
+      "quem": "Operador da Logística",
+      "st": "ok"
+    },
+    {
+      "nome": "Acompanhamento dos Pedidos, seção Embalagens",
+      "rota": "/ordens-producao/[id]",
+      "quem": "PCP",
+      "st": "ok"
+    },
+    {
+      "nome": "Consolidação de carga",
+      "rota": "ainda sem rota",
+      "quem": "Expedição",
+      "st": "gap"
+    },
+    {
+      "nome": "Transporte e roteiro",
+      "rota": "ainda sem rota",
+      "quem": "Logística",
+      "st": "gap"
+    }
+  ],
+  "contratos": [
+    {
+      "id": "LOG-54",
+      "titulo": "Documento de retirada e baixa na retirada",
+      "nos": "E6 · X1 · F1"
+    },
+    {
+      "id": "API-005",
+      "titulo": "Status do item para o av-hub",
+      "nos": "X1 · X4"
+    }
+  ],
+  "cartao": {
+    "id": "API-005",
+    "titulo": "Status do item na integração com o MES",
+    "serve": "Leva a etapa de cada item do MES para o av-hub, incluindo Embalagem e Pronto para expedição.",
+    "quem": "Vendedor (acompanha no av-hub) e quem desenvolve a integração.",
+    "nos": "X1 · X4",
+    "situacao": "Feito no código",
+    "st": "ok",
+    "muda": "Front: o cartão de etapas do pedido mostra os rótulos de expedição. MES: nenhuma mudança prevista; a Expedição não tem outro contrato com o av-hub.",
+    "arquivo": "06-Contratos/Entregues, nota API-005"
+  },
+  "palavrasFonte": 1662,
+  "duvidas": [
+    "Documento de retirada: quem pede e quem confirma já foi decidido (29/10). Seguem abertos o que o documento imprime, se ele junta parcelas de pedidos diferentes (Q6, do Robert) e se há conferência física dupla.",
+    "Frota própria e terceirizada usam o mesmo fluxo de carga? A nota não responde.",
+    "O fluxo mestre marca X1 como pronto e X2 a X4 como parciais; a nota marca X3 e X4 como sem código. O comprovante de entrega existe, o transporte não."
+  ]
+}

@@ -26,6 +26,11 @@ criado_original: 2026-10-13
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
 
+> [!abstract] Resumo em linguagem natural
+> **O que é:** A rota que informa as permissões do usuário (`GET /me/permissoes`) passou a devolver todos os seus vínculos de vendedor, com nome, situação ativo e origem (próprio, titular ou diligenciado). Evita várias chamadas do front.
+> **Quem é afetado:** Gustavo (DBA), que mexeu no banco, e Nathan, no front. O usuário passa a ver as telas de vendedor corretas.
+> **Situação:** ✅ Feito no banco e repassado pela API. 🟡 Segue aberta a pergunta de desenho sobre o que vem quando o escopo é "todos".
+
 
 > Status: proposta | **só leitura de código** (13/10/2026):[^c1] `api-acos-vital` (`origin/develop` `80581d0`), `00 - HUB` (`lib/api/mePermissoes.ts`) e este vault. Produção e o corpo de `auth.fn_me_permissoes` **não foram vistos** (a função é de banco e não está no repositório). Tudo marcado 🟡 é inferência; 🔴 precisa do DBA.
 
