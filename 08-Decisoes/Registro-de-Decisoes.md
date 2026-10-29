@@ -11,7 +11,7 @@ fontes: [v1 00-Indice/Registro-de-Decisoes-2026-10-07 (#1 a #99), v1 Decisoes-Ch
 
 **Em uma frase:** esta é a lista única de tudo o que a equipe já decidiu sobre o Aços Hub, uma decisão por linha, com data, quem decidiu e o que ela substitui; para uma visão rápida, comece pelas "Decisões mais importantes em linguagem simples" abaixo.
 
-Lista única de decisões do projeto: **N16-01 a N16-143** (16 a 29/10), **N14-01 a N14-33** (14 e 15/10), **DEC-1 a DEC-12**, **EN-01 a EN-07**, **EC-01 a EC-08** e **#1 a #106** do registro de 07/10. Cada linha tem data, dono, selo e o texto completo da decisão. Decisões superadas ou ajustadas trazem a nota na coluna "Superada". Prefixos: DEC = decisão com prazo; EN = encaixe do Estoque e da Revenda no PCP; EC = encaixe do circuito de compra, da Qualidade e da baixa; `#n` = item do registro de 07/10. Selos: 📝 decidido, 🟡 proposta adotada, 🔴 aberto, ✅ conferido no código, ❓ não conferido em produção ([[Regras-do-Vault]]). Tarefas: [[Backlog-por-Frente]]. Contradições do v1: [[Contradicoes-Resolvidas]].
+Lista única de decisões do projeto: **N16-01 a N16-144** (16 a 29/10), **N14-01 a N14-33** (14 e 15/10), **DEC-1 a DEC-12**, **EN-01 a EN-07**, **EC-01 a EC-08** e **#1 a #106** do registro de 07/10. Cada linha tem data, dono, selo e o texto completo da decisão. Decisões superadas ou ajustadas trazem a nota na coluna "Superada". Prefixos: DEC = decisão com prazo; EN = encaixe do Estoque e da Revenda no PCP; EC = encaixe do circuito de compra, da Qualidade e da baixa; `#n` = item do registro de 07/10. Selos: 📝 decidido, 🟡 proposta adotada, 🔴 aberto, ✅ conferido no código, ❓ não conferido em produção ([[Regras-do-Vault]]). Tarefas: [[Backlog-por-Frente]]. Contradições do v1: [[Contradicoes-Resolvidas]].
 
 **Precedência:** código, dumps, este registro, [[00-Fluxo-Mestre-0b]], v1. Em conflito entre dois itens, vale o de data mais recente.
 
@@ -56,6 +56,7 @@ Resumo das decisões vigentes que mais pesam, agrupadas por assunto. O ID entre 
 - O custo real e a compra acima do valor valem para o pedido que nasce de proposta e para o digitado direto no Omie (N16-102).
 - O pedido digitado no Omie tem estimativa preenchida pelo vendedor, como hoje no Simulador de Comissão (N16-104).
 - A comissão nova fica no schema `core_comissao`, separada do `core_comissionamento` atual (N16-143).
+- O imposto da linha da OC vem da parte de compras do pedido quando a OC é de pedido de venda ou recompra; para estoque ou uso interno, o Comprador digita. Uma linha por pedido, frete rateado pelo valor (N16-144).
 
 **Menu e telas**
 
@@ -88,9 +89,9 @@ Cada linha lista os IDs do assunto, para você ir direto às linhas da tabela (C
 - **Datas e previsão de faturamento:** N16-86, N16-88, N16-91, N16-96, N16-97, N16-104, #105, #106.
 - **Faturamento em partes e pedido sequencial:** N16-89, N16-91, N16-92, N16-93, N16-94, N16-97, N16-99, N16-100, N16-101, N16-130.
 - **Orçamento e base de preço (produto, fornecedor, score):** N16-06, N16-07, N16-16, N16-32, N16-41, N16-52, N16-54, N16-55, N16-56, N16-58, N16-59, N16-72, N16-104, N16-107, N16-108, N16-114, N14-02, #39.
-- **Compras e OC (emissão, aprovação, requisição):** N14-03, N14-08, N14-14, N14-21, N14-23, N14-24, N14-25, N14-28, N14-29, N14-30, N14-33, DEC-3, N16-08, N16-123, #50, #50b, #51, EC-04.
+- **Compras e OC (emissão, aprovação, requisição):** N14-03, N14-08, N14-14, N14-21, N14-23, N14-24, N14-25, N14-28, N14-29, N14-30, N14-33, DEC-3, N16-08, N16-123, N16-144, #50, #50b, #51, EC-04.
 - **Compra acima do valor da proposta:** N16-17, N16-18, N16-60, N16-61, N16-62, N16-63, N16-64, N16-65, N16-66, N16-67, N16-73, N16-76, N16-102.
-- **Custo real (por evento, NF de entrada, imposto da OC):** N16-09, N16-20, N16-22, N16-23, N16-37, N16-38, N16-40, N16-48, N16-53, N16-57, N16-86, N16-102.
+- **Custo real (por evento, NF de entrada, imposto da OC):** N16-09, N16-20, N16-22, N16-23, N16-37, N16-38, N16-40, N16-48, N16-53, N16-57, N16-86, N16-102, N16-144.
 - **Custo do lote e custo no Estoque:** #93, #94, #95, #97, #98, #99, N16-37, DEC-12.
 - **Comissão (cálculo, Controladoria, relatórios):** N16-10, N16-11, N16-12, N16-21, N16-34, N16-35, N16-39, N16-42, N16-43, N16-44, N16-45, N16-46, N16-47, N16-48, N16-49, N16-50, N16-51, N16-74, N16-77, N16-78, N16-103, N16-104, N16-105, N16-143, #90.
 - **Unidades e contas Omie:** N16-79, N16-80, N16-81, N16-83, N16-85, N14-31, DEC-1, EN-07, #31c.
@@ -258,6 +259,7 @@ Tomadas pelo Nathan entre 16 e 26/10/2026, com respostas da Controladoria (Miche
 | N16-141 | **Retrabalho: o PCP escolhe o setor de volta.** Nathan, 29/10. Deixa de valer a regra de voltar sempre ao setor imediatamente anterior (`retrabalho`, nota [[07-Producao-e-Roteiro]]); exige uma tela de escolha na decisão do novo norte (`P6`) | 29/10/2026 | Nathan | 📝, 🔴 sem código | regra 8 da nota 07 (volta ao setor anterior) |
 | N16-142 | **Pedidos anteriores à data de corte da liberação ficam fora do MES e terminam no sistema antigo.** Nathan, 29/10. Responde a pergunta aberta da nota 02 (erro 404 nos itens); falta só uma mensagem clara em vez do erro | 29/10/2026 | Nathan | 📝, 🔴 mensagem do erro | |
 | N16-143 | **A comissão nova fica em `core_comissao`, schema próprio.** Nathan, 29/10. Fecha o "schema de comissão a decidir" da N16-116: proposta, pedido e custo do fluxo vão para `core_vendas_faturamento`, e a comissão nova (já modelada e testada) continua em `core_comissao`, separada do `core_comissionamento` atual | 29/10/2026 | Nathan | 📝 | fecha parte da N16-116 |
+| N16-144 | **Imposto por item da OC: vem do pedido quando a OC é de pedido; digitado quando é para outros produtos.** Nathan, 29/10 (BL-053, PS-014). (1) A fonte depende da finalidade da requisição de cada linha (N14-33): `pedidos_venda` ou `recompra` trazem o imposto da **parte de compras** do item do pedido (IPI, ICMS a recuperar, ST e DIFAL que o vendedor preencheu, N16-38 e N16-106), nunca o imposto de venda; `estoque` ou `uso_interno`, o Comprador digita. O Comprador pode editar o que veio do pedido antes de aprovar, e a edição não volta ao pedido. (2) OC que atende vários pedidos com o mesmo produto tem **uma linha por pedido**, cada uma com o seu imposto, sem média (N16-20, N16-94). (3) Pedido sem a parte de compras preenchida não trava a OC: os campos vêm vazios, o Comprador digita e a linha fica marcada como imposto digitado. (4) O frete continua no cabeçalho e é **rateado pelas linhas na proporção do valor** de cada uma (`frete_unit`). Contrato: [[SQL-020-Imposto-por-Item-da-OC]]. Em aberto: a fórmula do custo com imposto (Controladoria) e a coluna de DIFAL no `lote_custo` (MES) | 29/10/2026 | Nathan | 📝, 🔴 sem código | complementa N16-38 (OC sem pedido) e N14-23 (fonte do imposto) |
 
 ## Decisões de 14/10/2026 (Nathan)
 

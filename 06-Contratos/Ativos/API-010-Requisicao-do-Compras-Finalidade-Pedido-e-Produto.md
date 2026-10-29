@@ -3,7 +3,7 @@ id: API-010
 aliases: ["Contrato 010", "010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto"]
 tags: [contrato, contrato-api, compras, requisicao, av-hub, sql]
 criado: 2026-10-15
-atualizado: 2026-10-26
+atualizado: 2026-10-29
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
@@ -19,7 +19,7 @@ criado_original: 2026-10-15
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Muda a requisição de compra do av-hub: ela passa a dizer para que se compra (pedido de venda, recompra, estoque ou uso interno), com produto sempre do cadastro e tudo na mesma unidade.
 > **Quem é afetado:** Compras, que cria a requisição com mais regras. Só a requisição com pedido de venda (PV) chega ao MES (sistema de produção).
-> **Situação:** Parcial. Banco e API em produção desde 20/10, segundo o Gustavo (não conferido); front do Nathan pronto (✅). Perguntas sobre a HRM e o setor do uso interno seguem abertas (🟡 🔴).
+> **Situação:** Parcial. Banco e API em produção desde 20/10, segundo o Gustavo (não conferido); front do Nathan pronto e API testada ponta a ponta na api-test em 29/10 (✅). Perguntas sobre a HRM e o setor do uso interno seguem abertas (🟡 🔴).
 > **Exemplo:** Finalidade "pedidos_venda" sem número de pedido de venda é recusada com erro 400.
 
 > [!info] Situação em 26/10/2026
@@ -27,9 +27,10 @@ criado_original: 2026-10-15
 >
 > - ✅ **Migration `api010` em produção desde 20/10/2026** (entrou na MEGA de 19/10), informado pelo Gustavo em 26/10; não conferi no banco.
 > - ✅ **Front pronto (HUB PR #209):** a "Nova requisição" é uma tela própria (`/compras/requisicoes/nova`) e já envia `finalidade`, `numero_pedido_venda` e `material` = `codigo_produto` do cadastro.
-> - ✅ **A API atende** (conferido na `develop` de `api-acos-vital`, 21/10/2026): `requisicoes_compra.model.js` tem `finalidade` e `numero_pedido_venda`; a rota valida e responde `FINALIDADE_INVALIDA`, `PEDIDO_VENDA_INEXISTENTE` e `PRODUTO_INEXISTENTE` (`requisicoes_compra.route.js:82,124,497,508`).
+> - ✅ **A API atende** (conferido na `develop` de `api-acos-vital`, 21/10/2026): `requisicoes_compra.model.js` tem `finalidade` e `numero_pedido_venda`; a rota valida e responde `FINALIDADE_INVALIDA`, `PEDIDO_VENDA_INEXISTENTE` e `PRODUTO_INEXISTENTE` (`requisicoes_compra.route.js:82,124,500,511`).
+> - ✅ **Testado na `api-test` (29/10/2026, Nathan):** a "Nova requisição" criou a REQ-000040 com `finalidade = pedidos_venda` e `numero_pedido_venda = 27605`, e a API devolveu os dois campos gravados. Era uma requisição de teste e foi cancelada em seguida.
 > - ✅ (26/10) A migration `api010` e a trava de unidade estão em produção desde 20/10, segundo o Gustavo.
-> - ✅ **SQL escrito e testado em banco descartável** (PostgreSQL 18, schema restaurado de `Dump Avhub (Esqueleto).sql`, tabelas vazias): [[0001-requisicoes-finalidade.sql]] em `API-010-anexos/`. Testes feitos: o PUT do MES grava a finalidade (`pedidos_venda` com pedido, `estoque` sem); os dois `CHECK` recusam `estoque` com pedido, `pedidos_venda` sem pedido e finalidade inválida; a trava do vínculo da OC aceita a mesma unidade e a unidade que compra por ela, e recusa outra. **Não testado:** o código da rota (ainda não existe) e uma carga real.
+> - ✅ **SQL escrito e testado em banco descartável** (PostgreSQL 18, schema restaurado de `Dump Avhub (Esqueleto).sql`, tabelas vazias): [[0001-requisicoes-finalidade.sql]] em `API-010-anexos/`. Testes feitos: o PUT do MES grava a finalidade (`pedidos_venda` com pedido, `estoque` sem); os dois `CHECK` recusam `estoque` com pedido, `pedidos_venda` sem pedido e finalidade inválida; a trava do vínculo da OC aceita a mesma unidade e a unidade que compra por ela, e recusa outra. **Não testado nesse banco descartável:** o código da rota e uma carga real. O código da rota existe na `develop` e foi testado ponta a ponta na `api-test` em 29/10/2026 (ver o item abaixo).
 > - A migration se chama **`api010`** (padrão `apiNNN`, como `api004` e `api007`).
 >
 > Este contrato **absorve a Parte 1** do [[API-009-Referencia-Requisicao-Hub-Integracao-MES]]; em caso de diferença, vale este. Selos em [[Regras-do-Vault]].

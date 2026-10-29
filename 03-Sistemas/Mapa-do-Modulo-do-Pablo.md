@@ -89,7 +89,7 @@ Caminhos abaixo são relativos a `av-hub\api-comercial\` quando não dizem o con
 |---|---|---|
 | O que é | Backend Express 5, TypeScript, Prisma 7, PostgreSQL schema `core_comercial`, porta 3001 | ✅ `README.md:3-7`, `src/app.ts` |
 | Tamanho | 30 models, 24 enums, 13 migrations, cerca de 91 handlers | ✅ `prisma/models/*.prisma`, `prisma/migrations/` |
-| Situação | API só de teste, não será publicada; o Pablo migra tudo para a `api-acos-vital`; o Gustavo revisa e cria no banco | 📝 N14-15, N16-15 |
+| Situação | API só de teste, não será publicada; o Robert migra o que for útil para a `api-acos-vital` (o Pablo acompanha, N16-117); o Gustavo revisa e cria no banco | 📝 N14-15, N16-15, N16-117 |
 | Banco publicado | Não existe `core_comercial` no dump do hub | ✅ `Dump Avhub (Esqueleto).sql` (só há `core_comissionamento`, `core_compras`, `core_vendas_faturamento` e outros; nenhum `CREATE SCHEMA core_comercial`) |
 | Permissão | 100% do RBAC do hub: telas × ações e escopo de vendedores viram "capacidades" | ✅ `src/domain/permissoes/capacidades.ts:8-19,64-84` |
 | Front | Telas em `app/(protected)/vendas`, `orcamento` e `compras/historico-compras`; BFF em `app/api/comercial/[...rota]/route.ts` | ✅ |
