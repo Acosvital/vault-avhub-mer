@@ -77,6 +77,6 @@ Transversais, na versão técnica:
 | Integração requisição MES ↔ av-hub (LOG-34, LOG-35) | ✅ ida e volta; sob demanda e polling de 5 min ([[Integracao-AvHub-MES]]) |
 | Status por item (API-005, API-006) | ✅ |
 | Torre de Fluxo (LOG-46) | 🟡 API e jobs no av-hub; o MES não publica `/fluxo/eventos`; o HUB não tem tela |
-| Custo por item (API-008, LOG-47) | 🟡 `lote_custo` existe; faltam `GET /itens/custo` e custo da OC; a migration 047b não está no dump. O Ciclo 1 segue sem imposto; o modelo com impostos foi desenhado em 29/10 (N16-144); falta código e a fórmula com a Controladoria |
+| Custo por item (API-008, LOG-47) | 🟡 `lote_custo` existe; faltam `GET /itens/custo` e custo da OC; a migration 047b não está no dump. O Ciclo 1 segue sem imposto; o modelo com impostos foi desenhado em 29/10 (N16-144); falta código; a fórmula do custo com imposto segue o motor do comissionamento, e cada setor confere as mudanças na implementação |
 | Cadastros TESTE no Omie | 🟡 O Omie não tem ambiente de teste; os cadastros TESTE do Nathan entram na pipeline e nos relatórios: filtrar ao conferir (BL-055) |
 | Pendências cadastrais | Perfil CCP e vínculo de usuários à Gerência de Compras: serão criados em breve, assunto cadastral simples (Nathan e Gustavo), sem bloqueio de desenho |
