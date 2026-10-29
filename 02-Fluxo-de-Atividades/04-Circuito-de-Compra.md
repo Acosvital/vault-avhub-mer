@@ -9,6 +9,82 @@ fontes: [00-Fluxo-Mestre-0b, Integracao-AvHub-MES (INT-02, INT-03, INT-04), LOG-
 
 # Circuito de compra (P3, C0 a C5, FN1)
 
+**Em uma frase:** transforma a necessidade de um material em uma ordem de compra (OC) aprovada, enviada ao Omie e acompanhada até o fornecedor entregar.
+
+O MES (sistema de chão de fábrica) pede e depois só lê. O av-hub cota, aprova, emite e acompanha. Preço, fornecedor e condição ficam no av-hub. O MES recebe só os marcos do andamento.
+
+Nós do [[00-Fluxo-Mestre-0b]]: `P3`, `C0` a `C5`, `FN1`. Fecha em `FN1 → R0` ([[05-Recebimento]]). Selos em [[Regras-do-Vault]].
+
+> [!info] Decisões de 16 a 29/10/2026 (fluxo aprovado em 26/10)
+> - Antes de cotar, Compras confere o que o vendedor preencheu na proposta (`C6`).
+> - Compras pode seguir o fornecedor do vendedor ou usar o valor correto (`C7`).
+> - Se comprar acima do custo do vendedor, ele aprova ou reprova em Meus Pedidos (`C8`).
+> - Não há trava entre quem emite e quem aprova a OC (N16-123).
+> - O Compras será avisado da recompra por RNC (N16-127) e da reabertura do recebimento (N16-137).
+> - Tudo isso exige contrato novo entre MES e hub. Detalhe completo na seção técnica e em [[11-Proposta-e-Pedido-de-Venda]].
+
+## Como funciona, passo a passo
+
+1. **Nasce a requisição.** O PCP (planejamento e controle da produção) pede o material do pedido pelo MES (`P3`). O Compras também pode criar uma requisição própria no av-hub, sem pedido de venda (`C0`).
+2. **O MES envia ao av-hub.** Cada item da requisição do PCP vai para o av-hub. Se o av-hub cair, a fila guarda e nada se perde (`P3`).
+3. **Compras confere a parte do vendedor.** Quando o pedido vem de uma proposta, o sistema puxa fornecedor, impostos e frete que o vendedor preencheu. O comprador confere 📝 (`C6`).
+4. **O comprador cota e negocia.** As duas origens caem na mesma caixa. A cotação acontece fora do sistema, e o comprador marca a requisição como em cotação (`C1`).
+5. **Valor correto e aviso ao vendedor.** Compras segue o fornecedor do vendedor ou usa o valor correto. Se comprar acima do custo da proposta, o vendedor aprova ou reprova 📝 (`C7`, `C8`).
+6. **Acima de R$ 30 mil, o Gerente aprova.** Até esse valor a OC sai sozinha, sem aprovação. Acima, espera o Gerente de Compras (`C2`, `C3`).
+7. **O comprador emite a OC.** Ela leva fornecedor, frete CIF ou FOB, moeda e valor por item. A requisição passa a "atendida". A integração envia a OC ao Omie por fila (`C4`).
+8. **O CCP acompanha o fornecedor.** Registra confirmação, previsão, despacho e ocorrências. O MES mostra esses marcos só para leitura (`C5`).
+9. **O fornecedor entrega.** Entrega no frete CIF ou libera para coleta no FOB. O sistema não envia a OC ao fornecedor: o comprador manda PDF ou e-mail por fora (`FN1`).
+10. **A OC aprovada entra nos esperados da doca.** Dali o trabalho passa ao [[05-Recebimento]] (`R0`).
+
+## Exemplo
+
+O PCP vê que faltam os materiais para os 100 flanges do Cliente Exemplo S.A. e abre a requisição no MES. Ela aparece na caixa do Compras.
+
+O comprador negocia com fornecedores por telefone e e-mail e emite a OC. Se a compra passar de R$ 30 mil, a OC espera o Gerente de Compras. Se ficar abaixo, sai direto e segue ao Omie.
+
+O comprador manda o PDF ao fornecedor por fora. O CCP anota a confirmação e a previsão de chegada, e o PCP acompanha pelo MES. Os 100 flanges chegam à doca com a nota fiscal.
+
+## Quem atua
+
+| Quem | O que faz |
+|---|---|
+| PCP | Abre no MES a requisição do material do pedido |
+| Comprador | Cota, negocia e emite a OC; até R$ 30 mil sem aprovação |
+| Gerente de Compras | Aprova a OC acima de R$ 30 mil |
+| CCP (acompanhamento de compras) | Acompanha o fornecedor: confirmação, previsão, despacho e ocorrência |
+| Fornecedor | Recebe a OC e entrega; não acessa o sistema |
+| Doca | Registra a chegada com a nota fiscal |
+
+## Regras que valem
+
+- Existem duas origens de requisição, mas uma caixa só: PCP e Compras são tratados igual.
+- Até R$ 30 mil, o comprador emite livre. Acima, o Gerente de Compras aprova.
+- A Diretoria não aprova.
+- O limite de R$ 30 mil é por unidade e provisório. Endurece depois da conversa com Compras.
+- O Gerente de Compras pode aprovar a OC que ele mesmo emitiu (N16-123).
+- Cancelar requisição exige motivo de 3 a 500 caracteres.
+- Requisição que já tem OC não se cancela pelo MES.
+- Compras · CCP no MES é só leitura.
+- A OC aprovada vai ao Omie por fila. OC com erro sai da fila e só volta se alguém reenviar.
+- OC cancelada devolve todas as requisições dela a "aberta". Nenhum estado é beco sem saída.
+
+## O que já existe e o que falta
+
+- ✅ Telas das duas origens, emissão da OC, lista de OCs, aprovações e follow-up do CCP.
+- ✅ Envio da OC ao Omie testado em 14/10. Produção ainda ❓.
+- 🟡 Regra de aprovação provisória: vai endurecer depois da conversa com Compras.
+- 📝 `C6` a `C8` decididos em 26/10, sem código.
+- 🔴 O MES ainda não lê a OC de requisição criada só no av-hub.
+- 🔴 Perfil exclusivo do CCP (hoje vale a permissão da tela).
+- 🔴 Contrato de recompra por RNC e aviso de atraso ao PCP e ao vendedor.
+- ❓ Teste ponta a ponta com as chaves reais; versionar `fn_requisicao_mes_aplicar`.
+
+## Detalhe técnico
+
+Tudo abaixo é o conteúdo original da nota, mantido para consulta.
+
+### Nós, entradas e decisões (texto original)
+
 Nós do [[00-Fluxo-Mestre-0b]]: `P3` requisição de compra (origem PCP, MES), `C0` requisição de compra (origem Compras, av-hub), `C1` cotação, `C2` acima de R$ 30 mil?, `C3` aprovação, `C4` emissão da OC, `C5` follow-up do CCP, `FN1` fornecedor. Fecha em `FN1 → R0` ([[05-Recebimento]]). Entrada: `E4` "solicitar compra" ([[03-Estoque-Atendimento-e-Despacho]]) e `Q3` recompra ([[06-Qualidade-Entrada]]). Sequências técnicas completas em [[Integracao-AvHub-MES]]. Selos em [[Regras-do-Vault]].
 
 > [!info] `C6` a `C8` (decisões de 16 a 26/10/2026, fluxo aprovado em 26/10)
@@ -19,11 +95,11 @@ Nós do [[00-Fluxo-Mestre-0b]]: `P3` requisição de compra (origem PCP, MES), `
 > - N16-127: o Compras é avisado no av-hub da recompra por RNC (hoje só o MES sabe e a OC segue "atendida"); exige contrato novo entre MES e hub.
 > - N16-137: a reabertura do recebimento pelo PCP também avisa o av-hub, pelo mesmo caminho.
 
-## Objetivo
+### Objetivo (original)
 
 Transformar uma **necessidade de material** em uma **Ordem de Compra aprovada**, enviada ao fornecedor e ao Omie, e acompanhar até a chegada física. O circuito cruza dois sistemas: o MES pede e depois só **lê**; o av-hub cota, aprova, emite, envia ao Omie e acompanha. O dado comercial (preço, fornecedor, condição) fica no av-hub; o MES recebe só os **marcos**.
 
-## Quem atua
+### Quem atua (completo)
 
 | Quem | Papel | Onde |
 |---|---|---|
@@ -38,7 +114,7 @@ Transformar uma **necessidade de material** em uma **Ordem de Compra aprovada**,
 | Doca | Registra a chegada com NF e tira a parcial de Compras · CCP | MES ([[05-Recebimento]]) |
 | Gustavo, Nathan, Robert | API do av-hub, front do av-hub, MES | ver [[Equipe-e-Divisao]] |
 
-## Regras decididas
+### Regras decididas
 
 | # | Regra | Selo |
 |---|---|---|
@@ -59,13 +135,13 @@ Transformar uma **necessidade de material** em uma **Ordem de Compra aprovada**,
 | 15 | Quem aprova ou cancela OC precisa de `pode_aprovar` na tela `compras`; a identidade vem da sessão do BFF | ✅ `ordens_compra.route.js:1230-1240`; HUB `app/api/compras/ordens/[id]/route.ts:35`, `:53` |
 | 16 | Comprador só emite OC na unidade a que pertence; unidade que compra por outra unidade recusa (23514) | ✅ Dump `fn_ordens_compra_nascer`, `fn_ordens_compra_comprador` |
 
-## Estados
+### Estados
 
-### Requisição no av-hub (`requisicoes_compra.status`)
+#### Requisição no av-hub (`requisicoes_compra.status`)
 
 `aberta` → `em_cotacao` → `atendida` (só trigger) · `cancelada`. Transições do PATCH: `aberta→em_cotacao|cancelada`, `em_cotacao→aberta|cancelada`, `cancelada→aberta|em_cotacao`, `atendida→(nenhuma)` (`requisicoes_compra.route.js:13-23`).
 
-### OC no av-hub (`ordens_compra.status`, `status_sincronizacao_omie`)
+#### OC no av-hub (`ordens_compra.status`, `status_sincronizacao_omie`)
 
 | Campo | Valores | Fonte |
 |---|---|---|
@@ -75,11 +151,11 @@ Transformar uma **necessidade de material** em uma **Ordem de Compra aprovada**,
 
 Trigger de recálculo: OC nasce `aguardando_aprovacao`; ao recalcular o total em BRL, **valor ≤ limite vira `aprovado` sozinho**, valor > limite fica `aguardando_aprovacao`; `rascunho` e `cancelado` não mudam; OC já aprovada que sobe acima do limite volta a `aguardando_aprovacao` (Dump `fn_ordens_compra_recalcular`, linhas 6750-6794).
 
-### Marcos que o MES recebe (`requisicoes_compra_eventos.tipo`, 14 valores)
+#### Marcos que o MES recebe (`requisicoes_compra_eventos.tipo`, 14 valores)
 
 `requisicao_recebida`, `em_cotacao`, `oc_criada`, `oc_removida`, `oc_enviada_aprovacao`, `oc_aprovada`, `oc_no_omie`, `fornecedor_confirmou`, `previsao_alterada`, `despachada`, `ocorrencia`, `oc_cancelada`, `requisicao_cancelada`, `requisicao_reaberta` (Dump Avhub, `requisicoes_compra_eventos_tipo_check`, linha 18692). Só existem para requisição com `id_origem` (a do MES).
 
-### No MES
+#### No MES
 
 | Entidade | Valores | Código |
 |---|---|---|
@@ -90,7 +166,7 @@ Trigger de recálculo: OC nasce `aguardando_aprovacao`; ao recalcular o total em
 
 Efeito de cada marco no MES: tabela em [[Integracao-AvHub-MES]] (INT-03) e `requisicao-avhub.eventos.ts:234-318`.
 
-## Telas
+### Telas
 
 | Nome | Rota | App | Quem | Estado |
 |---|---|---|---|---|
@@ -105,9 +181,9 @@ Efeito de cada marco no MES: tabela em [[Integracao-AvHub-MES]] (INT-03) e `requ
 
 Nome histórico no MES: o setor `COMPRAS` aparece como "Pedidos de Compra" em rótulos de 09/10 e hoje como **Compras · CCP**; a rota continua `/compras/pedidos-compra`. HUB confirmado em disco (`C:\Users\nathan.silva\Desktop\TI\NATHAN\00 - HUB`, b55ac55).
 
-## Endpoints e contratos
+### Endpoints e contratos
 
-### MES (`api-pcp`, `compras/requisicoes`)
+#### MES (`api-pcp`, `compras/requisicoes`)
 
 | Rota | Permissão | Efeito | Código |
 |---|---|---|---|
@@ -121,7 +197,7 @@ Nome histórico no MES: o setor `COMPRAS` aparece como "Pedidos de Compra" em r�
 | `POST /compras/requisicoes/:id/liberar-recebimento` | idem + `compras-liberar` | Rede de segurança | `:105-115` ✅ |
 | `PATCH /compras/requisicoes/:id/compra` | — | **Removida** (14/10): o registro manual da compra saiu | ✅ ausente em `compras.controller.ts` |
 
-### av-hub (`api-acos-vital`)
+#### av-hub (`api-acos-vital`)
 
 | Rota | Quem chama | Efeito | Código |
 |---|---|---|---|
@@ -135,44 +211,44 @@ Nome histórico no MES: o setor `COMPRAS` aparece como "Pedidos de Compra" em r�
 
 Montagem em `core_vendas_faturamento/index.js:190-193`. Contratos de banco: [[SQL-008-Requisicoes-Compra]], [[SQL-007-Ordens-Compra-Estruturada]], [[SQL-011-Ordens-Compra-Referencia-MES]], [[SQL-012-Ordens-Compra-Referencia-Valores]].
 
-## Como está no código
+### Como está no código
 
-### As duas origens da requisição
+#### As duas origens da requisição
 
 - ✅ **Origem 1, Compras (C0).** HUB: botão "Nova requisição" só com `can('pode_criar','compras')` (`ComprasRequisicoes.tsx:186`); o BFF exige `requirePermission('compras','pode_criar')` e repassa `POST {API_URL}/compras/requisicoes` com `created_by` da sessão (`app/api/compras/requisicoes/route.ts:79-95`). A API grava sem `id_origem`; o número vem do contador do banco por unidade (`requisicoes_compra.route.js:384-411`).
 - ✅ **Origem 2, PCP (P3).** O almoxarife usa "Solicitar compra" em `E4` e a parcial vai ao setor `REQUISICAO` (`itens-parciais.service.ts:727-730`); o PCP abre a requisição com 1+ materiais (`compras.service.ts:135-218`), obrigatório prazo de necessidade, produto buscado no av-hub; a parcial vai `EM_TRANSITO` a Compras · CCP e o envio entra na fila **na mesma transação** (`:212`). Cada material vira uma requisição separada no av-hub (cada requisição do av-hub tem 1 material).
 - 🟡 Fallback: em ordens montadas sem o setor Requisições, dá para requisitar já em Compras (`compras.service.ts:138-155`).
 
-### Ida (LOG-34)
+#### Ida (LOG-34)
 
 ✅ `EnvioAvhubService` faz `PUT {API_URL}/compras/requisicoes/origem/{id_origem}`, com `id_origem` = id do `RequisicaoCompraItem`. Dispara após criar ou cancelar e a cada `AVHUB_ENVIO_INTERVALO_SEG` (60 s); espera 1, 2, 5, 10, 30 e 60 min (`envio-avhub.service.ts:21`, `:130`). Chave `AVHUB_MES_INTEGRACAO_KEY`, que só abre esse PUT (`apiKeyAuth.js:94-100`). 200/201 grava `ENVIADO` e espelha id, número e status do av-hub; 409 `REQUISICAO_COM_OC` vira `RECUSADO` (`:164-169`). Precisão: o MES guarda 4 casas e o hub 3.
 
-### No av-hub: caixa do Compras (C1)
+#### No av-hub: caixa do Compras (C1)
 
 ✅ `fn_requisicao_mes_aplicar` aplica a ida (Dump Avhub, linha 8680). A caixa lê as **duas origens** sem distinção (`GET /compras/requisicoes`). Trigger grava marcos `requisicao_recebida` (INSERT) e `em_cotacao` (`aberta → em_cotacao`) (Dump, linha 8966). Cotação e negociação com o fornecedor são **fora do sistema** 📝.
 
-### C2 e C3: aprovação (✅ código igual à decisão)
+#### C2 e C3: aprovação (✅ código igual à decisão)
 
 - ✅ 📝 **Regra (N14-21):** OC que **excede R$ 30 mil** é aprovada pelo Gerente de Compras; OC **até R$ 30 mil** sai livre para os compradores. A Diretoria não participa.
 - ✅ **Como o código faz:** a OC nasce `aguardando_aprovacao`; a trigger de recálculo **aprova automaticamente** a OC cujo total em BRL é **menor ou igual** ao limite da unidade (`parametros_compras.limite_aprovacao`, 30.000,00 por padrão) e deixa `aguardando_aprovacao` a que passa do limite; OC já aprovada que sobe acima do limite volta a `aguardando_aprovacao` (Dump, linhas 6779-6794; texto da função em `docs/ENVIAR - contrato-compras-backend.md:649-694` do HUB). O HUB avisa "Acima de {limite}, ela nasce Aguardando aprovação" (`FecharCompra.tsx:604-605`, `:1652`). Quem aprova ou cancela uma OC aguardando é um usuário com `pode_aprovar` na tela `compras` (Gerência de Compras): `ordens_compra.route.js:1230-1240`. `condicoes_pagamento_compras.route.js:17` devolve o limite padrão 30.000,00 quando a unidade não tem linha.
 - 🟡 **Regra provisória:** o Nathan precisa de algo funcional agora; a regra vai ficar mais rígida quando conversarem com o setor de Compras (por exemplo, finalidade, tipo de item ou aprovação do Gerente também abaixo do limite). Não há desenho nem data.
 - 🟡 Segregação comprador ≠ aprovador: o `aprovado_por` vem do BFF (sessão), mas a API **não** compara com `created_by` (`ordens_compra.route.js:1217-1240`) ❓ conferir se há trava no banco. Evento `oc_enviada_aprovacao` só marca a mudança para `aguardando_aprovacao` (Dump, linha 6929).
 
-### C4: emissão da OC e envio ao Omie
+#### C4: emissão da OC e envio ao Omie
 
 ✅ A OC carrega fornecedor, transportadora, previsão de chegada, condição e parcelas, `tipo_frete`, `moeda` com `cotacao_moeda`/`cotacao_data`/`cotacao_origem` (PTAX), `valor_frete`, `valor_seguro`, `finalidade`, e por item: `valor_unitario`, `desconto`, `tipo_material` (acabado ou não), `id_requisicao` e `vinculos` ao pedido de venda (`ordens_compra.route.js:109-132`). Várias requisições do MES cabem numa OC (uma por item). ✅ A pipeline lê `fila-omie` e envia com `UpsertPedCompra` (`cCodIntPed` = número da OC), exclui OC cancelada que já estava no Omie com `ExcluirPedCompra`, e devolve `nCodPed` pelo `PATCH …/sincronizacao`; OC com erro **sai** da fila e só volta por "Reenviar" (`envioOrdensCompra.ts:18-40`). O evento `oc_no_omie` leva `numero_pedido_omie` ao MES.
 
 ✅ **Envio real testado:** o Nathan testou o envio da OC ao Omie em 14/10 e funciona em teste; produção ❓ (checklist de subida em [[Omie-Integracao-Estado]]). O Omie **não tem ambiente de teste**, por isso o Nathan criou cadastros **TESTE** (fornecedor, cliente e transportadora) para ninguém se confundir. 🟡 Cuidado: esses cadastros são do Omie de verdade, então a pipeline os traz para o av-hub e eles aparecem em listas, relatórios e conferências (por exemplo o CON-01). Ao emitir OC de verdade, não escolher o fornecedor nem a transportadora TESTE; ao conferir relatórios, filtrar ou ignorar esses cadastros.
 
-### C5: follow-up do CCP
+#### C5: follow-up do CCP
 
 ✅ HUB `/compras/followup` e tabelas `ordens_compra_acompanhamento`, `_contatos`, `_ocorrencias`. Marcos `fornecedor_confirmou`, `previsao_alterada`, `despachada` (data, NF do fornecedor, transportadora), `ocorrencia` (aberta ou resolvida) chegam ao MES. 🔴 Perfil exclusivo do CCP (só ele edita): hoje vale a permissão da tela, conforme [[LOG-32-Compras-CCP-Acompanhamento-OC]].
 
-### Volta (LOG-35) e Compras · CCP
+#### Volta (LOG-35) e Compras · CCP
 
 ✅ Dois gatilhos: polling de 5 min e leitura sob demanda (a tela chama `POST /compras/requisicoes/sincronizar` ao abrir e no "Atualizar", `FilaSetor.tsx:370-396`; rodada compartilhada, pulada se a última leitura boa tem menos de 30 s, `eventos-avhub.service.ts:31`, `:80`). Chave `API_KEY` do MES. Cada evento é gravado e aplicado numa transação; se falhar, o cursor não avança; evento que não aplica fica com `ERRO:` em `acao` (`:150-181`). O MES usa **todos os 14 marcos**; por marco: `etapaCompra`, `numeroOc`, `numeroPedidoOmie`, `previsaoChegada`, `despachadaEm`, `nfFornecedor`, `transportadora`, `ocorrenciaAberta` e o resumo da requisição (ABERTA ↔ EM_COMPRA). `requisicao_cancelada` com todos os materiais cancelados devolve a parcial a Requisições; `requisicao_reaberta` devolve a Compras · CCP. Migration 035b: `autor` e `comprador` em cada marco.
 
-### Pontas soltas da requisição
+#### Pontas soltas da requisição
 
 0. 📝 **N14-28 (15/10/2026): a requisição do Compras com vínculo a pedido de venda também deve aparecer no MES, antes da OC**, e a OC vinculada vai ao MES pela referência. Proposta: leitura nova `GET /compras/requisicoes/referencia` (BL-064, Gustavo; só leitura, sem `id_origem` e sem mexer no contrato 35), lida pelo mesmo job (BL-065, Robert), com aviso de compra duplicada ao requisitar. A tela "Nova requisição" precisa do campo de pedido de venda (BL-041). O que é de estoque, uso interno ou compra por fora não entra na Torre. O trecho de N14-20 abaixo, "a requisição em si não chega ao MES", vale só para requisição sem pedido de venda. Perguntas em [[Pontas-Soltas]] PS-034.
 1. 🔴 **A OC de uma requisição criada só no av-hub (C0) precisa ser lida pelo MES** (requisito de integração, N14-20). A requisição em si não chega ao MES (`id_origem` é `NOT NULL` em `requisicoes_compra_eventos`, Dump, linha 18683, então não gera marco), e isso fica assim: o MES lê a **OC**. Regra: (a) se o Compras vincula a requisição ou a OC a um pedido de venda, o PCP vê no MES que já existe OC para aquele pedido; (b) se a OC é para itens de **estoque** (sem pedido), o Estoque do MES mostra o **saldo futuro** ([[Glossario]]): saldo atual mais as OCs em andamento e a parte delas que preenche o estoque.
@@ -186,7 +262,7 @@ Montagem em `core_vendas_faturamento/index.js:190-193`. Contratos de banco: [[SQ
 7. 🟡 Recompra por RNC não tem contrato: a OC antiga segue `atendida` (ver [[06-Qualidade-Entrada]], pendência 2).
 8. 🟡 Um item cancelado pelo Compras volta a Requisições com motivo, e o PCP decide: abrir outra requisição ou devolver ao Estoque (`compras.service.ts:222-227`).
 
-## O que falta desenvolver
+### O que falta desenvolver
 
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
@@ -201,7 +277,7 @@ Montagem em `core_vendas_faturamento/index.js:190-193`. Contratos de banco: [[SQ
 | 9 | Dois formulários ou um para origem PCP e origem Compras (T-03): o MES exige pedido e prazo; o HUB aceita sem pedido | Nathan | P3, C0 | 🟡 |
 | 10 | Teste ponta a ponta do circuito com `AVHUB_MES_INTEGRACAO_KEY` e `API_KEY` reais | Robert, Gustavo | P3, C5 | ❓ |
 
-## Pendências
+### Pendências
 
 - Nathan e Compras (🟡, futuro): como endurecer a regra de aprovação (só valor, finalidade, tipo de item, aprovação abaixo do limite). O limite é por unidade (o código já tem assim).
 - Nathan: segregação comprador ≠ aprovador vale se o Gerente também compra? **Decidido em 29/10/2026 (N16-123): não há trava; o Gerente de Compras pode aprovar a OC que ele mesmo emitiu.**
@@ -209,7 +285,7 @@ Montagem em `core_vendas_faturamento/index.js:190-193`. Contratos de banco: [[SQ
 - Compras: quem avisa quando uma OC é cancelada depois de aprovada e a parcial já estava esperada no Recebimento (o MES tira da lista, mas ninguém avisa a doca).
 - Robert e Gustavo: o MES vê a OC de requisição do Compras só pela referência; `requisicoes_compra_eventos.id_origem` continua `NOT NULL` e não precisa mudar.
 
-## Subfluxo
+### Subfluxo
 
 ```mermaid
 flowchart TD

@@ -9,13 +9,79 @@ fontes: [Registro-de-Decisoes (N16-09 a N16-11, N16-17 a N16-23, N16-34 a N16-51
 
 # Custo real e comissão no fluxo (K1 a K6)
 
-**Só o fluxo.** Esta nota mostra por onde o custo real e a comissão atravessam o fluxo mestre. Os **modelos de dados** estão nos contratos: o custo realizado por item em `core_vendas_faturamento` e a comissão nova em `core_comissao` (testado em Postgres 18 com as respostas da Controladoria). O modelo está explicado em [[03-Modelo-Novo-core_comissao]]. Decisões: [[Registro-de-Decisoes]]. Selos em [[Regras-do-Vault]].
+**Em uma frase:** o vendedor estima a comissão na proposta, o custo real vai chegando conforme compras, estoque e produção acontecem, e a Controladoria decide a comissão final quando a nota sai.
+
+Tudo aqui ainda é proposta: não há API nem tela. Esta nota mostra só o fluxo. Os modelos de dados estão em [[03-Modelo-Novo-core_comissao]]. Decisões: [[Registro-de-Decisoes]]. Selos: [[Regras-do-Vault]].
 
 > [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
-> - N16-143: a comissão nova fica em `core_comissao`, schema próprio (modelado e testado). Proposta, pedido e custo realizado vão para `core_vendas_faturamento`; o `core_comercial` não existe (N16-116).
-> - A pendência de devolução parcial já está no banco: anexo de 21/10 (`comissao_devolucao_pendencia`).
+> - N16-143: a comissão nova fica em `core_comissao`, schema próprio, já modelado e testado.
+> - Proposta, pedido e custo realizado vão para `core_vendas_faturamento`. O `core_comercial` não existe (N16-116).
+> - A pendência de devolução parcial já está no banco.
 
-## Nós
+## Como funciona, passo a passo
+
+1. O vendedor monta a proposta e o sistema estima a comissão pelo motor atual. Ele só vê a estimativa que ele mesmo colocou. `K1`
+2. Cada compra, lote do Estoque ou matéria-prima da produção gera uma linha de custo real, com as condições do próprio evento. `K2`
+3. Enquanto o custo do item não cobre a quantidade, o custo é parcial. Só as peças com custo real entram na comissão. `K2`
+4. No recebimento, o valor da nota de entrada substitui o valor da ordem de compra (OC). `K2`
+5. Se a compra sai mais cara que a proposta, o vendedor aprova ou reprova a compra do produto dele. O preço de venda não muda. `C8`
+6. Quando o Omie emite a nota, a comissão fecha com o percentual vigente naquele momento e chega à Controladoria já calculada. `K3`
+7. Controladoria, Gerência ou Coordenação decidem: aprovar, desaprovar, bloquear, desbloquear, cortar ou alterar. Sempre com justificativa. `K4`
+8. Só depois da decisão o vendedor vê a comissão real e o motivo. Desaprovada aparece com R$ 0. `K5`
+9. Se a nota for cancelada, devolvida ou recusada, a comissão é abatida na mesma proporção. `K6`
+
+Se o custo completar depois da decisão, a diferença vai para a apuração seguinte, para nova decisão.
+
+## Exemplo
+
+Um pedido com 50 flanges (item A). Na proposta, o vendedor cotou R$ 100 por flange. A compra fechou a R$ 150 por flange, em várias OCs. Os R$ 100 e os R$ 150 vêm do exemplo do Nathan.
+
+- No início, a Controladoria vê custo parcial e a diferença contra o cotado.
+- O vendedor aprova ou reprova a compra mais cara. Se aprova, a margem e a comissão caem.
+- A nota sai e a comissão chega à Controladoria. Ela aprova ou corta, com justificativa.
+- O vendedor do Cliente Exemplo S.A. passa a ver o valor real e o porquê.
+- Se o cliente devolver parte das flanges, o Fiscal ou a Controladoria informam quantas voltaram. A comissão cai na proporção.
+
+## Quem atua
+
+| Quem | O que faz |
+|---|---|
+| Vendedor | Estima a comissão; aprova ou reprova compra acima do valor; vê a real depois da decisão |
+| Controladoria | Acompanha o custo real, decide a comissão e informa o que voltou nas devoluções parciais |
+| Gerência e Coordenação | Mesmas permissões de decisão da Controladoria |
+| Compras | Fornece o custo real pela OC e pela nota de entrada |
+| Fiscal | Informa, com a Controladoria, o que voltou numa devolução parcial |
+
+## Regras que valem
+
+- Controladoria, Gerência e Coordenação decidem sem teto. Ninguém decide a própria comissão.
+- Toda decisão tem justificativa, autor, data e valores anterior e novo.
+- O vendedor vê a comissão real só depois da decisão.
+- Com custo parcial, só as peças com custo real entram na comissão.
+- Cada nota fecha com o percentual vigente. Nunca se paga duas vezes a mesma peça.
+- A nota de entrada manda: ela substitui o valor da OC.
+- O encargo da condição de pagamento entra no preço sugerido, não no custo.
+- Cancelamento, devolução ou recusa abatem a comissão. Se já foi paga, o desconto entra na próxima apuração.
+- Devolução total vem do Omie. Na parcial, o Fiscal ou a Controladoria informam o que voltou.
+
+## O que já existe e o que falta
+
+- ✅ Motor atual de comissão, só leitura aqui.
+- ✅ Simulador de Comissão, usado como referência da tela nova.
+- 🟡 Tela "Custo real por item" existe, sem imposto e com dados de teste.
+- 🟡 Módulo novo em `core_comissao`: modelado e testado no banco, sem API nem tela.
+- 🔴 Comissão estimada na proposta (`K1`).
+- 🔴 Custo real por evento, com a nota de entrada como verdade (`K2`).
+- 🔴 Tela da Controladoria, relatórios e visão geral (`K4`).
+- 🔴 Aprovação do vendedor na compra acima do valor.
+- 🔴 Pendência de devolução parcial e apuração do vendedor.
+- ❓ Sobra aproveitável de chapa (OQ-32) e devolução de compra ao fornecedor (OQ-42).
+
+## Detalhe técnico
+
+**Só o fluxo.** Esta nota mostra por onde o custo real e a comissão atravessam o fluxo mestre. Os **modelos de dados** estão nos contratos: o custo realizado por item em `core_vendas_faturamento` e a comissão nova em `core_comissao` (testado em Postgres 18 com as respostas da Controladoria). O modelo está explicado em [[03-Modelo-Novo-core_comissao]].
+
+### Os nós K1 a K6
 
 Os `K` seguem o desenho do Nathan (artifact); o detalhe vem de N16-10, N16-42 a N16-51 e N16-74.
 
@@ -30,7 +96,7 @@ Os `K` seguem o desenho do Nathan (artifact); o detalhe vem de N16-10, N16-42 a 
 
 Regras de visibilidade: o vendedor só vê a estimada que ele colocou e a **comissão real depois da decisão** (N16-10). Na aprovação de **compra acima do valor** (`C8`), ele vê o valor da compra do produto dele e **aprova ou reprova** (N16-60); isso **supera** a regra antiga de que não havia aviso (N16-18). A Controladoria vê o custo real e a diferença.
 
-## Como o custo real atravessa o fluxo
+### Como o custo real atravessa o fluxo
 
 Regra (N16-09, N16-40): o custo real de um item do pedido é a **soma das linhas** (OC, NF de entrada ou lote); o unitário médio é o total dividido pela quantidade; o custo do pedido é a soma dos itens. Cada linha guarda data, material, origem, quantidade e valor. Linhas podem ser parciais (5.01, 5.02… do item parcial do MES).
 
@@ -49,11 +115,11 @@ Regra (N16-09, N16-40): o custo real de um item do pedido é a **soma das linhas
 
 Hoje o código tem a base: `lote_custo` (`api-pcp/prisma/models/estoque.prisma:394-423`, opcional), `OrigemCusto` `CARGA_INICIAL`, `OC`, `MANUAL` (`:378-382`), a tabela `itens_pedido_custo` no hub com o job que lê `GET /itens/custo` do MES (`itens_pedido_custo.job.js:78`) ([[API-008-Custo-do-Lote-no-MES]], [[LOG-47-Custo-Real-por-Item-no-Hub]]). O que as decisões acrescentam: custo **obrigatório**, linhas **por evento**, a **NF de entrada como verdade** do valor, e a soma por item do pedido.
 
-### Sobras de chapa ❓
+#### Sobras de chapa ❓
 
 Quando o item é fabricado com chapa, quem calcula o aproveitamento é o **PCP ou a Engenharia**; Compras só registra nas observações da OC. Se **não há sobra aproveitável**, o custo todo da chapa vai para o pedido. Se há, a sobra **vai ao Estoque** (e quem a controla é o Recebimento e o PCP). **Falta definir como a sobra aproveitável ganha custo** e como esse custo entra no pedido que a usa (OQ-32).
 
-## O exemplo do Nathan
+### O exemplo do Nathan
 
 Pedido com 5 itens: A. 50 Flanges; B. 1 Mão de obra; C. 50 Tubos; D. Flange sobre desenho; E. 50 Flanges cegas. Na proposta, o vendedor pôs as 50 flanges (A) a **R$ 100** o unitário. A compra, dividida em dias, fecha em **R$ 150** o unitário. **Só os R$ 100 e R$ 150 são do Nathan; os demais valores abaixo são ilustrativos 🟡 (Claude), para mostrar o cálculo.**
 
@@ -71,7 +137,7 @@ Custo do pedido (itens completos, valores ilustrativos): R$ 4.000 + R$ 7.500 + R
 
 O item A mostra a regra: o vendedor cotou R$ 100 o unitário (R$ 5.000 as 50); o custo real fecha em R$ 150 (R$ 7.500). O **preço de venda não muda** (N16-17). Como a compra ficou **mais cara que a proposta, o vendedor aprova ou reprova** a compra de cada produto (`C8`); se aprova, a margem e a comissão caem.
 
-### O que acontece com a comissão no exemplo
+#### O que acontece com a comissão no exemplo
 
 | Momento | `K` | O que o sistema faz | Quem vê |
 |---|---|---|---|
@@ -83,11 +149,11 @@ O item A mostra a regra: o vendedor cotou R$ 100 o unitário (R$ 5.000 as 50); o
 | Decisão | `K4` | Controladoria, Gerência ou Coordenação aprovam, desaprovam, bloqueiam, cortam ou alteram, com justificativa | **agora** o vendedor vê a comissão real e a justificativa (`K5`) |
 | Devolução da nota | `K6` | Total: abatimento de 100% sozinho. Parcial: pendência para Fiscal ou Controladoria informarem o que voltou; depois, abatimento proporcional | Controladoria; o vendedor vê o desconto com o motivo |
 
-### Várias notas, mesmo item (N16-49)
+#### Várias notas, mesmo item (N16-49)
 
 Exemplo da Michele: venda de R$ 1.000 a 2%, com notas de 500, 100, 100, 100, 100 e 100: a comissão é paga a 2% sobre cada nota. Se o custo real muda entre uma nota e outra, **cada nota fecha com o percentual vigente naquele momento**; quando o custo completa, o sistema recalcula o percentual final e **lança a diferença na apuração seguinte**. O banco guarda a **quantidade já comissionada** por item e nunca paga duas vezes a mesma peça (testado em 19/10).
 
-## As condições de cada evento de custo (N16-20)
+### As condições de cada evento de custo (N16-20)
 
 Um item de 50 unidades pode ter 50 OCs diferentes: cada uma com a sua condição de pagamento, encargo, impostos, frete e fornecedor. Por isso o custo real **não** usa um conjunto de condições por pedido. A regra:
 
@@ -101,7 +167,7 @@ Um item de 50 unidades pode ter 50 OCs diferentes: cada uma com a sua condição
 - Até os campos existirem, o evento calcula **sem imposto** (como o Ciclo 1) e a linha mostra "sem imposto" 🟡; a Controladoria vê que o custo está sem o imposto real. O impacto no cronograma está na proposta de cronograma (`Proposta-Orcamento-Comissao/07-Cronograma/Proposta-de-Cronograma.md`, fora do vault, a validar).
 - No exemplo do Nathan (item A), cada requisição vira uma OC com o seu fornecedor, a sua condição e o seu imposto. O custo líquido de A é a soma das três, cada uma com as suas condições. Impostos e encargos de cada uma são "a definir": **não há valor inventado aqui** 🟡.
 
-### Drill-down por evento (visão da Controladoria)
+#### Drill-down por evento (visão da Controladoria)
 
 Na tela da Controladoria, cada item abre a **lista dos seus eventos de custo**. Colunas propostas 🟡:
 
@@ -118,11 +184,11 @@ Na tela da Controladoria, cada item abre a **lista dos seus eventos de custo**. 
 
 Fonte de cada linha: eventos de custo realizado por item no `core_vendas_faturamento` e cálculos da comissão. O vendedor **não** vê esta lista.
 
-## A tela da comissão: três visões da mesma tela (N16-19)
+### A tela da comissão: três visões da mesma tela (N16-19)
 
 A tela da proposta é **semelhante à do Simulador de Comissão** que o Nathan mandou em 16/10 (`09-Diagramas/fontes/tela-simulador-comissao.png`; código em `av-hub/app/(protected)/comissoes/simulador/page.tsx`). Mesmo motor e mesmas regras, em **tabelas novas** (N16-21). A Controladoria tem a mesma tela com a verdade na tabela: o custo real e afins.
 
-### Blocos da tela e o que cada visão mostra
+#### Blocos da tela e o que cada visão mostra
 
 | Bloco do Simulador (imagem) | (a) Vendedor, na proposta (`V0.2`, `V0.3`) | (b) Compras (`C6`, `C7`, `C8`) | (c) Controladoria (`K4`) |
 |---|---|---|---|
@@ -133,13 +199,13 @@ A tela da proposta é **semelhante à do Simulador de Comissão** que o Nathan m
 | **Rodapé:** custo, venda, total da NF, sugerido, mark-up real, mark-up s/ compra, margem e letra | Estimados | Estimados e reais | Estimados e reais, com a queda por custo |
 | **Botões:** Recomeçar, Salvar rascunho, Enviar | Salvar a proposta; "Enviar" vira marcar aprovada e transformar em pedido (`V0.4` a `V0.6`) | Registrar a OC e tratar a lista dos casos reprovados | **Aprovar, desaprovar, bloquear, desbloquear, cortar ou alterar**, sempre com justificativa |
 
-### O passo "aprovação de Compras" do motor atual
+#### O passo "aprovação de Compras" do motor atual
 
 Hoje (✅ `simulacoes.route.js:30-36`, `:233-259`; `simulador/page.tsx:1192-1234`): o vendedor envia o simulador; Compras abre e, se o custo está errado, cria uma segunda versão (origem `COMPRAS`) com o custo correto; o percentual final do item é o menor entre o do vendedor e o de Compras ([[01-Motor-Atual-Como-Calcula]], R5 e R10).
 
 No fluxo novo (N16-51, OQ-28 em parte): o **percentual de Compras** deixa de ser uma digitação e passa a ser o cálculo `REAL`, gerado a cada evento de custo (`K2`); o passo "Compras aprova o percentual" **sai do fluxo e fica pronto no sistema, desligado**, até Compras validar. O percentual final continua sendo o **menor** entre os dois.
 
-### Telas e menu que a imagem mostra
+#### Telas e menu que a imagem mostra
 
 | Item do menu na imagem | O que é hoje | Alinhamento 🟡 |
 |---|---|---|
@@ -149,11 +215,11 @@ No fluxo novo (N16-51, OQ-28 em parte): o **percentual de Compras** deixa de ser
 
 Os contratos com o detalhe das telas e das regras foram removidos em 29/10/2026; o Robert cria os novos.
 
-### Relatórios da Controladoria (N16-50)
+#### Relatórios da Controladoria (N16-50)
 
 A lista por mês, vendedor, unidade e status (com exportação para Excel), mais: (1) **markup real** (Venda ÷ Custo − 1) de todos os pedidos, por vendedor, com consolidado; (2) **Faturamento × Compras por pedido**, com markup real, percentual de comissão e valor a pagar. Nos dois, separar **Revenda, Industrializado e Projeto** e sinalizar **recompra no mesmo pedido**. O **valor retido** das comissões bloqueadas aparece no resumo mensal, separado do valor a pagar. ❓ Projeto e recompra aguardam a OQ-44.
 
-## Casos de borda do custo real
+### Casos de borda do custo real
 
 | Caso | O que acontece |
 |---|---|
@@ -168,7 +234,7 @@ A lista por mês, vendedor, unidade e status (com exportação para Excel), mais
 | Devolução de **compra** (NF de entrada devolvida ao fornecedor) | ❓ Como aparece no Omie e o efeito na linha de custo: adiado (OQ-42) |
 | Pedido manual (`MAN-`) | Nunca entra no custo (D6 do 008, [[LOG-45-Pedido-de-Venda-Manual]]) |
 
-## Estados da comissão
+### Estados da comissão
 
 Os estados são os do banco (testado), resumidos em [[04-Regras-e-Estados-da-Comissao-Nova]]. Por nó do fluxo:
 
@@ -184,7 +250,7 @@ Os estados são os do banco (testado), resumidos em [[04-Regras-e-Estados-da-Com
 
 A decisão tem seis ações (`aprovar`, `desaprovar`, `bloquear`, `desbloquear`, `cortar`, `alterar`), sempre com justificativa.
 
-## Quem vê o quê
+### Quem vê o quê
 
 | Dado | Vendedor | Gerência e Coordenação | Compras | Controladoria |
 |---|---|---|---|---|
@@ -196,7 +262,7 @@ A decisão tem seis ações (`aprovar`, `desaprovar`, `bloquear`, `desbloquear`,
 | Visão geral e relatórios | não | 🟡 | não | sim |
 | Pendência de devolução parcial | não | não | não | sim (com o Fiscal) |
 
-## Estado no código e o que falta
+### Estado no código e o que falta
 
 | Item | Estado | Selo |
 |---|---|---|
@@ -211,7 +277,7 @@ A decisão tem seis ações (`aprovar`, `desaprovar`, `bloquear`, `desbloquear`,
 | Abatimento por devolução, pendência de devolução parcial e apuração do vendedor | o abatimento está no modelo; a pendência de devolução parcial e a apuração (OQ-42) **não** | 🔴 |
 | Tela da proposta no formato do Simulador | não existe; o Simulador atual calcula no navegador | 🔴 Nathan (tela), Pablo (proposta) |
 
-## Diagrama do subfluxo
+### Diagrama do subfluxo
 
 ```mermaid
 flowchart TD

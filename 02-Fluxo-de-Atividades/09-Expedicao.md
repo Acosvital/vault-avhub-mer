@@ -9,22 +9,72 @@ fontes: [api-pcp 579a625 (entregas, itens-parciais.service.ts, pedido-embalagens
 
 # Expedição e logística de saída (X1 a X4)
 
-Nós do [[00-Fluxo-Mestre-0b]]: `X1` embalagem e paletização, `X2` parcial ou integral?, `X3` consolida a carga, `X4` logística de saída (transporte). Termina na emissão da nota no Omie ([[10-Fiscal-Omie]]). No v1 as telas são 10.1 a 10.4.
+**Em uma frase:** a Expedição recebe o que está pronto, embala em pallets, decide se o pedido sai inteiro ou por partes, monta a carga e registra a entrega ao cliente. Nós `X1` a `X4` do [[00-Fluxo-Mestre-0b]]: embalagem e paletização, parcial ou integral, consolida a carga e transporte. Termina na emissão da nota no Omie ([[10-Fiscal-Omie]]). O sistema nunca emite nota fiscal.
 
 > [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
-> - N16-120, N16-121 e N16-122: a Expedição pede a retirada ao Estoque, só o Estoque confirma, a reserva é consumida junto com a baixa e a Embalagem só recebe depois da retirada confirmada. O que o documento imprime segue aberto. Contrato: [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada]].
-> - N16-130: quem decide se o pedido sai inteiro ou por partes é o vendedor, pela marca "pode faturar em partes".
+> - N16-120, N16-121 e N16-122: a Expedição pede a retirada ao Estoque e só o Estoque confirma. A reserva é consumida junto com a baixa. A Embalagem só recebe depois da retirada confirmada. O que o documento imprime segue aberto. Contrato: [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada]].
+> - N16-130: o vendedor decide se o pedido sai inteiro ou por partes, pela marca "pode faturar em partes".
 > - N16-131: item que nunca chega num pedido integral é decisão manual, sem prazo automático.
-> - N16-132: quem avisa o Fiscal é a Logística, ao fechar a carga (depende da consolidação de carga, `X3`, que não existe).
+> - N16-132: a Logística avisa o Fiscal ao fechar a carga. Depende da consolidação de carga (`X3`), que não existe.
 > - N16-133: pedido faturado antes da entrega no MES só gera aviso, sem bloqueio.
 
-## Objetivo
+## Como funciona, passo a passo
+
+1. A parcial pronta chega à Embalagem. O operador confirma o recebimento. Hoje a baixa do saldo do Estoque acontece aqui. `X1`
+2. O operador cadastra cada pallet com nome, peso e unidades. `X1`
+3. Ele passa a parcial da Embalagem para a Logística. `X1`
+4. Decide-se se o pedido sai por partes ou inteiro. Hoje isso é prática da Expedição, sem campo no sistema. `X2`
+5. Pedido inteiro: reúne-se a carga. Ainda não existe tela. `X3`
+6. Define-se o transporte, com frota própria ou terceirizada. Ainda não existe tela. `X4`
+7. O operador da Logística confirma a entrega: informa a quantidade e anexa comprovante, canhoto ou nota. `X4`
+8. O sistema marca o pedido como entregue quando nada mais está pendente. `X4`
+9. A Expedição avisa o faturista por fora. O Omie emite a nota. `X4`
+
+## Exemplo
+
+As 100 flanges do Cliente Exemplo S.A. chegam à Embalagem, que registra os pallets. Se só 60 estiverem embaladas, a soma fica em 60 e isso é válido. A Logística registra a entrega e anexa o canhoto assinado. Com todos os itens entregues, o pedido passa a entregue.
+
+## Quem atua
+
+| Quem | O que faz |
+|---|---|
+| Operador da Embalagem | Recebe a parcial e lança os pallets |
+| Operador da Logística | Confirma a entrega e anexa comprovante, canhoto ou nota |
+| PCP | Acompanha pedido, embalagens e entregas |
+| Vendedor | Vê o status final no av-hub e decide parcial ou integral |
+| Cliente | Recebe a mercadoria |
+| Faturamento (Omie) | Emite a nota |
+
+## Regras que valem
+
+- Embalagem e Logística de saída são os dois últimos setores de todo pedido. Pallets valem em qualquer um deles.
+- A soma das unidades dos pallets não passa da quantidade da parcial. Soma menor vale.
+- O peso dos pallets só se edita na Embalagem. Depois viaja com a peça, só para leitura.
+- A entrega é livre, item a item e por quantidade. Não há trava de "pedido inteiro pronto".
+- Só entrega parcial concluída, até o que ainda está pendente.
+- O pedido só vira entregue quando nada mais está pendente.
+- A nota é do Omie. O sistema guarda só o número digitado.
+- Decidido em 14/10: o despacho será no Estoque, pelo documento de retirada.
+
+## O que já existe e o que falta
+
+- ✅ Fila, pallets, confirmar entrega com comprovante e fechamento do pedido.
+- 🟡 Escolha parcial ou integral: decidida, falta o campo na tela.
+- 🟡 NF da entrega é texto livre, sem ligação com o número do Omie.
+- 🔴 Documento de retirada e baixa na retirada (sem código).
+- 🔴 Consolidação de carga (`X3`) e transporte (`X4`).
+- 🔴 Aviso ao Faturamento dentro do sistema (fila 11.1).
+- 🔴 Registro de remessa de produtos, no Ciclo 2.
+
+## Detalhe técnico
+
+### Objetivo (original)
 
 Receber o que está pronto, embalar e paletizar, decidir se o pedido sai por partes ou inteiro, montar a carga, definir o transporte e registrar a entrega. A Expedição tem **duas portas de entrada** hoje: a parcial atendida pelo Estoque (`atendidoPeloEstoque`) e a parcial que a Qualidade moveu (fabricado, [[08-Qualidade-Saida]]). Pela decisão de 14/10 haverá uma só: o **documento de retirada do Estoque**, porque tudo que é fabricado ou comprado passa pelo Estoque ([[03-Estoque-Atendimento-e-Despacho]]).
 
-O sistema **nunca emite nota fiscal**. Ele sinaliza a necessidade e o Omie emite.
+O sistema **nunca emite nota fiscal**. Ele sinaliza a necessidade e o Omie emite. No v1 as telas são 10.1 a 10.4.
 
-## Quem atua
+### Quem atua (com telas)
 
 | Quem | Papel | Onde |
 |---|---|---|
@@ -35,7 +85,7 @@ O sistema **nunca emite nota fiscal**. Ele sinaliza a necessidade e o Omie emite
 | Cliente | Recebe | externo |
 | Faturamento (Omie) | Emite a NF | [[10-Fiscal-Omie]] |
 
-## Regras decididas
+### Regras decididas
 
 | # | Regra | Selo |
 |---|---|---|
@@ -49,13 +99,13 @@ O sistema **nunca emite nota fiscal**. Ele sinaliza a necessidade e o Omie emite
 | 8 | Nota fiscal de saída é do Omie. O MES guarda só o número digitado na entrega | 📝 ✅ `entregas.service.ts:82` |
 | 9 | Remessa de produtos (registro de remessa) vai ao Ciclo 2 (22/01/2027), item 27 do registro de 07/10 | 📝 |
 
-## Estados
+### Estados
 
 Parcial: `RECEBIDO` ao entrar na Embalagem, `EM_ANDAMENTO` ao iniciar, `CONCLUIDO` no último setor, depois entregas. Etapa vista no av-hub (`etapaDoItem`, `integracao-avhub.service.ts:187-188`): `expedicao.embalagem` (qualquer status em setor `EXPEDICAO`) e `expedicao.concluido` (`CONCLUIDO`). Rótulos no HUB: "Embalagem", "Pronto para expedição" (`lib/domain/etapas-item.ts:44-45`).
 
 Pedido: `StatusPedido` `AGUARDANDO`, `EM_PRODUCAO`, `BLOQUEADO`, `ENTREGUE`. Todo pedido nasce `AGUARDANDO`; o único valor gravado depois é `ENTREGUE`, pelo `EntregasService` (`item-parcial-status.constants.ts:44-50`); `EM_PRODUCAO` e `BLOQUEADO` nunca são gravados. `TipoAnexo` do comprovante: `NOTA`, `CANHOTO`, `DESENHO`, `PEDIDO`, `ORDEM_PRODUCAO`, `COMPROVANTE_ENTREGA` (`producao.prisma:57-64`). Enums completos em [[Estados-e-Status]].
 
-## Telas
+### Telas
 
 | Nome atual | Nome antigo | Rota | App | Slug | Estado |
 |---|---|---|---|---|---|
@@ -68,7 +118,7 @@ Pedido: `StatusPedido` `AGUARDANDO`, `EM_PRODUCAO`, `BLOQUEADO`, `ENTREGUE`. Tod
 | Transporte e roteiro (10.3) | — | — | — | — | 🔴 não existe |
 | Fila de sinalização de faturamento (11.1) | — | — | — | — | 🔴 [[10-Fiscal-Omie]] |
 
-## Endpoints e contratos
+### Endpoints e contratos
 
 | Método e rota | Uso | Permissão | Código |
 |---|---|---|---|
@@ -82,16 +132,16 @@ Pedido: `StatusPedido` `AGUARDANDO`, `EM_PRODUCAO`, `BLOQUEADO`, `ENTREGUE`. Tod
 
 Não há contrato com o av-hub para a Expedição além da etapa do item ([[API-005-Status-Item-Integracao-MES]]). A baixa do item ("faturado") volta pelo pipeline do Omie, sem contrato.
 
-## Como está no código
+### Como está no código
 
-### X1 · 10.1 paletes ✅
+#### X1 · 10.1 paletes ✅
 
 Dois modelos coexistem:
 
 - **Por parcial** (usado na fila): `ItemParcial.pesosPallets`, `nomesPallets` e `unidadesPallets`, arrays alinhados por índice (`producao.prisma:454-468`). Atualizado por `atualizarPallets`, que exige setor tipo `EXPEDICAO` e o mesmo tamanho dos três arrays (`itens-parciais.service.ts:927-961`).
 - **Por pedido** (usado na seção Embalagens do detalhe): `PedidoEmbalagem` (identificação e `totalUnidades`) com `PedidoEmbalagemPallet` (identificação, `peso Decimal(10,3)`, `unidades`). `totalUnidades` é derivado e atualizado por delta a cada pallet (`producao.prisma:294-338`).
 
-### Baixa do saldo hoje 🔴
+#### Baixa do saldo hoje 🔴
 
 A baixa do Estoque acontece **quando a Embalagem recebe** a parcial:
 
@@ -101,39 +151,39 @@ A baixa do Estoque acontece **quando a Embalagem recebe** a parcial:
 
 Não existe **documento de retirada** nem tabela dele: a baixa depende do movimento da parcial, não de uma retirada física registrada no Estoque. Lacuna para o Robert (E6).
 
-### X2 · parcial ou integral 🟡
+#### X2 · parcial ou integral 🟡
 
 Não há campo nem tela para a escolha. A entrega parcial é permitida por padrão (regra 4). O "integral" é só a prática da Expedição de esperar. T-06 (item que nunca chega) não tem gatilho: compra e produção têm `CANCELADO` como saída, a consolidação não.
 
-### X3 · consolidação de carga 🔴 e X4 · transporte 🔴
+#### X3 · consolidação de carga 🔴 e X4 · transporte 🔴
 
 Nenhuma entidade (carga, romaneio, veículo, transportadora de saída) existe em `api-pcp/prisma/models`. O levantamento do PCP legado (romaneios de carga: criar, conferir, fechar, imprimir) está em [[Backlog-por-Frente]]. O comprovante de entrega (10.4) está feito ✅.
 
-### Fechamento do pedido
+#### Fechamento do pedido
 
 `EntregasService.create` marca `ENTREGUE` só se `pendentes === 0` e `parciaisAtivas === 0` (status fora de `CONCLUIDO` e `CANCELADO`). A segunda condição existe porque retrabalho pode deixar parcial ativa depois de entrega (`entregas.service.ts:104-130`).
 
-## O que falta desenvolver
+### O que falta desenvolver
 
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
 | 1 | **Documento de retirada** do Estoque (solicitante: Expedição ou Produção; itens, lotes, quantidades) e baixa do saldo na retirada; remover a baixa em `receber()` | Robert, Nathan decide fluxo | `E6`, X1 | 🔴 |
 | 2 | Entrada única na Expedição: tudo vem do Estoque pelo documento de retirada (hoje há duas portas) | Robert | X1 | 🔴 |
-| 3 | Decisão e campo parcial x integral por pedido, com gatilho de saída para item travado (T-06) | Nathan, Comercial, Expedição | X2 | 🔴 |
+| 3 | Decisão e campo parcial x integral por pedido, com gatilho de saída para item travado (T-06) | Nathan, Comercial, Expedição | X2 | 🔴 (decidido em 29/10, N16-130 e N16-131; falta o campo) |
 | 4 | Consolidação de carga (10.2): visão por pedido, espera dos itens, romaneio | Robert | X3 | 🔴 |
 | 5 | Transporte e roteiro (10.3): frota própria ou terceirizada | Robert | X4 | 🔴 |
 | 6 | Sinalização do MES ao Omie (11.1) com acompanhamento do retorno da NF | Robert, Gustavo | O1 | 🔴 |
 | 7 | NF da entrega só é texto livre (`numeroNf VarChar(30)`); ligar ao número que o Omie devolve | Robert | X4, O1 | 🟡 |
 | 8 | Registro de remessa de produtos | Robert | X4 | 🔴 Ciclo 2 |
 
-## Pendências
+### Pendências
 
 - Nathan: quem pode gerar o documento de retirada e quem o confirma (almoxarife)? A retirada exige conferência física dupla? **Decidido em 29/10/2026 (N16-120): a Expedição pede, só o Estoque confirma. Conferência física dupla e o que o documento imprime seguem abertos.**
 - Nathan e Comercial: pedido integral é opção do vendedor, regra do cliente ou decisão da Expedição? E o prazo máximo de espera? **Decidido em 29/10/2026 (N16-130 e N16-131): o vendedor decide; sem prazo automático.**
 - Expedição: frota própria e terceirizada usam o mesmo fluxo de carga?
 - Robert: `PerfilSetor` por filial (hoje inexistente) afeta quem vê a carga.
 
-## Subfluxo
+### Subfluxo
 
 ```mermaid
 flowchart TD

@@ -9,6 +9,67 @@ fontes: [00-Fluxo-Mestre-0b, LOG-26, v1 01-Fluxo-Operacional/PCP-Carteira, v1 Mo
 
 # Raia PCP: Triagem e Destinação do Pedido (P1, P2, P6)
 
+**Em uma frase:** o PCP (planejamento e controle da produção) vê os pedidos que o vendedor liberou e decide, para cada item, para onde ele vai, quanto vai agora e por quais setores passa.
+
+> [!info] Decisões de 29/10/2026
+> - A Triagem não mostra o saldo do Estoque. Quem decide sobre saldo é o Estoque, na etapa dele (N16-138).
+> - Saldo zero continua exigindo o clique do almoxarife, mesmo depois do marco zero de 13/11 (N16-139).
+> - No retrabalho, o PCP escolhe o setor de volta. Hoje o código volta sempre ao setor anterior (N16-141).
+> - Pedido anterior à data de corte fica fora do MES e termina no sistema antigo. Falta trocar o erro 404 por uma mensagem clara (N16-142).
+
+## Como funciona, passo a passo
+
+1. O PCP abre a Triagem do Pedido e vê os pedidos liberados, por mês, ano e filial. `P1`
+2. Para cada item, escolhe o destino: uma fábrica de fabricação ou a Revenda. `P2`
+3. Define quanto manda nesta rodada, até o que ainda resta do pedido, e a prioridade. Item sem destino fica para a próxima rodada.
+4. Monta o roteiro de cada destino. O Estoque já vem fixo como primeira etapa. Roteiro de fabricação precisa de uma inspeção de qualidade antes da expedição.
+5. O sistema grava a rodada de uma vez, com uma ordem por destino. Se uma falhar, nenhuma grava. Cada item vira uma parcial no Estoque, com 100% da quantidade.
+6. O MES avisa o av-hub que importou o pedido, e a marcação do vendedor trava. Se o aviso falhar, ele tenta de novo a cada 10 minutos, por 7 dias.
+7. O Estoque responde se há saldo. Essa pergunta não é do PCP. `E1`
+8. Se a Qualidade de saída reprova um item, ou o Recebimento reabre a compra, o PCP decide o novo rumo: retrabalho ou nova compra. Essa fila ainda não existe. `P6`
+
+## Exemplo
+
+O pedido de 100 flanges de aço carbono do Cliente Exemplo S.A. aparece na Triagem assim que o vendedor o libera. O PCP manda as 100 para um destino de fabricação. O roteiro leva o Estoque primeiro e uma inspeção de saída antes da expedição. As 100 flanges viram uma parcial no Estoque, esperando o almoxarife. Numa emergência, o PCP poderia mandar algumas para a Revenda e o resto para a fabricação, em ordens diferentes.
+
+## Quem atua
+
+| Quem | O que faz |
+|---|---|
+| PCP | Escolhe destino, quantidade, prioridade e roteiro. Decide o novo rumo quando algo reprova |
+| Vendedor | Só libera o pedido, na etapa anterior |
+| Almoxarife | Recebe a parcial no Estoque, na etapa seguinte |
+| Robert | Dono do código do MES (sistema de chão de fábrica) |
+
+## Regras que valem
+
+- Fabricação ou revenda não é do produto. É o tipo da fábrica escolhida na rodada.
+- Só pedido liberado vira ordem. Sem liberação, o sistema recusa.
+- O Estoque é sempre a primeira etapa. O PCP não inclui nem retira.
+- Compras e Estoque não entram no roteiro montado pelo PCP.
+- Roteiro de fabricação exige inspeção de qualidade antes da expedição.
+- A soma das ordens de um produto não passa do total do pedido de venda.
+- A rodada é tudo ou nada.
+- Saldo zero exige clique do almoxarife.
+- Se o Compras já emitiu OC (ordem de compra) para o pedido, o PCP deveria ver isso no MES. Ainda não vê.
+
+## O que já existe e o que falta
+
+- ✅ Triagem, Destinação, gravação da rodada em lote e confirmação ao av-hub com reenvio.
+- 🟡 Nomes técnicos antigos no código: `/carteira`, `ordemProducao`, prefixo `OP-`. Os rótulos novos já estão na tela.
+- 🟡 Pedido manual fica fora da espinha.
+- 🔴 Ordem de Produção como entidade e documento impresso. Está desenhada, sem código.
+- 🔴 Mostrar a OC do pedido na Triagem, na Destinação e no Atendimento.
+- 🔴 Fila "Novo norte" (P6) e roteiro por item.
+- 🔴 Consumo de matéria-prima ao enviar à produção.
+- 📝 Pedido anterior à data de corte: decidido, falta a mensagem no lugar do 404.
+
+Entrada: [[01-Vendas-Liberacao]]. Próxima raia: [[03-Estoque-Atendimento-e-Despacho]].
+
+## Detalhe técnico
+
+Tudo abaixo é o conteúdo completo da nota anterior: nós, regras numeradas, matriz de destinação, estados, telas, rotas, código, pendências e o diagrama.
+
 Nós do [[00-Fluxo-Mestre-0b]]: `P1` Triagem do Pedido, `P2` Destinação do Pedido, `P6` Novo norte. O nó `P3` (requisição de compra de origem PCP) fica em [[04-Circuito-de-Compra]]. Entrada: [[01-Vendas-Liberacao]]. Saída: [[03-Estoque-Atendimento-e-Despacho]]. Selos em [[Regras-do-Vault]].
 
 > [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
@@ -18,11 +79,11 @@ Nós do [[00-Fluxo-Mestre-0b]]: `P1` Triagem do Pedido, `P2` Destinação do Ped
 > - N16-142: pedidos anteriores à data de corte da liberação ficam fora do MES e terminam no sistema antigo; falta trocar o erro 404 por uma mensagem clara.
 > - Ordem de Produção: desenho em [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] (uma por destino de fabricação, numerada `pedido/N`; revenda não gera ordem). Proposta aceita em 15/10, sem código.
 
-## Objetivo
+### Objetivo
 
 O PCP enxerga os pedidos que o vendedor liberou (`P1`) e, por **rodada**, decide para cada item **qual destino** recebe (fábrica de fabricação ou a fábrica Revenda), **quanto** manda agora (até o restante) e **qual roteiro** o destino segue (`P2`). Cada rodada gera **uma ordem por destino**. O backend insere o setor **Estoque** como etapa 1 de todo roteiro: a pergunta "há saldo?" não é do PCP, é do Estoque ([[03-Estoque-Atendimento-e-Despacho]]). Ao gravar, o MES confirma a importação ao av-hub e a marcação do vendedor trava.
 
-## Quem atua
+### Quem atua
 
 | Quem | Papel | Onde |
 |---|---|---|
@@ -31,7 +92,7 @@ O PCP enxerga os pedidos que o vendedor liberou (`P1`) e, por **rodada**, decide
 | Almoxarife | Recebe a parcial no Estoque (raia seguinte) | MES |
 | Robert | Dono do código do MES | `api-pcp`, `app-pcp` |
 
-## Regras decididas
+### Regras decididas
 
 | # | Regra | Selo |
 |---|---|---|
@@ -51,7 +112,7 @@ O PCP enxerga os pedidos que o vendedor liberou (`P1`) e, por **rodada**, decide
 | 14 | **Ordem de Produção (OP)** é uma **entidade** do sistema e também um **documento para impressão** (formalidade), emitido **só para o que será fabricado** (revenda e o que o Estoque atende não geram OP). Não confundir com a "ordem" que hoje o código grava por destino (`Pedidos`, `pedidoVenda/N`), nem com o campo `ordemProducao`, que hoje é só o texto do pedido | 📝 N14-22, #74 🔴 a entidade e o documento não existem (`producao.prisma:97`) |
 | 15 | **Se o Compras já emitiu OC vinculada ao pedido de venda, o PCP vê, no MES, que existe ordem de compra para aquele pedido** (número da OC, situação, quantidade, previsão), na Triagem, na Destinação e no Atendimento do Estoque. Fonte: a referência da OC do hub, item com `destino` do tipo `pedido_venda` | 📝 N14-20 🔴 o MES não lê a referência (BL-049). **N14-28:** a requisição do Compras com pedido de venda aparece antes da OC ("Requisição aberta no Compras", BL-064 e BL-065), e o MES avisa ao requisitar se já há requisição ou OC para o item |
 
-### Matriz de destinação (eixo 1 × eixo 2)
+#### Matriz de destinação (eixo 1 × eixo 2)
 
 O diagrama antigo tratava Estoque, Revenda e Fabricação como três ramos. O modelo vigente tem **três eixos independentes**: (1) natureza, escolhida pela fábrica da rodada; (2) disponibilidade física, resolvida **no setor Estoque**; (3) destinação da reserva (a tabela `Reserva`, ver [[03-Estoque-Atendimento-e-Despacho]]). A matriz abaixo diz o que acontece com cada célula.
 
@@ -62,7 +123,7 @@ O diagrama antigo tratava Estoque, Revenda e Fabricação como três ramos. O mo
 
 Regra de bolso: **o PCP escolhe o destino; o Estoque decide quanto sai do saldo e para onde vai o restante.** Pedido pode misturar as três situações ao mesmo tempo, item a item.
 
-## Estados
+### Estados
 
 | Estado | Valores | Onde |
 |---|---|---|
@@ -75,7 +136,7 @@ Regra de bolso: **o PCP escolhe o destino; o Estoque decide quanto sai do saldo 
 | `TipoSetor` | `PRODUTIVO`, `ESTOQUE`, `COMPRAS`, `EXPEDICAO`, `REQUISICAO`, `LOGISTICA_ENTRADA`, `QUALIDADE` | `fabricas.prisma:17-32` |
 | Parcial | `CRIADO`, `RECEBIDO`, `EM_ANDAMENTO`, `EM_TRANSITO`, `PAUSADO`, `REPROVADO`, `CONCLUIDO`, `CANCELADO` (completo em [[Estados-e-Status]]) | `producao.prisma:29+` |
 
-## Telas
+### Telas
 
 | Nome atual | Nome antigo | Rota | App | Slug de permissão |
 |---|---|---|---|---|
@@ -87,7 +148,7 @@ Regra de bolso: **o PCP escolhe o destino; o Estoque decide quanto sai do saldo 
 
 A Triagem lista por mês, ano e **filial** (`codigoEmpresa`), mostra a coluna Qualidade ("Acompanha" ou "Não", `carteira/page.tsx:284-291`), o chip de envio e o de produção, e abre a Destinação com `router.push('/ordens-producao/novo?...')` (`carteira/page.tsx:155`). A Destinação distribui os itens entre destinos, com quantidade a enviar por item (começa cheia), prioridade, observação e montador de roteiro por destino (Estoque fixo travado no topo). Item sem destino **não vai na rodada** e continua na Triagem para a próxima (`ordens-producao/novo/page.tsx:359-366`, `:494-504`).
 
-## Endpoints e contratos
+### Endpoints e contratos
 
 | Método e rota | Permissão | Uso | Código |
 |---|---|---|---|
@@ -102,7 +163,7 @@ A Triagem lista por mês, ano e **filial** (`codigoEmpresa`), mostra a coluna Qu
 
 O `POST /pedidos/completo` singular foi apagado (PR #50); só o `/lote` existe.
 
-## Como está no código
+### Como está no código
 
 - ✅ **Triagem.** `PedidosCarteiraService.listar` lê a página do av-hub (`listarCarteiraIntegracao`), busca os itens de cada pedido com concorrência 8 (`pedidos-carteira.service.ts:48`, `:94-116`) e cruza com as ordens do MES **na mesma filial** (`:132-148`). Falha de um pedido vira `INDISPONIVEL`, não derruba a página.
 - ✅ **Criação.** Valida todos os destinos (fábrica, roteiro, liberação no av-hub, `pedidos.service.ts:207-260`) e depois grava numa transação com timeout de 30 s (`:396`): `Pedidos` com `acompanhamentoQualidade` e `codigoPedidoOmie` copiados do av-hub (`:250-253`, `:282-285`), `ItensPedido`, `Roteiros` (Estoque ordem 0) e uma `ItemParcial` por item.
@@ -113,7 +174,7 @@ O `POST /pedidos/completo` singular foi apagado (PR #50); só o `/lote` existe.
 - 🔴 **OC do pedido na Triagem e na Destinação (N14-20).** O PCP não vê hoje se o Compras já emitiu OC para o pedido. O MES precisa ler a referência da OC do hub (`GET /ordens-compra/referencia`, item com `destino` do tipo `pedido_venda`) e mostrar a OC ao lado do pedido e do item (BL-049); do lado do hub já existem o vínculo `ordens_compra_itens_vinculos`, a view `vw_pedido_venda_itens_compra` e `GET /compras/pedidos-venda/:numero/compras` ✅ ([[04-Circuito-de-Compra]]).
 - 🔴 **P6 Novo norte:** a Qualidade de saída pode reprovar e abrir retrabalho (`PATCH /itens-parciais/:id/reprovar`, `/resolver`, `/retrabalho`, `itens-parciais.controller.ts:205-239`), mas **não existe a fila "Novo norte"** nem o `RoteiroItem` (C8, EC-03). A única fila de decisão do PCP existente é a de divergência de recebimento.
 
-## O que falta desenvolver
+### O que falta desenvolver
 
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
@@ -126,14 +187,14 @@ O `POST /pedidos/completo` singular foi apagado (PR #50); só o `/lote` existe.
 | 5 | Pedido manual (`SistemaOrigem.MANUAL`) fora da espinha; ver anexo [[Pedido-Manual]] | Nathan | P2 | 🟡 |
 | 6 | Pedido liberado anterior à data de corte não aparece na Triagem (404 nos itens) | Nathan | P1 | 📝 decidido em 29/10 (N16-142): ficam fora do MES e terminam no sistema antigo; falta a mensagem no lugar do 404 (ver [[01-Vendas-Liberacao]]) |
 
-## Pendências
+### Pendências
 
 - Nathan: o saldo zero continua exigindo clique mesmo depois do marco zero do Estoque (13/11)? Hoje vale o clique sempre (#31b). **Decidido em 29/10/2026 (N16-139): sim, o clique vale sempre, também depois do marco zero.**
 - Nathan e Robert: a Triagem deve mostrar o saldo do Estoque por item (hoje não mostra; a decisão de saldo é só no Estoque). Com N14-20, ela também mostraria o saldo futuro e a OC do pedido. **Decidido em 29/10/2026 (N16-138): a Triagem não mostra o saldo do Estoque; o Estoque decide na etapa dele.**
 - Robert: a OP é uma entidade por destino de fabricação, por item ou por rodada? Como se relaciona com a "ordem" que o código grava hoje (`pedidoVenda/N`)?
 - Robert: se `ensureEtapasPorTipo` deve aceitar roteiro de Revenda **sem nenhuma** etapa além do Estoque (o front exige roteiro não vazio, `ordens-producao/novo/page.tsx:376-379`).
 
-## Subfluxo
+### Subfluxo
 
 ```mermaid
 flowchart TD
