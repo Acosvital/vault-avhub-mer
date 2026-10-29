@@ -3,8 +3,8 @@ id: SQL-015
 aliases: ["Contrato SQL 015", "015-Carteira-do-PCP"]
 tags: [contrato, contrato-sql, dba, pcp, carteira, pedidos, vendas, prazo, desvio, dashboard]
 criado: 2026-10-21
-atualizado: 2026-10-26
-status: parcial
+atualizado: 2026-10-29
+status: aplicado-em-producao
 sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
@@ -19,12 +19,13 @@ criado_original: 2026-10-21
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Define os totais que o banco entrega ao Dashboard do PCP (Planejamento e Controle da Produção): carteira (valor de pedidos ainda abertos), no prazo, atrasado, desvio de previsão e carteira por vendedor. Inclui a marca "Avanço" do diligenciador.
 > **Quem é afetado:** O PCP e os diligenciadores, que passam a ver quanto dinheiro está em carteira e quem concentra o atraso.
-> **Situação:** Parcial. Funções e rotas estão no ar e foram conferidas em 22 e 26/10 (dono: Gustavo). A marcação de avanço ainda não foi testada.
+> **Situação:** Entregue. O Gustavo terminou o banco e a API (informado em 29/10); funções e rotas estão no ar e foram conferidas em 22 e 26/10. Falta só o Nathan testar na tela a marcação de avanço e o cartão "Em avanço".
 > **Exemplo:** Em 22/10, o vendedor Euveraldo concentrava R$ 29,7 milhões da carteira em 5 pedidos.
 
-> [!info] Situação em 26/10/2026
-> **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
+> [!info] Situação em 29/10/2026
+> **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
+> - ✅ **Banco e API terminados pelo Gustavo (informado pelo Nathan em 29/10/2026).** O contrato sai de `Ativos` para `Entregues`. **Front (Nathan):** falta testar `PUT .../marcacao` (marcar e desmarcar, escopo, histórico) e conferir o cartão "Em avanço" do Dashboard PCP. **MES:** sem trabalho.
 > - ✅ **Conferido por mim em 26/10/2026** na API em uso pelo av-hub (perfil admin): `GET /pedidos_venda?carteira=true&desvio=true` devolve **221** pedidos, igual a `desvio_pedidos` do `/carteira` (critério 7); cada pedido traz `desvio_previsao`, `dias_previsao_inclusao` (exemplo: 9) e os campos de avanço (`avanco`, `avanco_marcado_por`, `avanco_marcado_por_nome`, `avanco_marcado_em`); a soma dos 57 vendedores bate com o resumo (carteira R$ 77.952.537,88 e 221 de desvio); avanço em 0 pedidos (ninguém marcou). 🟡 **Não testei `PUT .../marcacao`** (marcar e desmarcar grava dado; o escopo e o histórico seguem sem conferência).
 > - ✅ **G1 a G3 decididos em 21/10/2026, informado pelo Gustavo (26/10):** G1 lê direto de `pedidos_vendas`; G2 deu cerca de **45 ms** no resumo no teste dele; G3 ficou com **duas rotas** (`/carteira` e `/carteira/vendedores`).
 > - ✅ **Conferido em 22/10/2026 no preview** (Portal do PCP, Dashboard PCP, perfil admin), depois de o Gustavo informar que implementou. `GET /pedidos_venda/carteira` e `/carteira/vendedores` respondem 200 com todos os campos do contrato (`carteira_*`, `no_prazo_*`, `atrasados_*`, `sem_previsao_*`, `desvio_*`, `avanco_*`). Carteira R$ 77.702.706,01 em 888 pedidos = no prazo R$ 63.293.656,61 (541) + atrasados R$ 14.409.049,40 (349) + sem previsão 0; desvio R$ 7.094.757,08 em 219 pedidos (10 dias); a soma dos 56 vendedores bate com o resumo em carteira, no prazo, atrasados e desvio, e a lista vem ordenada pela carteira. Euveraldo (R$ 29.712.357, 5 pedidos) e Tiago Viana (R$ 7.640.565, 9) batem com a tabela de 21/10; os totais diferem dos de 21/10 por um dia de movimento (a conferência exata pede a mesma janela de 2026).

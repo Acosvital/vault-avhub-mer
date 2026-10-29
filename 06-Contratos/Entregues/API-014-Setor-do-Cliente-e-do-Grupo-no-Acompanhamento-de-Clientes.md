@@ -4,7 +4,7 @@ aliases: ["Contrato 014", "014-Setor-do-Cliente-e-do-Grupo"]
 tags: [contrato, contrato-api, acompanhamento-clientes, clientes, setor, categorizacao, grupos-de-empresa, av-hub]
 criado: 2026-10-21
 atualizado: 2026-10-29
-status: parcial
+status: aplicado-em-producao
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
 etapa_0b: []
@@ -19,12 +19,13 @@ criado_original: 2026-10-21
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Permite classificar clientes (CNPJ) ou grupos de empresa por setor de atuação (Mineração, Óleo & Gás etc.), com lista que a equipe pode ampliar, e olhar a carteira por setor no Acompanhamento de clientes.
 > **Quem é afetado:** Quem cuida dos clientes classifica e filtra por setor; o vendedor só vê. O MES não tem trabalho.
-> **Situação:** Parcial. Vários setores por cliente está feito no banco, na API e no front (conferido no código em 29/10/2026). Faltam confirmar no banco as linhas de permissão (❓) e definir os perfis (❓). Salvar 2 ou mais setores em um cliente real não foi visto (🟡).
+> **Situação:** Entregue. O Gustavo terminou o banco e a API (informado em 29/10/2026); vários setores por cliente está feito no banco, na API e no front (conferido no código em 29/10/2026). Faltam confirmar no banco as linhas de permissão (❓) e definir os perfis (❓). Salvar 2 ou mais setores em um cliente real não foi visto (🟡).
 > **Exemplo:** Grupo com os setores Mineração e Energia: seus CNPJs herdam os dois, e um CNPJ com Siderurgia própria usa só ela.
 
-> [!info] Situação em 26/10/2026
-> **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
+> [!info] Situação em 29/10/2026
+> **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (banco e API); Nathan (front)
 >
+> - ✅ **Banco e API terminados pelo Gustavo (informado pelo Nathan em 29/10/2026).** O contrato sai de `Ativos` para `Entregues`. **Front (Nathan):** falta testar salvar 2 setores, o filtro `id_setor` com 2, o Excel e o `403` do perfil só de leitura, e definir os perfis `pode_editar`/`pode_criar` e o lote. **MES:** sem trabalho.
 > - ✅ **Vários setores por cliente: feito no banco e na API, informado pelo Gustavo (26/10/2026):** commit `43dbec3` e migration `api014b` em produção; `kpis.por_setor` existe em `/acompanhamento_clientes` e o cliente conta em cada um dos setores dele.
 > - ✅ **Conferido por mim em 26/10/2026 (só leitura, na API em uso pelo av-hub):** cada linha traz `setores` (lista; vem com `setor_ativo` a mais) além de `id_setor`/`setor`; `kpis.por_setor` vem com Construção Civil 1, Farmacêutico 1, Mineração 1, Óleo & Gás 2 e "sem setor" 4.004 (soma 4.009 = `total_clientes`). 🟡 **Ainda não vi nenhum cliente com 2 ou mais setores** (por isso a soma fecha no total), então **salvar 2 setores**, o filtro `id_setor` com 2, o Excel e o `403` do perfil só de leitura **não foram conferidos** (gravam dados reais). O front de vários setores está na `develop` do av-hub (`a24d187`, 23/10).
 > - 📝 **Pedido do Nathan, 21/10/2026:** quem cuida dos clientes precisa poder **categorizar o cliente (CNPJ) ou o grupo de empresa por setor**, escolhendo de uma lista e **podendo acrescentar um setor novo** quando o cliente não é de nenhum dos listados. Lista inicial: Agricultura, Arquitetura e Design, Automotivo, Construção Civil, Energia, Indústria Naval, Mineração, Óleo & Gás, Papel & Celulose, Petroquímica, Saneamento e Siderurgia.

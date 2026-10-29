@@ -17,18 +17,18 @@ Quando nascer um contrato novo, ele entra **completo** em `06-Contratos/` (nunca
 
 | Pasta | Contratos (.md) | Anexos (.sql, .patch) | Total de arquivos |
 |---|---|---|---|
-| `Ativos` (a fazer ou parcial) | 31 | 20 | 51 |
-| `Entregues` (feito no código ou aplicado) | 63 | 12 | 75 |
+| `Ativos` (a fazer ou parcial) | 14 | 6 | 20 |
+| `Entregues` (feito no código ou aplicado) | 65 | 12 | 77 |
 | `Arquivados` (superado, fora de escopo ou histórico) | 11 | 0 | 11 |
-| **Total** | **105** | **32** | **137** |
+| **Total** | **90** | **18** | **108** |
 
 | Status | Contratos |
 |---|---|
-| `proposta` | 15 |
+| `proposta` | 2 |
 | `para-implementar` | 0 |
-| `parcial` | 15 |
+| `parcial` | 13 |
 | `implementado-no-codigo` | 46 |
-| `aplicado-em-producao` | 17 |
+| `aplicado-em-producao` | 18 |
 | `arquivado` | 11 |
 
 Vocabulário de status: `proposta` (ainda sem decisão), `para-implementar` (decidido, falta código), `parcial` (parte no código, parte não), `implementado-no-codigo` (conferido no código de 14/10), `aplicado-em-producao` (aplicado no banco, confirmado por dump; produção não reconferida em 14/10 ❓), `arquivado` (superado, rejeitado, fora de escopo ou histórico, com o motivo na nota).
@@ -62,7 +62,7 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | SQL-012 | Contrato SQL 012 | [[SQL-012-Ordens-Compra-Referencia-Valores\|Valores da OC na `vw_ordens_compra_referencia_mes`]] | `implementado-no-codigo` | av-hub: banco | Entregues | R0, R4 | — | — | — | — |
 | SQL-013 | Contrato SQL 013 | [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso\|Produtos: prováveis duplicatas (normalização, pares por semelhança e uso)]] | `aplicado-em-producao` | av-hub: banco | Entregues | — | — | Gustavo: informar os ajustes feitos no script | — | — |
 | SQL-014 | Contrato SQL 014 | [[SQL-014-Pedido-Encerrado-por-Saldo-Zerado\|Pedido encerrado por saldo zerado ("Faturado, encerrado") e encerrado em atraso]] | `aplicado-em-producao` | av-hub: banco | Entregues | — | — | — | — | — |
-| SQL-015 | Contrato SQL 015 | [[SQL-015-Carteira-do-PCP-Totais-por-Vendedor-e-Desvio\|Carteira do PCP: totais, por vendedor e desvio de previsão]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | — (G1 a G3 decididos; `desvio=true` conferido 26/10) | Nathan: testar `PUT .../marcacao` (marcar e desmarcar) | — |
+| SQL-015 | Contrato SQL 015 | [[SQL-015-Carteira-do-PCP-Totais-por-Vendedor-e-Desvio\|Carteira do PCP: totais, por vendedor e desvio de previsão]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | — | — | ✅ banco e API terminados (Gustavo, 29/10) | Nathan: testar `PUT .../marcacao` (marcar e desmarcar) | — |
 | API-001 | — | [[API-001-Produtos-Parceiros-Filtro-Incremental\|Filtro incremental `alterado_desde` em produtos e parceiros]] | `implementado-no-codigo` | av-hub: API · pipeline Omie | Entregues | — | — | — (`alterado_desde` corrigido, informado 26/10) | — | — |
 | API-002 | — | [[API-002-Material-Alias-Omie-MES\|Alias de material Omie no MES (rejeitado)]] | `arquivado` | MES: API | Arquivados | — | — | — | — | — |
 | API-003 | — | [[API-003-Requisicao-Compra-Integracao-MES\|Requisição de compra MES → av-hub (versão polling)]] | `arquivado` | av-hub: API · MES: API | Arquivados | P3 | — | — | — | — |
@@ -73,10 +73,10 @@ Contrato que pede uma resposta de negócio a quem conhece o assunto, com context
 | API-008 | Contrato 008 | [[API-008-Custo-do-Lote-no-MES\|Custo do lote no MES (`lote_custo`, G1, recebimento, consumo, `GET /itens/custo`)]] | `parcial` | av-hub: API · MES: API | Ativos | R4, E3, E5 | §3 custo da OC no Recebimento, rota MANUAL, §4 snapshot na SAIDA, §5 `GET /itens/custo`; cenários com e sem imposto: desenho decidido em 29/10 (N16-144); contrato só quando o desenvolvimento começar (contrato não editado) | — | — | — |
 | API-009 | Contrato 009 | [[API-009-Referencia-Requisicao-Hub-Integracao-MES\|Referência da requisição do Compras com pedido de venda (av-hub → MES)]] | `parcial` | av-hub: banco, API · MES: API, front | Ativos | C0, P1, P2, P3, E1 | Job de leitura junto do da referência da OC, projeção, tela do PCP e aviso de compra duplicada (BL-065) | Gustavo: responder Q1 a Q4 (migration `api009` em produção desde 20/10) | Nathan: campo "Pedido de venda" na "Nova requisição" (BL-041); decidir Q5 | — |
 | API-010 | Contrato 010 | [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto\|Requisição do Compras: finalidade, pedido de venda e produto do cadastro]] | `parcial` | av-hub: banco, API, front | Ativos | C0 | — | Gustavo: responder Q1 e Q4 (migration `api010` em produção desde 20/10) | Nathan: tela nova pronta (PR #209); a OC herda a finalidade; decidir Q2 e Q3 | — |
-| API-011 | Contrato 011 | [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno\|Compra em andamento, recebimento por item da OC e uso interno (MES)]] | `proposta` | MES: banco, API, front | Ativos | P1, P2, P3, E1, R0, R1, R4 | Cruzamento e abate, aviso ao requisitar, requisição interna "origem hub", saldo futuro, recebimento por item da OC e por NF, uso interno (BL-049, BL-050, BL-051, BL-065) | Gustavo: API-009 e API-010 | Nathan: Q3 (contabilidade e EPI) e Q5 (BL-049 e BL-050 no Ciclo 1) | — |
+| API-011 | Contrato 011 | [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno\|Compra em andamento, recebimento por item da OC e uso interno (MES)]] | `parcial` | MES: banco, API, front | Ativos | P1, P2, P3, E1, R0, R1, R4 | Teste em homologação, rateio da chegada (Q2), saldo futuro (BL-050) e OC visível ao PCP (BL-049); o resto está na `develop` do MES | ✅ Gustavo: API-009 e API-010 (29/10) | Nathan: Q3 (contabilidade e EPI) e Q5 (BL-049 e BL-050 no Ciclo 1) | — |
 | API-012 | Contrato 012 | [[API-012-Produtos-Provaveis-Duplicatas-Rota-e-Tela\|Produtos: prováveis duplicatas (rota `GET /produtos/duplicatas` e nova tela)]] | `implementado-no-codigo` | av-hub: banco, API, front | Entregues | — | — | Gustavo: rota `GET /produtos/duplicatas` antes de `/:id` e cache de 60 s | Nathan: BFF, serviço sem varredura e tela nova | — |
 | API-013 | Contrato 013 | [[API-013-Acompanhamento-de-Clientes-So-Cliente-e-Periodo-Total\|Acompanhamento de clientes: só clientes (tag) e período total]] | `aplicado-em-producao` | av-hub: API, front | Entregues | — | — | — | — | — |
-| API-014 | Contrato 014 | [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes\|Setor do cliente e do grupo no Acompanhamento de clientes]] | `parcial` | av-hub: banco, API, front | Ativos | — | — | — (vários setores e `kpis.por_setor` no ar, conferido 26/10) | Nathan: testar salvar 2 setores, filtro e Excel; definir perfis e o lote | — |
+| API-014 | Contrato 014 | [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes\|Setor do cliente e do grupo no Acompanhamento de clientes]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | — | — | ✅ banco e API terminados (Gustavo, 29/10) | Nathan: testar salvar 2 setores, filtro e Excel; definir perfis e o lote | — |
 | API-016 | Contrato 016 | [[API-016-Observacao-do-PCP-por-Item-do-Pedido\|Observação do PCP por item (produto) do pedido, no lugar de por parcial]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | — | — | — | — | — |
 | API-017 | Contrato 017 | [[API-017-Carteira-do-PCP-por-Periodo-e-Previsao-de-Faturamento-por-Mes\|Carteira do PCP por período do seletor e previsão de faturamento por mês]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | — | — | — | — | — |
 | API-018 | Contrato 018 | [[API-018-Carteira-do-PCP-Vencem-Hoje-e-Atrasados-Conferidos\|Carteira do PCP: "vencem hoje" em valor e atrasados conferidos com a lista]] | `aplicado-em-producao` | av-hub: banco, API, front | Entregues | — | — | — (feito, conferido em 26/10) | — | — |
@@ -169,7 +169,7 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 ### Robert (MES: `api-pcp` e `app-pcp`)
 
 
-- [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno|API-011]]: cruzamento e abate, aviso ao requisitar, requisição interna "origem hub", saldo futuro, recebimento por item da OC e por NF, uso interno
+- [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno|API-011]]: testar em homologação, rateio da chegada (Q2), saldo futuro (BL-050) e OC visível ao PCP (BL-049); recebimento por OC e NF, uso interno e aviso ao requisitar já estão na `develop`
 - [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado|LOG-53]]: ✅ OP emitida e impressa e lote `PRODUCAO` por OP e produto feitos em 27/10 (`ab3318d`, na `develop`); falta o custo do fabricado (BL-067) e subir para a `main` (BL-035)
 - [[LOG-54-Documento-de-Retirada-e-Baixa-na-Retirada|LOG-54]]: documento de retirada e baixa na retirada (tirar a baixa da Embalagem e da entrega)
 - [[API-009-Referencia-Requisicao-Hub-Integracao-MES|API-009]]: ✅ job, projeção e requisições na Triagem feitos em 23/10 (`9e75df5`); falta conferir na tela o aviso de compra duplicada (BL-065)
@@ -222,6 +222,17 @@ Só contratos fora de `Arquivados/`. O detalhe e os selos estão na nota de cada
 ### Pablo (Comercial & Suprimentos)
 
 - Desde 28/10/2026 **acompanha** o Robert (N16-117). As pendências que eram dele (ciclo da proposta, módulo na `api-acos-vital`, Ciclo 2 do LOG-47, substituir o orçamento do LOG-42) passaram ao Robert.
+
+## O que mudou de pasta em 29/10/2026
+
+O Gustavo terminou o banco e a API destes contratos (informado pelo Nathan em 29/10). O que sobra é front ou MES e continua em "Pendências por frente".
+
+| Contrato | De | Para | Motivo |
+|---|---|---|---|
+| [[SQL-015-Carteira-do-PCP-Totais-por-Vendedor-e-Desvio\|SQL-015]] | Ativos | Entregues | Banco e API terminados; falta o Nathan testar a marcação de avanço na tela |
+| [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes\|API-014]] | Ativos | Entregues | Banco e API terminados (`api014b`); falta o Nathan testar 2 setores, o filtro e o Excel e definir os perfis |
+
+**Sem mudança de pasta:** [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno\|API-011]] passa de `proposta` para `parcial`: a parte do hub (Gustavo) está pronta e o MES já tem boa parte na `develop`; o resto é do Robert. Os totais do resumo foram recontados pelos arquivos (antes não descontavam os 15 contratos removidos em 29/10).
 
 ## O que mudou de pasta em 26/10/2026
 
