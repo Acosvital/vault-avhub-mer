@@ -2,7 +2,7 @@
 id: conexao-telas-pablo-api-hub
 tags: [comercial, suprimentos, api-acos-vital, analise, rascunho]
 criado: 2026-10-27
-atualizado: 2026-10-27
+atualizado: 2026-10-29
 status: rascunho
 fontes: ["Dump do Avhub para referência (completo).sql (avhub_prd_db, gerado em 26/10/2026 08:30)", "av-hub branch refactor/menu-enxuto-vendas-orcamento-compras (3bccfce): app/(protected)/vendas, orcamento, dashboards/dash-comercial, comissoes/simulador; app/api/comercial/**; services/comercial/*", "api-acos-vital origin/develop a7fda49: src/schemas/**", "LOG-52 §0, LOG-56, API-019, API-020, N16-109, N16-111"]
 ---
@@ -194,7 +194,7 @@ KPIs cotado, fechado, em aberto, perdido e conversão; evolução diária; ranki
 | Cadastro | `/produtos/:id` | ✅ |
 | Fornecedores com última cotação e última compra | `/produtos/:id/fornecedores` | ✅ |
 | Histórico de preços | `/historico_precos`, `/orcamento/cotacoes` | ✅ |
-| Média, mínimo e máximo de 90 d por fornecedor | — | ❌ (rota de resumo; o dado existe) |
+| Média, mínimo e máximo de 90 d por fornecedor | `/produtos/:id/precos` (resumo por fornecedor, API-020) | 🟡 feito na aba Fornecedores (av-hub PR #250, 29/10); falta a rota no Hub publicado |
 | Dados técnicos | — | ❌ `produtos_perfil` |
 | É a página do produto `B2` do vault (LOG-56 R5: histórico, top fornecedores, flutuação) | | ❓ alinhar com o contrato do `B2` |
 
