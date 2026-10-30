@@ -24,7 +24,7 @@ criado_original: 2026-10-20
 > - 🕓 Registro de 20/10 (superado): front dado como escrito, não verificado na tela.
 > - 🕓 Registro de 20/10 (superado): banco e API não existiam.
 > - ✅ **Q1 decidida (20/10):** só a criada no Hub; a do MES continua cancelada com motivo.
-> - 🔴 **Pergunta aberta** (seção 6): o perfil Comprador ter `pode_deletar` em `compras` (Q2).
+> - ✅ **Q2 respondida (Nathan, 30/10/2026):** já existe perfil com `pode_deletar` em `compras`, então o botão de excluir aparece para quem tem esse perfil.
 
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Permite ao comprador excluir uma requisição de compra criada à mão no Hub (erro, duplicada, teste). É exclusão lógica; a do MES (sistema de chão de fábrica) continua sendo cancelada com motivo.
@@ -43,7 +43,7 @@ O comprador não consegue apagar uma requisição. Só existe **cancelar** (kanb
 | 2 | Só exclui requisição **sem OC** (`id_ordem_compra IS NULL`) e com status diferente de `atendida` | 🟡 |
 | 3 | Só exclui requisição **criada no Hub** (`id_origem IS NULL`). A que veio do MES se **cancela com motivo**; apagar deixaria o MES com a parcial pendurada | 📝 Q1 (Nathan, 20/10) |
 | 4 | Requisição excluída some de **todas** as leituras (lista, resumo, kanban, eventos para o MES, `GET /:id` devolve 404) e não conta nos KPIs | 🟡 |
-| 5 | Quem exclui precisa de `pode_deletar` na tela `compras` **e** ser comprador da unidade (`codigo_empresa`) da requisição, como já vale para fechar a compra | 🟡 Q2 |
+| 5 | Quem exclui precisa de `pode_deletar` na tela `compras` **e** ser comprador da unidade (`codigo_empresa`) da requisição, como já vale para fechar a compra | ✅ Q2 (30/10/2026) |
 | 6 | Excluir requisição **já vinculada a pedido de venda** (`numero_pedido_venda`) é permitido: o vínculo é só referência. A API recalcula o "saldo a comprar" do pedido | 🟡 |
 | 7 | Excluir **não gera evento** para o MES (a regra 3 garante que o MES nunca soube dela) | 🟡 |
 

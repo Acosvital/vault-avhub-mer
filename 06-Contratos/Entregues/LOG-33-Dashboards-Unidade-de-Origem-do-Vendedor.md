@@ -150,7 +150,7 @@ Branch `feat/vendedor-periodo-ativo`, ainda **sem commit**; tipos, telas e texto
 - [ ] Sem filtro, os totais dos 3 dashboards batem com os de hoje, ao centavo.
 - [ ] Com filtro, cada vendedor aparece em **uma** unidade só, e a soma das unidades é igual ao total "todas".
 - [ ] Preencheu `inativo_desde` dos inativos (P6) e conferiu o ranking de jan–mar/2026.
-- [ ] P1 a P7 respondidas.
+- [ ] P1 a P7 respondidas. Em 30/10/2026 o Nathan informou que vinculou os vendedores necessários (P1). A data de inatividade dos vendedores inativos (P6) não foi confirmada.
 
 ## 9. Depois de aplicado
 

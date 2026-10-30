@@ -3,7 +3,7 @@ id: LOG-48
 aliases: ["Contrato 48", "48-Acompanhamento-de-Clientes-Grupos-de-Empresa"]
 tags: [contrato, contrato-sql, contrato-api, dba, av-hub, clientes, grupos-de-empresa, portal-do-gerente, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-29
+atualizado: 2026-10-30
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo (DBA)"
@@ -19,14 +19,14 @@ criado_original: 2026-10-13
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Define a tela de Acompanhamento de Clientes e os grupos de empresa, que juntam CNPJs do mesmo cliente para que um CNPJ sem compra não seja marcado como inativo se outro do grupo comprou.
 > **Quem é afetado:** Vendedores veem só os próprios clientes. Gerência e admin veem tudo.
-> **Situação:** Parcial. Banco e API foram entregues pelo DBA (Gustavo) e conferidos na `api-test` em 15/10. As páginas do cliente e do grupo existem no front, mas ainda há marcas `GAMBIARRA` do §13 (Excel) a tirar pelo Nathan. Produção não conferida.
+> **Situação:** Parcial. Banco e API foram entregues pelo DBA (Gustavo) e conferidos na `api-test` em 15/10. As páginas do cliente e do grupo existem no front, e as marcas `GAMBIARRA` do §13 (Excel) saíram em 30/10/2026 (commit `046598a` do av-hub). Produção não conferida.
 > **Exemplo:** Cliente com 50 CNPJs: o CNPJ 50 sem venda fica como coberto pelo grupo se outro CNPJ comprou dentro do prazo.
 
 > [!info] Situação em 29/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
 > - ✅ **Conferido em 29/10/2026 no `av-hub` (`develop`):** o front do Acompanhamento de Clientes tem as páginas por cliente e por grupo, com os desdobramentos API-013 (só cliente e período total) e API-014 (vários setores, `a24d187`), ambos já em [[API-014-Setor-do-Cliente-e-do-Grupo-no-Acompanhamento-de-Clientes|Entregues]].
-> - 🔴 **Falta (Nathan):** as marcas `GAMBIARRA` do Excel ainda estão em `lib/api/acompanhamentoClientesPlanilha.ts` (linhas 22, 787 e 914), `lib/api/acompanhamentoClientesExportar.ts:15` e `lib/domain/acompanhamentoClientes.ts:398`; elas dizem que a API não manda o resumo por vendedor, mas o §13.2 foi entregue em 19/10, então o front precisa passar a usá-lo. Produção segue ❓.
+> - ✅ **Marcas `GAMBIARRA` tiradas (Nathan, 30/10/2026, commit `046598a` do av-hub, testado por ele na tela e no Excel):** a coluna Vendedores do grupo usa o `vendedores` que a API soma na linha, o cartão "Sem pedido" usa `kpis.sem_pedido_mes`, e a aba "Vendedores" do Excel vem de `GET /acompanhamento_clientes/vendedores` (§13.2, entregue em 19/10). A função `vendedoresDe` foi removida. Produção segue ❓.
 >
 > **Registro de 26/10/2026, mantido:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
@@ -347,8 +347,8 @@ Revisão do av-hub em 14/10 contra a API (`origin/develop`, 63871f3). O front fo
 2. **Visão por grupo:** o filtro de status vale na linha do grupo (só `ativo`/`inativo`), mas os `kpis` contam CNPJs. Clicar em "Cobertos pelo grupo" na visão por grupo dá lista vazia. Definir o status do grupo para o filtro, ou aplicar o filtro nos membros.
 3. **Escopo dos números do cliente:** `qtd/valor_pedidos_mes` e `vendedores` contam todos os vendedores, enquanto o `/movimento` mostra só os do usuário. Mesma página, dois números (e valor de outro vendedor à vista). Alinhar à §10.2.
 4. **`/movimento`:** `totais.qtd_pedidos` conta linhas (cabeçalho + parcelas), não pedidos.
-5. **Linha do grupo sem `vendedores`:** o front soma os dos membros (marca `GAMBIARRA` em `lib/domain/acompanhamentoClientes.ts`). Pedido: `vendedores` agregado na linha do grupo.
-6. **`kpis.sem_pedido_mes`:** o cartão "Sem pedido no mês" faz `total_clientes − com_pedido_mes` no navegador (marca `GAMBIARRA`). Some quando a §10 trocar o cartão.
+5. ✅ **Resolvido em 30/10/2026** (a API manda `vendedores` na linha do grupo e o front o usa). **Linha do grupo sem `vendedores`:** o front somava os dos membros (marca `GAMBIARRA` em `lib/domain/acompanhamentoClientes.ts`). Pedido: `vendedores` agregado na linha do grupo.
+6. ✅ **Resolvido em 30/10/2026** (o cartão usa `kpis.sem_pedido_mes`). **`kpis.sem_pedido_mes`:** o cartão "Sem pedido no mês" faz `total_clientes − com_pedido_mes` no navegador (marca `GAMBIARRA`). Some quando a §10 trocar o cartão.
 7. **Grupos:** o 409 `CLIENTE_EM_OUTRO_GRUPO` tem dois formatos (o caminho AV482 devolve `id_grupo`/`nome_grupo`, sem `conflitos[]`); pedir sempre `conflitos[]`. Sugestões com parâmetro `raiz` exato em vez de `busca` (com `limit 20`, a raiz certa pode sair da página). Edição atômica (nome + inclusões + remoções numa transação).
 8. 🔴 **Sem token de usuário a API não aplica o escopo:** na sessão local de 14/10 **não havia `backendToken`**, e a tela devolvia os clientes de todos os vendedores. Conferir se em produção a sessão tem o token. Se tiver, o BFF pode recusar sem token (como `liberar-pedidos`); se não, a tela mostra tudo para um vendedor.
 9. **Página do pedido para vendedor:** o movimento leva a `/pedidos-equipe/...`; confirmar se o perfil vendedor tem essa tela.
@@ -399,7 +399,7 @@ Botão **Exportar Excel** no cabeçalho da lista. Rota do BFF: `GET /api/acompan
 | Cobertos pelo grupo | só aparece quando existe CNPJ coberto |
 | Top 50 venda / Top 50 faturamento | `sort=venda_liquida_mes` e `sort=faturamento_liquido_mes` na API; a aba some se a API ignorar a ordenação |
 | Grupos de empresa, CNPJs dos grupos | só aparecem quando existem grupos |
-| Vendedores, Cliente x Vendedor | carteira de cada vendedor segundo os pedidos (GAMBIARRA abaixo) |
+| Vendedores, Cliente x Vendedor | carteira de cada vendedor segundo os pedidos (vem da API desde 30/10/2026) |
 | Dicionário | significado de cada status e coluna |
 
 Todas as colunas têm filtro; a linha "Total do filtro" (SUBTOTAL) acima do cabeçalho recalcula só o que está visível. Cabeçalho e cliente congelados, status colorido (formatação condicional), dias sem comprar em escala de cor, link "No Hub" para a página do cliente.
@@ -407,7 +407,7 @@ Todas as colunas têm filtro; a linha "Total do filtro" (SUBTOTAL) acima do cabe
 ### 13.2 Como é montado e o que fica para o backend
 
 - A rota faz cerca de **27 consultas** à API (todas as páginas de cada recorte, 500 por página, 5 ao mesmo tempo) e formata. Com a base inteira (3.964 clientes) leva **15 a 25 segundos** e o arquivo tem ~1,2 MB. Nada é recalculado: status, deduções e vendas vêm prontos.
-- 🟡 **Resumo por vendedor e `vendedores` do grupo** são somados na rota (duas marcas `GAMBIARRA` em `lib/api/acompanhamentoClientesPlanilha.ts`). Pedido: a API devolver o resumo por vendedor (clientes atendidos, pedidos no histórico e no mês, última venda) e `vendedores` agregado na linha do grupo.
+- ✅ **Resumo por vendedor e `vendedores` do grupo** vêm da API desde 30/10/2026 (as marcas `GAMBIARRA` saíram). O pedido era: a API devolver o resumo por vendedor (clientes atendidos, pedidos no histórico e no mês, última venda) e `vendedores` agregado na linha do grupo.
 - 🟡 **Endpoint de exportação no backend** (o `.xlsx` pronto, como o relatório do `api-comercial`) tiraria as 27 idas e voltas do BFF e o risco de um proxy cortar a requisição antes dos 120 s. Opcional.
 - 📝 **Permissão própria decidida em 30/10/2026 (N16-147): a exportação ganha a ação `pode_exportar`.** Falta criar a ação no banco e nos perfis. Antes: hoje exportar exige só `pode_visualizar`, e o arquivo sai do sistema com CNPJ e CPF dos clientes. Decidir se pede uma ação específica (`pode_exportar`).
 

@@ -189,7 +189,7 @@ flowchart LR
 
 ## Devolução da sobra ao Estoque (modelo aprovado em 30/10/2026)
 
-Quando o material retirado não é todo usado, a sobra volta ao Estoque por um documento próprio, ligado à retirada de origem (N16-146). O documento traz os dados da Aços Vital, a declaração de devolução, quem devolve (nome, setor, data e horário), a lista com lote, **retirado, utilizado e devolvido**, a condição do material, e quem devolveu e quem recebeu no Estoque, com a assinatura dos dois. Segue o layout da Ordem de Compra. O modelo está em `09-Diagramas/documento-reentrada-modelo.pdf`. 📝 modelo aprovado pelo Nathan; 🔴 as regras de negócio estão nas perguntas Q7 a Q13.
+Quando o material retirado não é todo usado, a sobra volta ao Estoque por um documento próprio, ligado à retirada de origem (N16-146). O documento traz os dados da Aços Vital, a declaração de devolução, quem devolve (nome, setor, data e horário), a lista com lote, **retirado, utilizado e devolvido**, a condição do material, e quem devolveu e quem recebeu no Estoque, com a assinatura dos dois. Segue o layout da Ordem de Compra. O modelo está em `09-Diagramas/documento-reentrada-modelo.pdf`. 📝 modelo aprovado pelo Nathan; 🔴 as regras de negócio estão nas perguntas Q7 a Q13, que o Nathan vai conversar só em dezembro de 2026.
 
 ## Perguntas em aberto
 
