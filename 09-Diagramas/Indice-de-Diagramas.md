@@ -29,7 +29,7 @@ fontes: [v1 04-Arquitetura-Transversal/Diagramas-UML, v1 01-Fluxo-Operacional (F
 | Quais programas existem, onde rodam e como se falam | [[Componentes-e-Implantacao]] |
 | Quais tabelas existem nos bancos do MES e do av-hub | [[Modelo-de-Dados]] |
 | O circuito de compra em forma de grafo | [[04-Circuito-de-Compra]] |
-| As conversas entre o av-hub e o MES (INT-01 a INT-07) | [[Integracao-AvHub-MES]] |
+| As conversas entre o av-hub e o MES (INT-01 a INT-09) | [[Integracao-AvHub-MES]] |
 | A transferência de estoque entre filiais | [[Transferencia-entre-Filiais]] |
 
 ## Os diagramas do v2

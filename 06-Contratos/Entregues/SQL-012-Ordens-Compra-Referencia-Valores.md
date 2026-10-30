@@ -3,12 +3,12 @@ id: SQL-012
 aliases: ["Contrato SQL 012", "012-Ordens-Compra-Referencia-Valores"]
 tags: [contrato, contrato-sql, dba, integracao-av-hub-mes, compras, custo, api004]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: [R0, R4]
-fontes: ["Dump Avhub (Esqueleto).sql:20237-20330", "api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_ordens_compra_referencia_mes/vw_ordens_compra_referencia_mes.route.js:51-53"]
+fontes: ["Dump Avhub (Esqueleto).sql:20237-20330", "api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_ordens_compra_referencia_mes/vw_ordens_compra_referencia_mes.route.js:53-57"]
 criado_original: 2026-10-09
 ---
 
@@ -19,8 +19,9 @@ criado_original: 2026-10-09
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** R0, R4 · **Dono:** Gustavo (DBA)
 >
-> - ✅ A view já traz `moeda`, `cotacao_moeda`, `cotacao_data`, `cotacao_origem`, `valor_frete`, `valor_seguro` e, nos itens, `valor_unitario`, `desconto_pct`, `valor_desconto`, `valor_total_item` (`Dump Avhub (Esqueleto).sql:20237-20330`); a rota os expõe (`vw_ordens_compra_referencia_mes.route.js:51-53`). Migration `api007` aplicada.
-> - O consumo no MES continua pendente: [[API-007-Referencia-OC-Valores-no-MES]].
+> - ✅ A view já traz `moeda`, `cotacao_moeda`, `cotacao_data`, `cotacao_origem`, `valor_frete`, `valor_seguro` e, nos itens, `valor_unitario`, `desconto_pct`, `valor_desconto`, `valor_total_item` (`Dump Avhub (Esqueleto).sql:20237-20330`); a rota os expõe (`vw_ordens_compra_referencia_mes.route.js:53-57`). Migration `api007` aplicada.
+> - O consumo no MES existe na `develop` do MES (leitura K4 e custo no lote K5, conferido em 29/10/2026); o contrato do lado do MES está em [[API-007-Referencia-OC-Valores-no-MES]].
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
@@ -28,10 +29,10 @@ criado_original: 2026-10-09
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Acrescentou à view de referência de OC (Ordem de Compra) os valores: preço, desconto, moeda, cotação, frete e seguro. Assim o lote recebido no MES (sistema de chão de fábrica) nasce com custo.
 > **Quem é afetado:** Compras, Orçamento e Recebimento do MES.
-> **Situação:** ✅ View e rota já trazem os valores (migration `api007` aplicada). 🔴 O consumo no MES continua pendente.
+> **Situação:** ✅ View e rota já trazem os valores (migration `api007` aplicada). ✅ O MES já lê os valores (`api-pcp/src/integracao-avhub/oc-referencia-avhub.service.ts`, K4) e grava o custo da OC no lote (`api-pcp/src/compras/compra-oc.ts:89-114`, K5), conferido em 29/10/2026 só na `develop` do MES; a view ganhou o fornecedor da OC na migration `api007b` (26/10).
 
 
-> **Status: `para-implementar` (Gustavo, DBA).**[^c1] Estende a migration `api004` do [[SQL-011-Ordens-Compra-Referencia-MES|011-Ordens-Compra-Referencia-MES]], que o DBA informou em 09/10/2026 ter **entregue e aplicado**. Este contrato só **acrescenta** colunas e eventos: nada que a rota ou o MES leem hoje muda de nome, tipo ou significado. Contrato de API que o consome: [[API-007-Referencia-OC-Valores-no-MES|007-Referencia-OC-Valores-no-MES]]. Desenho de negócio: [[Modelo-Estoque-e-Custo-do-Lote|Estoque-Custo-do-Lote]].
+> **Status (superado, ver a Situação no topo): `para-implementar` (Gustavo, DBA).**[^c1] Estende a migration `api004` do [[SQL-011-Ordens-Compra-Referencia-MES|011-Ordens-Compra-Referencia-MES]], que o DBA informou em 09/10/2026 ter **entregue e aplicado**. Este contrato só **acrescenta** colunas e eventos: nada que a rota ou o MES leem hoje muda de nome, tipo ou significado. Contrato de API que o consome: [[API-007-Referencia-OC-Valores-no-MES|007-Referencia-OC-Valores-no-MES]]. Desenho de negócio: [[Modelo-Estoque-e-Custo-do-Lote|Estoque-Custo-do-Lote]].
 
 ## Por quê
 

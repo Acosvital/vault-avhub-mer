@@ -3,12 +3,12 @@ id: LOG-39
 aliases: ["Contrato 39", "39-Vendedores-Fila-de-Vinculo"]
 tags: [contrato, contrato-api, vendedores, cadastros, acessos, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js:268"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/vendedores/vendedores.route.js:269"]
 criado_original: 2026-10-06
 ---
 
@@ -24,8 +24,9 @@ criado_original: 2026-10-06
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - ✅ `sem_vinculo=true` filtra a fila de vendedores sem funcionário (`vendedores.route.js:268`). Anexo em `LOG-39-anexos/`.
+> - ✅ `sem_vinculo=true` filtra a fila de vendedores sem funcionário (`vendedores.route.js:269`). Anexo em `LOG-39-anexos/`.
 > - ❓ Produção: o vault v1 registra conferência em produção em 07/10; não reconferido.
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.

@@ -44,9 +44,9 @@ Quando o Compras compra antes de o PCP movimentar o pedido, o MES não sabe e po
 | Fonte                                                                      | O que é                                                | Chega por                                       | Estado         |
 | -------------------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------- | -------------- |
 | OC aprovada (e cancelada depois de aprovada)                               | `OcReferencia` e itens, com `destino[]` e `finalidade` | `GET /ordens-compra/referencia` (K4)            | ✅ na `develop` |
-| Requisição do hub com pedido de venda, sem OC ou com OC ainda em aprovação | `RequisicaoHubReferencia`                              | `GET /compras/requisicoes/referencia` (API-009) | 🔴             |
+| Requisição do hub com pedido de venda, sem OC ou com OC ainda em aprovação | `RequisicaoHubReferencia`                              | `GET /compras/requisicoes/referencia` (API-009) | ✅ na `develop` (23/10) |
 | Requisição do MES ainda aberta                                             | `RequisicaoCompra` (origem `MES`)                      | tabela do MES                                   | ✅              |
-| Parcela já coberta por OC                                                  | `RequisicaoCompra` de origem `HUB`                     | criada pelo MES (seção 5, R2)                   | 🔴             |
+| Parcela já coberta por OC                                                  | `RequisicaoCompra` de origem `HUB`                     | criada pelo MES (seção 5, R2)                   | ✅ na `develop` (20/10) |
 
 A OC em `aguardando_aprovacao` **não** vem pela referência da OC; a requisição `atendida` do API-009 cobre esse intervalo, com `situacao_ordem_compra`.
 

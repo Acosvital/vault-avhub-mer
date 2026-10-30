@@ -3,12 +3,12 @@ id: LOG-35
 aliases: ["Contrato 35", "35-Compras-Marcos-Requisicao-para-MES"]
 tags: [contrato, contrato-sql, contrato-api, compras, integracao-mes, torre-de-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco, hub-api, mes-api]
 dono: "Robert"
 etapa_0b: [C1, C3, C4, C5, R0, P3]
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/requisicoes_compra/requisicoes_compra.route.js:289", "api-pcp/src/integracao-avhub/eventos-avhub.service.ts:31,61,80,185", "api-pcp/src/integracao-avhub/requisicao-avhub.eventos.ts", "api-pcp/src/compras/compras.controller.ts:48,57,96,108"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/requisicoes_compra/requisicoes_compra.route.js:382", "api-pcp/src/integracao-avhub/eventos-avhub.service.ts:26,58,74,185", "api-pcp/src/integracao-avhub/requisicao-avhub.eventos.ts", "api-pcp/src/compras/compras.controller.ts:48,56,114,126"]
 criado_original: 2026-10-02
 ---
 
@@ -24,11 +24,12 @@ criado_original: 2026-10-02
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C1, C3, C4, C5, R0, P3 · **Dono:** Robert
 >
-> - ✅ **av-hub:** `GET /compras/requisicoes/eventos` com `alterado_desde`, `apos_id`, `codigo_empresa`, `limit` (`requisicoes_compra.route.js:289`); `autor` e `comprador` em cada marco (migration 035b, `2aee636`).
-> - ✅ **MES:** duas leituras. Polling a cada `AVHUB_EVENTOS_INTERVALO_MIN` = 5 min (`eventos-avhub.service.ts:61`) e leitura sob demanda por `POST /compras/requisicoes/sincronizar` (`compras.controller.ts:57`), com rodada compartilhada pulada se a última leitura tem menos de 30 s (`eventos-avhub.service.ts:31,80`). Cursor `(registrado_em, id)`; cada evento é gravado e aplicado numa transação, falha não avança o cursor.
+> - ✅ **av-hub:** `GET /compras/requisicoes/eventos` com `alterado_desde`, `apos_id`, `codigo_empresa`, `limit` (`requisicoes_compra.route.js:382`); `autor` e `comprador` em cada marco (migration 035b, `2aee636`).
+> - ✅ **MES:** duas leituras. Polling a cada `AVHUB_EVENTOS_INTERVALO_MIN` = 5 min (`eventos-avhub.service.ts:58`) e leitura sob demanda por `POST /compras/requisicoes/sincronizar` (`compras.controller.ts:56`), com rodada compartilhada pulada se a última leitura tem menos de 30 s (`eventos-avhub.service.ts:26,74`). Cursor `(registrado_em, id)`; cada evento é gravado e aplicado numa transação, falha não avança o cursor.
 > - ✅ O MES usa **todos** os marcos (`requisicao-avhub.eventos.ts`): atualiza `etapaCompra` (`AGUARDANDO_COMPRADOR`, `EM_COTACAO`, `EM_APROVACAO`, `COM_FORNECEDOR`, `EM_TRANSITO`, `CANCELADA`), `numeroOc`, `numeroPedidoOmie`, `previsaoChegada`, `despachadaEm`, `nfFornecedor`, `transportadora`, `ocorrenciaAberta` e recalcula o resumo (ABERTA ↔ EM_COMPRA). `oc_aprovada` põe o item nos esperados do Recebimento (`GET /compras/requisicoes/esperados`, `compras.controller.ts:48`); `oc_cancelada` tira e devolve ao comprador; `requisicao_cancelada` e `requisicao_reaberta` devolvem a parcial a Requisições ou a Compras·CCP.
-> - ✅ A chegada exige NF (`POST /compras/requisicoes/:id/chegada`, `compras.controller.ts:96`); rede de segurança `POST /compras/requisicoes/:id/liberar-recebimento` (`:108`, permissão `compras-liberar`, com motivo). Anexos SQL e patch em `LOG-35-anexos/`.
+> - ✅ A chegada exige NF (`POST /compras/requisicoes/:id/chegada`, `compras.controller.ts:114`); rede de segurança `POST /compras/requisicoes/:id/liberar-recebimento` (`:126`, permissão `compras-liberar`, com motivo). Anexos SQL e patch em `LOG-35-anexos/`.
 > - 🟡 O texto original, escrito antes do commit `579a625`, diz que o MES "só reage a" alguns marcos e cita o registro manual de compra: ambos superados (ver notas de rodapé).
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89` e `api-pcp` `develop` `befd973`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.

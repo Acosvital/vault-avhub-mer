@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Robert
-fontes: [v1 Diagramas-UML (1, 2, 3, 23, 25), api-pcp 579a625 prisma/models/*.prisma, HUB b55ac55 api-comercial/prisma/models/*.prisma]
+fontes: [v1 Diagramas-UML (1, 2, 3, 23, 25), api-pcp 579a625 prisma/models/*.prisma (LoteCusto e OrigemLote reconferidos na develop befd973 em 29/10/2026), HUB b55ac55 api-comercial/prisma/models/*.prisma]
 ---
 
 # Diagramas de classes
@@ -326,9 +326,9 @@ classDiagram
 ```
 ✅ Conferido no código. O registro manual da compra saiu: `pedidoCompra`, `fornecedor` e `previsaoEntrega` vêm do av-hub, nunca digitados.
 
-## 4. api-comercial (schema `core_comercial`, Comercial e Suprimentos)
+## 4. api-comercial (schema `core_comercial`, Comercial e Suprimentos; legado de leitura)
 
-Fora do fluxo 0b; ver [[Comercial-Suprimentos]]. Mostra clientes, propostas, fornecedores, ofertas de preço e ordens de compra do módulo do Pablo. As caixas sem campos só entram para mostrar a ligação.
+Fora do fluxo 0b; ver [[Comercial-Suprimentos]]. **O desenho é o do legado de 14/10**: desde 28/10 a `api-comercial` é só de leitura (N16-117) e o Robert refaz o módulo na `api-acos-vital`, com a proposta sem fechamento parcial e `StatusProposta` novo (`ABERTA`, `APROVADA`, `TRANSFORMADA`, `CANCELADA`, ver [[Estados]] 13). Mostra clientes, propostas, fornecedores, ofertas de preço e ordens de compra do módulo do Pablo. As caixas sem campos só entram para mostrar a ligação.
 
 ```mermaid
 classDiagram
@@ -395,14 +395,14 @@ O diagrama 3 do v1 (RBAC e comercial do av-hub: `Usuario`, `Perfil`, `Tela`, `Fu
 
 ## Detalhe técnico
 
-Redesenhados a partir do Prisma do `api-pcp` (`prisma/models/`) e do Prisma do `api-comercial` (HUB `b55ac55`), ambos de 14/10/2026. Nem todos os campos aparecem.
+Redesenhados a partir do Prisma do `api-pcp` (`prisma/models/`) e do Prisma do `api-comercial` (HUB `b55ac55`), ambos de 14/10/2026. Nem todos os campos aparecem. As linhas de arquivo citadas abaixo são de 14/10 e podem ter se deslocado na `develop` de 29/10.
 
 ### Diagrama 1: Estoque e compras no MES
 
 Selo ✅ para todas as classes exceto `RetiradaEstoque` (📝 decidida em 14/10, 🔴 sem código). Fontes: `estoque.prisma:61-423`. Mudanças em relação ao v1:
 
 - `Deposito` ganhou `codigoEmpresa` e `nomeUnidade` (filial do depósito) ✅ `estoque.prisma:69-70`; o v1 dizia que não tinha.
-- `LoteCusto` existe e tem `OrigemCusto` (`CARGA_INICIAL`, `OC`, `MANUAL`); só a carga inicial grava 🔴 (o Recebimento não grava custo).
+- `LoteCusto` existe e tem `OrigemCusto` (`CARGA_INICIAL`, `OC`, `MANUAL`). Em 14/10 só a carga inicial gravava; na `develop` de 29/10 o Recebimento grava o custo da OC (19/10, `97b9adc`) e o custo pode ser informado ou corrigido à mão (27/10, `6c11147`) ✅. `OrigemLote` ganhou `PRODUCAO` (fabricado aprovado na inspeção de saída, LOG-53).
 - `Pesagem` não é classe: peso teórico, real e recontado ficam em `RecebimentoItem` (diagrama 3). Etiqueta é geração sob demanda (`src/estoque/etiquetas`), sem tabela. `OrdemSeparacao`, `ItemSeparacao`, `DevolucaoCliente` e `ContagemCiclica` não existem no schema e saíram deste vault (fora do fluxo 0b).
 - `Fornecedor` é projeção local (`fornecedores`) sem ligação com o lote; o lote guarda `numeroNf` e o recebimento guarda o nome do fornecedor.
 - `RetiradaEstoque` entra como proposta do nó E6: a baixa sai do recebimento da parcial na Embalagem e passa para a retirada. Nome e campos 🟡 a definir com o Robert.

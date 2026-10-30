@@ -16,6 +16,9 @@ fontes: [api-acos-vital f322dcd src/schemas/core_compras/aggregates/orcamento, H
 > [!warning] Arquivado em 26/10/2026
 > O Orçamento entrou no fluxo mestre (`B1` a `B4`, N16-07, N16-16). A nota vigente é [[12-Orcamento-Base-de-Preco]], que diz o que aconteceu com cada item desta. Esta nota fica só como registro do estado de 14/10.
 
+> [!note] O que mudou depois (conferido em 29/10/2026)
+> O módulo antigo de Orçamento do HUB (telas lendo JSON do repositório, `lib/orcamento`, `app/api/orcamento`) foi **removido em 16/10** (`c851cda`, av-hub). As telas de Orçamento de hoje são as do antigo Comercial & Suprimentos, em `orcamento/` (`catalogo-produtos`, `custo-itens`, `fornecedores`, `painel-comprador`, `parametros-custo`). O Orçamento é do Pablo, com o Robert (N16-117). As tabelas `orc_*` e as rotas `/orcamento` da API seguem como estavam; não conferi se ainda têm consumidor ❓.
+
 ## Como estava em 14/10
 
 - Decisão do Nathan de 07/10 (item 39 do v1): o orçamento é feito por fora, no módulo Comercial & Suprimentos ([[Comercial-Suprimentos]]). A tela e o código antigos do HUB saem quando o módulo novo os substituir 🟡 ([[LOG-42-Coordenadores-e-Orcamento-sair-do-JSON-do-Repositorio]], proposta).

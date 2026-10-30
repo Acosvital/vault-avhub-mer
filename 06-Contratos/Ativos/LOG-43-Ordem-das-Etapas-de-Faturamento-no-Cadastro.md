@@ -3,7 +3,7 @@ id: LOG-43
 aliases: ["Contrato 43", "Contrato 05 (P6)", "43-Ordem-das-Etapas-de-Faturamento-no-Cadastro"]
 tags: [contrato, contrato-api, contrato-sql, etapas-faturamento, pipeline, front, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-19
+atualizado: 2026-10-29
 status: parcial
 sistemas: [hub-banco, hub-api, hub-front, pipeline-omie]
 dono: "Gustavo (DBA)"
@@ -22,8 +22,13 @@ criado_original: 2026-10-07
 > **Situação:** Parcial. Coluna, view e rota já existem e o código morto do front saiu. Falta proteger a coluna no pipeline e conferir o seed (carga inicial) dos valores 1 a 6. Dono: Gustavo.
 > **Exemplo:** Com a ordem no cadastro, a etapa 80 aparece antes da 50, e ajustar isso passa a ser um PUT na API, sem deploy do front.
 
-> [!info] Situação em 14/10/2026
+> [!info] Situação em 29/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
+>
+> - ✅ **Reconferido em 29/10/2026:** a rota `GET /etapas_faturamento?ordem=fluxo` segue na `develop` da `api-acos-vital` (`etapas_faturamento.route.js:67-76`) e `utils/etapasFluxo.ts` e `ORDEM_ETAPAS` não existem mais no `av-hub`.
+> - 🔴 **Continua aberto:** `omie-elt-pipeline/src/db/protectedColumns.ts` (`master`, último commit de 05/10) não tem a entrada `core.etapas_faturamento: [ordem_fluxo]`; o seed dos valores 1 a 6 também não foi conferido (❓).
+>
+> **Registro de 14/10/2026, mantido:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
 > - ✅ **Banco e API:** a coluna `core.etapas_faturamento.ordem_fluxo smallint` com `CHECK` 1..999 existe (`Dump Avhub (Esqueleto).sql:11084-11101`), a view `vw_etapas_fluxo_pedido` também (`:19354`), e `GET /etapas_faturamento?ordem=fluxo` ordena pelo cadastro (`api-acos-vital/src/schemas/core/tables/etapas_faturamento/etapas_faturamento.route.js:66-76`).
 > - 🔴 **Pipeline:** `omie-elt-pipeline/src/db/protectedColumns.ts` não tem a entrada `'core.etapas_faturamento': ['ordem_fluxo']` (§3.2); hoje o upsert não sobrescreve a ordem "por acaso".

@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Robert (MES) · Nathan (decisões)
-fontes: [00-Fluxo-Mestre-0b, LOG-26, v1 01-Fluxo-Operacional/PCP-Carteira, v1 Modelo-Destinacao-Item, v1 Encaixe-Estoque-Revenda-no-PCP, v1 Fluxo-Estoque-Completo, api-pcp 579a625 (pedidos.service.ts, pedidos-carteira.service.ts, pedidos.controller.ts, fabricas.prisma), app-pcp 1fca8d3 (carteira, ordens-producao/novo), Registro-de-Decisoes #31b #50b]
+fontes: [00-Fluxo-Mestre-0b, LOG-26, v1 01-Fluxo-Operacional/PCP-Carteira, v1 Modelo-Destinacao-Item, v1 Encaixe-Estoque-Revenda-no-PCP, v1 Fluxo-Estoque-Completo, api-pcp 579a625 (pedidos.service.ts, pedidos-carteira.service.ts, pedidos.controller.ts, fabricas.prisma), app-pcp 1fca8d3 (carteira, ordens-producao/novo), Registro-de-Decisoes #31b #50b, api-pcp e app-pcp develop de 27/10/2026 (OP, Montagem do Roteiro), N16-138 a N16-142]
 ---
 
 # Raia PCP: Triagem e Destinação do Pedido (P1, P2, P6)
@@ -16,22 +16,24 @@ fontes: [00-Fluxo-Mestre-0b, LOG-26, v1 01-Fluxo-Operacional/PCP-Carteira, v1 Mo
 > - Saldo zero continua exigindo o clique do almoxarife, mesmo depois do marco zero de 13/11 (N16-139).
 > - No retrabalho, o PCP escolhe o setor de volta. Hoje o código volta sempre ao setor anterior (N16-141).
 > - Pedido anterior à data de corte fica fora do MES e termina no sistema antigo. Falta trocar o erro 404 por uma mensagem clara (N16-142).
-> - Ordem de Produção: desenho em [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] (uma por destino de fabricação, numerada `pedido/N`; revenda não gera ordem). Proposta aceita em 15/10, sem código.
+> - Ordem de Produção: [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] ✅ está na `develop` do MES desde 27/10/2026 (`api-pcp` `ab3318d`, `app-pcp` `b9e8cb1`): toda ordem de destino de fabricação é uma OP emitida na criação, numerada `pedido/N`, com PDF e botão "Imprimir OP" (2ª via); revenda não gera OP.
+> - Roteiro: desde 22/10 (`develop`) a Destinação cria a OP só com o Estoque e o roteiro é montado depois, na tela Montagem do Roteiro (`/montagem-roteiro`), que libera a OP.
+> - Código: o que aparece como "develop" nesta nota não está na `main` do MES, parada em 08/10 (merge BL-035).
 
 ## Como funciona, passo a passo
 
 1. O PCP abre a Triagem do Pedido e vê os pedidos liberados, por mês, ano e filial. `P1`
 2. Para cada item, escolhe o destino: uma fábrica de fabricação ou a Revenda. `P2`
 3. Define quanto manda nesta rodada, até o que ainda resta do pedido, e a prioridade. Item sem destino fica para a próxima rodada.
-4. Monta o roteiro de cada destino. O Estoque já vem fixo como primeira etapa. Roteiro de fabricação precisa de uma inspeção de qualidade antes da expedição.
-5. O sistema grava a rodada de uma vez, com uma ordem por destino. Se uma falhar, nenhuma grava. Cada item vira uma parcial no Estoque, com 100% da quantidade.
+4. Cada destino ganha uma ordem com o Estoque fixo como primeira etapa. O roteiro dos demais setores é montado depois, na Montagem do Roteiro (`develop`); roteiro de fabricação precisa de uma inspeção de qualidade antes da expedição. Na `main` do MES o roteiro ainda é montado nesta mesma tela.
+5. O sistema grava a rodada de uma vez, com uma ordem por destino. Se uma falhar, nenhuma grava. Cada item vira uma parcial no Estoque, com 100% da quantidade. Enquanto o roteiro não é liberado, a parcial só sai do Estoque para compra (`develop`).
 6. O MES avisa o av-hub que importou o pedido, e a marcação do vendedor trava. Se o aviso falhar, ele tenta de novo a cada 10 minutos, por 7 dias.
 7. O Estoque responde se há saldo. Essa pergunta não é do PCP. `E1`
 8. Se a Qualidade de saída reprova um item, ou o Recebimento reabre a compra, o PCP decide o novo rumo: retrabalho ou nova compra. Essa fila ainda não existe. `P6`
 
 ## Exemplo
 
-O pedido de 100 flanges de aço carbono do Cliente Exemplo S.A. aparece na Triagem assim que o vendedor o libera. O PCP manda as 100 para um destino de fabricação. O roteiro leva o Estoque primeiro e uma inspeção de saída antes da expedição. As 100 flanges viram uma parcial no Estoque, esperando o almoxarife. Numa emergência, o PCP poderia mandar algumas para a Revenda e o resto para a fabricação, em ordens diferentes.
+O pedido de 100 flanges de aço carbono do Cliente Exemplo S.A. aparece na Triagem assim que o vendedor o libera. O PCP manda as 100 para um destino de fabricação. O roteiro (montado em seguida) leva o Estoque primeiro e uma inspeção de saída antes da expedição. As 100 flanges viram uma parcial no Estoque, esperando o almoxarife. Numa emergência, o PCP poderia mandar algumas para a Revenda e o resto para a fabricação, em ordens diferentes.
 
 ## Quem atua
 
@@ -52,17 +54,18 @@ O pedido de 100 flanges de aço carbono do Cliente Exemplo S.A. aparece na Triag
 - A soma das ordens de um produto não passa do total do pedido de venda.
 - A rodada é tudo ou nada.
 - Saldo zero exige clique do almoxarife.
-- Se o Compras já emitiu OC (ordem de compra) para o pedido, o PCP deveria ver isso no MES. Ainda não vê.
+- Se o Compras já emitiu OC (ordem de compra) para o pedido, o PCP deveria ver isso no MES. Na `develop` o MES já lê as OCs e as requisições do Compras com pedido de venda aparecem na Triagem (23/10); a OC do pedido ainda não aparece (BL-049).
 
 ## O que já existe e o que falta
 
 - ✅ Triagem, Destinação, gravação da rodada em lote e confirmação ao av-hub com reenvio.
 - 🟡 Nomes técnicos antigos no código: `/carteira`, `ordemProducao`, prefixo `OP-`. Os rótulos novos já estão na tela.
 - 🟡 Pedido manual fica fora da espinha.
-- 🔴 Ordem de Produção como entidade e documento impresso. Está desenhada, sem código.
-- 🔴 Mostrar a OC do pedido na Triagem, na Destinação e no Atendimento.
-- 🔴 Fila "Novo norte" (P6) e roteiro por item.
-- 🔴 Consumo de matéria-prima ao enviar à produção.
+- ✅ Na `develop` (27/10): Ordem de Produção como documento impresso, com 2ª via (BL-052).
+- ✅ Na `develop` (22/10): Montagem do Roteiro separada da Destinação; roteiro individual do item lido pelo motor.
+- 🔴 Mostrar a OC do pedido na Triagem, na Destinação e no Atendimento (BL-049).
+- 🔴 Fila "Novo norte" (P6).
+- 🟡 Matéria-prima: a `develop` baixa no "Atender pelo estoque" (19/10); a decisão é baixar na retirada (N16-140) 🔴.
 - 📝 Pedido anterior à data de corte: decidido, falta a mensagem no lugar do 404.
 
 Entrada: [[01-Vendas-Liberacao]]. Próxima raia: [[03-Estoque-Atendimento-e-Despacho]].
@@ -97,8 +100,8 @@ Nós do [[00-Fluxo-Mestre-0b]]: `P1` Triagem do Pedido, `P2` Destinação do Ped
 | 11 | **Saldo zero exige clique**: nenhuma parcial passa sozinha pelo Estoque (#31b, 08/10) | 📝 ✅ `itens-parciais.service.ts:588-590` |
 | 12 | Confirmação de importação ao av-hub depois de gravar; falhou, o MES reenvia a cada 10 min por 7 dias (20 por rodada) | ✅ `pedidos.service.ts:63-122`, `:399-406` |
 | 13 | O PCP **decide o novo norte** (retrabalho ou reabrir compra) quando a Qualidade de saída reprova ou o Recebimento reabre | 📝 🔴 sem tela de fila |
-| 14 | **Ordem de Produção (OP)** é uma **entidade** do sistema e também um **documento para impressão** (formalidade), emitido **só para o que será fabricado** (revenda e o que o Estoque atende não geram OP). Não confundir com a "ordem" que hoje o código grava por destino (`Pedidos`, `pedidoVenda/N`), nem com o campo `ordemProducao`, que hoje é só o texto do pedido | 📝 N14-22, #74 🔴 a entidade e o documento não existem (`producao.prisma:97`) |
-| 15 | **Se o Compras já emitiu OC vinculada ao pedido de venda, o PCP vê, no MES, que existe ordem de compra para aquele pedido** (número da OC, situação, quantidade, previsão), na Triagem, na Destinação e no Atendimento do Estoque. Fonte: a referência da OC do hub, item com `destino` do tipo `pedido_venda` | 📝 N14-20 🔴 o MES não lê a referência (BL-049). **N14-28:** a requisição do Compras com pedido de venda aparece antes da OC ("Requisição aberta no Compras", BL-064 e BL-065), e o MES avisa ao requisitar se já há requisição ou OC para o item |
+| 14 | **Ordem de Produção (OP)** é uma **entidade** do sistema e também um **documento para impressão** (formalidade), emitido **só para o que será fabricado** (revenda e o que o Estoque atende não geram OP). Na `develop` a OP é a própria ordem do destino de fabricação (`Pedidos`, `pedidoVenda/N`), com emissão gravada (`opEmitidaEm`, `opImpressoes`) e PDF `GET /pedidos/:id/op` | 📝 N14-22, #74 ✅ `develop` (27/10, `ab3318d`); na `main` do MES o campo `ordemProducao` é só o texto do pedido (`producao.prisma:97`) |
+| 15 | **Se o Compras já emitiu OC vinculada ao pedido de venda, o PCP vê, no MES, que existe ordem de compra para aquele pedido** (número da OC, situação, quantidade, previsão), na Triagem, na Destinação e no Atendimento do Estoque. Fonte: a referência da OC do hub, item com `destino` do tipo `pedido_venda` | 📝 N14-20; ✅ o MES já lê a referência da OC (K4, `develop`, 15/10) e as requisições do hub aparecem na Triagem (API-009, 23/10); 🔴 a OC do pedido ainda não aparece nas telas (BL-049). **N14-28:** a requisição do Compras com pedido de venda aparece antes da OC ("Requisição aberta no Compras", BL-064 e BL-065), e o MES avisa ao requisitar se já há requisição ou OC para o item |
 
 #### Matriz de destinação (eixo 1 × eixo 2)
 
@@ -131,6 +134,8 @@ Regra de bolso: **o PCP escolhe o destino; o Estoque decide quanto sai do saldo 
 | Triagem do Pedido | Carteira de Pedidos | `/carteira` | app-pcp | `carteira` (visualizar) ✅ `pedidos.controller.ts:101` |
 | Destinação do Pedido | Nova Ordem de Produção | `/ordens-producao/novo` | app-pcp | `ordens-producao` (criar) ✅ `ordens-producao/novo/page.tsx:517` |
 | Acompanhamento dos Pedidos | Ordens de Produção | `/ordens-producao`, `/ordens-producao/[id]` | app-pcp | `ordens-producao` (visualizar) |
+| Montagem do Roteiro | — | `/montagem-roteiro`, `/montagem-roteiro/[id]` | app-pcp | `montagem-roteiro` (só na `develop`, 22/10) |
+| Produtos em Produção | — | `/produtos-em-producao` | app-pcp | `produtos-em-producao` (só na `develop`, 20/10) |
 | Divergências de Recebimento | Decisões do PCP | `/decisoes-pcp` | app-pcp | `decisoes-pcp` (ver [[05-Recebimento]]) |
 | Filas de Produção | Movimentações | `/movimentacoes` | app-pcp | `movimentacoes` |
 
@@ -158,8 +163,8 @@ O `POST /pedidos/completo` singular foi apagado (PR #50); só o `/lote` existe.
 - ✅ **Excluir ordem** devolve reservas ATIVAS (`liberarReservas`), enfileira o cancelamento das requisições no av-hub (`enfileirarCancelamentosDoPedido`, 409 se já tem OC) e apaga com snapshot (`pedidos.service.ts:622-712`).
 - ✅ **Reenvio do `importado`** com `AVHUB_REENVIO_IMPORTADO_MIN` (padrão 10; 0 desliga) (`pedidos.service.ts:80-85`).
 - 🟡 **Nomes técnicos antigos:** a rota é `/carteira`, o campo é `ordemProducao`, os códigos são `OP-`. Os rótulos novos já estão na tela (09/10, `9bb47e4`).
-- 🔴 **Ordem de Produção como entidade e documento (N14-22).** Não existe no código: `ordemProducao` é só o texto do pedido (`producao.prisma:97`). Falta criar a entidade (emitida só para o que será fabricado), o documento imprimível e a numeração; a contagem de esforço é do Robert (BL-052).
-- 🔴 **OC do pedido na Triagem e na Destinação (N14-20).** O PCP não vê hoje se o Compras já emitiu OC para o pedido. O MES precisa ler a referência da OC do hub (`GET /ordens-compra/referencia`, item com `destino` do tipo `pedido_venda`) e mostrar a OC ao lado do pedido e do item (BL-049); do lado do hub já existem o vínculo `ordens_compra_itens_vinculos`, a view `vw_pedido_venda_itens_compra` e `GET /compras/pedidos-venda/:numero/compras` ✅ ([[04-Circuito-de-Compra]]).
+- ✅ **Ordem de Produção como entidade e documento (N14-22), só na `develop`.** Desde 27/10 (`ab3318d`) toda ordem de destino de fabricação é emitida na criação e tem PDF (`src/pedidos/ordem-producao-pdf.ts`, `GET /pedidos/:id/op`, `opImpressoes` conta as 2ªs vias). Registro de 14/10 (superado na `develop`): `ordemProducao` era só o texto do pedido (`producao.prisma:97`).
+- 🔴 **OC do pedido na Triagem e na Destinação (N14-20).** O MES já lê a referência da OC do hub (K4, `develop`, 15/10) e mostra as requisições do Compras com pedido de venda (`GET /pedidos/requisicoes-hub/:pedidoVenda`, 23/10), mas ainda não mostra a OC ao lado do pedido e do item (BL-049); do lado do hub já existem o vínculo `ordens_compra_itens_vinculos`, a view `vw_pedido_venda_itens_compra` e `GET /compras/pedidos-venda/:numero/compras` ✅ ([[04-Circuito-de-Compra]]).
 - 🔴 **P6 Novo norte:** a Qualidade de saída pode reprovar e abrir retrabalho (`PATCH /itens-parciais/:id/reprovar`, `/resolver`, `/retrabalho`, `itens-parciais.controller.ts:205-239`), mas **não existe a fila "Novo norte"** nem o `RoteiroItem` (C8, EC-03). A única fila de decisão do PCP existente é a de divergência de recebimento.
 
 ### O que falta desenvolver
@@ -169,17 +174,17 @@ O `POST /pedidos/completo` singular foi apagado (PR #50); só o `/lote` existe.
 | 1 | Fila "Novo norte" (P6): decidir retrabalho ou reabrir compra depois de reprovação de saída ou recompra | Robert | P6 | 🔴 |
 | 2 | `RoteiroItem` (roteiro por item, C8, EC-03) | Robert | P2, P6 | 🔴 |
 | 3 | Renomear rota, campo e prefixo (`/carteira`, `ordemProducao`, `OP-`) para os nomes novos (BL-036) | Robert | P1, P2 | 🔴 |
-| 4 | Consumo de matéria-prima ao enviar à produção (J2, J3): hoje o restante segue o roteiro sem baixa | Robert | P2, E4 | 🔴 |
+| 4 | Baixa de matéria-prima na retirada do Estoque (J2, J3; N16-140). Na `develop` há a baixa imediata no "Atender pelo estoque" (19/10) | Robert | P2, E4 | 🟡 baixa imediata ✅; 🔴 retirada |
 | 5 | Pedido manual (`SistemaOrigem.MANUAL`) fora da espinha; ver anexo [[Pedido-Manual]] | Nathan | P2 | 🟡 |
 | 6 | Pedido liberado anterior à data de corte não aparece na Triagem (404 nos itens) | Nathan | P1 | 📝 decidido em 29/10 (N16-142): ficam fora do MES e terminam no sistema antigo; falta a mensagem no lugar do 404 (ver [[01-Vendas-Liberacao]]) |
-| 7 | **Ordem de Produção: entidade e documento imprimível**, só para o que será fabricado (BL-052; esforço a estimar pelo Robert) | Robert | P2 | 🔴 📝 N14-22 |
-| 8 | **Mostrar a OC do pedido** (Triagem, Destinação, Atendimento) lendo a referência da OC do hub (BL-049, depende de BL-001) | Robert | P1, P2, E1 | 🔴 📝 N14-20 |
+| 7 | **Ordem de Produção: entidade e documento imprimível**, só para o que será fabricado (BL-052): feito na `develop` (27/10); falta o merge do MES para a `main` (BL-035) | Robert | P2 | 📝 N14-22 ✅ `develop` |
+| 8 | **Mostrar a OC do pedido** (Triagem, Destinação, Atendimento) lendo a referência da OC do hub (BL-049; a leitura, BL-001, já existe na `develop`) | Robert | P1, P2, E1 | 🔴 📝 N14-20 |
 
 ### Pendências
 
 - Nathan: o saldo zero continua exigindo clique mesmo depois do marco zero do Estoque (13/11)? Hoje vale o clique sempre (#31b). **Decidido em 29/10/2026 (N16-139): sim, o clique vale sempre, também depois do marco zero.**
 - Nathan e Robert: a Triagem deve mostrar o saldo do Estoque por item (hoje não mostra; a decisão de saldo é só no Estoque). Com N14-20, ela também mostraria o saldo futuro e a OC do pedido. **Decidido em 29/10/2026 (N16-138): a Triagem não mostra o saldo do Estoque; o Estoque decide na etapa dele.**
-- Robert: a OP é uma entidade por destino de fabricação, por item ou por rodada? Como se relaciona com a "ordem" que o código grava hoje (`pedidoVenda/N`)?
+- Robert: a OP é uma entidade por destino de fabricação, por item ou por rodada? Na `develop` a OP é a ordem por destino de fabricação (`pedidoVenda/N`); confirmar com o Robert se é essa a decisão final.
 - Robert: se `ensureEtapasPorTipo` deve aceitar roteiro de Revenda **sem nenhuma** etapa além do Estoque (o front exige roteiro não vazio, `ordens-producao/novo/page.tsx:376-379`).
 
 ### Subfluxo

@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Gustavo (DBA, pipeline e banco) · Robert (sinalização no MES) · Nathan (decisões)
-fontes: [omie-elt-pipeline 0f739f0 (notasFiscais.ts, pedidosVendas.ts, scheduler/config), Dump Avhub 14/10 (fn_sync_situacao_pv, pedidos_vendas, notas_fiscais, produto_vendas), api-pcp 579a625 (entregas), v1 Fluxo-Expedicao-Faturamento-Completo, v1 Fluxograma-Telas-por-Bloco bloco 11, v1 08-Integracao-Omie/01-Dados-Extraidos]
+fontes: [omie-elt-pipeline 0f739f0 (notasFiscais.ts, pedidosVendas.ts, scheduler/config), Dump Avhub 14/10 (fn_sync_situacao_pv, pedidos_vendas, notas_fiscais, produto_vendas), api-pcp 579a625 (entregas), v1 Fluxo-Expedicao-Faturamento-Completo, v1 Fluxograma-Telas-por-Bloco bloco 11, v1 08-Integracao-Omie/01-Dados-Extraidos, api-acos-vital develop 0384e89 (POST /comercial/clientes)]
 ---
 
 # Fiscal no Omie (O1, O2)
@@ -49,7 +49,7 @@ A Expedição avisa que as 100 flanges do Cliente Exemplo S.A. estão prontas. O
 - A baixa do item volta pelo pipeline, sem tela e sem escrita do MES.
 - O banco calcula a situação do pedido a partir das marcas do Omie.
 - As telas de notas só mostram o que o Omie já emitiu.
-- A única escrita do pipeline no Omie é o envio da ordem de compra.
+- A única escrita do pipeline no Omie é o envio da ordem de compra. A API do Hub, por conta própria, também cadastra cliente no Omie (`POST /comercial/clientes`, 28/10/2026).
 - Remessa de produtos fica para o Ciclo 2 (22/01/2027).
 
 ## O que já existe e o que falta
@@ -75,7 +75,7 @@ O Omie é o sistema fiscal e financeiro (decisão #30 do registro de 07/10). O M
 | 3 | Parcial x integral na faturação é decisão da Expedição ([[09-Expedicao]], X2, T-06); pela N16-130, de 29/10, quem decide é o vendedor, pela marca "pode faturar em partes" | 📝 |
 | 4 | A sinalização ao Omie é uma fila de cargas prontas (tela 11.1), com acompanhamento do número e da chave da NF pelo pipeline | 🟡 desenho, sem código |
 | 5 | Remessa de produtos (registro de remessa) fica para o Ciclo 2 (22/01/2027) | 📝 |
-| 6 | Só uma escrita do pipeline no Omie: envio da OC (`UpsertPedCompra`, `ExcluirPedCompra`) | ✅ [[04-Circuito-de-Compra]] |
+| 6 | Só uma escrita do pipeline no Omie: envio da OC (`UpsertPedCompra`, `ExcluirPedCompra`; `omie-elt-pipeline` `master` sem mudança desde 08/10). A `api-acos-vital` (`develop`) já escreve cliente no Omie por `UpsertClienteCpfCnpj` (`260e835`, 28/10, `src/utils/omie.js`); o pedido da proposta (`IncluirPedido`) ainda não é enviado: `POST /comercial/propostas/:id/transformar` grava o pedido do Hub com `status_sincronizacao_omie = pendente` e deixa o envio para a pipeline | ✅ [[04-Circuito-de-Compra]]; 🔴 envio do pedido |
 
 ### Estados
 

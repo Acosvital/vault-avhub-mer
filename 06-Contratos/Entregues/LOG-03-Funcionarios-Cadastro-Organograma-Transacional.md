@@ -3,12 +3,12 @@ id: LOG-03
 aliases: ["Contrato 03", "03-Funcionarios-Cadastro-Organograma-Transacional"]
 tags: [contrato, contrato-logica, funcionarios, organograma, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
-fontes: ["api-acos-vital/src/schemas/core/tables/funcionarios/funcionarios.route.js:119-123,423"]
+fontes: ["api-acos-vital/src/schemas/core/tables/funcionarios/funcionarios.route.js:119-124,424"]
 ---
 # Contrato — Funcionários: salvar/excluir com o organograma numa operação só
 
@@ -17,7 +17,7 @@ fontes: ["api-acos-vital/src/schemas/core/tables/funcionarios/funcionarios.route
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - ✅ Erros `409 CICLO_HIERARQUIA` e `400 SUPERIOR_INVALIDO` (`funcionarios.route.js:119-123`) e `GET /funcionarios/:id/equipe` (`funcionarios.route.js:423`).
+> - ✅ Erros `409 CICLO_HIERARQUIA` e `400 SUPERIOR_INVALIDO` (`funcionarios.route.js:119-124`) e `GET /funcionarios/:id/equipe` (`funcionarios.route.js:424`).
 > - Fora do fluxo de Atividades (RH).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).

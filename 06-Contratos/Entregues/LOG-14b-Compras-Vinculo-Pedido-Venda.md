@@ -3,12 +3,12 @@ id: LOG-14b
 aliases: ["Contrato 14 (vínculo)", "14-Compras-Vinculo-Pedido-Venda", "Contrato 24 (numeração antiga)"]
 tags: [contrato, contrato-logica, compras, pedido-venda]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: [C4, P3]
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:195", "api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_pedido_venda_compras/vw_pedido_venda_compras.route.js:52-92", "Dump Avhub (Esqueleto).sql (ordens_compra_itens_vinculos)"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:213", "api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_pedido_venda_compras/vw_pedido_venda_compras.route.js:52-92", "Dump Avhub (Esqueleto).sql (ordens_compra_itens_vinculos)"]
 ---
 # Contrato — Compras: vínculo da ordem de compra com o pedido de venda
 
@@ -17,13 +17,13 @@ fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/index.js:195", "api
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Define como a OC se liga ao pedido de venda (PV). Antes, o comprador escrevia o número do PV à mão no Omie. Agora escolhe a finalidade (um PV, vários, estoque, recompra, uso interno) e o vínculo é por item.
 > **Quem é afetado:** Compradores, e quem consulta o card "Compras deste pedido" no PV.
-> **Situação:** ✅ API entregue: rotas `/compras/pedidos-venda/:numero` e `/:numero/compras`, mais a tabela de vínculos. ❓ O front (4 telas) só foi conferido pelo vault anterior.
+> **Situação:** ✅ API entregue: rotas `/compras/pedidos-venda/:numero` e `/:numero/compras`, mais a tabela de vínculos. ✅ O front existe no av-hub (`components/Compras/PedidosVendaOC.tsx`, BFF `app/api/compras/pedidos-venda/`; conferido em 29/10/2026); ❓ as 4 telas uma a uma não foram reconferidas.
 
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C4, P3 · **Dono:** Gustavo (DBA)
 >
-> - ✅ `GET /compras/pedidos-venda/:numero` e `/:numero/compras` (`api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_pedido_venda_compras/vw_pedido_venda_compras.route.js:52,92`, montadas em `index.js:195`) e a tabela `ordens_compra_itens_vinculos` (alimenta o `destino` da referência da OC, [[API-004-Referencia-OC-Integracao-MES]]).
-> - ❓ Front (4 telas do card "Compras deste pedido"): citado como mergeado pelo vault v1; HUB fora da pasta de repos.
+> - ✅ `GET /compras/pedidos-venda/:numero` e `/:numero/compras` (`api-acos-vital/src/schemas/core_vendas_faturamento/views/vw_pedido_venda_compras/vw_pedido_venda_compras.route.js:52,92`, montadas em `index.js:213`) e a tabela `ordens_compra_itens_vinculos` (alimenta o `destino` da referência da OC, [[API-004-Referencia-OC-Integracao-MES]]).
+> - ✅ Front: `PedidosVendaOC.tsx` e o BFF `app/api/compras/pedidos-venda/[numero]` e `/[numero]/compras` existem no av-hub (conferido em 29/10/2026). 🟡 As 4 telas do card "Compras deste pedido" seguem citadas pelo vault v1.
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.

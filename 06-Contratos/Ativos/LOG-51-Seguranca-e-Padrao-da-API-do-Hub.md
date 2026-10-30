@@ -8,7 +8,7 @@ status: parcial
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo (DBA)"
 etapa_0b: []
-fontes: ["api-acos-vital 276dab8 (app.js, middlewares/apiKeyAuth.js, middlewares/identidadeUsuario.js, utils/acessoConfig.js, utils/azureIdToken.js, utils/crudFactory.js, schemas/auth/**, schemas/core_organograma/tables/node/node.route.js)", "Dump Avhub (Esqueleto).sql:19-23, :519, :2498, :10198-10214, :12465, :12483, :13650", "auditoria de segurança de 15/10/2026 (leitura de código, sem teste dinâmico)", "verificação de 29/10/2026: api-acos-vital develop (e705797; src/, test/, .github/, eslint.config.js, Dump do Avhub para referência.sql de 28/10) e av-hub develop (app/api/auth/[...nextauth]/route.ts, lib/api/requirePermission.ts, lib/auth/backendToken.ts)"]
+fontes: ["api-acos-vital 276dab8 (app.js, middlewares/apiKeyAuth.js, middlewares/identidadeUsuario.js, utils/acessoConfig.js, utils/azureIdToken.js, utils/crudFactory.js, schemas/auth/**, schemas/core_organograma/tables/node/node.route.js)", "Dump Avhub (Esqueleto).sql:19-23, :519, :2498, :10198-10214, :12465, :12483, :13650", "auditoria de segurança de 15/10/2026 (leitura de código, sem teste dinâmico)", "verificação de 29/10/2026: api-acos-vital develop (0384e89, antes e705797; src/, test/, .github/, eslint.config.js, Dump do Avhub para referência.sql de 28/10) e av-hub develop (app/api/auth/[...nextauth]/route.ts, lib/api/requirePermission.ts, lib/auth/backendToken.ts)"]
 criado_original: 2026-10-15
 ---
 
@@ -19,7 +19,7 @@ criado_original: 2026-10-15
 > [!info] Situação em 29/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` (o arquivo ainda está em `Entregues` e deve voltar para `Ativos` enquanto houver item aberto) · **Nós do 0b:** — (transversal, fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> Verificado em 29/10/2026 contra o código da `api-acos-vital` (`develop`, `e705797`) e do `av-hub` (`develop`), mais o dump de esquema de 28/10. Rodei hoje o Vitest (74 testes ok, 12 pulados), o ESLint (sem erro) e o `npm audit --omit=dev` (sem alta nem crítica). Não rodei os testes de aceite T1 a T12 (precisam de banco de teste) e não vi produção.
+> Verificado em 29/10/2026 contra o código da `api-acos-vital` (`develop`, `0384e89` (antes `e705797`; o commit foi reescrito)) e do `av-hub` (`develop`), mais o dump de esquema de 28/10. Rodei hoje o Vitest (74 testes ok, 12 pulados), o ESLint (sem erro) e o `npm audit --omit=dev` (sem alta nem crítica). Não rodei os testes de aceite T1 a T12 (precisam de banco de teste) e não vi produção.
 >
 > - ✅ **Feito no código da API (19 dos 27 itens):** S2, S3, S4, S5, S6, S7, S10, S11, S12, S13, S14, S16, S19, S20, S21, S22, S23, S24 e S27. Boa parte entrou no commit `f76424b` (19/10/2026), que também trouxe o CI.
 > - 🟡 **Parcial (7 itens):** S1 (chave presa a rotas feita, mas `IDENTIDADE_EXIGIR_TOKEN` ainda é variável e vale `false` por padrão), S8 (a API não faz mais DDL e o role `avhub_api` existe, mas faltam GRANT, SQL versionado e saber o `DB_USER` de produção), S9 (CI e 74 testes unitários prontos; os 12 de aceite ficam fora do CI), S15 (corpo só depois da chave, mas o limite padrão segue 10 MB), S17 (antes e depois e auditoria imutável prontos, sem gatilho em preço e aprovação), S18 (colunas e índices citados feitos, restam tabelas e chaves estrangeiras) e S26 (peças unificadas e `no-console` ligado; arquivos grandes sem dividir).
@@ -375,7 +375,7 @@ Para o DBA saber o que **não** mexer:
 
 ## 15. Verificação de 29/10/2026 (código contra o contrato)
 
-- **O que foi lido:** `api-acos-vital` (`develop`, `e705797`): `src/app.js`, `src/middlewares/`, `src/utils/`, as rotas de autenticação, usuários, organograma, pedidos, notas, `docs/`, `.github/workflows/ci.yml`, `test/`, `eslint.config.js`, `Dockerfile`, `.dockerignore`; o `Dump do Avhub para referência.sql` (gerado em 28/10/2026); e, no `av-hub` (`develop`), `app/api/auth/[...nextauth]/route.ts`, `lib/api/requirePermission.ts`, `lib/auth/backendToken.ts`, `lib/api/parametrosSeguros.ts`.
+- **O que foi lido:** `api-acos-vital` (`develop`, `0384e89` (antes `e705797`; o commit foi reescrito)): `src/app.js`, `src/middlewares/`, `src/utils/`, as rotas de autenticação, usuários, organograma, pedidos, notas, `docs/`, `.github/workflows/ci.yml`, `test/`, `eslint.config.js`, `Dockerfile`, `.dockerignore`; o `Dump do Avhub para referência.sql` (gerado em 28/10/2026); e, no `av-hub` (`develop`), `app/api/auth/[...nextauth]/route.ts`, `lib/api/requirePermission.ts`, `lib/auth/backendToken.ts`, `lib/api/parametrosSeguros.ts`.
 - **O que foi rodado (só leitura):** `vitest run` (74 ok, 12 pulados), `eslint .` (0 erros, 4 avisos de estilo), `npm audit --omit=dev --audit-level=high` (sem alta nem crítica; 2 moderadas em `sequelize` e `uuid`) e dois scripts de contagem no dump (colunas de autoria por tabela e chaves estrangeiras sem índice).
 - **O que não foi possível ver:** produção e homologação (variáveis do Coolify, `auth.chaves_servico` e `auth.chaves_servico_rotas` com dados, `auth.rotas_telas`, `DB_USER` da API), os GRANTs (o dump não traz), as migrations 051 (não estão no repositório da API) e o resultado dos testes T1 a T12 contra um banco.
 - **Lembrete:** o dump de referência mostra o esquema do banco em que foi gerado em 28/10, e não necessariamente o de produção.

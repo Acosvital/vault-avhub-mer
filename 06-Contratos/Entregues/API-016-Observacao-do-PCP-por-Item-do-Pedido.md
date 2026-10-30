@@ -3,12 +3,12 @@ id: API-016
 aliases: ["Contrato 016", "016-Observacao-do-PCP-por-Item"]
 tags: [contrato, contrato-api, pcp, pedidos, observacao, item, diligenciador, av-hub]
 criado: 2026-10-22
-atualizado: 2026-10-22
+atualizado: 2026-10-29
 status: aplicado-em-producao
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
 etapa_0b: []
-fontes: ["Pedido do Nathan de 22/10/2026", "api-acos-vital src/schemas/core_vendas_faturamento/tables/pedido_observacao_pcp (model e route)", "Dump do Avhub para referência.sql (core_vendas_faturamento.pedido_observacao_pcp; core_fluxo.item_estado_projetado.codigo_item_omie)", "av-hub components/Pedidos/PedidoDetalhe.tsx, services/pcp/observacoesPedido.ts, app/api/pcp/observacoes", "api-acos-vital src/middlewares/escopoVendedor.js (dono 'observacao')"]
+fontes: ["Pedido do Nathan de 22/10/2026", "api-acos-vital src/schemas/core_vendas_faturamento/tables/pedido_item_observacao_pcp (model e route; a antiga pedido_observacao_pcp segue no código; ver o item "Migrar ou apagar" mais abaixo)", "Dump do Avhub para referência.sql (core_vendas_faturamento.pedido_observacao_pcp; core_fluxo.item_estado_projetado.codigo_item_omie)", "av-hub components/Pedidos/PedidoDetalhe.tsx, services/pcp/observacoesPedido.ts, app/api/pcp/observacoes", "api-acos-vital src/middlewares/escopoVendedor.js (dono 'observacao')"]
 criado_original: 2026-10-22
 ---
 

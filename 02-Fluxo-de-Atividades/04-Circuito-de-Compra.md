@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Compras (regra) · Gustavo (API) · Nathan (front av-hub) · Robert (MES)
-fontes: [00-Fluxo-Mestre-0b, Integracao-AvHub-MES (INT-02, INT-03, INT-04), LOG-34, LOG-35, LOG-32, LOG-23, LOG-36, SQL-008, API-004, v1 02-PRD-Estoque/Fluxo-Compras-Completo, decisões do Nathan de 14/10 (duas origens, aprovação, Compras·CCP só leitura), api-pcp 579a625, api-acos-vital f322dcd, omie-elt-pipeline 0f739f0, HUB b55ac55 (lido em disco), Dump Avhub 14/10]
+fontes: [00-Fluxo-Mestre-0b, Integracao-AvHub-MES (INT-02, INT-03, INT-04), LOG-34, LOG-35, LOG-32, LOG-23, LOG-36, SQL-008, API-004, v1 02-PRD-Estoque/Fluxo-Compras-Completo, decisões do Nathan de 14/10 (duas origens, aprovação, Compras·CCP só leitura), api-pcp 579a625, api-acos-vital f322dcd, omie-elt-pipeline 0f739f0, HUB b55ac55 (lido em disco), Dump Avhub 14/10, api-pcp develop de 27/10/2026 (K4, API-009, API-011), N16-144]
 ---
 
 # Circuito de compra (P3, C0 a C5, FN1)
@@ -22,6 +22,8 @@ Nós do [[00-Fluxo-Mestre-0b]]: `P3`, `C0` a `C5`, `FN1`. Fecha em `FN1 → R0` 
 > - Compras e o CCP registram as datas de entrega do fornecedor, que movem a previsão de faturamento (N16-88).
 > - Não há trava entre quem emite e quem aprova a OC; o Gerente de Compras pode aprovar a que ele mesmo emitiu. O limite de R$ 30 mil continua provisório (N16-123).
 > - O Compras será avisado no av-hub da recompra por RNC (N16-127; hoje só o MES sabe e a OC segue "atendida") e da reabertura do recebimento pelo PCP (N16-137), pelo mesmo caminho.
+> - O imposto por item da OC vem da parte de compras do pedido quando a finalidade da linha é `pedidos_venda` ou `recompra`; para `estoque` ou `uso_interno` o Comprador digita. Uma linha por pedido, sem média; o frete é rateado pelas linhas na proporção do valor; o Comprador pode editar antes de aprovar (N16-144). O contrato só será escrito quando o desenvolvimento começar.
+> - O recebimento e a leitura da OC pelo MES já existem na `develop` do MES (15 a 26/10; ver o fim desta nota). A `main` do MES parou em 08/10.
 > - Tudo isso exige contrato novo entre MES e hub. Detalhe em [[11-Proposta-e-Pedido-de-Venda]].
 
 ## Como funciona, passo a passo
@@ -74,8 +76,8 @@ O comprador manda o PDF ao fornecedor por fora. O CCP anota a confirmação e a 
 - ✅ Telas das duas origens, emissão da OC, lista de OCs, aprovações e follow-up do CCP.
 - ✅ Envio da OC ao Omie testado em 14/10. Produção ainda ❓.
 - 🟡 Regra de aprovação provisória: vai endurecer depois da conversa com Compras.
-- 📝 `C6` a `C8` decididos em 26/10, sem código.
-- 🔴 O MES ainda não lê a OC de requisição criada só no av-hub.
+- 📝 `C6` a `C8` decididos em 26/10; sem código na `api-acos-vital` nem no front 🔴 (conferido em 29/10: nenhuma rota `divergencias_compra`).
+- ✅ O MES lê a OC do hub desde 15/10 (K4, `develop` do `api-pcp`) e as requisições do Compras com pedido de venda aparecem ao PCP na Triagem desde 23/10 (API-009). 🔴 Falta o PCP ver a OC do pedido na Triagem e na Destinação (BL-049) e o saldo futuro no Estoque (BL-050).
 - 🔴 Perfil exclusivo do CCP (hoje vale a permissão da tela).
 - 🔴 Contrato de recompra por RNC e aviso de atraso ao PCP e ao vendedor.
 - ❓ Teste ponta a ponta com as chaves reais; versionar `fn_requisicao_mes_aplicar`.
@@ -194,7 +196,8 @@ Nome histórico no MES: o setor `COMPRAS` aparece como "Pedidos de Compra" em r�
 | `GET /compras/ordens`, `POST /compras/ordens`, `PATCH /:id` (`aprovado` ou `cancelado`) | HUB | lista, emite, aprova ou cancela | `ordens_compra.route.js:607`, `:923`, `:1177` ✅ [[LOG-23-Compras-Pipeline-Consolidado]], [[LOG-36-Compras-Produto-Obrigatorio-e-Comprador-da-OC]] |
 | `GET /compras/ordens/fila-omie`, `PATCH /:id/sincronizacao`, `POST /:id/reenviar` | pipeline e HUB | fila e retorno do envio ao Omie | `ordens_compra.route.js:857`, `:1267`, `:1321` ✅ |
 | `GET /compras/acompanhamento`, `GET`/`PUT /compras/ordens/:id/acompanhamento`, `POST …/contatos`, `POST …/ocorrencias`, `PATCH /compras/ocorrencias/:id` | HUB (CCP) | follow-up | `ordens_compra_acompanhamento.route.js:298-586` ✅ [[LOG-32-Compras-CCP-Acompanhamento-OC]] |
-| `GET /ordens-compra/referencia` | MES (job) | referência e valores da OC | [[API-004-Referencia-OC-Integracao-MES]], [[API-007-Referencia-OC-Valores-no-MES]]; lado hub ✅, **MES não consome** 🔴 |
+| `GET /ordens-compra/referencia` | MES (job) | referência e valores da OC | [[API-004-Referencia-OC-Integracao-MES]], [[API-007-Referencia-OC-Valores-no-MES]]; lado hub ✅; o MES consome na `develop` (K4, `6914fe9`, 15/10) ✅ |
+| `GET /compras/requisicoes/referencia` | MES (job) | requisições do Compras com pedido de venda, antes de virarem OC | [[API-009-Referencia-Requisicao-Hub-Integracao-MES]]; lado hub ✅; o MES lê na `develop` (`9e75df5`, 23/10) ✅ |
 
 Montagem em `core_vendas_faturamento/index.js:190-193`. Contratos de banco: [[SQL-008-Requisicoes-Compra]], [[SQL-007-Ordens-Compra-Estruturada]], [[SQL-011-Ordens-Compra-Referencia-MES]], [[SQL-012-Ordens-Compra-Referencia-Valores]].
 
@@ -240,10 +243,11 @@ Montagem em `core_vendas_faturamento/index.js:190-193`. Contratos de banco: [[SQ
 0. 📝 **N14-28 (15/10/2026): a requisição do Compras com vínculo a pedido de venda também deve aparecer no MES, antes da OC**, e a OC vinculada vai ao MES pela referência. Proposta: leitura nova `GET /compras/requisicoes/referencia` (BL-064, Gustavo; só leitura, sem `id_origem` e sem mexer no contrato 35), lida pelo mesmo job (BL-065, Robert), com aviso de compra duplicada ao requisitar. A tela "Nova requisição" precisa do campo de pedido de venda (BL-041). O que é de estoque, uso interno ou compra por fora não entra na Torre. O trecho de N14-20 abaixo, "a requisição em si não chega ao MES", vale só para requisição sem pedido de venda. Perguntas em [[Pontas-Soltas]] PS-034.
 1. 🔴 **A OC de uma requisição criada só no av-hub (C0) precisa ser lida pelo MES** (requisito de integração, N14-20). A requisição em si não chega ao MES (`id_origem` é `NOT NULL` em `requisicoes_compra_eventos`, Dump, linha 18683, então não gera marco), e isso fica assim: o MES lê a **OC**. Regra: (a) se o Compras vincula a requisição ou a OC a um pedido de venda, o PCP vê no MES que já existe OC para aquele pedido; (b) se a OC é para itens de **estoque** (sem pedido), o Estoque do MES mostra o **saldo futuro** ([[Glossario]]): saldo atual mais as OCs em andamento e a parte delas que preenche o estoque.
    - ✅ **O que o av-hub já tem:** `ordens_compra.finalidade` (`pedidos_venda`, `recompra`, `estoque`, `uso_interno`; só as duas primeiras ligam a pedido de venda, `ordens_compra.route.js:92-94`, `:572-578`; sem finalidade a OC nasce `estoque`, `:982`); a tabela `ordens_compra_itens_vinculos` (item da OC para pedido de venda, `index.js:38`); a view `vw_pedido_venda_itens_compra` (vendido, pendente, em OC, saldo, `vw_pedido_venda_compras.route.js:12`, `:144`); `GET /compras/pedidos-venda/:numero` e `GET /compras/pedidos-venda/:numero/compras` (`index.js:195`, `vw_pedido_venda_compras.route.js:52`); e `GET /ordens-compra/referencia`, cujo item traz `destino[]` com `pedido_venda` (com `numero_pedido_venda`) e `estoque`, somando a quantidade do item (`vw_ordens_compra_referencia_mes.swagger.json:61-88`), mais `finalidade` e `situacao` da OC (`vw_ordens_compra_referencia_mes.route.js:44-47`). Os eventos do contrato 35 não são o caminho (só existem para requisição com `id_origem`).
-   - 🔴 **O que falta no MES:** consumir a referência (job K4, BL-001 e [[API-004-Referencia-OC-Integracao-MES]], [[API-007-Referencia-OC-Valores-no-MES]]); mostrar a OC do pedido na Triagem, na Destinação e no Atendimento (BL-049); calcular e mostrar o saldo futuro no Atendimento e no Saldo (BL-050); dar um caminho de entrada à mercadoria dessa OC no Recebimento (BL-051, ver [[05-Recebimento]]). No hub, BL-028 (Gustavo) confere se a referência e uma consulta por produto e por pedido bastam.
+   - ✅ **Já feito no MES (`develop` do `api-pcp`):** o job que consome a referência (K4, `6914fe9`, 15/10; [[API-004-Referencia-OC-Integracao-MES]], [[API-007-Referencia-OC-Valores-no-MES]]); o aviso de compra em andamento e o vínculo da parcial à OC ao requisitar (20/10, `c269aa7`); a entrada da mercadoria dessa OC no Recebimento, por OC e por NF (BL-051, ver [[05-Recebimento]]).
+   - 🔴 **O que falta no MES:** mostrar a OC do pedido na Triagem, na Destinação e no Atendimento (BL-049); calcular e mostrar o saldo futuro no Atendimento e no Saldo (BL-050) ([[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno]]). No hub, BL-028 (Gustavo) confere se a referência e uma consulta por produto e por pedido bastam.
 2. 🔴 `GET /requisicoes-compra` do MES ([[API-003-Requisicao-Compra-Integracao-MES]], `integracao-avhub.controller.ts:20-24`) ficou **sem consumidor** (a ida é por PUT).
 3. 🟡 O comentário "JOB DE POLLING do MES" em `requisicoes_compra.route.js:31-34` está velho.
-4. 🔴 **Fornecedor da OC só chega ao MES** com o job do contrato 004/007 (K4), sem código: `RequisicaoCompra.fornecedor` fica vazio e a conferência usa o que a doca digita (`compras.prisma:84-91`).
+4. ✅ **Fornecedor da OC no MES:** a referência traz o fornecedor desde a `api007b` (26/10) e o MES o projeta (`fornecedorDasOcs`, `compras.service.ts`, `develop`). O registro de 14/10 (`RequisicaoCompra.fornecedor` vazio) está superado; a conferência ainda aceita o que a doca digita.
 5. 🟡 A regra de aprovação é provisória: endurece depois da conversa com Compras (item C2/C3 acima).
 6. ❓ O SQL de `fn_requisicao_mes_aplicar` (migration 034) está em produção mas não versionado (Gustavo).
 7. 🟡 Recompra por RNC não tem contrato: a OC antiga segue `atendida` (ver [[06-Qualidade-Entrada]], pendência 2).
@@ -254,12 +258,12 @@ Montagem em `core_vendas_faturamento/index.js:190-193`. Contratos de banco: [[SQ
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
 | 1 | **Endurecer a regra de aprovação** depois da conversa com Compras (a regra atual já funciona); sem desenho nem data. Pendência cadastral: vincular usuários à Gerência de Compras (PS-008) | Nathan, com Compras | C2, C3 | 🟡 |
-| 2 | **MES ler as OCs do hub:** OC do pedido para o PCP, saldo futuro no Estoque e entrada da mercadoria no Recebimento (ponta solta 1; BL-006, BL-049, BL-050, BL-051; BL-028 no hub) | Robert (MES), Gustavo (API) | C0, R0 | 🔴 |
-| 3 | **Job do contrato 004/007 no MES:** projeção da OC (fornecedor, valores) e custo do lote | Robert | C4, R4 | 🔴 |
+| 2 | **MES ler as OCs do hub:** a leitura e a entrada da mercadoria no Recebimento estão na `develop` (K4, BL-051). Falta a OC do pedido para o PCP (BL-049) e o saldo futuro no Estoque (BL-050); BL-028 no hub | Robert (MES), Gustavo (API) | C0, R0 | ✅ leitura e recebimento; 🔴 BL-049 e BL-050 |
+| 3 | Job do contrato 004/007 no MES (projeção da OC com fornecedor e valores, custo do lote): feito na `develop` (15 e 19/10, `6914fe9`, `97b9adc`). Falta o merge do MES para a `main` (BL-035) | Robert | C4, R4 | ✅ `develop` |
 | 4 | **Perfil CCP:** edição só pelo CCP | Gustavo, Nathan | C5 | 🔴 |
 | 5 | Remover ou arquivar `GET /requisicoes-compra` (contrato 003) e o comentário velho | Gustavo, Robert | — | 🟡 |
 | 6 | **Versionar** `fn_requisicao_mes_aplicar` (migration 034) | Gustavo | P3 | ❓ |
-| 7 | Contrato de **recompra por RNC** | Nathan decide | Q3, C1 | 🔴 |
+| 7 | Contrato de **recompra por RNC** (decidido: o Compras é avisado no av-hub, N16-127) e da **reabertura do recebimento** (N16-137) | Nathan, Gustavo, Robert | Q3, C1 | 🔴 sem contrato |
 | 8 | Aviso ao PCP e ao vendedor quando a previsão de chegada atrasa o pedido de venda | Nathan | C5 | 🔴 |
 | 9 | Dois formulários ou um para origem PCP e origem Compras (T-03): o MES exige pedido e prazo; o HUB aceita sem pedido | Nathan | P3, C0 | 🟡 |
 | 10 | Teste ponta a ponta do circuito com `AVHUB_MES_INTEGRACAO_KEY` e `API_KEY` reais | Robert, Gustavo | P3, C5 | ❓ |

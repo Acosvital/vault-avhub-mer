@@ -29,7 +29,7 @@ fontes: [omie-elt-pipeline 0f739f0 (master), README.md, ARCHITECTURE.md, src/con
 
 - O Omie não avisa quando algo muda. O serviço consulta por janela de datas, de 3 em 3 minutos o dia atual.
 - Ele nunca escreve nas colunas protegidas do banco ([[Colunas-Protegidas]]).
-- A única escrita no Omie é enviar ou excluir OC.
+- A única escrita **da pipeline** no Omie é enviar ou excluir OC. Desde 28/10 a `api-acos-vital` também escreve direto no Omie, sem fila e sem a pipeline, para cadastrar o cliente da proposta (`POST /comercial/clientes`) ✅ `api-acos-vital/src/utils/omie.js`; ela usa as mesmas variáveis `FILIAL_<CHAVE>_OMIE_*` da pipeline.
 - Reenviar uma OC altera a que já existe, sem duplicar.
 - Se o Omie recusar a OC, ela fica com erro até alguém clicar em "Reenviar" no HUB. Depois de 3 recusas seguidas, a rodada da unidade para.
 - Só a condição de pagamento vai ao Omie, nunca as parcelas.
@@ -58,7 +58,7 @@ Serviço que traz os dados do Omie para o banco do av-hub e, só para a OC, escr
 | `omie-extract-worker` | `dist/workers/extractWorker.js` | chama a API do Omie, respeitando o limite por IP+AppKey+método (padrão 3 simultâneas e 200/min por método) | 4 e 2 (duas filas) ✅ `extractWorker.ts:54,114` |
 | `omie-load-worker` | `dist/workers/loadWorker.js` | upsert no PostgreSQL | `LOAD_WORKER_CONCURRENCY` (20) e `LOAD_WORKER_REALTIME_CONCURRENCY` (5) ✅ `loadWorker.ts:254,269` |
 | `omie-scraping-worker` | `dist/workers/scrapingWorker.js` | Playwright: relatório de manifestação (destinatário) do portal Omie, 1x/dia | próprio |
-| `omie-envio-oc-worker` | `dist/workers/envioOcWorker.js` | **única escrita no Omie**: envia e exclui OC | 1 (fila `omie-envio-oc`) ✅ `envioOcWorker.ts:20`, `queue/index.ts:111` |
+| `omie-envio-oc-worker` | `dist/workers/envioOcWorker.js` | **única escrita da pipeline no Omie**: envia e exclui OC | 1 (fila `omie-envio-oc`) ✅ `envioOcWorker.ts:20`, `queue/index.ts:111` |
 | `omie-dashboard` | `dist/dashboard/index.js` | Bull Board (HTTP + Redis) | — |
 
 Todos reiniciam sozinhos, com backoff exponencial e `max_restarts` de 1 000 000 ✅ `ecosystem.config.cjs:17-24`. O comentário do `omie-envio-oc-worker` no mesmo arquivo ("ocioso enquanto SYNC_ENVIO_OC=false") está velho: o envio é fixo desde 07/10 ✅ `config/index.ts:154-163`.
@@ -103,7 +103,7 @@ Os catálogos de Compras (condições, projetos, contas, categorias, compradores
 
 O pedido de venda entra no av-hub **travado** (sem marcação de liberação); a liberação é do vendedor ([[01-Vendas-Liberacao]]). O pipeline nunca escreve em `pedidos_vendas.manual` nem nas outras colunas protegidas ✅ `src/db/protectedColumns.ts:50-58`.
 
-### Envio da OC ao Omie (única escrita)
+### Envio da OC ao Omie (única escrita da pipeline)
 
 1. A cada 2 minutos o scheduler enfileira a rodada; o `envio-oc-worker` faz, por unidade, `GET {AVHUB_API_URL}/compras/ordens/fila-omie?codigo_empresa=` ✅ `src/avhub/client.ts:1-13`, `jobs/envioOrdensCompra.ts:17-26`.
 2. `acao: "enviar"` (OC `aprovado` com `status_sincronizacao_omie = pendente`) vira `UpsertPedCompra` com `cCodIntPed` = número da OC (reenvio altera, não duplica). `acao: "excluir"` (OC cancelada que já estava no Omie) vira `ExcluirPedCompra` ✅ `envioOrdensCompra.ts:19-26`; a fila vem de `api-acos-vital` `ordens_compra.route.js:857-891`.

@@ -5,7 +5,7 @@ status: aguardando-resposta
 sistemas: [consulta]
 tags: [contrato, consulta, caldeiraria, rastreabilidade, book]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 dono: Nathan
 destinatarios: [Qualidade da Caldeiraria HRM, quem monta o Data Book hoje, quem acompanha o Book com o cliente, Robert (confirma o que o sistema precisa)]
 prazo: 2026-10-20
@@ -129,7 +129,7 @@ Fica registrado como pendência (PS-027) e a Caldeiraria entra no sistema novo *
 
 ## Respostas recebidas
 
-_Nenhuma ainda._
+_Nenhuma ainda (conferido em 29/10/2026). O prazo de 20/10/2026 já passou sem resposta registrada; o status segue `aguardando-resposta` até o Nathan reenviar ou fechar a consulta._
 
 | Data | Quem respondeu | Perguntas | Resposta |
 |---|---|---|---|

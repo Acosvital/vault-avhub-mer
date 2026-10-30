@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Robert (MES) · Nathan (decisões)
-fontes: [00-Fluxo-Mestre-0b, Integracao-AvHub-MES (INT-03), API-007, API-008, v1 02-PRD-Estoque/Fluxo-Recebimento-Completo, v1 App-PCP-Recebimento-Conferencia, decisões do Nathan de 14/10 (conferência contra a NF), api-pcp 579a625 (recebimento.service.ts, compras.service.ts, compras.prisma, compras-ccp.dto.ts), app-pcp 1fca8d3 (FilaSetor, ConferirRecebimentoModal, decisoes-pcp)]
+fontes: [00-Fluxo-Mestre-0b, Integracao-AvHub-MES (INT-03), API-007, API-008, v1 02-PRD-Estoque/Fluxo-Recebimento-Completo, v1 App-PCP-Recebimento-Conferencia, decisões do Nathan de 14/10 (conferência contra a NF), api-pcp 579a625 (recebimento.service.ts, compras.service.ts, compras.prisma, compras-ccp.dto.ts), app-pcp 1fca8d3 (FilaSetor, ConferirRecebimentoModal, decisoes-pcp), api-pcp develop de 27/10/2026 (recebimento por OC e por NF, custo da OC), API-011, N16-134 a N16-137]
 ---
 
 # Raia Recebimento (R0 a R6)
@@ -16,8 +16,9 @@ Nós do [[00-Fluxo-Mestre-0b]]: `R0`, `R1`, `R2`, `R3`, `R4`, `R6`. Entrada: `FN
 > [!info] Decisões de 29/10/2026 (N16-120 a N16-143)
 > - N16-134: tolerância de peso de 5% por padrão, ajustável por material.
 > - N16-135: quando houver cruzamento com a OC, divergência contra a OC bloqueia, como a da nota.
-> - N16-136: uma nota pode trazer itens de mais de uma OC. A conferência é por item da OC (proposta do Robert).
+> - N16-136: uma nota pode trazer itens de mais de uma OC. A conferência é por item da OC (proposta do Robert). Na `develop` do MES isso já existe: `POST /compras/recebimentos/nf` recebe várias conferências na mesma nota, cada uma de uma requisição do MES ou de uma OC do hub, e a tela "Receber com NF" aceita vários itens (`api-pcp` 19 a 20/10, `app-pcp` `5f50fff`, `9ced089`) ✅.
 > - N16-137: a reabertura pelo PCP avisa o av-hub. Exige contrato novo entre MES e hub.
+> - Código: o que aparece como ✅ de MES, a partir da conferência por OC e do custo da OC, está na `develop` do `api-pcp` e do `app-pcp`. A `main` do MES parou em 08/10 e só recebe com o merge BL-035.
 
 ## Como funciona, passo a passo
 
@@ -60,16 +61,16 @@ Se faltassem flanges mesmo depois da recontagem, o PCP decidiria entre aceitar o
 - O lote sempre nasce em quarentena, mesmo item acabado.
 - O Recebimento nunca decide compra. A divergência vai ao PCP, e a reabertura devolve a Compras.
 - Só pode haver um recebimento aberto por parcial.
-- O custo do lote vem da OC, é opcional e nunca bloqueia o recebimento.
+- O custo do lote vem da OC, hoje é opcional e não bloqueia o recebimento. A N16-09 manda que todo lote tenha custo (obrigatório, BL-066), o que ainda não vale no código.
 - Divergência contra a OC também bloqueia, quando o cruzamento existir (N16-135).
 
 ## O que já existe e o que falta
 
 - ✅ Telas de recebimento, recontagem e decisão do PCP; lote em quarentena com etiqueta em PDF.
 - ✅ Recebimento parcial com divisão da parcial.
-- 🔴 O custo da OC ainda não é gravado no lote.
-- 🔴 A conferência ainda não cruza com a OC (preço, quantidade comprada, fornecedor); hoje só compara com a NF. O cruzamento entra com o job do contrato 004/007.
-- 🔴 Entrada de mercadoria de OC sem requisição do MES (OC criada só no av-hub): é proposta, o desenho é do Robert.
+- ✅ Na `develop` do MES: o custo da OC é gravado no lote (19/10, `97b9adc`; unidade diferente da OC ou OC fora da projeção gera lote sem custo e sinalizado).
+- ✅ Na `develop` do MES: entrada de mercadoria de OC sem requisição do MES (OC criada só no av-hub), por OC e por NF, e uso interno sem lote (16 a 20/10).
+- 🔴 A conferência ainda não cruza com a OC (preço, quantidade comprada, fornecedor); só compara contado com a NF. O rateio da chegada entre destinos da OC também falta (API-011).
 - 🔴 Aviso ao av-hub quando o PCP reabre o recebimento; leitor de código de barras da NF; reabertura de divergência de produção.
 - 🟡 Aviso à doca quando uma OC esperada é cancelada.
 - 🔴 Alerta de OC que passou da previsão sem chegar.
@@ -109,7 +110,7 @@ Permissões: `movimentacoes` (visualizar ou editar) para conferir e recontar; `d
 | 10 | Avaria exige foto (URL de evidência); descrição e avaria são informadas pelo conferente; quantidade e peso o sistema calcula | ✅ `recebimento.service.ts:411-413`; `compras.prisma:39-47` |
 | 11 | Só um recebimento aberto por parcial (409 se há conferência aguardando recontagem ou decisão) | ✅ `recebimento.service.ts:534-546` |
 | 12 | Lote **sempre** nasce `PENDENTE` (quarentena), mesmo item "acabado" | 📝 ✅ `compras.service.ts:545-547` |
-| 13 | **Custo do lote vem da OC, opcional**, e nunca bloqueia o recebimento | 📝 🔴 não gravado (ver R4) |
+| 13 | **Custo do lote vem da OC.** Hoje é opcional e não bloqueia o recebimento; a N16-09 torna o custo obrigatório em todo lote | 📝 ✅ gravado na `develop` (19/10, `97b9adc`; ver R4); 🔴 obrigatório (BL-066) |
 | 14 | Recebimento nunca decide compra: a divergência vai ao PCP; o `REABERTO` devolve a Compras | 📝 ✅ `recebimento.service.ts:340-351` |
 
 ### Estados
@@ -152,12 +153,14 @@ Parcial no setor `LOGISTICA_ENTRADA` (nome "Recebimento", código `logistica-ent
 | `GET /compras/recebimentos`, `GET /:id` | `movimentacoes:visualizar` | Lista (até 200) e detalhe | `recebimento.controller.ts:26-43` ✅ |
 | `GET /compras/recebimentos/decisoes` | `decisoes-pcp:visualizar` | Fila `AGUARDANDO_DECISAO` | `:32-37` ✅ |
 | `POST /compras/recebimentos` | `movimentacoes:editar` | R1 a R4: conferir (`idRequisicao`, `idItemParcial`, itens com `quantidadeNf`, `quantidadeContada`, `pesoReal`, `idLocalizacao`; cabeçalho `numeroNf`, `chaveAcessoNf`, `fornecedor`, `laudoUrl`; divergências informadas) | `:45-49` ✅ |
+| `POST /compras/recebimentos/nf` | `movimentacoes:editar` | Conferência de uma NF com várias conferências, cada uma de uma requisição do MES (`itensRequisicao`) ou de uma OC do hub sem requisição (`idOrdemCompra` e `itensOc`); item de uso interno não vira lote | `recebimento.controller.ts`, `recebimento.service.ts` (`ConferirNfDto`) ✅ `develop` |
+| `GET /compras/recebimentos/oc-esperadas` | `movimentacoes:visualizar` | Esperados por item de OC aprovada, com ou sem requisição do MES | `recebimento.controller.ts` ✅ `develop` |
 | `POST /compras/recebimentos/:id/recontar` | `movimentacoes:editar` | Recontagem por outra pessoa | `:51-59` ✅ |
 | `POST /compras/recebimentos/:id/decidir` `{decisao: ACEITAR\|REABRIR, motivo}` | `decisoes-pcp:editar` | Decisão do PCP | `:61-69` ✅ |
 | `POST /compras/requisicoes/:id/recebimentos` | — | **Removida**; o registro direto não existe mais | ✅ |
 | `GET /estoque/lotes/:id/etiqueta` | Estoque | PDF Code128 do lote | `estoque/etiquetas/etiqueta.controller.ts` ✅ |
 
-Contratos de apoio: [[LOG-35-Compras-Marcos-Requisicao-para-MES]] (marco `oc_aprovada` põe a parcial nos esperados), [[API-004-Referencia-OC-Integracao-MES]] e [[API-007-Referencia-OC-Valores-no-MES]] (referência e valores da OC, **MES não consome**), [[API-008-Custo-do-Lote-no-MES]] (custo no lote).
+Contratos de apoio: [[LOG-35-Compras-Marcos-Requisicao-para-MES]] (marco `oc_aprovada` põe a parcial nos esperados), [[API-004-Referencia-OC-Integracao-MES]] e [[API-007-Referencia-OC-Valores-no-MES]] (referência e valores da OC; o MES consome na `develop`, K4 de 15/10), [[API-008-Custo-do-Lote-no-MES]] (custo no lote).
 
 ### Como está no código
 
@@ -186,7 +189,7 @@ Contratos de apoio: [[LOG-35-Compras-Marcos-Requisicao-para-MES]] (marco `oc_apr
 4. A parcela que o recebimento cobre avança: na revenda, o que chegou do **produto final**, `min(parcial, produtoFinal)`; só com matéria-prima, a parcial inteira quando tudo chegou (`:508-526`). Se é a parcial toda, `moverParcial`; se é parte, `splitParaDestino` (nasce parcial nova) para o setor `QUALIDADE` com `idLoteCompra` apontando o lote (`:590-601`).
 5. O restante volta a **Compras · CCP** `EM_TRANSITO`, com "falta N" (`:604-611`).
 
-🔴 **Custo da OC não é gravado.** O desenho (API-008, decisão D1 de 14/10) manda criar `lote_custo` com `origem = OC` por produto dentro da OC, com `id_item_oc`. Em `registrarRecebimento` e em `RecebimentoService` **não há** `loteCusto.create` (as únicas gravações são a carga inicial, `estoque-operacao.service.ts:440`, e a cisão, `estoque-operacao.helpers.ts:434`). Faltam: o job do 004/007 que traz os valores da OC ao MES, a regra do lote por produto dentro da OC, a conversão de unidade (D2: sem fator no ciclo 1; lote sem custo e sinalizado) e o aviso `cotacao_a_conferir` quando a cotação é manual.
+✅ **Custo da OC gravado (na `develop`, 19/10, `97b9adc`).** O lote do Recebimento nasce com `idOcItem` e com `lote_custo` de `origem = OC` (`compras.service.ts` e `recebimento.service.ts` chamam `loteCusto.create` com o custo calculado de `compra-oc.ts`). Unidade diferente da OC ou OC fora da projeção gera lote sem custo e sinalizado (D2). Registro de 14/10 (superado): não havia `loteCusto.create` no recebimento. 🔴 Falta o custo obrigatório em todo lote (BL-066, N16-09).
 
 #### R6: divergência e decisão do PCP
 
@@ -207,7 +210,9 @@ Migrations: `20261006140000_recebimento_conferencia`, `20261014120000_compras_cc
 
 ### Mercadoria de OC sem requisição do MES (C0)
 
-📝 N14-20: o MES passa a ler as OCs do hub. A mercadoria de uma OC criada a partir de requisição só do av-hub (ou de uma OC de estoque, sem requisição) precisa ter entrada no Estoque, mas o Recebimento do MES hoje **exige requisição do MES**: a chegada pede requisição não cancelada, `podeReceber`, parcial do mesmo item do pedido **em Compras · CCP** e `pode_atuar` no Recebimento (`compras.service.ts:362-382`), e a conferência valida que cada item pertence à requisição (`recebimento.service.ts:147-162`). Uma OC sem `id_origem` não tem parcial nem requisição no MES, então não cai nos esperados.
+✅ **Feito na `develop` do MES (16 a 20/10/2026, BL-051):** a mercadoria de OC sem requisição do MES entra pelos esperados por item de OC (`GET /compras/recebimentos/oc-esperadas`) e pela conferência por OC (`POST /compras/recebimentos/nf`, `itensOc`), com o lote ligado ao item da OC e ao custo; o uso interno vira `EntradaUsoInterno`, sem lote nem saldo (N14-30). Ver [[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno]]. O texto abaixo é o registro do desenho e do estado de 14/10.
+
+📝 N14-20: o MES passa a ler as OCs do hub. A mercadoria de uma OC criada a partir de requisição só do av-hub (ou de uma OC de estoque, sem requisição) precisa ter entrada no Estoque, mas o Recebimento do MES, em 14/10, **exigia requisição do MES**: a chegada pede requisição não cancelada, `podeReceber`, parcial do mesmo item do pedido **em Compras · CCP** e `pode_atuar` no Recebimento (`compras.service.ts:362-382`), e a conferência valida que cada item pertence à requisição (`recebimento.service.ts:147-162`). Uma OC sem `id_origem` não tem parcial nem requisição no MES, então não cai nos esperados.
 
 Caminho necessário 🟡 (proposta; o desenho é do Robert):
 1. O job do contrato 004/007 (BL-001) grava a projeção da OC aprovada; o item traz `id_requisicao` nulo ou sem `id_origem` e o `destino` (pedido de venda ou estoque) ✅ `vw_ordens_compra_referencia_mes.swagger.json:44-88`.
@@ -226,9 +231,9 @@ Pontos a decidir pelo Robert: se o "esperado por OC" é entidade própria ou uma
 
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
-| 1 | **Gravar o custo da OC no lote** (`lote_custo`, `origem OC`, `id_item_oc`, `cotacao_a_conferir`) com o job do 004/007; lote por produto dentro da OC; lote sem custo sinalizado quando a unidade difere | Robert (MES), Gustavo (rota) | R4 | 🔴 |
-| 2 | **Cruzar a conferência com a OC** (quantidade comprada, fornecedor) quando existir o job 004/007; hoje só NF | Robert | R1, R3 | 🔴 |
-| 3 | **Caminho de entrada da mercadoria de OC sem requisição do MES** (requisição criada só no av-hub, C0; BL-051): ver "Mercadoria de OC sem requisição do MES" abaixo | Robert (MES), Gustavo (API) | R0 | 🔴 📝 N14-20 |
+| 1 | Gravar o custo da OC no lote (`lote_custo`, `origem OC`, `id_item_oc`): feito na `develop` (19/10). Falta o custo obrigatório em todo lote (BL-066) | Robert | R4 | ✅ gravação; 🔴 obrigatório |
+| 2 | **Cruzar a conferência com a OC** (quantidade comprada, preço, fornecedor, N16-135): a referência da OC já chega ao MES (K4), mas a divergência contra a OC não existe; hoje só NF | Robert | R1, R3 | 🔴 |
+| 3 | Caminho de entrada da mercadoria de OC sem requisição do MES (BL-051): feito na `develop` (16 a 20/10). Falta o rateio da chegada entre destinos da OC e o teste em homologação (API-011); ver "Mercadoria de OC sem requisição do MES" abaixo | Robert | R0 | ✅ entrada; 🔴 rateio |
 | 4 | Reabertura de divergência de produção e o `P6` novo norte | Robert | R6, P6 | 🔴 |
 | 5 | Leitor de código de barras da chave da NF e posto de recebimento (impressora, leitor) | Robert | R1 | 🔴 |
 | 6 | Avisar o av-hub quando o PCP **reabre** o recebimento (devolução ao fornecedor, nova compra) | Nathan, Gustavo, Robert | R6 | 🔴 |
@@ -240,8 +245,8 @@ Pontos a decidir pelo Robert: se o "esperado por OC" é entidade própria ou uma
 
 - Nathan: tolerância de peso de 5% vale para toda categoria (decisão provisória do v1), ou por material? O código guarda por material (`toleranciaPeso`, padrão 0,05). **Decidido em 29/10/2026 (N16-134): 5% por padrão, ajustável por material.**
 - Nathan: quando existir o cruzamento com a OC, a divergência de quantidade contra a OC bloqueia (como a da NF) ou só avisa? **Decidido em 29/10/2026 (N16-135): bloqueia.**
-- Robert: conferência de NF com **várias OCs** ou várias requisições na mesma nota (hoje a conferência é por requisição e parcial). **Decidido em 29/10/2026 (N16-136): uma nota pode trazer várias OCs, conferidas por item da OC.**
-- Robert: `RecebimentoService.conferir` usa o fornecedor digitado quando o MES não tem `fornecedor` da OC; confirmar que o campo preenchido pela doca não conflita com o futuro vindo do 004.
+- Robert: conferência de NF com **várias OCs** ou várias requisições na mesma nota. **Decidido em 29/10/2026 (N16-136): uma nota pode trazer várias OCs, conferidas por item da OC.** Na `develop` do MES já existe (`POST /compras/recebimentos/nf`, `conferencias[]`).
+- Robert: na conferência por OC, o fornecedor digitado vale e, sem ele, fica o da OC (`oc.nomeFornecedor`, `api007b`); confirmar que os dois não conflitam.
 
 ### Subfluxo
 
@@ -249,11 +254,11 @@ Pontos a decidir pelo Robert: se o "esperado por OC" é entidade própria ou uma
 flowchart TD
     FN1["FN1 · Fornecedor entrega<br/>CIF direto ou coleta FOB"] --> R0["R0 · Esperados: OC aprovada<br/>doca registra a chegada com NF<br/>POST compras requisicoes chegada"]
     C5["C5 · Marco oc_aprovada do av-hub"] -.->|"entra nos esperados"| R0
-    C0["C0 · OC de requisição só do av-hub<br/>ou de estoque, lida pela referência"] -.->|"esperado por OC, a construir"| R0
+    C0["C0 · OC de requisição só do av-hub<br/>ou de estoque, lida pela referência"] -.->|"esperado por OC, na develop do MES"| R0
     R0 --> R1["R1 · Confere contra a NF<br/>chave de 44 dígitos, contado x NF"]
     R1 --> R2["R2 · Pesagem<br/>peso real obrigatório se há peso teórico<br/>tolerância 5%"]
     R2 --> R3{"R3 · Bate com o esperado?"}
-    R3 -->|sim| R4["R4 · Cria o lote PENDENTE em quarentena<br/>ENTRADA no saldo, split se chegou parte<br/>custo da OC ainda não gravado"]
+    R3 -->|sim| R4["R4 · Cria o lote PENDENTE em quarentena<br/>ENTRADA no saldo, split se chegou parte<br/>custo da OC gravado na develop"]
     R3 -->|"não: recontagem por outra pessoa"| R6["R6 · Divergência<br/>QUANTIDADE, DESCRICAO, PESO, AVARIA"]
     R6 -->|"recontagem bate"| R4
     R6 -->|"PCP aceita"| R4

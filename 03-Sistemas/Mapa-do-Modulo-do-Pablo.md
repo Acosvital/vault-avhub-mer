@@ -89,8 +89,8 @@ Caminhos abaixo são relativos a `av-hub\api-comercial\` quando não dizem o con
 |---|---|---|
 | O que é | Backend Express 5, TypeScript, Prisma 7, PostgreSQL schema `core_comercial`, porta 3001 | ✅ `README.md:3-7`, `src/app.ts` |
 | Tamanho | 30 models, 24 enums, 13 migrations, cerca de 91 handlers | ✅ `prisma/models/*.prisma`, `prisma/migrations/` |
-| Situação | API só de teste, não será publicada; o Robert migra o que for útil para a `api-acos-vital` (o Pablo acompanha, N16-117); o Gustavo revisa e cria no banco | 📝 N14-15, N16-15, N16-117 |
-| Banco publicado | Não existe `core_comercial` no dump do hub | ✅ `Dump Avhub (Esqueleto).sql` (só há `core_comissionamento`, `core_compras`, `core_vendas_faturamento` e outros; nenhum `CREATE SCHEMA core_comercial`) |
+| Situação | API só de teste, **fora do BFF desde 27/10 e só para leitura desde 28/10** (`LEIA-ME-LEGADO.md`); o Robert migra o que for útil para a `api-acos-vital` (as primeiras rotas `/comercial/*` já existem, 28 e 29/10; o Pablo acompanha, N16-117); o Gustavo revisa e cria no banco | 📝 N14-15, N16-15, N16-111, N16-117 |
+| Banco publicado | Não existia `core_comercial` no dump de 14/10. **Existe no dump de 26/10 e no de 29/10**, com 23 tabelas (o legado tinha 30 models), criado pela migration `2026-10-15_052`; a N16-116 diz que ele não existirá, e o código de 28 e 29/10 ainda o usa | ✅ `Dump Avhub (Esqueleto).sql` de 14/10 (sem `CREATE SCHEMA core_comercial`); `Dump do Avhub para referência (29.10).sql` (com ele) |
 | Permissão | 100% do RBAC do hub: telas × ações e escopo de vendedores viram "capacidades" | ✅ `src/domain/permissoes/capacidades.ts:8-19,64-84` |
 | Front | Telas em `app/(protected)/vendas`, `orcamento` e `compras/historico-compras`; BFF em `app/api/comercial/[...rota]/route.ts` | ✅ |
 | Cadastro das telas | Feito pelo Nathan na api-test em 16/10; em produção o Gustavo roda o SQL | 📝 N16-14, `telas-vendas-orcamento-compras.sql` (anexo do contrato do menu, removido em 29/10/2026) |
@@ -241,6 +241,9 @@ Prefixo de cada router em `src/app.ts:97-115`. Linha = handler.
 O BFF tem 84 entradas na allowlist, cada uma com tela e ação ✅ `app/api/comercial/[...rota]/route.ts:10-132`. Rotas dedicadas a arquivo: PDF da proposta, da aprovação interna, do lote e dos relatórios, planilhas de relatório, de clientes, de fornecedores, de ofertas, da importação de itens e do pedido Omie ✅ `find app/api/comercial` (14 arquivos além da allowlist).
 
 ### 6. Telas do av-hub
+
+> [!info] Estado em 29/10/2026 (av-hub 758d5f0)
+> A tabela abaixo é de 16/10 (av-hub 5aa5311). Depois do menu enxuto (LOG-62, 27/10) **não existem mais** as telas `/vendas/clientes` (virou `/vendas/acompanhamento-clientes`), `/vendas/relatorio-cotacoes`, `/orcamento/pedido-cotacao`, `/orcamento/ofertas-fornecedor`, `/orcamento/pesquisa-materiais`, `/orcamento/tabela-telha` e `/compras/historico-compras` (N16-108). Existem hoje em `app/(protected)`: `vendas/propostas` (lista, `nova`, `[id]`; do Robert), `vendas/relatorio-gerencial`, `vendas/pedidos-de-venda`, `orcamento/{catalogo-produtos,fornecedores,painel-comprador,parametros-custo,custo-itens}` (do Pablo com o Robert) e `dashboards/dash-comercial` ✅. O BFF só liga ao Hub as rotas marcadas `api: 'hub'`; as demais respondem 503 `RECURSO_NAO_MIGRADO`.
 
 | URL | Componente | Slug | Selo |
 |---|---|---|---|

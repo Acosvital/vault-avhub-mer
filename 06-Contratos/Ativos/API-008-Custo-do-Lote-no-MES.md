@@ -3,7 +3,7 @@ id: API-008
 aliases: ["Contrato 008", "008-Custo-do-Lote-no-MES"]
 tags: [contrato, contrato-api, mes, estoque, custo, g1, genealogia]
 criado: 2026-10-14
-atualizado: 2026-10-26
+atualizado: 2026-10-29
 status: parcial
 sistemas: [mes-api, hub-api]
 dono: "Robert"
@@ -19,18 +19,24 @@ criado_original: 2026-10-09
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Define como o MES (sistema de produção) guarda o custo de cada lote de estoque e o informa ao av-hub, por uma rota que devolve o custo de cada item do pedido.
 > **Quem é afetado:** Estoque, Recebimento e a comissão: o custo do pedido passa a vir dos lotes realmente usados.
-> **Situação:** Parcial, dono Robert. Tabela de custo, carga inicial e telas prontas (✅); o lote do Recebimento já nasce com custo da OC. Faltam o custo na saída e a rota de custo (🔴). Em 16/10 decidiu-se que todo lote terá custo obrigatório (📝).
+> **Situação:** Parcial, dono Robert. Tabela de custo, carga inicial, telas, custo da OC no lote, custo à mão, custo gravado na saída e a rota `GET /itens/custo` estão na `develop` (✅, 27/10). Falta tornar o custo obrigatório em todo lote (BL-066, N16-09 📝) e o custo do fabricado (BL-067), além do teste de ponta a ponta com o hub e do merge para a `main` (BL-035).
 > **Exemplo:** 20 flanges em três lotes (10×10, 5×12 e 5×15) dão custo total de 235,00 e médio de 11,75.
 
-> [!info] Situação em 14/10/2026
+> [!info] Situação em 29/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** R4, E3, E5 · **Dono:** Robert
+>
+> - ✅ **Feito em 27/10/2026 (Robert, `api-pcp` `6c11147`, PR #77, `develop`):** a rota `GET /itens/custo` existe (`src/integracao-avhub/integracao-avhub.controller.ts`, regra em `itens-custo.ts`: uma linha por filial, pedido e produto; cursor `alterado_em` + `id`; custo sem impostos; fabricado fora até o custo da matéria-prima). A saída grava o custo do lote (`custoUnitario` do movimento, `estoque.prisma:290`) e existe `PUT /estoque/lotes/:id/custo` para informar ou corrigir à mão, com motivo e histórico (`estoque-operacao.service.ts:699`). Isto fecha os itens 🔴 de 14/10 (§3 manual, §4 e §5).
+> - ✅ O consumidor no hub existe (`api-acos-vital` `itens_pedido_custo.job.js`) e deixa de receber 404 quando o MES novo for publicado; ainda não foi testado junto ([[LOG-47-Custo-Real-por-Item-no-Hub]]).
+> - 🔴 **Falta:** custo obrigatório em todo lote (BL-066): a carga inicial ainda aceita vazio ou `0` como lote sem custo (`estoque-operacao.service.ts:616-617`); custo do fabricado (BL-067); escopo e data da carga de 13/11 (OQ-07).
+>
+> **Registro anterior (14/10/2026), mantido:** `parcial` · **Nós do 0b:** R4, E3, E5 · **Dono:** Robert
 >
 > - ✅ **§1 Schema:** tabela `lote_custo` (model `LoteCusto`, `api-pcp/prisma/models/estoque.prisma:394-423`; migration `20261009140000_lote_custo`), com `origem`, `custo_liquido_unitario`, `cotacao_a_conferir`, `id_item_oc`.
 > - ✅ **§2 G1, carga inicial:** `POST /estoque/lotes/carga-inicial` aceita `custoUnitario` e grava `lote_custo` (`api-pcp/src/estoque/operacao/estoque-operacao.service.ts:403-445`); vazio ou `0` = lote sem custo. Permissão `estoque-custo` (default-deny; `api-pcp/src/common/constants/estoque-custo.constants.ts:5`) controla quem informa e quem vê o custo (`estoque-operacao.service.ts:65`).
 > - ✅ **§6 Telas:** coluna de custo e campo na carga inicial no `app-pcp` (`app-pcp/app/(protected)/estoque-operacao/saldo/EntradaLoteModal.tsx`, `.../lotes/[id]/page.tsx`).
-> - 🔴 **§3 Recebimento com custo da OC:** o lote de recebimento nasce sem `lote_custo` (depende da projeção da OC, ver [[API-007-Referencia-OC-Valores-no-MES]]). Rota de custo `MANUAL` (`PUT /estoque/lotes/:id/custo`, decisão D8): não existe no controller de Estoque.
-> - 🔴 **§4 Snapshot do custo na `SAIDA`:** não há (o movimento não grava o custo do lote).
-> - 🔴 **§5 `GET /itens/custo`:** não existe no `api-pcp` (grep sem resultado). O av-hub já tem o consumidor (`itens_pedido_custo.job.js:78`) e responde 404 "ainda não publicado" no MES: o job só avisa no log.
+> - 🕓 **(14/10, superado em 19/10 e 27/10) §3 Recebimento com custo da OC:** o lote de recebimento nasce sem `lote_custo` (depende da projeção da OC, ver [[API-007-Referencia-OC-Valores-no-MES]]). Rota de custo `MANUAL` (`PUT /estoque/lotes/:id/custo`, decisão D8): não existe no controller de Estoque.
+> - 🕓 **(14/10, superado em 27/10) §4 Snapshot do custo na `SAIDA`:** não há (o movimento não grava o custo do lote).
+> - 🕓 **(14/10, superado em 27/10) §5 `GET /itens/custo`:** não existe no `api-pcp` (grep sem resultado). O av-hub já tem o consumidor (`itens_pedido_custo.job.js:78`) e responde 404 "ainda não publicado" no MES: o job só avisa no log.
 > - ✅ **§3 em 19/10 (Robert, BL-005, `api-pcp` `97b9adc`):** o lote do Recebimento nasce com `idOcItem` e `lote_custo` origem `OC`; unidade diferente da OC ou OC fora da projeção gera lote sem custo e sinalizado ([[Backlog-por-Frente]]).
 > - 📝 **N16-09 (16/10):** todo lote tem custo, **obrigatório**, inclusive na carga inicial; o lote tem valor total e valor por item e, no fim, o valor unitário. Isto supera o #93 e o trecho "o custo é opcional e nunca bloqueia", o A3 do #97 (`0` = sem custo) e o D2 do #98 (lote sem custo e sinalizado). O item do pedido soma as linhas por evento (OC, lote, matéria-prima do fabricado), que alimentam o `K2` da comissão nova ([[13-Custo-Real-e-Comissao-no-Fluxo]]). Escopo e data da carga de 13/11: OQ-07 🔴. Trabalho: BL-066 e BL-067.
 >

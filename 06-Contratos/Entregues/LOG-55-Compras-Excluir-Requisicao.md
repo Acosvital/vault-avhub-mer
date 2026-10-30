@@ -3,12 +3,12 @@ id: LOG-55
 aliases: ["Contrato 55", "55-Compras-Excluir-Requisicao"]
 tags: [contrato, contrato-sql, contrato-api, compras, requisicao]
 criado: 2026-10-20
-atualizado: 2026-10-26
+atualizado: 2026-10-29
 status: aplicado-em-producao
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Nathan"
 etapa_0b: [C0, C1]
-fontes: ["av-hub: app/api/compras/requisicoes/[id]/route.ts (GET e PATCH, sem DELETE)", "av-hub: components/Compras/Kanban/RequisicoesKanban.tsx:27-48 (matriz de status)", "av-hub: components/Compras/ComprasRequisicoes.tsx (lista)", "LOG-35 (cancelar exige motivo e vai ao MES)", "SQL-008 (requisicoes_compra)"]
+fontes: ["av-hub: app/api/compras/requisicoes/[id]/route.ts (GET, DELETE e PATCH)", "av-hub: components/Compras/Kanban/RequisicoesKanban.tsx:27-48 (matriz de status)", "av-hub: components/Compras/ComprasRequisicoes.tsx (lista)", "LOG-35 (cancelar exige motivo e vai ao MES)", "SQL-008 (requisicoes_compra)"]
 criado_original: 2026-10-20
 ---
 

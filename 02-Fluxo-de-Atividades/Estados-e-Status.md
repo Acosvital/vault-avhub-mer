@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Nathan
-fontes: [api-pcp 579a625 prisma/models/*.prisma, integracao-avhub.service.ts, requisicao-avhub.eventos.ts, Dump MES 14/10 (CREATE TYPE, linhas 128-424), Dump Avhub 14/10 (CHECK constraints), app-pcp 1fca8d3 movimentacoes/labels.ts e acoes.ts, HUB b55ac55 lib/domain/etapas-item.ts, 00-Fluxo-Mestre-0b]
+fontes: [api-pcp 579a625 prisma/models/*.prisma, integracao-avhub.service.ts, requisicao-avhub.eventos.ts, Dump MES 14/10 (CREATE TYPE, linhas 128-424), Dump Avhub 14/10 (CHECK constraints), app-pcp 1fca8d3 movimentacoes/labels.ts e acoes.ts, HUB b55ac55 lib/domain/etapas-item.ts, 00-Fluxo-Mestre-0b, api-pcp develop de 27/10/2026 (FINALIZADO, PRODUCAO), api-acos-vital develop (propostas)]
 ---
 
 # Estados e status do fluxo
@@ -109,6 +109,15 @@ A reserva não expira. Ela nasce `ATIVA`, vira `CONSUMIDA` na saída física e `
 
 Detalhes em [[04-Circuito-de-Compra]].
 
+### Proposta e pedido do Hub
+
+| Campo | Valores | Fonte |
+|---|---|---|
+| `propostas.status` | `ABERTA`, `APROVADA`, `TRANSFORMADA`, `CANCELADA`; a API e o front aceitam também `EXPIRADA` (validade vencida) ❓ o `CHECK` do dump de 29/10 tem só os quatro primeiros | `api-acos-vital` `propostas.route.js`; Dump Avhub 29/10 (`ck_propostas_status`) ✅ |
+| `pedido.status_sincronizacao_omie` | `pendente`, `sincronizado`, `erro` | N16-36; `transformar` grava `pendente` ✅ |
+
+Detalhe e transições em [[11-Proposta-e-Pedido-de-Venda]].
+
 ### Etapa do item vista pelo vendedor
 
 O vendedor vê o item em uma de 11 etapas, do "Requisição de compra" até o "Pronto para expedição". A etapa vem do **tipo do setor atual** mais o status. O vocabulário é provisório ([[API-005-Status-Item-Integracao-MES]], [[API-006-Status-por-Item-Leitura-no-Hub]]). A tabela completa está no Detalhe técnico. Não há etapa "entregue" nem "faturado" 🔴.
@@ -159,13 +168,14 @@ Uso: `ENTREGUE` é gravado por `EntregasService.create` quando zera o pendente e
 
 #### Parcial do item (`ItemParcial.status`)
 
-`StatusItemParcial` (`producao.prisma:29-54`, dump 226; a ordem do dump difere):
+`StatusItemParcial` (`producao.prisma:29-54`, dump 226; a ordem do dump difere). Na `develop` do MES (23/10, ação `finalizar`) há mais um valor, `FINALIZADO`, que não está na `main` nem no dump de 14/10:
 
 | Valor | Rótulo na tela | Significado |
 |---|---|---|
 | `CRIADO` | Aguardando recebimento | Nasce no primeiro setor; não gera linha de histórico |
 | `RECEBIDO` | Recebido | Operador confirmou o recebimento (`receivedBy`) |
 | `EM_ANDAMENTO` | Em produção | Trabalho iniciado, `startedAt` preenchido |
+| `FINALIZADO` (só na `develop`) | Finalizado | Setor terminado, peça aguardando no setor; sai por `mover` ou volta a `EM_ANDAMENTO` por `reabrir`. Para o av-hub conta como `fabrica.espera` (`etapaDoItem`, `integracao-avhub.service.ts`) |
 | `EM_TRANSITO` | Em trânsito | Movida para outro setor, aguardando recebimento |
 | `PAUSADO` | Pausado | Pausa com motivo; sai só por `retomar` |
 | `REPROVADO` | Reprovado | Reprovada na Qualidade (setor tipo `QUALIDADE`); abre `Divergencia` |
@@ -239,7 +249,7 @@ Regras: bateu vai a `CONCLUIDO`; divergiu vai a `AGUARDANDO_RECONTAGEM`; continu
 | Enum | Valores | Fonte |
 |---|---|---|
 | `StatusQualidadeLote` | `PENDENTE`, `LIBERADO`, `REPROVADO`, `QUARENTENA` | `estoque.prisma:25-32` (261) ✅ |
-| `OrigemLote` | `RECEBIMENTO`, `CARGA_INICIAL` (sem origem de produção 🔴) | `estoque.prisma:17-20` (155) ✅ |
+| `OrigemLote` | `RECEBIMENTO`, `CARGA_INICIAL` e, só na `develop` do MES (27/10, LOG-53), `PRODUCAO` (fabricado aprovado) | `estoque.prisma:17-20` (155) ✅; `PRODUCAO` ✅ `develop` |
 | `NaturezaMaterial` | `MATERIA_PRIMA`, `REVENDA` | `estoque.prisma:12-15` (128) ✅ |
 | `TipoMovimentoEstoque` | `ENTRADA`, `SAIDA`, `TRANSFERENCIA`, `AJUSTE` | `estoque.prisma:38-43` (409) ✅ |
 | `StatusReserva` | `ATIVA`, `CONSUMIDA`, `LIBERADA` | `estoque.prisma:48-52` (308) ✅ |

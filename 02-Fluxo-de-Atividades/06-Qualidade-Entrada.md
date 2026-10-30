@@ -100,7 +100,7 @@ CCP = acompanhamento de compras. Os perfis são dados do banco (`perfis`, `permi
 | `REPROVADO` | Lote inteiro reprovado, ou o **lote filho** da cisão com a quantidade reprovada | Não |
 | `QUARENTENA` | Parte aprovada de uma reprovação parcial, bloqueada até a substituição ser aprovada | Não |
 
-`OrigemLote` (`estoque.prisma:17-20`) tem só `RECEBIMENTO` e `CARGA_INICIAL`. Não existe origem de produção (ver [[08-Qualidade-Saida]] e [[Estados-e-Status]]).
+`OrigemLote` (`estoque.prisma:11-17`) tem `RECEBIMENTO`, `CARGA_INICIAL` e, desde 27/10 na `develop`, `PRODUCAO` (lote do fabricado, ver [[08-Qualidade-Saida]] e [[Estados-e-Status]]).
 
 #### Transições
 
@@ -207,8 +207,8 @@ Consequência de projeto: qualquer usuário com `inspecao-entrada:editar` decide
 |---|---|---|---|---|
 | 1 | Fechar a RNC: endpoint e tela para registrar a nota de devolução, dar baixa do lote reprovado e zerar `nota_devolucao_pendente` | Robert (MES) | Q3 | 🔴 |
 | 2 | Contrato para a **recompra por RNC**: avisar o Compras no av-hub que a parte reprovada exige devolução e substituição (hoje só o MES sabe; a OC no av-hub segue "atendida") | Nathan decide, Gustavo e Robert implementam | Q3 → `C1` | 🔴 sem contrato |
-| 3 | Vincular a inspeção ao setor: checar `PerfilSetor` em `aprovar` e `reprovar` | Robert | Q2 | 🟡 |
-| 4 | Concessão de lote fora de especificação (aceite com restrição) e destino do lote 100% reprovado (devolução, descarte ou retrabalho) | Nathan | Q2 | 🔴 pergunta aberta (decidida em 29/10, N16-125 e N16-126) |
+| 3 | Vincular a inspeção ao setor: checar `PerfilSetor` em `aprovar` e `reprovar` (decidido em N16-124; conferido em 29/10 na `develop` do MES: `qualidade.service.ts` ainda não checa o setor) | Robert | Q2 | 📝 🔴 |
+| 4 | Concessão de lote fora de especificação: não existe (N16-125). Lote 100% reprovado: volta ao fornecedor e abre a recompra (N16-126), o que depende do item 1 e do contrato do item 2 | Nathan | Q2 | 📝 decidido; 🔴 sem código |
 | 5 | Inspeção de processo (vendedor marca "Qualidade acompanha desde o início"; inspeção documental). O flag existe em `Pedidos.acompanhamentoQualidade` mas nada o consome | Robert, Ciclo 2 | — | 🔴 |
 | 6 | Trocar o mock restante de `qualidade/route` e do painel do Estoque por dados reais | Robert | — | 🟡 |
 | 7 | Rótulo de etapa "Em quarentena" do contrato 005 já existe (`qualidade.quarentena`); falta teste ponta a ponta no cartão "Etapa dos itens" | Nathan | — | ❓ |

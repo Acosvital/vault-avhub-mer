@@ -77,11 +77,11 @@ sequenceDiagram
         MES->>DB: restante segue o roteiro de producao
     end
 ```
-✅ Conferido. 🔴 O custo do item (média dos lotes) ainda não é calculado.
+✅ Conferido. O custo do item (média dos lotes) é publicado por `GET /itens/custo` na `develop` do MES desde 27/10 (fora da `main`) ✅.
 
 ## 3. Requisição de compra: ida (P3) e volta (C1 a C5)
 
-Há duas origens de requisição ([[00-Fluxo-Mestre-0b]], nós P3 e C0). Estes diagramas mostram a origem PCP. A origem Compras (`C0`) nasce no av-hub e a requisição não chega ao MES; o MES lê a OC dela pela referência (N14-20), o que 🔴 ainda não faz (ver [[Integracao-AvHub-MES]]).
+Há duas origens de requisição ([[00-Fluxo-Mestre-0b]], nós P3 e C0). Estes diagramas mostram a origem PCP. A origem Compras (`C0`) nasce no av-hub e a requisição não chega ao MES; o MES lê a OC dela pela referência (N14-20; job K4 na `develop` desde 15/10 ✅), mas ainda não a usa na Triagem e no Estoque 🔴 (ver [[Integracao-AvHub-MES]]).
 
 ### 3.1 Ida (LOG-34)
 
@@ -136,7 +136,7 @@ sequenceDiagram
     API->>API: eventos despachada, previsao_alterada, ocorrencia
     MES->>MES: etapaCompra EM_TRANSITO e previsaoChegada
 ```
-✅ Conferido. 🔴 O MES ainda não recebe o fornecedor da OC: falta o job do contrato 004/007.
+✅ Conferido. O MES recebe a OC com o fornecedor pelo job K4 (`develop`; fornecedor desde 26/10, `api007b`) ✅.
 
 ## 4. Chegada com NF e Recebimento (R0 a R6)
 
@@ -174,7 +174,7 @@ sequenceDiagram
         end
     end
 ```
-✅ Conferido. 🔴 O custo da OC não é gravado no lote (`R4`).
+✅ Conferido. O custo da OC é gravado no lote (`R4`) na `develop` desde 19/10 ✅; fora da `main` do MES.
 
 ## 5. Inspeção de entrada e volta ao Estoque (Q1 a Q4, E5)
 
@@ -259,7 +259,7 @@ Fluxo 4 da integração ([[Integracao-AvHub-MES]], INT-01). Selo ✅: rotas em `
 
 ### 2. Atendimento do Estoque
 
-Selo ✅: `itens-parciais.service.ts:607-700` (`atenderEstoque`, `destinoRestante` `'ROTEIRO' | 'COMPRA'`); saldo em `estoque-operacao.controller.ts:46`. 🔴 O custo do item (média dos lotes) não é calculado: não existe `GET /itens/custo` no MES.
+Selo ✅: `itens-parciais.service.ts` (`atenderEstoque`, `destinoRestante` `'ROTEIRO' | 'COMPRA'`); saldo em `estoque-operacao.controller.ts`. O `GET /itens/custo` existe na `develop` do MES desde 27/10 ✅ (fora da `main`).
 
 ### 3.1 Ida (LOG-34)
 
@@ -267,11 +267,11 @@ Selo ✅: `envio-avhub.service.ts:21,98-102,129-175`; resposta do hub `requisico
 
 ### 3.2 Volta (LOG-35)
 
-Selo ✅: `eventos-avhub.service.ts:25-27,31,80,150-181`, tratamento por tipo em `requisicao-avhub.eventos.ts:234-318`. 🔴 O MES não recebe fornecedor da OC: falta o job do contrato 004/007.
+Selo ✅: `eventos-avhub.service.ts`, tratamento por tipo em `requisicao-avhub.eventos.ts`. O MES recebe o fornecedor da OC pelo job K4 na `develop` ✅.
 
 ### 4. Chegada com NF e Recebimento
 
-Selo ✅: `compras.service.ts:356-402` (chegada exige NF, parcial em `COMPRAS`), `:404-455` (liberar), `recebimento.service.ts:135,249,331`; rotas `recebimento.controller.ts:46,52,62`. 🔴 O custo da OC não é gravado no lote (R4).
+Selo ✅: `compras.service.ts` (chegada exige NF, parcial em `COMPRAS`; liberar), `recebimento.service.ts`, `recebimento.controller.ts`. O custo da OC é gravado no lote (R4) na `develop` ✅.
 
 ### 5. Inspeção de entrada e volta ao Estoque
 
@@ -279,8 +279,8 @@ Selo ✅: `qualidade.service.ts:83-100` (aprovar), `:102-262` (reprovar, quarent
 
 ### 6. Produção, inspeção de saída e Expedição
 
-Selo ✅: `itens-parciais.controller.ts:206-229` (reprovar, resolver, retrabalho), `itens-parciais.service.ts:279` e `entregas.service.ts:88` (baixa). 🟡 Q8 (aprovado volta ao Estoque) e X3 (consolidar carga) sem código. 🔴 Sinalização de faturamento (11.1). O nó `Q8` do Mestre manda o aprovado ao Estoque (E5); o código manda à Expedição.
+Selo ✅: `itens-parciais.controller.ts` (reprovar, resolver, retrabalho), `itens-parciais.service.ts` e `entregas.service.ts` (baixa). 🟡 Q8 (aprovado volta ao Estoque) e X3 (consolidar carga) sem código. 🔴 Sinalização de faturamento (11.1). O nó `Q8` do Mestre manda o aprovado ao Estoque (E5); o código manda à Expedição.
 
 ### 7. Despacho do Estoque
 
-📝 Decisão do Nathan de 14/10. 🔴 Não existe documento de retirada nem tela; hoje a baixa é na Embalagem/Expedição (`itens-parciais.service.ts:274-282`). Dono: Robert ([[03-Estoque-Atendimento-e-Despacho]]).
+📝 Decisão do Nathan de 14/10. 🔴 Não existe documento de retirada nem tela; hoje a baixa é na Embalagem/Expedição (`itens-parciais.service.ts`). Dono: Robert ([[03-Estoque-Atendimento-e-Despacho]]).

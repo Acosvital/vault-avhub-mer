@@ -3,12 +3,12 @@ id: LOG-50
 aliases: ["Contrato 50", "50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front"]
 tags: [contrato, contrato-logica, av-hub, bff, escopo, front]
 criado: 2026-10-14
-atualizado: 2026-10-15
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-front]
 dono: "Nathan"
 etapa_0b: []
-fontes: ["Dump Avhub (Esqueleto).sql:615-678", "api-acos-vital/src/middlewares/escopoVendedor.js:165"]
+fontes: ["Dump Avhub (Esqueleto).sql:615-678", "api-acos-vital/src/middlewares/escopoVendedor.js:175"]
 criado_original: 2026-10-13
 ---
 

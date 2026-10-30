@@ -3,7 +3,7 @@ id: API-013
 aliases: ["Contrato 013", "013-Acompanhamento-Clientes-So-Cliente-Periodo-Total"]
 tags: [contrato, contrato-api, acompanhamento-clientes, clientes, tag-cliente, periodo, exportacao, av-hub, leitura]
 criado: 2026-10-19
-atualizado: 2026-10-20
+atualizado: 2026-10-29
 status: aplicado-em-producao
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo"
@@ -20,12 +20,12 @@ criado_original: 2026-10-19
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (API e banco); Nathan (front)
 >
 > - ✅ **Encerrado em 20/10/2026.** O DBA implementou `so_cliente` e `periodo=total` (com o eco `so_cliente` e `periodo`); o front saiu nos PRs av-hub #224 e #228 e está na `main` (#227 e #229). Validado pelo Nathan em produção: a tela mostra só clientes e todo o período, e o Excel sai filtrado. O texto abaixo é o histórico da proposta (os itens "Hoje" descrevem o estado de 19/10, antes da entrega).
-> - ✅ **Hoje a tela não filtra por tag.** Nem a tela, nem o BFF, nem a rota `GET /acompanhamento_clientes` filtram por `core.tipos_parceiro`. A **base** da função `fn_acompanhamento_clientes` é a união (`UNION`) de: parceiros com o tipo `CLIENTE` (CTE `cadastro`, `upper(tp.tipo) = 'CLIENTE'`) **mais** quem tem pedido ou NF **mais** membros de grupo **mais** quem tem venda/faturamento no mês ([[LOG-48-Acompanhamento-de-Clientes-Grupos-de-Empresa]] §12.2). Quem compra e não tem a tag (fornecedor, sem tipo, "Setor - *") aparece na tela. Em 13/10 eram **122** clientes sem a tag, de 3.964.
-> - ✅ A função já devolve a coluna `cliente_cadastro` (boolean) em cada linha: é `true` quando o parceiro tem a tag. O front só a usa na aba "Clientes" da planilha ("Cliente no cadastro: Sim/Não").
-> - ✅ **Exportação** (`GET /api/acompanhamento-clientes/exportar`) pede à API todos os recortes **sem** filtro de tag: sai a base inteira, com a tag ou sem.
-> - ✅ **Período:** a função, a rota e a tela trabalham sempre **um mês** (`mes`, `ano`). Os campos `*_mes` (venda, faturamento, pedidos, NFs) são só desse mês. Não há como ver nem exportar o histórico inteiro.
+> - 🕓 **Registro de 19/10 (superado): a tela não filtrava por tag.** Nem a tela, nem o BFF, nem a rota `GET /acompanhamento_clientes` filtram por `core.tipos_parceiro`. A **base** da função `fn_acompanhamento_clientes` é a união (`UNION`) de: parceiros com o tipo `CLIENTE` (CTE `cadastro`, `upper(tp.tipo) = 'CLIENTE'`) **mais** quem tem pedido ou NF **mais** membros de grupo **mais** quem tem venda/faturamento no mês ([[LOG-48-Acompanhamento-de-Clientes-Grupos-de-Empresa]] §12.2). Quem compra e não tem a tag (fornecedor, sem tipo, "Setor - *") aparece na tela. Em 13/10 eram **122** clientes sem a tag, de 3.964.
+> - 🕓 Registro de 19/10: a função já devolvia a coluna `cliente_cadastro` (boolean) em cada linha: é `true` quando o parceiro tem a tag. O front só a usa na aba "Clientes" da planilha ("Cliente no cadastro: Sim/Não").
+> - 🕓 Registro de 19/10: a **exportação** (`GET /api/acompanhamento-clientes/exportar`) pedia à API todos os recortes **sem** filtro de tag: sai a base inteira, com a tag ou sem.
+> - 🕓 Registro de 19/10 (superado): a função, a rota e a tela trabalhavam sempre **um mês** (`mes`, `ano`). Os campos `*_mes` (venda, faturamento, pedidos, NFs) são só desse mês. Não há como ver nem exportar o histórico inteiro.
 > - 📝 **Pedido do Nathan, 19/10/2026:** (1) exportar já filtrado só com clientes (tag CLIENTE); (2) opção de ver **todo o período**, sem limite de datas, na tela e na exportação.
-> - 🔴 Nada deste contrato está codificado. O front (Nathan) sai pronto **esperando** a API: o BFF repassa os parâmetros novos e a API atual os ignora; por isso a tela avisa quando o eco do filtro/período não vem na resposta (seção 4).
+> - 🕓 Registro de 19/10 (superado): nada deste contrato estava codificado. O front (Nathan) sai pronto **esperando** a API: o BFF repassa os parâmetros novos e a API atual os ignora; por isso a tela avisa quando o eco do filtro/período não vem na resposta (seção 4).
 > - **MES (Robert): sem trabalho.**
 >
 > Selos em [[Regras-do-Vault]].

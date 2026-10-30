@@ -3,12 +3,12 @@ id: LOG-32
 aliases: ["Contrato 32", "32-Compras-CCP-Acompanhamento-OC"]
 tags: [contrato, contrato-logica, contrato-sql, contrato-api, compras, ccp]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco, hub-api, hub-front]
 dono: "Gustavo (DBA)"
 etapa_0b: [C5]
-fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra_acompanhamento/ordens_compra_acompanhamento.route.js:298,393,404,505,562,586", "Dump Avhub (Esqueleto).sql (ordens_compra_acompanhamento, ordens_compra_ocorrencias)"]
+fontes: ["api-acos-vital/src/schemas/core_vendas_faturamento/tables/ordens_compra_acompanhamento/ordens_compra_acompanhamento.route.js:297,392,403,504,561,585", "Dump Avhub (Esqueleto).sql (ordens_compra_acompanhamento, ordens_compra_ocorrencias)"]
 criado_original: 2026-09-30
 ---
 
@@ -24,10 +24,11 @@ criado_original: 2026-09-30
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** C5 · **Dono:** Gustavo (DBA)
 >
-> - ✅ `GET /compras/acompanhamento` (`ordens_compra_acompanhamento.route.js:298`), `GET`/`PUT /compras/ordens/:id/acompanhamento` (`:393`, `:404`), `POST /compras/ordens/:id/contatos` (`:505`), `POST /compras/ordens/:id/ocorrencias` (`:562`), `PATCH /compras/ocorrencias/:id` (`:586`), montadas em `index.js:190`.
+> - ✅ `GET /compras/acompanhamento` (`ordens_compra_acompanhamento.route.js:297`), `GET`/`PUT /compras/ordens/:id/acompanhamento` (`:392`, `:403`), `POST /compras/ordens/:id/contatos` (`:504`), `POST /compras/ordens/:id/ocorrencias` (`:561`), `PATCH /compras/ocorrencias/:id` (`:585`), montadas em `core_vendas_faturamento/index.js:204`.
 > - ✅ O MES recebe estes marcos pelo [[LOG-35-Compras-Marcos-Requisicao-para-MES]] (`oc_confirmada`, previsão, despacho, ocorrência) e os mostra em Compras · CCP, só leitura.
 > - 🔴 Falta criar o perfil CCP: tarefa de cadastro do Nathan e do Gustavo (N14-24), **não** é do Robert nem desenvolvimento no MES (nó C5 do [[00-Fluxo-Mestre-0b]]).
 > - ❓ Front (Follow-up, `/compras/followup`) no HUB: não conferido.
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro.

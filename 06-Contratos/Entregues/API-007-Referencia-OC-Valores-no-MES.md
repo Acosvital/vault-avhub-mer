@@ -3,8 +3,8 @@ id: API-007
 aliases: ["Contrato 007 (API)", "007-Referencia-OC-Valores-no-MES"]
 tags: [contrato, contrato-api, mes, estoque, compras, custo, integracao-av-hub-mes]
 criado: 2026-10-14
-atualizado: 2026-10-15
-status: parcial
+atualizado: 2026-10-29
+status: implementado-no-codigo
 sistemas: [hub-banco, hub-api, mes-api]
 dono: "Robert"
 etapa_0b: [C4, R4]
@@ -19,11 +19,15 @@ criado_original: 2026-10-09
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Amplia a referência da Ordem de Compra (OC) do API-004: a rota passa a devolver também valor unitário, desconto, moeda, cotação e frete, para o lote comprado nascer com custo.
 > **Quem é afetado:** Estoque e Recebimento do MES (o lote ganha custo). Compras e Orçamento poderão comparar orçado, comprado e custo real, como uso futuro.
-> **Situação:** Parcial. O lado do av-hub está entregue (✅). No MES, o job de leitura com valores existe desde 15/10 (Robert); falta gravar o custo da OC no lote.
+> **Situação:** Feito no código, sugerido para Entregues. O lado do av-hub está entregue (✅) e, no MES, a leitura com valores existe desde 15/10 (K4) e o lote do Recebimento já nasce com o custo da OC desde 19/10 (K5, `97b9adc`). Só chega à `main` do MES com o merge do BL-035.
 > **Exemplo:** Uma OC em dólar chega com moeda, cotação e valor unitário, e o MES calcula o valor unitário em reais.
 
-> [!info] Situação em 14/10/2026
-> **Status:** `parcial` · **Pasta:** `Ativos` · **Nós do 0b:** C4, R4 · **Dono:** Robert
+> [!info] Situação em 29/10/2026
+> **Status:** `implementado-no-codigo` · **Pasta:** `Ativos` (sugerida: `Entregues`) · **Nós do 0b:** C4, R4 · **Dono:** Robert
+>
+> - ✅ **Conferido em 29/10/2026:** a gravação do custo da OC no lote existe (`api-pcp/src/compras/compra-oc.ts:89-114`, `lote_custo` com origem `OC`; commit `97b9adc`). Unidade diferente da OC ou OC fora da projeção gera lote sem custo e sinalizado; a regra de custo obrigatório (N16-09) é do [[API-008-Custo-do-Lote-no-MES]]. A rota segue com o fornecedor da OC (`api007b`).
+>
+> **Registro anterior (14/10/2026), mantido:** `parcial` · **Nós do 0b:** C4, R4
 >
 > - ✅ **Lado do hub entregue:** a rota devolve `moeda`, `cotacao_moeda`, `cotacao_data`, `cotacao_origem`, `valor_frete`, `valor_seguro` na OC e, em cada item, `valor_unitario`, `desconto_pct`, `valor_desconto`, `valor_total_item` (`vw_ordens_compra_referencia_mes.route.js:51-53`; view no `Dump Avhub (Esqueleto).sql:20237-20330`, comentário "Contratos de API 004 e 007 (SQL 012)"). O contrato SQL [[SQL-012-Ordens-Compra-Referencia-Valores]] está aplicado no código e no dump.
 > - ✅ **Atualização de 15/10/2026 (Robert):** job de leitura e projeção da OC com valores já são o K4 (`develop` do `api-pcp`, PR #59). Falta só gravar o custo da OC no lote (K5), além dos BL-049, BL-050 e BL-051 do [[API-004-Referencia-OC-Integracao-MES]]. O item abaixo marcado 🔴 é do estado de 14/10.

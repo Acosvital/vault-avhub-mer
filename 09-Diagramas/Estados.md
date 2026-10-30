@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Nathan
-fontes: [v1 Diagramas-UML (5, 6, 7, 8, 20, 24), api-pcp 579a625 prisma/models, api-acos-vital f322dcd, 00-Fluxo-Mestre-0b, api-comercial 5aa5311 enums.prisma, migrações de 26/10/2026, Registro-de-Decisoes N16]
+fontes: [v1 Diagramas-UML (5, 6, 7, 8, 20, 24), api-pcp 579a625 prisma/models, api-acos-vital f322dcd, 00-Fluxo-Mestre-0b, api-comercial 5aa5311 enums.prisma, migrações de 26/10/2026, Dump Avhub de 29/10/2026 e rotas `/comercial/propostas` da api-acos-vital develop (29/10), Registro-de-Decisoes N16]
 ---
 
 # Diagramas de estados
@@ -75,7 +75,7 @@ stateDiagram-v2
         ou LIBERADO se nao
     end note
 ```
-Se a reprovação é parcial, o MES cria um lote filho reprovado com a quantidade ruim. 🔴 Ainda não existe origem de lote para o fabricado aprovado.
+Se a reprovação é parcial, o MES cria um lote filho reprovado com a quantidade ruim. Na `develop` o fabricado aprovado já tem origem de lote (`PRODUCAO`, LOG-53, 27/10) ✅; na `main` do MES não 🔴.
 
 ## 3. Reserva de estoque
 
@@ -366,7 +366,7 @@ Selo ✅: ações em `itens-parciais.controller.ts:100-297` (receber, iniciar, m
 
 ### 2. Lote (`StatusQualidadeLote`)
 
-Selo ✅: enum `estoque.prisma:25-32`; `qualidade.service.ts:83-262` (quarentena em `:243`); carga inicial `OrigemLote.CARGA_INICIAL`. 🔴 Não existe origem de lote para fabricado aprovado (`OrigemLote` só tem `RECEBIMENTO` e `CARGA_INICIAL`).
+Selo ✅: enum em `estoque.prisma`; `qualidade.service.ts` (quarentena); carga inicial `OrigemLote.CARGA_INICIAL`. `OrigemLote` tem `RECEBIMENTO`, `CARGA_INICIAL` e, na `develop`, `PRODUCAO` (fabricado aprovado); a `main` só tem as duas primeiras 🔴.
 
 ### 3. Reserva de estoque (`StatusReserva`)
 
@@ -414,11 +414,11 @@ Não é um diagrama de transição: o MES calcula a etapa por regra (`etapaDoIte
 
 O enum de hoje, no módulo do Pablo, é `ABERTA`, `PARCIAL`, `FECHADA`, `PERDIDA` (`api-comercial/prisma/models/enums.prisma:69-76` ✅). O desenho é o da migração (`ck_propostas_status`), pelas N16-02 e N16-03: sem fechamento parcial, ajuste só até aprovar, proposta incompleta não aprova, cancelada não reabre.
 
-Selo 🟡 (migração testada em Postgres 18, fora da produção). Nós do Mestre: `V0.1` a `V0.7`, `V0C`. Hoje (✅ no teste) `atualizar` só roda em `ABERTA` (`propostas.service.ts:478-481`), `perder` leva a `PERDIDA` (`:555-575`), `reabrir` e `fechar` parcial existem (`:578-649`) e saem. Regras: [[11-Proposta-e-Pedido-de-Venda]].
+Selo ✅ no código de 29/10: a `ck_propostas_status` do dump de 29/10 tem `ABERTA`, `APROVADA`, `TRANSFORMADA` e `CANCELADA`, e a `api-acos-vital` já tem `PUT /comercial/propostas/:id`, `aprovar`, `cancelar`, `copiar` e `transformar` (Robert, 28 e 29/10); produção ❓. Nós do Mestre: `V0.1` a `V0.7`, `V0C`. No legado (✅ no teste) `atualizar` só roda em `ABERTA` (`propostas.service.ts:478-481`), `perder` leva a `PERDIDA` (`:555-575`), `reabrir` e `fechar` parcial existem (`:578-649`) e saem. Regras: [[11-Proposta-e-Pedido-de-Venda]].
 
-### 14. Pedido de venda do Hub (`core_comercial.pedidos.status_sincronizacao_omie`, 🟡)
+### 14. Pedido de venda do Hub (`status_sincronizacao_omie`, 🟡)
 
-Selo 🟡. Mesmo vocabulário da OC (`ck_ordens_compra_status`, Dump Avhub 17315-17320 ✅). O pedido tem `origem` `PROPOSTA` ou `OMIE` (N16-106); o da proposta nasce com `status_liberacao = liberado` (diagrama 11), e o do Omie segue o diagrama 11 desde `pendente`. Na recusa, o vendedor vê o motivo e o botão "Tentar novamente" (N16-36).
+Selo 🟡. A rota `POST /comercial/propostas/:id/transformar` cita a tabela `core_comercial.pedidos_venda`, que **não existe** no dump de 29/10; o schema final (`core_comercial` ou `core_vendas_faturamento`, N16-116) está em decisão. Mesmo vocabulário da OC (`ck_ordens_compra_status`, Dump Avhub 17315-17320 ✅). O pedido tem `origem` `PROPOSTA` ou `OMIE` (N16-106); o da proposta nasce com `status_liberacao = liberado` (diagrama 11), e o do Omie segue o diagrama 11 desde `pendente`. Na recusa, o vendedor vê o motivo e o botão "Tentar novamente" (N16-36).
 
 ### 15. Pedido de custo ao Orçamento (`StatusSolicitacao`)
 
@@ -436,6 +436,6 @@ Selo 🟡 (testado em Postgres 18, fora da produção; N16-10, N16-43 a N16-49).
 |---|---|---|
 | `StatusPedido` | `AGUARDANDO`, `EM_PRODUCAO`, `BLOQUEADO`, `ENTREGUE` | ✅ `producao.prisma:11-16` |
 | `TipoMovimentoEstoque` | `ENTRADA`, `SAIDA`, `TRANSFERENCIA`, `AJUSTE` | ✅ `estoque.prisma:38-43` |
-| `OrigemCusto` (`lote_custo`) | `CARGA_INICIAL`, `OC`, `MANUAL` | ✅ `estoque.prisma:378-382`; só a carga inicial grava 🔴 |
+| `OrigemCusto` (`lote_custo`) | `CARGA_INICIAL`, `OC`, `MANUAL` | ✅ `estoque.prisma`; na `develop` a carga inicial, o Recebimento (OC) e a edição à mão gravam |
 | `TipoSetor` | `PRODUTIVO`, `ESTOQUE`, `COMPRAS`, `EXPEDICAO`, `REQUISICAO`, `LOGISTICA_ENTRADA`, `QUALIDADE` | ✅ `fabricas.prisma:17-30` |
 | `TipoFabrica` | `FABRICACAO`, `REVENDA` | ✅ `fabricas.prisma:5-8` |

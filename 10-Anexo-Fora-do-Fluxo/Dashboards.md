@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Gustavo (DBA)
-fontes: [api-acos-vital f322dcd src/schemas/core_vendas_faturamento, HUB b55ac55 app/(protected), LOG-31, LOG-33, LOG-37, LOG-04b]
+fontes: [api-acos-vital f322dcd src/schemas/core_vendas_faturamento, HUB b55ac55 app/(protected), conferência de 29/10/2026 em av-hub develop 758d5f0, LOG-31, LOG-33, LOG-37, LOG-04b]
 ---
 
 # Dashboards
@@ -18,8 +18,8 @@ Fora do fluxo 0b (nota de 09/10: dashboards, comissões, orçamento e pedidos ma
 ## Telas do HUB
 
 - Vendas e faturamento, e as versões por tipo.
-- Comercial (vem do `api-comercial`).
-- Comissões (ver [[Comissoes]]; os coordenadores ainda 🔴 saem de um arquivo).
+- Comercial (o BFF chama a API do Hub; a rota `GET /dashboards/comercial` ainda não existe lá e responde 503 `RECURSO_NAO_MIGRADO`, ver [[Comercial-Suprimentos]]).
+- Comissões (ver [[Comissoes]]; os coordenadores ainda 🔴 saem de um arquivo no servidor).
 - Notas fiscais manuais.
 - Dashboard do vendedor, da equipe e do PCP.
 
@@ -45,10 +45,10 @@ Fora do fluxo 0b (nota de 09/10: dashboards, comissões, orçamento e pedidos ma
 | Dashboard de vendas | `dashboards/dash-vendas` | `app/api/dashboard/vendas` | ✅ |
 | Dashboard de faturamento | `dashboards/dash-faturamento` | `app/api/dashboard/faturamento` | ✅ |
 | Vendas por tipo, faturamento por tipo | `dash-vendas-por-tipo`, `dash-faturamento-por-tipo` | idem | ✅ |
-| Dashboard comercial | `dashboards/dash-comercial` | `api-comercial` `GET /dashboards/comercial` (tela `dash-comercial`) | ✅ `app/api/comercial/[...rota]/route.ts:59` |
+| Dashboard comercial | `dashboards/dash-comercial` | `app/api/comercial/dashboards/comercial` (tela `dash-comercial`); sem destino no Hub ainda: 503 | ✅ tela; 🔴 rota na API do Hub (`app/api/comercial/[...rota]/route.ts`) |
 | Dashboard de comissões | `dashboards/dash-comissoes` | ver [[Comissoes]] | ✅, coordenadores 🔴 |
 | Notas fiscais manuais | `dashboards/notas-fiscais-manuais` | `app/api/notas-manuais` | ✅ |
-| Dashboard do vendedor, da equipe, do PCP | `meu-dashboard`, `dashboard-equipe`, `pcp-dashboard` | `app/api/meu-dashboard`, `dashboard-equipe`, `pcp/dashboard` | ✅ |
+| Dashboard do vendedor, da equipe, do PCP | `vendas/meu-dashboard`, `dashboard-equipe`, `pcp-dashboard` | `app/api/meu-dashboard`, `dashboard-equipe`, `pcp/dashboard` | ✅ |
 
 ### Rotas da API
 

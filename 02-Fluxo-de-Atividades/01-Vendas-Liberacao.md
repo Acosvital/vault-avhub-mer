@@ -12,7 +12,7 @@ fontes: [LOG-26 (contrato de liberação), LOG-40 (escopo do vendedor), API-005,
 **Em uma frase:** o pedido de venda só segue para a produção depois que o vendedor o libera. É o portão do fluxo e a única entrada de pedido de venda no MES: sem liberação, o PCP (planejamento e controle da produção) não enxerga o pedido.
 
 > [!info] Proposta ao pedido (decisões de 16 a 26/10/2026, fluxo aprovado em 26/10)
-> Esta nota descreve a liberação que **existe hoje** ✅. O desenho aprovado põe a proposta antes do `V1`, com duas origens no mesmo fluxo. O pedido que nasce da proposta já vem liberado (a Qualidade é respondida no "Transformar em pedido"). O pedido digitado no Omie continua chegando travado, mas o vendedor responde a Qualidade e o faturamento em partes na tela do pedido e preenche ali a parte de compras, sem travar o fluxo. A liberação gravada é a mesma desta nota, que o MES lê. Esse desenho ainda não está pronto 📝 (N16-05, N16-91, N16-106) 🔴. Detalhe em [[11-Proposta-e-Pedido-de-Venda]].
+> Esta nota descreve a liberação que **existe hoje** ✅. O desenho aprovado põe a proposta antes do `V1`, com duas origens no mesmo fluxo. O pedido que nasce da proposta já vem liberado (a Qualidade é respondida no "Transformar em pedido"). O pedido digitado no Omie continua chegando travado, mas o vendedor responde a Qualidade e o faturamento em partes na tela do pedido e preenche ali a parte de compras, sem travar o fluxo. A liberação gravada é a mesma desta nota, que o MES lê. Esse desenho ainda não está todo pronto 📝 (N16-05, N16-91, N16-106): a `api-acos-vital` (`develop`, 29/10/2026) já cria, aprova, cancela e transforma a proposta em pedido do Hub, mas **não envia o pedido ao Omie** e a resposta de `V2`/`V3` na tela do pedido do Omie ainda não existe 🔴. Detalhe em [[11-Proposta-e-Pedido-de-Venda]].
 
 ## Como funciona, passo a passo
 
@@ -128,7 +128,7 @@ O desenho do v1 (estados do item visto pelo vendedor) tem 9 valores: `AGUARDANDO
 
 | Nome atual | Nome antigo | Rota | App | Quem |
 |---|---|---|---|---|
-| Liberar Pedidos | Caixa de entrada do vendedor (tela 1.1) | `/liberar-pedidos` | HUB (Portal do Vendedor) | Vendedor e Admin (Dev): `pode_visualizar` e `pode_editar` |
+| Liberar Pedidos | Caixa de entrada do vendedor (tela 1.1) | `/liberar-pedidos` | HUB (Portal do Vendedor) | Vendedor: `pode_visualizar` e `pode_editar` |
 | Liberação da Equipe | visão do gerente da 1.1 | `/liberacao-equipe` | HUB (Portal do Gerente) | perfis com `pedidos-equipe`: só `pode_visualizar` |
 | Meus Pedidos (detalhe, cartão Etapa dos itens) | Meus Pedidos por etapa (tela 1.2) | `/meus-pedidos/pedido/:empresa/:numero` | HUB | Vendedor |
 | Pedidos da Equipe (detalhe, mesmo cartão) | idem | `/pedidos-equipe/pedido/:empresa/:numero` | HUB | Gerência |
@@ -195,7 +195,7 @@ Modelo do banco do av-hub em [[Banco-AvHub]]; do MES em [[Banco-MES]].
 
 #### Data de corte
 
-- Regra: `data_inclusao >= parametros_vendas.data_inicio_liberacao`. Pedido anterior não trava, **e também não aparece na Triagem**: os itens dele respondem 404 e o MES mostra "não encontrado" (observação do Robert, 30/09). Os pedidos anteriores à data de corte só chegam ao MES se a regra mudar ou se forem liberados explicitamente.
+- Regra: `data_inclusao >= parametros_vendas.data_inicio_liberacao`. Pedido anterior não trava, **e também não aparece na Triagem**: os itens dele respondem 404 e o MES mostra "não encontrado" (observação do Robert, 30/09). Os pedidos anteriores à data de corte ficam fora do MES e terminam no sistema antigo 📝 (N16-142, 29/10/2026); falta uma mensagem clara no lugar do erro 404 🔴.
 - Valor vigente: ❓. O contrato registra `2026-07-28` na `api-test` (conferido em 01/10) e `2026-09-01` no banco local. O vault anterior dizia 01/09/2026 em produção. O Dump Avhub é de esqueleto e não traz o dado. Conferir com `SELECT data_inicio_liberacao FROM core_vendas_faturamento.parametros_vendas` (Gustavo).
 
 ### Quem vê o quê
@@ -225,14 +225,14 @@ Escopo (contrato 40, ✅ fixo na API): vale quando o usuário entrou por tela co
 | 10 | **Migration `api005`** (função, tabela e mapa de rotas do status por item) não verificada no banco; DDL não versionado | Gustavo | V1 | ❓ |
 | 11 | ✅ Marcas `GAMBIARRA(` de escopo removidas do front (`lib/api/pedidosVenda.ts`, `lib/api/portalPcp.ts`; `484dea6`, 15/10): contrato [[LOG-50-Tirar-as-Marcas-de-Escopo-de-Vendedores-do-Front]] | Nathan | V2 | ✅ |
 | 12 | **Valor da data de corte em produção** e documentar | Nathan e Gustavo | V1 | ❓ |
-| 13 | Pedido manual: o desenho só prevê pedido que chega do Omie; o risco do `exclusionSync` apagar pedido manual está em [[Riscos]] | Gustavo | V1 | 🔴 |
+| 13 | Pedido manual ([[LOG-45-Pedido-de-Venda-Manual]]): o desenho só prevê pedido que chega do Omie; o risco do `exclusionSync` apagar pedido manual está em [[Riscos]] | Gustavo | V1 | 🔴 |
 
 ### Pendências
 
 | # | Pergunta | Dono |
 |---|---|---|
 | 1 | Auxiliar pode liberar pelo titular? Está implementado que sim; confirmar a regra de negócio | Nathan |
-| 2 | Pedidos anteriores à data de corte somem da Triagem: aceitar, ou liberar em massa o que ainda está aberto no PCP? | Nathan |
+| 2 | ✅ Pedidos anteriores à data de corte ficam fora do MES e terminam no sistema antigo (N16-142). Falta só trocar o erro 404 dos itens por uma mensagem clara 🔴 | Robert (mensagem) |
 | 3 | O vendedor confirma pedido a pedido ou existe liberação automática depois de um prazo? (T-07) | Nathan e Comercial |
 | 4 | Quem avisa o vendedor quando o pedido já está importado e ele tenta trocar a marcação (hoje aparece o cadeado)? | Nathan |
 | 5 | Perfil com escopo `todos`: só a Gerência PCP? Os demais perfis passam a ver só os vendedores vinculados, o que muda o dia a dia de comprador e diligenciador | Nathan e Gustavo |

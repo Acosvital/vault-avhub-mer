@@ -3,12 +3,12 @@ id: LOG-04b
 aliases: ["Contrato 05", "05 P6/P8", "04-Pedidos-Notas-Dashboards-Agregacao-no-Banco"]
 tags: [contrato, contrato-logica, pedidos, dashboards, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
-fontes: ["Dump Avhub (Esqueleto).sql:7526", "api-acos-vital/src/schemas/core_vendas_faturamento/aggregates/pedidos_venda/pedidos_venda.route.js:91-166", "api-acos-vital/src/schemas/core_vendas_faturamento/aggregates/dashboard/dashboard.route.js:99-217"]
+fontes: ["Dump Avhub (Esqueleto).sql:7526", "api-acos-vital/src/schemas/core_vendas_faturamento/aggregates/pedidos_venda/pedidos_venda.route.js:118-240", "api-acos-vital/src/schemas/core_vendas_faturamento/aggregates/dashboard/dashboard.route.js:99-217"]
 ---
 # Contrato — Pedidos, Notas e Dashboards: agrupamento, filtros e totais no banco
 
@@ -17,7 +17,7 @@ fontes: ["Dump Avhub (Esqueleto).sql:7526", "api-acos-vital/src/schemas/core_ven
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - ✅ P1 a P5: `fn_pedidos_venda` devolve 1 linha por pedido com `parciais[]`, filtros de situação, etapa, prazo e blacklist (`Dump Avhub (Esqueleto).sql:7526`, comentário "Contrato 05 (P1–P5)"). P7: `GET /pedidos_venda/:codigo_empresa/:pedido_venda` (`pedidos_venda.route.js:166`); resumo: `GET /pedidos_venda/resumo` (`:133`).
+> - ✅ P1 a P5: `fn_pedidos_venda` devolve 1 linha por pedido com `parciais[]`, filtros de situação, etapa, prazo e blacklist (`Dump Avhub (Esqueleto).sql:7526`, comentário "Contrato 05 (P1–P5)"). P7: `GET /pedidos_venda/:codigo_empresa/:pedido_venda` (`pedidos_venda.route.js:421`); resumo: `GET /pedidos_venda/resumo` (`:161`).
 > - ✅ Dashboards agregados: `GET /dashboard/vendedor`, `/equipe`, `/pcp` (`api-acos-vital/src/schemas/core_vendas_faturamento/aggregates/dashboard/dashboard.route.js:99,151,217`).
 > - 🟡 P6 (ordem das etapas) segue em [[LOG-43-Ordem-das-Etapas-de-Faturamento-no-Cadastro]] (banco tem `ordem_fluxo`; falta o front). N1 a N3 (notas) e P8 não foram conferidos item a item (❓).
 > - Alias: o código chama este contrato de "Contrato 05" (P1 a P8).

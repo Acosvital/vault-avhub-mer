@@ -3,8 +3,8 @@ id: LOG-53
 aliases: ["Contrato 53", "53-Ordem-de-Producao-e-Lote-do-Fabricado"]
 tags: [contrato, contrato-logica, mes, producao, estoque, op, sql, prisma]
 criado: 2026-10-15
-atualizado: 2026-10-19
-status: proposta
+atualizado: 2026-10-29
+status: implementado-no-codigo
 sistemas: [mes-banco, mes-api, mes-front]
 dono: "Robert"
 etapa_0b: [P2, F1, Q7, Q8, E5]
@@ -19,14 +19,19 @@ criado_original: 2026-10-15
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Define a Ordem de Produção (OP) como documento em PDF, numerada `pedidoVenda/N`, só para destinos de fabricação. Define também que o item fabricado vira lote no Estoque depois da inspeção de saída.
 > **Quem é afetado:** PCP, Produção, Qualidade e Estoque no MES. Aprovada na inspeção de saída, a peça vai ao Estoque, não mais à Expedição, e o Estoque informa a localização.
-> **Situação:** Proposta, dono Robert. Nada existe no código; o SQL foi escrito e validado em banco descartável. Estimativa: 3,0 e 4,0 pd, dentro do Ciclo 1.
+> **Situação:** Feito no código, dono Robert, sugerido para Entregues. Em 27/10 a OP (BL-052) e o fabricado virando lote no Estoque (BL-008) entraram na `develop` do `api-pcp` e do `app-pcp` (✅). O custo do fabricado (BL-067) não vem neste contrato e segue aberto. Só chega à `main` com o merge do BL-035.
 > **Exemplo:** Pedido 27605 com dois destinos de fabricação e um de revenda gera duas OPs, 27605/1 e 27605/2.
 
-> [!info] Situação em 15/10/2026
-> **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** P2, F1, Q7, Q8, E5 · **Dono:** Robert (MES, sem API entre sistemas)
+> [!info] Situação em 29/10/2026
+> **Status:** `implementado-no-codigo` · **Pasta:** `Ativos` (sugerida: `Entregues`) · **Nós do 0b:** P2, F1, Q7, Q8, E5 · **Dono:** Robert (MES, sem API entre sistemas)
+>
+> - ✅ **Feito pelo Robert em 27/10/2026** (`api-pcp` `ab3318d`, PR #78; `app-pcp` `b9e8cb1`, PR #63; ambos na `develop`): toda ordem de destino de fabricação é uma OP emitida na criação (`Pedidos.opImpressoes` em `producao.prisma:132`, PDF em `src/pedidos/ordem-producao-pdf.ts`, botão "Imprimir OP" e 2ª via no detalhe da ordem). O fabricado aprovado na inspeção de saída vai ao Estoque por `PATCH /itens-parciais/:id/aprovar-saida` e `.../receber-fabricado` (`itens-parciais.controller.ts:236,248`), num lote de origem `PRODUCAO` ligado à OP (`estoque.prisma:16,232`). O lote nasce sem custo: o custo do fabricado é o BL-067 ([[API-008-Custo-do-Lote-no-MES]]).
+> - 🔴 Pendente fora do código: homologação e o merge para a `main` (BL-035). As perguntas Q1 a Q5 abaixo seguem como estavam; não conferi se o Robert as fechou na implementação.
+>
+> **Registro anterior (15/10/2026), mantido:** `proposta` · **Nós do 0b:** P2, F1, Q7, Q8, E5 · **Dono:** Robert (MES, sem API entre sistemas)
 >
 > - 📝 **N14-22:** a OP é uma **entidade** e um **documento para impressão**, só para o que será fabricado. **N14-06:** tudo que é fabricado ou comprado vai ao Estoque e vira lote e saldo. **N14-29 (15/10):** proposta do Robert aceita. Estimativas (±30%): **BL-052 3,0 pd** e **BL-008 4,0 pd**, ambas **dentro** da conta do Ciclo 1.
-> - 🔴 **Nada existe no código** (`api-pcp`): o "OP" é só o texto `pedidoVenda/N` em `Pedidos.ordemProducao` (`@@unique([ordemProducao])`); `OrigemLote` só tem `RECEBIMENTO` e `CARGA_INICIAL`; o "sim" da inspeção de saída é um `mover` que leva à Expedição.
+> - 🕓 **(15/10, superado em 27/10) Nada existia no código** (`api-pcp`): o "OP" é só o texto `pedidoVenda/N` em `Pedidos.ordemProducao` (`@@unique([ordemProducao])`); `OrigemLote` só tem `RECEBIMENTO` e `CARGA_INICIAL`; o "sim" da inspeção de saída é um `mover` que leva à Expedição.
 > - ✅ **SQL escrito e validado** em banco descartável (PostgreSQL 18, tabelas-esqueleto): [[0001-origem-lote-producao.sql]] e [[0002-op-e-lote-do-fabricado.sql]] em `LOG-53-anexos/`. Validado: um lote `PRODUCAO` por OP e produto (o segundo é recusado), lote `PRODUCAO` sempre com OP e os demais nunca, vários lotes de recebimento do mesmo produto continuam possíveis, contagem de impressões. **Não validado:** contra o schema real do MES e nenhum código existe.
 >
 > Selos em [[Regras-do-Vault]]. Rotas, nomes e o conteúdo do PDF são **propostas** para o Robert ajustar; as regras são as decididas.

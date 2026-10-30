@@ -13,7 +13,7 @@ fontes: [N16-02, N16-03, N16-09, N16-10, N16-11, N16-17, N16-18, N16-19, N16-20,
 
 **Quando consultar esta nota:** quando precisar entender o desenho do banco da comissão nova, quem escreve em cada tabela e o que muda em relação ao módulo atual. Vendedor e Controladoria leem só o resumo. O time de TI segue para o detalhe técnico.
 
-Tudo aqui é 🟡 proposta, salvo onde há decisão (📝) ou código (✅). O módulo novo fica em **Operações**, em schema novo, e **não toca em `core_comissionamento`** (N16-11). Os contratos do DDL, das rotas e das telas foram removidos em 29/10/2026. O Robert cria os novos. Motor atual: [[01-Motor-Atual-Como-Calcula]]. Tabelas atuais: [[02-Tabelas-Atuais-core_comissionamento]]. Estados: [[04-Regras-e-Estados-da-Comissao-Nova]]. Selos: [[Regras-do-Vault]].
+Tudo aqui é 🟡 proposta, salvo onde há decisão (📝) ou código (✅). **A comissão nova fica em `core_comissao`, schema próprio (N16-143, 29/10).** Onde esta nota diz `core_comercial.*` para proposta, pedido e custo por evento (`propostas`, `pedidos`, `custos_eventos`, `vw_pedido_item_custo`), são os nomes do desenho de 16/10: pela N16-116 esses objetos vão para `core_vendas_faturamento`, e o Robert refaz os nomes ao criar os contratos novos. O dump de 29/10 tem `core_comercial.propostas` (plural) e não traz `pedidos`, `pedidos_itens` nem `custos_eventos` ✅. O módulo novo fica em **Operações**, em schema novo, e **não toca em `core_comissionamento`** (N16-11). Os contratos do DDL, das rotas e das telas foram removidos em 29/10/2026. O Robert cria os novos. Motor atual: [[01-Motor-Atual-Como-Calcula]]. Tabelas atuais: [[02-Tabelas-Atuais-core_comissionamento]]. Estados: [[04-Regras-e-Estados-da-Comissao-Nova]]. Selos: [[Regras-do-Vault]].
 
 ## O que o módulo faz, etapa por etapa
 

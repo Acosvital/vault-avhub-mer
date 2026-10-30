@@ -4,7 +4,7 @@ criado: 2026-10-14
 atualizado: 2026-10-29
 status: vigente
 dono: Robert (MES) · Expedição/Logística (regra) · Nathan (decisões)
-fontes: [api-pcp 579a625 (entregas, itens-parciais.service.ts, pedido-embalagens, pedido-embalagem-pallets, estoque-operacao.helpers.ts), app-pcp 1fca8d3 (logistica/expedicao, movimentacoes, ordens-producao), v1 Fluxo-Expedicao-Faturamento-Completo, v1 Fluxograma-Telas-por-Bloco bloco 10, T-06]
+fontes: [api-pcp 579a625 (entregas, itens-parciais.service.ts, pedido-embalagens, pedido-embalagem-pallets, estoque-operacao.helpers.ts), app-pcp 1fca8d3 (logistica/expedicao, movimentacoes, ordens-producao), v1 Fluxo-Expedicao-Faturamento-Completo, v1 Fluxograma-Telas-por-Bloco bloco 10, T-06, api-pcp develop de 27/10/2026, N16-130 a N16-133]
 ---
 
 # Expedição e logística de saída (X1 a X4)
@@ -70,7 +70,7 @@ As 100 flanges do Cliente Exemplo S.A. chegam à Embalagem, que registra os pall
 
 ### Objetivo (original)
 
-A Expedição tem **duas portas de entrada** hoje: a parcial atendida pelo Estoque (`atendidoPeloEstoque`) e a parcial que a Qualidade moveu (fabricado, [[08-Qualidade-Saida]]). Pela decisão de 14/10 haverá uma só: o **documento de retirada do Estoque**, porque tudo que é fabricado ou comprado passa pelo Estoque ([[03-Estoque-Atendimento-e-Despacho]]).
+A Expedição tem **duas portas de entrada** na `main` do MES (parada em 08/10): a parcial atendida pelo Estoque (`atendidoPeloEstoque`) e a parcial que a Qualidade moveu (fabricado, [[08-Qualidade-Saida]]). Na `develop` (27/10, `ab3318d`) o fabricado aprovado já volta ao Estoque antes de seguir ([[03-Estoque-Atendimento-e-Despacho]]); ❓ conferir se ainda sobra alguma porta direta. Pela decisão de 14/10 haverá uma só: o **documento de retirada do Estoque**, porque tudo que é fabricado ou comprado passa pelo Estoque ([[03-Estoque-Atendimento-e-Despacho]]).
 
 O sistema **nunca emite nota fiscal**. Ele sinaliza a necessidade e o Omie emite. No v1 as telas são 10.1 a 10.4.
 
@@ -170,7 +170,7 @@ Nenhuma entidade (carga, romaneio, veículo, transportadora de saída) existe em
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
 | 1 | **Documento de retirada** do Estoque (solicitante: Expedição ou Produção; itens, lotes, quantidades) e baixa do saldo na retirada; remover a baixa em `receber()` | Robert, Nathan decide fluxo | `E6`, X1 | 🔴 |
-| 2 | Entrada única na Expedição: tudo vem do Estoque pelo documento de retirada (hoje há duas portas) | Robert | X1 | 🔴 |
+| 2 | Entrada única na Expedição: tudo vem do Estoque pelo documento de retirada (na `main` há duas portas; na `develop` o fabricado já passa pelo Estoque, falta a retirada) | Robert | X1 | 🟡 🔴 retirada |
 | 3 | Decisão e campo parcial x integral por pedido, com gatilho de saída para item travado (T-06) | Nathan, Comercial, Expedição | X2 | 🔴 (decidido em 29/10, N16-130 e N16-131; falta o campo) |
 | 4 | Consolidação de carga (10.2): visão por pedido, espera dos itens, romaneio | Robert | X3 | 🔴 |
 | 5 | Transporte e roteiro (10.3): frota própria ou terceirizada | Robert | X4 | 🔴 |

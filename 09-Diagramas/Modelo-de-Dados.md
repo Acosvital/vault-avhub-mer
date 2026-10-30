@@ -176,7 +176,7 @@ classDiagram
     recebimentos_itens "0..*" --> "1" requisicoes_compra_itens
     itens_parciais "0..*" --> "0..1" lotes : id_lote_compra
 ```
-✅ Conferido no código. `depositos.codigo_empresa` e `lote_custo` existem agora. Só a carga inicial grava custo no lote 🔴.
+✅ Conferido no código. `depositos.codigo_empresa` e `lote_custo` existem agora. Na `develop`, a carga inicial, o Recebimento (OC) e a edição à mão gravam custo no lote ✅.
 
 ## 2. MES: Produção
 
@@ -397,7 +397,7 @@ classDiagram
 
 - O status da liberação não é uma coluna: é calculado a partir de `importado_mes_em`.
 - A requisição criada só no av-hub não gera evento 🔴.
-- O custo por item ainda grava por número do item; a troca para produto está pendente 🔴 Gustavo (BL-019).
+- O custo por item grava por produto na API (047b, BL-019 feito pelo Gustavo em 15/10); aplicação no banco de produção ❓.
 
 ## 5. Mapa dos dois bancos
 
@@ -423,12 +423,12 @@ flowchart LR
     A_REQ -->|"INT-03 o MES le os eventos"| M_INT
     A_OC -.->|"INT-04 referencia da OC, a construir"| M_CMP
     M_PROD -->|"INT-05 status por item, o hub le"| A_ST
-    M_EST -->|"INT-06 custo, 404 hoje"| A_ST
+    M_EST -->|"INT-06 custo, rota na develop"| A_ST
     M_PROD -.->|"INT-07 feed da Torre, 404 hoje"| A_FL
     M_PROD <-->|"reserva por parcial"| M_EST
     M_CMP <-->|"lote nasce da requisicao"| M_EST
 ```
-✅ Setas cheias existem. 🔴 Setas tracejadas e `INT-06` ainda não funcionam. Rota, chave e cursor de cada seta: [[Integracao-AvHub-MES]].
+✅ Setas cheias existem. `INT-06` tem a rota do MES na `develop` desde 27/10 (a `main` não). 🔴 As setas tracejadas (Torre, `INT-07`) ainda não funcionam. Rota, chave e cursor de cada seta: [[Integracao-AvHub-MES]].
 
 ## Detalhe técnico
 
@@ -436,7 +436,7 @@ Nomes de tabela e coluna como estão no banco: no MES, o `@map` do Prisma de `ap
 
 ### 1. MES: Estoque e Compras
 
-Selo ✅ `estoque.prisma`, `compras.prisma`. Conferido: `depositos.codigo_empresa` existe agora (`estoque.prisma:69`; o v1 marcava L-09 como pendente); `lote_custo` existe (`estoque.prisma:394-423`); `recebimentos_itens.id_localizacao` e `id_lote` não têm FK no schema (`compras.prisma:218-240`). Em `lote_custo` só a carga inicial grava 🔴.
+Selo ✅ `estoque.prisma`, `compras.prisma`. Conferido: `depositos.codigo_empresa` existe agora (`estoque.prisma`; o v1 marcava L-09 como pendente); `lote_custo` existe (`estoque.prisma`); `recebimentos_itens.id_localizacao` e `id_lote` não têm FK no schema (`compras.prisma:218-240`). Em `lote_custo` só a carga inicial grava 🔴.
 
 ### 2. MES: Produção
 
@@ -456,9 +456,9 @@ Selo ✅ Dump Avhub de 14/10 (`core_vendas_faturamento.*`). Observações:
 
 - `pedidos_vendas_liberacao` não tem coluna de status: `pendente`, `liberado` e `importado` são calculados pela view `vw_pedidos_liberacao` a partir de `importado_mes_em`.
 - `requisicoes_compra.id_origem` é o id do `requisicoes_compra_itens` do MES; vale só para a origem MES. `requisicoes_compra_eventos.id_origem` é `NOT NULL`, por isso a requisição criada só no av-hub não gera evento 🔴 ([[Integracao-AvHub-MES]]).
-- `itens_pedido_custo` ainda grava por `item integer` no dump; a migration 047b troca para produto 🔴 Gustavo (BL-019).
+- `itens_pedido_custo`: a API exige a 047b (grava por produto, BL-019 feito em 15/10); o dump de 14/10 ainda mostrava `item integer`; produção ❓.
 - `itens_pedido_status` e `itens_pedido_custo` são projeções lidas do MES pelos jobs de 90 s; `ordens_compra_itens_vinculos` liga o item da OC ao pedido de venda (contrato [[LOG-14b-Compras-Vinculo-Pedido-Venda]]).
 
 ### 5. Mapa dos dois bancos
 
-Selo ✅ nas setas cheias; 🔴 nas tracejadas e em `INT-06`. Ver [[Integracao-AvHub-MES]] para rota, chave e cursor de cada seta.
+Selo ✅ nas setas cheias; 🔴 nas tracejadas; `INT-06` só na `develop`. Ver [[Integracao-AvHub-MES]] para rota, chave e cursor de cada seta.

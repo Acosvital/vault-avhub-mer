@@ -3,12 +3,12 @@ id: LOG-02
 aliases: ["Contrato 02", "02-Funcionarios-Listagem-Filtros-Ordenacao-Resumo"]
 tags: [contrato, contrato-logica, funcionarios, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco, hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
-fontes: ["api-acos-vital/src/schemas/core/tables/funcionarios/funcionarios.route.js:372", "api-acos-vital/src/schemas/core/views/vw_funcionarios_lista/vw_funcionarios_lista.model.js"]
+fontes: ["api-acos-vital/src/schemas/core/tables/funcionarios/funcionarios.route.js:358,373", "api-acos-vital/src/schemas/core/views/vw_funcionarios_lista/vw_funcionarios_lista.model.js"]
 ---
 # Contrato — Funcionários: filtro, busca, ordenação, paginação e resumo no servidor
 
@@ -17,7 +17,7 @@ fontes: ["api-acos-vital/src/schemas/core/tables/funcionarios/funcionarios.route
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - ✅ `GET /funcionarios/resumo` e a listagem filtrada existem (`api-acos-vital/src/schemas/core/tables/funcionarios/funcionarios.route.js:372`).
+> - ✅ `GET /funcionarios/resumo` e a listagem filtrada existem (`api-acos-vital/src/schemas/core/tables/funcionarios/funcionarios.route.js:358,373`).
 > - Fora do fluxo de Atividades (RH).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).

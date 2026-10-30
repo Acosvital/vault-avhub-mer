@@ -25,8 +25,8 @@ fontes: [api-acos-vital f322dcd src/schemas/core_aprovacao_de_vagas e core_organ
 
 - ✅ Funcionários, cargos, setores e unidades existem, com escopo de unidade e de setor.
 - ✅ O organograma tem rotas no banco e a tela de funcionários existe no HUB.
-- ❓ A página do organograma no HUB não foi localizada.
-- ❓ O vínculo do usuário com o funcionário apaga o usuário se o funcionário for apagado (era assim no v1; não relido no dump). Confirmar com o Gustavo.
+- ❓ A página do organograma no HUB não foi localizada (reconferido em 29/10: só existem `rh/funcionarios` e `rh/solicitacoes-de-vagas`).
+- ✅ O vínculo do usuário com o funcionário apaga o usuário se o funcionário for apagado: `fk_usuarios_funcionario ... ON DELETE CASCADE` no dump de 29/10/2026. Se isso é desejado fica com o Gustavo.
 
 ## Pendências
 
@@ -39,23 +39,23 @@ fontes: [api-acos-vital f322dcd src/schemas/core_aprovacao_de_vagas e core_organ
 
 | Item | Estado | Selo |
 |---|---|---|
-| Rotas `/vagas` | `POST /`, `GET /`, `GET /resumo`, `GET /:id`, `GET /:id/decisoes`, `POST /:id/decisao`, `PUT` e `PATCH /:id`, `DELETE /:id` | ✅ `vaga.route.js:218-485` |
+| Rotas `/vagas` | `POST /`, `GET /`, `GET /resumo`, `GET /:id`, `GET /:id/decisoes`, `POST /:id/decisao`, `PUT` e `PATCH /:id`, `DELETE /:id` | ✅ `vaga.route.js` |
 | Leitura | Sai da view `vw_vagas` (`custo_total` gerado pelo banco; `dias_pendente` e atenção a partir de `parametros_rh`) | ✅ `vaga.route.js` (cabeçalho) |
-| Decisão | Só por `POST /vagas/:id/decisao` (função `fn_decidir_vaga`); exige `pode_aprovar` na tela `solicitacoes-de-vagas`; histórico em `vagas_decisoes` | ✅ `vaga.route.js:338` |
+| Decisão | Só por `POST /vagas/:id/decisao` (função `fn_decidir_vaga`); exige `pode_aprovar` na tela `solicitacoes-de-vagas`; histórico em `vagas_decisoes` | ✅ `vaga.route.js` |
 | Edição | `POST`, `PUT` e `PATCH` não mudam `situacao` (400 `SITUACAO_SO_PELA_DECISAO`); editar vaga já decidida a devolve a `pendente` e grava origem `edicao` em `vagas_decisoes` | ✅ regra fixa desde o contrato 38 |
 | `situacao` | `aprovado`, `pendente`, `reprovado` (default `pendente`) | ✅ `vaga.model.js` |
 | Tabelas no dump | `vaga`, `vagas_decisoes`, `parametros_rh`, `vaga_custo_total_legado` | ✅ Dump Avhub |
-| Tela HUB | `rh/solicitacoes-de-vagas`; BFF `app/api/vagas` (`pode_visualizar`, `pode_criar`, `pode_editar`, `pode_deletar`, mais `[id]/decisao` e `[id]/decisoes`) | ✅ `app/api/vagas/route.ts:10,34`, `[id]/route.ts:9,32,68` |
+| Tela HUB | `rh/solicitacoes-de-vagas`; BFF `app/api/vagas` (`pode_visualizar`, `pode_criar`, `pode_editar`, `pode_deletar`, mais `[id]/decisao` e `[id]/decisoes`) | ✅ `app/api/vagas/route.ts`, `[id]/route.ts` |
 
 ### Funcionários e organograma
 
 | Item | Estado | Selo |
 |---|---|---|
-| `/funcionarios`, `/cargos`, `/setores`, `/unidades` | Com escopo de unidade e de setor (`resolverEscopoUnidade`, `resolverEscopoSetor`, subárvore para cargos e setores) | ✅ `core/index.js:69-85` |
+| `/funcionarios`, `/cargos`, `/setores`, `/unidades` | Com escopo de unidade e de setor (`resolverEscopoUnidade`, `resolverEscopoSetor`, subárvore para cargos e setores) | ✅ `core/index.js` |
 | Organograma | `/organograma_nodes`, `/vw_organograma_nodes`, `/niveis_hierarquicos`, `/historia`, `/welcome-presets`, `/welcome-settings` no schema `core_organograma` | ✅ `core_aprovacao_de_vagas/index.js` e `core_organograma/index.js` |
 | Tela HUB de funcionários | `rh/funcionarios`; BFF `app/api/funcionarios` e `app/api/organograma_nodes` | ✅ |
 | Tela de organograma no HUB | Só o BFF `organograma_nodes` e a tela de cargos foram achados; página do organograma não localizada | ❓ |
-| Vínculo `auth.usuarios.id_funcionario` | `ON DELETE CASCADE` no v1: apagar o funcionário apagaria o usuário | ❓ não relido no dump; confirmar com o Gustavo |
+| Vínculo `auth.usuarios.id_funcionario` | `ON DELETE CASCADE` (`fk_usuarios_funcionario`): apagar o funcionário apaga o usuário | ✅ Dump Avhub de 29/10/2026 |
 
 ### Pendências (detalhe)
 

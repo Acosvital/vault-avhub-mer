@@ -3,12 +3,12 @@ id: LOG-04a
 aliases: ["Contrato 04 (vagas)", "04-Vagas-Fila-Decisao-no-Banco"]
 tags: [contrato, contrato-logica, vagas, fora-do-fluxo]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: []
-fontes: ["api-acos-vital/src/schemas/core_aprovacao_de_vagas/tables/vaga/vaga.route.js:247-338"]
+fontes: ["api-acos-vital/src/schemas/core_aprovacao_de_vagas/tables/vaga/vaga.route.js:248-339"]
 ---
 
 # Contrato — Solicitações de vagas: fila, decisão e permissões no banco
@@ -18,7 +18,7 @@ fontes: ["api-acos-vital/src/schemas/core_aprovacao_de_vagas/tables/vaga/vaga.ro
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - ✅ Fila (`GET /vagas`, `/vagas/resumo`), decisões (`POST /vagas/:id/decisao`, `GET /vagas/:id/decisoes`) no código (`api-acos-vital/src/schemas/core_aprovacao_de_vagas/tables/vaga/vaga.route.js:247-338`).
+> - ✅ Fila (`GET /vagas`, `/vagas/resumo`), decisões (`POST /vagas/:id/decisao`, `GET /vagas/:id/decisoes`) no código (`api-acos-vital/src/schemas/core_aprovacao_de_vagas/tables/vaga/vaga.route.js:248-339`).
 > - Fora do fluxo de Atividades (RH).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).

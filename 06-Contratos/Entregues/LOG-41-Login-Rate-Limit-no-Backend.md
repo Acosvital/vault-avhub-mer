@@ -3,12 +3,12 @@ id: LOG-41
 aliases: ["Contrato 41", "41-Login-Rate-Limit-no-Backend"]
 tags: [contrato, contrato-logica, contrato-api, seguranca, login]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: implementado-no-codigo
 sistemas: [hub-api]
 dono: "Gustavo (DBA)"
 etapa_0b: []
-fontes: ["api-acos-vital/src/schemas/auth/aggregates/autenticacao/autenticacao.route.js:59-79", "api-acos-vital/src/utils/acessoConfig.js"]
+fontes: ["api-acos-vital/src/schemas/auth/aggregates/autenticacao/autenticacao.route.js:57-96", "api-acos-vital/src/utils/acessoConfig.js"]
 criado_original: 2026-10-07
 ---
 
@@ -19,8 +19,9 @@ criado_original: 2026-10-07
 > [!info] Situação em 14/10/2026
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** — (fora do fluxo de Atividades) · **Dono:** Gustavo (DBA)
 >
-> - ✅ Limite e janela fixos no código (`loginLimite()` em `api-acos-vital/src/utils/acessoConfig.js`), `429 LOGIN_LIMITE` em `autenticacao.route.js:59-79`; sem variável de ambiente.
-> - ❓ Remoção do limitador em memória do front (`lib/auth/loginRateLimiter.ts`, HUB): não conferida.
+> - ✅ Limite e janela fixos no código (`loginLimite()` em `api-acos-vital/src/utils/acessoConfig.js`), `429 LOGIN_LIMITE` em `autenticacao.route.js:57-96`; sem variável de ambiente.
+> - ✅ Limitador em memória do front removido: `lib/auth/loginRateLimiter.ts` não existe mais e nenhum arquivo do `av-hub` (`develop`) usa `reservarTentativaLogin` (conferido em 29/10/2026).
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
@@ -28,7 +29,7 @@ criado_original: 2026-10-07
 > [!abstract] Resumo em linguagem natural
 > **O que é:** O limite de tentativas de login passou para a API: depois de 5 falhas em 15 minutos o login é bloqueado (erro 429). O valor é fixo no código, sem variável de ambiente.
 > **Quem é afetado:** Quem entra com e-mail e senha. O login pelo Azure AD fica fora do limite.
-> **Situação:** ✅ aplicado no código da API. ❓ Não foi conferida a remoção do limitador antigo que vivia no front.
+> **Situação:** ✅ aplicado no código da API. ✅ O limitador antigo do front foi removido (conferido em 29/10/2026). ❓ Produção não vista.
 
 
 > **(atualizado em 13/10/2026) ENTREGUE PELO DBA (relato do Nathan) e movido para `Realizados/`[^c2] a pedido do critério do vault (implementação confirmada no código).** Na `develop` e na `main` da `api-acos-vital` (`c2173b9`, 09/10; `main` com o PR #287): limite **fixo no código**, `LOGIN_MAX_FALHAS = 5` e janela de `900` s (as chaves `LOGIN_LIMITE_*` não são mais lidas); `POST /autenticacao/login` conta as **falhas** em `auth.login_tentativas`, responde `429` com `Retry-After` e `{ "codigo": "LOGIN_LIMITE" }`, e usa as chaves `email:<e-mail>` e `ip:<ip>:<e-mail>` (**nunca o IP sozinho**, como recomendado), com `loginOk` zerando as duas. O Azure AD continua fora do limite. **Conferido só no código; produção não foi vista** (e o DDL real de `auth.fn_login_*` e `auth.login_tentativas` segue fora do repositório da API). 🔴 **Falta no front:** apagar `lib/auth/loginRateLimiter.ts` e seus usos em `app/api/auth/[...nextauth]/route.ts` (`chaveRateLimit`, `chaveRateLimitEmail`, `reservarTentativaLogin`, `limparTentativas`) e a marca `GAMBIARRA(` (S9), mantendo o tratamento do 429 e a mensagem. Só depois de confirmar que o limite da API vale em produção. **Banco conferido no dump de teste:** `auth.fn_login_bloqueado`, `auth.fn_login_falha` e `auth.fn_login_sucesso` existem (13/10). **Front: PR [#186](https://github.com/Acosvital/av-hub/pull/186) (aberto) apaga o limitador local.** Em teste local (porta 3000, contra a API de produção) o aviso de "muitas tentativas" apareceu, o que mostra que a produção devolve o 429 e tem as funções `auth.fn_login_*`; **falta** saber em qual tentativa bloqueou (esperado: a 6ª) e o teste de login com sucesso. As seções abaixo mantêm o texto da proposta.

@@ -4,7 +4,7 @@ criado: 2026-10-21
 atualizado: 2026-10-29
 status: proposta
 dono: Nathan
-fontes: [ (comissoes, comissoes_nf, comissao_lancamentos, comissao_devolucao_pendencia), N16-10, N16-42 a N16-51, N16-74]
+fontes: [tabelas comissoes, comissoes_nf, comissao_lancamentos e comissao_devolucao_pendencia, N16-10, N16-42 a N16-51, N16-74, N16-143]
 ---
 
 # Regras e estados da comissão nova

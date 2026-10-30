@@ -3,12 +3,12 @@ id: SQL-008
 aliases: ["Contrato SQL 008", "008-Requisicoes-Compra"]
 tags: [contrato, contrato-sql, dba, integracao-av-hub-mes, compras]
 criado: 2026-10-14
-atualizado: 2026-10-14
+atualizado: 2026-10-29
 status: aplicado-em-producao
 sistemas: [hub-banco]
 dono: "Gustavo (DBA)"
 etapa_0b: [P3, C0]
-fontes: ["Dump Avhub (Esqueleto).sql:8680", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/requisicoes_compra/requisicoes_compra.route.js:148-413"]
+fontes: ["Dump Avhub (Esqueleto).sql:8680", "api-acos-vital/src/schemas/core_vendas_faturamento/tables/requisicoes_compra/requisicoes_compra.route.js:236-781"]
 criado_original: 2026-09-22
 ---
 
@@ -19,9 +19,10 @@ criado_original: 2026-09-22
 > [!info] Situação em 14/10/2026
 > **Status:** `aplicado-em-producao` · **Pasta:** `Entregues` · **Nós do 0b:** P3, C0 · **Dono:** Gustavo (DBA)
 >
-> - ✅ Tabela `requisicoes_compra` e `fn_requisicao_mes_aplicar` (`Dump Avhub (Esqueleto).sql:8680`) existem; rotas em `requisicoes_compra.route.js:148-413`. Entregue em `ec2a42b` (PR #273); a coluna `id_origem` e os eventos vieram com [[LOG-34-Requisicoes-MES-Empurra-para-o-Hub]] e [[LOG-35-Compras-Marcos-Requisicao-para-MES]].
+> - ✅ Tabela `requisicoes_compra` e `fn_requisicao_mes_aplicar` (`Dump Avhub (Esqueleto).sql:8680`) existem; rotas em `requisicoes_compra.route.js:236-781`. Entregue em `ec2a42b` (PR #273); a coluna `id_origem` e os eventos vieram com [[LOG-34-Requisicoes-MES-Empurra-para-o-Hub]] e [[LOG-35-Compras-Marcos-Requisicao-para-MES]].
 > - Status da requisição: `aberta`, `em_cotacao`, `atendida`, `cancelada`; `atendida` é marcada pela trigger da OC, nunca pelo PATCH.
 > - ❓ Produção: confirmado em 23/09 (vault v1); não reconferido.
+> - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89`).
 >
 > Conferido em 14/10/2026 contra `api-pcp` 579a625, `app-pcp` 1fca8d3, `api-acos-vital` f322dcd, `omie-elt-pipeline` 0f739f0 e os dumps de 14/10. O front do av-hub (HUB b55ac55) só pelo vault v1 (❓).
 > O texto original abaixo está inteiro; os trechos que o estado atual contradiz têm nota de rodapé.
