@@ -20,7 +20,7 @@ criado_original: 2026-10-09
 > **Status:** `implementado-no-codigo` · **Pasta:** `Entregues` · **Nós do 0b:** V1 · **Dono:** Gustavo (DBA)
 >
 > - ✅ `POST /pedidos_vendas/manual` (`pedidos_vendas.route.js:443`), `PUT`/`PATCH /manual/:codigo` (`:517-518`), `GET /manual/:codigo/historico` (`:559`) e a regra em `api-acos-vital/src/utils/pedidoVendaManual.js`.
-> - ✅ **Numeração (29/10/2026):** os comentários e o swagger do pedido manual passaram a citar "Contrato 45" (commit `0384e89` na `develop` local da `api-acos-vital`; em 29/10/2026 estava 1 commit à frente de `origin/develop`, sem push). O "Contrato 30" do código ficou só no PDF do pedido de compra do Omie (LOG-30). A migration 030 não foi alterada.
+> - ✅ **Numeração (29/10/2026):** os comentários e o swagger do pedido manual passaram a citar "Contrato 45" (commit `0384e89` na `develop` da `api-acos-vital`, enviado em 30/10/2026). O "Contrato 30" do código ficou só no PDF do pedido de compra do Omie (LOG-30). A migration 030 não foi alterada.
 > - Pedido manual nunca participa do custo do item (decisão D6 do [[API-008-Custo-do-Lote-no-MES]]) nem do fluxo de Atividades. Assunto no anexo `10-Anexo-Fora-do-Fluxo` (Pedido-Manual). Produção não verificada (❓).
 > - ✅ Linhas de código reconferidas em 29/10/2026 (`api-acos-vital` `develop` `0384e89`).
 >
@@ -30,7 +30,7 @@ criado_original: 2026-10-09
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Define o pedido de venda manual: criado e editado direto no Hub, só por administrador, convivendo com os pedidos que o pipeline traz do Omie (ERP). Existia no código sem contrato.
 > **Quem é afetado:** Administradores. O pedido manual não entra no custo do item nem no fluxo de Atividades.
-> **Situação:** ✅ Rotas e regra existem no código da API. ❓ Produção não verificada. ✅ Em 29/10/2026 o código passou a chamar este assunto de "Contrato 45", como no vault (commit local, falta o push).
+> **Situação:** ✅ Rotas e regra existem no código da API. ❓ Produção não verificada. ✅ Em 29/10/2026 o código passou a chamar este assunto de "Contrato 45", como no vault (commit `0384e89` na `develop`, enviado em 30/10/2026).
 
 
 > **Status: `implementada-no-codigo`. Produção NÃO verificada.** Lido em 09/10/2026 na `develop` da `api-acos-vital` (`origin/develop` = `dee35b0`; a cópia local está 2 commits atrás, por isso tudo abaixo vem de `git show origin/develop:…`), no pipeline `omie-elt-pipeline` (`master` `d2886bf`) e no front `00 - HUB` (`996e320`). Produção só pelo dump de 07/10 ([[Mapa-v1-para-v2|Auditoria-Dump-Producao-2026-10-07]]), que **não** traz o corpo de triggers nem o mapa de rotas deste assunto. Decisões da rodada: [[Registro-de-Decisoes|Registro-de-Decisoes-2026-10-07]]. Origem deste contrato: item "Contrato novo para pedido de venda manual" da [[Mapa-v1-para-v2|Auditoria-Pente-Fino-2026-10-08]].
@@ -165,7 +165,7 @@ Em homologação (`api-test`), com a API em `develop` e **uma unidade de teste**
 | 2 | Aplicar `AND NOT manual AND codigo_pedido_omie > 0` no `exclusionSync` (SELECT e DELETE). | 🔴 Gustavo |
 | 3 | Construir a tela `pedidos-vendas-manuais` ou limpar a tela de `auth.telas`? | 🔴 Nathan |
 | 4 | Quais perfis têm a permissão em produção (só o admin)? As rotas `/pedidos_vendas/manual*` estão em `auth.rotas_telas`? | 🔴 DBA |
-| 5 | Trocar os comentários "Contrato 30" do pedido manual por "contrato 45 do vault" (código, swagger, migration 030). ✅ Feito em 29/10/2026 no código e no swagger (commit `0384e89` (antes `e705797`; o commit foi reescrito), falta o push); a migration 030 não foi alterada. | ✅ Gustavo / DBA confirmam o push |
+| 5 | Trocar os comentários "Contrato 30" do pedido manual por "contrato 45 do vault" (código, swagger, migration 030). ✅ Feito em 29/10/2026 no código e no swagger (commit `0384e89` na `develop`, enviado em 30/10/2026); a migration 030 não foi alterada. | ✅ Gustavo / DBA só precisam ver o commit |
 | 6 | O histórico (`GET …/historico`) deve exigir `pode_visualizar`? | 🔴 Nathan |
 | 7 | Remover o código morto do caminho sem trava (`ajustarEdicaoManual` e os `if` de `:689-692,707-710,732-733`). | 🟡 Gustavo |
 
