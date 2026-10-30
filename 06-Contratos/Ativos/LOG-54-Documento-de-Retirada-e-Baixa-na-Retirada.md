@@ -191,11 +191,11 @@ flowchart LR
 
 | # | Pergunta | Dono | Selo |
 |---|---|---|---|
-| Q1 | O documento nasce de **quem**: a Expedição pede ao Estoque (como desenhado acima), ou o Estoque gera quando a parcela chega à Expedição? O que o documento imprime (lote, localização, quantidade, assinatura) e **quem confirma** (só o Estoque)? | Nathan | 📝 em 29/10 (N16-120): a Expedição pede e só o Estoque confirma. 🔴 **o que imprime** segue aberto |
+| Q1 | O documento nasce de **quem**: a Expedição pede ao Estoque (como desenhado acima), ou o Estoque gera quando a parcela chega à Expedição? O que o documento imprime (lote, localização, quantidade, assinatura) e **quem confirma** (só o Estoque)? | Nathan | 📝 em 29/10 (N16-120): a Expedição pede e só o Estoque confirma. 📝 **o que imprime** foi definido em 30/10 (N16-145): dados da Aços Vital, texto de declaração, solicitante, setor, data e horário, lista com quantidade, quem entregou e quem recebeu e as assinaturas, no layout da Ordem de Compra. Modelo em `09-Diagramas/documento-retirada-modelo.pdf`, 🟡 aguardando a aprovação do Nathan |
 | Q2 | A **reserva** continua depois da retirada (para rastrear custo) ou é consumida junto com a baixa? O desenho consome junto, com o custo gravado na `SAIDA` | Nathan | 📝 em 29/10 (N16-121): consumida junto |
 | Q3 | A Embalagem só **recebe** a parcela depois da retirada confirmada (regra 6, é o que traz a mercadoria até ela)? Ou recebe antes e a retirada confirma depois? | Nathan | 📝 em 29/10 (N16-122): só depois da retirada confirmada |
 | Q4 | **Estornar** uma retirada confirmada (mercadoria devolvida ao Estoque) é ação própria? Hoje `estornarConsumosDaParcial` faz isso para o desfazer-recebimento | Robert | 🟡 |
-| Q5 | O BL-007 (3,5 pd) entra no Ciclo 1? Aguardando decisão | Nathan | 🟡 |
+| Q5 | O BL-007 (3,5 pd) entra no Ciclo 1? **Sim: entra** (N16-145, 30/10/2026). O Robert valida o efeito no prazo | Nathan | 📝 |
 | Q6 | Uma retirada pode juntar parcelas de **pedidos diferentes** (uma ida ao estoque) ou é por pedido? O desenho aceita várias parcelas | Robert | ❓ |
 
 Relacionados: [[03-Estoque-Atendimento-e-Despacho]], [[09-Expedicao]], [[07-Producao-e-Roteiro]], [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]], [[API-008-Custo-do-Lote-no-MES]], [[Pontas-Soltas]] (PS-024), [[Riscos]] (RS-004), [[Backlog-por-Frente]] (BL-007), [[Registro-de-Decisoes]] (N14-05).
