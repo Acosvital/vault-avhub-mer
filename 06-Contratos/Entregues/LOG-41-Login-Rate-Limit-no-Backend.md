@@ -94,8 +94,8 @@ criado_original: 2026-10-07
 
 | # | Pergunta | Dono |
 |---|---|---|
-| Q1 | 🔴 Confirmar 5 tentativas / 900 s fixos no código (os do front). | Nathan |
-| Q2 | 🔴 Chave: e-mail + **IP+e-mail** (recomendado) ou e-mail + IP sozinho (como o código está)? | Nathan / Gustavo |
+| Q1 | ✅ Confirmado em 30/10/2026 (N16-147): 5 tentativas / 15 min (900 s). | Nathan |
+| Q2 | ✅ Decidido em 30/10/2026 (N16-147): e-mail e **IP+e-mail**; o código da API ainda usa e-mail e IP sozinho, o Gustavo ajusta. Chave: e-mail + **IP+e-mail** (recomendado) ou e-mail + IP sozinho (como o código está)? | Nathan / Gustavo |
 | Q3 | 🔴 Quantos proxies entre o cliente e o BFF? O último valor de `x-forwarded-for` é o IP do cliente? | Gustavo |
 | Q4 | 🔴 `LOGIN_LIMITE_TENTATIVAS` está setada em produção? Corpo de `fn_login_*` (`>=` ou `>`, tipo da chave)? Falha aberta ou fechada se o banco falhar? | Gustavo |
 | Q5 | Mensagem própria do 429: **feita** no PR #178; falta mergear. | Front |
@@ -192,8 +192,8 @@ Quem usa: só o `authorize` do `CredentialsProvider` em `app/api/auth/[...nextau
 
 | # | Pergunta | Dono |
 |---|---|---|
-| Q1 | 🔴 Valores finais: manter **5 tentativas / 15 min** (do front) ou mudar? | Nathan |
-| Q2 | 🔴 Bloquear por **e-mail** e **IP+e-mail** (como o front) ou por e-mail e **IP sozinho** (como a API está)? O IP sozinho pode travar a empresa inteira atrás de um NAT. | Nathan / Gustavo |
+| Q1 | ✅ Decidido em 30/10/2026 (N16-147): manter **5 tentativas / 15 min** | Nathan |
+| Q2 | ✅ Decidido em 30/10/2026 (N16-147): **e-mail e IP+e-mail**; a API ainda usa e-mail e IP sozinho, o Gustavo ajusta. Bloquear por **e-mail** e **IP+e-mail** (como o front) ou por e-mail e **IP sozinho** (como a API está)? O IP sozinho pode travar a empresa inteira atrás de um NAT. | Nathan / Gustavo |
 | Q3 | 🔴 Quantos proxies existem entre o cliente e o BFF (Traefik só, ou algo mais)? O IP certo é o último item de `x-forwarded-for`? | Gustavo |
 | Q4 | 🔴 O limite já está ligado em produção (`LOGIN_LIMITE_TENTATIVAS`)? Falha aberta ou fechada se o banco do limite falhar? | Gustavo |
 | Q5 | 🟡 Mostrar mensagem própria para 429 na tela de login (opcional). | Nathan |

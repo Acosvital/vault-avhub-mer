@@ -171,7 +171,7 @@ Os contratos 34 e 35, o `id_origem NOT NULL` dos eventos, o circuito do MES e o 
 |---|---|---|---|
 | Q1 | A exceção da unidade que compra por outra (HRM) continua valendo na trava de unidade da OC? | Nathan | 🟡 |
 | Q2 | `recompra` exige o pedido que está sendo reposto (como a tela da OC)? Proposta: sim, igual a `pedidos_venda` (já é o que o `CHECK` faz) | Nathan | 🟡 |
-| Q3 | `uso_interno` precisa de "setor que pediu"? O Recebimento entrega ao setor que pediu ([[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno]]); hoje só há `solicitante` (texto, 100) | Nathan | 🔴 |
+| Q3 | `uso_interno` precisa de "setor que pediu"? O Recebimento entrega ao setor que pediu ([[API-011-Compra-em-Andamento-Recebimento-por-Item-da-OC-e-Uso-Interno]]); hoje só há `solicitante` (texto, 100) | Nathan | 📝 **Sim, campo novo** (Nathan, 30/10/2026, N16-147); falta desenhar o campo com o Gustavo |
 | Q4 | Requisição antiga cujo `material` não casa com o cadastro: manter como está (a validação vale só para criação)? Proposta: sim | Gustavo | 🟡 |
 | Q5 | `descricao` vem do cadastro quando o corpo não trouxer, ou sempre do cadastro? Proposta: só quando não vier | Gustavo | 🟡 |
 

@@ -409,7 +409,7 @@ Todas as colunas têm filtro; a linha "Total do filtro" (SUBTOTAL) acima do cabe
 - A rota faz cerca de **27 consultas** à API (todas as páginas de cada recorte, 500 por página, 5 ao mesmo tempo) e formata. Com a base inteira (3.964 clientes) leva **15 a 25 segundos** e o arquivo tem ~1,2 MB. Nada é recalculado: status, deduções e vendas vêm prontos.
 - 🟡 **Resumo por vendedor e `vendedores` do grupo** são somados na rota (duas marcas `GAMBIARRA` em `lib/api/acompanhamentoClientesPlanilha.ts`). Pedido: a API devolver o resumo por vendedor (clientes atendidos, pedidos no histórico e no mês, última venda) e `vendedores` agregado na linha do grupo.
 - 🟡 **Endpoint de exportação no backend** (o `.xlsx` pronto, como o relatório do `api-comercial`) tiraria as 27 idas e voltas do BFF e o risco de um proxy cortar a requisição antes dos 120 s. Opcional.
-- 🟡 **Permissão própria:** hoje exportar exige só `pode_visualizar`, e o arquivo sai do sistema com CNPJ e CPF dos clientes. Decidir se pede uma ação específica (`pode_exportar`).
+- 📝 **Permissão própria decidida em 30/10/2026 (N16-147): a exportação ganha a ação `pode_exportar`.** Falta criar a ação no banco e nos perfis. Antes: hoje exportar exige só `pode_visualizar`, e o arquivo sai do sistema com CNPJ e CPF dos clientes. Decidir se pede uma ação específica (`pode_exportar`).
 
 ### 13.3 Como conferir
 

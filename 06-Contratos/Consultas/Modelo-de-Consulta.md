@@ -66,3 +66,4 @@ O [[Painel-de-Contratos]] lista as Consultas abertas. O ID usa o prefixo `CON-` 
 
 - [[CON-01-Relatorios-Valores-e-Faturamento-Itens-28-e-29]]
 - [[CON-02-Rastreabilidade-e-Book-Itens-18-e-20]]
+- [[CON-03-Devolucao-de-Compra-e-Classificacao-do-Pedido]]
