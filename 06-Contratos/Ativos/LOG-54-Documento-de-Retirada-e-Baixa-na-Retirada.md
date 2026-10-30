@@ -187,15 +187,26 @@ flowchart LR
 
 1. Nathan decide as perguntas Q1 a Q3. 2. Robert: migration, modelos, rotas e a baixa na confirmação; tirar `consumirReservasDaParcial` de `receber()` e da entrega (BL-007). 3. Telas de pedir e de confirmar. Depende do [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] para o fabricado e do [[API-008-Custo-do-Lote-no-MES]] (K6) para o custo na saída.
 
+## Devolução da sobra ao Estoque (modelo aprovado em 30/10/2026)
+
+Quando o material retirado não é todo usado, a sobra volta ao Estoque por um documento próprio, ligado à retirada de origem (N16-146). O documento traz os dados da Aços Vital, a declaração de devolução, quem devolve (nome, setor, data e horário), a lista com lote, **retirado, utilizado e devolvido**, a condição do material, e quem devolveu e quem recebeu no Estoque, com a assinatura dos dois. Segue o layout da Ordem de Compra. O modelo está em `09-Diagramas/documento-reentrada-modelo.pdf`. 📝 modelo aprovado pelo Nathan; 🔴 as regras de negócio estão nas perguntas Q7 a Q13.
+
 ## Perguntas em aberto
 
 | # | Pergunta | Dono | Selo |
 |---|---|---|---|
-| Q1 | O documento nasce de **quem**: a Expedição pede ao Estoque (como desenhado acima), ou o Estoque gera quando a parcela chega à Expedição? O que o documento imprime (lote, localização, quantidade, assinatura) e **quem confirma** (só o Estoque)? | Nathan | 📝 em 29/10 (N16-120): a Expedição pede e só o Estoque confirma. 🔴 **o que imprime** segue aberto |
+| Q1 | O documento nasce de **quem**: a Expedição pede ao Estoque (como desenhado acima), ou o Estoque gera quando a parcela chega à Expedição? O que o documento imprime (lote, localização, quantidade, assinatura) e **quem confirma** (só o Estoque)? | Nathan | 📝 em 29/10 (N16-120): a Expedição pede e só o Estoque confirma. 📝 **o que imprime** foi definido em 30/10 (N16-145): dados da Aços Vital, texto de declaração, solicitante, setor, data e horário, lista com quantidade, quem entregou e quem recebeu e as assinaturas, no layout da Ordem de Compra. Modelo em `09-Diagramas/documento-retirada-modelo.pdf`, 📝 aprovado pelo Nathan em 30/10/2026 |
 | Q2 | A **reserva** continua depois da retirada (para rastrear custo) ou é consumida junto com a baixa? O desenho consome junto, com o custo gravado na `SAIDA` | Nathan | 📝 em 29/10 (N16-121): consumida junto |
 | Q3 | A Embalagem só **recebe** a parcela depois da retirada confirmada (regra 6, é o que traz a mercadoria até ela)? Ou recebe antes e a retirada confirma depois? | Nathan | 📝 em 29/10 (N16-122): só depois da retirada confirmada |
 | Q4 | **Estornar** uma retirada confirmada (mercadoria devolvida ao Estoque) é ação própria? Hoje `estornarConsumosDaParcial` faz isso para o desfazer-recebimento | Robert | 🟡 |
-| Q5 | O BL-007 (3,5 pd) entra no Ciclo 1? Aguardando decisão | Nathan | 🟡 |
+| Q5 | O BL-007 (3,5 pd) entra no Ciclo 1? **Sim: entra** (N16-145, 30/10/2026). O Robert valida o efeito no prazo | Nathan | 📝 |
 | Q6 | Uma retirada pode juntar parcelas de **pedidos diferentes** (uma ida ao estoque) ou é por pedido? O desenho aceita várias parcelas | Robert | ❓ |
+| Q7 | O material devolvido volta ao **mesmo lote** (o custo do lote segue) ou vira lote novo (custo a definir)? | Nathan | 🔴 |
+| Q8 | A sobra passa pela Qualidade antes de voltar ao saldo, ou o Estoque aceita direto? | Nathan | 🔴 |
+| Q9 | Sobra de chapa ou barra cortada entra como lote novo, com o tamanho que sobrou? (liga à OQ-32) | Nathan | 🔴 |
+| Q10 | Material danificado ou perdido: a diferença entre o retirado e o devolvido sem uso vira baixa, perda ou refugo? | Nathan | 🔴 |
+| Q11 | Quem pode devolver: só quem fez a retirada ou qualquer pessoa do setor? | Nathan | 🔴 |
+| Q12 | Quem informa o local de guarda da sobra? O modelo deixa isso para o Estoque | Nathan | 🔴 |
+| Q13 | O documento de devolução entra no Ciclo 1? | Nathan | 🔴 |
 
 Relacionados: [[03-Estoque-Atendimento-e-Despacho]], [[09-Expedicao]], [[07-Producao-e-Roteiro]], [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]], [[API-008-Custo-do-Lote-no-MES]], [[Pontas-Soltas]] (PS-024), [[Riscos]] (RS-004), [[Backlog-por-Frente]] (BL-007), [[Registro-de-Decisoes]] (N14-05).

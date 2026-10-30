@@ -367,7 +367,7 @@ Estoque, uso interno e compra por fora **não geram evento** de fluxo: a Torre a
 | Q2 | O rateio do **recebido** entre os destinos de uma OC que cobre vários pedidos e estoque (a fórmula da seção 6 é proporcional e provisória), e em que ordem atende o pedido. **Decidir antes do R1 (Robert, 19/10).** | Robert, Nathan | 🔴 |
 | Q3 | Contabilidade: custo de uso interno vai para despesa? EPI tem inspeção? | Nathan | 🟡 |
 | Q4 | De onde vem o setor que pediu o uso interno (campo novo na requisição do hub) | Nathan, Gustavo | 🔴 |
-| Q5 | BL-049 e BL-050 (3,0 pd) entram no Ciclo 1? Aguardando decisão | Nathan | 🟡 |
+| Q5 | BL-049 e BL-050 (3,0 pd) entram no Ciclo 1? **Sim: entram** (N16-145, 30/10/2026). O Robert valida o efeito no prazo | Nathan | 📝 |
 | Q6 | O `Recebimento` sem parcela precisa de setor atual/histórico próprio (hoje o recebimento é um passo da parcela)? | Robert | ❓ |
 
 Relacionados: [[API-004-Referencia-OC-Integracao-MES]], [[API-007-Referencia-OC-Valores-no-MES]], [[API-008-Custo-do-Lote-no-MES]], [[API-009-Referencia-Requisicao-Hub-Integracao-MES]], [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto]], [[05-Recebimento]], [[02-PCP-Triagem-e-Destinacao]], [[03-Estoque-Atendimento-e-Despacho]], [[04-Circuito-de-Compra]], [[Pontas-Soltas]] (PS-034), [[Backlog-por-Frente]] (BL-049, BL-050, BL-051, BL-065), [[Registro-de-Decisoes]].
