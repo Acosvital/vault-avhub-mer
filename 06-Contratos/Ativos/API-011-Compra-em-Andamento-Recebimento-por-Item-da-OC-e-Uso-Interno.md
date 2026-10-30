@@ -366,7 +366,7 @@ Estoque, uso interno e compra por fora **não geram evento** de fluxo: a Torre a
 | Q1 | A resolução do `codigo_produto_omie` do item da OC para o `Material` da unidade, quando o `Material` ainda não existe | Robert | ❓ |
 | Q2 | O rateio do **recebido** entre os destinos de uma OC que cobre vários pedidos e estoque (a fórmula da seção 6 é proporcional e provisória), e em que ordem atende o pedido. **Decidir antes do R1 (Robert, 19/10).** | Robert, Nathan | 🔴 |
 | Q3 | Contabilidade: custo de uso interno vai para despesa? EPI tem inspeção? | Nathan | 🟡 |
-| Q4 | De onde vem o setor que pediu o uso interno (campo novo na requisição do hub) | Nathan, Gustavo | 🔴 |
+| Q4 | De onde vem o setor que pediu o uso interno (campo novo na requisição do hub). O Nathan decidiu em 30/10/2026 (N16-147) que o campo existe; falta definir a origem da lista de setores | Nathan, Gustavo | 📝 campo; 🔴 origem da lista |
 | Q5 | BL-049 e BL-050 (3,0 pd) entram no Ciclo 1? **Sim: entram** (N16-145, 30/10/2026). O Robert valida o efeito no prazo | Nathan | 📝 |
 | Q6 | O `Recebimento` sem parcela precisa de setor atual/histórico próprio (hoje o recebimento é um passo da parcela)? | Robert | ❓ |
 

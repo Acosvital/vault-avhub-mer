@@ -48,7 +48,7 @@ criado_original: 2026-09-28
 >
 > **Situação em 30/09/2026:** **L4 concluído** pelo Robert (`api-pcp` commit `901f9bb`, 29/09, já na
 > `develop`; conferido no código: as 4 trocas da seção 4.2 estão feitas e batem com as rotas da API).
-> **Continua faltando a data de corte (L1)**: sem ela não há teste de ponta a ponta na `api-test`. L6
+> **Continua faltando a data de corte (L1)** (📝 decidido em 30/10/2026, N16-147: vale o dia em que a tela for para produção, e o Nathan informa a data): sem ela não há teste de ponta a ponta na `api-test`. L6
 > atualizado (a chave do MES precisa ser de escrita). Observações do Robert na seção 6.
 
 **Criado em:** 28/09/2026 · **Para:** DBA, backend (`api-acos-vital`) e MES (`api-pcp`, Robert)

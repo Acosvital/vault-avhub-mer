@@ -163,7 +163,7 @@ Em homologação (`api-test`), com a API em `develop` e **uma unidade de teste**
 |---|---|---|
 | 1 | O trigger `trg_pedidos_vendas_manual_sem_delete` (e `_validar`, `_imutavel`) existe em produção? Versionar o SQL da migration 030 no vault. | 🔴 DBA |
 | 2 | Aplicar `AND NOT manual AND codigo_pedido_omie > 0` no `exclusionSync` (SELECT e DELETE). | 🔴 Gustavo |
-| 3 | Construir a tela `pedidos-vendas-manuais` ou limpar a tela de `auth.telas`? | 🔴 Nathan |
+| 3 | Construir a tela `pedidos-vendas-manuais` ou limpar a tela de `auth.telas`? 📝 **Decidido em 30/10/2026 (N16-147): construir a tela**, no molde da nota manual. | 📝 Nathan faz a tela |
 | 4 | Quais perfis têm a permissão em produção (só o admin)? As rotas `/pedidos_vendas/manual*` estão em `auth.rotas_telas`? | 🔴 DBA |
 | 5 | Trocar os comentários "Contrato 30" do pedido manual por "contrato 45 do vault" (código, swagger, migration 030). ✅ Feito em 29/10/2026 no código e no swagger (commit `0384e89` na `develop`, enviado em 30/10/2026); a migration 030 não foi alterada. | ✅ Gustavo / DBA só precisam ver o commit |
 | 6 | O histórico (`GET …/historico`) deve exigir `pode_visualizar`? | 🔴 Nathan |
