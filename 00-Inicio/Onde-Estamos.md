@@ -13,6 +13,9 @@ fontes: [00-Fluxo-Mestre-0b, notas de raia 02-Fluxo-de-Atividades, Registro-de-D
 
 **Quando consultar esta nota:** quando você precisar saber o que está pronto, o que falta e quem toca cada setor.
 
+> [!warning] O que é "produção" e o que está em uso (Nathan, 30/10/2026)
+> No av-hub, **produção é a `main`**: a última versão pronta e testada. Isso não quer dizer que alguém usa. **Em uso real hoje, só os dashboards, a tela de aprovação de vagas e as telas da gerência.** O resto (Compras, ordem de compra, requisição, proposta, pedido manual, Torre, custo e as demais telas) ainda não tem uso real: nenhuma OC criada no av-hub existe no banco de produção. Onde as notas dizem "produção ❓" ou "não conferido em produção", leia "ainda não foi para a `main`" ou "ainda não foi usado". Mudanças de formato, como a numeração só com dígitos (N16-148), não têm dado real para migrar.
+
 O estado do código é o de 29/10/2026 (`develop` do MES, da `api-acos-vital` e do av-hub). A `main` do MES parou em 08/10: a OP, o lote do fabricado e o custo por item (26 e 27/10) estão só na `develop` (BL-035). A API da proposta e as telas já existem; o Orçamento, a conferência de Compras (`C6` a `C8`) e a comissão nova ainda não têm código. A fila de trabalho está em [[Backlog-por-Frente]].
 
 **Decisões de 30/10/2026 (N16-145 a N16-148):** o Ciclo 1 passa a incluir o documento de retirada (BL-007), BL-049 e BL-050 (déficit do Robert de 36,1 pd e fim em 03/03/2027 a 75% de foco; o Robert valida a conta); os modelos dos documentos de retirada e de devolução da sobra ao Estoque foram aprovados; o número da proposta e da ordem de compra é só dígitos no banco, com o prefixo só na tela e no PDF; só o perfil Admin vê a Torre de Fluxo por enquanto.
