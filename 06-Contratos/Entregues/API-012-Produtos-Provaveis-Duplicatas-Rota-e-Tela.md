@@ -24,7 +24,7 @@ criado_original: 2026-10-19
 > - 📝 **Decisão do Nathan, 19/10/2026:** cálculo no banco e na API; **só leitura, sem alias** (mantém a rejeição de 21/09/2026, [[API-002-Material-Alias-Omie-MES]]); **por unidade**; mostrar uso em venda, OC, estoque e fornecedores.
 > - ✅ **Rota na `develop` da `api-acos-vital`** (commit `c685571`, 21/10/2026): `GET /produtos/duplicatas` registrada antes de `/:id`, com escopo de unidade (403), 404 para unidade inexistente, cache de 60 s dos pares, swagger e testes unitários (`test/unit/produtosDuplicatas.test.js`). Devolve também `motivo_sugestao` no item sugerido (`unico_ativo`, `mais_usado`, `maior_estoque`, `mais_antigo`, `menor_id`), além do contrato.
 > - ✅ **Tela no `av-hub`** (`develop`, PR #223): consome a rota por BFF `GET /api/produtos/duplicatas`, com uma chamada só. Testado em 21/10/2026 contra a API real: 200 nas 3 unidades (Aços Vital 7.079 grupos em 53.515 produtos), 0,9 a 9,6 s sem cache e cerca de 0,45 s com cache.
-> - 🟡 **Ainda no front:** o fallback de dados de exemplo (`produtosDuplicadosMock.ts` e o tratamento de 404/400 em `produtosDuplicados.ts`) segue no código; remover. A tela calcula o texto do motivo da sugestão; trocar por `motivo_sugestao` da API.
+> - ✅ **Front limpo em 30/10/2026 (Nathan, testado):** o fallback de dados de exemplo, `produtosDuplicadosMock.ts`, o aviso na tela e a marca `GAMBIARRA` saíram, e o motivo da sugestão vem da API (`motivo_sugestao`). Antes: **Ainda no front:** o fallback de dados de exemplo (`produtosDuplicadosMock.ts` e o tratamento de 404/400 em `produtosDuplicados.ts`) segue no código; remover. A tela calcula o texto do motivo da sugestão; trocar por `motivo_sugestao` da API.
 > - 🟡 **Qualidade da nota, a melhorar** (ver [[SQL-013-Produtos-Provaveis-Duplicatas-Funcoes-e-Uso]]): medidas em ordem, variações por unidade, grupos em corrente e faixa `alta`.
 > - 📝 **Em modelagem (21/10/2026, experimental):** curadoria dos grupos (tirar, incluir, confirmar, salvar, nome do grupo e referência nos pedidos). Mudaria a decisão de "só leitura" e é assunto de contrato novo, ainda não escrito.
 > - **MES (Robert): sem trabalho.** Este contrato não toca o MES nem o `api-pcp`.
@@ -34,7 +34,7 @@ criado_original: 2026-10-19
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Moveu para o banco e a API o cálculo de produtos que provavelmente são duplicados, em modo só leitura, por unidade, mostrando uso em venda, compra e estoque.
 > **Quem é afetado:** Quem cuida do cadastro de produtos usa a tela nova de duplicatas; Gustavo (DBA) fez rota e banco, Nathan fez a tela.
-> **Situação:** ✅ Rota e tela entregues em 21/10/2026, testadas na API real. 🟡 Falta remover os dados de exemplo e melhorar a nota. 📝 Curadoria dos grupos segue em modelagem, sem contrato.
+> **Situação:** ✅ Rota e tela entregues em 21/10/2026, testadas na API real. ✅ Os dados de exemplo saíram em 30/10/2026. 🟡 Falta melhorar a nota. 📝 Curadoria dos grupos segue em modelagem, sem contrato.
 
 ## Por quê
 
