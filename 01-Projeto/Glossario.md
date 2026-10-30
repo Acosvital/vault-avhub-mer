@@ -40,7 +40,7 @@ Os termos estão em ordem alfabética. Os nomes de tela seguem a regra de [[Regr
 - **Casamento av-hub e MES** — o modo como o pedido ou a requisição de um sistema encontra o do outro. Foi decidido por REST com consulta periódica (DEC-2); a requisição de compra evoluiu para o PUT do MES (contrato 34). Ver [[Integracao-AvHub-MES]].
 - **CCP** — equipe do PCP que acompanha o prazo de entrega do fornecedor (nó `C5`). Registra a nova data com o motivo e vincula a NF de entrada à OC (N16-86, N16-88). No HUB é o Follow-up; no MES, a tela Compras · CCP, só de leitura.
 - **Chegada** — o registro da doca de que a mercadoria chegou com a NF. A parcial sai de Compras · CCP e vai ao Recebimento ✅.
-- **Ciclo 1 e Ciclo 2** — o Ciclo 1 fecha em 18/02/2027 (era 21/01; deslocado pelo N14-30 e abatido pelo K4, N14-32). O Ciclo 2 começa em 19/02/2027 e leva transferência entre filiais (etapas 2 a 4), `GET /itens/custo`, sobras e perdas, entre outros 📝. Ver [[Cronograma]].
+- **Ciclo 1 e Ciclo 2** — o Ciclo 1 fecha em 18/02/2027 (era 21/01; deslocado pelo N14-30 e abatido pelo K4, N14-32; com BL-007, BL-049 e BL-050 (N16-145): 36,1 pd e 03/03/2027 a 75% de foco; o Robert valida). O Ciclo 2 começa em 19/02/2027 e leva transferência entre filiais (etapas 2 a 4), `GET /itens/custo`, sobras e perdas, entre outros 📝. Ver [[Cronograma]].
 - **CIF e FOB** — quem paga e contrata o frete da compra. No CIF, o fornecedor entrega direto. No FOB, a Aços Vital coleta no fornecedor. A escolha é feita na emissão da OC (nó `C4`) ✅.
 - **Circuito de compra** — o caminho fixo, fora do roteiro do PCP: Estoque, Requisições, Compras, Recebimento, Qualidade de entrada e volta ao mesmo Estoque. Ver [[04-Circuito-de-Compra]].
 - **Compras · CCP** — ver a tabela de telas.

@@ -25,9 +25,9 @@ Marcas: ✅ a documentação mostra · 🟡 leitura minha · ❓ só um teste re
 
 - **Cancelar pedido existe por API** (`CancelarPedidoVenda`). A primeira leitura errou, e foi corrigida em 23/10. O vendedor cancela, edita e exclui pelo hub (N16-84).
 - **Imposto da compra existe por item, em valor, sem DIFAL** (diferencial de alíquota). A NF de entrada traz percentual e valor.
-- **A NF de entrada não vem ligada ao item da OC** na prática (correção do Nathan, 21/10). O vínculo continua manual, com o PCP (N16-57).
+- **A NF de entrada não vem ligada ao item da OC** na prática (correção do Nathan, 21/10). O vínculo continua manual, feito pelo CCP, entre a NF de entrada e a OC (N16-86, que corrige o PCP e o item do pedido da N16-57).
 - **A quantidade devolvida não vem do Omie** (correção do Nathan, 21/10). Falta definir de onde sai a proporção do abatimento (OQ-42).
-- **Dá para mandar o nosso número de pedido** 🟡, mas falta testar se o Omie o mantém.
+- **Dá para mandar o nosso número de pedido** ✅ (o Omie aceita o `numero_pedido` nosso, N16-82); a conferência na prática fica para os testes depois das telas.
 - **O pedido criado por API pode nascer bloqueado** 🟡. Se nascer, o Fiscal não fatura sem desbloquear.
 
 ## O que a pipeline precisa ganhar
@@ -40,7 +40,7 @@ São sete trabalhos: gravar os códigos de integração de pedido e item, ler a 
 
 ### 1. Pedido de venda (`/produtos/pedido/`)
 
-**Métodos do serviço:** `IncluirPedido`, `AlterarPedidoVenda`, `ConsultarPedido`, `ListarPedidos`, `StatusPedido`, `TrocarEtapaPedido`, `ExcluirPedido`, `DevolverPedido`, `AlterarPedFaturado`, `SimularImpostos`. **Não existe** método de cancelar nem de encerrar pedido.
+**Métodos do serviço:** `IncluirPedido`, `AlterarPedidoVenda`, `ConsultarPedido`, `ListarPedidos`, `StatusPedido`, `TrocarEtapaPedido`, `ExcluirPedido`, `DevolverPedido`, `AlterarPedFaturado`, `SimularImpostos`. **Neste serviço (`/produtos/pedido/`) não existe** método de cancelar nem de encerrar pedido; o cancelar existe no serviço `/produtos/pedidovendafat/` (`CancelarPedidoVenda`, N16-84).
 
 #### Criar o pedido (V0.7): responde a OQ-15 e a OQ-16
 | O que a documentação mostra | Efeito no projeto |
@@ -50,7 +50,7 @@ São sete trabalhos: gravar os códigos de integração de pedido e item, ler a 
 | ✅ `det[].ide.codigo_item_integracao` (texto de até 30) é o código do **item** no nosso sistema. O `ConsultarPedido` devolve o `codigo_item` do Omie na mesma linha | Dá o vínculo **item da proposta ↔ `codigo_item_omie`** que o `comissao_itens_vinculo` precisa. Hoje o vínculo seria montado por casamento; com este código, é direto |
 | ✅ `cabecalho.etapa` no exemplo do `IncluirPedido` é `"10"` | **OQ-16:** etapa inicial = `"10"`. 🟡 Confirmar na conta: o nome das etapas 10, 15 e 20 ainda está pendente no vault (#52); a lista vem de `ListarEtapasFaturamento` |
 | ✅ Campos do exemplo de inclusão: `codigo_cliente`, `data_previsao`, `codigo_parcela` (`"999"` com `lista_parcelas`), `quantidade_itens`, `frete.modalidade`, `informacoes_adicionais` (`codigo_categoria`, `codigo_conta_corrente`, `consumidor_final`, `codVend`, `codProj`, `numero_pedido_cliente`, `numero_contrato`), `observacoes.obs_venda`, e por item `produto` (`codigo_produto`, `quantidade`, `valor_unitario`, `cfop`, `ncm`, `unidade`, `tipo_desconto`, `valor_desconto`) | É a lista de campos do **contrato do pedido por API**. ❓ Quais são **obrigatórios na conta de vocês** só o teste diz (categoria, conta corrente e vendedor variam por filial) |
-| ✅ O exemplo envia `cabecalho.numero_pedido` (`"40451"`) | 🟡 Parece que dá para **mandar o nosso número**, o que simplificaria a numeração própria (N16-26). ❓ Testar se o Omie aceita e se mantém o número sem renumerar |
+| ✅ O exemplo envia `cabecalho.numero_pedido` (`"40451"`) | ✅ O Omie aceita o **nosso número** (`numero_pedido`), o que simplifica a numeração própria (N16-26); decidido na N16-82 |
 | ✅ `cabecalho.bloqueado` ("Pedido Bloqueado pela API") e `importado_api` | 🟡 Pedido **criado por API** pode nascer **bloqueado para edição na tela do Omie**. ❓ Testar: se sim, o `AlterarPedidoVenda` com `bloqueado = "N"` pode ser necessário para o Fiscal faturar normalmente |
 | ✅ Não há campo de imposto de venda obrigatório no exemplo de inclusão; existe `codigo_cenario_impostos` e o método **`SimularImpostos`** (devolve ICMS, ST, IPI, PIS, COFINS por item) | 🟡 O Omie **calcula** o imposto de venda pelo cenário. O `SimularImpostos` pode alimentar o simulador (ST e DIFAL da venda) **sem digitação** |
 | ✅ Itens aceitam `inf_adic.numero_pedido_compra` e `item_pedido_compra` | Existe campo para ligar o item de venda a um pedido de compra no próprio Omie 🟡 |
@@ -81,7 +81,7 @@ São sete trabalhos: gravar os códigos de integração de pedido e item, ler a 
 ### 3. Recebimento de NF-e (`/produtos/recebimentonfe/`): a **NF de entrada** (N16-40 e N16-57)
 | O que a documentação mostra | Efeito no projeto |
 |---|---|
-| 🟡 A documentação lista, por item da NF de entrada, `nIdPedido`, `nIdItPedido`, `nNumPedCompra` e `cNumItPedCompra`. **O Nathan corrige (21/10): na prática a NF de entrada NÃO vem ligada ao item da OC.** Tratar como **não disponível** | **A tarefa do PCP (N16-57) continua inteira:** ligar a NF de entrada ao item do pedido, além do problema de unidade diferente (KG na nota, PC no pedido). Não dá para contar com a ligação automática. O teste 6 só confirma o que o Omie realmente devolve |
+| 🟡 A documentação lista, por item da NF de entrada, `nIdPedido`, `nIdItPedido`, `nNumPedCompra` e `cNumItPedCompra`. **O Nathan corrige (21/10): na prática a NF de entrada NÃO vem ligada ao item da OC.** Tratar como **não disponível** | **A tarefa continua inteira, e é do CCP (N16-86, que corrige a N16-57):** ligar a NF de entrada à OC, na tela de Follow-up, além do problema de unidade diferente (KG na nota, PC no pedido). Não dá para contar com a ligação automática. O teste 6 só confirma o que o Omie realmente devolve |
 | ✅ Por item: `nQtdeNFe`, `cUnidadeNfe`, `nPrecoUnit`, `vFrete`, `vTotalItem`, `nQtdeRecebida` e blocos `itensICMS`, `itensIPI`, `itensPIS`, `itensCOFINS`, `itensICMSST` com **base, alíquota e valor** | **A NF de entrada traz o imposto real** (percentual e valor). Fonte melhor que o imposto do pedido de compra, **e é a que o N16-40 manda usar como custo real** |
 | ✅ `infoCadastro.cRecebido`, **`dRec`** (data do recebimento) e `hRec` | **Resolve a pergunta da "data real de recebimento"** que a nota de histórico do score precisa (N16-56). **O hub não sincroniza** esse serviço hoje (não está nos recursos da pipeline): é **recurso novo** a criar |
 | ✅ `cCancelada`, `dCanc`, `cDevolvido`, `cDevolvidoParc`, `cItemDevolvido` | Cobre **NF de entrada cancelada ou devolvida**, que estorna a linha de custo (N16-40). ❓ A regra de devolução total e parcial que o Nathan descreveu (21/10) é para **venda**; **como a devolução de compra aparece** no Omie não foi dita |
@@ -94,12 +94,12 @@ São sete trabalhos: gravar os códigos de integração de pedido e item, ler a 
 | Pergunta | Situação depois do estudo |
 |---|---|
 | **OQ-15** (liberação na criação) | ✅ **Resolvida pela documentação:** usar `codigo_pedido_integracao` e gravar a liberação na **resposta do `IncluirPedido`**. A pipeline passa a gravar esse código no hub |
-| **OQ-16** (etapa e campos) | ✅ Etapa `"10"` e a lista de campos acima. ❓ Obrigatórios da conta, **numeração** (`numero_pedido`) e **`bloqueado`**: só teste |
+| **OQ-16** (etapa e campos) | ✅ Etapa `"10"` e a lista de campos acima. ✅ O Omie aceita o nosso `numero_pedido` (N16-82). ❓ Obrigatórios da conta e **`bloqueado`**: só teste |
 | **OQ-17 / OQ-48** (cancelamento no Omie) | ✅ **Há cancelar por API** (`CancelarPedidoVenda`); o vendedor cancela, edita e exclui (N16-84). O hub guarda o cancelamento por conta própria e confirma pelo `ListarEtapasPedido`. `ExcluirPedido` só para não faturado e **com o risco** do `exclusionSync`; excluir no Hub apaga no Omie, então reutilizar o código de integração é possível |
 | **OQ-37** (imposto da OC) | ✅ O imposto **existe por item, em valor** (sem DIFAL) no pedido de compra, e com **percentual e valor** na NF de entrada. Falta **ampliar o espelho** e o **envio** da OC |
-| **OQ-39 / N16-57** (vínculo da NF de entrada) | 🟡 A documentação sugere uma ligação automática, mas **o Nathan informa que ela não existe na prática**. O vínculo **NF de entrada → item do pedido continua manual, com o PCP**. Resta decidir como o sistema o guarda (quantidade coberta ou valor total) |
+| **OQ-39 / N16-57** (vínculo da NF de entrada) | 🟡 A documentação sugere uma ligação automática, mas **o Nathan informa que ela não existe na prática**. O vínculo **NF de entrada ↔ OC continua manual, feito pelo CCP** (N16-86). Resta decidir como o sistema o guarda (quantidade coberta ou valor total) |
 | **OQ-42** (devolução e recusa) | ❌ A quantidade devolvida **não** vem do Omie (correção do Nathan). Falta definir de onde sai a proporção do abatimento: registro no hub, valor da NF de devolução ou NF referenciada. A **recusa** (manifestação) segue dependendo do scraping |
-| **OQ-14** (numeração própria) | 🟡 Possível mandar `numero_pedido` ❓ testar |
+| **OQ-14** (numeração própria) | ✅ O Omie aceita o nosso `numero_pedido` (N16-82) |
 | **Data real de recebimento** (N16-56) | ✅ Existe (`dRec`), em serviço **ainda não sincronizado** |
 
 ### 5. O que a pipeline do hub precisa ganhar (trabalho, não decisão)
@@ -114,7 +114,7 @@ São sete trabalhos: gravar os códigos de integração de pedido e item, ler a 
 ### 6. Testes que só o Omie responde (checklist)
 Todos no Omie de verdade, com **cadastros TESTE** e conferindo que nada vá a cliente, fornecedor ou financeiro reais.
 1. `IncluirPedido` mínimo: quais campos o Omie **exige** em cada filial.
-2. O Omie aceita o **nosso `numero_pedido`** e o mantém?
+2. ✅ O Omie aceita o **nosso `numero_pedido`** (N16-82).
 3. O pedido criado por API nasce **bloqueado** na tela? O que o Fiscal consegue fazer com ele?
 4. `ExcluirPedido` num pedido **sem NF**: o que acontece no `ListarPedidos` seguinte e com o `exclusionSync`?
 5. Cancelamento pela API: chamar `CancelarPedidoVenda` num pedido de teste não faturado e conferir que o `ListarEtapasPedido` traz `cCancelado = S`; comparar com `ExcluirPedido`.

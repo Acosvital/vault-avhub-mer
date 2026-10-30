@@ -41,7 +41,7 @@ Selos: ✅ está na documentação ou no código · 📝 decisão do Nathan · �
 - **Endpoint:** `https://app.omie.com.br/api/v1/produtos/pedido/`, método `IncluirPedido` ("Inclui um pedido de venda de produto"). ✅
 - **Entrada e saída:** recebe `pedido_venda_produto` e devolve `codigo_pedido`, `codigo_pedido_integracao`, `numero_pedido`, `codigo_status` e `descricao_status`. ✅ Erro vem no formato `omie_fail` (`code`, `description`, `referer`, `fatal`). ✅
 - **Mesma estrutura para incluir, alterar e consultar:** o `AlterarPedidoVenda` e o `ConsultarPedido` usam o mesmo objeto. ✅ Isso permite ler de volta o que o Omie gravou e comparar com o que enviamos.
-- **Outros métodos do serviço:** `ListarPedidos`, `ConsultarPedido`, `StatusPedido`, `TrocarEtapaPedido`, `AlterarPedFaturado`, `SimularImpostos`, `DevolverPedido` e `ExcluirPedido`. ✅ **Não existe** método de cancelar pedido. ✅
+- **Outros métodos do serviço:** `ListarPedidos`, `ConsultarPedido`, `StatusPedido`, `TrocarEtapaPedido`, `AlterarPedFaturado`, `SimularImpostos`, `DevolverPedido` e `ExcluirPedido`. ✅ **Neste serviço não existe** método de cancelar pedido; o cancelar existe no serviço `pedidovendafat` (`CancelarPedidoVenda`, N16-84; falta só testar num pedido não faturado, PS-037). ✅
 - **Cada conta Omie é uma unidade — são três:** Mogi (Aços Vital), Arujá (HRM) e Uberaba (Aços Uberaba), no mesmo sistema do Hub (N16-79). O pedido vai à conta da empresa emissora da proposta (a unidade da proposta, `core.unidades`; N16-80). ✅
 
 ### 2. Cabeçalho (`cabecalho`)
@@ -51,7 +51,7 @@ Selos: ✅ está na documentação ou no código · 📝 decisão do Nathan · �
 | `codigo_cliente` | inteiro | ID do cliente **na conta Omie da emissora** | `cliente_unidade_omie` | ✅ obrigatório no exemplo. Cliente sem cadastro na conta **não vira pedido** (`CLIENTE_SEM_CADASTRO_OMIE`) |
 | `codigo_cliente_integracao` | texto 60 | alternativa ao ID | — | 🟡 não usar: o ID é mais direto |
 | `codigo_pedido_integracao` | texto 60 | o **nosso código** do pedido | `pedido_venda.codigo_pedido_integracao` (= número do hub) | ✅ chave de idempotência; a pipeline consulta por ele antes de recriar |
-| `numero_pedido` | texto 15 | o número do pedido que **nós** geramos | `pedido_venda.numero` | ✅ o campo existe e o exemplo o manda. ❓ O Omie aceita o número nosso ou renumera? Se renumerar, o número do Omie continua a chave no MES |
+| `numero_pedido` | texto 15 | o número do pedido que **nós** geramos | `pedido_venda.numero` | ✅ o campo existe e o exemplo o manda. ✅ O Omie aceita o número nosso (N16-82); o número do Omie continua a chave no MES |
 | `data_previsao` | texto 10 (`dd/mm/aaaa`) | previsão de **faturamento** | **a data que o vendedor informa, obrigatória**, ao transformar em pedido; depois passa a ser a **vigente** (entrega do fornecedor mais recente + 1; N16-88) | ✅ o Omie chama de "Data de Previsão de Faturamento". A previsão vigente (entrega + 1 dia útil) **não volta ao Omie** (N16-91); o Omie guarda a inicial |
 | `etapa` | texto 2 | `"10"` | fixo | ✅ exemplo; ❓ o nome das etapas 10, 15, 20 da conta (`ListarEtapasFaturamento`) |
 | `codigo_parcela` | texto 3 | `"999"` quando mandamos `lista_parcelas`; ou o código da condição cadastrada | `proposta.codigo_parcela_omie` | ✅ exemplo; ❓ ver seção 5 (condição de pagamento) |
@@ -193,7 +193,7 @@ O que isso resolve e o que não resolve:
 **Decisão do Nathan (N16-82): os testes ficam para depois que as telas estiverem prontas**; cadastra-se pelas telas e vão-se cortando as rebarbas ou acrescentando o que falta, como foi feito com a OC. Já respondidos: o Omie **aceita o nosso `numero_pedido`** (item 2); o vencimento conta do **faturamento** (item 9, provisório); o catálogo de condições é **por unidade** (as três contas são puxadas e cada unidade vê a sua); apagar o pedido no Hub apaga no Omie e o código de integração pode ser reutilizado (item 12). Sem ambiente de teste, os testes usam cadastros TESTE no ambiente real e devem ser feitos por quem tem acesso, um por vez:
 
 1. **Mínimo obrigatório:** qual é o menor `IncluirPedido` que o Omie aceita em Mogi, em Arujá e em Uberaba (as três contas podem exigir coisas diferentes).
-2. **`numero_pedido` próprio:** o Omie aceita o nosso número ou gera outro?
+2. **`numero_pedido` próprio:** ✅ o Omie aceita o nosso número (N16-82).
 3. **Bloqueio:** o pedido incluído por API nasce `bloqueado`? O Fiscal consegue faturar sem mexer?
 4. **CFOP e cenário:** se não mandarmos `cfop` e `codigo_cenario_impostos`, o Omie preenche certo?
 5. **Preço com ou sem imposto:** o `valor_unitario` é a base e o Omie soma IPI e ST por cima? O total do pedido bate com o total da proposta?

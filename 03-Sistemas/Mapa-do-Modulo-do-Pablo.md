@@ -243,7 +243,7 @@ O BFF tem 84 entradas na allowlist, cada uma com tela e ação ✅ `app/api/come
 ### 6. Telas do av-hub
 
 > [!info] Estado em 29/10/2026 (av-hub 758d5f0)
-> A tabela abaixo é de 16/10 (av-hub 5aa5311). Depois do menu enxuto (LOG-62, 27/10) **não existem mais** as telas `/vendas/clientes` (virou `/vendas/acompanhamento-clientes`), `/vendas/relatorio-cotacoes`, `/orcamento/pedido-cotacao`, `/orcamento/ofertas-fornecedor`, `/orcamento/pesquisa-materiais`, `/orcamento/tabela-telha` e `/compras/historico-compras` (N16-108). Existem hoje em `app/(protected)`: `vendas/propostas` (lista, `nova`, `[id]`; do Robert), `vendas/relatorio-gerencial`, `vendas/pedidos-de-venda`, `orcamento/{catalogo-produtos,fornecedores,painel-comprador,parametros-custo,custo-itens}` (do Pablo com o Robert) e `dashboards/dash-comercial` ✅. O BFF só liga ao Hub as rotas marcadas `api: 'hub'`; as demais respondem 503 `RECURSO_NAO_MIGRADO`.
+> A tabela abaixo é de 16/10 (av-hub 5aa5311). Depois do menu enxuto (N16-107, 27/10) **não existem mais** as telas `/vendas/clientes` (virou `/vendas/acompanhamento-clientes`), `/vendas/relatorio-cotacoes`, `/orcamento/pedido-cotacao`, `/orcamento/ofertas-fornecedor`, `/orcamento/pesquisa-materiais`, `/orcamento/tabela-telha` e `/compras/historico-compras` (N16-108). Existem hoje em `app/(protected)`: `vendas/propostas` (lista, `nova`, `[id]`; do Robert), `vendas/relatorio-gerencial`, `vendas/pedidos-de-venda`, `orcamento/{catalogo-produtos,fornecedores,painel-comprador,parametros-custo,custo-itens}` (do Pablo com o Robert) e `dashboards/dash-comercial` ✅. O BFF só liga ao Hub as rotas marcadas `api: 'hub'`; as demais respondem 503 `RECURSO_NAO_MIGRADO`.
 
 | URL | Componente | Slug | Selo |
 |---|---|---|---|

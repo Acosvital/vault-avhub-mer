@@ -1,10 +1,10 @@
 ---
 tags: [inicio, status]
 criado: 2026-10-14
-atualizado: 2026-10-29
+atualizado: 2026-10-30
 status: vigente
 dono: Nathan
-fontes: [00-Fluxo-Mestre-0b, notas de raia 02-Fluxo-de-Atividades, Registro-de-Decisoes (N16-01 a N16-144), Painel-de-Contratos de 29/10, develop do api-pcp e do app-pcp (27/10), develop da api-acos-vital (29/10), develop do av-hub (29/10), omie-elt-pipeline 0f739f0]
+fontes: [00-Fluxo-Mestre-0b, notas de raia 02-Fluxo-de-Atividades, Registro-de-Decisoes (N16-01 a N16-148), Painel-de-Contratos de 29/10, develop do api-pcp e do app-pcp (27/10), develop da api-acos-vital (29/10), develop do av-hub (29/10), omie-elt-pipeline 0f739f0]
 ---
 
 # Onde estamos (estado de 29/10/2026)
@@ -15,6 +15,8 @@ fontes: [00-Fluxo-Mestre-0b, notas de raia 02-Fluxo-de-Atividades, Registro-de-D
 
 O estado do código é o de 29/10/2026 (`develop` do MES, da `api-acos-vital` e do av-hub). A `main` do MES parou em 08/10: a OP, o lote do fabricado e o custo por item (26 e 27/10) estão só na `develop` (BL-035). A API da proposta e as telas já existem; o Orçamento, a conferência de Compras (`C6` a `C8`) e a comissão nova ainda não têm código. A fila de trabalho está em [[Backlog-por-Frente]].
 
+**Decisões de 30/10/2026 (N16-145 a N16-148):** o Ciclo 1 passa a incluir o documento de retirada (BL-007), BL-049 e BL-050 (déficit do Robert de 36,1 pd e fim em 03/03/2027 a 75% de foco; o Robert valida a conta); os modelos dos documentos de retirada e de devolução da sobra ao Estoque foram aprovados; o número da proposta e da ordem de compra é só dígitos no banco, com o prefixo só na tela e no PDF; só o perfil Admin vê a Torre de Fluxo por enquanto.
+
 ## Resumo por setor
 
 | Setor | Como está | Quem toca | O que falta |
@@ -23,7 +25,7 @@ O estado do código é o de 29/10/2026 (`develop` do MES, da `api-acos-vital` e 
 | [[12-Orcamento-Base-de-Preco]] | 🟡 Menu e abas no front; o resto sem código | Pablo, Robert, Gustavo | Base de preço gerada das compras; página do produto com score e volatilidade; pedido de custo ao Orçamento |
 | [[01-Vendas-Liberacao]] | ✅ Liberação funciona · 🔴 pedido no Hub | Nathan, Gustavo | Pedido do Omie no mesmo fluxo do pedido da proposta; compras e faturamento em partes na tela do pedido |
 | [[02-PCP-Triagem-e-Destinacao]] | ✅ Triagem e Destinação · 🔴 volta de reprovado | Robert | Caminho para o item reprovado (retrabalho ou nova compra); mostrar a OC do pedido ao PCP. A Ordem de Produção já é emitida e impressa e a Triagem mostra as requisições do hub (`develop`, 23 e 27/10) |
-| [[03-Estoque-Atendimento-e-Despacho]] | ✅ Atendimento · 🔴 despacho | Robert | Documento de retirada com baixa na retirada; saldo futuro. O custo do item e o fabricado virando lote já estão na `develop` (27/10) |
+| [[03-Estoque-Atendimento-e-Despacho]] | ✅ Atendimento · 🔴 despacho | Robert | Documento de retirada com baixa na retirada (no Ciclo 1; modelos de retirada e de devolução aprovados em 30/10, N16-145 e N16-146); saldo futuro. O custo do item e o fabricado virando lote já estão na `develop` (27/10) |
 | [[04-Circuito-de-Compra]] | ✅ Compra, aprovação e envio ao Omie · ✅ o MES lê a OC (`develop`) | Robert, Gustavo | Mostrar a OC do pedido ao PCP e o saldo futuro; regra de aprovação definitiva com Compras |
 | Conferência de Compras (`C6` a `C8`) | 🔴 Desenhada e aprovada, sem código | Nathan, Gustavo | Conferir a parte do vendedor ao emitir a OC; avisar o vendedor se a compra sair mais cara |
 | [[05-Recebimento]] | ✅ Recebimento por OC e por NF na `develop` | Robert | Conferir contra a OC (preço, quantidade, fornecedor, N16-135); rateio da chegada; testar em homologação |
@@ -40,7 +42,7 @@ O estado do código é o de 29/10/2026 (`develop` do MES, da `api-acos-vital` e 
 |---|---|
 | Requisição MES ↔ av-hub | ✅ Funciona nos dois sentidos, por pedido imediato e por consulta a cada 5 minutos |
 | Status por item | ✅ Pronto |
-| Torre de Fluxo (painel de acompanhamento) | 🟡 API, rotinas e telas prontas no av-hub (telas sobre dados de exemplo, desde 15/10); o MES não envia os eventos; nenhum perfil de negócio recebe as telas ainda |
+| Torre de Fluxo (painel de acompanhamento) | 🟡 API, rotinas e telas prontas no av-hub (telas sobre dados de exemplo, desde 15/10); o MES não envia os eventos; só o perfil Admin (os desenvolvedores) vê as telas, por enquanto (N16-148, BL-021) |
 | Custo por item | 🟡 O lote nasce com o custo da OC e o MES publica `GET /itens/custo` (27/10, na `develop`); falta o hub ler. O Ciclo 1 segue sem imposto; o modelo com impostos foi desenhado em 29/10 (N16-144) |
 | Cadastros TESTE no Omie | 🟡 O Omie não tem ambiente de teste. Os cadastros TESTE do Nathan entram nos relatórios: filtre ao conferir |
 | Pendências de cadastro | O perfil CCP e o vínculo de usuários à Gerência de Compras saem em breve. É cadastro simples e não trava o desenho |
@@ -76,7 +78,7 @@ Transversais, na versão técnica:
 |---|---|
 | Integração requisição MES ↔ av-hub (LOG-34, LOG-35) | ✅ ida e volta; sob demanda e polling de 5 min ([[Integracao-AvHub-MES]]) |
 | Status por item (API-005, API-006) | ✅ |
-| Torre de Fluxo (LOG-46) | 🟡 API e jobs no av-hub; BFF `/api/fluxo/*` e 4 telas no HUB sobre dados de exemplo (15/10); o MES não publica `/fluxo/eventos`; a 046b só deu as telas ao perfil de testes do time de TI (BL-021) |
+| Torre de Fluxo (LOG-46) | 🟡 API e jobs no av-hub; BFF `/api/fluxo/*` e 4 telas no HUB sobre dados de exemplo (15/10); o MES não publica `/fluxo/eventos`; a 046b só deu as telas ao perfil de testes do time de TI, e só o Admin as vê por enquanto (N16-148, BL-021) |
 | Custo por item (API-008, LOG-47) | 🟡 `lote_custo` nasce com o custo da OC (19/10) e `GET /itens/custo` está publicada na `develop` do MES (27/10); falta o hub ler e subir para a `main`. O Ciclo 1 segue sem imposto; o modelo com impostos foi desenhado em 29/10 (N16-144); falta código; a fórmula do custo com imposto segue o motor do comissionamento, e cada setor confere as mudanças na implementação |
 | Cadastros TESTE no Omie | 🟡 O Omie não tem ambiente de teste; os cadastros TESTE do Nathan entram na pipeline e nos relatórios: filtrar ao conferir (BL-055) |
 | Pendências cadastrais | Perfil CCP e vínculo de usuários à Gerência de Compras: serão criados em breve, assunto cadastral simples (Nathan e Gustavo), sem bloqueio de desenho |

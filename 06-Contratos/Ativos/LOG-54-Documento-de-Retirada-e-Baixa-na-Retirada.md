@@ -19,7 +19,7 @@ criado_original: 2026-10-15
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Define o documento de retirada: quem precisa da mercadoria do Estoque (Expedição ou Produção) pede, o Estoque confirma, e só então o saldo baixa.
 > **Quem é afetado:** Estoque, Expedição, Produção e Embalagem. Hoje a baixa ocorre quando a Embalagem recebe a parcela. Passa a ocorrer na retirada confirmada, e a Embalagem só recebe depois dela.
-> **Situação:** Proposta, dono Robert. Nada existe no código; o SQL foi validado em banco descartável. Decidido em 29/10 quem pede e quem confirma; o que o documento imprime segue aberto. O BL-007 (3,5 pd) está fora da conta do Ciclo 1 até o Nathan decidir.
+> **Situação:** Proposta, dono Robert. Nada existe no código; o SQL foi validado em banco descartável. Decidido em 29/10 quem pede e quem confirma; em 30/10 o Nathan aprovou o que o documento imprime (N16-145). O BL-007 (3,5 pd) entra no Ciclo 1 (N16-145, 30/10).
 
 > [!info] Situação em 15/10/2026
 > **Status:** `proposta` · **Pasta:** `Ativos` · **Nós do 0b:** E6, X1, F1 · **Dono:** Robert (MES, sem API entre sistemas)
@@ -28,7 +28,7 @@ criado_original: 2026-10-15
 > - 🔴 **Não existe no código** (`api-pcp`): hoje a baixa roda quando a Embalagem **recebe** a parcela (`consumirReservasDaParcial` em `receber()`, `itens-parciais.service.ts:275-285`) e há uma segunda chamada "de garantia" na entrega (`entregas.service.ts:84-94`). Nenhuma ocorrência de "retirada" em `api-pcp/src` nem em `app-pcp`.
 > - ✅ **SQL escrito e validado** em banco descartável (PostgreSQL 18, tabelas-esqueleto): [[0001-documento-de-retirada.sql]] em `LOG-54-anexos/`. Validado: a mesma parcela não entra duas vezes na retirada; não se retira mais que o solicitado; confirmar exige quem confirmou; cancelar exige quem cancelou e o motivo; o movimento de saída carrega a retirada. **Não validado:** contra o schema real do MES; nenhum código existe.
 > - 📝 **Decidido em 29/10/2026 (N16-120 a N16-122):** a Expedição (ou a Produção) pede e só o Estoque confirma; a reserva é consumida junto com a baixa; a Embalagem só recebe depois da retirada confirmada. **Segue aberto:** o que o documento imprime (seção "Perguntas", Q1).
-> - **BL-007: 3,5 pd (±30%) do Robert, fora da conta do Ciclo 1** até o Nathan decidir (se entrar, o déficit vai a 36,1 pd e a W0 a 03/03/2027 a 75% de foco).
+> - **BL-007: 3,5 pd (±30%) do Robert, dentro da conta do Ciclo 1** (N16-145, 30/10: o déficit vai a 36,1 pd e a W0 a 03/03/2027 a 75% de foco; a conta não foi refeita e o Robert a valida).
 
 Selos em [[Regras-do-Vault]]. Rotas, nomes e telas são **propostas**; as regras são as decididas ou marcadas 🟡.
 
@@ -185,7 +185,7 @@ flowchart LR
 
 ## Ordem
 
-1. Nathan decide as perguntas Q1 a Q3. 2. Robert: migration, modelos, rotas e a baixa na confirmação; tirar `consumirReservasDaParcial` de `receber()` e da entrega (BL-007). 3. Telas de pedir e de confirmar. Depende do [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] para o fabricado e do [[API-008-Custo-do-Lote-no-MES]] (K6) para o custo na saída.
+1. ✅ Nathan decidiu as perguntas Q1 a Q3 (N16-120 a N16-122; Q1 também na N16-145). 2. Robert: migration, modelos, rotas e a baixa na confirmação; tirar `consumirReservasDaParcial` de `receber()` e da entrega (BL-007). 3. Telas de pedir e de confirmar. Depende do [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] para o fabricado e do [[API-008-Custo-do-Lote-no-MES]] (K6) para o custo na saída.
 
 ## Devolução da sobra ao Estoque (modelo aprovado em 30/10/2026)
 
