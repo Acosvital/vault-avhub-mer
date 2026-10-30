@@ -26,7 +26,7 @@ Fora do fluxo 0b. O pedido manual **não percorre o MES**: sem liberação, sem 
 
 ## Pendências
 
-- ✅ A API existe. 🔴 O HUB **não tem tela** de pedido manual (reconferido em 29/10); só a de nota manual. O Nathan decide se haverá tela.
+- ✅ A API existe. ✅ O HUB **tem a tela** de pedido manual desde 30/10/2026 (N16-147): Cadastros › Auxiliares › Pedidos de venda manuais, no molde da nota manual, testada pelo Nathan.
 - ❓ Gustavo confere em produção os gatilhos do banco e o mapa de permissões das rotas manuais.
 - 🟡 Sem token, o autor do pedido é só um identificador informado no corpo (brecha herdada do contrato 29).
 
@@ -46,6 +46,6 @@ Fora do fluxo 0b. O pedido manual **não percorre o MES**: sem liberação, sem 
 
 ### Pendências (detalhe)
 
-- **O HUB não tem tela de pedido manual** (em `b55ac55` e de novo em 29/10, `758d5f0`): a busca por `pedidos-vendas-manuais` e `pedidos_vendas/manual` em `app`, `lib` e `components` não achou nada; só existe a de nota manual (`app/api/notas-manuais`, `dashboards/notas-fiscais-manuais`) 🔴 Nathan decide se haverá tela.
+- ✅ **Atualização de 30/10/2026: a tela foi construída (N16-147).** Antes, **o HUB não tinha tela de pedido manual** (em `b55ac55` e de novo em 29/10, `758d5f0`): a busca por `pedidos-vendas-manuais` e `pedidos_vendas/manual` em `app`, `lib` e `components` não achou nada; só existe a de nota manual (`app/api/notas-manuais`, `dashboards/notas-fiscais-manuais`) 🔴 Nathan decide se haverá tela.
 - Triggers `trg_pedidos_vendas_manual_*` e o mapa `auth.rotas_telas` das rotas `/pedidos_vendas/manual*` em produção ❓ Gustavo.
 - Sem token, o autor do corpo é só um UUID informado (brecha herdada do contrato 29; ligada à separação de chaves L6) 🟡.
