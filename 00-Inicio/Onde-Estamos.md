@@ -13,8 +13,8 @@ fontes: [00-Fluxo-Mestre-0b, notas de raia 02-Fluxo-de-Atividades, Registro-de-D
 
 **Quando consultar esta nota:** quando você precisar saber o que está pronto, o que falta e quem toca cada setor.
 
-> [!warning] O que está em produção (Nathan, 30/10/2026)
-> No av-hub, **só os dashboards, a tela de aprovação de vagas e as telas da gerência** estão em produção. Todo o resto (Compras, ordem de compra, requisição, proposta, pedido manual, Torre, custo e as demais telas) está **só em teste**: nenhuma OC criada no av-hub existe no banco de produção. Onde as notas dizem "produção ❓" ou "não conferido em produção", leia "ainda não foi para produção". Mudanças de formato, como a numeração só com dígitos (N16-148), não têm dado real para migrar.
+> [!warning] O que é "produção" e o que está em uso (Nathan, 30/10/2026)
+> No av-hub, **produção é a `main`**: a última versão pronta e testada. Isso não quer dizer que alguém usa. **Em uso real hoje, só os dashboards, a tela de aprovação de vagas e as telas da gerência.** O resto (Compras, ordem de compra, requisição, proposta, pedido manual, Torre, custo e as demais telas) ainda não tem uso real: nenhuma OC criada no av-hub existe no banco de produção. Onde as notas dizem "produção ❓" ou "não conferido em produção", leia "ainda não foi para a `main`" ou "ainda não foi usado". Mudanças de formato, como a numeração só com dígitos (N16-148), não têm dado real para migrar.
 
 O estado do código é o de 29/10/2026 (`develop` do MES, da `api-acos-vital` e do av-hub). A `main` do MES parou em 08/10: a OP, o lote do fabricado e o custo por item (26 e 27/10) estão só na `develop` (BL-035). A API da proposta e as telas já existem; o Orçamento, a conferência de Compras (`C6` a `C8`) e a comissão nova ainda não têm código. A fila de trabalho está em [[Backlog-por-Frente]].
 

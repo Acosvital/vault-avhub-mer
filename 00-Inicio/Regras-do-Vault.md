@@ -35,7 +35,7 @@ Toda afirmação relevante leva um selo.
 | 📝 | Decidido (cite o ID da decisão) |
 | 🟡 | Proposta, ainda sem decisão |
 | 🔴 | Aberto ou sem código |
-| ❓ | Não conferido em produção (no av-hub, só dashboards, aprovação de vagas e telas da gerência estão em produção; o resto está em teste) |
+| ❓ | Não conferido em produção (no av-hub, produção é a `main`, a última versão pronta e testada; só dashboards, aprovação de vagas e telas da gerência têm uso real) |
 
 ## Nomes de telas
 
