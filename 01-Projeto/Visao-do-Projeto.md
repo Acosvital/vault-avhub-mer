@@ -80,7 +80,7 @@ Ficam em notas curtas de anexo: comissões, RH (vagas e funcionários), dashboar
 
 ## Datas
 
-- **Ciclo 1** vai até 18/02/2027. Era 21/01; mudou por N14-30 e N14-32.
+- **Ciclo 1** vai até 18/02/2027. Era 21/01; mudou por N14-30 e N14-32 (com BL-007, BL-049 e BL-050 (N16-145): 36,1 pd e 03/03/2027 a 75% de foco; o Robert valida).
 - **Ciclo 2** começa em 19/02/2027.
 - **Marco zero do saldo:** 13/11/2026.
 

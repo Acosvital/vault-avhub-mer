@@ -264,7 +264,7 @@ Montagem em `core_vendas_faturamento/index.js:190-193`. Contratos de banco: [[SQ
 | 5 | Remover ou arquivar `GET /requisicoes-compra` (contrato 003) e o comentário velho | Gustavo, Robert | — | 🟡 |
 | 6 | **Versionar** `fn_requisicao_mes_aplicar` (migration 034) | Gustavo | P3 | ❓ |
 | 7 | Contrato de **recompra por RNC** (decidido: o Compras é avisado no av-hub, N16-127) e da **reabertura do recebimento** (N16-137) | Nathan, Gustavo, Robert | Q3, C1 | 🔴 sem contrato |
-| 8 | Aviso ao PCP e ao vendedor quando a previsão de chegada atrasa o pedido de venda | Nathan | C5 | 🔴 |
+| 8 | Aviso ao PCP e ao vendedor quando a previsão de chegada atrasa o pedido de venda | Nathan | C5 | ✅ decidido: a mudança de data do CCP só avisa o vendedor, em Meus Pedidos (N16-64, N16-91); a previsão de faturamento é derivada (N16-88, N16-97); o PCP vê a vigente e todas as datas (N16-104); e-mail e notificações ficam para o futuro (N16-113) |
 | 9 | Dois formulários ou um para origem PCP e origem Compras (T-03): o MES exige pedido e prazo; o HUB aceita sem pedido | Nathan | P3, C0 | 🟡 |
 | 10 | Teste ponta a ponta do circuito com `AVHUB_MES_INTEGRACAO_KEY` e `API_KEY` reais | Robert, Gustavo | P3, C5 | ❓ |
 

@@ -110,7 +110,7 @@ Depois do pedido, o PCP abre as requisições (`P3`). Compras recebe e o sistema
 | Auxiliar do titular | Mesmo escopo do vendedor (vê e edita pelos titulares que auxilia, como em Meus Pedidos) 🟡 | idem |
 | Gerência (João Vitor, Sérgio Vital) | Aprova desconto e margem **fisicamente** (`V0.4`). Quando o vendedor reprova uma compra, **Compras leva o caso a ela, fisicamente**; a Gerência **não cancela no sistema** e **não tem tela** para isso (N16-66) | fora do sistema |
 | Orçamento (setor orçamentário) | **Setor novo; uma das pessoas é o Moisés** (N16-104). O sistema funciona sem orçamentista (N16-59). Atende o pedido de custo e mantém a base de preço ([[12-Orcamento-Base-de-Preco]]). O perfil "orçamentista" deve existir | Orçamento, `/orcamento/painel-comprador` |
-| Gerente de Vendas e perfis que veem a equipe | Leem propostas da equipe (escopo `vinculados`/`todos`) 🟡 | Vendas |
+| Gerente de Vendas e perfis que veem a equipe | Leem propostas da equipe (escopo `vinculados`/`todos`) ✅ o gestor vê o time (N16-147, N16-148); falta a relação gestor-time no banco (Gustavo) | Vendas |
 | PCP | Consome o pedido liberado e abre a requisição (`P1` a `P3`); **é avisado do cancelamento** do pedido; **liga a NF de entrada ao item do pedido** (N16-57) | MES |
 | Compras (compradores, Gerente de Compras) | `C6`, `C7`, `C8`, OC (`C1` a `C4`); **lista dos casos reprovados pelo vendedor** e registro da solução (N16-73) | HUB, `/compras/*` |
 | Fiscal | Cria o produto novo no Omie; separa o pedido em sequenciais para faturar em partes (N16-92); informa a **devolução parcial** (N16-74). **Não cancela o pedido**: quem cancela é o vendedor (N16-84) | Omie |
@@ -315,7 +315,7 @@ As colunas e as condições **vêm das mesmas entradas do motor atual** (`simula
 
 | # | O quê | Dono | Nó | Selo |
 |---|---|---|---|---|
-| 1 | Migrar o módulo de propostas para a `api-acos-vital`: feito para criar, listar, revisar, aprovar, cancelar, copiar e transformar (29/10). Falta a numeração só de dígitos (hoje `CO-{AV\|AU\|HRM}{AAAA}-{NNNN}-R{RR}`, formato final em aberto, PS-038; diverge da N16-04 e da N16-26), versões, importação de itens e o cálculo no servidor | Robert, Gustavo | `V0.1` | ✅ rotas; 🔴 numeração e o resto |
+| 1 | Migrar o módulo de propostas para a `api-acos-vital`: feito para criar, listar, revisar, aprovar, cancelar, copiar e transformar (29/10). Falta a numeração só de dígitos (hoje `CO-{AV\|AU\|HRM}{AAAA}-{NNNN}-R{RR}`, formato decidido: só dígitos, ano mais sequência, N16-148 e PS-038; diverge da N16-04 e da N16-26, e a mudança é do Gustavo), versões, importação de itens e o cálculo no servidor | Robert, Gustavo | `V0.1` | ✅ rotas; 🔴 numeração e o resto |
 | 2 | Estado `APROVADA`, trava de ajuste e aprovar com a revisão: rotas feitas (29/10). Falta ligar o BFF e a tela, e conferir no banco a regra "incompleta" | Robert, Nathan | `V0.4`, `V0.5` | ✅ API; 🔴 tela |
 | 3 | Cancelar com motivo: rota feita (29/10). Falta o histórico da comissão estimada | Robert | `V0C` | ✅ API; 🔴 histórico |
 | 4 | Botão "Transformar em pedido" e marcação da Qualidade obrigatória: rota `transformar` feita (grava o pedido do Hub `pendente`). Faltam a tela, a fila do pedido e o retorno da pipeline | Robert (API), Nathan (tela e pipeline), Gustavo (banco) | `V0.6`, `V0.7` | ✅ API; 🔴 tela e envio |

@@ -322,11 +322,11 @@ A OC com `destino` **estoque** não abate: aparece como saldo futuro para o PCP 
 |---|---|
 | Esperados | A OC de `finalidade = uso_interno` entra em R3 com `usoInterno = true`, pelo mesmo caminho da OC sem requisição |
 | Conferência | Contra a NF, como as demais |
-| Estoque | **Não cria lote nem saldo**: `EntradaUsoInterno`, entregue ao setor que pediu, **visível no Estoque como entrada registrada, sem saldo** (R6) |
+| Estoque | **Não cria lote nem saldo**: `EntradaUsoInterno`, entregue ao setor que pediu (📝 o campo "setor que pediu" existe no `uso_interno`, N16-147; falta a coluna na API), **visível no Estoque como entrada registrada, sem saldo** (R6) |
 | Saldo futuro | Fica fora (R5) |
 | Custo | Vai para **despesa**, fora do custo do lote (nada em `LoteCusto`) |
 | Quarentena | **Sem quarentena**, salvo categoria que o Nathan pedir (por exemplo, EPI) |
-| Quem pediu | `EntradaUsoInterno.setorSolicitante`; 🔴 hoje a requisição do hub só tem `solicitante` (texto); ver Q3 do [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto]] |
+| Quem pediu | `EntradaUsoInterno.setorSolicitante`; 📝 o campo "setor que pediu" foi decidido em 30/10 (N16-147); 🔴 hoje a requisição do hub só tem `solicitante` (texto) e falta a coluna; ver Q3 do [[API-010-Requisicao-do-Compras-Finalidade-Pedido-e-Produto]] |
 
 🟡 Confirmar com a contabilidade que o custo de uso interno vai para despesa.
 

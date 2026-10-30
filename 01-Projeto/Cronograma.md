@@ -9,7 +9,7 @@ fontes: [v1 07-Cronograma/Cronograma-2-Meses seções 1, 3.2, 3.3, 3.4, 6, 9, v1
 
 # Cronograma
 
-**Em uma frase:** o plano entrega primeiro o recebimento e o estoque (até 18/11/2026), depois a rastreabilidade (18/12/2026) e fecha o Ciclo 1 em 18/02/2027; o PCP antigo migra para o MES até 18/11/2027.
+**Em uma frase:** o plano entrega primeiro o recebimento e o estoque (até 18/11/2026), depois a rastreabilidade (18/12/2026) e fecha o Ciclo 1 em 18/02/2027 (com BL-007, BL-049 e BL-050 (N16-145): 36,1 pd e 03/03/2027 a 75% de foco; o Robert valida); o PCP antigo migra para o MES até 18/11/2027.
 
 **Quando consultar esta nota:** quando você precisar saber o que está previsto para cada data, quem tem carga demais e o que pode ser cortado.
 
@@ -26,14 +26,14 @@ fontes: [v1 07-Cronograma/Cronograma-2-Meses seções 1, 3.2, 3.3, 3.4, 6, 9, v1
 | 15/11/2026 | Protótipo | 📝 |
 | 18/11/2026 | Decisão de seguir ou não com o piloto de recebimento (M6) | 🟡 |
 | 18/12/2026 | Rastreabilidade completa: Torre de Fluxo e log de eventos (M7) | 🔴 O MES ainda não envia os eventos |
-| 18/02/2027 | **Fim do Ciclo 1**: o déficit do Robert zerado. Começa o Ciclo 2 em 19/02/2027 | 🟡 Deslocado de 21/01 pelo N14-30 |
+| 18/02/2027 | **Fim do Ciclo 1**: o déficit do Robert zerado. Começa o Ciclo 2 em 19/02/2027 | 🟡 Deslocado de 21/01 pelo N14-30; com BL-007, BL-049 e BL-050 (N16-145): 36,1 pd e 03/03/2027 a 75% de foco; o Robert valida |
 | 11/05/2027 a 18/11/2027 | PCP antigo migrado para o MES, em quatro marcos: Flange alta (M8), Flange completa (M9), Caldeiraria (M10) e Análise e gestão (M11) | 🟡 |
 
 As novas frentes de 16/10 (proposta, Orçamento, custo real e comissão nova) ainda não mexem nesses marcos. Elas estão em "Novas frentes" no Detalhe técnico e só valem depois que cada pessoa validar seus pd 🟡. **Os donos mudaram em 28/10** (o Robert conduz o módulo comercial na API do Hub, N16-117 a N16-119) e os contratos dessa parte foram removidos em 29/10 para o Robert recriar; a distribuição por pessoa abaixo é só o histórico da proposta de 16/10 e precisa ser refeita.
 
 ## Gargalos
 
-- **Robert:** o plano pede mais do que ele entrega. O déficit é de **29,6 pd** no Ciclo 1 (era 16,1 pd; 32,6 antes do crédito do K4) 🔴. A cobertura decidida é dobrar o esforço e fazer horas extras, se preciso 📝 (Nathan, 14/10). Desde então o Robert também entregou, na `develop`, o custo da OC no lote (K5, 19/10) e o `GET /itens/custo` (27/10) e assumiu o módulo comercial (28/10); o déficit **não foi recalculado** ❓.
+- **Robert:** o plano pede mais do que ele entrega. O déficit é de **29,6 pd** no Ciclo 1 (era 16,1 pd; 32,6 antes do crédito do K4) 🔴. A cobertura decidida é dobrar o esforço e fazer horas extras, se preciso 📝 (Nathan, 14/10). Desde então o Robert também entregou, na `develop`, o custo da OC no lote (K5, 19/10) e o `GET /itens/custo` (27/10) e assumiu o módulo comercial (28/10); o déficit **não foi recalculado** ❓ (com BL-007, BL-049 e BL-050 (N16-145): 36,1 pd e 03/03/2027 a 75% de foco; o Robert valida).
 - **Nathan:** na proposta de 16/10 as telas dele terminavam só em 06/07/2027, e ele era o gargalo 🟡. Em 28/10 as telas de proposta passaram ao Robert e as de Orçamento ao Pablo com o Robert, o que tira trabalho do Nathan; a conta não foi refeita ❓. As alternativas A, B e C ficam no Detalhe técnico como histórico.
 - **Gustavo:** tem folga (11,9 pd na S1–FC e 9,8 pd na S5) e pode receber parte do backend do MES 🟡.
 
@@ -72,7 +72,7 @@ Equipe em [[Equipe-e-Divisao]]. Itens do levantamento em [[Backlog-por-Frente]].
 
 - A execução do plano vai de **22/09/2026 a 18/12/2026**. S1 a FC terminam em **18/11/2026**; S5 e M7 terminam em **18/12/2026** 📝.
 - **Marco zero do saldo: 13/11/2026** (M5): carga inicial conferida em dupla; nenhum consumo por PCP ou Comercial antes disso 📝.
-- **Ciclo 1 fecha em 18/02/2027** (o Robert zera o déficit da Onda 0 nessa data; era 21/01, deslocado pelo N14-30 e abatido pelo K4, N14-32). **Ciclo 2 começa em 19/02/2027** 📝 (item 27 do Registro do v1, aceito pelo Nathan em 09/10).
+- **Ciclo 1 fecha em 18/02/2027** (o Robert zera o déficit da Onda 0 nessa data; era 21/01, deslocado pelo N14-30 e abatido pelo K4, N14-32). **Ciclo 2 começa em 19/02/2027** 📝 (item 27 do Registro do v1, aceito pelo Nathan em 09/10). Com BL-007, BL-049 e BL-050 (N16-145): 36,1 pd e 03/03/2027 a 75% de foco; o Robert valida.
 - Feriados considerados: 12/10 e 02/11 de 2026; 25/12, 01/01, Carnaval (08 e 09/02), 26/03, 21/04, 27/05, 07/09, 12/10, 02/11 e 15/11 de 2027.
 - O plano de 2 meses (e a duração de 60 dias) não vale mais; esta nota é a única fonte de datas.
 
@@ -111,7 +111,7 @@ Equipe igual à atual: só o Robert no MES, 75% de foco (0,75 pd por dia útil).
 
 | Onda | Entra | pd | Acumulado | Fim |
 |---|---|---|---|---|
-| W0 | Déficit do Ciclo 1 (inclui custo do lote K5 e K6 e o escopo do N14-29: 16,1 + 16,5 − 3,0 do K4, já na `develop`, N14-32) | 29,6 | 29,6 | 18/02/2027 |
+| W0 | Déficit do Ciclo 1 (inclui custo do lote K5 e K6 e o escopo do N14-29: 16,1 + 16,5 − 3,0 do K4, já na `develop`, N14-32) | 29,6 (36,1 com BL-007, BL-049 e BL-050, N16-145) | 29,6 | 18/02/2027 (03/03/2027 a 75% de foco com os três; o Robert valida) |
 | W1 | Flange, prioridade alta (itens 1, 2, 4, 5, 6, 7, 11) | 42 | 71,6 | 11/05/2027 (M8) |
 | W2 | Flange, média e baixa (itens 3, 8, 9, 10, 12, 13, 14) | 26 | 97,6 | 30/06/2027 (M9) |
 | W3 | Caldeiraria HRM (itens 15 a 22) | 51 | 148,6 | 05/10/2027 (M10) |
@@ -126,7 +126,7 @@ Com 100% de foco as ondas terminam em 02/02 (W0), 06/04, 13/05, 26/07 e 25/08/20
 |---|---|---|---|
 | Nathan | 40% | 16,8 pd | S5: 11 pd contra 9,2 pd. A tela de ranking de gargalos (T.5b, uma das 4 telas da Torre de Fluxo) é a candidata a ir ao Ciclo 2 se faltar capacidade; o Nathan ainda não decidiu 🟡 |
 | Gustavo | 60% | 25,2 pd | folga de 11,9 pd na S1–FC e 9,8 pd na S5; pode receber parte do backend do MES 🟡 |
-| Robert | 75% | 31,5 pd | S1–FC + S5: capacidade 48,75 pd contra 78,35 planejados (64,85 + 16,5 do N14-29 − 3,0 do K4), **déficit de 29,6 pd** 🔴 (era 16,1 pd; 32,6 antes do crédito do K4) |
+| Robert | 75% | 31,5 pd | S1–FC + S5: capacidade 48,75 pd contra 78,35 planejados (64,85 + 16,5 do N14-29 − 3,0 do K4), **déficit de 29,6 pd** 🔴 (era 16,1 pd; 32,6 antes do crédito do K4; com BL-007, BL-049 e BL-050 (N16-145): 36,1 pd e 03/03/2027 a 75% de foco; o Robert valida) |
 | Pablo | 75% | fora da conta | Comercial & Suprimentos |
 
 Custo do lote (09/10) somou ao Robert K3 1,0 + K4 3,0 + K5 1,5 + K6 0,5 pd; ao Gustavo K1, K2 e K7 (1,5 pd); K8 (`GET /itens/custo`) e K9 a K11 iam ao Ciclo 2; com a N16-09 (custo obrigatório e custo real por evento) a proposta de 16/10 os traz de volta como R3 e R5 (seção "Novas frentes de 16/10") 🟡. Detalhe em [[Modelo-Estoque-e-Custo-do-Lote]] e [[API-008-Custo-do-Lote-no-MES]].

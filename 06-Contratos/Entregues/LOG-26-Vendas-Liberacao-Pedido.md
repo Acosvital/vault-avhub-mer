@@ -42,13 +42,13 @@ criado_original: 2026-09-28
 > ([av-hub#103](https://github.com/Acosvital/av-hub/pull/103)). Na `api-test`, `GET /pedidos_liberacao`,
 > `GET /pedidos_liberados` e `PUT /pedidos_liberacao/{empresa}/{numero}` respondem e validam a entrada, e as
 > telas estão no menu ("Liberar Pedidos": Vendedor e Admin (Dev); "Liberação da Equipe": Gerência e Admin (Dev)).
-> **Falta:** (1) **a data de corte** — `parametros_vendas.data_inicio_liberacao` está vazia, então nenhum
+> **Falta:** (1) **a data de corte** (✅ superado em 01/10/2026 na `api-test`: `2026-07-28`; só o valor de produção segue ❓, SELECT do Gustavo) — `parametros_vendas.data_inicio_liberacao` está vazia, então nenhum
 > pedido entra na liberação (decisão do Nathan, depois `INSERT` do DBA); (2) L4, o `api-pcp` (Robert) passar a
 > Carteira para o `/pedidos_liberados`. Telas ainda não testadas com pedidos reais.
 >
 > **Situação em 30/09/2026:** **L4 concluído** pelo Robert (`api-pcp` commit `901f9bb`, 29/09, já na
 > `develop`; conferido no código: as 4 trocas da seção 4.2 estão feitas e batem com as rotas da API).
-> **Continua faltando a data de corte (L1)** (📝 decidido em 30/10/2026, N16-147: vale o dia em que a tela for para produção, e o Nathan informa a data): sem ela não há teste de ponta a ponta na `api-test`. L6
+> **Continuava faltando a data de corte (L1)** (✅ superado em 01/10/2026: na `api-test` ficou `2026-07-28`; só o valor de produção segue ❓, SELECT do Gustavo) (📝 decidido em 30/10/2026, N16-147: vale o dia em que a tela for para produção, e o Nathan informa a data): sem ela não há teste de ponta a ponta na `api-test`. L6
 > atualizado (a chave do MES precisa ser de escrita). Observações do Robert na seção 6.
 
 **Criado em:** 28/09/2026 · **Para:** DBA, backend (`api-acos-vital`) e MES (`api-pcp`, Robert)
@@ -195,7 +195,7 @@ está desligado — ver L5.
 
 ## 7. Perguntas em aberto
 
-1. **Data de corte em produção** (L1): qual dia?
+1. **Data de corte em produção** (L1): qual dia? (✅ `api-test` resolvida em 01/10: `2026-07-28`; produção: regra decidida na N16-147, o valor segue ❓, SELECT do Gustavo)
 2. **Correção depois da importação:** hoje ninguém destrava. Precisa de uma ação da Gerência/PCP
    ("reabrir marcação")? Se sim, vira item novo (rota + permissão `pode_aprovar`).
 3. **Pedido parado:** pedido que o vendedor nunca libera fica invisível para o PCP. A tela do gerente

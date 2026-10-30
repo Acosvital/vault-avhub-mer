@@ -19,13 +19,13 @@ criado_original: 2026-10-15
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Muda a requisição de compra do av-hub: ela passa a dizer para que se compra (pedido de venda, recompra, estoque ou uso interno), com produto sempre do cadastro e tudo na mesma unidade.
 > **Quem é afetado:** Compras, que cria a requisição com mais regras. Só a requisição com pedido de venda (PV) chega ao MES (sistema de produção).
-> **Situação:** Parcial. Banco e API em produção desde 20/10, segundo o Gustavo (não conferido); front do Nathan pronto e API testada ponta a ponta na api-test em 29/10 (✅). Perguntas sobre a HRM e o setor do uso interno seguem abertas (🟡 🔴).
+> **Situação:** Parcial. Banco e API em produção desde 20/10, segundo o Gustavo (não conferido); front do Nathan pronto e API testada ponta a ponta na api-test em 29/10 (✅). A pergunta sobre a HRM segue aberta (🟡); o setor do uso interno foi decidido em 30/10 (N16-147: campo novo; falta desenhá-lo com o Gustavo).
 > **Exemplo:** Finalidade "pedidos_venda" sem número de pedido de venda é recusada com erro 400.
 
 > [!info] Situação em 29/10/2026
 > **Status:** `parcial` · **Pasta:** `Ativos` · **Nó do 0b:** C0 · **Dono:** Gustavo (banco e API); Nathan (front, já pronto)
 >
-> - ✅ Banco, API e front estão feitos e testados (itens abaixo). O que mantém o contrato em `parcial` são só as perguntas Q1 (exceção da HRM) e Q3 (setor que pediu o uso interno), do Nathan, na seção 10; se elas forem respondidas sem mudança de código, o contrato pode ir para `Entregues`.
+> - ✅ Banco, API e front estão feitos e testados (itens abaixo). O que mantém o contrato em `parcial` são só a pergunta Q1 (exceção da HRM), do Nathan, na seção 10, e o campo novo da Q3 (setor que pediu o uso interno, decidido em 30/10, N16-147, falta a coluna); se a Q1 for respondida sem mudança de código, o contrato pode ir para `Entregues`.
 >
 > - ✅ **Migration `api010` em produção desde 20/10/2026** (entrou na MEGA de 19/10), informado pelo Gustavo em 26/10; não conferi no banco.
 > - ✅ **Front pronto (HUB PR #209):** a "Nova requisição" é uma tela própria (`/compras/requisicoes/nova`) e já envia `finalidade`, `numero_pedido_venda` e `material` = `codigo_produto` do cadastro.

@@ -227,7 +227,7 @@ A lista por mês, vendedor, unidade e status (com exportação para Excel), mais
 | OC cancelada antes de receber | A linha de custo dela é estornada; o item volta a parcial |
 | NF de entrada diferente da OC (peso da balança) | O valor da NF substitui o da OC (N16-40) |
 | Item sem nenhuma linha quando a NF de saída sai | `K3` fecha só as peças com custo real; o resto espera (N16-48); a Controladoria vê "custo parcial" |
-| Unidade de medida diferente entre proposta, OC e lote (KG × PC) | **Sem conversão no sistema** (Compras); o PCP liga a NF ao item do pedido (N16-57); linha marcada "unidade diferente" |
+| Unidade de medida diferente entre proposta, OC e lote (KG × PC) | **Sem conversão no sistema** (Compras); o CCP liga a NF de entrada à OC (N16-86, que corrige a N16-57); linha marcada "unidade diferente" |
 | Pedido digitado no Omie | O `K1` nasce quando o vendedor preenche a parte de compras do pedido (a simulação, N16-104, N16-106); a nota que sair antes **espera**, e a Controladoria já vê a margem real (N16-105); com as duas, fecha pelo menor |
 | Proposta ou pedido **cancelado** | A estimada vira histórico. O que já foi comprado vai ao **Estoque, livre**, como lote com o custo da OC, e **deixa de ser custo** do pedido cancelado (N16-68, N16-69) |
 | Pedido **faturado** e depois cancelado | O cancelamento não desfaz compra nem produção; fica o abatimento da comissão (`K6`) e o saldo não faturado, parte por parte (N16-71) |

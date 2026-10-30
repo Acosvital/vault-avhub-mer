@@ -37,7 +37,7 @@ Atribuições decididas: Pablo no Comercial & Suprimentos e Robert no MES 📝 (
 
 ## Risco: capacidade do Robert
 
-O plano pede mais trabalho do Robert do que ele consegue entregar no prazo. O Ciclo 1 só fecha em 18/02/2027 por causa disso. Ele chegou a ser 21/01/2027, e o Ciclo 2 começa em 19/02/2027 (N14-30 e N14-32). Conta em [[Cronograma]]; risco em [[Riscos]].
+O plano pede mais trabalho do Robert do que ele consegue entregar no prazo. O Ciclo 1 só fecha em 18/02/2027 por causa disso. Ele chegou a ser 21/01/2027, e o Ciclo 2 começa em 19/02/2027 (N14-30 e N14-32; com BL-007, BL-049 e BL-050 (N16-145): 36,1 pd e 03/03/2027 a 75% de foco; o Robert valida). Conta em [[Cronograma]]; risco em [[Riscos]].
 
 ## Quem usa o sistema (perfis de uso, não de desenvolvimento)
 
@@ -87,4 +87,4 @@ Desde 15/09/2026, em 14/10: os commits do MES são do Robert (28 no `api-pcp`, 3
 
 Com G1, D11, I1, J2, J5 e D12 no Robert e o custo do lote (K3 a K6) somado, o plano fecha em **déficit de 16,1 pd** no Ciclo 1 (**32,6 pd desde 15/10**, com o N14-29, e o Nathan aceitou deslocar a data: N14-30). O planejado é 64,85 pd contra 48,75 pd de capacidade. A conta não inclui a baixa no despacho do Estoque, que não tem pd dimensionado 🟡. As estimativas são minhas, ±30%, e o Robert valida.
 
-Consequência: o Ciclo 1 só fecha em 21/01/2027 e o Ciclo 2 começa em 22/01/2027. **Desde 15/10, as datas são 18/02/2027 e 19/02/2027** (N14-30 e N14-32).
+Consequência: o Ciclo 1 só fecha em 21/01/2027 e o Ciclo 2 começa em 22/01/2027. **Desde 15/10, as datas são 18/02/2027 e 19/02/2027** (N14-30 e N14-32; com BL-007, BL-049 e BL-050 (N16-145): 36,1 pd e 03/03/2027 a 75% de foco; o Robert valida).
