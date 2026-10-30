@@ -187,6 +187,10 @@ flowchart LR
 
 1. Nathan decide as perguntas Q1 a Q3. 2. Robert: migration, modelos, rotas e a baixa na confirmação; tirar `consumirReservasDaParcial` de `receber()` e da entrega (BL-007). 3. Telas de pedir e de confirmar. Depende do [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]] para o fabricado e do [[API-008-Custo-do-Lote-no-MES]] (K6) para o custo na saída.
 
+## Devolução da sobra ao Estoque (modelo aprovado em 30/10/2026)
+
+Quando o material retirado não é todo usado, a sobra volta ao Estoque por um documento próprio, ligado à retirada de origem (N16-146). O documento traz os dados da Aços Vital, a declaração de devolução, quem devolve (nome, setor, data e horário), a lista com lote, **retirado, utilizado e devolvido**, a condição do material, e quem devolveu e quem recebeu no Estoque, com a assinatura dos dois. Segue o layout da Ordem de Compra. O modelo está em `09-Diagramas/documento-reentrada-modelo.pdf`. 📝 modelo aprovado pelo Nathan; 🔴 as regras de negócio estão nas perguntas Q7 a Q13.
+
 ## Perguntas em aberto
 
 | # | Pergunta | Dono | Selo |
@@ -197,5 +201,12 @@ flowchart LR
 | Q4 | **Estornar** uma retirada confirmada (mercadoria devolvida ao Estoque) é ação própria? Hoje `estornarConsumosDaParcial` faz isso para o desfazer-recebimento | Robert | 🟡 |
 | Q5 | O BL-007 (3,5 pd) entra no Ciclo 1? **Sim: entra** (N16-145, 30/10/2026). O Robert valida o efeito no prazo | Nathan | 📝 |
 | Q6 | Uma retirada pode juntar parcelas de **pedidos diferentes** (uma ida ao estoque) ou é por pedido? O desenho aceita várias parcelas | Robert | ❓ |
+| Q7 | O material devolvido volta ao **mesmo lote** (o custo do lote segue) ou vira lote novo (custo a definir)? | Nathan | 🔴 |
+| Q8 | A sobra passa pela Qualidade antes de voltar ao saldo, ou o Estoque aceita direto? | Nathan | 🔴 |
+| Q9 | Sobra de chapa ou barra cortada entra como lote novo, com o tamanho que sobrou? (liga à OQ-32) | Nathan | 🔴 |
+| Q10 | Material danificado ou perdido: a diferença entre o retirado e o devolvido sem uso vira baixa, perda ou refugo? | Nathan | 🔴 |
+| Q11 | Quem pode devolver: só quem fez a retirada ou qualquer pessoa do setor? | Nathan | 🔴 |
+| Q12 | Quem informa o local de guarda da sobra? O modelo deixa isso para o Estoque | Nathan | 🔴 |
+| Q13 | O documento de devolução entra no Ciclo 1? | Nathan | 🔴 |
 
 Relacionados: [[03-Estoque-Atendimento-e-Despacho]], [[09-Expedicao]], [[07-Producao-e-Roteiro]], [[LOG-53-Ordem-de-Producao-e-Lote-do-Fabricado]], [[API-008-Custo-do-Lote-no-MES]], [[Pontas-Soltas]] (PS-024), [[Riscos]] (RS-004), [[Backlog-por-Frente]] (BL-007), [[Registro-de-Decisoes]] (N14-05).
