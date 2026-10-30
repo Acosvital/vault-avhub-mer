@@ -19,7 +19,7 @@ criado_original: 2026-10-21
 > [!abstract] Resumo em linguagem natural
 > **O que é:** Permite classificar clientes (CNPJ) ou grupos de empresa por setor de atuação (Mineração, Óleo & Gás etc.), com lista que a equipe pode ampliar, e olhar a carteira por setor no Acompanhamento de clientes.
 > **Quem é afetado:** Quem cuida dos clientes classifica e filtra por setor; o vendedor só vê. O MES não tem trabalho.
-> **Situação:** Entregue. O Gustavo terminou o banco e a API (informado em 29/10/2026); vários setores por cliente está feito no banco, na API e no front (conferido no código em 29/10/2026). Faltam confirmar no banco as linhas de permissão (❓) e definir os perfis (❓). Salvar 2 ou mais setores em um cliente real não foi visto (🟡).
+> **Situação:** Entregue. O Gustavo terminou o banco e a API (informado em 29/10/2026); vários setores por cliente está feito no banco, na API e no front (conferido no código em 29/10/2026). Faltam confirmar no banco as linhas de permissão (❓). Salvar 2 ou mais setores em um cliente real não foi visto (🟡).
 > **Exemplo:** Grupo com os setores Mineração e Energia: seus CNPJs herdam os dois, e um CNPJ com Siderurgia própria usa só ela.
 
 > [!info] Situação em 29/10/2026
@@ -206,7 +206,7 @@ Corpo (revisado em 23/10/2026: **`id_setores`**, uma lista; o `id_setor` único 
 - [x] Coluna, filtro e quadro por setor; campo Setor na página do cliente e do grupo; "Adicionar setor…" (um setor, PR #235).
 - [x] **Vários setores (23/10):** selos múltiplos na lista, campo com caixas de seleção, `id_setores` ao salvar, Excel com os nomes juntos e o aviso no quadro "Por setor". Lê `setores` e cai para `id_setor`/`setor` enquanto a API não entrega. ✅ Caixas de seleção e `id_setores` ao salvar estão no código (`SetorCampo.tsx`, `services/acompanhamentoClientes.ts`, commit `a24d187`). O Excel com os nomes juntos também existe (item do Excel abaixo).
 - [x] Excel com a coluna e o quadro por setor. ✅ Conferido em 29/10/2026 em `lib/api/acompanhamentoClientesPlanilha.ts`: colunas "Setor" (vários setores separados por `;`) e "Setor vem de", e o quadro "Clientes por setor" (linha 1475).
-- [ ] Definir os perfis com `pode_editar`/`pode_criar` e se o lote entra na 1ª etapa. ❓ Decisão do Nathan, ainda sem registro.
+- [x] Definir os perfis com `pode_editar`/`pode_criar` e se o lote entra na 1ª etapa. ✅ Feito pelo Nathan em 30/10/2026: a permissão foi dada no perfil de acompanhamento da Sara.
 
 **Robert (MES):** nada.
 
